@@ -3718,3 +3718,2819 @@ body {
     transform: scale(1);
   }
 }
+
+/* L311: Require real customer account before checkout */
+.checkoutAccountNotice {
+  margin: 14px 0 0;
+  border: 1px solid rgba(255, 210, 63, 0.75);
+  border-radius: 18px;
+  background: #fff8d8;
+  padding: 14px 16px;
+}
+
+.checkoutAccountNotice strong {
+  display: block;
+  color: #111111;
+  font-size: 15px;
+  font-weight: 950;
+}
+
+.checkoutAccountNotice p {
+  margin: 5px 0 0;
+  color: #4b5563;
+  font-size: 13px;
+  font-weight: 800;
+  line-height: 1.38;
+}
+
+.checkoutAccountRequiredBox {
+  margin: 0 0 18px;
+  border: 1px solid rgba(11, 122, 49, 0.24);
+  border-radius: 24px;
+  background: #ffffff;
+  padding: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.045);
+}
+
+.checkoutAccountRequiredBox span {
+  display: block;
+  color: #0b7a31;
+  font-size: 12px;
+  font-weight: 950;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.checkoutAccountRequiredBox strong {
+  display: block;
+  margin-top: 4px;
+  color: #111111;
+  font-size: 20px;
+  font-weight: 950;
+}
+
+.checkoutAccountRequiredBox p {
+  margin: 6px 0 0;
+  color: #4b5563;
+  font-size: 14px;
+  font-weight: 800;
+  line-height: 1.4;
+}
+
+.checkoutAccountRequiredBox button {
+  border: 0;
+  border-radius: 999px;
+  background: #111111;
+  color: #ffd23f;
+  padding: 13px 18px;
+  font-size: 13px;
+  font-weight: 950;
+  white-space: nowrap;
+}
+
+@media (max-width: 700px) {
+  .checkoutAccountRequiredBox {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .checkoutAccountRequiredBox button {
+    width: 100%;
+  }
+}
+
+/* L312: Full-page product details and image zoom */
+.productFullScreenOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9650;
+  background:
+    radial-gradient(circle at 0% 0%, rgba(255, 210, 63, 0.16), transparent 30%),
+    linear-gradient(135deg, #f7f7f7 0%, #eef1f4 55%, #e8edf2 100%);
+  overflow-y: auto;
+  color: #111111;
+}
+
+.productFullScreenPage {
+  min-height: 100vh;
+  width: 100%;
+  padding: 24px clamp(16px, 4vw, 56px) 46px;
+}
+
+.productDetailTopBar {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 16px;
+  margin: -24px calc(clamp(16px, 4vw, 56px) * -1) 24px;
+  padding: 16px clamp(16px, 4vw, 56px);
+  background: rgba(247, 247, 247, 0.92);
+  backdrop-filter: blur(16px);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.productBackButton,
+.productDetailCartButton {
+  border: 0;
+  border-radius: 999px;
+  background: #111111;
+  color: #ffd23f;
+  padding: 13px 18px;
+  font-size: 14px;
+  font-weight: 950;
+  box-shadow: 0 10px 22px rgba(0, 0, 0, 0.08);
+}
+
+.productDetailCartButton {
+  background: #ffd23f;
+  color: #111111;
+}
+
+.productDetailTopTitle {
+  text-align: center;
+  min-width: 0;
+}
+
+.productDetailTopTitle strong {
+  display: block;
+  color: #111111;
+  font-size: 17px;
+  font-weight: 950;
+}
+
+.productDetailTopTitle span {
+  display: block;
+  margin-top: 3px;
+  color: #666666;
+  font-size: 12px;
+  font-weight: 850;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.productDetailHeroGrid {
+  display: grid;
+  grid-template-columns: minmax(320px, 0.9fr) minmax(360px, 1.1fr);
+  gap: clamp(20px, 4vw, 42px);
+  align-items: start;
+}
+
+.productDetailImageButton {
+  position: sticky;
+  top: 88px;
+  width: 100%;
+  min-height: clamp(380px, 46vw, 620px);
+  border: 1px solid #ececec;
+  border-radius: 34px;
+  background: #ffffff;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: clamp(18px, 3vw, 34px);
+  box-shadow: 0 20px 44px rgba(0, 0, 0, 0.08);
+}
+
+.productDetailImageButton.isClickable:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 24px 52px rgba(0, 0, 0, 0.11);
+}
+
+.productDetailImageButton img {
+  width: 100%;
+  height: 100%;
+  max-height: 560px;
+  object-fit: contain;
+}
+
+.productDetailImageButton:disabled {
+  cursor: default;
+}
+
+.productDetailFreeBadge {
+  position: absolute;
+  top: 18px;
+  left: 18px;
+  border-radius: 999px;
+  background: #111111;
+  color: #ffd23f;
+  padding: 8px 12px;
+  font-size: 11px;
+  font-weight: 950;
+  letter-spacing: 0.4px;
+}
+
+.productImageTapHint {
+  position: absolute;
+  right: 18px;
+  bottom: 18px;
+  border-radius: 999px;
+  background: rgba(17, 17, 17, 0.88);
+  color: #ffd23f;
+  padding: 9px 12px;
+  font-size: 12px;
+  font-weight: 950;
+}
+
+.productDetailMainPanel {
+  border-radius: 34px;
+  background: #ffffff;
+  border: 1px solid #e7e7e7;
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.06);
+  padding: clamp(22px, 3.5vw, 38px);
+}
+
+.productDetailBadgeRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.productDetailBadgeRow span {
+  border-radius: 999px;
+  background: #fff4bf;
+  color: #111111;
+  padding: 8px 12px;
+  font-size: 12px;
+  font-weight: 950;
+}
+
+.productDetailMainPanel h1 {
+  margin: 0;
+  color: #111111;
+  font-size: clamp(34px, 5vw, 62px);
+  line-height: 1.02;
+  font-weight: 950;
+  letter-spacing: -1.2px;
+}
+
+.productDetailDeliveryPromise {
+  margin-top: 22px;
+  border-radius: 24px;
+  background: #111111;
+  color: #ffffff;
+  padding: 18px;
+}
+
+.productDetailDeliveryPromise strong {
+  display: block;
+  color: #ffd23f;
+  font-size: 16px;
+  font-weight: 950;
+}
+
+.productDetailDeliveryPromise p {
+  margin: 8px 0 0;
+  color: #e8e8e8;
+  font-size: 14px;
+  font-weight: 750;
+  line-height: 1.45;
+}
+
+.productDetailSizePicker {
+  margin-top: 18px;
+}
+
+.productDetailActionBar {
+  margin-top: 18px;
+  border-radius: 26px;
+  background: #111111;
+  padding: 20px;
+  display: flex;
+  justify-content: space-between;
+  gap: 18px;
+  align-items: center;
+}
+
+.productDetailActionBar span {
+  color: #d8d8d8;
+  font-size: 13px;
+  font-weight: 850;
+}
+
+.productDetailActionBar strong {
+  display: block;
+  margin-top: 6px;
+  color: #ffd23f;
+  font-size: 25px;
+  font-weight: 950;
+}
+
+.productDetailActionBar button {
+  border: 0;
+  border-radius: 18px;
+  background: #ffd23f;
+  color: #111111;
+  padding: 16px 24px;
+  font-size: 15px;
+  font-weight: 950;
+  min-width: 152px;
+}
+
+.productDetailActionBar button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.productDetailInfoGrid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.35fr) minmax(260px, 0.65fr);
+  gap: 20px;
+  margin-top: 24px;
+}
+
+.productDetailDescriptionCard,
+.productDetailTrustCard {
+  min-height: 146px;
+}
+
+.productImageZoomOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9900;
+  background: rgba(0, 0, 0, 0.86);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: clamp(16px, 4vw, 42px);
+}
+
+.productImageZoomShell {
+  position: relative;
+  width: min(980px, 100%);
+  max-height: 92vh;
+  border-radius: 30px;
+  background: #ffffff;
+  padding: clamp(18px, 3vw, 30px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 28px 70px rgba(0, 0, 0, 0.34);
+}
+
+.productImageZoomShell img {
+  width: 100%;
+  max-height: 82vh;
+  object-fit: contain;
+}
+
+.productImageZoomClose {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  z-index: 2;
+  border: 0;
+  border-radius: 999px;
+  background: #111111;
+  color: #ffd23f;
+  padding: 10px 14px;
+  font-size: 13px;
+  font-weight: 950;
+}
+
+@media (max-width: 900px) {
+  .productDetailHeroGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .productDetailImageButton {
+    position: relative;
+    top: auto;
+    min-height: 330px;
+  }
+
+  .productDetailInfoGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 700px) {
+  .productFullScreenPage {
+    padding: 18px 14px 34px;
+  }
+
+  .productDetailTopBar {
+    grid-template-columns: 1fr auto;
+    margin: -18px -14px 18px;
+    padding: 12px 14px;
+  }
+
+  .productDetailTopTitle {
+    display: none;
+  }
+
+  .productBackButton,
+  .productDetailCartButton {
+    padding: 11px 13px;
+    font-size: 13px;
+  }
+
+  .productDetailImageButton,
+  .productDetailMainPanel {
+    border-radius: 26px;
+  }
+
+  .productDetailMainPanel h1 {
+    font-size: 34px;
+  }
+
+  .productDetailActionBar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .productDetailActionBar button {
+    width: 100%;
+  }
+
+  .productImageTapHint {
+    right: 12px;
+    bottom: 12px;
+  }
+}
+
+/* L313: Mobile Safari / phone responsive cleanup for getdarik.com
+   Goal: keep the desktop look, but make phones feel like a real app instead of a zoomed-out desktop page. */
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+body {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
+  touch-action: manipulation;
+}
+
+button,
+input,
+select,
+textarea {
+  -webkit-tap-highlight-color: rgba(255, 210, 63, 0.28);
+}
+
+@supports (-webkit-touch-callout: none) {
+  input,
+  select,
+  textarea {
+    font-size: 16px !important;
+  }
+}
+
+@media (max-width: 820px) {
+  html,
+  body,
+  .darikPage,
+  .webAppShell {
+    max-width: 100vw !important;
+    overflow-x: hidden !important;
+  }
+
+  .darikPage {
+    background: linear-gradient(180deg, #f7f7f7 0%, #eef1f4 100%) !important;
+  }
+
+  .webAppShell {
+    padding: 14px 12px 36px !important;
+  }
+
+  .topHeader {
+    grid-template-columns: 44px minmax(0, 1fr) 44px !important;
+    min-height: 86px !important;
+    gap: 8px !important;
+    margin-bottom: 12px !important;
+  }
+
+  .topHeader.topHeaderShrunk {
+    min-height: 64px !important;
+    padding-top: 4px !important;
+    padding-bottom: 4px !important;
+  }
+
+  .circleButton,
+  .topHeader.topHeaderShrunk .circleButton {
+    width: 44px !important;
+    height: 44px !important;
+    min-width: 44px !important;
+    font-size: 20px !important;
+    box-shadow: 0 8px 18px rgba(0, 0, 0, 0.08) !important;
+  }
+
+  .settingsHeaderButton {
+    font-size: 22px !important;
+  }
+
+  .cartButton {
+    font-size: 18px !important;
+  }
+
+  .cartButton span {
+    top: -4px !important;
+    right: -5px !important;
+    min-width: 20px !important;
+    height: 20px !important;
+    font-size: 11px !important;
+  }
+
+  .logoWrap,
+  .topHeader.topHeaderShrunk .logoWrap {
+    height: 86px !important;
+    min-width: 0 !important;
+  }
+
+  .topHeader.topHeaderShrunk .logoWrap {
+    height: 54px !important;
+  }
+
+  .logoWrap img,
+  .topHeader.topHeaderShrunk .logoWrap img {
+    width: min(245px, 62vw) !important;
+    height: 76px !important;
+    max-height: 76px !important;
+    object-fit: contain !important;
+  }
+
+  .topHeader.topHeaderShrunk .logoWrap img {
+    width: min(190px, 56vw) !important;
+    height: 52px !important;
+    max-height: 52px !important;
+  }
+
+  .topHeader ~ .searchBar,
+  .topHeader ~ .sponsoredBannerCarousel,
+  .topHeader ~ .trustGrid,
+  .topHeader ~ .cartSummary,
+  .topHeader ~ .sectionBlock,
+  .topHeader ~ .operationsPromise {
+    transform: none !important;
+    width: 100% !important;
+    margin-top: 0 !important;
+    margin-right: 0 !important;
+  }
+
+  .searchBar {
+    min-height: 52px !important;
+    border-radius: 26px !important;
+    padding: 0 14px !important;
+    gap: 10px !important;
+    margin-bottom: 14px !important;
+  }
+
+  .searchBar span {
+    font-size: 21px !important;
+  }
+
+  .searchBar input {
+    min-width: 0 !important;
+    font-size: 16px !important;
+  }
+
+  .sponsoredBannerCarousel {
+    margin: 0 0 16px !important;
+  }
+
+  .sponsoredBannerCard {
+    min-height: clamp(174px, 46vw, 280px) !important;
+    border-radius: 22px !important;
+  }
+
+  .sponsoredBannerImage {
+    object-fit: contain !important;
+  }
+
+  .sponsoredBannerFallback {
+    padding: 20px !important;
+  }
+
+  .sponsoredBannerFallback img {
+    width: 150px !important;
+    height: 58px !important;
+  }
+
+  .sponsoredBannerFallback h2 {
+    font-size: 30px !important;
+  }
+
+  .sponsoredBannerFallback p {
+    font-size: 15px !important;
+  }
+
+  .sponsoredBannerCta {
+    right: 12px !important;
+    bottom: 12px !important;
+    padding: 8px 10px !important;
+    font-size: 10px !important;
+  }
+
+  .trustGrid,
+  .bestSellerCleanSection {
+    position: static !important;
+    top: auto !important;
+    margin-bottom: 16px !important;
+  }
+
+  .trustGrid {
+    grid-template-columns: 1fr !important;
+    gap: 10px !important;
+  }
+
+  .trustCard {
+    min-height: auto !important;
+    padding: 14px !important;
+    border-radius: 18px !important;
+    gap: 12px !important;
+  }
+
+  .trustIcon {
+    width: 42px !important;
+    height: 42px !important;
+    font-size: 22px !important;
+  }
+
+  .trustCard h3 {
+    font-size: 16px !important;
+  }
+
+  .trustCard p {
+    font-size: 13px !important;
+  }
+
+  .cartSummary {
+    padding: 14px !important;
+    border-radius: 18px !important;
+    margin-bottom: 16px !important;
+    gap: 12px !important;
+  }
+
+  .cartSummary h3 {
+    font-size: 16px !important;
+  }
+
+  .cartSummary p,
+  .cartSummary span {
+    font-size: 12px !important;
+  }
+
+  .cartSummary strong {
+    font-size: 18px !important;
+    white-space: nowrap !important;
+  }
+
+  .sectionBlock {
+    margin-top: 18px !important;
+    overflow: hidden !important;
+  }
+
+  .sectionTitleRow {
+    align-items: flex-start !important;
+    flex-direction: column !important;
+    gap: 4px !important;
+    margin-bottom: 12px !important;
+  }
+
+  .sectionTitleRow h2 {
+    font-size: 22px !important;
+    line-height: 1.1 !important;
+  }
+
+  .sectionTitleRow p,
+  .sectionTitleRow span {
+    font-size: 13px !important;
+  }
+
+  .categoryRow {
+    display: flex !important;
+    zoom: 1 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    gap: 12px !important;
+    padding: 4px 1px 14px !important;
+    overflow-x: auto !important;
+    overflow-y: visible !important;
+    scroll-snap-type: x proximity !important;
+    -webkit-overflow-scrolling: touch !important;
+  }
+
+  .categoryButton {
+    width: 82px !important;
+    min-width: 82px !important;
+    padding: 0 !important;
+    scroll-snap-align: start !important;
+  }
+
+  .categoryCircle {
+    width: 58px !important;
+    height: 58px !important;
+    margin-bottom: 8px !important;
+    font-size: 24px !important;
+  }
+
+  .categoryButton strong {
+    min-height: 30px !important;
+    font-size: 12px !important;
+    line-height: 1.15 !important;
+  }
+
+  .subcategoryFilterBlock {
+    transform: none !important;
+    width: 100% !important;
+    margin: 0 0 14px !important;
+    padding: 14px !important;
+    border-radius: 18px !important;
+  }
+
+  .subcategoryTitleRow {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 4px !important;
+    margin-bottom: 10px !important;
+  }
+
+  .subcategoryTitleRow h3 {
+    border: 0 !important;
+    background: transparent !important;
+    padding: 0 !important;
+    font-size: 20px !important;
+    line-height: 1.15 !important;
+  }
+
+  .subcategoryTitleRow p {
+    font-size: 12px !important;
+  }
+
+  .subcategoryChipRow {
+    gap: 8px !important;
+    padding: 2px 0 8px !important;
+    -webkit-overflow-scrolling: touch !important;
+  }
+
+  .subcategoryChip {
+    padding: 10px 13px !important;
+    font-size: 13px !important;
+  }
+
+  .productGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 18px 12px !important;
+  }
+
+  .productImageWrap {
+    border-radius: 18px !important;
+    aspect-ratio: 1 / 1 !important;
+  }
+
+  .productImageWrap img {
+    padding: 8px !important;
+  }
+
+  .productInitials {
+    width: 52px !important;
+    height: 52px !important;
+    font-size: 14px !important;
+  }
+
+  .productInfo h3 {
+    font-size: 14px !important;
+    line-height: 1.18 !important;
+    -webkit-line-clamp: 2 !important;
+    line-clamp: 2 !important;
+  }
+
+  .productInfo p {
+    font-size: 11px !important;
+  }
+
+  .productBottom {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 8px !important;
+    margin-top: 6px !important;
+  }
+
+  .productBottom strong {
+    font-size: 16px !important;
+  }
+
+  .productBottom span {
+    font-size: 11px !important;
+  }
+
+  .productBottom button {
+    width: 100% !important;
+    min-width: 0 !important;
+    padding: 9px 10px !important;
+    font-size: 13px !important;
+  }
+
+  .freeBadge,
+  .bestSellerCleanFreeBadge {
+    top: 8px !important;
+    left: 8px !important;
+    padding: 4px 7px !important;
+    font-size: 9px !important;
+  }
+
+  .bestSellerDepartmentStack {
+    gap: 20px !important;
+  }
+
+  .bestSellerDepartmentTitle {
+    font-size: 18px !important;
+    margin-bottom: 10px !important;
+  }
+
+  .bestSellerCarousel {
+    gap: 12px !important;
+    padding-bottom: 14px !important;
+    -webkit-overflow-scrolling: touch !important;
+  }
+
+  .bestSellerCleanItem {
+    width: 148px !important;
+    min-width: 148px !important;
+  }
+
+  .bestSellerCleanImageWrap {
+    border-radius: 16px !important;
+  }
+
+  .bestSellerCleanImage {
+    padding: 8px !important;
+  }
+
+  .bestSellerCleanItem h4 {
+    font-size: 13px !important;
+    line-height: 1.18 !important;
+    white-space: normal !important;
+    display: -webkit-box !important;
+    -webkit-line-clamp: 2 !important;
+    line-clamp: 2 !important;
+    -webkit-box-orient: vertical !important;
+    overflow: hidden !important;
+  }
+
+  .bestSellerCleanItem strong {
+    font-size: 15px !important;
+  }
+
+  .operationsPromise {
+    margin-top: 22px !important;
+    padding: 18px !important;
+    border-radius: 22px !important;
+  }
+
+  .operationsPromise h2 {
+    font-size: 21px !important;
+  }
+
+  .operationsPromise p {
+    font-size: 14px !important;
+  }
+
+  .emptyCard {
+    padding: 22px !important;
+    border-radius: 20px !important;
+  }
+
+  .modalOverlay {
+    align-items: stretch !important;
+    padding: 0 !important;
+  }
+
+  .cartSheet {
+    width: 100% !important;
+    height: 100dvh !important;
+    max-height: 100dvh !important;
+    border-radius: 0 !important;
+    padding: 14px !important;
+  }
+
+  .cartHeader {
+    gap: 12px !important;
+    align-items: flex-start !important;
+  }
+
+  .cartHeader h2 {
+    font-size: 23px !important;
+  }
+
+  .cartHeader p {
+    font-size: 13px !important;
+  }
+
+  .cartHeader button {
+    padding: 10px 12px !important;
+    font-size: 13px !important;
+  }
+
+  .cartItemsList,
+  .checkoutBox,
+  .savedForLaterBox {
+    border-radius: 20px !important;
+    padding: 10px !important;
+  }
+
+  .cartItem,
+  .savedForLaterItem {
+    align-items: flex-start !important;
+    gap: 10px !important;
+    padding: 10px !important;
+    border-radius: 16px !important;
+  }
+
+  .cartImage {
+    width: 58px !important;
+    height: 58px !important;
+    border-radius: 14px !important;
+  }
+
+  .cartMiddle h3 {
+    font-size: 14px !important;
+  }
+
+  .cartMiddle p {
+    font-size: 12px !important;
+  }
+
+  .quantityBox {
+    gap: 7px !important;
+  }
+
+  .quantityBox button {
+    width: 32px !important;
+    height: 32px !important;
+  }
+
+  .cartActionsColumn {
+    justify-items: stretch !important;
+  }
+
+  .saveForLaterButton {
+    padding: 8px 10px !important;
+    font-size: 11px !important;
+  }
+
+  .deliveryCard,
+  .checkoutDeliveryCard,
+  .paymentMethodCard,
+  .checkoutAccountNotice,
+  .checkoutAccountRequiredBox {
+    padding: 13px !important;
+    border-radius: 16px !important;
+  }
+
+  .summaryRows div,
+  .checkoutSummaryRows div {
+    font-size: 13px !important;
+  }
+
+  .checkoutButton,
+  .placeOrderButton {
+    min-height: 48px !important;
+    border-radius: 16px !important;
+  }
+}
+
+@media (max-width: 820px) {
+  .checkoutFullScreenOverlay,
+  .settingsFullScreenOverlay,
+  .productFullScreenOverlay {
+    height: 100dvh !important;
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+  }
+
+  .checkoutFullScreenPage,
+  .settingsFullScreenPage,
+  .productFullScreenPage {
+    width: 100% !important;
+    max-width: 100vw !important;
+    min-height: 100dvh !important;
+    padding: 16px 12px 28px !important;
+  }
+
+  .checkoutFullTopBar,
+  .settingsTopBar,
+  .productDetailTopBar {
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 55 !important;
+    margin: -16px -12px 16px !important;
+    padding: 12px !important;
+    background: rgba(246, 246, 246, 0.97) !important;
+    backdrop-filter: blur(16px) !important;
+    -webkit-backdrop-filter: blur(16px) !important;
+  }
+
+  .checkoutFullTopBar,
+  .settingsTopBar {
+    grid-template-columns: auto 1fr !important;
+    gap: 10px !important;
+    align-items: center !important;
+  }
+
+  .checkoutFullTopBar h2,
+  .settingsTopBar h2 {
+    font-size: 22px !important;
+    line-height: 1.12 !important;
+    letter-spacing: -0.03em !important;
+  }
+
+  .checkoutFullTopBar p,
+  .settingsTopBar p {
+    display: none !important;
+  }
+
+  .checkoutBackButton,
+  .settingsSaveTopButton,
+  .settingsPrimaryButton,
+  .settingsSecondaryButton,
+  .settingsGhostButton,
+  .settingsDangerButton,
+  .productBackButton,
+  .productDetailCartButton {
+    min-height: 42px !important;
+    border-radius: 999px !important;
+    padding: 10px 13px !important;
+    font-size: 13px !important;
+  }
+
+  .settingsSaveTopButton {
+    grid-column: 1 / -1 !important;
+    width: 100% !important;
+  }
+
+  .checkoutTopTotal {
+    grid-column: 1 / -1 !important;
+    width: 100% !important;
+    padding: 10px 12px !important;
+    border-radius: 16px !important;
+    text-align: left !important;
+  }
+
+  .checkoutTopTotal strong {
+    font-size: 19px !important;
+  }
+
+  .checkoutFullScreenPage .checkoutGrid,
+  .checkoutGrid,
+  .settingsGrid,
+  .settingsTwoColumn,
+  .settingsSupportLayout,
+  .gpsInputGrid {
+    grid-template-columns: 1fr !important;
+    gap: 12px !important;
+  }
+
+  .checkoutPanel,
+  .checkoutReviewBox,
+  .settingsPanel,
+  .settingsAuthBox,
+  .settingsPasswordBox,
+  .settingsSupportForm,
+  .settingsSupportTickets,
+  .settingsPanelFull,
+  .settingsSignInNotice,
+  .savedLocationsBox,
+  .currentLocationBox {
+    border-radius: 20px !important;
+    padding: 14px !important;
+  }
+
+  .checkoutPanel h3,
+  .checkoutReviewBox h3,
+  .settingsPanelHeader h3,
+  .settingsAuthForm h4,
+  .settingsSupportForm h4,
+  .settingsSupportTickets h4 {
+    font-size: 18px !important;
+  }
+
+  .checkoutPanel label,
+  .settingsPanel label {
+    font-size: 13px !important;
+  }
+
+  .checkoutPanel input,
+  .checkoutPanel textarea,
+  .settingsPanel input,
+  .settingsSelect,
+  .settingsTextarea {
+    width: 100% !important;
+    border-radius: 16px !important;
+    padding: 13px 14px !important;
+    font-size: 16px !important;
+  }
+
+  .currentLocationBox,
+  .savedLocationCard,
+  .settingsSavedLocationCard,
+  .settingsOrderHeader,
+  .settingsOrderTotals,
+  .settingsSupportTicketsHeader,
+  .supportThreadTop,
+  .settingsOptionCard {
+    grid-template-columns: 1fr !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+  }
+
+  .currentLocationBox button,
+  .savedLocationCard button,
+  .settingsSavedLocationActions,
+  .settingsSavedLocationActions button,
+  .settingsButtonRow,
+  .settingsButtonRow button,
+  .settingsOptionCard button {
+    width: 100% !important;
+  }
+
+  .settingsPanelHeader {
+    align-items: flex-start !important;
+    gap: 10px !important;
+  }
+
+  .settingsPanelHeader > span {
+    width: 40px !important;
+    height: 40px !important;
+    font-size: 22px !important;
+  }
+
+  .settingsAccountCard,
+  .settingsCreditCard,
+  .settingsOptionCard,
+  .settingsEmptyState,
+  .settingsOrderCard,
+  .supportThreadCard {
+    border-radius: 18px !important;
+    padding: 14px !important;
+  }
+
+  .settingsOptionButton {
+    border-radius: 18px !important;
+    padding: 13px !important;
+    align-items: flex-start !important;
+  }
+
+  .settingsOptionButton span {
+    width: 38px !important;
+    height: 38px !important;
+    font-size: 20px !important;
+  }
+
+  .languageToggle {
+    width: 100% !important;
+  }
+
+  .languageToggle button {
+    flex: 1 !important;
+  }
+
+  .settingsOrderItemRow,
+  .checkoutReviewItems div {
+    align-items: flex-start !important;
+    flex-direction: column !important;
+    gap: 4px !important;
+  }
+
+  .settingsOrderItemRow small,
+  .checkoutReviewItems strong {
+    white-space: normal !important;
+  }
+
+  .supportMessages {
+    max-height: 48vh !important;
+  }
+}
+
+@media (max-width: 700px) {
+  .productDetailTopBar {
+    grid-template-columns: 1fr auto !important;
+  }
+
+  .productDetailTopTitle {
+    display: none !important;
+  }
+
+  .productDetailHeroGrid {
+    display: block !important;
+  }
+
+  .productDetailImageButton {
+    width: 100% !important;
+    min-height: auto !important;
+    aspect-ratio: 1 / 1 !important;
+    border-radius: 22px !important;
+    padding: 14px !important;
+    margin-bottom: 14px !important;
+    position: relative !important;
+    top: auto !important;
+  }
+
+  .productDetailImageButton img {
+    max-height: none !important;
+  }
+
+  .productDetailMainPanel {
+    padding: 18px !important;
+    border-radius: 22px !important;
+  }
+
+  .productDetailMainPanel h1 {
+    font-size: 26px !important;
+    line-height: 1.08 !important;
+    letter-spacing: -0.5px !important;
+  }
+
+  .productDetailBadgeRow {
+    gap: 7px !important;
+    margin-bottom: 12px !important;
+  }
+
+  .productDetailBadgeRow span {
+    font-size: 11px !important;
+    padding: 7px 10px !important;
+  }
+
+  .productDetailDeliveryPromise {
+    margin-top: 15px !important;
+    padding: 14px !important;
+    border-radius: 18px !important;
+  }
+
+  .productDetailSizePicker {
+    margin-top: 14px !important;
+  }
+
+  .sizeChipRow {
+    gap: 8px !important;
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+  }
+
+  .sizeChip {
+    min-width: 52px !important;
+    min-height: 42px !important;
+    padding: 10px 12px !important;
+    font-size: 13px !important;
+  }
+
+  .productDetailActionBar {
+    position: sticky !important;
+    bottom: 0 !important;
+    z-index: 40 !important;
+    margin: 16px -18px -18px !important;
+    border-radius: 22px 22px 0 0 !important;
+    padding: 14px !important;
+    box-shadow: 0 -12px 30px rgba(0, 0, 0, 0.16) !important;
+  }
+
+  .productDetailActionBar strong {
+    font-size: 22px !important;
+  }
+
+  .productDetailActionBar button {
+    width: 100% !important;
+    min-height: 48px !important;
+  }
+
+  .productDetailInfoGrid {
+    display: block !important;
+    margin-top: 14px !important;
+  }
+
+  .productDetailDescriptionCard,
+  .productDetailTrustCard,
+  .detailCard {
+    min-height: auto !important;
+    padding: 14px !important;
+    border-radius: 18px !important;
+    margin-top: 12px !important;
+  }
+
+  .productImageTapHint {
+    right: 10px !important;
+    bottom: 10px !important;
+    padding: 7px 10px !important;
+    font-size: 11px !important;
+  }
+
+  .productImageZoomOverlay {
+    padding: 10px !important;
+  }
+
+  .productImageZoomShell {
+    width: 100% !important;
+    max-height: 88dvh !important;
+    border-radius: 20px !important;
+    padding: 14px !important;
+  }
+
+  .productImageZoomShell img {
+    max-height: 78dvh !important;
+  }
+
+  .productImageZoomClose {
+    top: 10px !important;
+    right: 10px !important;
+  }
+}
+
+@media (max-width: 430px) {
+  .productGrid {
+    gap: 16px 10px !important;
+  }
+
+  .categoryButton {
+    width: 76px !important;
+    min-width: 76px !important;
+  }
+
+  .categoryCircle {
+    width: 54px !important;
+    height: 54px !important;
+  }
+
+  .bestSellerCleanItem {
+    width: 136px !important;
+    min-width: 136px !important;
+  }
+
+  .productInfo h3,
+  .bestSellerCleanItem h4 {
+    font-size: 12.5px !important;
+  }
+
+  .productBottom strong,
+  .bestSellerCleanItem strong {
+    font-size: 14.5px !important;
+  }
+
+  .cartSummary {
+    align-items: flex-start !important;
+    flex-direction: column !important;
+  }
+}
+
+
+/* L314: Premium compact product detail page
+   Goal: remove the oversized desktop look and make the product page feel like a polished shopping page. */
+.productFullScreenOverlay {
+  background:
+    radial-gradient(circle at 6% 4%, rgba(255, 210, 63, 0.12), transparent 28%),
+    linear-gradient(135deg, #fafafa 0%, #f2f4f7 58%, #edf1f5 100%) !important;
+}
+
+.productFullScreenPage {
+  width: min(100%, 1240px) !important;
+  max-width: 1240px !important;
+  margin: 0 auto !important;
+  padding: 18px 28px 42px !important;
+}
+
+.productDetailTopBar {
+  position: sticky !important;
+  top: 10px !important;
+  z-index: 80 !important;
+  grid-template-columns: 190px minmax(0, 1fr) 150px !important;
+  margin: 0 0 22px !important;
+  padding: 10px 12px !important;
+  border: 1px solid rgba(17, 17, 17, 0.08) !important;
+  border-radius: 999px !important;
+  background: rgba(255, 255, 255, 0.92) !important;
+  box-shadow: 0 14px 34px rgba(17, 17, 17, 0.08) !important;
+  backdrop-filter: blur(18px) !important;
+  -webkit-backdrop-filter: blur(18px) !important;
+}
+
+.productBackButton,
+.productDetailCartButton {
+  min-height: 46px !important;
+  border-radius: 999px !important;
+  padding: 10px 16px !important;
+  font-size: 13px !important;
+  box-shadow: none !important;
+}
+
+.productDetailTopTitle strong {
+  font-size: 15px !important;
+  letter-spacing: -0.01em !important;
+}
+
+.productDetailTopTitle span {
+  margin-top: 1px !important;
+  font-size: 11px !important;
+}
+
+.productDetailHeroGrid {
+  grid-template-columns: minmax(360px, 0.86fr) minmax(440px, 1fr) !important;
+  gap: 26px !important;
+  align-items: start !important;
+}
+
+.productDetailImageButton {
+  position: sticky !important;
+  top: 88px !important;
+  min-height: auto !important;
+  height: clamp(430px, 52vh, 560px) !important;
+  border-radius: 32px !important;
+  padding: 22px !important;
+  background: #ffffff !important;
+  border: 1px solid rgba(17, 17, 17, 0.08) !important;
+  box-shadow: 0 18px 42px rgba(17, 17, 17, 0.08) !important;
+}
+
+.productDetailImageButton img {
+  width: 100% !important;
+  height: 100% !important;
+  max-height: 100% !important;
+  object-fit: contain !important;
+}
+
+.productDetailImageButton.isClickable:hover {
+  transform: translateY(-1px) !important;
+  box-shadow: 0 22px 48px rgba(17, 17, 17, 0.10) !important;
+}
+
+.productImageTapHint {
+  right: 16px !important;
+  bottom: 16px !important;
+  background: rgba(17, 17, 17, 0.86) !important;
+  padding: 8px 12px !important;
+  font-size: 11px !important;
+}
+
+.productDetailFreeBadge {
+  top: 16px !important;
+  left: 16px !important;
+  padding: 7px 11px !important;
+  font-size: 10px !important;
+}
+
+.productDetailMainPanel {
+  border-radius: 32px !important;
+  padding: 28px !important;
+  border: 1px solid rgba(17, 17, 17, 0.08) !important;
+  box-shadow: 0 18px 42px rgba(17, 17, 17, 0.07) !important;
+}
+
+.productDetailBadgeRow {
+  gap: 8px !important;
+  margin-bottom: 14px !important;
+}
+
+.productDetailBadgeRow span {
+  padding: 7px 10px !important;
+  font-size: 11px !important;
+  background: #fff4bf !important;
+}
+
+.productDetailMainPanel h1 {
+  max-width: 720px !important;
+  font-size: clamp(32px, 3.2vw, 46px) !important;
+  line-height: 1.06 !important;
+  letter-spacing: -0.04em !important;
+}
+
+.detailCategory {
+  margin: 12px 0 0 !important;
+  color: #5f6368 !important;
+  font-size: 14px !important;
+  font-weight: 850 !important;
+}
+
+.detailPrice {
+  margin-top: 18px !important;
+  font-size: 31px !important;
+  letter-spacing: -0.03em !important;
+}
+
+.productDetailDeliveryPromise {
+  margin-top: 18px !important;
+  border-radius: 20px !important;
+  padding: 15px 16px !important;
+  background: #111111 !important;
+}
+
+.productDetailDeliveryPromise strong {
+  font-size: 15px !important;
+}
+
+.productDetailDeliveryPromise p {
+  margin-top: 5px !important;
+  font-size: 13px !important;
+}
+
+.productDetailSizePicker {
+  margin-top: 16px !important;
+  border-radius: 22px !important;
+  padding: 16px !important;
+}
+
+.productDetailSizePicker h3 {
+  font-size: 18px !important;
+  margin-bottom: 12px !important;
+}
+
+.productDetailSizePicker .sizeChipRow {
+  gap: 10px !important;
+}
+
+.productDetailSizePicker .sizeChip {
+  min-width: 58px !important;
+  min-height: 46px !important;
+  padding: 10px 15px !important;
+  font-size: 14px !important;
+}
+
+.productDetailActionBar {
+  margin-top: 16px !important;
+  border-radius: 22px !important;
+  padding: 16px !important;
+  gap: 16px !important;
+  box-shadow: inset 0 0 0 1px rgba(255, 210, 63, 0.10) !important;
+}
+
+.productDetailActionBar span {
+  font-size: 12px !important;
+}
+
+.productDetailActionBar strong {
+  margin-top: 4px !important;
+  font-size: 24px !important;
+}
+
+.productDetailActionBar button {
+  min-width: 168px !important;
+  min-height: 52px !important;
+  border-radius: 17px !important;
+  padding: 14px 22px !important;
+  font-size: 15px !important;
+}
+
+.productDetailInfoGrid {
+  grid-template-columns: minmax(0, 1fr) minmax(280px, 0.48fr) !important;
+  gap: 16px !important;
+  margin-top: 18px !important;
+}
+
+.productDetailDescriptionCard,
+.productDetailTrustCard,
+.productDetailInfoGrid .detailCard {
+  min-height: 118px !important;
+  border-radius: 24px !important;
+  padding: 18px !important;
+}
+
+.productDetailInfoGrid .detailCard h3 {
+  font-size: 18px !important;
+}
+
+.productDetailInfoGrid .detailCard p {
+  font-size: 14px !important;
+  line-height: 1.46 !important;
+}
+
+.productImageZoomShell {
+  width: min(100%, 980px) !important;
+  border-radius: 28px !important;
+  padding: 22px !important;
+}
+
+.productImageZoomShell img {
+  max-height: 82vh !important;
+}
+
+@media (min-width: 1400px) {
+  .productFullScreenPage {
+    max-width: 1180px !important;
+  }
+
+  .productDetailHeroGrid {
+    grid-template-columns: 500px minmax(0, 1fr) !important;
+  }
+}
+
+@media (max-width: 980px) {
+  .productFullScreenPage {
+    padding: 16px 16px 34px !important;
+  }
+
+  .productDetailTopBar {
+    top: 0 !important;
+    grid-template-columns: auto minmax(0, 1fr) auto !important;
+    margin: 0 -2px 16px !important;
+    border-radius: 0 0 22px 22px !important;
+  }
+
+  .productDetailHeroGrid {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    gap: 14px !important;
+  }
+
+  .productDetailImageButton {
+    position: relative !important;
+    top: auto !important;
+    height: auto !important;
+    aspect-ratio: 1 / 1 !important;
+    max-height: 520px !important;
+  }
+}
+
+@media (max-width: 700px) {
+  .productFullScreenPage {
+    padding: 0 12px 28px !important;
+  }
+
+  .productDetailTopBar {
+    grid-template-columns: 1fr auto !important;
+    margin: 0 -12px 14px !important;
+    padding: 10px 12px !important;
+    border-radius: 0 0 20px 20px !important;
+    border-top: 0 !important;
+  }
+
+  .productBackButton,
+  .productDetailCartButton {
+    min-height: 42px !important;
+    padding: 9px 12px !important;
+    font-size: 12px !important;
+  }
+
+  .productDetailHeroGrid {
+    display: block !important;
+  }
+
+  .productDetailImageButton {
+    border-radius: 22px !important;
+    padding: 12px !important;
+    margin-bottom: 12px !important;
+    aspect-ratio: 1 / 1 !important;
+    box-shadow: 0 12px 28px rgba(17, 17, 17, 0.07) !important;
+  }
+
+  .productDetailMainPanel {
+    padding: 16px !important;
+    border-radius: 22px !important;
+    box-shadow: 0 12px 28px rgba(17, 17, 17, 0.06) !important;
+  }
+
+  .productDetailMainPanel h1 {
+    font-size: 24px !important;
+    line-height: 1.08 !important;
+    letter-spacing: -0.03em !important;
+  }
+
+  .detailCategory {
+    font-size: 12px !important;
+    margin-top: 9px !important;
+  }
+
+  .detailPrice {
+    font-size: 25px !important;
+    margin-top: 12px !important;
+  }
+
+  .productDetailDeliveryPromise {
+    margin-top: 12px !important;
+    padding: 13px !important;
+    border-radius: 17px !important;
+  }
+
+  .productDetailDeliveryPromise strong {
+    font-size: 14px !important;
+  }
+
+  .productDetailDeliveryPromise p {
+    font-size: 12px !important;
+  }
+
+  .productDetailSizePicker {
+    margin-top: 12px !important;
+    padding: 14px !important;
+    border-radius: 18px !important;
+  }
+
+  .productDetailSizePicker h3 {
+    font-size: 17px !important;
+  }
+
+  .productDetailActionBar {
+    margin: 14px -16px -16px !important;
+    border-radius: 20px 20px 0 0 !important;
+    padding: 13px 14px calc(13px + env(safe-area-inset-bottom)) !important;
+  }
+
+  .productDetailActionBar strong {
+    font-size: 21px !important;
+  }
+
+  .productDetailActionBar button {
+    min-height: 48px !important;
+    border-radius: 16px !important;
+  }
+
+  .productDetailInfoGrid {
+    margin-top: 12px !important;
+  }
+
+  .productDetailDescriptionCard,
+  .productDetailTrustCard,
+  .productDetailInfoGrid .detailCard {
+    padding: 14px !important;
+    border-radius: 18px !important;
+  }
+}
+
+
+/* L315 Amazon-style Darik product detail layout */
+.darikPdpHeader {
+  position: sticky;
+  top: 0;
+  z-index: 60;
+  display: grid;
+  grid-template-columns: 190px 1fr 160px;
+  align-items: center;
+  gap: 16px;
+  background: #ffffff;
+  border: 1px solid #ececec;
+  border-radius: 18px;
+  padding: 14px 18px;
+  margin-bottom: 18px;
+  box-shadow: 0 10px 24px rgba(17,17,17,0.05);
+}
+.darikPdpBackButton,
+.darikPdpCartButton {
+  border: 0;
+  border-radius: 999px;
+  padding: 14px 18px;
+  font-size: 16px;
+  font-weight: 900;
+}
+.darikPdpBackButton { background: #111111; color: #ffd23f; text-align: left; }
+.darikPdpCartButton { background: #ffd23f; color: #111111; justify-self: end; min-width: 138px; }
+.darikPdpHeaderBrand { text-align: center; display:flex; flex-direction:column; }
+.darikPdpHeaderBrand strong { font-size: 22px; font-weight: 950; color:#111111; line-height:1; }
+.darikPdpHeaderBrand span { margin-top: 3px; font-size: 12px; color:#666; font-weight:800; letter-spacing:.4px; }
+.darikPdpFrame {
+  background: #ffffff;
+  border: 1px solid #ececec;
+  border-radius: 22px;
+  padding: 18px 22px 24px;
+  box-shadow: 0 18px 40px rgba(17,17,17,0.06);
+}
+.darikPdpBreadcrumbs {
+  display:flex; align-items:center; gap:9px; flex-wrap:wrap;
+  color:#777; font-size:13px; font-weight:700; margin-bottom: 18px;
+}
+.darikPdpGrid {
+  display:grid;
+  grid-template-columns: minmax(320px, 470px) minmax(340px, 1fr) 280px;
+  gap: 24px;
+  align-items: start;
+}
+.darikPdpMediaColumn { display:grid; grid-template-columns: 64px 1fr; gap: 16px; align-items:start; }
+.darikPdpThumbRail { display:flex; flex-direction:column; gap: 10px; }
+.darikPdpThumb {
+  width: 64px; height: 64px; border-radius: 12px; background:#fff; border:1px solid #dfdfdf;
+  display:flex; align-items:center; justify-content:center; overflow:hidden;
+}
+.darikPdpThumb.active { border-color:#111; box-shadow:0 0 0 2px rgba(17,17,17,0.08); }
+.darikPdpThumb img { width:100%; height:100%; object-fit:cover; }
+.darikPdpThumb span { font-size:13px; font-weight:900; color:#111; }
+.darikPdpImageStage {
+  position: relative;
+  min-height: 520px;
+  border-radius: 18px;
+  border: 1px solid #ececec;
+  background: #ffffff;
+  display:flex; align-items:center; justify-content:center;
+  padding: 24px;
+  overflow:hidden;
+}
+.darikPdpImageStage img { width:100%; max-width: 430px; max-height: 470px; object-fit: contain; }
+.darikPdpImageStage.isClickable { cursor: zoom-in; }
+.darikPdpZoomHint {
+  position:absolute; bottom:14px; left:50%; transform:translateX(-50%);
+  background: rgba(17,17,17,0.9); color:#fff; border-radius:999px;
+  padding: 8px 14px; font-size:12px; font-weight:800;
+}
+.darikPdpFreeBadge {
+  position:absolute; top:14px; left:14px; background:#0b7a31; color:#fff;
+  border-radius:999px; padding:6px 10px; font-size:11px; font-weight:900;
+}
+.darikPdpInfoColumn { min-width:0; }
+.darikPdpBrandLabel { color:#666; font-size:12px; font-weight:800; }
+.darikPdpTitle {
+  margin: 8px 0 8px;
+  color:#111; font-size: 38px; line-height:1.08; font-weight: 950;
+  letter-spacing: -.5px;
+}
+.darikPdpMetaRow { color:#666; font-size:16px; font-weight:700; margin-bottom:10px; }
+.darikPdpRatingRow { display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-bottom:12px; color:#444; font-size:14px; }
+.darikPdpRatingRow strong { font-size:18px; color:#111; }
+.darikPdpStars { color:#d38b00; letter-spacing:1px; font-size:15px; }
+.darikPdpPrice { font-size: 22px; font-weight: 950; color:#111; }
+.darikPdpVatNote { color:#777; font-size:13px; font-weight:700; margin-top:6px; }
+.darikPdpTrustStrip {
+  display:flex; gap:20px; flex-wrap:wrap; align-items:center;
+  margin: 18px 0 22px; padding: 12px 0 16px;
+  border-top:1px solid #eee; border-bottom:1px solid #eee;
+  color:#444; font-size:13px; font-weight:800;
+}
+.darikPdpSizeBlock { margin-bottom: 18px; }
+.darikPdpSectionTitleRow { display:flex; align-items:center; gap:10px; flex-wrap:wrap; font-size:14px; margin-bottom: 12px; }
+.darikPdpSectionTitleRow strong { color:#111; font-weight:900; }
+.darikPdpSectionTitleRow span { color:#555; font-weight:700; }
+.darikPdpSizeRow { display:flex; flex-wrap:wrap; gap: 10px; }
+.darikPdpSizeChip {
+  min-width: 52px; padding: 11px 16px; border-radius: 12px;
+  border:1px solid #dadada; background:#fff; color:#111; font-weight:900;
+}
+.darikPdpSizeChip.active { background:#111; border-color:#111; color:#fff; }
+.darikPdpSizeGuideButton {
+  border:0; background:transparent; color:#375a9e; font-size:13px; font-weight:800; padding:0; margin-top:10px;
+}
+.darikPdpMuted { color:#777; font-size:14px; font-weight:700; }
+.darikPdpAccordionGroup { display:flex; flex-direction:column; gap:0; margin-top: 10px; }
+.darikPdpAccordion {
+  border-bottom:1px solid #ececec;
+  padding: 0;
+}
+.darikPdpAccordion:first-child { border-top:1px solid #ececec; }
+.darikPdpAccordion summary {
+  list-style:none; cursor:pointer; padding: 16px 4px; font-size:15px; font-weight:900; color:#111; position:relative;
+}
+.darikPdpAccordion summary::-webkit-details-marker { display:none; }
+.darikPdpAccordion summary::after {
+  content:'+'; position:absolute; right:2px; top:50%; transform:translateY(-50%); color:#666; font-size:20px; font-weight:400;
+}
+.darikPdpAccordion[open] summary::after { content:'−'; }
+.darikPdpAccordion p,
+.darikPdpAccordion ul {
+  margin: 0 0 16px; color:#555; font-size:14px; font-weight:700; line-height:1.6; padding-right:18px;
+}
+.darikPdpAccordion ul { padding-left: 18px; }
+.darikPdpBuyBox {
+  background:#fafafa; border:1px solid #e5e5e5; border-radius:16px; padding:18px; position:sticky; top:88px;
+}
+.darikPdpBuyBoxTop span { color:#555; font-size:13px; font-weight:800; display:block; }
+.darikPdpBuyBoxTop strong { display:block; margin-top:4px; color:#111; font-size:34px; font-weight:950; line-height:1; }
+.darikPdpShipCard {
+  margin-top:16px; padding:14px; border-radius:14px; background:#fff; border:1px solid #ececec;
+}
+.darikPdpShipLine { color:#333; font-size:13px; font-weight:800; line-height:1.5; }
+.darikPdpShipAccent { color:#188038; }
+.darikPdpLocationRow { display:flex; justify-content:space-between; gap:12px; align-items:center; margin:14px 0 16px; }
+.darikPdpLocationRow span { color:#444; font-size:13px; font-weight:800; }
+.darikPdpLocationRow button { border:0; background:transparent; color:#375a9e; font-weight:800; }
+.darikPdpPrimaryButton,
+.darikPdpSecondaryButton,
+.darikPdpTertiaryButton {
+  width:100%; border-radius:12px; padding:13px 14px; font-size:15px; font-weight:900; border:1px solid transparent;
+}
+.darikPdpPrimaryButton { background:#ffd23f; color:#111; }
+.darikPdpSecondaryButton { background:#fff; color:#111; border-color:#dcdcdc; margin-top:10px; }
+.darikPdpTertiaryButton { background:transparent; color:#444; border-color:#dcdcdc; margin-top:10px; }
+.darikPdpPrimaryButton:disabled,
+.darikPdpSecondaryButton:disabled { opacity:.65; cursor:not-allowed; }
+.darikPdpSellerCard { margin-top:16px; padding-top:16px; border-top:1px solid #ececec; }
+.darikPdpSellerCard span { display:block; color:#666; font-size:12px; font-weight:800; }
+.darikPdpSellerCard strong { display:block; color:#111; font-size:18px; font-weight:900; margin-top:4px; }
+.darikPdpSellerCard p { margin:6px 0 12px; color:#666; font-size:13px; font-weight:700; }
+.darikPdpSellerCard button { width:100%; border-radius:10px; border:1px solid #dcdcdc; background:#fff; padding:11px 12px; font-weight:800; }
+@media (max-width: 1200px) {
+  .darikPdpGrid { grid-template-columns: minmax(280px, 420px) minmax(320px, 1fr); }
+  .darikPdpBuyBox { grid-column: 1 / -1; position: static; }
+}
+@media (max-width: 820px) {
+  .darikPdpHeader { grid-template-columns: 1fr auto; gap:12px; }
+  .darikPdpHeaderBrand { order: -1; grid-column: 1 / -1; }
+  .darikPdpBackButton { min-width:0; }
+  .darikPdpCartButton { min-width:0; }
+  .darikPdpFrame { padding: 14px; }
+  .darikPdpGrid { grid-template-columns: 1fr; gap:18px; }
+  .darikPdpMediaColumn { grid-template-columns: 1fr; }
+  .darikPdpThumbRail { order:2; flex-direction:row; overflow-x:auto; }
+  .darikPdpThumb { flex:0 0 56px; width:56px; height:56px; }
+  .darikPdpImageStage { min-height: 360px; }
+  .darikPdpImageStage img { max-height: 320px; }
+  .darikPdpTitle { font-size: 30px; }
+}
+@media (max-width: 520px) {
+  .darikPdpHeader { padding: 12px; border-radius: 14px; }
+  .darikPdpBackButton, .darikPdpCartButton { padding: 12px 14px; font-size: 14px; }
+  .darikPdpHeaderBrand strong { font-size: 20px; }
+  .darikPdpBreadcrumbs { font-size: 12px; }
+  .darikPdpTitle { font-size: 25px; }
+  .darikPdpTrustStrip { gap:12px; }
+  .darikPdpBuyBoxTop strong { font-size: 28px; }
+}
+
+
+/* L319: Make regular category tab product listings about 30% smaller than original.
+   Featured / Best Sellers stays unchanged because it uses .bestSeller* classes,
+   while actual category tabs use .productGrid. */
+.productGrid {
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 24px 18px;
+}
+
+.productGrid .productImageWrap {
+  border-radius: 20px;
+  box-shadow: 0 9px 20px rgba(0, 0, 0, 0.045);
+}
+
+.productGrid .productImageWrap img {
+  padding: 10px;
+}
+
+.productGrid .productInfo h3 {
+  font-size: 14px;
+  line-height: 1.16;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+}
+
+.productGrid .productInfo p {
+  margin-top: 4px;
+  font-size: 11px;
+}
+
+.productGrid .productBottom {
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.productGrid .productBottom strong {
+  font-size: 15px;
+}
+
+.productGrid .productBottom span {
+  margin-top: 4px;
+  font-size: 11px;
+}
+
+.productGrid .productBottom button {
+  min-width: 56px;
+  padding: 8px 12px;
+  font-size: 12px;
+  border-radius: 999px;
+}
+
+.productGrid .freeBadge {
+  top: 6px;
+  left: 6px;
+  padding: 4px 7px;
+  font-size: 9px;
+}
+
+@media (max-width: 1200px) {
+  .productGrid {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 22px 16px;
+  }
+}
+
+@media (max-width: 900px) {
+  .productGrid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 20px 14px;
+  }
+}
+
+@media (max-width: 700px) {
+  .productGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 20px 14px;
+  }
+
+  .productGrid .productImageWrap {
+    border-radius: 18px;
+  }
+
+  .productGrid .productInfo h3 {
+    font-size: 14px;
+  }
+
+  .productGrid .productBottom {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .productGrid .productBottom button {
+    width: 100%;
+    padding: 9px 10px;
+  }
+}
+
+@media (max-width: 420px) {
+  .productGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 18px 12px;
+  }
+
+  .productGrid .productInfo h3 {
+    font-size: 13px;
+  }
+
+  .productGrid .productBottom strong {
+    font-size: 14px;
+  }
+}
+
+
+/* L321: Correctly shrink the REAL subcategory filter section by about 15%.
+   Previous attempt did not work because the actual classes are:
+   .subcategoryFilterBlock, .subcategoryTitleRow, .subcategoryChipRow, .subcategoryChip
+   and older CSS used !important, so these overrides must also use !important. */
+
+.subcategoryFilterBlock {
+  transform: scale(0.6375) !important; /* 15% smaller than the current 0.75 scale */
+  width: 156.8627% !important;         /* keeps the visual width full after scale */
+  margin-top: -86px !important;
+  margin-bottom: -18px !important;
+  padding: 20px !important;
+  border-radius: 25px !important;
+}
+
+.subcategoryTitleRow {
+  margin-bottom: 14px !important;
+}
+
+.subcategoryTitleRow h3 {
+  font-size: 30px !important;
+  line-height: 1.06 !important;
+}
+
+.subcategoryTitleRow p {
+  font-size: 17px !important;
+  line-height: 1.18 !important;
+}
+
+.subcategoryChipRow {
+  gap: 13px !important;
+  padding: 4px 2px 13px !important;
+}
+
+.subcategoryChipRow + .subcategoryChipRow {
+  margin-top: 9px !important;
+}
+
+.subcategoryChip {
+  padding: 14px 22px !important;
+  font-size: 20px !important;
+  border-radius: 999px !important;
+  font-weight: 950 !important;
+}
+
+@media (max-width: 700px) {
+  .subcategoryFilterBlock {
+    transform: scale(0.731) !important; /* 15% smaller than previous mobile 0.86 */
+    width: 136.7989% !important;
+    margin-top: -44px !important;
+    margin-bottom: -12px !important;
+    padding: 15px !important;
+    border-radius: 22px !important;
+  }
+
+  .subcategoryTitleRow h3 {
+    font-size: 22px !important;
+  }
+
+  .subcategoryTitleRow p {
+    font-size: 14px !important;
+  }
+
+  .subcategoryChip {
+    font-size: 16px !important;
+    padding: 12px 18px !important;
+  }
+}
+
+
+/* L322: Make search bar and cart summary about 20% bigger.
+   Uses the real existing classes: .searchBar and .cartSummary.
+   Important is used because the web CSS has several later responsive overrides. */
+
+.searchBar {
+  min-height: 84px !important;
+  border-radius: 42px !important;
+  padding: 0 30px !important;
+  gap: 18px !important;
+  margin-bottom: 31px !important;
+}
+
+.searchBar span {
+  font-size: 31px !important;
+}
+
+.searchBar input {
+  font-size: 24px !important;
+}
+
+.cartSummary {
+  padding: 24px 29px !important;
+  border-radius: 31px !important;
+  margin-bottom: 31px !important;
+}
+
+.cartSummary h3 {
+  font-size: 24px !important;
+}
+
+.cartSummary p,
+.cartSummary span {
+  font-size: 16px !important;
+}
+
+.cartSummary strong {
+  font-size: 25px !important;
+}
+
+@media (max-width: 700px) {
+  .searchBar {
+    min-height: 72px !important;
+    border-radius: 36px !important;
+    padding: 0 22px !important;
+    gap: 13px !important;
+    margin-bottom: 24px !important;
+  }
+
+  .searchBar span {
+    font-size: 26px !important;
+  }
+
+  .searchBar input {
+    font-size: 18px !important;
+  }
+
+  .cartSummary {
+    padding: 20px 22px !important;
+    border-radius: 26px !important;
+    margin-bottom: 24px !important;
+  }
+
+  .cartSummary h3 {
+    font-size: 21px !important;
+  }
+
+  .cartSummary p,
+  .cartSummary span {
+    font-size: 14px !important;
+  }
+
+  .cartSummary strong {
+    font-size: 23px !important;
+  }
+}
+
+
+/* L323: Make the entire top category icon row about 15% smaller.
+   This targets category icons/circles/text only. Featured products and product cards are unchanged. */
+
+.categoryRow {
+  gap: 20px !important;
+  padding-bottom: 17px !important;
+}
+
+.categoryButton {
+  width: 100px !important;
+  min-width: 100px !important;
+}
+
+.categoryCircle {
+  width: 66px !important;
+  height: 66px !important;
+  margin-bottom: 10px !important;
+  font-size: 26px !important;
+}
+
+.categoryButton strong {
+  font-size: 13px !important;
+  min-height: 32px !important;
+  line-height: 1.12 !important;
+}
+
+.imageCategoryCircle img {
+  width: 100% !important;
+  height: 100% !important;
+}
+
+@media (max-width: 700px) {
+  .categoryRow {
+    gap: 14px !important;
+    padding-bottom: 16px !important;
+  }
+
+  .categoryButton {
+    width: 82px !important;
+    min-width: 82px !important;
+  }
+
+  .categoryCircle {
+    width: 58px !important;
+    height: 58px !important;
+    margin-bottom: 9px !important;
+    font-size: 24px !important;
+  }
+
+  .categoryButton strong {
+    font-size: 12px !important;
+    min-height: 30px !important;
+  }
+}
+
+
+/* L324: Pull ONLY the Featured tab product section closer to the category bar.
+   Other category tabs are intentionally untouched.
+   The old page uses scale/pull CSS, so this needs to target the actual product section class directly. */
+.featuredItemsTightSection {
+  margin-top: -92px !important;
+}
+
+/* Keep the visible gap around half an inch instead of a large blank area. */
+.featuredItemsTightSection .sectionTitleRow {
+  margin-bottom: 14px !important;
+}
+
+.featuredItemsTightSection .bestSellerDepartmentStack {
+  gap: 22px !important;
+}
+
+@media (max-width: 700px) {
+  .featuredItemsTightSection {
+    margin-top: -42px !important;
+  }
+
+  .featuredItemsTightSection .sectionTitleRow {
+    margin-bottom: 12px !important;
+  }
+}
+
+
+/* L325: Make the gap between Cart Summary and the Categories bar about 1/4 inch.
+   This targets ONLY the Categories section after cart summary. */
+.categoriesTightAfterCart {
+  margin-top: -18px !important;
+}
+
+.categoriesTightAfterCart .sectionTitleRow {
+  margin-bottom: 10px !important;
+}
+
+.categoriesTightAfterCart .categoryRow {
+  padding-top: 0 !important;
+}
+
+@media (max-width: 700px) {
+  .categoriesTightAfterCart {
+    margin-top: -10px !important;
+  }
+
+  .categoriesTightAfterCart .sectionTitleRow {
+    margin-bottom: 8px !important;
+  }
+}
+
+
+/* L326: Remove the massive empty page-bottom gap on the Featured tab only.
+   Cause: older transform: scale() rules visually shrink sections but the browser still
+   reserves the original unscaled height in the document flow.
+   Fix: when Featured is active, remove the unused reserved space after the Featured
+   product section and hide the bottom operations promise block on that tab only. */
+
+.featuredTabActive .featuredItemsTightSection {
+  margin-bottom: -360px !important;
+}
+
+.featuredTabActive .operationsPromise {
+  display: none !important;
+}
+
+@media (max-width: 900px) {
+  .featuredTabActive .featuredItemsTightSection {
+    margin-bottom: -260px !important;
+  }
+}
+
+@media (max-width: 700px) {
+  .featuredTabActive .featuredItemsTightSection {
+    margin-bottom: -160px !important;
+  }
+}
+
+
+/* L327: Real fix for Featured tab massive bottom gap.
+   The old rule used transform: scale(0.5), which visually shrinks content but
+   keeps the original unscaled height in the page. That is why L326 margin changes
+   did not remove the blank space.
+
+   For the Featured product section only, switch from transform-scaling to zoom-scaling.
+   zoom changes the actual layout height in Chromium/Safari-style browsers, so the page
+   no longer reserves the giant invisible block below the visible products. */
+
+.featuredTabActive .featuredItemsTightSection {
+  transform: none !important;
+  zoom: 0.5 !important;
+  width: 200% !important;
+  margin-top: -45px !important;
+  margin-bottom: 0 !important;
+  padding-bottom: 0 !important;
+}
+
+/* Keep the visual Featured products close to the Categories row without reserving hidden height. */
+.featuredTabActive .featuredItemsTightSection .sectionTitleRow {
+  margin-bottom: 14px !important;
+}
+
+.featuredTabActive .featuredItemsTightSection .bestSellerDepartmentStack {
+  gap: 22px !important;
+  margin-bottom: 0 !important;
+  padding-bottom: 0 !important;
+}
+
+.featuredTabActive .featuredItemsTightSection .bestSellerDepartmentSection {
+  margin-bottom: 0 !important;
+  padding-bottom: 0 !important;
+}
+
+.featuredTabActive .featuredItemsTightSection .bestSellerCarousel {
+  padding-bottom: 8px !important;
+  margin-bottom: 0 !important;
+}
+
+/* Hide the bottom operations block on Featured only, so the page ends cleanly after products. */
+.featuredTabActive .operationsPromise {
+  display: none !important;
+}
+
+@media (max-width: 700px) {
+  .featuredTabActive .featuredItemsTightSection {
+    transform: none !important;
+    zoom: 0.72 !important;
+    width: 138.8889% !important;
+    margin-top: -28px !important;
+    margin-bottom: 0 !important;
+    padding-bottom: 0 !important;
+  }
+}
+
+
+/* L328: Real visual cleanup for the Featured tab bottom area.
+   The previous attempt removed/hid the bottom block, which left the viewport looking empty
+   after the last visible Featured product row. This version brings the Darik footer/promise
+   block back and positions it directly under Featured products so the page has a clean end. */
+
+.featuredTabActive .operationsPromise {
+  display: block !important;
+  transform: none !important;
+  zoom: 1 !important;
+  width: 100% !important;
+  margin-top: 18px !important;
+  margin-bottom: 24px !important;
+  padding: 22px 26px !important;
+  border-radius: 24px !important;
+}
+
+.featuredTabActive .operationsPromise h2 {
+  font-size: 23px !important;
+  line-height: 1.15 !important;
+}
+
+.featuredTabActive .operationsPromise p {
+  font-size: 14px !important;
+  margin-bottom: 0 !important;
+}
+
+/* Stop the Featured product section from reserving invisible extra height. */
+.featuredTabActive .featuredItemsTightSection {
+  transform: none !important;
+  zoom: 0.5 !important;
+  width: 200% !important;
+  margin-bottom: 0 !important;
+  padding-bottom: 0 !important;
+}
+
+.featuredTabActive .featuredItemsTightSection .bestSellerDepartmentStack,
+.featuredTabActive .featuredItemsTightSection .bestSellerDepartmentSection,
+.featuredTabActive .featuredItemsTightSection .bestSellerCarousel {
+  margin-bottom: 0 !important;
+  padding-bottom: 0 !important;
+}
+
+/* Remove extra page-shell bottom padding only on Featured. */
+.featuredTabActive .webAppShell {
+  padding-bottom: 16px !important;
+}
+
+@media (max-width: 700px) {
+  .featuredTabActive .operationsPromise {
+    margin-top: 14px !important;
+    margin-bottom: 18px !important;
+    padding: 18px !important;
+    border-radius: 20px !important;
+  }
+
+  .featuredTabActive .operationsPromise h2 {
+    font-size: 20px !important;
+  }
+
+  .featuredTabActive .operationsPromise p {
+    font-size: 13px !important;
+  }
+
+  .featuredTabActive .featuredItemsTightSection {
+    transform: none !important;
+    zoom: 0.72 !important;
+    width: 138.8889% !important;
+  }
+
+  .featuredTabActive .webAppShell {
+    padding-bottom: 12px !important;
+  }
+}
+
+
+/* L329: Featured tab staged loading and 5-item paging controls. */
+.bestSellerDepartmentHeader {
+  display: grid;
+  grid-template-columns: 140px 1fr 140px;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 12px;
+}
+
+.bestSellerDepartmentHeader .bestSellerDepartmentTitle {
+  margin: 0;
+  text-align: center;
+}
+
+.bestSellerDepartmentPageHint {
+  margin: 5px 0 0;
+  color: #777777;
+  font-size: 13px;
+  font-weight: 800;
+  text-align: center;
+}
+
+.bestSellerPagingButton {
+  border: 1px solid #d9d9d9;
+  border-radius: 999px;
+  background: #ffffff;
+  color: #111111;
+  padding: 10px 14px;
+  font-size: 13px;
+  font-weight: 950;
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.045);
+}
+
+.bestSellerPagingButton.next {
+  background: #111111;
+  color: #ffd23f;
+  border-color: #111111;
+}
+
+.bestSellerPagingButton.previous {
+  justify-self: start;
+}
+
+.bestSellerPagingButton.next {
+  justify-self: end;
+}
+
+.bestSellerPagingButton:disabled {
+  opacity: 0.32;
+  cursor: not-allowed;
+}
+
+.featuredTabActive .bestSellerCarousel {
+  display: grid !important;
+  grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
+  gap: 18px !important;
+  overflow: visible !important;
+  padding: 2px 0 10px !important;
+}
+
+.featuredTabActive .bestSellerCleanItem {
+  width: 100% !important;
+  min-width: 0 !important;
+}
+
+@media (max-width: 900px) {
+  .featuredTabActive .bestSellerCarousel {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  }
+
+  .bestSellerDepartmentHeader {
+    grid-template-columns: 118px 1fr 118px;
+  }
+
+  .bestSellerPagingButton {
+    font-size: 12px;
+    padding: 9px 11px;
+  }
+}
+
+@media (max-width: 700px) {
+  .featuredTabActive .bestSellerCarousel {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 14px !important;
+  }
+
+  .bestSellerDepartmentHeader {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .bestSellerPagingButton.previous,
+  .bestSellerPagingButton.next {
+    justify-self: stretch;
+  }
+
+  .bestSellerDepartmentHeader .bestSellerDepartmentTitle,
+  .bestSellerDepartmentPageHint {
+    text-align: left;
+  }
+}
+
+
+/* L330: Keep Featured product row visually like the original carousel.
+   Replace the small header See more / See previous buttons with attractive inline
+   circular controls placed directly beside the product pictures. */
+
+.bestSellerDepartmentHeader,
+.bestSellerDepartmentPageHint,
+.bestSellerPagingButton {
+  display: none !important;
+}
+
+.featuredTabActive .bestSellerCarousel {
+  display: flex !important;
+  gap: 18px !important;
+  overflow-x: auto !important;
+  overflow-y: visible !important;
+  padding: 2px 4px 18px 0 !important;
+  scroll-snap-type: x proximity !important;
+}
+
+.featuredTabActive .bestSellerCleanItem {
+  width: clamp(190px, 17vw, 250px) !important;
+  min-width: clamp(190px, 17vw, 250px) !important;
+  flex: 0 0 auto !important;
+}
+
+.bestSellerInlinePagingCircle {
+  width: clamp(120px, 10vw, 150px);
+  min-width: clamp(120px, 10vw, 150px);
+  height: clamp(120px, 10vw, 150px);
+  align-self: center;
+  border-radius: 50%;
+  border: 2px solid #111111;
+  background: #111111;
+  color: #ffd23f;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  box-shadow: 0 14px 28px rgba(0, 0, 0, 0.16);
+  scroll-snap-align: center;
+  flex: 0 0 auto;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.bestSellerInlinePagingCircle:hover {
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 18px 34px rgba(0, 0, 0, 0.20);
+}
+
+.bestSellerInlinePagingCircle span {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: #ffd23f;
+  color: #111111;
+  font-size: 34px;
+  line-height: 1;
+  font-weight: 950;
+}
+
+.bestSellerInlinePagingCircle strong {
+  max-width: 90px;
+  color: #ffd23f;
+  font-size: 13px;
+  font-weight: 950;
+  line-height: 1.05;
+  text-align: center;
+}
+
+.bestSellerInlinePagingCircle.previous {
+  background: #ffffff;
+  color: #111111;
+  border-color: #dcdcdc;
+}
+
+.bestSellerInlinePagingCircle.previous span {
+  background: #111111;
+  color: #ffd23f;
+}
+
+.bestSellerInlinePagingCircle.previous strong {
+  color: #111111;
+}
+
+@media (max-width: 700px) {
+  .featuredTabActive .bestSellerCarousel {
+    display: flex !important;
+    gap: 14px !important;
+    overflow-x: auto !important;
+  }
+
+  .featuredTabActive .bestSellerCleanItem {
+    width: 170px !important;
+    min-width: 170px !important;
+  }
+
+  .bestSellerInlinePagingCircle {
+    width: 112px;
+    min-width: 112px;
+    height: 112px;
+  }
+
+  .bestSellerInlinePagingCircle span {
+    width: 36px;
+    height: 36px;
+    font-size: 29px;
+  }
+
+  .bestSellerInlinePagingCircle strong {
+    font-size: 12px;
+  }
+}
+
+
+/* L331: Featured categories should load the next 2 as soon as the customer
+   reaches the currently loaded 2, instead of waiting near the bottom of the page.
+   No visual design changes here. */
+.featuredTabActive .bestSellerDepartmentSection {
+  scroll-margin-bottom: 180px;
+}
+
+
+/* L333: Fast first paint without loading catalog immediately.
+   Initial load shows only the top area through Cart Summary.
+   Catalog loads only after a real scroll event shrinks the header. */
+.catalogDeferredPlaceholder {
+  margin-top: 18px;
+  padding: 0;
+}
+
+.catalogDeferredCard {
+  background: #ffffff;
+  border: 1px solid #e7e7e7;
+  border-radius: 26px;
+  padding: 22px 26px;
+  box-shadow: 0 12px 26px rgba(0, 0, 0, 0.05);
+}
+
+.catalogDeferredCard strong {
+  display: block;
+  color: #111111;
+  font-size: 21px;
+  font-weight: 950;
+}
+
+.catalogDeferredCard p {
+  margin: 8px 0 0;
+  color: #666666;
+  font-size: 14px;
+  font-weight: 800;
+}
+
+
+/* L335: Preload only the word Categories before deferred catalog load.
+   No loading card/text appears when scrolling. The catalog loads quietly after header shrink. */
+.catalogPreloadCategoriesOnly {
+  min-height: 0 !important;
+  padding-bottom: 0 !important;
+  margin-bottom: 0 !important;
+}
+
+.catalogPreloadCategoriesOnly .sectionTitleRow {
+  margin-bottom: 0 !important;
+}
+
+/* Hide old deferred card style if any older class remains cached or duplicated. */
+.catalogDeferredPlaceholder,
+.catalogDeferredCard {
+  display: none !important;
+}
+
+
+/* L336: Normal category tabs staged loading.
+   Only the first 12 products render first; scrolling loads 12 more.
+   Featured/Best Sellers uses its own staged loading and is untouched. */
+.categoryProductsGrid {
+  overflow-anchor: none;
+}
+
+.categoryProductsGrid::after {
+  content: '';
+  display: block;
+  height: 1px;
+  grid-column: 1 / -1;
+}
+
+
+/* L337: True staged data loading.
+   The page no longer downloads all products and all variants when the header shrinks.
+   It fetches products only for the currently needed categories. */
+
+
+/* L339: Preload all category icons on first getdarik.com load.
+   Products/subcategories/variants still defer until real scroll/header shrink. */
+.categoriesTightAfterCart {
+  visibility: visible;
+}
+
+
+/* L341: Quiet deferred catalog loading indicator with animated dots. */
+.deferredCatalogLoadingInline {
+  width: 100%;
+  background: #ffffff;
+  border: 1px solid #e7e7e7;
+  border-radius: 20px;
+  padding: 18px 22px;
+  margin: 14px 0 10px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  color: #111111;
+  font-size: 18px;
+  font-weight: 950;
+  box-shadow: 0 10px 22px rgba(0, 0, 0, 0.045);
+}
+
+.loadingDots {
+  display: inline-flex;
+  width: 30px;
+  justify-content: flex-start;
+  color: #ffd23f;
+  font-size: 24px;
+  font-weight: 950;
+  line-height: 1;
+}
+
+.loadingDots i {
+  font-style: normal;
+  animation: darikLoadingDotPulse 1.05s infinite ease-in-out;
+  opacity: 0.25;
+}
+
+.loadingDots i:nth-child(2) {
+  animation-delay: 0.18s;
+}
+
+.loadingDots i:nth-child(3) {
+  animation-delay: 0.36s;
+}
+
+@keyframes darikLoadingDotPulse {
+  0%, 80%, 100% {
+    opacity: 0.25;
+    transform: translateY(0);
+  }
+
+  40% {
+    opacity: 1;
+    transform: translateY(-3px);
+  }
+}
+
+@media (max-width: 700px) {
+  .deferredCatalogLoadingInline {
+    padding: 15px 18px;
+    border-radius: 18px;
+    font-size: 16px;
+  }
+
+  .loadingDots {
+    font-size: 22px;
+  }
+}

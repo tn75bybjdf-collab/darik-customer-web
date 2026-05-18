@@ -340,6 +340,12 @@ const DARIK_WAREHOUSE_LATITUDE = 31.953900;
 const DARIK_WAREHOUSE_LONGITUDE = 35.910600;
 const EXPRESS_DELIVERY_RADIUS_KM = 5;
 const NEXT_DAY_DELIVERY_RADIUS_KM = 10;
+const FEATURED_DEPARTMENTS_PER_LOAD = 2;
+const FEATURED_PRODUCTS_PER_PAGE = 5;
+const CATEGORY_PRODUCTS_PER_LOAD = 12;
+const FEATURED_PRODUCTS_PREFETCH_PER_CATEGORY = 15;
+const CATEGORY_PRODUCTS_PREFETCH_PER_CATEGORY = 48;
+
 
 
 const fallbackCategories: Category[] = [
@@ -895,6 +901,9 @@ function getProductPhotoUrl(product: Product | null | undefined) {
 
 export default function DarikCustomerWebHome() {
   const [loading, setLoading] = useState(true);
+  const [catalogDeferredLoading, setCatalogDeferredLoading] = useState(false);
+  const [catalogLoaded, setCatalogLoaded] = useState(false);
+  const catalogLoadStartedRef = useRef(false);
   const [categories, setCategories] = useState<Category[]>([]);
   const [marketplaceCategorySubcategories, setMarketplaceCategorySubcategories] = useState<MarketplaceCategorySubcategory[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
@@ -934,8 +943,23 @@ export default function DarikCustomerWebHome() {
   const [locationMessage, setLocationMessage] = useState('');
   const [selectedDeliveryOption, setSelectedDeliveryOption] = useState<'next_day_free' | 'express_2hr'>('express_2hr');
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const [productImageZoomOpen, setProductImageZoomOpen] = useState(false);
   const [selectedClothingSize, setSelectedClothingSize] = useState('');
   const [selectedClothingVariantId, setSelectedClothingVariantId] = useState('');
+  const [visibleFeaturedDepartmentCount, setVisibleFeaturedDepartmentCount] = useState(FEATURED_DEPARTMENTS_PER_LOAD);
+  const [featuredProductPageByDepartment, setFeaturedProductPageByDepartment] = useState<Record<string, number>>({});
+  const lastFeaturedBatchLoadScrollYRef = useRef(0);
+  const [visibleCategoryProductCount, setVisibleCategoryProductCount] = useState(CATEGORY_PRODUCTS_PER_LOAD);
+  const lastCategoryBatchLoadScrollYRef = useRef(0);
+  const loadedProductCategoryLimitRef = useRef<Record<string, number>>({});
+  const loadingProductCategoryRef = useRef<Record<string, boolean>>({});
+  const shoppingReturnStateRef = useRef<{
+    scrollY: number;
+    categoryId: string;
+    departmentCode: string;
+    subcategoryCode: string;
+    searchText: string;
+  } | null>(null);
 
   const [authLoading, setAuthLoading] = useState(true);
   const [authBusy, setAuthBusy] = useState(false);
@@ -1502,65 +1526,201 @@ export default function DarikCustomerWebHome() {
     }
   }
 
-  async function loadData() {
+  function openProductDetail(product: Product) {
+    shoppingReturnStateRef.current = {
+      scrollY: typeof window !== 'undefined' ? window.scrollY : 0,
+      categoryId: selectedCategoryId,
+      departmentCode: selectedDepartmentCode,
+      subcategoryCode: selectedSubcategoryCode,
+      searchText,
+    };
+
+    setSelectedClothingSize('');
+    setSelectedClothingVariantId('');
+    setProductImageZoomOpen(false);
+    setSelectedProduct(product);
+
+    if (typeof window !== 'undefined') {
+      window.scrollTo({ top: 0, behavior: 'auto' });
+    }
+  }
+
+  function returnToShoppingFromProduct() {
+    const savedReturnState = shoppingReturnStateRef.current;
+
+    setProductImageZoomOpen(false);
+    setSelectedProduct(null);
+
+    if (savedReturnState && typeof window !== 'undefined') {
+      setSearchText(savedReturnState.searchText);
+      setSelectedCategoryId(savedReturnState.categoryId);
+      setSelectedDepartmentCode(savedReturnState.departmentCode);
+      setSelectedSubcategoryCode(savedReturnState.subcategoryCode);
+
+      window.setTimeout(() => {
+        window.scrollTo({
+          top: savedReturnState.scrollY,
+          behavior: 'auto',
+        });
+      }, 80);
+    }
+  }
+
+  async function loadTopPageData() {
     setLoading(true);
 
-    const [categoriesResult, subcategoriesResult, productsResult, productVariantsResult, bannersResult] = await Promise.all([
-      supabase.from('categories').select('*').order('name', { ascending: true }),
-      supabase
-        .from('marketplace_category_subcategories')
-        .select('*')
-        .eq('is_active', true)
-        .order('sort_order', { ascending: true }),
-      supabase
-        .from('products')
-        .select('*')
-        .eq('product_status', 'live')
-        .gt('quantity_in_stock', 0)
-        .order('created_at', { ascending: false })
-        .limit(1000),
-      supabase
-        .from('product_variants')
-        .select('*')
-        .gt('quantity_in_stock', 0)
-        .order('size_sort_order', { ascending: true }),
+    const [bannersResult, categoriesResult] = await Promise.all([
       supabase
         .from('active_customer_ad_banners')
         .select('*')
         .order('sort_order', { ascending: true })
         .order('created_at', { ascending: false })
         .limit(8),
+      supabase.from('categories').select('*').order('name', { ascending: true }),
     ]);
-
-    if (!categoriesResult.error) {
-      setCategories((categoriesResult.data ?? []) as Category[]);
-    }
-
-    if (!subcategoriesResult.error) {
-      setMarketplaceCategorySubcategories((subcategoriesResult.data ?? []) as MarketplaceCategorySubcategory[]);
-    }
-
-    if (!productsResult.error) {
-      setProducts((productsResult.data ?? []) as Product[]);
-    } else {
-      setProducts([]);
-    }
-
-    if (!productVariantsResult.error) {
-      setProductVariants(sortProductVariants((productVariantsResult.data ?? []) as ProductVariant[]).filter(isActiveSellableVariant));
-    } else {
-      setProductVariants([]);
-    }
 
     if (!bannersResult.error) {
       setBanners((bannersResult.data ?? []) as CustomerAdBanner[]);
     }
 
+    if (!categoriesResult.error) {
+      setCategories((categoriesResult.data ?? []) as Category[]);
+    }
+
     setLoading(false);
   }
 
+  function appendUniqueProducts(nextProducts: Product[]) {
+    setProducts((currentProducts) => {
+      const productMap = new Map<string, Product>();
+
+      currentProducts.forEach((product) => {
+        productMap.set(product.id, product);
+      });
+
+      nextProducts.forEach((product) => {
+        productMap.set(product.id, product);
+      });
+
+      return Array.from(productMap.values());
+    });
+  }
+
+  function appendUniqueProductVariants(nextVariants: ProductVariant[]) {
+    setProductVariants((currentVariants) => {
+      const variantMap = new Map<string, ProductVariant>();
+
+      currentVariants.forEach((variant) => {
+        variantMap.set(variant.id, variant);
+      });
+
+      nextVariants.forEach((variant) => {
+        if (isActiveSellableVariant(variant)) {
+          variantMap.set(variant.id, variant);
+        }
+      });
+
+      return sortProductVariants(Array.from(variantMap.values())).filter(isActiveSellableVariant);
+    });
+  }
+
+  async function loadProductsForCategoryIds(categoryIds: string[], productLimitPerCategory: number) {
+    const cleanCategoryIds = Array.from(
+      new Set(categoryIds.map((categoryId) => String(categoryId ?? '').trim()).filter(Boolean))
+    );
+
+    const categoriesToLoad = cleanCategoryIds.filter((categoryId) => {
+      const alreadyLoadedLimit = loadedProductCategoryLimitRef.current[categoryId] ?? 0;
+      return alreadyLoadedLimit < productLimitPerCategory && !loadingProductCategoryRef.current[categoryId];
+    });
+
+    if (categoriesToLoad.length === 0) return;
+
+    categoriesToLoad.forEach((categoryId) => {
+      loadingProductCategoryRef.current[categoryId] = true;
+    });
+
+    const productResults = await Promise.all(
+      categoriesToLoad.map((categoryId) =>
+        supabase
+          .from('products')
+          .select('*')
+          .eq('product_status', 'live')
+          .gt('quantity_in_stock', 0)
+          .eq('category_id', categoryId)
+          .order('created_at', { ascending: false })
+          .limit(productLimitPerCategory)
+      )
+    );
+
+    const nextProducts: Product[] = [];
+
+    productResults.forEach((result, index) => {
+      const categoryId = categoriesToLoad[index];
+
+      if (!result.error) {
+        const rows = (result.data ?? []) as Product[];
+        nextProducts.push(...rows);
+        loadedProductCategoryLimitRef.current[categoryId] = Math.max(
+          loadedProductCategoryLimitRef.current[categoryId] ?? 0,
+          productLimitPerCategory
+        );
+      }
+
+      loadingProductCategoryRef.current[categoryId] = false;
+    });
+
+    appendUniqueProducts(nextProducts);
+
+    const productIds = nextProducts.map((product) => product.id).filter(Boolean);
+
+    if (productIds.length > 0) {
+      const variantsResult = await supabase
+        .from('product_variants')
+        .select('*')
+        .in('product_id', productIds)
+        .gt('quantity_in_stock', 0)
+        .order('size_sort_order', { ascending: true });
+
+      if (!variantsResult.error) {
+        appendUniqueProductVariants((variantsResult.data ?? []) as ProductVariant[]);
+      }
+    }
+  }
+
+  async function loadCatalogAfterScroll() {
+    if (catalogLoadStartedRef.current || catalogLoaded) return;
+
+    catalogLoadStartedRef.current = true;
+    setCatalogDeferredLoading(true);
+
+    const subcategoriesResult = await supabase
+      .from('marketplace_category_subcategories')
+      .select('*')
+      .eq('is_active', true)
+      .order('sort_order', { ascending: true });
+
+    if (!subcategoriesResult.error) {
+      setMarketplaceCategorySubcategories((subcategoriesResult.data ?? []) as MarketplaceCategorySubcategory[]);
+    }
+
+    const currentCategories = categories.length > 0 ? sortDarikCustomerCategories(categories) : sortDarikCustomerCategories(fallbackCategories);
+
+    setVisibleFeaturedDepartmentCount(FEATURED_DEPARTMENTS_PER_LOAD);
+    setFeaturedProductPageByDepartment({});
+    lastFeaturedBatchLoadScrollYRef.current = 0;
+
+    await loadProductsForCategoryIds(
+      currentCategories.slice(0, FEATURED_DEPARTMENTS_PER_LOAD).map((category) => category.id),
+      FEATURED_PRODUCTS_PREFETCH_PER_CATEGORY
+    );
+
+    setCatalogLoaded(true);
+    setCatalogDeferredLoading(false);
+  }
+
   useEffect(() => {
-    loadData().catch(() => setLoading(false));
+    loadTopPageData().catch(() => setLoading(false));
   }, []);
 
   useEffect(() => {
@@ -1586,6 +1746,15 @@ export default function DarikCustomerWebHome() {
 
     return () => subscription.unsubscribe();
   }, []);
+
+  useEffect(() => {
+    if (authLoading || !checkoutOpen) return;
+
+    if (!customerSession?.user || !customerProfile?.id) {
+      setCheckoutOpen(false);
+      openCheckoutAccountGate();
+    }
+  }, [authLoading, checkoutOpen, customerProfile?.id, customerSession?.user]);
 
   useEffect(() => {
     try {
@@ -1835,14 +2004,76 @@ export default function DarikCustomerWebHome() {
     selectedCategoryCode,
   ]);
 
+  const visibleCategoryProducts = useMemo(() => {
+    if (selectedCategoryId === 'BestSellers') return filteredProducts;
+    return filteredProducts.slice(0, visibleCategoryProductCount);
+  }, [filteredProducts, selectedCategoryId, visibleCategoryProductCount]);
+
+  const hasMoreCategoryProducts =
+    selectedCategoryId !== 'BestSellers' && visibleCategoryProductCount < filteredProducts.length;
+
+  useEffect(() => {
+    if (selectedCategoryId === 'BestSellers') return;
+
+    setVisibleCategoryProductCount(CATEGORY_PRODUCTS_PER_LOAD);
+    lastCategoryBatchLoadScrollYRef.current = 0;
+  }, [selectedCategoryId, selectedDepartmentCode, selectedSubcategoryCode, searchText]);
+
+  useEffect(() => {
+    if (selectedCategoryId === 'BestSellers' || !catalogLoaded) return;
+
+    function handleCategoryProductScrollLoad() {
+      if (!hasMoreCategoryProducts) return;
+
+      const productGrid = document.querySelector<HTMLElement>('.categoryProductsGrid');
+      if (!productGrid) return;
+
+      const currentScrollY = window.scrollY;
+
+      if (
+        lastCategoryBatchLoadScrollYRef.current > 0 &&
+        currentScrollY < lastCategoryBatchLoadScrollYRef.current + 160
+      ) {
+        return;
+      }
+
+      const gridBottom = productGrid.getBoundingClientRect().bottom;
+      const immediateLoadLine = window.innerHeight + 220;
+
+      if (gridBottom <= immediateLoadLine) {
+        setVisibleCategoryProductCount((currentCount) => {
+          if (currentCount >= filteredProducts.length) return currentCount;
+
+          lastCategoryBatchLoadScrollYRef.current = currentScrollY;
+          return Math.min(currentCount + CATEGORY_PRODUCTS_PER_LOAD, filteredProducts.length);
+        });
+      }
+    }
+
+    window.addEventListener('scroll', handleCategoryProductScrollLoad, { passive: true });
+    window.addEventListener('resize', handleCategoryProductScrollLoad);
+
+    return () => {
+      window.removeEventListener('scroll', handleCategoryProductScrollLoad);
+      window.removeEventListener('resize', handleCategoryProductScrollLoad);
+    };
+  }, [
+    selectedCategoryId,
+    catalogLoaded,
+    hasMoreCategoryProducts,
+    filteredProducts.length,
+    visibleCategoryProductCount,
+  ]);
+
   const visibleBestSellerDepartments = useMemo(() => {
     const cleanSearch = searchText.trim().toLowerCase();
 
-    return visibleCategories.filter((category) => {
-      const departmentProducts = products.filter((product) => {
-        if (product.category_id !== category.id) return false;
+    if (!cleanSearch) return visibleCategories;
 
-        if (!cleanSearch) return true;
+    return visibleCategories.filter((category) => {
+      const categoryText = [category.name, category.description].filter(Boolean).join(' ').toLowerCase();
+      const categoryHasMatchingLoadedProducts = products.some((product) => {
+        if (product.category_id !== category.id) return false;
 
         return [product.name, product.description, category.name]
           .filter(Boolean)
@@ -1851,9 +2082,111 @@ export default function DarikCustomerWebHome() {
           .includes(cleanSearch);
       });
 
-      return departmentProducts.length > 0;
+      return categoryText.includes(cleanSearch) || categoryHasMatchingLoadedProducts;
     });
   }, [visibleCategories, products, searchText]);
+
+  const visibleFeaturedDepartmentsToRender = useMemo(() => {
+    return visibleBestSellerDepartments.slice(0, visibleFeaturedDepartmentCount);
+  }, [visibleBestSellerDepartments, visibleFeaturedDepartmentCount]);
+
+  useEffect(() => {
+    if (selectedCategoryId !== 'BestSellers') return;
+
+    setVisibleFeaturedDepartmentCount(FEATURED_DEPARTMENTS_PER_LOAD);
+    setFeaturedProductPageByDepartment({});
+    lastFeaturedBatchLoadScrollYRef.current = 0;
+  }, [searchText, selectedCategoryId]);
+
+  useEffect(() => {
+    if (!catalogLoaded) return;
+
+    if (selectedCategoryId === 'BestSellers') {
+      loadProductsForCategoryIds(
+        visibleFeaturedDepartmentsToRender.map((category) => category.id),
+        FEATURED_PRODUCTS_PREFETCH_PER_CATEGORY
+      ).catch(() => undefined);
+      return;
+    }
+
+    loadProductsForCategoryIds([selectedCategoryId], CATEGORY_PRODUCTS_PREFETCH_PER_CATEGORY).catch(() => undefined);
+  }, [catalogLoaded, selectedCategoryId, visibleFeaturedDepartmentCount, selectedDepartmentCode, selectedSubcategoryCode]);
+
+  useEffect(() => {
+    if (selectedCategoryId !== 'BestSellers' || !catalogLoaded) return;
+
+    function handleFeaturedScrollLoad() {
+      const featuredSections = Array.from(
+        document.querySelectorAll<HTMLElement>('.featuredItemsTightSection .bestSellerDepartmentSection')
+      );
+
+      if (featuredSections.length === 0) return;
+
+      const currentScrollY = window.scrollY;
+
+      // Prevent chain-loading all departments immediately after the catalog appears.
+      // After one batch loads, the customer must scroll farther before the next batch can load.
+      if (
+        lastFeaturedBatchLoadScrollYRef.current > 0 &&
+        currentScrollY < lastFeaturedBatchLoadScrollYRef.current + 140
+      ) {
+        return;
+      }
+
+      const lastLoadedSection = featuredSections[featuredSections.length - 1];
+      const lastLoadedSectionBottom = lastLoadedSection.getBoundingClientRect().bottom;
+      const immediateLoadLine = window.innerHeight + 120;
+
+      if (lastLoadedSectionBottom <= immediateLoadLine) {
+        setVisibleFeaturedDepartmentCount((currentCount) => {
+          if (currentCount >= visibleBestSellerDepartments.length) return currentCount;
+
+          lastFeaturedBatchLoadScrollYRef.current = currentScrollY;
+          return Math.min(currentCount + FEATURED_DEPARTMENTS_PER_LOAD, visibleBestSellerDepartments.length);
+        });
+      }
+    }
+
+    window.addEventListener('scroll', handleFeaturedScrollLoad, { passive: true });
+    window.addEventListener('resize', handleFeaturedScrollLoad);
+
+    return () => {
+      window.removeEventListener('scroll', handleFeaturedScrollLoad);
+      window.removeEventListener('resize', handleFeaturedScrollLoad);
+    };
+  }, [selectedCategoryId, visibleBestSellerDepartments.length, catalogLoaded]);
+
+  function getFeaturedProductPage(departmentId: string) {
+    return featuredProductPageByDepartment[departmentId] ?? 0;
+  }
+
+  function showNextFeaturedProducts(departmentId: string, totalProducts: number) {
+    const currentLoadedLimit = loadedProductCategoryLimitRef.current[departmentId] ?? FEATURED_PRODUCTS_PREFETCH_PER_CATEGORY;
+    const nextLimit = currentLoadedLimit + FEATURED_PRODUCTS_PREFETCH_PER_CATEGORY;
+
+    loadProductsForCategoryIds([departmentId], nextLimit).catch(() => undefined);
+
+    setFeaturedProductPageByDepartment((currentPages) => {
+      const currentPage = currentPages[departmentId] ?? 0;
+      const maxPage = Math.max(0, Math.ceil(Math.max(totalProducts, nextLimit) / FEATURED_PRODUCTS_PER_PAGE) - 1);
+
+      return {
+        ...currentPages,
+        [departmentId]: Math.min(currentPage + 1, maxPage),
+      };
+    });
+  }
+
+  function showPreviousFeaturedProducts(departmentId: string) {
+    setFeaturedProductPageByDepartment((currentPages) => {
+      const currentPage = currentPages[departmentId] ?? 0;
+
+      return {
+        ...currentPages,
+        [departmentId]: Math.max(currentPage - 1, 0),
+      };
+    });
+  }
 
   function getBestSellerDepartmentProducts(categoryId: string) {
     const cleanSearch = searchText.trim().toLowerCase();
@@ -1871,8 +2204,7 @@ export default function DarikCustomerWebHome() {
           .join(' ')
           .toLowerCase()
           .includes(cleanSearch);
-      })
-      .slice(0, 12);
+      });
   }
 
   const cartCount = useMemo(() => {
@@ -1949,20 +2281,27 @@ export default function DarikCustomerWebHome() {
 
   useEffect(() => {
     function handleHeaderScroll() {
-      setHeaderShrunk(window.scrollY > 40);
+      const shouldShrinkHeader = window.scrollY > 40;
+      setHeaderShrunk(shouldShrinkHeader);
+
+      if (shouldShrinkHeader) {
+        loadCatalogAfterScroll().catch(() => setCatalogDeferredLoading(false));
+      }
     }
 
-    handleHeaderScroll();
+    // Important: do NOT call handleHeaderScroll() on mount.
+    // Some browsers restore scroll position after refresh, which made the catalog load immediately.
     window.addEventListener('scroll', handleHeaderScroll, { passive: true });
 
     return () => {
       window.removeEventListener('scroll', handleHeaderScroll);
     };
-  }, []);
+  }, [catalogLoaded]);
 
   useEffect(() => {
     setSelectedClothingSize('');
     setSelectedClothingVariantId('');
+    setProductImageZoomOpen(false);
   }, [selectedProduct?.id]);
 
 
@@ -1993,14 +2332,14 @@ export default function DarikCustomerWebHome() {
       (sizeOptions.length === 1 ? sizeOptions[0] : singleSize);
 
     if (requiresSize && !selectedVariant && variantsForProduct.length > 0) {
-      setSelectedProduct(product);
+      openProductDetail(product);
       setSelectedClothingSize('');
       setSelectedClothingVariantId('');
       return;
     }
 
     if (requiresSize && !finalSize) {
-      setSelectedProduct(product);
+      openProductDetail(product);
       setSelectedClothingSize('');
       setSelectedClothingVariantId('');
       return;
@@ -2134,8 +2473,14 @@ export default function DarikCustomerWebHome() {
 
   async function useSavedLocationFromSettings(locationId: string) {
     applySavedLocation(locationId);
+
+    if (!customerSession?.user || !customerProfile?.id) {
+      openCheckoutAccountGate();
+      return;
+    }
+
     setSettingsOpen(false);
-    setCheckoutOpen(true);
+    openCheckoutFromCart();
   }
 
   async function clearWebCustomerSettings() {
@@ -2199,6 +2544,12 @@ export default function DarikCustomerWebHome() {
 
     if (!cleanLatitude || !cleanLongitude) {
       setLocationMessage('Choose current location or enter GPS before saving.');
+      return false;
+    }
+
+    if (!customerProfile?.id) {
+      setLocationMessage('Log in before saving a delivery location. Guest checkout is not available.');
+      openCheckoutAccountGate();
       return false;
     }
 
@@ -2391,11 +2742,35 @@ export default function DarikCustomerWebHome() {
     return productVariants.find((variant) => variant.id === item.productVariantId) ?? null;
   }
 
+  function openCheckoutAccountGate() {
+    setCheckoutError('');
+    setCheckoutOpen(false);
+    setCartOpen(false);
+    setAuthMode('signup');
+    setSettingsOpen(true);
+    setSettingsActiveTool('account');
+    showSettingsError('Create a Darik customer account or log in before checkout. Guest checkout is not available.');
+
+    window.setTimeout(() => {
+      scrollSettingsToolIntoView('account');
+    }, 180);
+  }
+
   function openCheckoutFromCart() {
     setCheckoutError('');
 
     if (cartItems.length === 0) {
       setCheckoutError('Your cart is empty.');
+      return;
+    }
+
+    if (authLoading) {
+      setCheckoutError('Checking your Darik account. Please try again in a moment.');
+      return;
+    }
+
+    if (!customerSession?.user || !customerProfile?.id) {
+      openCheckoutAccountGate();
       return;
     }
 
@@ -2421,6 +2796,12 @@ export default function DarikCustomerWebHome() {
 
     if (cartItems.length === 0) {
       setCheckoutError('Your cart is empty.');
+      return;
+    }
+
+    if (!customerSession?.user || !customerProfile?.id) {
+      setCheckoutError('Create a Darik customer account or log in before checkout. Guest checkout is not available.');
+      openCheckoutAccountGate();
       return;
     }
 
@@ -2498,7 +2879,7 @@ export default function DarikCustomerWebHome() {
 
     try {
       const orderInsertPayload = {
-        customer_id: customerProfile?.id ?? null,
+        customer_id: customerProfile.id,
         customer_name: cleanName,
         customer_phone: cleanPhone,
         delivery_latitude: cleanLatitude,
@@ -2648,12 +3029,16 @@ export default function DarikCustomerWebHome() {
   }
 
   function openProduct(product: Product) {
-    setSelectedProduct(product);
+    setProductImageZoomOpen(false);
+    openProductDetail(product);
+    if (typeof window !== 'undefined') {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
   }
 
   if (loading) {
     return (
-      <main className="darikPage" dir={customerLanguage === 'ar' ? 'rtl' : 'ltr'}>
+      <main className={`darikPage ${selectedCategoryId === 'BestSellers' ? 'featuredTabActive' : ''}`} dir={customerLanguage === 'ar' ? 'rtl' : 'ltr'}>
         <div className="loadingScreen">
           <div className="loadingLogo">
             <img src={LOADING_SCREEN_LOGO} alt="Darik" />
@@ -2791,7 +3176,7 @@ export default function DarikCustomerWebHome() {
           </button>
         ) : null}
 
-        <section className="sectionBlock">
+        <section className="sectionBlock categoriesTightAfterCart">
           <div className="sectionTitleRow">
             <h2>Categories</h2>
           </div>
@@ -2804,6 +3189,7 @@ export default function DarikCustomerWebHome() {
                 setSelectedCategoryId('BestSellers');
                 setSelectedDepartmentCode('All');
                 setSelectedSubcategoryCode('All');
+                loadCatalogAfterScroll().catch(() => setCatalogDeferredLoading(false));
               }}
             >
               <span className="categoryCircle best">★</span>
@@ -2817,6 +3203,7 @@ export default function DarikCustomerWebHome() {
                 className={`categoryButton ${selectedCategoryId === category.id ? 'active' : ''}`}
                 onClick={() => {
                   setSelectedCategoryId(category.id);
+                  loadCatalogAfterScroll().catch(() => setCatalogDeferredLoading(false));
                 }}
               >
                 <span className="categoryCircle imageCategoryCircle">
@@ -2838,6 +3225,19 @@ export default function DarikCustomerWebHome() {
           </div>
         </section>
 
+        {!catalogLoaded && catalogDeferredLoading ? (
+          <section className="deferredCatalogLoadingInline" aria-live="polite">
+            <span>Loading marketplace</span>
+            <span className="loadingDots">
+              <i>.</i>
+              <i>.</i>
+              <i>.</i>
+            </span>
+          </section>
+        ) : null}
+
+        {catalogLoaded ? (
+          <>
         {selectedCategoryId !== 'BestSellers' && selectedCategoryHasSubcategories ? (
           <section className="subcategoryFilterBlock">
             <div className="subcategoryTitleRow">
@@ -2907,13 +3307,17 @@ export default function DarikCustomerWebHome() {
           </section>
         ) : null}
 
-        <section className="sectionBlock">
+        <section className={`sectionBlock ${selectedCategoryId === 'BestSellers' ? 'featuredItemsTightSection' : ''}`}>
           <div className="sectionTitleRow">
             <div>
               <h2>{selectedCategoryId === 'BestSellers' ? 'Best Sellers' : 'Products'}</h2>
               <p>Verified stock ready for delivery</p>
             </div>
-            <span>{filteredProducts.length} items</span>
+            <span>
+              {selectedCategoryId === 'BestSellers'
+                ? `${filteredProducts.length} items`
+                : `Showing ${Math.min(visibleCategoryProductCount, filteredProducts.length)} of ${filteredProducts.length} items`}
+            </span>
           </div>
 
           {selectedCategoryId === 'BestSellers' ? (
@@ -2924,8 +3328,16 @@ export default function DarikCustomerWebHome() {
               </div>
             ) : (
               <div className="bestSellerDepartmentStack">
-                {visibleBestSellerDepartments.map((department) => {
+                {visibleFeaturedDepartmentsToRender.map((department) => {
                   const departmentProducts = getBestSellerDepartmentProducts(department.id);
+                  const featuredProductPage = getFeaturedProductPage(department.id);
+                  const firstProductIndex = featuredProductPage * FEATURED_PRODUCTS_PER_PAGE;
+                  const visibleDepartmentProducts = departmentProducts.slice(
+                    firstProductIndex,
+                    firstProductIndex + FEATURED_PRODUCTS_PER_PAGE
+                  );
+                  const canShowPreviousProducts = featuredProductPage > 0;
+                  const canShowMoreProducts = firstProductIndex + FEATURED_PRODUCTS_PER_PAGE < Math.max(departmentProducts.length, loadedProductCategoryLimitRef.current[department.id] ?? 0);
 
                   if (departmentProducts.length === 0) return null;
 
@@ -2936,7 +3348,18 @@ export default function DarikCustomerWebHome() {
                       </h3>
 
                       <div className="bestSellerCarousel">
-                        {departmentProducts.map((product) => {
+                        {canShowPreviousProducts ? (
+                          <button
+                            type="button"
+                            className="bestSellerInlinePagingCircle previous"
+                            onClick={() => showPreviousFeaturedProducts(department.id)}
+                          >
+                            <span>‹</span>
+                            <strong>See previous</strong>
+                          </button>
+                        ) : null}
+
+                        {visibleDepartmentProducts.map((product) => {
                           const photoUrl = getProductPhotoUrl(product);
 
                           return (
@@ -2965,6 +3388,17 @@ export default function DarikCustomerWebHome() {
                             </button>
                           );
                         })}
+
+                        {canShowMoreProducts ? (
+                          <button
+                            type="button"
+                            className="bestSellerInlinePagingCircle next"
+                            onClick={() => showNextFeaturedProducts(department.id, departmentProducts.length)}
+                          >
+                            <span>›</span>
+                            <strong>See more</strong>
+                          </button>
+                        ) : null}
                       </div>
                     </section>
                   );
@@ -2977,8 +3411,8 @@ export default function DarikCustomerWebHome() {
               <p>Add or approve products from the retailer/admin apps.</p>
             </div>
           ) : (
-            <div className="productGrid">
-              {filteredProducts.map((product) => {
+            <div className="productGrid categoryProductsGrid">
+              {visibleCategoryProducts.map((product) => {
                 const photoUrl = getProductPhotoUrl(product);
                 const categoryName =
                   product.category_id
@@ -3021,9 +3455,8 @@ export default function DarikCustomerWebHome() {
                               const variantsForProduct = getVariantsForProduct(product);
 
                               if (variantsForProduct.length !== 1) {
-                                setSelectedProduct(product);
+                                openProductDetail(product);
                                 setSelectedClothingSize('');
-                  setSelectedClothingVariantId('');
                                 setSelectedClothingVariantId('');
                                 return;
                               }
@@ -3045,118 +3478,279 @@ export default function DarikCustomerWebHome() {
             </div>
           )}
         </section>
+          </>
+        ) : null}
 
+        {catalogLoaded ? (
         <section className="operationsPromise">
           <span>DARIK OPERATIONS PROMISE</span>
           <h2>Essentials delivered with warehouse-level control.</h2>
           <p>Every live item is tied to stock, routing, driver dispatch, and order history.</p>
         </section>
+        ) : null}
       </div>
 
       {selectedProduct ? (
-        <div className="modalOverlay" onClick={() => setSelectedProduct(null)}>
-          <div className="productModal" onClick={(event) => event.stopPropagation()}>
+        <section className="productFullScreenOverlay" aria-label="Product details">
+          <div className="productFullScreenPage">
             {(() => {
-              const modalRequiresSize = productRequiresSize(selectedProduct, categoryById);
-              const modalVariantOptions = getVariantsForProduct(selectedProduct);
-              const modalSizeOptions = getProductSizeOptions(selectedProduct, modalVariantOptions);
-              const modalSingleSize = getProductSingleSize(selectedProduct);
-              const modalSelectedVariant = getSelectedVariantForProduct(
+              const detailRequiresSize = productRequiresSize(selectedProduct, categoryById);
+              const detailVariantOptions = getVariantsForProduct(selectedProduct);
+              const detailSizeOptions = getProductSizeOptions(selectedProduct, detailVariantOptions);
+              const detailSingleSize = getProductSingleSize(selectedProduct);
+              const detailSelectedVariant = getSelectedVariantForProduct(
                 selectedProduct,
                 selectedClothingVariantId,
                 selectedClothingSize
               );
-              const modalFinalSelectedSize =
-                modalSelectedVariant?.size_label ||
+              const detailFinalSelectedSize =
+                detailSelectedVariant?.size_label ||
                 selectedClothingSize ||
-                (modalSizeOptions.length === 1 ? modalSizeOptions[0] : modalSingleSize);
+                (detailSizeOptions.length === 1 ? detailSizeOptions[0] : detailSingleSize);
+              const detailPhotoUrl = getProductPhotoUrl(selectedProduct);
+              const detailCategoryName = selectedProduct.category_id
+                ? categoryById.get(selectedProduct.category_id)?.name ?? selectedProduct.category_name ?? 'Category'
+                : selectedProduct.category_name ?? 'Category';
+              const detailSubcategoryLabel = stripSubcategoryLeaf(selectedProduct.subcategory_name);
 
               return (
                 <>
-            <button className="modalBackButton" type="button" onClick={() => setSelectedProduct(null)}>
-              Back
-            </button>
+                  <div className="darikPdpHeader">
+                    <button
+                      className="darikPdpBackButton"
+                      type="button"
+                      onClick={returnToShoppingFromProduct}
+                    >
+                      ← Back to shopping
+                    </button>
 
-            <div className="detailImageBox">
-              {getProductPhotoUrl(selectedProduct) ? (
-                <img src={getProductPhotoUrl(selectedProduct)!} alt={selectedProduct.name} />
-              ) : (
-                <div className="productInitials big">{shortCode(selectedProduct.name)}</div>
-              )}
-            </div>
+                    <div className="darikPdpHeaderBrand">
+                      <strong>Darik</strong>
+                      <span>Marketplace</span>
+                    </div>
 
-            <div className="detailBadgeRow">
-              <span>Live</span>
-              <p>4.8 rating | 28 reviews</p>
-            </div>
+                    <button className="darikPdpCartButton" type="button" onClick={() => setCartOpen(true)}>
+                      Cart ({cartCount})
+                    </button>
+                  </div>
 
-            <h1>{selectedProduct.name}</h1>
-            <p className="detailCategory">
-              {selectedProduct.category_id ? categoryById.get(selectedProduct.category_id)?.name ?? 'Category' : 'Category'}
-              {selectedProduct.subcategory_name ? ` • ${stripSubcategoryLeaf(selectedProduct.subcategory_name)}` : ''}
-            </p>
-            <strong className="detailPrice">{money(getCustomerPrice(selectedProduct))} JOD</strong>
+                  <div className="darikPdpFrame">
+                    <div className="darikPdpBreadcrumbs">
+                      <span>Home</span>
+                      <span>›</span>
+                      <span>{detailCategoryName}</span>
+                      {detailSubcategoryLabel ? (
+                        <>
+                          <span>›</span>
+                          <span>{detailSubcategoryLabel}</span>
+                        </>
+                      ) : null}
+                    </div>
 
-            <div className="detailCard">
-              <h3>Description</h3>
-              <p>{selectedProduct.description || 'No description added yet.'}</p>
-            </div>
+                    <div className="darikPdpGrid">
+                      <div className="darikPdpMediaColumn">
+                        <div className="darikPdpThumbRail" aria-hidden="true">
+                          {[1, 2, 3, 4].map((thumbIndex) => (
+                            <div key={thumbIndex} className={'darikPdpThumb ' + (thumbIndex === 1 ? 'active' : '')}>
+                              {detailPhotoUrl ? (
+                                <img src={detailPhotoUrl} alt={selectedProduct.name + ' thumbnail ' + thumbIndex} />
+                              ) : (
+                                <span>{shortCode(selectedProduct.name)}</span>
+                              )}
+                            </div>
+                          ))}
+                        </div>
 
-            {modalRequiresSize ? (
-              <div className="sizePickerCard">
-                <h3>Choose Size</h3>
-                {modalSizeOptions.length > 0 ? (
-                  <div className="sizeChipRow">
-                    {(modalVariantOptions.length > 0 ? modalVariantOptions : modalSizeOptions.map((size) => ({ id: size, size_label: size, quantity_in_stock: 1 } as ProductVariant))).map((variant) => {
-                      const size = variant.size_label;
-                      const isActive = modalSelectedVariant
-                        ? modalSelectedVariant.id === variant.id
-                        : modalFinalSelectedSize === size;
-
-                      return (
                         <button
-                          key={variant.id}
                           type="button"
-                          className={`sizeChip ${isActive ? 'active' : ''}`}
+                          className={'darikPdpImageStage ' + (detailPhotoUrl ? 'isClickable' : '')}
                           onClick={() => {
-                            setSelectedClothingSize(size);
-                            setSelectedClothingVariantId(variant.id);
+                            if (detailPhotoUrl) setProductImageZoomOpen(true);
+                          }}
+                          disabled={!detailPhotoUrl}
+                          aria-label="Open larger product image"
+                        >
+                          {detailPhotoUrl ? (
+                            <img src={detailPhotoUrl} alt={selectedProduct.name} />
+                          ) : (
+                            <div className="productInitials big">{shortCode(selectedProduct.name)}</div>
+                          )}
+
+                          {selectedProduct.product_free_delivery_enabled ? (
+                            <span className="darikPdpFreeBadge">FREE NEXT-DAY</span>
+                          ) : null}
+
+                          <span className="darikPdpZoomHint">Click image to zoom</span>
+                        </button>
+                      </div>
+
+                      <div className="darikPdpInfoColumn">
+                        <div className="darikPdpBrandLabel">Darik Marketplace</div>
+                        <h1 className="darikPdpTitle">{selectedProduct.name}</h1>
+
+                        <div className="darikPdpMetaRow">
+                          <span>{detailCategoryName}{detailSubcategoryLabel ? ' • ' + detailSubcategoryLabel : ''}</span>
+                        </div>
+
+                        <div className="darikPdpRatingRow">
+                          <strong>4.6</strong>
+                          <span className="darikPdpStars">★★★★★</span>
+                          <span>(128 reviews)</span>
+                        </div>
+
+                        <div className="darikPdpPrice">{money(getCustomerPrice(selectedProduct))} JOD</div>
+                        <div className="darikPdpVatNote">All prices include VAT</div>
+
+                        <div className="darikPdpTrustStrip">
+                          <span>Secure payment</span>
+                          <span>Easy returns</span>
+                          <span>Buyer protection</span>
+                        </div>
+
+                        {detailRequiresSize ? (
+                          <div className="darikPdpSizeBlock">
+                            <div className="darikPdpSectionTitleRow">
+                              <strong>Size:</strong>
+                              <span>{detailFinalSelectedSize ? detailFinalSelectedSize : 'Please select'}</span>
+                            </div>
+                            {detailSizeOptions.length > 0 ? (
+                              <div className="darikPdpSizeRow">
+                                {(detailVariantOptions.length > 0
+                                  ? detailVariantOptions
+                                  : detailSizeOptions.map((size) => ({ id: size, size_label: size, quantity_in_stock: 1 } as ProductVariant))
+                                ).map((variant) => {
+                                  const size = variant.size_label;
+                                  const isActive = detailSelectedVariant
+                                    ? detailSelectedVariant.id === variant.id
+                                    : detailFinalSelectedSize === size;
+
+                                  return (
+                                    <button
+                                      key={variant.id}
+                                      type="button"
+                                      className={'darikPdpSizeChip ' + (isActive ? 'active' : '')}
+                                      onClick={() => {
+                                        setSelectedClothingSize(size);
+                                        setSelectedClothingVariantId(variant.id);
+                                      }}
+                                    >
+                                      {size}
+                                    </button>
+                                  );
+                                })}
+                              </div>
+                            ) : (
+                              <p className="darikPdpMuted">No active size inventory was found for this product in product_variants.</p>
+                            )}
+                            <button type="button" className="darikPdpSizeGuideButton">Size guide</button>
+                          </div>
+                        ) : null}
+
+                        <div className="darikPdpAccordionGroup">
+                          <details className="darikPdpAccordion" open>
+                            <summary>Product highlights</summary>
+                            <ul>
+                              <li>Warehouse-stocked item with live inventory control</li>
+                              <li>Fast Darik delivery across Amman</li>
+                              <li>Support handled directly by Darik</li>
+                              <li>Sizes shown reflect available stock</li>
+                            </ul>
+                          </details>
+
+                          <details className="darikPdpAccordion">
+                            <summary>Product details</summary>
+                            <p>{selectedProduct.description || 'This item is listed on Darik Marketplace and delivered through Darik operations.'}</p>
+                          </details>
+
+                          <details className="darikPdpAccordion">
+                            <summary>Materials & care</summary>
+                            <ul>
+                              <li>Follow the care instructions provided by the retailer when available</li>
+                              <li>Store in a cool, dry place</li>
+                              <li>Contact support if you need product-specific care help</li>
+                            </ul>
+                          </details>
+
+                          <details className="darikPdpAccordion">
+                            <summary>Measurements</summary>
+                            <p>Use the size selector above. If you need help choosing the right fit, contact Darik support before ordering.</p>
+                          </details>
+                        </div>
+                      </div>
+
+                      <aside className="darikPdpBuyBox">
+                        <div className="darikPdpBuyBoxTop">
+                          <span>Buy this item</span>
+                          <strong>{money(getCustomerPrice(selectedProduct))} JOD</strong>
+                        </div>
+
+                        <div className="darikPdpShipCard">
+                          <div className="darikPdpShipLine"><strong>Free delivery to Amman</strong></div>
+                          <div className="darikPdpShipLine">Tomorrow, May 20</div>
+                          <div className="darikPdpShipLine darikPdpShipAccent">Order within 5 hrs 17 mins</div>
+                        </div>
+
+                        <div className="darikPdpLocationRow">
+                          <span>Deliver to Jordan</span>
+                          <button type="button" onClick={() => { setSettingsOpen(true); setSettingsActiveTool('locations'); }}>Change</button>
+                        </div>
+
+                        <button
+                          type="button"
+                          className="darikPdpPrimaryButton"
+                          disabled={detailRequiresSize && !detailFinalSelectedSize}
+                          onClick={() => {
+                            if (detailRequiresSize && !detailFinalSelectedSize) return;
+                            addToCart(selectedProduct, detailFinalSelectedSize, detailSelectedVariant);
                           }}
                         >
-                          {size}
+                          {detailRequiresSize && !detailFinalSelectedSize ? 'Choose Size' : 'Add to Cart'}
                         </button>
-                      );
-                    })}
+
+                        <button
+                          type="button"
+                          className="darikPdpSecondaryButton"
+                          disabled={detailRequiresSize && !detailFinalSelectedSize}
+                          onClick={() => {
+                            if (detailRequiresSize && !detailFinalSelectedSize) return;
+                            addToCart(selectedProduct, detailFinalSelectedSize, detailSelectedVariant);
+                            setSelectedProduct(null);
+                            setSelectedClothingSize('');
+                            setSelectedClothingVariantId('');
+                            setProductImageZoomOpen(false);
+                            setCartOpen(true);
+                          }}
+                        >
+                          Buy Now
+                        </button>
+
+                        <button type="button" className="darikPdpTertiaryButton" onClick={() => setSettingsOpen(true)}>
+                          Add to Wishlist
+                        </button>
+
+                        <div className="darikPdpSellerCard">
+                          <span>Sold by</span>
+                          <strong>Darik Seller</strong>
+                          <p>98% positive (2,340)</p>
+                          <button type="button" onClick={() => { setSettingsOpen(true); setSettingsActiveTool('support'); }}>Contact seller</button>
+                        </div>
+                      </aside>
+                    </div>
                   </div>
-                ) : (
-                  <p>No active size inventory was found for this product in product_variants.</p>
-                )}
-              </div>
-            ) : null}
-
-            <div className="detailBottomBar">
-              <div>
-                <span>Item price</span>
-                <strong>{money(getCustomerPrice(selectedProduct))} JOD</strong>
-                {modalRequiresSize && modalFinalSelectedSize ? <p className="selectedSizeText">Size: {modalFinalSelectedSize}</p> : null}
-              </div>
-
-              <button
-                type="button"
-                disabled={modalRequiresSize && !modalFinalSelectedSize}
-                onClick={() => {
-                  if (modalRequiresSize && !modalFinalSelectedSize) return;
-                  addToCart(selectedProduct, modalFinalSelectedSize, modalSelectedVariant);
-                  setSelectedProduct(null);
-                  setSelectedClothingSize('');
-                }}
-              >
-                {modalRequiresSize && !modalFinalSelectedSize ? 'Choose Size' : 'Add to Cart'}
-              </button>
-            </div>
                 </>
               );
             })()}
+          </div>
+        </section>
+      ) : null}
+
+      {selectedProduct && productImageZoomOpen && getProductPhotoUrl(selectedProduct) ? (
+        <div className="productImageZoomOverlay" onClick={() => setProductImageZoomOpen(false)}>
+          <div className="productImageZoomShell" onClick={(event) => event.stopPropagation()}>
+            <button className="productImageZoomClose" type="button" onClick={() => setProductImageZoomOpen(false)}>
+              Close
+            </button>
+            <img src={getProductPhotoUrl(selectedProduct)!} alt={selectedProduct.name} />
           </div>
         </div>
       ) : null}
@@ -3833,8 +4427,15 @@ export default function DarikCustomerWebHome() {
                     </div>
                   </div>
 
+                  {!customerSession?.user || !customerProfile?.id ? (
+                    <div className="checkoutAccountNotice">
+                      <strong>Account required</strong>
+                      <p>Create a Darik customer account or log in before checkout. You can still browse and add items without signing in.</p>
+                    </div>
+                  ) : null}
+
                   <button className="checkoutButton" type="button" onClick={openCheckoutFromCart}>
-                    Continue to Checkout
+                    {customerSession?.user && customerProfile?.id ? 'Continue to Checkout' : 'Create Account / Login to Checkout'}
                   </button>
                 </div>
               </>
@@ -3863,6 +4464,19 @@ export default function DarikCustomerWebHome() {
             </div>
 
             {checkoutError ? <div className="checkoutErrorBox">{checkoutError}</div> : null}
+
+            {customerSession?.user && customerProfile?.id ? (
+              <div className="checkoutAccountRequiredBox">
+                <div>
+                  <span>Signed in checkout</span>
+                  <strong>{customerProfile.full_name || customerName || customerSession.user.email}</strong>
+                  <p>This order will be saved to the customer account. Guest checkout is not available on Darik.</p>
+                </div>
+                <button type="button" onClick={() => setSettingsOpen(true)}>
+                  Account Settings
+                </button>
+              </div>
+            ) : null}
 
             <div className="checkoutGrid">
               <section className="checkoutPanel">
