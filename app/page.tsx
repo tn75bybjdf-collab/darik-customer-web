@@ -1643,7 +1643,7 @@ export default function DarikCustomerWebHome() {
     const productResults = await Promise.all(
       categoriesToLoad.map((categoryId) =>
         supabase
-          .from('products')
+          .from('public_products')
           .select('*')
           .eq('product_status', 'live')
           .gt('quantity_in_stock', 0)
@@ -1676,7 +1676,7 @@ export default function DarikCustomerWebHome() {
 
     if (productIds.length > 0) {
       const variantsResult = await supabase
-        .from('product_variants')
+        .from('public_product_variants')
         .select('*')
         .in('product_id', productIds)
         .gt('quantity_in_stock', 0)
