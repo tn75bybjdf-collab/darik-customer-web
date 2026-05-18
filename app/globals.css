@@ -7131,3 +7131,13 @@ textarea {
     background: #111111;
   }
 }
+
+
+/* L345: Mobile Safari sponsored banner uses a fixed Darik under-2-hours image.
+   Desktop/PC sponsored banner logic remains unchanged. */
+@media (max-width: 700px) {
+  .mobileSponsoredBannerImage {
+    object-fit: contain;
+    background: #111111;
+  }
+}

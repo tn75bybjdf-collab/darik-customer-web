@@ -3096,19 +3096,18 @@ export default function DarikCustomerWebHome() {
                   backgroundColor: banner.background_color || '#111111',
                 }}
               >
-                {banner.banner_image_url ? (
-                  <img
-                    className="mobileSponsoredBannerImage"
-                    src={banner.banner_image_url}
-                    alt={banner.headline || banner.sponsor_name || 'Darik offer'}
-                  />
-                ) : (
-                  <div className="mobileSponsoredBannerFallback">
-                    <img src={MAIN_SHOPPING_SCREEN_LOGO} alt="Darik" />
-                    <h2>{banner.headline || 'Darik Marketplace'}</h2>
-                    <p>{banner.subheadline || 'Essentials delivered fast around Amman.'}</p>
-                  </div>
-                )}
+                <img
+                  className="mobileSponsoredBannerImage"
+                  src="/darik_under_2_hours_banner1.png"
+                  alt="Darik under 2 hours delivery"
+                  onError={(event) => {
+                    if (banner.banner_image_url) {
+                      event.currentTarget.src = banner.banner_image_url;
+                    } else {
+                      event.currentTarget.style.display = 'none';
+                    }
+                  }}
+                />
 
                 <span className="mobileSponsoredBannerCta">
                   {banner.cta_label || 'CLICK TO SHOP'}
