@@ -3051,7 +3051,279 @@ export default function DarikCustomerWebHome() {
 
   return (
     <main className="darikPage" dir={customerLanguage === 'ar' ? 'rtl' : 'ltr'}>
-      <div className="webAppShell">
+      <div className="mobileAppWebLayout">
+        <header className={`mobileAppHeader ${headerShrunk ? 'shrunk' : ''}`}>
+          <button className="mobileIconButton" type="button" onClick={() => setSettingsOpen(true)} aria-label="Settings">
+            ☰
+          </button>
+
+          <div className="mobileLogoBox">
+            <img src={MAIN_SHOPPING_SCREEN_LOGO} alt="Darik Marketplace" />
+          </div>
+
+          <button className="mobileCartPill" type="button" onClick={() => setCartOpen(true)} aria-label="Cart">
+            🛒
+            {cartCount > 0 ? <span>{cartCount}</span> : null}
+          </button>
+        </header>
+
+        <section className="mobileSearchCard">
+          <span>⌕</span>
+          <input
+            value={searchText}
+            onChange={(event) => setSearchText(event.target.value)}
+            onFocus={() => loadCatalogAfterScroll().catch(() => setCatalogDeferredLoading(false))}
+            placeholder="Search Darik"
+          />
+        </section>
+
+        <button className="mobileCartSummaryCard" type="button" onClick={() => setCartOpen(true)}>
+          <div>
+            <strong>{cartCount > 0 ? `${cartCount} item${cartCount === 1 ? '' : 's'} in cart` : 'Your Darik cart'}</strong>
+            <span>{cartCount > 0 ? 'Tap to review checkout' : 'Start shopping essentials around Amman'}</span>
+          </div>
+          <b>{money(subtotal)} JOD</b>
+        </button>
+
+        <section className="mobileSection">
+          <div className="mobileSectionTitleRow">
+            <h2>Categories</h2>
+          </div>
+
+          <div className="mobileCategoryScroller">
+            <button
+              type="button"
+              className={`mobileCategoryChip ${selectedCategoryId === 'BestSellers' ? 'active' : ''}`}
+              onClick={() => {
+                setSelectedCategoryId('BestSellers');
+                setSelectedDepartmentCode('All');
+                setSelectedSubcategoryCode('All');
+                loadCatalogAfterScroll().catch(() => setCatalogDeferredLoading(false));
+              }}
+            >
+              <span>★</span>
+              <strong>Featured</strong>
+            </button>
+
+            {visibleCategories.map((category) => (
+              <button
+                key={category.id}
+                type="button"
+                className={`mobileCategoryChip ${selectedCategoryId === category.id ? 'active' : ''}`}
+                onClick={() => {
+                  setSelectedCategoryId(category.id);
+                  loadCatalogAfterScroll().catch(() => setCatalogDeferredLoading(false));
+                }}
+              >
+                <span className="mobileCategoryImage">
+                  {getCategoryPreviewImageUrl(category.name) ? (
+                    <img
+                      src={getCategoryPreviewImageUrl(category.name)!}
+                      alt={category.name}
+                      onError={(event) => {
+                        event.currentTarget.style.display = 'none';
+                      }}
+                    />
+                  ) : (
+                    getCategoryEmoji(category.name)
+                  )}
+                </span>
+                <strong>{category.name}</strong>
+              </button>
+            ))}
+          </div>
+        </section>
+
+        {!catalogLoaded && catalogDeferredLoading ? (
+          <section className="mobileLoadingMarketplace" aria-live="polite">
+            <span>Loading marketplace</span>
+            <b className="loadingDots">
+              <i>.</i>
+              <i>.</i>
+              <i>.</i>
+            </b>
+          </section>
+        ) : null}
+
+        {catalogLoaded ? (
+          <>
+            {selectedCategoryId !== 'BestSellers' && selectedCategoryHasSubcategories ? (
+              <section className="mobileSubcategoryPanel">
+                <h3>Subcategories</h3>
+
+                {selectedCategoryHasMultipleDepartments ? (
+                  <div className="mobileSubcategoryScroller">
+                    <button
+                      type="button"
+                      className={`mobileSubcategoryChip ${selectedDepartmentCode === 'All' ? 'active' : ''}`}
+                      onClick={() => {
+                        setSelectedDepartmentCode('All');
+                        setSelectedSubcategoryCode('All');
+                      }}
+                    >
+                      All
+                    </button>
+
+                    {selectedCategoryDepartmentOptions.map((department) => (
+                      <button
+                        key={department.id}
+                        type="button"
+                        className={`mobileSubcategoryChip ${selectedDepartmentCode === department.id ? 'active' : ''}`}
+                        onClick={() => setSelectedDepartmentCode(department.id)}
+                      >
+                        {department.label}
+                      </button>
+                    ))}
+                  </div>
+                ) : null}
+
+                <div className="mobileSubcategoryScroller">
+                  <button
+                    type="button"
+                    className={`mobileSubcategoryChip ${selectedSubcategoryCode === 'All' ? 'active' : ''}`}
+                    onClick={() => setSelectedSubcategoryCode('All')}
+                  >
+                    All items
+                  </button>
+
+                  {selectedCategoryItemTypeOptions.map((itemType) => (
+                    <button
+                      key={itemType.id}
+                      type="button"
+                      className={`mobileSubcategoryChip ${selectedSubcategoryCode === itemType.id ? 'active' : ''}`}
+                      onClick={() => setSelectedSubcategoryCode(itemType.id)}
+                    >
+                      {itemType.label}
+                    </button>
+                  ))}
+                </div>
+              </section>
+            ) : null}
+
+            {selectedCategoryId === 'BestSellers' ? (
+              <section className="mobileSection">
+                <div className="mobileSectionTitleRow">
+                  <h2>Featured items</h2>
+                </div>
+
+                <div className="mobileFeaturedStack">
+                  {visibleFeaturedDepartmentsToRender.map((department) => {
+                    const departmentProducts = getBestSellerDepartmentProducts(department.id);
+                    const featuredProductPage = getFeaturedProductPage(department.id);
+                    const firstProductIndex = featuredProductPage * FEATURED_PRODUCTS_PER_PAGE;
+                    const visibleDepartmentProducts = departmentProducts.slice(
+                      firstProductIndex,
+                      firstProductIndex + FEATURED_PRODUCTS_PER_PAGE
+                    );
+                    const canShowPreviousProducts = featuredProductPage > 0;
+                    const canShowMoreProducts =
+                      firstProductIndex + FEATURED_PRODUCTS_PER_PAGE <
+                      Math.max(departmentProducts.length, loadedProductCategoryLimitRef.current[department.id] ?? 0);
+
+                    if (departmentProducts.length === 0) return null;
+
+                    return (
+                      <section key={department.id} className="mobileFeaturedDepartment">
+                        <h3>Best Sellers in {department.name}</h3>
+
+                        <div className="mobileProductRow">
+                          {canShowPreviousProducts ? (
+                            <button
+                              type="button"
+                              className="mobileMoreCircle previous"
+                              onClick={() => showPreviousFeaturedProducts(department.id)}
+                            >
+                              ‹
+                              <small>Previous</small>
+                            </button>
+                          ) : null}
+
+                          {visibleDepartmentProducts.map((product) => {
+                            const photoUrl = getProductPhotoUrl(product);
+
+                            return (
+                              <button
+                                key={product.id}
+                                type="button"
+                                className="mobileProductCard"
+                                onClick={() => openProductDetail(product)}
+                              >
+                                <span className="mobileProductImageBox">
+                                  {photoUrl ? (
+                                    <img src={photoUrl} alt={product.name} />
+                                  ) : (
+                                    <b>{shortCode(product.name)}</b>
+                                  )}
+                                </span>
+                                <strong>{product.name}</strong>
+                                <em>{money(getCustomerPrice(product))} JOD</em>
+                              </button>
+                            );
+                          })}
+
+                          {canShowMoreProducts ? (
+                            <button
+                              type="button"
+                              className="mobileMoreCircle"
+                              onClick={() => showNextFeaturedProducts(department.id, departmentProducts.length)}
+                            >
+                              ›
+                              <small>More</small>
+                            </button>
+                          ) : null}
+                        </div>
+                      </section>
+                    );
+                  })}
+                </div>
+              </section>
+            ) : (
+              <section className="mobileSection">
+                <div className="mobileSectionTitleRow">
+                  <h2>{selectedCategoryName || 'Products'}</h2>
+                  <span>{Math.min(visibleCategoryProductCount, filteredProducts.length)} of {filteredProducts.length}</span>
+                </div>
+
+                {visibleCategoryProducts.length === 0 ? (
+                  <div className="mobileEmptyCard">
+                    <strong>No products found</strong>
+                    <p>Try a different category or search.</p>
+                  </div>
+                ) : (
+                  <div className="mobileProductGrid categoryProductsGrid">
+                    {visibleCategoryProducts.map((product) => {
+                      const photoUrl = getProductPhotoUrl(product);
+
+                      return (
+                        <article key={product.id} className="mobileGridProductCard">
+                          <button type="button" className="mobileGridImageButton" onClick={() => openProductDetail(product)}>
+                            {photoUrl ? (
+                              <img src={photoUrl} alt={product.name} />
+                            ) : (
+                              <b>{shortCode(product.name)}</b>
+                            )}
+                          </button>
+
+                          <button type="button" className="mobileGridInfoButton" onClick={() => openProductDetail(product)}>
+                            <strong>{product.name}</strong>
+                            <span>{money(getCustomerPrice(product))} JOD</span>
+                          </button>
+
+                          <button type="button" className="mobileAddButton" onClick={() => addToCart(product)}>
+                            Add
+                          </button>
+                        </article>
+                      );
+                    })}
+                  </div>
+                )}
+              </section>
+            )}
+          </>
+        ) : null}
+      </div>
+
+      <div className="webAppShell desktopWebLayout">
         <header className={`topHeader ${headerShrunk ? 'topHeaderShrunk' : ''}`}>
           <button className="circleButton settingsHeaderButton" type="button" onClick={() => setSettingsOpen(true)} aria-label="Settings">
             ⚙
