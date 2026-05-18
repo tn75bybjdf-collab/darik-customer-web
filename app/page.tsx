@@ -3077,6 +3077,61 @@ export default function DarikCustomerWebHome() {
           />
         </section>
 
+        <section className="mobileSponsoredBannerCarousel" aria-label="Darik sponsored store offers">
+          <div
+            className="mobileSponsoredBannerTrack"
+            style={{ transform: `translateX(-${activeBannerIndex * 100}%)` }}
+          >
+            {visibleAdBanners.map((banner) => (
+              <button
+                key={banner.id}
+                type="button"
+                className="mobileSponsoredBannerCard"
+                onClick={() => {
+                  if (banner.retailer_id) {
+                    setSelectedCategoryId('BestSellers');
+                  }
+                }}
+                style={{
+                  backgroundColor: banner.background_color || '#111111',
+                }}
+              >
+                {banner.banner_image_url ? (
+                  <img
+                    className="mobileSponsoredBannerImage"
+                    src={banner.banner_image_url}
+                    alt={banner.headline || banner.sponsor_name || 'Darik offer'}
+                  />
+                ) : (
+                  <div className="mobileSponsoredBannerFallback">
+                    <img src={MAIN_SHOPPING_SCREEN_LOGO} alt="Darik" />
+                    <h2>{banner.headline || 'Darik Marketplace'}</h2>
+                    <p>{banner.subheadline || 'Essentials delivered fast around Amman.'}</p>
+                  </div>
+                )}
+
+                <span className="mobileSponsoredBannerCta">
+                  {banner.cta_label || 'CLICK TO SHOP'}
+                </span>
+              </button>
+            ))}
+          </div>
+
+          {visibleAdBanners.length > 1 ? (
+            <div className="mobileSponsoredBannerDots" aria-label="Sponsored offer slides">
+              {visibleAdBanners.map((banner, index) => (
+                <button
+                  key={banner.id}
+                  type="button"
+                  className={index === activeBannerIndex ? 'active' : ''}
+                  onClick={() => setActiveBannerIndex(index)}
+                  aria-label={`Show sponsored offer ${index + 1}`}
+                />
+              ))}
+            </div>
+          ) : null}
+        </section>
+
         <button className="mobileCartSummaryCard" type="button" onClick={() => setCartOpen(true)}>
           <div>
             <strong>{cartCount > 0 ? `${cartCount} item${cartCount === 1 ? '' : 's'} in cart` : 'Your Darik cart'}</strong>
