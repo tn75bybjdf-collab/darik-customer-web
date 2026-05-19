@@ -1225,6 +1225,65 @@ export default function DarikCustomerWebHome() {
     }));
   }
 
+  function getProductForOrderItem(item: CustomerOrderItem) {
+    const rawItem = item as any;
+    const productId = String(item.product_id ?? rawItem.productId ?? '').trim();
+    const productName = String(item.product_name ?? '').trim().toLowerCase();
+
+    return (
+      products.find((product) => String(product.id) === productId) ||
+      products.find((product) => String(product.name ?? '').trim().toLowerCase() === productName) ||
+      null
+    );
+  }
+
+  function openOrderItemMainPage(item: CustomerOrderItem) {
+    const matchedProduct = getProductForOrderItem(item);
+    if (matchedProduct) {
+      setSettingsOpen(false);
+      openProductDetail(matchedProduct);
+      return;
+    }
+
+    const rawItem = item as any;
+    const itemPhotoUrl = getOrderItemPhotoUrl(item);
+
+    const fallbackProduct: Product = {
+      id: String(item.product_id || item.id),
+      retailer_id: '',
+      category_id: null,
+      name: String(item.product_name || 'Ordered item'),
+      description: 'This product was part of your Darik order.',
+      vendor_price: null,
+      app_price: item.app_price ?? item.line_total ?? null,
+      quantity_in_stock: null,
+      product_status: 'active',
+      photo_status: 'approved',
+      official_product_photo_url: itemPhotoUrl || rawItem.official_product_photo_url || null,
+      official_product_thumbnail_url: itemPhotoUrl || rawItem.official_product_thumbnail_url || null,
+      retailer_raw_photo_url: rawItem.retailer_raw_photo_url || null,
+      product_free_delivery_enabled: null,
+      has_size_variants: Boolean(item.size_label_snapshot),
+      variant_summary: null,
+      subcategory_name: null,
+      clothing_department: null,
+      clothing_item_type: null,
+      category_name: null,
+      category_code: null,
+      size: item.size_label_snapshot ?? null,
+      selected_size: item.size_label_snapshot ?? null,
+      product_size: item.size_label_snapshot ?? null,
+      variant_size: item.size_label_snapshot ?? null,
+      size_label: item.size_label_snapshot ?? null,
+      available_sizes: item.size_label_snapshot ? [item.size_label_snapshot] : null,
+      sizes: item.size_label_snapshot ? [item.size_label_snapshot] : null,
+      size_options: item.size_label_snapshot ? [item.size_label_snapshot] : null,
+    };
+
+    setSettingsOpen(false);
+    openProductDetail(fallbackProduct);
+  }
+
   function getOrderItemPhotoUrl(item: CustomerOrderItem) {
     const rawItem = item as any;
 
@@ -1490,18 +1549,37 @@ export default function DarikCustomerWebHome() {
       return;
     }
 
-    const itemsResult = await supabase
-      .from('order_items')
-      .select('*')
-      .in('order_id', orderIds)
-      .order('created_at', { ascending: true });
+    let loadedOrderItems: CustomerOrderItem[] = [];
 
-    if (itemsResult.error) {
-      showSettingsError(itemsResult.error.message);
-      return;
+    try {
+      const { data: enrichedItemsPayload, error: enrichedItemsError } = await supabase.rpc('customer_get_order_items_with_product_photos_v1', {
+        p_customer_id: profileId,
+      });
+
+      if (!enrichedItemsError) {
+        const payload = Array.isArray(enrichedItemsPayload) ? enrichedItemsPayload[0] : enrichedItemsPayload;
+        loadedOrderItems = Array.isArray(payload?.items) ? (payload.items as CustomerOrderItem[]) : [];
+      }
+    } catch {
+      // Fallback below keeps older deployments working before SQL v361 is installed.
     }
 
-    const loadedOrderItems = await enrichCustomerOrderItemsWithProductPhotos((itemsResult.data ?? []) as CustomerOrderItem[]);
+    if (loadedOrderItems.length === 0) {
+      const itemsResult = await supabase
+        .from('order_items')
+        .select('*')
+        .in('order_id', orderIds)
+        .order('created_at', { ascending: true });
+
+      if (itemsResult.error) {
+        showSettingsError(itemsResult.error.message);
+        return;
+      }
+
+      loadedOrderItems = (itemsResult.data ?? []) as CustomerOrderItem[];
+    }
+
+    loadedOrderItems = await enrichCustomerOrderItemsWithProductPhotos(loadedOrderItems);
     setCustomerOrderItems(loadedOrderItems);
 
     const returnsResult = await supabase
@@ -5034,19 +5112,28 @@ export default function DarikCustomerWebHome() {
 
                                   return (
                                     <div key={item.id} className="settingsOrderItemRow settingsOrderItemRowStacked settingsOrderItemRowWithPhoto">
-                                      <div className="settingsOrderItemPhotoBox">
+                                      <button
+                                        type="button"
+                                        className="settingsOrderItemPhotoBox"
+                                        onClick={() => openOrderItemMainPage(item)}
+                                        title="Open item page"
+                                      >
                                         {itemPhotoUrl ? (
                                           <img src={itemPhotoUrl} alt={item.product_name || 'Ordered item'} />
                                         ) : (
-                                          <span>📦</span>
+                                          <span>{shortCode(item.product_name || 'Item')}</span>
                                         )}
-                                      </div>
+                                      </button>
                                       <div className="settingsOrderItemContent">
                                         <div className="settingsOrderItemMainLine settingsOrderItemMainLineDetailed">
-                                        <span>
+                                        <button
+                                          type="button"
+                                          className="settingsOrderItemNameButton"
+                                          onClick={() => openOrderItemMainPage(item)}
+                                        >
                                           {item.product_name || 'Item'}
                                           {item.size_label_snapshot ? ` • Size ${item.size_label_snapshot}` : ''}
-                                        </span>
+                                        </button>
                                         <small>
                                           Qty {Number(item.quantity ?? 0)}
                                           {' • '}Unit {money((item as any).unit_price ?? (Number(item.line_total ?? 0) / Math.max(Number(item.quantity ?? 1), 1)))} JOD
