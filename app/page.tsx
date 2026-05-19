@@ -1399,6 +1399,30 @@ export default function DarikCustomerWebHome() {
   }
 
 
+
+  function isSupportThreadClosedForCustomer(thread: SupportThread | null | undefined) {
+    const status = String((thread as any)?.status ?? '').trim().toLowerCase();
+    return [
+      'closed',
+      'resolved',
+      'complete',
+      'completed',
+      'done',
+      'archived',
+      'cancelled',
+      'canceled',
+    ].includes(status);
+  }
+
+  function getSupportThreadClosedLabel(thread: SupportThread | null | undefined) {
+    const status = String((thread as any)?.status ?? '').trim().toLowerCase();
+    if (status === 'resolved' || status === 'complete' || status === 'completed' || status === 'done') {
+      return 'This chat has been resolved. You can still view the full conversation, but you cannot send new messages here.';
+    }
+    return 'This chat is closed. You can still view the full conversation, but you cannot send new messages here.';
+  }
+
+
   function normalizeSupportMessageForCustomerWeb(rawMessage: any): SupportMessage {
     const messageBody =
       rawMessage?.message_body ??
@@ -1843,6 +1867,11 @@ export default function DarikCustomerWebHome() {
   async function submitSupportReply(thread: SupportThread) {
     if (!customerProfile?.id) return;
 
+    if (isSupportThreadClosedForCustomer(thread)) {
+      showSettingsMessage(getSupportThreadClosedLabel(thread));
+      return;
+    }
+
     const cleanReply = supportReplyBody.trim();
     if (cleanReply.length < 2) {
       showSettingsError('Type your reply first.');
@@ -1851,7 +1880,7 @@ export default function DarikCustomerWebHome() {
 
     try {
       setSupportBusy(true);
-      const { data, error } = await supabase.rpc('customer_add_support_message_v2', {
+      const { data, error } = await supabase.rpc('customer_add_support_message_v3', {
         p_thread_id: thread.id,
         p_customer_id: customerProfile.id,
         p_customer_name: customerProfile.full_name || customerName || customerSession?.user.email || 'Customer',
@@ -4995,15 +5024,24 @@ export default function DarikCustomerWebHome() {
                                       )}
                                     </div>
 
-                                    <textarea
-                                      className="settingsTextarea"
-                                      value={supportReplyBody}
-                                      onChange={(event) => setSupportReplyBody(event.target.value)}
-                                      placeholder={t('replySupportPlaceholder')}
-                                    />
-                                    <button type="button" className="settingsSecondaryButton" disabled={supportBusy} onClick={() => submitSupportReply(thread).catch(() => {})}>
-                                      {supportBusy ? t('pleaseWait') : t('sendReply')}
-                                    </button>
+                                    {isSupportThreadClosedForCustomer(thread) ? (
+                                      <div className="supportThreadClosedBox">
+                                        <strong>Chat closed</strong>
+                                        <p>{getSupportThreadClosedLabel(thread)}</p>
+                                      </div>
+                                    ) : (
+                                      <>
+                                        <textarea
+                                          className="settingsTextarea"
+                                          value={supportReplyBody}
+                                          onChange={(event) => setSupportReplyBody(event.target.value)}
+                                          placeholder={t('replySupportPlaceholder')}
+                                        />
+                                        <button type="button" className="settingsSecondaryButton" disabled={supportBusy} onClick={() => submitSupportReply(thread).catch(() => {})}>
+                                          {supportBusy ? t('pleaseWait') : t('sendReply')}
+                                        </button>
+                                      </>
+                                    )}
                                   </div>
                                 ) : null}
                               </div>
