@@ -5575,20 +5575,30 @@ export default function DarikCustomerWebHome() {
       {checkoutOpen ? (
         <div className="checkoutFullScreenOverlay">
           <div className="checkoutFullScreenPage">
-            <div className="checkoutFullTopBar">
-              <button type="button" className="checkoutBackButton" onClick={() => setCheckoutOpen(false)}>
-                ← Back to Cart
+            <div className="amazonCheckoutTopBar">
+              <button
+                type="button"
+                className="amazonCheckoutBackButton"
+                onClick={() => {
+                  setCheckoutOpen(false);
+                  setCartOpen(true);
+                }}
+              >
+                ← Cart
               </button>
 
-              <div>
-                <h2>Checkout</h2>
-                <p>Confirm delivery, location, and payment</p>
+              <div className="amazonCheckoutLogoBlock">
+                <strong>DARIK</strong>
+                <span>Checkout</span>
               </div>
 
-              <div className="checkoutTopTotal">
-                <span>Total Due</span>
-                <strong>{money(total)} JOD</strong>
+              <div className="amazonCheckoutSteps">
+                <span className={selectedDeliveryOption ? 'done' : 'active'}>1 Delivery</span>
+                <span>2 Payment</span>
+                <span>3 Review</span>
               </div>
+
+              <div className="amazonCheckoutSecure">🔒 Secure Checkout</div>
             </div>
 
             {checkoutError ? <div className="checkoutErrorBox">{checkoutError}</div> : null}
@@ -5606,229 +5616,283 @@ export default function DarikCustomerWebHome() {
               </div>
             ) : null}
 
-            <div className="checkoutGrid">
-              <section className="checkoutPanel">
-                <h3>Customer Details</h3>
+            <div className="amazonCheckoutShell">
+              <div className="amazonCheckoutMain">
+                <section className="amazonCheckoutSection">
+                  <div className="amazonCheckoutSectionNumber">1</div>
+                  <div className="amazonCheckoutSectionBody">
+                    <div className="amazonCheckoutSectionHeader">
+                      <div>
+                        <h3>Delivery address</h3>
+                        <p>Where should Darik deliver this order?</p>
+                      </div>
+                    </div>
 
-                <label>
-                  Full Name
-                  <input
-                    value={customerName}
-                    onChange={(event) => setCustomerName(event.target.value)}
-                    placeholder="Example: Ahmad Saleh"
-                  />
-                </label>
+                    <div className="amazonAddressGrid">
+                      <label>
+                        Full Name
+                        <input
+                          value={customerName}
+                          onChange={(event) => setCustomerName(event.target.value)}
+                          placeholder="Example: Ahmad Saleh"
+                        />
+                      </label>
 
-                <label>
-                  Phone Number
-                  <input
-                    value={customerPhone}
-                    onChange={(event) => setCustomerPhone(event.target.value)}
-                    placeholder="Example: 0790000000"
-                  />
-                </label>
-              </section>
+                      <label>
+                        Phone Number
+                        <input
+                          value={customerPhone}
+                          onChange={(event) => setCustomerPhone(event.target.value)}
+                          placeholder="Example: 0790000000"
+                        />
+                      </label>
+                    </div>
 
-              <section className="checkoutPanel checkoutLocationPanel">
-                <h3>Delivery Location</h3>
+                    {savedLocations.length > 0 ? (
+                      <div className="amazonSavedLocations">
+                        <strong>Saved locations</strong>
+                        <div className="amazonSavedLocationList">
+                          {savedLocations.map((location) => (
+                            <button
+                              key={location.id}
+                              type="button"
+                              className={`amazonSavedLocationCard ${selectedSavedLocationId === location.id ? 'active' : ''}`}
+                              onClick={() => applySavedLocation(location.id)}
+                            >
+                              <span>{location.label}</span>
+                              <small>{location.addressDetails || `${location.latitude}, ${location.longitude}`}</small>
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    ) : null}
 
-                <div className="currentLocationBox">
-                  <div>
-                    <strong>Use Current Location</strong>
-                    <p>Customer can share GPS from this browser for faster delivery setup.</p>
+                    <div className="amazonLocationActions">
+                      <button type="button" disabled={locationLoading} onClick={useCurrentLocationForCheckout}>
+                        {locationLoading ? 'Getting Location...' : 'Use current location'}
+                      </button>
+                      <span>or enter GPS manually below</span>
+                    </div>
+
+                    {locationMessage ? <div className="locationMessage">{locationMessage}</div> : null}
+
+                    <div className="amazonAddressGrid">
+                      <label>
+                        Latitude
+                        <input
+                          value={manualLatitude}
+                          onChange={(event) => {
+                            setManualLatitude(event.target.value);
+                            setSelectedSavedLocationId('');
+                          }}
+                          placeholder="31.953900"
+                        />
+                      </label>
+
+                      <label>
+                        Longitude
+                        <input
+                          value={manualLongitude}
+                          onChange={(event) => {
+                            setManualLongitude(event.target.value);
+                            setSelectedSavedLocationId('');
+                          }}
+                          placeholder="35.910600"
+                        />
+                      </label>
+                    </div>
+
+                    <label className="amazonFullField">
+                      Extra Address Details
+                      <textarea
+                        value={deliveryAddressDetails}
+                        onChange={(event) => setDeliveryAddressDetails(event.target.value)}
+                        placeholder="Building, street, floor, apartment, nearby landmark"
+                      />
+                    </label>
+
+                    <label className="amazonFullField">
+                      Delivery Note
+                      <textarea
+                        value={deliveryNote}
+                        onChange={(event) => setDeliveryNote(event.target.value)}
+                        placeholder="Optional: call when nearby"
+                      />
+                    </label>
+
+                    <label className="amazonSaveLocationToggle">
+                      <input
+                        type="checkbox"
+                        checked={saveLocationForFuture}
+                        onChange={(event) => setSaveLocationForFuture(event.target.checked)}
+                      />
+                      Save this location for future purchases
+                    </label>
+
+                    {saveLocationForFuture ? (
+                      <label className="amazonFullField">
+                        Location Name
+                        <input
+                          value={newLocationName}
+                          onChange={(event) => setNewLocationName(event.target.value)}
+                          placeholder="Example: Home, Work, Mom's House"
+                        />
+                      </label>
+                    ) : null}
                   </div>
+                </section>
 
-                  <button type="button" disabled={locationLoading} onClick={useCurrentLocationForCheckout}>
-                    {locationLoading ? 'Getting Location...' : 'Use Current Location'}
-                  </button>
-                </div>
+                <section className="amazonCheckoutSection">
+                  <div className="amazonCheckoutSectionNumber">2</div>
+                  <div className="amazonCheckoutSectionBody">
+                    <div className="amazonCheckoutSectionHeader">
+                      <div>
+                        <h3>Delivery method</h3>
+                        <p>Choose your delivery speed. Nothing is preselected.</p>
+                      </div>
+                    </div>
 
-                {savedLocations.length > 0 ? (
-                  <div className="savedLocationsBox">
-                    <strong>Saved Locations</strong>
+                    {!selectedDeliveryOption ? (
+                      <div className="amazonDeliveryRequired">Please choose Free Next-Day or Express Delivery before placing the order.</div>
+                    ) : null}
 
-                    <div className="savedLocationList">
-                      {savedLocations.map((location) => (
-                        <div
-                          key={location.id}
-                          className={`savedLocationCard ${selectedSavedLocationId === location.id ? 'active' : ''}`}
-                        >
-                          <button type="button" onClick={() => applySavedLocation(location.id)}>
-                            <span>{location.label}</span>
-                            <small>
-                              {location.addressDetails || `${location.latitude}, ${location.longitude}`}
-                            </small>
-                          </button>
+                    {checkoutDistanceKm !== null ? (
+                      <div className={`deliveryRadiusStatus amazonDistanceStatus ${checkoutDeliveryRadiusWarning ? 'blocked' : 'allowed'}`}>
+                        <strong>Warehouse Distance: {checkoutDistanceKm.toFixed(1)} km</strong>
+                        <p>
+                          {checkoutDeliveryRadiusWarning ||
+                            `This location is inside the Darik delivery area. Express limit: ${EXPRESS_DELIVERY_RADIUS_KM} km. Next-Day limit: ${NEXT_DAY_DELIVERY_RADIUS_KM} km.`}
+                        </p>
+                      </div>
+                    ) : null}
 
-                          <button type="button" className="deleteSavedLocationButton" onClick={() => removeSavedLocation(location.id)}>
-                            Remove
-                          </button>
+                    <div className="amazonDeliveryOptions">
+                      <button
+                        type="button"
+                        className={`amazonDeliveryOption ${selectedDeliveryOption === 'express_2hr' ? 'active' : ''}`}
+                        disabled={checkoutDistanceKm !== null && checkoutDistanceKm > EXPRESS_DELIVERY_RADIUS_KM}
+                        onClick={() => setSelectedDeliveryOption('express_2hr')}
+                      >
+                        <span className="amazonRadioDot" />
+                        <div>
+                          <strong>Express Delivery Under 2 Hours</strong>
+                          <p>{checkoutDistanceKm !== null && checkoutDistanceKm > EXPRESS_DELIVERY_RADIUS_KM ? `Outside ${EXPRESS_DELIVERY_RADIUS_KM} km Express area` : `${buildDeliveryEtaLabel('express_2hr')} • up to ${EXPRESS_DELIVERY_RADIUS_KM} km`}</p>
+                        </div>
+                        <b>{money(EXPRESS_DELIVERY_FEE)} JOD</b>
+                      </button>
+
+                      <button
+                        type="button"
+                        className={`amazonDeliveryOption ${selectedDeliveryOption === 'next_day_free' && freeNextDayUnlocked ? 'active' : ''}`}
+                        disabled={!freeNextDayUnlocked || (checkoutDistanceKm !== null && checkoutDistanceKm > NEXT_DAY_DELIVERY_RADIUS_KM)}
+                        onClick={() => setSelectedDeliveryOption('next_day_free')}
+                      >
+                        <span className="amazonRadioDot" />
+                        <div>
+                          <strong>Free Next-Day Delivery</strong>
+                          <p>
+                            {checkoutDistanceKm !== null && checkoutDistanceKm > NEXT_DAY_DELIVERY_RADIUS_KM
+                              ? `Outside ${NEXT_DAY_DELIVERY_RADIUS_KM} km delivery area`
+                              : freeNextDayUnlocked
+                                ? `${buildDeliveryEtaLabel('next_day_free')} • up to ${NEXT_DAY_DELIVERY_RADIUS_KM} km`
+                                : `Requires ${FREE_NEXT_DAY_MIN_ORDER.toFixed(2)} JOD minimum. Add ${money(FREE_NEXT_DAY_MIN_ORDER - subtotal)} JOD more.`}
+                          </p>
+                        </div>
+                        <b>FREE</b>
+                      </button>
+                    </div>
+                  </div>
+                </section>
+
+                <section className="amazonCheckoutSection">
+                  <div className="amazonCheckoutSectionNumber">3</div>
+                  <div className="amazonCheckoutSectionBody">
+                    <div className="amazonCheckoutSectionHeader">
+                      <div>
+                        <h3>Payment method</h3>
+                        <p>Cash is collected by the driver when the order arrives.</p>
+                      </div>
+                    </div>
+
+                    <div className="amazonPaymentCard">
+                      <span>Cash</span>
+                      <div>
+                        <strong>Cash on Delivery</strong>
+                        <p>Pay the driver after receiving the order.</p>
+                      </div>
+                    </div>
+                  </div>
+                </section>
+
+                <section className="amazonCheckoutSection">
+                  <div className="amazonCheckoutSectionNumber">4</div>
+                  <div className="amazonCheckoutSectionBody">
+                    <div className="amazonCheckoutSectionHeader">
+                      <div>
+                        <h3>Review your order</h3>
+                        <p>Confirm items and totals before placing the order.</p>
+                      </div>
+                    </div>
+
+                    <div className="amazonReviewItems">
+                      {cartItems.map((item) => (
+                        <div key={item.id} className="amazonReviewItem">
+                          <div className="amazonReviewItemImage">
+                            {item.photoUrl ? <img src={item.photoUrl} alt={item.name} /> : <span>{shortCode(item.name)}</span>}
+                          </div>
+                          <div>
+                            <strong>{item.name}</strong>
+                            {item.selectedCartSize ? <p>Size: {item.selectedCartSize}</p> : null}
+                            <small>Qty: {item.quantity}</small>
+                          </div>
+                          <b>{money(item.priceNumber * item.quantity)} JOD</b>
                         </div>
                       ))}
                     </div>
                   </div>
-                ) : null}
-
-                {locationMessage ? <div className="locationMessage">{locationMessage}</div> : null}
-
-                {checkoutDistanceKm !== null ? (
-                  <div className={`deliveryRadiusStatus ${checkoutDeliveryRadiusWarning ? 'blocked' : 'allowed'}`}>
-                    <strong>Warehouse Distance: {checkoutDistanceKm.toFixed(1)} km</strong>
-                    <p>
-                      {checkoutDeliveryRadiusWarning ||
-                        `This location is inside the Darik delivery area. Express limit: ${EXPRESS_DELIVERY_RADIUS_KM} km. Next-Day limit: ${NEXT_DAY_DELIVERY_RADIUS_KM} km.`}
-                    </p>
-                  </div>
-                ) : null}
-
-                <div className="manualGpsBox">
-                  <strong>GPS Coordinates</strong>
-                  <p>Use current location above, choose a saved location, or enter GPS manually.</p>
-
-                  <div className="gpsInputGrid">
-                    <label>
-                      Latitude
-                      <input
-                        value={manualLatitude}
-                        onChange={(event) => {
-                          setManualLatitude(event.target.value);
-                          setSelectedSavedLocationId('');
-                        }}
-                        placeholder="31.953900"
-                      />
-                    </label>
-
-                    <label>
-                      Longitude
-                      <input
-                        value={manualLongitude}
-                        onChange={(event) => {
-                          setManualLongitude(event.target.value);
-                          setSelectedSavedLocationId('');
-                        }}
-                        placeholder="35.910600"
-                      />
-                    </label>
-                  </div>
-                </div>
-
-                <label>
-                  Extra Address Details
-                  <textarea
-                    value={deliveryAddressDetails}
-                    onChange={(event) => setDeliveryAddressDetails(event.target.value)}
-                    placeholder="Building, street, floor, apartment, nearby landmark"
-                  />
-                </label>
-
-                <label>
-                  Delivery Note
-                  <textarea
-                    value={deliveryNote}
-                    onChange={(event) => setDeliveryNote(event.target.value)}
-                    placeholder="Optional: call when nearby"
-                  />
-                </label>
-
-                <label className="saveLocationToggle">
-                  <input
-                    type="checkbox"
-                    checked={saveLocationForFuture}
-                    onChange={(event) => setSaveLocationForFuture(event.target.checked)}
-                  />
-                  Save this location for future purchases
-                </label>
-
-                {saveLocationForFuture ? (
-                  <label>
-                    Location Name
-                    <input
-                      value={newLocationName}
-                      onChange={(event) => setNewLocationName(event.target.value)}
-                      placeholder="Example: Home, Work, Mom's House"
-                    />
-                  </label>
-                ) : null}
-              </section>
-
-              <section className="checkoutPanel">
-                <h3>Delivery Speed</h3>
-
-                <button
-                  type="button"
-                  className={`deliveryCard checkoutDeliveryCard ${selectedDeliveryOption === 'next_day_free' && freeNextDayUnlocked ? 'active' : ''}`}
-                  disabled={!freeNextDayUnlocked || (checkoutDistanceKm !== null && checkoutDistanceKm > NEXT_DAY_DELIVERY_RADIUS_KM)}
-                  onClick={() => setSelectedDeliveryOption('next_day_free')}
-                >
-                  <div>
-                    <strong>Free Next-Day Delivery</strong>
-                    <p>
-                      {checkoutDistanceKm !== null && checkoutDistanceKm > NEXT_DAY_DELIVERY_RADIUS_KM
-                        ? `Outside ${NEXT_DAY_DELIVERY_RADIUS_KM} km delivery area`
-                        : freeNextDayUnlocked
-                          ? `${buildDeliveryEtaLabel('next_day_free')} • up to ${NEXT_DAY_DELIVERY_RADIUS_KM} km`
-                          : `Requires ${FREE_NEXT_DAY_MIN_ORDER.toFixed(2)} JOD minimum. Add ${money(FREE_NEXT_DAY_MIN_ORDER - subtotal)} JOD more.`}
-                    </p>
-                  </div>
-                  <span>0.00 JOD</span>
-                </button>
-
-                <button
-                  type="button"
-                  className={`deliveryCard checkoutDeliveryCard ${selectedDeliveryOption === 'express_2hr' ? 'active' : ''}`}
-                  disabled={checkoutDistanceKm !== null && checkoutDistanceKm > EXPRESS_DELIVERY_RADIUS_KM}
-                  onClick={() => setSelectedDeliveryOption('express_2hr')}
-                >
-                  <div>
-                    <strong>Express Delivery</strong>
-                    <p>{checkoutDistanceKm !== null && checkoutDistanceKm > EXPRESS_DELIVERY_RADIUS_KM ? `Outside ${EXPRESS_DELIVERY_RADIUS_KM} km Express area` : `${buildDeliveryEtaLabel('express_2hr')} • up to ${EXPRESS_DELIVERY_RADIUS_KM} km`}</p>
-                  </div>
-                  <span>{money(EXPRESS_DELIVERY_FEE)} JOD</span>
-                </button>
-              </section>
-
-              <section className="checkoutPanel">
-                <h3>Payment Method</h3>
-                <div className="paymentMethodCard">
-                  <strong>Cash on Delivery</strong>
-                  <p>Customer pays the driver when the order arrives.</p>
-                </div>
-              </section>
-            </div>
-
-            <div className="checkoutReviewBox">
-              <h3>Order Review</h3>
-
-              <div className="checkoutReviewItems">
-                {cartItems.map((item) => (
-                  <div key={item.id}>
-                    <span>
-                      {item.quantity} × {item.name}
-                      {item.selectedCartSize ? ` • Size ${item.selectedCartSize}` : ''}
-                    </span>
-                    <strong>{money(item.priceNumber * item.quantity)} JOD</strong>
-                  </div>
-                ))}
+                </section>
               </div>
 
-              <div className="summaryRows checkoutSummaryRows">
-                <div>
-                  <span>Subtotal</span>
-                  <strong>{money(subtotal)} JOD</strong>
-                </div>
-                <div>
-                  <span>Delivery</span>
-                  <strong>{money(deliveryFee)} JOD</strong>
-                </div>
-                <div className="grand">
-                  <span>Total Due</span>
-                  <strong>{money(total)} JOD</strong>
-                </div>
-              </div>
+              <aside className="amazonCheckoutSummary">
+                <h3>Order Summary</h3>
 
-              <button className="checkoutButton placeOrderButton" type="button" disabled={placingOrder} onClick={placeWebOrder}>
-                {placingOrder ? 'Placing Order...' : 'Place Cash Order'}
-              </button>
+                <div className="amazonSummaryItems">
+                  {cartItems.slice(0, 3).map((item) => (
+                    <div key={item.id} className="amazonSummaryItem">
+                      <div className="amazonSummaryItemImage">
+                        {item.photoUrl ? <img src={item.photoUrl} alt={item.name} /> : <span>{shortCode(item.name)}</span>}
+                      </div>
+                      <div>
+                        <strong>{item.name}</strong>
+                        <small>Qty: {item.quantity}</small>
+                      </div>
+                      <b>{money(item.priceNumber * item.quantity)} JOD</b>
+                    </div>
+                  ))}
+                  {cartItems.length > 3 ? <p className="amazonMoreItems">+ {cartItems.length - 3} more item{cartItems.length - 3 === 1 ? '' : 's'}</p> : null}
+                </div>
+
+                <div className="amazonSummaryRows">
+                  <div>
+                    <span>Subtotal</span>
+                    <strong>{money(subtotal)} JOD</strong>
+                  </div>
+                  <div>
+                    <span>Delivery</span>
+                    <strong>{selectedDeliveryOption ? `${money(deliveryFee)} JOD` : 'Choose option'}</strong>
+                  </div>
+                  <div className="grand">
+                    <span>Order Total</span>
+                    <strong>{money(total)} JOD</strong>
+                  </div>
+                </div>
+
+                <button className="amazonPlaceOrderButton" type="button" disabled={placingOrder} onClick={placeWebOrder}>
+                  {placingOrder ? 'Placing Order...' : 'Place Cash Order'}
+                </button>
+
+                <div className="amazonSecureNote">🔒 Secure checkout • Your information is safe with Darik.</div>
+              </aside>
             </div>
           </div>
         </div>
