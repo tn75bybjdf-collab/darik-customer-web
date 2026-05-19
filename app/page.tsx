@@ -1042,6 +1042,7 @@ export default function DarikCustomerWebHome() {
   const [returnRequestBusyItemId, setReturnRequestBusyItemId] = useState('');
   const [pendingReturnCheckout, setPendingReturnCheckout] = useState<PendingDarikReturnCheckout | null>(null);
   const [returnCheckoutReason, setReturnCheckoutReason] = useState('');
+  const [expandedPastOrderIds, setExpandedPastOrderIds] = useState<Record<string, boolean>>({});
   const [settingsActiveTool, setSettingsActiveTool] = useState<SettingsTool>('account');
   const [settingsError, setSettingsError] = useState('');
   const [supportThreads, setSupportThreads] = useState<SupportThread[]>([]);
@@ -1202,6 +1203,30 @@ export default function DarikCustomerWebHome() {
     const pin = String(order.delivery_pin ?? '').trim();
     const status = String(order.order_status ?? '').toLowerCase();
     return Boolean(pin) && !['delivered', 'cancelled', 'canceled'].includes(status);
+  }
+
+  function isPastOrderExpanded(orderId: string) {
+    return Boolean(expandedPastOrderIds[orderId]);
+  }
+
+  function togglePastOrderDetails(orderId: string) {
+    setExpandedPastOrderIds((current) => ({
+      ...current,
+      [orderId]: !current[orderId],
+    }));
+  }
+
+  function getOrderItemPhotoUrl(item: CustomerOrderItem) {
+    const rawItem = item as any;
+    return String(
+      rawItem.product_photo_url ||
+        rawItem.product_image_url ||
+        rawItem.official_photo_url ||
+        rawItem.image_url ||
+        rawItem.photo_url ||
+        rawItem.main_photo_url ||
+        '',
+    ).trim();
   }
 
   function openDarikReturnCheckout(
@@ -4866,6 +4891,24 @@ export default function DarikCustomerWebHome() {
                                 <span className="settingsStatusPill">{String(order.order_status ?? 'placed').replace(/_/g, ' ')}</span>
                               </div>
 
+                              <div className="settingsOrderClosedSummary">
+                                <span>{getItemsForOrder(order.id).length} item{getItemsForOrder(order.id).length === 1 ? '' : 's'}</span>
+                                <span>{order.delivered_at ? `Delivered ${formatDisplayDate(order.delivered_at)}` : String(order.order_status ?? 'placed').replace(/_/g, ' ')}</span>
+                                <strong>{money(order.customer_amount_due ?? order.total)} JOD</strong>
+                              </div>
+
+                              <button
+                                type="button"
+                                className="settingsOrderExpandButton"
+                                onClick={() => togglePastOrderDetails(order.id)}
+                              >
+                                {isPastOrderExpanded(order.id) ? 'Hide full details' : 'Show full details'}
+                              </button>
+
+                              {isPastOrderExpanded(order.id) ? (
+                                <div className="settingsOrderExpandedDetails">
+
+
                               <div className="settingsOrderDetailGrid">
                                 <div>
                                   <span>Order date</span>
@@ -4919,10 +4962,19 @@ export default function DarikCustomerWebHome() {
                                   const alreadyActiveReturn = Boolean(returnRequest && !['cancelled', 'denied', 'rejected'].includes(String(returnRequest.request_status ?? '').toLowerCase()));
                                   const returnUnavailableReason = getReturnUnavailableReason(order);
                                   const returnButtonTitle = returnOpen ? t('returnReplaceThisItem') : returnUnavailableReason;
+                                  const itemPhotoUrl = getOrderItemPhotoUrl(item);
 
                                   return (
-                                    <div key={item.id} className="settingsOrderItemRow settingsOrderItemRowStacked">
-                                      <div className="settingsOrderItemMainLine settingsOrderItemMainLineDetailed">
+                                    <div key={item.id} className="settingsOrderItemRow settingsOrderItemRowStacked settingsOrderItemRowWithPhoto">
+                                      <div className="settingsOrderItemPhotoBox">
+                                        {itemPhotoUrl ? (
+                                          <img src={itemPhotoUrl} alt={item.product_name || 'Ordered item'} />
+                                        ) : (
+                                          <span>📦</span>
+                                        )}
+                                      </div>
+                                      <div className="settingsOrderItemContent">
+                                        <div className="settingsOrderItemMainLine settingsOrderItemMainLineDetailed">
                                         <span>
                                           {item.product_name || 'Item'}
                                           {item.size_label_snapshot ? ` • Size ${item.size_label_snapshot}` : ''}
@@ -4970,10 +5022,15 @@ export default function DarikCustomerWebHome() {
                                           )}
                                         </div>
                                       ) : null}
+                                      </div>
                                     </div>
                                   );
                                 })}
                               </div>
+
+                              
+                                </div>
+                              ) : null}
 
                               <button
                                 type="button"

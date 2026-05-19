@@ -7370,7 +7370,12 @@ textarea {
 }
 
 .returnCheckoutOverlay {
-  z-index: 120;
+  z-index: 9950 !important;
+}
+
+.returnCheckoutModal {
+  position: relative;
+  z-index: 9951 !important;
 }
 
 .returnCheckoutModal {
@@ -7679,5 +7684,108 @@ textarea {
   .settingsOrderDetailGrid,
   .settingsOrderTotalsDetailed {
     grid-template-columns: 1fr;
+  }
+}
+
+/* L359: Return checkout must appear above the full-screen settings page. */
+.returnCheckoutOverlay {
+  z-index: 9950 !important;
+}
+
+.returnCheckoutOverlay .returnCheckoutModal {
+  position: relative;
+  z-index: 9951 !important;
+}
+
+/* L359: Past orders collapsed summary + expandable full details. */
+.settingsOrderClosedSummary {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin: 12px 0;
+}
+
+.settingsOrderClosedSummary span,
+.settingsOrderClosedSummary strong {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  background: #f3f4f6;
+  color: #374151;
+  padding: 7px 10px;
+  font-size: 12px;
+  font-weight: 950;
+}
+
+.settingsOrderClosedSummary strong {
+  background: #111111;
+  color: #ffd23f;
+}
+
+.settingsOrderExpandButton {
+  width: 100%;
+  border: 1px solid #111111;
+  border-radius: 16px;
+  background: #ffffff;
+  color: #111111;
+  padding: 11px 12px;
+  font-size: 13px;
+  font-weight: 950;
+  cursor: pointer;
+  margin-bottom: 12px;
+}
+
+.settingsOrderExpandButton:hover {
+  background: #111111;
+  color: #ffd23f;
+}
+
+.settingsOrderExpandedDetails {
+  border-top: 1px solid #eef0f4;
+  padding-top: 12px;
+  margin-top: 4px;
+}
+
+.settingsOrderItemRowWithPhoto {
+  display: grid !important;
+  grid-template-columns: 64px minmax(0, 1fr);
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.settingsOrderItemPhotoBox {
+  width: 64px;
+  height: 64px;
+  border-radius: 18px;
+  background: #f3f4f6;
+  border: 1px solid #eef0f4;
+  overflow: hidden;
+  display: grid;
+  place-items: center;
+  color: #9ca3af;
+  font-size: 22px;
+  flex-shrink: 0;
+}
+
+.settingsOrderItemPhotoBox img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.settingsOrderItemContent {
+  min-width: 0;
+}
+
+@media (max-width: 520px) {
+  .settingsOrderItemRowWithPhoto {
+    grid-template-columns: 54px minmax(0, 1fr);
+  }
+
+  .settingsOrderItemPhotoBox {
+    width: 54px;
+    height: 54px;
+    border-radius: 16px;
   }
 }
