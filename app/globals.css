@@ -9121,3 +9121,386 @@ textarea {
     font-size: 17px !important;
   }
 }
+
+/* L368 Amazon-style Customer Settings Option 2 - clean card layout */
+.settingsFullScreenOverlay {
+  background: #f4f5f6 !important;
+  padding: 0 !important;
+  align-items: stretch !important;
+  justify-content: stretch !important;
+}
+
+.settingsFullScreenPage {
+  width: 100% !important;
+  max-width: none !important;
+  min-height: 100vh !important;
+  border-radius: 0 !important;
+  background: #f4f5f6 !important;
+  box-shadow: none !important;
+  overflow: auto !important;
+  padding: 0 !important;
+}
+
+.settingsTopBar {
+  position: sticky !important;
+  top: 0 !important;
+  z-index: 80 !important;
+  display: grid !important;
+  grid-template-columns: auto 1fr auto !important;
+  align-items: center !important;
+  gap: 18px !important;
+  background: #0b0b0b !important;
+  color: #ffffff !important;
+  padding: 14px clamp(18px, 5vw, 78px) !important;
+  border-bottom: 0 !important;
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.18) !important;
+}
+
+.settingsTopBar h2,
+.settingsTopBar strong {
+  color: #ffffff !important;
+}
+
+.settingsTopBar p,
+.settingsTopBar span {
+  color: rgba(255, 255, 255, 0.72) !important;
+}
+
+.settingsTopBar button,
+.settingsBackButton,
+.settingsCloseButton {
+  border: 1px solid rgba(255, 255, 255, 0.24) !important;
+  border-radius: 999px !important;
+  background: transparent !important;
+  color: #ffffff !important;
+  min-height: 38px !important;
+  padding: 8px 13px !important;
+  font-size: 13px !important;
+  font-weight: 950 !important;
+  cursor: pointer !important;
+}
+
+.settingsTopBar button:hover,
+.settingsBackButton:hover,
+.settingsCloseButton:hover {
+  background: rgba(255, 255, 255, 0.10) !important;
+}
+
+.settingsContent,
+.settingsBody,
+.settingsMain,
+.settingsPanelBody {
+  width: min(1280px, calc(100vw - 42px)) !important;
+  margin: 24px auto 52px !important;
+}
+
+.settingsGrid,
+.settingsToolsGrid {
+  display: grid !important;
+  grid-template-columns: 260px minmax(0, 1fr) !important;
+  gap: 22px !important;
+  align-items: start !important;
+}
+
+.settingsSidebar,
+.settingsToolMenu,
+.settingsNavPanel {
+  position: sticky !important;
+  top: 82px !important;
+  align-self: start !important;
+  background: #ffffff !important;
+  border: 1px solid #e5e7eb !important;
+  border-radius: 18px !important;
+  box-shadow: 0 8px 26px rgba(15, 23, 42, 0.06) !important;
+  padding: 10px !important;
+  overflow: hidden !important;
+}
+
+.settingsSidebar button,
+.settingsToolMenu button,
+.settingsNavPanel button,
+.settingsMenuButton,
+.settingsToolButton {
+  width: 100% !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  gap: 10px !important;
+  border: 0 !important;
+  border-radius: 12px !important;
+  background: transparent !important;
+  color: #111827 !important;
+  padding: 11px 12px !important;
+  min-height: 42px !important;
+  font-size: 13px !important;
+  font-weight: 900 !important;
+  text-align: left !important;
+  cursor: pointer !important;
+}
+
+.settingsSidebar button:hover,
+.settingsToolMenu button:hover,
+.settingsNavPanel button:hover,
+.settingsMenuButton:hover,
+.settingsToolButton:hover {
+  background: #f3f4f6 !important;
+}
+
+.settingsSidebar button.active,
+.settingsToolMenu button.active,
+.settingsNavPanel button.active,
+.settingsMenuButton.active,
+.settingsToolButton.active {
+  background: #fff7cc !important;
+  color: #111111 !important;
+}
+
+.settingsSignOutButton,
+.settingsLogoutButton {
+  color: #dc2626 !important;
+}
+
+.settingsAccountHero,
+.settingsOverviewHero,
+.settingsWelcomeCard {
+  background: #ffffff !important;
+  border: 1px solid #e5e7eb !important;
+  border-radius: 20px !important;
+  padding: 20px !important;
+  box-shadow: 0 8px 26px rgba(15, 23, 42, 0.06) !important;
+  margin-bottom: 18px !important;
+}
+
+.settingsAccountHero h2,
+.settingsOverviewHero h2,
+.settingsWelcomeCard h2,
+.settingsSection h2,
+.settingsSection h3,
+.settingsToolPanel h2,
+.settingsToolPanel h3 {
+  color: #111827 !important;
+  letter-spacing: -0.02em !important;
+}
+
+.settingsAccountHero p,
+.settingsOverviewHero p,
+.settingsWelcomeCard p {
+  color: #6b7280 !important;
+  font-size: 14px !important;
+  font-weight: 800 !important;
+}
+
+.settingsSection,
+.settingsToolPanel,
+.settingsCard,
+.settingsFormCard,
+.settingsOrdersCard,
+.settingsSupportCard,
+.settingsSavedLocationCard {
+  background: #ffffff !important;
+  border: 1px solid #e5e7eb !important;
+  border-radius: 18px !important;
+  box-shadow: 0 8px 26px rgba(15, 23, 42, 0.05) !important;
+}
+
+.settingsSection {
+  padding: 18px !important;
+  margin-bottom: 16px !important;
+}
+
+.settingsToolPanel {
+  padding: 20px !important;
+}
+
+.settingsOverviewGrid,
+.settingsAccountCards,
+.settingsQuickCards,
+.settingsCardsGrid {
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  gap: 14px !important;
+}
+
+.settingsOverviewCard,
+.settingsQuickCard,
+.settingsAccountCard {
+  display: grid !important;
+  grid-template-columns: 44px minmax(0, 1fr) auto !important;
+  gap: 12px !important;
+  align-items: center !important;
+  background: #ffffff !important;
+  border: 1px solid #e5e7eb !important;
+  border-radius: 18px !important;
+  padding: 16px !important;
+  min-height: 92px !important;
+  box-shadow: 0 4px 16px rgba(15, 23, 42, 0.04) !important;
+  cursor: pointer !important;
+}
+
+.settingsOverviewCard:hover,
+.settingsQuickCard:hover,
+.settingsAccountCard:hover {
+  border-color: #d1d5db !important;
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.08) !important;
+  transform: translateY(-1px) !important;
+}
+
+.settingsOverviewCard::after,
+.settingsQuickCard::after,
+.settingsAccountCard::after {
+  content: "›";
+  color: #6b7280;
+  font-size: 24px;
+  font-weight: 800;
+}
+
+.settingsOverviewIcon,
+.settingsQuickIcon,
+.settingsAccountIcon {
+  width: 44px !important;
+  height: 44px !important;
+  border-radius: 999px !important;
+  background: #f3f4f6 !important;
+  color: #111827 !important;
+  display: grid !important;
+  place-items: center !important;
+  font-size: 18px !important;
+}
+
+.settingsOverviewCard strong,
+.settingsQuickCard strong,
+.settingsAccountCard strong {
+  color: #111827 !important;
+  font-size: 14px !important;
+  font-weight: 950 !important;
+}
+
+.settingsOverviewCard p,
+.settingsQuickCard p,
+.settingsAccountCard p {
+  color: #6b7280 !important;
+  margin: 4px 0 0 !important;
+  font-size: 12px !important;
+  font-weight: 800 !important;
+  line-height: 1.35 !important;
+}
+
+.settingsInput,
+.settingsTextarea,
+.settingsSection input,
+.settingsSection textarea,
+.settingsToolPanel input,
+.settingsToolPanel textarea {
+  border: 1px solid #d1d5db !important;
+  border-radius: 12px !important;
+  background: #ffffff !important;
+  padding: 11px 12px !important;
+  color: #111827 !important;
+  font-size: 14px !important;
+  font-weight: 750 !important;
+  outline: none !important;
+}
+
+.settingsInput:focus,
+.settingsTextarea:focus,
+.settingsSection input:focus,
+.settingsSection textarea:focus,
+.settingsToolPanel input:focus,
+.settingsToolPanel textarea:focus {
+  border-color: #111111 !important;
+  box-shadow: 0 0 0 3px rgba(255, 210, 63, 0.24) !important;
+}
+
+.settingsPrimaryButton,
+.settingsSaveButton {
+  border: 0 !important;
+  border-radius: 12px !important;
+  background: #ffd23f !important;
+  color: #111111 !important;
+  min-height: 44px !important;
+  padding: 11px 16px !important;
+  font-size: 14px !important;
+  font-weight: 950 !important;
+  cursor: pointer !important;
+  box-shadow: 0 8px 18px rgba(255, 210, 63, 0.24) !important;
+}
+
+.settingsSecondaryButton,
+.settingsGhostButton,
+.settingsInlineButton {
+  border: 1px solid #d1d5db !important;
+  border-radius: 12px !important;
+  background: #ffffff !important;
+  color: #111827 !important;
+  min-height: 40px !important;
+  padding: 9px 14px !important;
+  font-size: 13px !important;
+  font-weight: 950 !important;
+  cursor: pointer !important;
+}
+
+.settingsOrderCard,
+.settingsSupportThreadCard,
+.supportThreadCard,
+.settingsLocationCard {
+  border: 1px solid #e5e7eb !important;
+  border-radius: 18px !important;
+  background: #ffffff !important;
+  box-shadow: 0 5px 18px rgba(15, 23, 42, 0.04) !important;
+  padding: 16px !important;
+}
+
+.settingsStatusPill {
+  background: #fff7cc !important;
+  color: #111111 !important;
+  border-radius: 999px !important;
+  padding: 6px 10px !important;
+  font-size: 11px !important;
+  font-weight: 950 !important;
+}
+
+@media (max-width: 920px) {
+  .settingsContent,
+  .settingsBody,
+  .settingsMain,
+  .settingsPanelBody {
+    width: min(720px, calc(100vw - 20px)) !important;
+    margin-top: 14px !important;
+  }
+
+  .settingsGrid,
+  .settingsToolsGrid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .settingsSidebar,
+  .settingsToolMenu,
+  .settingsNavPanel {
+    position: static !important;
+    display: flex !important;
+    gap: 8px !important;
+    overflow-x: auto !important;
+  }
+
+  .settingsSidebar button,
+  .settingsToolMenu button,
+  .settingsNavPanel button,
+  .settingsMenuButton,
+  .settingsToolButton {
+    width: auto !important;
+    flex: 0 0 auto !important;
+    white-space: nowrap !important;
+  }
+
+  .settingsOverviewGrid,
+  .settingsAccountCards,
+  .settingsQuickCards,
+  .settingsCardsGrid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .settingsTopBar {
+    padding: 12px 14px !important;
+    grid-template-columns: auto 1fr auto !important;
+  }
+}
