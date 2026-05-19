@@ -178,6 +178,8 @@ type CustomerOrder = {
   total: number | string | null;
   customer_amount_due?: number | string | null;
   delivery_pin?: string | null;
+  return_qualified?: boolean | null;
+  return_not_qualified_reason?: string | null;
   delivery_address_details?: string | null;
   delivery_note?: string | null;
   created_at: string;
@@ -346,6 +348,9 @@ const DARIK_WEB_TRANSLATIONS = {
   returnSubmitted: { en: 'Return request submitted.', ar: 'تم إرسال طلب الإرجاع.' },
   returnAlreadyRequested: { en: 'Return already requested for this item.', ar: 'تم طلب إرجاع لهذا المنتج مسبقاً.' },
   returnWindowClosed: { en: 'Return window closed.', ar: 'انتهت مدة الإرجاع.' },
+  returnNoLongerQualified: { en: 'This product no longer qualifies for return because the return window has closed after delivery funds cleared.', ar: 'هذا المنتج لم يعد مؤهلاً للإرجاع لأن فترة الإرجاع انتهت بعد تصفية المبلغ.' },
+  deliveryCode: { en: 'Delivery Code', ar: 'رمز التوصيل' },
+  giveCodeToDriver: { en: 'Give this code to the driver when the driver asks for it.', ar: 'أعطِ هذا الرمز للسائق عندما يطلبه.' },
   deliveredOrdersOnly: { en: 'Returns are available after delivery.', ar: 'الإرجاع متاح بعد التوصيل.' },
   returnStatus: { en: 'Return Status', ar: 'حالة الإرجاع' },
   creditReturnNote: { en: 'Darik reviews the request, picks up the item, then issues credit after inspection.', ar: 'تراجع Darik الطلب، تستلم المنتج، ثم تصدر الرصيد بعد الفحص.' },
@@ -1057,6 +1062,36 @@ export default function DarikCustomerWebHome() {
     return DARIK_WEB_TRANSLATIONS[key]?.[customerLanguage] ?? DARIK_WEB_TRANSLATIONS[key]?.en ?? key;
   }
 
+  useEffect(() => {
+    const faviconHref = MAIN_SHOPPING_SCREEN_LOGO;
+
+    let iconLink = document.querySelector<HTMLLinkElement>('link[rel="icon"]');
+    if (!iconLink) {
+      iconLink = document.createElement('link');
+      iconLink.rel = 'icon';
+      document.head.appendChild(iconLink);
+    }
+    iconLink.type = 'image/png';
+    iconLink.href = faviconHref;
+
+    let shortcutIconLink = document.querySelector<HTMLLinkElement>('link[rel="shortcut icon"]');
+    if (!shortcutIconLink) {
+      shortcutIconLink = document.createElement('link');
+      shortcutIconLink.rel = 'shortcut icon';
+      document.head.appendChild(shortcutIconLink);
+    }
+    shortcutIconLink.type = 'image/png';
+    shortcutIconLink.href = faviconHref;
+
+    let appleTouchIconLink = document.querySelector<HTMLLinkElement>('link[rel="apple-touch-icon"]');
+    if (!appleTouchIconLink) {
+      appleTouchIconLink = document.createElement('link');
+      appleTouchIconLink.rel = 'apple-touch-icon';
+      document.head.appendChild(appleTouchIconLink);
+    }
+    appleTouchIconLink.href = faviconHref;
+  }, []);
+
   function showSettingsMessage(message: string) {
     setSettingsSavedMessage(message);
     window.setTimeout(() => setSettingsSavedMessage(''), 2600);
@@ -1125,6 +1160,7 @@ export default function DarikCustomerWebHome() {
   }
 
   function isReturnWindowOpen(order: CustomerOrder) {
+    if (order.return_qualified === false) return false;
     if (!isOrderDeliveredForReturn(order)) return false;
     const baseTime = getReturnWindowBaseTime(order);
     if (!baseTime) return false;
@@ -1142,6 +1178,23 @@ export default function DarikCustomerWebHome() {
     return `${resolution || 'return'} • ${requestStatus}${pickupStatus}${replacementStatus}`;
   }
 
+  function getReturnUnavailableReason(order: CustomerOrder) {
+    if (order.return_qualified === false) {
+      return order.return_not_qualified_reason || t('returnNoLongerQualified');
+    }
+
+    if (!isOrderDeliveredForReturn(order)) return t('deliveredOrdersOnly');
+    if (!isReturnWindowOpen(order)) return t('returnWindowClosed');
+
+    return '';
+  }
+
+  function hasDeliveryCodeForDriver(order: CustomerOrder) {
+    const pin = String(order.delivery_pin ?? '').trim();
+    const status = String(order.order_status ?? '').toLowerCase();
+    return Boolean(pin) && !['delivered', 'cancelled', 'canceled'].includes(status);
+  }
+
   async function submitDarikReturnRequestFromWeb(
     order: CustomerOrder,
     item: CustomerOrderItem,
@@ -1153,7 +1206,7 @@ export default function DarikCustomerWebHome() {
     }
 
     if (!isReturnWindowOpen(order)) {
-      showSettingsError(isOrderDeliveredForReturn(order) ? t('returnWindowClosed') : t('deliveredOrdersOnly'));
+      showSettingsError(getReturnUnavailableReason(order) || t('returnWindowClosed'));
       return;
     }
 
@@ -1258,7 +1311,41 @@ export default function DarikCustomerWebHome() {
       return;
     }
 
-    const loadedOrders = (ordersResult.data ?? []) as CustomerOrder[];
+    let loadedOrders = (ordersResult.data ?? []) as CustomerOrder[];
+
+    try {
+      const { data: statusRows, error: statusError } = await supabase.rpc('customer_get_order_return_pin_status_v1', {
+        p_customer_id: profileId,
+      });
+
+      if (!statusError && Array.isArray(statusRows)) {
+        const statusByOrderId = new Map(
+          statusRows.map((row: any) => [
+            String(row.order_id ?? ''),
+            {
+              delivery_pin: row.delivery_pin ?? null,
+              return_qualified: row.return_qualified,
+              return_not_qualified_reason: row.return_not_qualified_reason ?? null,
+            },
+          ]),
+        );
+
+        loadedOrders = loadedOrders.map((order) => {
+          const status = statusByOrderId.get(order.id);
+          if (!status) return order;
+
+          return {
+            ...order,
+            delivery_pin: status.delivery_pin || order.delivery_pin || null,
+            return_qualified: typeof status.return_qualified === 'boolean' ? status.return_qualified : order.return_qualified ?? null,
+            return_not_qualified_reason: status.return_not_qualified_reason || order.return_not_qualified_reason || null,
+          };
+        });
+      }
+    } catch {
+      // The order page should still load even if the helper RPC is not installed yet.
+    }
+
     setCustomerOrders(loadedOrders);
 
     const orderIds = loadedOrders.map((order) => order.id);
@@ -4621,7 +4708,13 @@ export default function DarikCustomerWebHome() {
 
                               {order.delivery_eta_label ? <p className="settingsOrderEta">{order.delivery_eta_label}</p> : null}
                               {order.driver_stops_away_label ? <p className="settingsOrderEta">{order.driver_stops_away_label}</p> : null}
-                              {order.delivery_pin ? <p className="settingsOrderPin">PIN: {order.delivery_pin}</p> : null}
+                              {hasDeliveryCodeForDriver(order) ? (
+                                <div className="settingsOrderDeliveryCodeBox">
+                                  <span>{t('deliveryCode')}</span>
+                                  <strong>{String(order.delivery_pin ?? '').trim()}</strong>
+                                  <p>{t('giveCodeToDriver')}</p>
+                                </div>
+                              ) : null}
 
                               <div className="settingsOrderItems">
                                 <strong>{t('orderItems')}</strong>
@@ -4631,6 +4724,8 @@ export default function DarikCustomerWebHome() {
                                   const deliveredForReturn = isOrderDeliveredForReturn(order);
                                   const returnBusy = returnRequestBusyItemId === item.id;
                                   const alreadyActiveReturn = Boolean(returnRequest && !['cancelled', 'denied', 'rejected'].includes(String(returnRequest.request_status ?? '').toLowerCase()));
+                                  const returnUnavailableReason = getReturnUnavailableReason(order);
+                                  const returnButtonTitle = returnOpen ? t('returnReplaceThisItem') : returnUnavailableReason;
 
                                   return (
                                     <div key={item.id} className="settingsOrderItemRow settingsOrderItemRowStacked">
@@ -4656,7 +4751,7 @@ export default function DarikCustomerWebHome() {
                                             className="settingsReturnButton"
                                             disabled={!returnOpen || returnBusy}
                                             onClick={() => submitDarikReturnRequestFromWeb(order, item, 'credit_return').catch(() => {})}
-                                            title={!deliveredForReturn ? t('deliveredOrdersOnly') : !returnOpen ? t('returnWindowClosed') : t('darikCreditReturn')}
+                                            title={returnOpen ? t('darikCreditReturn') : returnButtonTitle}
                                           >
                                             {returnBusy ? t('pleaseWait') : t('darikCreditReturn')}
                                           </button>
@@ -4666,15 +4761,13 @@ export default function DarikCustomerWebHome() {
                                             className="settingsReturnButton settingsReturnButtonAlt"
                                             disabled={!returnOpen || returnBusy}
                                             onClick={() => submitDarikReturnRequestFromWeb(order, item, 'exact_replacement').catch(() => {})}
-                                            title={!deliveredForReturn ? t('deliveredOrdersOnly') : !returnOpen ? t('returnWindowClosed') : t('exactReplacement')}
+                                            title={returnOpen ? t('exactReplacement') : returnButtonTitle}
                                           >
                                             {t('exactReplacement')}
                                           </button>
 
-                                          {!deliveredForReturn ? (
-                                            <span className="settingsReturnHelp">{t('deliveredOrdersOnly')}</span>
-                                          ) : !returnOpen ? (
-                                            <span className="settingsReturnHelp">{t('returnWindowClosed')}</span>
+                                          {!returnOpen ? (
+                                            <span className="settingsReturnUnavailableBox">{returnUnavailableReason || t('returnNoLongerQualified')}</span>
                                           ) : (
                                             <span className="settingsReturnHelp">{t('returnReplaceThisItem')}</span>
                                           )}
