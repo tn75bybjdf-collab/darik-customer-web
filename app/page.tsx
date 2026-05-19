@@ -348,7 +348,7 @@ const DARIK_WEB_TRANSLATIONS = {
   returnSubmitted: { en: 'Return request submitted.', ar: 'تم إرسال طلب الإرجاع.' },
   returnAlreadyRequested: { en: 'Return already requested for this item.', ar: 'تم طلب إرجاع لهذا المنتج مسبقاً.' },
   returnWindowClosed: { en: 'Return window closed.', ar: 'انتهت مدة الإرجاع.' },
-  returnNoLongerQualified: { en: 'This product no longer qualifies for return because the return window has closed after delivery funds cleared.', ar: 'هذا المنتج لم يعد مؤهلاً للإرجاع لأن فترة الإرجاع انتهت بعد تصفية المبلغ.' },
+  returnNoLongerQualified: { en: 'This product no longer qualifies for return because the return window has closed. Return window is 24 hours after delivery completed.', ar: 'هذا المنتج لم يعد مؤهلاً للإرجاع لأن فترة الإرجاع انتهت. فترة الإرجاع 24 ساعة بعد اكتمال التوصيل.' },
   deliveryCode: { en: 'Delivery Code', ar: 'رمز التوصيل' },
   giveCodeToDriver: { en: 'Give this code to the driver when the driver asks for it.', ar: 'أعطِ هذا الرمز للسائق عندما يطلبه.' },
   deliveredOrdersOnly: { en: 'Returns are available after delivery.', ar: 'الإرجاع متاح بعد التوصيل.' },
