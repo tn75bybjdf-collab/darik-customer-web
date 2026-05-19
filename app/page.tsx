@@ -1437,7 +1437,7 @@ export default function DarikCustomerWebHome() {
     }
 
     try {
-      const { data, error } = await supabase.rpc('customer_get_support_threads_with_messages_v2', {
+      const { data, error } = await supabase.rpc('customer_get_support_threads_with_messages_v3', {
         p_customer_id: profileId,
       });
 
@@ -1452,6 +1452,10 @@ export default function DarikCustomerWebHome() {
 
         setSupportThreads(nextThreads);
         setSupportMessages(nextMessages);
+        setSelectedSupportThreadId((currentThreadId) => {
+          if (currentThreadId && nextThreads.some((thread) => thread.id === currentThreadId)) return currentThreadId;
+          return nextThreads[0]?.id ?? null;
+        });
         return;
       }
     } catch {
@@ -1474,6 +1478,10 @@ export default function DarikCustomerWebHome() {
 
     const loadedThreads = (threadsResult.data ?? []).map((thread: any) => normalizeSupportThreadForCustomerWeb(thread)) as SupportThread[];
     setSupportThreads(loadedThreads);
+    setSelectedSupportThreadId((currentThreadId) => {
+      if (currentThreadId && loadedThreads.some((thread) => thread.id === currentThreadId)) return currentThreadId;
+      return loadedThreads[0]?.id ?? null;
+    });
 
     const threadIds = loadedThreads.map((thread) => thread.id);
     if (threadIds.length === 0) {
@@ -1798,7 +1806,8 @@ export default function DarikCustomerWebHome() {
       }
 
       const createdThread = result?.thread ? normalizeSupportThreadForCustomerWeb(result.thread) : undefined;
-      const createdMessage = result?.message ? normalizeSupportMessageForCustomerWeb(result.message) : undefined;
+      const createdMessagePayload = result?.support_message || result?.message_row || (typeof result?.message === 'object' ? result.message : null);
+      const createdMessage = createdMessagePayload ? normalizeSupportMessageForCustomerWeb(createdMessagePayload) : undefined;
       const createdThreadId = String(result?.thread_id || createdThread?.id || '');
 
       if (createdThread) {
@@ -1842,7 +1851,7 @@ export default function DarikCustomerWebHome() {
 
     try {
       setSupportBusy(true);
-      const { data, error } = await supabase.rpc('customer_add_support_message_v1', {
+      const { data, error } = await supabase.rpc('customer_add_support_message_v2', {
         p_thread_id: thread.id,
         p_customer_id: customerProfile.id,
         p_customer_name: customerProfile.full_name || customerName || customerSession?.user.email || 'Customer',
@@ -1860,7 +1869,8 @@ export default function DarikCustomerWebHome() {
         return;
       }
 
-      const createdMessage = result?.message ? normalizeSupportMessageForCustomerWeb(result.message) : undefined;
+      const createdMessagePayload = result?.support_message || result?.message_row || (typeof result?.message === 'object' ? result.message : null);
+      const createdMessage = createdMessagePayload ? normalizeSupportMessageForCustomerWeb(createdMessagePayload) : undefined;
       if (createdMessage) {
         setSupportMessages((currentMessages) => [
           ...currentMessages.filter((message) => message.id !== createdMessage.id),
@@ -4966,14 +4976,23 @@ export default function DarikCustomerWebHome() {
 
                                 {isSelected ? (
                                   <div className="supportThreadBody">
+                                    <div className="supportChatHeader">
+                                      <strong>Darik Support Chat</strong>
+                                      <span>{threadMessages.length} message{threadMessages.length === 1 ? '' : 's'}</span>
+                                    </div>
+
                                     <div className="supportMessages">
-                                      {threadMessages.map((message) => (
-                                        <div key={message.id} className={`supportMessage ${message.sender_role === 'customer' ? 'customer' : 'admin'}`}>
-                                          <strong>{message.sender_name || message.sender_role || 'Darik'}</strong>
-                                          <p>{message.message_body}</p>
-                                          <small>{formatDisplayDate(message.created_at)}</small>
-                                        </div>
-                                      ))}
+                                      {threadMessages.length === 0 ? (
+                                        <div className="supportChatEmpty">No messages loaded yet. Tap refresh if this was just created.</div>
+                                      ) : (
+                                        threadMessages.map((message) => (
+                                          <div key={message.id} className={`supportMessage ${String(message.sender_role ?? '').toLowerCase() === 'customer' ? 'customer' : 'admin'}`}>
+                                            <strong>{message.sender_name || message.sender_role || 'Darik'}</strong>
+                                            <p>{message.message_body}</p>
+                                            <small>{formatDisplayDate(message.created_at)}</small>
+                                          </div>
+                                        ))
+                                      )}
                                     </div>
 
                                     <textarea
