@@ -9986,3 +9986,103 @@ button[class*="signOut"] {
     font-size: 18px !important;
   }
 }
+
+/* L370: make customer settings left account information side 1.5x wider */
+.settingsGrid,
+.settingsLayout,
+.settingsAccountLayout,
+.settingsToolsGrid {
+  grid-template-columns: 375px minmax(0, 1fr) !important;
+  gap: 20px !important;
+}
+
+.settingsProfilePanel,
+.settingsAccountPanel,
+.settingsCustomerCard,
+.settingsAccountInfoCard,
+.settingsSidePanel,
+.settingsSidebar,
+.settingsLeftPanel {
+  width: 100% !important;
+  max-width: 375px !important;
+}
+
+/* Give the wider left panel breathing room without making it bulky */
+.settingsProfilePanel,
+.settingsAccountPanel,
+.settingsCustomerCard,
+.settingsAccountInfoCard,
+.settingsSidePanel,
+.settingsSidebar,
+.settingsLeftPanel {
+  padding: 16px !important;
+}
+
+/* Prevent account labels/email/customer number from wrapping ugly */
+.settingsProfilePanel p,
+.settingsAccountPanel p,
+.settingsCustomerCard p,
+.settingsAccountInfoCard p,
+.settingsSidePanel p,
+.settingsSidebar p,
+.settingsLeftPanel p,
+.settingsProfilePanel span,
+.settingsAccountPanel span,
+.settingsCustomerCard span,
+.settingsAccountInfoCard span,
+.settingsSidePanel span,
+.settingsSidebar span,
+.settingsLeftPanel span {
+  word-break: normal !important;
+  overflow-wrap: anywhere !important;
+}
+
+/* Wider left panel can fit two small info boxes cleaner */
+.settingsProfilePanel .settingsInfoGrid,
+.settingsAccountPanel .settingsInfoGrid,
+.settingsCustomerCard .settingsInfoGrid,
+.settingsAccountInfoCard .settingsInfoGrid,
+.settingsSidePanel .settingsInfoGrid,
+.settingsSidebar .settingsInfoGrid,
+.settingsLeftPanel .settingsInfoGrid {
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  gap: 10px !important;
+}
+
+@media (max-width: 1100px) {
+  .settingsGrid,
+  .settingsLayout,
+  .settingsAccountLayout,
+  .settingsToolsGrid {
+    grid-template-columns: 330px minmax(0, 1fr) !important;
+  }
+
+  .settingsProfilePanel,
+  .settingsAccountPanel,
+  .settingsCustomerCard,
+  .settingsAccountInfoCard,
+  .settingsSidePanel,
+  .settingsSidebar,
+  .settingsLeftPanel {
+    max-width: 330px !important;
+  }
+}
+
+@media (max-width: 920px) {
+  .settingsGrid,
+  .settingsLayout,
+  .settingsAccountLayout,
+  .settingsToolsGrid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .settingsProfilePanel,
+  .settingsAccountPanel,
+  .settingsCustomerCard,
+  .settingsAccountInfoCard,
+  .settingsSidePanel,
+  .settingsSidebar,
+  .settingsLeftPanel {
+    max-width: none !important;
+  }
+}
