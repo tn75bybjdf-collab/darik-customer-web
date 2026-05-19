@@ -225,6 +225,7 @@ type PendingDarikReturnCheckout = {
   order: CustomerOrder;
   item: CustomerOrderItem;
   resolutionType: 'credit_return' | 'exact_replacement';
+  unavailableReason?: string;
 };
 
 type SupportThread = {
@@ -433,7 +434,7 @@ function getRetailerBasePrice(product: Product | null | undefined) {
   return roundMoney(Number(product?.vendor_price ?? 0));
 }
 
-function buildDeliveryEtaLabel(deliveryOption: 'next_day_free' | 'express_2hr') {
+function buildDeliveryEtaLabel(deliveryOption: '' | 'next_day_free' | 'express_2hr') {
   const now = new Date();
   const beforeCutoff = now.getHours() < 20;
 
@@ -479,7 +480,7 @@ function getDistanceKmFromWarehouse(latitude: number, longitude: number) {
   );
 }
 
-function getDeliveryRadiusWarning(distanceKm: number | null, deliveryOption: 'next_day_free' | 'express_2hr') {
+function getDeliveryRadiusWarning(distanceKm: number | null, deliveryOption: '' | 'next_day_free' | 'express_2hr') {
   if (distanceKm === null) return '';
 
   if (deliveryOption === 'express_2hr' && distanceKm > EXPRESS_DELIVERY_RADIUS_KM) {
@@ -1004,7 +1005,7 @@ export default function DarikCustomerWebHome() {
   const [newLocationName, setNewLocationName] = useState('');
   const [locationLoading, setLocationLoading] = useState(false);
   const [locationMessage, setLocationMessage] = useState('');
-  const [selectedDeliveryOption, setSelectedDeliveryOption] = useState<'next_day_free' | 'express_2hr'>('express_2hr');
+  const [selectedDeliveryOption, setSelectedDeliveryOption] = useState<'' | 'next_day_free' | 'express_2hr'>('');
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [productImageZoomOpen, setProductImageZoomOpen] = useState(false);
   const [selectedClothingSize, setSelectedClothingSize] = useState('');
@@ -1213,18 +1214,18 @@ export default function DarikCustomerWebHome() {
       return;
     }
 
-    if (!isReturnWindowOpen(order)) {
-      showSettingsError(getReturnUnavailableReason(order) || t('returnWindowClosed'));
-      return;
-    }
-
     const existingRequest = getReturnRequestForItem(order.id, item.id);
     if (existingRequest && !['cancelled', 'denied', 'rejected'].includes(String(existingRequest.request_status ?? '').toLowerCase())) {
       showSettingsError(t('returnAlreadyRequested'));
       return;
     }
 
-    setPendingReturnCheckout({ order, item, resolutionType });
+    // L357:
+    // Always open the return checkout screen when the customer taps Return/Replace.
+    // If the item is not eligible, the checkout screen shows the reason instead of the tap feeling dead.
+    const unavailableReason = getReturnUnavailableReason(order);
+
+    setPendingReturnCheckout({ order, item, resolutionType, unavailableReason });
     setReturnCheckoutReason('');
   }
 
@@ -2704,16 +2705,12 @@ export default function DarikCustomerWebHome() {
     if (selectedDeliveryOption !== 'next_day_free') return;
     if (freeNextDayUnlocked) return;
 
-    const expressIsAllowed =
-      checkoutDistanceKm === null || checkoutDistanceKm <= EXPRESS_DELIVERY_RADIUS_KM;
-
-    if (expressIsAllowed) {
-      setSelectedDeliveryOption('express_2hr');
-    }
-  }, [cartItems.length, checkoutDistanceKm, freeNextDayUnlocked, selectedDeliveryOption]);
+    // Do not auto-select Express. Customer must manually choose delivery.
+    setSelectedDeliveryOption('');
+  }, [cartItems.length, freeNextDayUnlocked, selectedDeliveryOption]);
 
   const selectedDeliveryFee =
-    cartItems.length === 0
+    cartItems.length === 0 || !selectedDeliveryOption
       ? 0
       : selectedDeliveryOption === 'next_day_free' && freeNextDayUnlocked
         ? 0
@@ -2727,12 +2724,12 @@ export default function DarikCustomerWebHome() {
     if (selectedDeliveryOption !== 'express_2hr') return;
 
     const expressIsBlocked = checkoutDistanceKm > EXPRESS_DELIVERY_RADIUS_KM;
-    const nextDayIsAllowedByDistance = checkoutDistanceKm <= NEXT_DAY_DELIVERY_RADIUS_KM;
 
-    if (expressIsBlocked && nextDayIsAllowedByDistance && freeNextDayUnlocked) {
-      setSelectedDeliveryOption('next_day_free');
+    if (expressIsBlocked) {
+      // Do not auto-select Free Next-Day. Customer must manually choose delivery.
+      setSelectedDeliveryOption('');
     }
-  }, [checkoutDistanceKm, freeNextDayUnlocked, selectedDeliveryOption]);
+  }, [checkoutDistanceKm, selectedDeliveryOption]);
 
   const visibleAdBanners = useMemo<CustomerAdBanner[]>(() => {
     const darikPermanentBanner: CustomerAdBanner = {
@@ -3239,6 +3236,11 @@ export default function DarikCustomerWebHome() {
       return;
     }
 
+    if (!selectedDeliveryOption) {
+      setCheckoutError('Choose Free Next-Day Delivery or Express Delivery before placing the order.');
+      return;
+    }
+
     if (authLoading) {
       setCheckoutError('Checking your Darik account. Please try again in a moment.');
       return;
@@ -3267,7 +3269,9 @@ export default function DarikCustomerWebHome() {
     const selectedStoredLabel =
       selectedDeliveryOption === 'next_day_free'
         ? 'Free Next-Day Delivery'
-        : 'Express Delivery';
+        : selectedDeliveryOption === 'express_2hr'
+          ? 'Express Delivery'
+          : '';
 
     if (cartItems.length === 0) {
       setCheckoutError('Your cart is empty.');
@@ -4857,16 +4861,43 @@ export default function DarikCustomerWebHome() {
                               <div className="settingsOrderHeader">
                                 <div>
                                   <strong>Order {getOrderDisplayNumber(order)}</strong>
-                                  <p>{formatDisplayDate(order.created_at)}</p>
+                                  <p>Placed: {formatDisplayDate(order.created_at)}</p>
                                 </div>
                                 <span className="settingsStatusPill">{String(order.order_status ?? 'placed').replace(/_/g, ' ')}</span>
                               </div>
 
-                              <div className="settingsOrderTotals">
-                                <span>{t('subtotal')}: {money(order.subtotal)} JOD</span>
-                                <span>{t('delivery')}: {money(order.delivery_fee)} JOD</span>
-                                <strong>{t('total')}: {money(order.customer_amount_due ?? order.total)} JOD</strong>
+                              <div className="settingsOrderDetailGrid">
+                                <div>
+                                  <span>Order date</span>
+                                  <strong>{formatDisplayDate(order.created_at)}</strong>
+                                </div>
+                                <div>
+                                  <span>Delivered</span>
+                                  <strong>{order.delivered_at ? formatDisplayDate(order.delivered_at) : 'Not delivered yet'}</strong>
+                                </div>
+                                <div>
+                                  <span>Delivery option</span>
+                                  <strong>{order.delivery_eta_label || order.delivery_option || 'Not saved'}</strong>
+                                </div>
+                                <div>
+                                  <span>Payment</span>
+                                  <strong>{String(order.payment_method ?? 'Cash on delivery').replace(/_/g, ' ')}</strong>
+                                </div>
                               </div>
+
+                              <div className="settingsOrderTotals settingsOrderTotalsDetailed">
+                                <div><span>{t('subtotal')}</span><strong>{money(order.subtotal)} JOD</strong></div>
+                                <div><span>{t('delivery')}</span><strong>{money(order.delivery_fee)} JOD</strong></div>
+                                <div className="grand"><span>{t('total')}</span><strong>{money(order.customer_amount_due ?? order.total)} JOD</strong></div>
+                              </div>
+
+                              {order.delivery_address_details ? (
+                                <div className="settingsOrderAddressBox">
+                                  <strong>Delivery address</strong>
+                                  <p>{order.delivery_address_details}</p>
+                                  {order.delivery_note ? <small>Note: {order.delivery_note}</small> : null}
+                                </div>
+                              ) : null}
 
                               {order.delivery_eta_label ? <p className="settingsOrderEta">{order.delivery_eta_label}</p> : null}
                               {order.driver_stops_away_label ? <p className="settingsOrderEta">{order.driver_stops_away_label}</p> : null}
@@ -4891,12 +4922,16 @@ export default function DarikCustomerWebHome() {
 
                                   return (
                                     <div key={item.id} className="settingsOrderItemRow settingsOrderItemRowStacked">
-                                      <div className="settingsOrderItemMainLine">
+                                      <div className="settingsOrderItemMainLine settingsOrderItemMainLineDetailed">
                                         <span>
                                           {item.product_name || 'Item'}
                                           {item.size_label_snapshot ? ` • Size ${item.size_label_snapshot}` : ''}
                                         </span>
-                                        <small>x{Number(item.quantity ?? 0)} • {money(item.line_total ?? 0)} JOD</small>
+                                        <small>
+                                          Qty {Number(item.quantity ?? 0)}
+                                          {' • '}Unit {money((item as any).unit_price ?? (Number(item.line_total ?? 0) / Math.max(Number(item.quantity ?? 1), 1)))} JOD
+                                          {' • '}Line total {money(item.line_total ?? 0)} JOD
+                                        </small>
                                       </div>
 
                                       {returnRequest ? (
@@ -4911,7 +4946,7 @@ export default function DarikCustomerWebHome() {
                                           <button
                                             type="button"
                                             className="settingsReturnButton"
-                                            disabled={!returnOpen || returnBusy}
+                                            disabled={returnBusy}
                                             onClick={() => openDarikReturnCheckout(order, item, 'credit_return')}
                                             title={returnOpen ? t('darikCreditReturn') : returnButtonTitle}
                                           >
@@ -4921,7 +4956,7 @@ export default function DarikCustomerWebHome() {
                                           <button
                                             type="button"
                                             className="settingsReturnButton settingsReturnButtonAlt"
-                                            disabled={!returnOpen || returnBusy}
+                                            disabled={returnBusy}
                                             onClick={() => openDarikReturnCheckout(order, item, 'exact_replacement')}
                                             title={returnOpen ? t('exactReplacement') : returnButtonTitle}
                                           >
@@ -5269,6 +5304,9 @@ export default function DarikCustomerWebHome() {
 
                 <div className="checkoutBox">
                   <h3>Choose delivery</h3>
+                  {!selectedDeliveryOption ? (
+                    <div className="deliveryChoiceRequired">Choose one delivery option to continue. Nothing is preselected.</div>
+                  ) : null}
 
                   <button type="button" className={`deliveryCard ${selectedDeliveryOption === 'next_day_free' && freeNextDayUnlocked ? 'active' : ''}`} disabled={!freeNextDayUnlocked} onClick={() => setSelectedDeliveryOption('next_day_free')}>
                     <div>
@@ -5619,6 +5657,13 @@ export default function DarikCustomerWebHome() {
               </p>
             </div>
 
+            {pendingReturnCheckout.unavailableReason ? (
+              <div className="returnCheckoutUnavailableBox">
+                <strong>Return not available</strong>
+                <p>{pendingReturnCheckout.unavailableReason}</p>
+              </div>
+            ) : null}
+
             <label className="returnCheckoutReasonBox">
               <span>Explain why you want to return this item</span>
               <textarea
@@ -5626,7 +5671,8 @@ export default function DarikCustomerWebHome() {
                 onChange={(event) => setReturnCheckoutReason(event.target.value)}
                 placeholder="Example: item arrived damaged, wrong size, product not as expected..."
                 rows={5}
-                autoFocus
+                disabled={Boolean(pendingReturnCheckout.unavailableReason)}
+                autoFocus={!pendingReturnCheckout.unavailableReason}
               />
             </label>
 
@@ -5638,7 +5684,7 @@ export default function DarikCustomerWebHome() {
                 type="button"
                 className="checkoutButton returnCheckoutSubmitButton"
                 onClick={() => submitDarikReturnRequestFromCheckout().catch(() => {})}
-                disabled={Boolean(returnRequestBusyItemId) || returnCheckoutReason.trim().length < 8}
+                disabled={Boolean(returnRequestBusyItemId) || Boolean(pendingReturnCheckout.unavailableReason) || returnCheckoutReason.trim().length < 8}
               >
                 {returnRequestBusyItemId ? 'Submitting...' : 'Submit return request'}
               </button>
