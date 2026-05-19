@@ -5387,53 +5387,52 @@ export default function DarikCustomerWebHome() {
       ) : null}
 
       {cartOpen ? (
-        <div className="modalOverlay" onClick={() => setCartOpen(false)}>
-          <div className="cartSheet" onClick={(event) => event.stopPropagation()}>
-            <div className="cartHandle" />
-
-            <div className="cartHeader">
+        <div className="modalOverlay cleanCartOverlay" onClick={() => setCartOpen(false)}>
+          <div className="cartSheet cleanAmazonCartSheet" onClick={(event) => event.stopPropagation()}>
+            <div className="cleanCartHeader">
               <div>
                 <h2>Your Cart</h2>
-                <p>{cartCount} item{cartCount === 1 ? '' : 's'} ready for delivery</p>
+                <p>{cartCount} item{cartCount === 1 ? '' : 's'}</p>
               </div>
 
-              <button type="button" onClick={() => setCartOpen(false)}>
-                Close
+              <button type="button" className="cleanCartCloseButton" onClick={() => setCartOpen(false)} aria-label="Close cart">
+                ×
               </button>
             </div>
 
             {cartItems.length === 0 ? (
               <>
-                <div className="emptyCard">
+                <div className="cleanEmptyCart">
                   <h3>Your cart is empty</h3>
                   <p>Add products to start an order.</p>
+                  <button type="button" onClick={() => setCartOpen(false)}>Continue shopping</button>
                 </div>
 
                 {savedForLaterItems.length > 0 ? (
-                  <div className="savedForLaterBox">
-                    <div className="savedForLaterHeader">
+                  <div className="cleanSavedForLaterBox">
+                    <div className="cleanSavedHeader">
                       <h3>Saved for Later</h3>
                       <span>{savedForLaterItems.length} item{savedForLaterItems.length === 1 ? '' : 's'}</span>
                     </div>
 
-                    <div className="savedForLaterList">
+                    <div className="cleanSavedList">
                       {savedForLaterItems.map((item) => (
-                        <div key={item.id} className="savedForLaterItem">
-                          <div className="cartImage">
+                        <div key={item.id} className="cleanSavedItem">
+                          <div className="cleanCartImage">
                             {item.photoUrl ? <img src={item.photoUrl} alt={item.name} /> : <span>{shortCode(item.name)}</span>}
                           </div>
 
-                          <div className="cartMiddle">
+                          <div className="cleanCartMiddle">
                             <h3>{item.name}</h3>
                             {item.selectedCartSize ? <p>Size: {item.selectedCartSize}</p> : null}
-                            <p>Saved item • {money(item.priceNumber)} JOD each</p>
+                            <p>{money(item.priceNumber)} JOD each</p>
                           </div>
 
-                          <div className="savedForLaterActions">
+                          <div className="cleanSavedActions">
                             <button type="button" onClick={() => moveSavedItemToCart(item.id)}>
                               Move to Cart
                             </button>
-                            <button type="button" className="removeSavedButton" onClick={() => removeSavedForLaterItem(item.id)}>
+                            <button type="button" onClick={() => removeSavedForLaterItem(item.id)}>
                               Remove
                             </button>
                           </div>
@@ -5445,34 +5444,41 @@ export default function DarikCustomerWebHome() {
               </>
             ) : (
               <>
-                <div className="cartItemsList">
+                <div className="cleanCartTopSummary">
+                  <span>Subtotal ({cartCount} item{cartCount === 1 ? '' : 's'})</span>
+                  <strong>{money(subtotal)} JOD</strong>
+                </div>
+
+                <div className="cleanCartItemsList">
                   {cartItems.map((item) => (
-                    <div key={item.id} className="cartItem">
-                      <div className="cartImage">
+                    <div key={item.id} className="cleanCartItem">
+                      <div className="cleanCartImage">
                         {item.photoUrl ? <img src={item.photoUrl} alt={item.name} /> : <span>{shortCode(item.name)}</span>}
                       </div>
 
-                      <div className="cartMiddle">
+                      <div className="cleanCartMiddle">
                         <h3>{item.name}</h3>
                         {item.selectedCartSize ? <p>Size: {item.selectedCartSize}</p> : null}
-                        <p>{money(item.priceNumber)} JOD each</p>
+                        <p>Qty: {item.quantity}</p>
+                        <small>{money(item.priceNumber)} JOD each</small>
                         {cartItemIsAtStockLimit(item) ? <p className="stockLimitText">Max available in stock</p> : null}
                       </div>
 
-                      <div className="cartActionsColumn">
-                        <div className="quantityBox">
-                          <button type="button" onClick={() => decreaseQuantity(item.id)}>-</button>
-                          <strong>{item.quantity}</strong>
+                      <div className="cleanCartRight">
+                        <strong>{money(item.priceNumber * item.quantity)} JOD</strong>
+                        <div className="cleanQuantityBox">
+                          <button type="button" onClick={() => decreaseQuantity(item.id)} aria-label="Decrease quantity">−</button>
+                          <span>{item.quantity}</span>
                           <button
                             type="button"
                             disabled={cartItemIsAtStockLimit(item)}
                             onClick={() => increaseQuantity(item.id)}
+                            aria-label="Increase quantity"
                           >
                             +
                           </button>
                         </div>
-
-                        <button type="button" className="saveForLaterButton" onClick={() => saveCartItemForLater(item.id)}>
+                        <button type="button" className="cleanCartTextButton" onClick={() => saveCartItemForLater(item.id)}>
                           Save for Later
                         </button>
                       </div>
@@ -5481,30 +5487,30 @@ export default function DarikCustomerWebHome() {
                 </div>
 
                 {savedForLaterItems.length > 0 ? (
-                  <div className="savedForLaterBox">
-                    <div className="savedForLaterHeader">
+                  <div className="cleanSavedForLaterBox">
+                    <div className="cleanSavedHeader">
                       <h3>Saved for Later</h3>
                       <span>{savedForLaterItems.length} item{savedForLaterItems.length === 1 ? '' : 's'}</span>
                     </div>
 
-                    <div className="savedForLaterList">
+                    <div className="cleanSavedList">
                       {savedForLaterItems.map((item) => (
-                        <div key={item.id} className="savedForLaterItem">
-                          <div className="cartImage">
+                        <div key={item.id} className="cleanSavedItem">
+                          <div className="cleanCartImage">
                             {item.photoUrl ? <img src={item.photoUrl} alt={item.name} /> : <span>{shortCode(item.name)}</span>}
                           </div>
 
-                          <div className="cartMiddle">
+                          <div className="cleanCartMiddle">
                             <h3>{item.name}</h3>
                             {item.selectedCartSize ? <p>Size: {item.selectedCartSize}</p> : null}
-                            <p>Saved item • {money(item.priceNumber)} JOD each</p>
+                            <p>{money(item.priceNumber)} JOD each</p>
                           </div>
 
-                          <div className="savedForLaterActions">
+                          <div className="cleanSavedActions">
                             <button type="button" onClick={() => moveSavedItemToCart(item.id)}>
                               Move to Cart
                             </button>
-                            <button type="button" className="removeSavedButton" onClick={() => removeSavedForLaterItem(item.id)}>
+                            <button type="button" onClick={() => removeSavedForLaterItem(item.id)}>
                               Remove
                             </button>
                           </div>
@@ -5514,57 +5520,30 @@ export default function DarikCustomerWebHome() {
                   </div>
                 ) : null}
 
-                <div className="checkoutBox">
-                  <h3>Choose delivery</h3>
-                  {!selectedDeliveryOption ? (
-                    <div className="deliveryChoiceRequired">Choose one delivery option to continue. Nothing is preselected.</div>
-                  ) : null}
-
-                  <button type="button" className={`deliveryCard ${selectedDeliveryOption === 'next_day_free' && freeNextDayUnlocked ? 'active' : ''}`} disabled={!freeNextDayUnlocked} onClick={() => setSelectedDeliveryOption('next_day_free')}>
-                    <div>
-                      <strong>Free Next-Day Delivery</strong>
-                      <p>
-                        {freeNextDayUnlocked
-                          ? 'Free tomorrow delivery unlocked.'
-                          : `Add ${money(FREE_NEXT_DAY_MIN_ORDER - subtotal)} JOD more to unlock.`}
-                      </p>
-                    </div>
-                    <span>0.00 JOD</span>
-                  </button>
-
-                  <button type="button" className={`deliveryCard ${selectedDeliveryOption === 'express_2hr' ? 'active' : ''}`} disabled={checkoutDistanceKm !== null && checkoutDistanceKm > EXPRESS_DELIVERY_RADIUS_KM} onClick={() => setSelectedDeliveryOption('express_2hr')}>
-                    <div>
-                      <strong>Express Delivery</strong>
-                      <p>Delivered today under 2 hours • up to 5 km from warehouse.</p>
-                    </div>
-                    <span>{money(EXPRESS_DELIVERY_FEE)} JOD</span>
-                  </button>
-
-                  <div className="summaryRows">
-                    <div>
-                      <span>Subtotal</span>
-                      <strong>{money(subtotal)} JOD</strong>
-                    </div>
-                    <div>
-                      <span>Delivery</span>
-                      <strong>{money(deliveryFee)} JOD</strong>
-                    </div>
-                    <div className="grand">
-                      <span>Total</span>
-                      <strong>{money(total)} JOD</strong>
-                    </div>
+                <div className="cleanCartCheckoutBox">
+                  <div className="cleanCartSubtotalRow">
+                    <span>Subtotal ({cartCount} item{cartCount === 1 ? '' : 's'})</span>
+                    <strong>{money(subtotal)} JOD</strong>
                   </div>
 
+                  <p>Delivery is selected during checkout.</p>
+
                   {!customerSession?.user || !customerProfile?.id ? (
-                    <div className="checkoutAccountNotice">
+                    <div className="checkoutAccountNotice cleanCartAccountNotice">
                       <strong>Account required</strong>
-                      <p>Create a Darik customer account or log in before checkout. You can still browse and add items without signing in.</p>
+                      <p>Create a Darik customer account or log in before checkout.</p>
                     </div>
                   ) : null}
 
-                  <button className="checkoutButton" type="button" onClick={openCheckoutFromCart}>
-                    {customerSession?.user && customerProfile?.id ? 'Continue to Checkout' : 'Create Account / Login to Checkout'}
+                  <button className="checkoutButton cleanProceedCheckoutButton" type="button" onClick={openCheckoutFromCart}>
+                    {customerSession?.user && customerProfile?.id ? 'Proceed to Checkout' : 'Create Account / Login to Checkout'}
                   </button>
+
+                  <button type="button" className="cleanViewCartButton" onClick={() => setCartOpen(false)}>
+                    Continue Shopping
+                  </button>
+
+                  <div className="cleanCartSecureNote">🔒 Secure checkout • Delivery options appear on the checkout page.</div>
                 </div>
               </>
             )}
