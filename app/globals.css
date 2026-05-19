@@ -8979,3 +8979,88 @@ textarea {
     height: 48px;
   }
 }
+
+/* L366 search dropdown size fix:
+   - dropdown is the same full width as the search bar
+   - suggestion rows/images/text are larger and easier to read
+*/
+.searchBar.searchWithDropdown,
+.mobileSearchCard.searchWithDropdown {
+  position: relative;
+  overflow: visible !important;
+}
+
+.searchBar.searchWithDropdown .searchSuggestionsDropdown,
+.mobileSearchCard.searchWithDropdown .searchSuggestionsDropdown {
+  left: 0 !important;
+  right: 0 !important;
+  width: 100% !important;
+  max-width: none !important;
+  margin: 0 !important;
+  transform: none !important;
+  box-sizing: border-box;
+}
+
+.desktopSearchSuggestionsDropdown {
+  max-width: none !important;
+  width: 100% !important;
+}
+
+.searchSuggestionsDropdown {
+  border-radius: 22px;
+  box-shadow: 0 22px 58px rgba(15, 23, 42, 0.18);
+}
+
+.searchSuggestionItem {
+  grid-template-columns: 82px minmax(0, 1fr) !important;
+  gap: 18px !important;
+  padding: 16px 18px !important;
+  min-height: 96px;
+}
+
+.searchSuggestionImage {
+  width: 82px !important;
+  height: 82px !important;
+  border-radius: 18px !important;
+  font-size: 14px !important;
+}
+
+.searchSuggestionItem strong {
+  font-size: 18px !important;
+  line-height: 1.25 !important;
+  white-space: normal !important;
+}
+
+.searchSuggestionItem small {
+  margin-top: 7px !important;
+  font-size: 14px !important;
+  line-height: 1.35 !important;
+}
+
+.searchSuggestionEmpty {
+  padding: 22px 18px !important;
+  font-size: 16px !important;
+}
+
+@media (max-width: 640px) {
+  .searchSuggestionItem {
+    grid-template-columns: 70px minmax(0, 1fr) !important;
+    gap: 14px !important;
+    padding: 14px 15px !important;
+    min-height: 84px;
+  }
+
+  .searchSuggestionImage {
+    width: 70px !important;
+    height: 70px !important;
+    border-radius: 16px !important;
+  }
+
+  .searchSuggestionItem strong {
+    font-size: 16px !important;
+  }
+
+  .searchSuggestionItem small {
+    font-size: 13px !important;
+  }
+}
