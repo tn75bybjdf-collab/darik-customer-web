@@ -9064,3 +9064,60 @@ textarea {
     font-size: 13px !important;
   }
 }
+
+/* L367 search dropdown: make result items another 1.5x bigger */
+.searchSuggestionItem {
+  grid-template-columns: 124px minmax(0, 1fr) !important;
+  gap: 24px !important;
+  padding: 22px 24px !important;
+  min-height: 138px !important;
+}
+
+.searchSuggestionImage {
+  width: 124px !important;
+  height: 124px !important;
+  border-radius: 22px !important;
+  font-size: 18px !important;
+}
+
+.searchSuggestionItem strong {
+  font-size: 27px !important;
+  line-height: 1.18 !important;
+  font-weight: 950 !important;
+  white-space: normal !important;
+}
+
+.searchSuggestionItem small {
+  margin-top: 10px !important;
+  font-size: 21px !important;
+  line-height: 1.3 !important;
+  font-weight: 850 !important;
+}
+
+.searchSuggestionEmpty {
+  padding: 30px 24px !important;
+  font-size: 22px !important;
+}
+
+@media (max-width: 640px) {
+  .searchSuggestionItem {
+    grid-template-columns: 96px minmax(0, 1fr) !important;
+    gap: 18px !important;
+    padding: 18px 18px !important;
+    min-height: 112px !important;
+  }
+
+  .searchSuggestionImage {
+    width: 96px !important;
+    height: 96px !important;
+    border-radius: 20px !important;
+  }
+
+  .searchSuggestionItem strong {
+    font-size: 22px !important;
+  }
+
+  .searchSuggestionItem small {
+    font-size: 17px !important;
+  }
+}
