@@ -221,6 +221,12 @@ type DarikReturnRequest = {
   pickup_fee_deducted_from_credit?: number | string | null;
 };
 
+type PendingDarikReturnCheckout = {
+  order: CustomerOrder;
+  item: CustomerOrderItem;
+  resolutionType: 'credit_return' | 'exact_replacement';
+};
+
 type SupportThread = {
   id: string;
   sender_type: string;
@@ -1033,6 +1039,8 @@ export default function DarikCustomerWebHome() {
   const [customerOrderItems, setCustomerOrderItems] = useState<CustomerOrderItem[]>([]);
   const [darikReturnRequests, setDarikReturnRequests] = useState<DarikReturnRequest[]>([]);
   const [returnRequestBusyItemId, setReturnRequestBusyItemId] = useState('');
+  const [pendingReturnCheckout, setPendingReturnCheckout] = useState<PendingDarikReturnCheckout | null>(null);
+  const [returnCheckoutReason, setReturnCheckoutReason] = useState('');
   const [settingsActiveTool, setSettingsActiveTool] = useState<SettingsTool>('account');
   const [settingsError, setSettingsError] = useState('');
   const [supportThreads, setSupportThreads] = useState<SupportThread[]>([]);
@@ -1195,7 +1203,7 @@ export default function DarikCustomerWebHome() {
     return Boolean(pin) && !['delivered', 'cancelled', 'canceled'].includes(status);
   }
 
-  async function submitDarikReturnRequestFromWeb(
+  function openDarikReturnCheckout(
     order: CustomerOrder,
     item: CustomerOrderItem,
     resolutionType: 'credit_return' | 'exact_replacement',
@@ -1216,27 +1224,58 @@ export default function DarikCustomerWebHome() {
       return;
     }
 
-    const isReplacement = resolutionType === 'exact_replacement';
-    const confirmed = window.confirm(
-      isReplacement
-        ? `${t('exactReplacement')}\n\n${t('replacementReturnNote')}`
-        : `${t('darikCreditReturn')}\n\n${t('creditReturnNote')}`,
-    );
+    setPendingReturnCheckout({ order, item, resolutionType });
+    setReturnCheckoutReason('');
+  }
 
-    if (!confirmed) return;
+  function closeDarikReturnCheckout() {
+    if (returnRequestBusyItemId) return;
+    setPendingReturnCheckout(null);
+    setReturnCheckoutReason('');
+  }
+
+  async function submitDarikReturnRequestFromCheckout() {
+    if (!customerProfile || !pendingReturnCheckout) {
+      showSettingsError(t('loginRequiredText'));
+      return;
+    }
+
+    const { order, item, resolutionType } = pendingReturnCheckout;
+
+    if (!isReturnWindowOpen(order)) {
+      showSettingsError(getReturnUnavailableReason(order) || t('returnWindowClosed'));
+      return;
+    }
+
+    const existingRequest = getReturnRequestForItem(order.id, item.id);
+    if (existingRequest && !['cancelled', 'denied', 'rejected'].includes(String(existingRequest.request_status ?? '').toLowerCase())) {
+      showSettingsError(t('returnAlreadyRequested'));
+      closeDarikReturnCheckout();
+      return;
+    }
+
+    const cleanReason = returnCheckoutReason.trim();
+    if (cleanReason.length < 8) {
+      showSettingsError('Please explain why you want to return this item.');
+      return;
+    }
+
+    const isReplacement = resolutionType === 'exact_replacement';
+    const replacementSizeText = item.size_label_snapshot ? ` Replacement size requested: ${item.size_label_snapshot}.` : '';
+    const reasonCategory = isReplacement ? 'Defective item - wants exact replacement' : 'Customer requested Darik Credit return';
+    const customerNote = isReplacement
+      ? `Customer chose free exact same item replacement from getdarik.com return checkout. Reason: ${cleanReason}.${replacementSizeText}`
+      : `Customer chose Darik Credit return from getdarik.com return checkout. Reason: ${cleanReason}`;
 
     setReturnRequestBusyItemId(item.id);
 
-    const replacementSizeText = item.size_label_snapshot ? ` Replacement size requested: ${item.size_label_snapshot}.` : '';
     const { data, error } = await supabase.rpc('customer_request_darik_return_v3', {
       p_customer_id: customerProfile.id,
       p_order_id: order.id,
       p_order_item_id: item.id,
       p_resolution_type: resolutionType,
-      p_reason_category: isReplacement ? 'Defective item - wants exact replacement' : 'Customer requested Darik Credit return',
-      p_customer_note: isReplacement
-        ? `Customer chose free exact same item replacement from getdarik.com Order History.${replacementSizeText}`
-        : 'Customer chose Darik Credit return from getdarik.com Order History.',
+      p_reason_category: reasonCategory,
+      p_customer_note: customerNote,
       p_customer_photo_url: null,
       p_replacement_product_variant_id: isReplacement ? item.product_variant_id ?? null : null,
       p_replacement_size_label: isReplacement ? item.size_label_snapshot ?? null : null,
@@ -1255,9 +1294,12 @@ export default function DarikCustomerWebHome() {
       return;
     }
 
+    setPendingReturnCheckout(null);
+    setReturnCheckoutReason('');
     showSettingsMessage(result?.message || t('returnSubmitted'));
     await loadCustomerOrders(customerProfile.id);
   }
+
 
   function getMessagesForSupportThread(threadId: string) {
     return supportMessages
@@ -4870,7 +4912,7 @@ export default function DarikCustomerWebHome() {
                                             type="button"
                                             className="settingsReturnButton"
                                             disabled={!returnOpen || returnBusy}
-                                            onClick={() => submitDarikReturnRequestFromWeb(order, item, 'credit_return').catch(() => {})}
+                                            onClick={() => openDarikReturnCheckout(order, item, 'credit_return')}
                                             title={returnOpen ? t('darikCreditReturn') : returnButtonTitle}
                                           >
                                             {returnBusy ? t('pleaseWait') : t('darikCreditReturn')}
@@ -4880,7 +4922,7 @@ export default function DarikCustomerWebHome() {
                                             type="button"
                                             className="settingsReturnButton settingsReturnButtonAlt"
                                             disabled={!returnOpen || returnBusy}
-                                            onClick={() => submitDarikReturnRequestFromWeb(order, item, 'exact_replacement').catch(() => {})}
+                                            onClick={() => openDarikReturnCheckout(order, item, 'exact_replacement')}
                                             title={returnOpen ? t('exactReplacement') : returnButtonTitle}
                                           >
                                             {t('exactReplacement')}
@@ -5536,6 +5578,69 @@ export default function DarikCustomerWebHome() {
 
               <button className="checkoutButton placeOrderButton" type="button" disabled={placingOrder} onClick={placeWebOrder}>
                 {placingOrder ? 'Placing Order...' : 'Place Cash Order'}
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
+
+      {pendingReturnCheckout ? (
+        <div className="modalOverlay returnCheckoutOverlay" onClick={closeDarikReturnCheckout}>
+          <div className="returnCheckoutModal" onClick={(event) => event.stopPropagation()}>
+            <div className="returnCheckoutHeader">
+              <div>
+                <span>Return Checkout</span>
+                <h2>Review your return request</h2>
+              </div>
+              <button type="button" className="returnCheckoutCloseButton" onClick={closeDarikReturnCheckout} disabled={Boolean(returnRequestBusyItemId)}>
+                ×
+              </button>
+            </div>
+
+            <div className="returnCheckoutItemCard">
+              <div className="returnCheckoutItemThumb">↩</div>
+              <div>
+                <strong>{pendingReturnCheckout.item.product_name || 'Item'}</strong>
+                <p>
+                  {pendingReturnCheckout.item.size_label_snapshot ? `Size ${pendingReturnCheckout.item.size_label_snapshot} • ` : ''}
+                  Qty {Number(pendingReturnCheckout.item.quantity ?? 0)} • {money(pendingReturnCheckout.item.line_total ?? 0)} JOD
+                </p>
+                <small>Order #{getOrderDisplayNumber(pendingReturnCheckout.order)}</small>
+              </div>
+            </div>
+
+            <div className="returnCheckoutResolutionBox">
+              <span>Return option</span>
+              <strong>
+                {pendingReturnCheckout.resolutionType === 'exact_replacement' ? t('exactReplacement') : t('darikCreditReturn')}
+              </strong>
+              <p>
+                {pendingReturnCheckout.resolutionType === 'exact_replacement' ? t('replacementReturnNote') : t('creditReturnNote')}
+              </p>
+            </div>
+
+            <label className="returnCheckoutReasonBox">
+              <span>Explain why you want to return this item</span>
+              <textarea
+                value={returnCheckoutReason}
+                onChange={(event) => setReturnCheckoutReason(event.target.value)}
+                placeholder="Example: item arrived damaged, wrong size, product not as expected..."
+                rows={5}
+                autoFocus
+              />
+            </label>
+
+            <div className="returnCheckoutFooter">
+              <button type="button" className="settingsGhostButton" onClick={closeDarikReturnCheckout} disabled={Boolean(returnRequestBusyItemId)}>
+                Cancel
+              </button>
+              <button
+                type="button"
+                className="checkoutButton returnCheckoutSubmitButton"
+                onClick={() => submitDarikReturnRequestFromCheckout().catch(() => {})}
+                disabled={Boolean(returnRequestBusyItemId) || returnCheckoutReason.trim().length < 8}
+              >
+                {returnRequestBusyItemId ? 'Submitting...' : 'Submit return request'}
               </button>
             </div>
           </div>
