@@ -8853,3 +8853,13 @@ textarea {
     gap: 12px;
   }
 }
+
+/* L364 safeguard: cart must never hide behind product detail page. */
+.cleanCartOverlay {
+  z-index: 9900 !important;
+}
+
+.cleanAmazonCartSheet {
+  position: relative;
+  z-index: 9901 !important;
+}

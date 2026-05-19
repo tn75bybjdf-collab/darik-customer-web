@@ -2152,6 +2152,7 @@ export default function DarikCustomerWebHome() {
   function returnToShoppingFromProduct() {
     const savedReturnState = shoppingReturnStateRef.current;
 
+    setCartOpen(false);
     setProductImageZoomOpen(false);
     setSelectedProduct(null);
 
@@ -3407,11 +3408,6 @@ export default function DarikCustomerWebHome() {
       return;
     }
 
-    if (!selectedDeliveryOption) {
-      setCheckoutError('Choose Free Next-Day Delivery or Express Delivery before placing the order.');
-      return;
-    }
-
     if (authLoading) {
       setCheckoutError('Checking your Darik account. Please try again in a moment.');
       return;
@@ -3426,6 +3422,7 @@ export default function DarikCustomerWebHome() {
       setSelectedDeliveryOption('express_2hr');
     }
 
+    setCartOpen(false);
     setCheckoutOpen(true);
   }
 
@@ -4509,7 +4506,15 @@ export default function DarikCustomerWebHome() {
                       <span>Marketplace</span>
                     </div>
 
-                    <button className="darikPdpCartButton" type="button" onClick={() => setCartOpen(true)}>
+                    <button
+                      className="darikPdpCartButton"
+                      type="button"
+                      onClick={() => {
+                        setProductImageZoomOpen(false);
+                        setSelectedProduct(null);
+                        setCartOpen(true);
+                      }}
+                    >
                       Cart ({cartCount})
                     </button>
                   </div>
@@ -5526,7 +5531,7 @@ export default function DarikCustomerWebHome() {
                     <strong>{money(subtotal)} JOD</strong>
                   </div>
 
-                  <p>Delivery is selected during checkout.</p>
+                  <p>Delivery is selected on the next checkout screen.</p>
 
                   {!customerSession?.user || !customerProfile?.id ? (
                     <div className="checkoutAccountNotice cleanCartAccountNotice">
