@@ -7771,7 +7771,8 @@ textarea {
 .settingsOrderItemPhotoBox img {
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: contain;
+  background: #ffffff;
 }
 
 .settingsOrderItemContent {
@@ -7788,4 +7789,20 @@ textarea {
     height: 54px;
     border-radius: 16px;
   }
+}
+
+.returnCheckoutItemPhotoThumb {
+  overflow: hidden;
+  background: #ffffff;
+  border: 1px solid #eef0f4;
+}
+
+.returnCheckoutItemPhotoThumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.returnCheckoutItemPhotoThumb span {
+  color: #ffd23f;
 }

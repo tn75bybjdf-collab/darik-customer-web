@@ -199,6 +199,15 @@ type CustomerOrderItem = {
   app_price: number | string | null;
   line_total: number | string | null;
   created_at?: string | null;
+  product_photo_url?: string | null;
+  product_image_url?: string | null;
+  official_photo_url?: string | null;
+  official_product_photo_url?: string | null;
+  official_product_thumbnail_url?: string | null;
+  retailer_raw_photo_url?: string | null;
+  image_url?: string | null;
+  photo_url?: string | null;
+  main_photo_url?: string | null;
 };
 
 type DarikReturnRequest = {
@@ -1218,15 +1227,31 @@ export default function DarikCustomerWebHome() {
 
   function getOrderItemPhotoUrl(item: CustomerOrderItem) {
     const rawItem = item as any;
-    return String(
+
+    const directPhoto = String(
       rawItem.product_photo_url ||
         rawItem.product_image_url ||
         rawItem.official_photo_url ||
+        rawItem.official_product_photo_url ||
+        rawItem.official_product_thumbnail_url ||
+        rawItem.retailer_raw_photo_url ||
         rawItem.image_url ||
         rawItem.photo_url ||
         rawItem.main_photo_url ||
         '',
     ).trim();
+
+    if (directPhoto) return directPhoto;
+
+    const productId = String(item.product_id ?? rawItem.productId ?? '').trim();
+    const productName = String(item.product_name ?? '').trim().toLowerCase();
+
+    const matchedProduct =
+      products.find((product) => String(product.id) === productId) ||
+      products.find((product) => String(product.name ?? '').trim().toLowerCase() === productName);
+
+    const matchedProductPhoto = getProductPhotoUrl(matchedProduct);
+    return matchedProductPhoto ? String(matchedProductPhoto).trim() : '';
   }
 
   function openDarikReturnCheckout(
@@ -1359,6 +1384,48 @@ export default function DarikCustomerWebHome() {
     setCustomerNumber(profile.customer_number ?? '');
   }
 
+  async function enrichCustomerOrderItemsWithProductPhotos(items: CustomerOrderItem[]) {
+    const productIds = Array.from(
+      new Set(
+        items
+          .map((item) => String(item.product_id ?? '').trim())
+          .filter(Boolean),
+      ),
+    );
+
+    if (productIds.length === 0) return items;
+
+    try {
+      const { data, error } = await supabase
+        .from('public_customer_products')
+        .select('id, official_product_thumbnail_url, official_product_photo_url, retailer_raw_photo_url')
+        .in('id', productIds);
+
+      if (error || !Array.isArray(data)) {
+        return items;
+      }
+
+      const photoByProductId = new Map(
+        data.map((product: any) => [
+          String(product.id),
+          String(
+            product.official_product_thumbnail_url ||
+              product.official_product_photo_url ||
+              product.retailer_raw_photo_url ||
+              '',
+          ).trim(),
+        ]),
+      );
+
+      return items.map((item) => {
+        const productPhotoUrl = photoByProductId.get(String(item.product_id ?? '')) || '';
+        return productPhotoUrl ? { ...item, product_photo_url: productPhotoUrl } : item;
+      });
+    } catch {
+      return items;
+    }
+  }
+
   async function loadCustomerOrders(profileId?: string | null) {
     if (!profileId) {
       setCustomerOrders([]);
@@ -1434,7 +1501,8 @@ export default function DarikCustomerWebHome() {
       return;
     }
 
-    setCustomerOrderItems((itemsResult.data ?? []) as CustomerOrderItem[]);
+    const loadedOrderItems = await enrichCustomerOrderItemsWithProductPhotos((itemsResult.data ?? []) as CustomerOrderItem[]);
+    setCustomerOrderItems(loadedOrderItems);
 
     const returnsResult = await supabase
       .from('darik_return_requests')
@@ -5693,7 +5761,13 @@ export default function DarikCustomerWebHome() {
             </div>
 
             <div className="returnCheckoutItemCard">
-              <div className="returnCheckoutItemThumb">↩</div>
+              <div className="returnCheckoutItemThumb returnCheckoutItemPhotoThumb">
+                {getOrderItemPhotoUrl(pendingReturnCheckout.item) ? (
+                  <img src={getOrderItemPhotoUrl(pendingReturnCheckout.item)} alt={pendingReturnCheckout.item.product_name || 'Returned item'} />
+                ) : (
+                  <span>↩</span>
+                )}
+              </div>
               <div>
                 <strong>{pendingReturnCheckout.item.product_name || 'Item'}</strong>
                 <p>
