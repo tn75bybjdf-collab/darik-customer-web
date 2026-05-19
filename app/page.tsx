@@ -1398,11 +1398,64 @@ export default function DarikCustomerWebHome() {
     setSavedLocations((savedLocationsResult.data ?? []).map(normalizeDbSavedLocation).slice(0, 20));
   }
 
+
+  function normalizeSupportMessageForCustomerWeb(rawMessage: any): SupportMessage {
+    const messageBody =
+      rawMessage?.message_body ??
+      rawMessage?.body ??
+      rawMessage?.message ??
+      rawMessage?.message_text ??
+      rawMessage?.content ??
+      '';
+
+    return {
+      ...rawMessage,
+      message_body: String(messageBody ?? ''),
+      sender_role: rawMessage?.sender_role ?? rawMessage?.sender_type ?? rawMessage?.role ?? 'admin',
+      sender_name: rawMessage?.sender_name ?? rawMessage?.admin_name ?? rawMessage?.staff_name ?? 'Darik Support',
+    } as SupportMessage;
+  }
+
+  function normalizeSupportThreadForCustomerWeb(rawThread: any): SupportThread {
+    return {
+      ...rawThread,
+      last_message_preview:
+        rawThread?.last_message_preview ??
+        rawThread?.last_message ??
+        rawThread?.latest_message_preview ??
+        rawThread?.subject ??
+        '',
+    } as SupportThread;
+  }
+
+
   async function loadCustomerSupport(profileId?: string | null) {
     if (!profileId) {
       setSupportThreads([]);
       setSupportMessages([]);
       return;
+    }
+
+    try {
+      const { data, error } = await supabase.rpc('customer_get_support_threads_with_messages_v2', {
+        p_customer_id: profileId,
+      });
+
+      if (!error) {
+        const payload = Array.isArray(data) ? data[0] : data;
+        const nextThreads = Array.isArray(payload?.threads)
+          ? payload.threads.map((thread: any) => normalizeSupportThreadForCustomerWeb(thread))
+          : [];
+        const nextMessages = Array.isArray(payload?.messages)
+          ? payload.messages.map((message: any) => normalizeSupportMessageForCustomerWeb(message))
+          : [];
+
+        setSupportThreads(nextThreads);
+        setSupportMessages(nextMessages);
+        return;
+      }
+    } catch {
+      // Fallback below keeps older local setups working before SQL v352 is installed.
     }
 
     const threadsResult = await supabase
@@ -1419,7 +1472,7 @@ export default function DarikCustomerWebHome() {
       return;
     }
 
-    const loadedThreads = (threadsResult.data ?? []) as SupportThread[];
+    const loadedThreads = (threadsResult.data ?? []).map((thread: any) => normalizeSupportThreadForCustomerWeb(thread)) as SupportThread[];
     setSupportThreads(loadedThreads);
 
     const threadIds = loadedThreads.map((thread) => thread.id);
@@ -1435,7 +1488,7 @@ export default function DarikCustomerWebHome() {
       .order('created_at', { ascending: true });
 
     if (!messagesResult.error) {
-      setSupportMessages((messagesResult.data ?? []) as SupportMessage[]);
+      setSupportMessages((messagesResult.data ?? []).map((message: any) => normalizeSupportMessageForCustomerWeb(message)) as SupportMessage[]);
     }
   }
 
@@ -1722,18 +1775,15 @@ export default function DarikCustomerWebHome() {
 
     try {
       setSupportBusy(true);
-      const { data, error } = await supabase.rpc('create_support_thread_with_message', {
-        p_sender_type: 'customer',
-        p_sender_id: customerProfile.id,
-        p_sender_name: customerProfile.full_name || customerName || customerSession?.user.email || 'Customer',
-        p_sender_phone: customerProfile.phone || customerPhone || null,
-        p_sender_email: customerProfile.email || customerSession?.user.email || null,
+      const { data, error } = await supabase.rpc('customer_create_support_thread_with_message_v2', {
+        p_customer_id: customerProfile.id,
+        p_customer_name: customerProfile.full_name || customerName || customerSession?.user.email || 'Customer',
+        p_customer_phone: customerProfile.phone || customerPhone || null,
+        p_customer_email: customerProfile.email || customerSession?.user.email || null,
         p_issue_type: supportIssueType,
         p_subject: cleanSubject,
         p_message_body: cleanMessage,
         p_related_order_id: supportRelatedOrderId,
-        p_related_product_id: null,
-        p_related_payout_id: null,
       });
 
       if (error) {
@@ -1747,11 +1797,34 @@ export default function DarikCustomerWebHome() {
         return;
       }
 
+      const createdThread = result?.thread ? normalizeSupportThreadForCustomerWeb(result.thread) : undefined;
+      const createdMessage = result?.message ? normalizeSupportMessageForCustomerWeb(result.message) : undefined;
+      const createdThreadId = String(result?.thread_id || createdThread?.id || '');
+
+      if (createdThread) {
+        setSupportThreads((currentThreads) => [
+          createdThread,
+          ...currentThreads.filter((thread) => thread.id !== createdThread.id),
+        ]);
+      }
+
+      if (createdMessage) {
+        setSupportMessages((currentMessages) => [
+          ...currentMessages.filter((message) => message.id !== createdMessage.id),
+          createdMessage,
+        ]);
+      }
+
       setSupportSubject('');
       setSupportMessageBody('');
       setSupportRelatedOrderId(null);
+      if (createdThreadId) {
+        setSelectedSupportThreadId(createdThreadId);
+      }
       await loadCustomerSupport(customerProfile.id);
-      setSelectedSupportThreadId(result?.thread_id ?? null);
+      if (createdThreadId) {
+        setSelectedSupportThreadId(createdThreadId);
+      }
       showSettingsMessage(t('messageSent'));
     } finally {
       setSupportBusy(false);
@@ -1769,11 +1842,10 @@ export default function DarikCustomerWebHome() {
 
     try {
       setSupportBusy(true);
-      const { data, error } = await supabase.rpc('add_support_message', {
+      const { data, error } = await supabase.rpc('customer_add_support_message_v1', {
         p_thread_id: thread.id,
-        p_sender_role: 'customer',
-        p_sender_id: customerProfile.id,
-        p_sender_name: customerProfile.full_name || customerName || customerSession?.user.email || 'Customer',
+        p_customer_id: customerProfile.id,
+        p_customer_name: customerProfile.full_name || customerName || customerSession?.user.email || 'Customer',
         p_message_body: cleanReply,
       });
 
@@ -1788,8 +1860,17 @@ export default function DarikCustomerWebHome() {
         return;
       }
 
+      const createdMessage = result?.message ? normalizeSupportMessageForCustomerWeb(result.message) : undefined;
+      if (createdMessage) {
+        setSupportMessages((currentMessages) => [
+          ...currentMessages.filter((message) => message.id !== createdMessage.id),
+          createdMessage,
+        ]);
+      }
+
       setSupportReplyBody('');
       await loadCustomerSupport(customerProfile.id);
+      setSelectedSupportThreadId(thread.id);
       showSettingsMessage(t('replySent'));
     } finally {
       setSupportBusy(false);
