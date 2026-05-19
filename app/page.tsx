@@ -972,6 +972,79 @@ function safeReadDarikJson<T>(storageKey: string, fallbackValue: T): T {
   }
 }
 
+
+function normalizeDarikSearchText(value: string | null | undefined) {
+  return String(value ?? '')
+    .toLowerCase()
+    .replace(/[إأآا]/g, 'ا')
+    .replace(/[ىي]/g, 'ي')
+    .replace(/ة/g, 'ه')
+    .replace(/ؤ/g, 'و')
+    .replace(/ئ/g, 'ي')
+    .replace(/[ًٌٍَُِّْـ]/g, '')
+    .trim();
+}
+
+function getDarikArabicSearchAliases(product: Product) {
+  const baseText = [
+    product.name,
+    product.description,
+    product.category_name,
+    product.category_code,
+    product.subcategory_name,
+    product.clothing_department,
+    product.clothing_item_type,
+  ]
+    .filter(Boolean)
+    .join(' ')
+    .toLowerCase();
+
+  const aliases: string[] = [];
+
+  const add = (...words: string[]) => aliases.push(...words);
+
+  if (baseText.includes('charger') || baseText.includes('charging')) add('شاحن', 'شواحن', 'تشارجر');
+  if (baseText.includes('cable') || baseText.includes('usb') || baseText.includes('type c') || baseText.includes('type-c')) add('كيبل', 'كابل', 'سلك', 'وصله', 'وصلة', 'يو اس بي', 'تايب سي');
+  if (baseText.includes('headphone') || baseText.includes('headset') || baseText.includes('earbud') || baseText.includes('earphone')) add('سماعه', 'سماعات', 'هيدفون', 'ايربودز');
+  if (baseText.includes('phone') || baseText.includes('mobile')) add('تلفون', 'موبايل', 'خلوي');
+  if (baseText.includes('case') || baseText.includes('cover')) add('كفر', 'جراب', 'غطا', 'غطاء', 'حمايه', 'حماية');
+  if (baseText.includes('screen protector') || baseText.includes('protector') || baseText.includes('glass')) add('حمايه شاشه', 'حماية شاشة', 'لزقه', 'لزقة', 'زجاج');
+  if (baseText.includes('battery') || baseText.includes('power bank') || baseText.includes('powerbank')) add('بطاريه', 'بطارية', 'باور بنك', 'بور بنك');
+  if (baseText.includes('toy') || baseText.includes('toys')) add('لعبه', 'لعبة', 'العاب', 'ألعاب');
+  if (baseText.includes('baby')) add('بيبي', 'اطفال', 'أطفال', 'رضيع');
+  if (baseText.includes('pet') || baseText.includes('cat') || baseText.includes('dog')) add('حيوانات', 'قطط', 'كلاب', 'حيوان اليف', 'حيوان أليف');
+  if (baseText.includes('cosmetic') || baseText.includes('makeup') || baseText.includes('beauty')) add('مكياج', 'تجميل', 'كوزمتكس');
+  if (baseText.includes('clean') || baseText.includes('detergent')) add('تنظيف', 'منظف', 'منظفات');
+  if (baseText.includes('car') || baseText.includes('auto')) add('سياره', 'سيارة', 'سيارات');
+  if (baseText.includes('school') || baseText.includes('stationery') || baseText.includes('pen') || baseText.includes('pencil')) add('مدرسه', 'مدرسة', 'قرطاسيه', 'قرطاسية', 'قلم', 'اقلام');
+  if (baseText.includes('home') || baseText.includes('kitchen')) add('بيت', 'منزل', 'مطبخ');
+  if (baseText.includes('tool') || baseText.includes('hardware')) add('عده', 'عدة', 'ادوات', 'أدوات');
+  if (baseText.includes('gift')) add('هديه', 'هدية', 'هدايا');
+  if (baseText.includes('clothing') || baseText.includes('shirt') || baseText.includes('pants') || baseText.includes('dress')) add('ملابس', 'قميص', 'بنطلون', 'فستان');
+  if (baseText.includes('perfume') || baseText.includes('cologne')) add('عطر', 'عطور', 'كولونيا', 'برفان');
+
+  return aliases.join(' ');
+}
+
+function getDarikSearchHaystack(product: Product, categoryName?: string | null) {
+  return normalizeDarikSearchText(
+    [
+      product.name,
+      product.description,
+      categoryName,
+      product.category_name,
+      product.category_code,
+      product.subcategory_name,
+      product.clothing_department,
+      product.clothing_item_type,
+      getDarikArabicSearchAliases(product),
+    ]
+      .filter(Boolean)
+      .join(' ')
+  );
+}
+
+
 export default function DarikCustomerWebHome() {
   const [loading, setLoading] = useState(true);
   const [catalogDeferredLoading, setCatalogDeferredLoading] = useState(false);
@@ -985,6 +1058,7 @@ export default function DarikCustomerWebHome() {
   const [activeBannerIndex, setActiveBannerIndex] = useState(0);
   const [headerShrunk, setHeaderShrunk] = useState(false);
   const [searchText, setSearchText] = useState('');
+  const [searchDropdownOpen, setSearchDropdownOpen] = useState(false);
   const [selectedCategoryId, setSelectedCategoryId] = useState('BestSellers');
   const [selectedDepartmentCode, setSelectedDepartmentCode] = useState('All');
   const [selectedSubcategoryCode, setSelectedSubcategoryCode] = useState('All');
@@ -2608,7 +2682,7 @@ export default function DarikCustomerWebHome() {
   }, [selectedDepartmentCode]);
 
   const filteredProducts = useMemo(() => {
-    const cleanSearch = searchText.trim().toLowerCase();
+    const cleanSearch = normalizeDarikSearchText(searchText);
 
     return products.filter((product) => {
       const matchesCategory = productMatchesMainCategory(
@@ -2632,12 +2706,7 @@ export default function DarikCustomerWebHome() {
       if (!cleanSearch) return true;
 
       const categoryName = product.category_id ? categoryById.get(product.category_id)?.name ?? '' : '';
-
-      return [product.name, product.description, categoryName, product.subcategory_name, product.clothing_department, product.clothing_item_type]
-        .filter(Boolean)
-        .join(' ')
-        .toLowerCase()
-        .includes(cleanSearch);
+      return getDarikSearchHaystack(product, categoryName).includes(cleanSearch);
     });
   }, [
     products,
@@ -2651,6 +2720,29 @@ export default function DarikCustomerWebHome() {
     selectedCategoryName,
     selectedCategoryCode,
   ]);
+
+  const searchSuggestions = useMemo(() => {
+    const cleanSearch = normalizeDarikSearchText(searchText);
+    if (cleanSearch.length < 1) return [];
+
+    const matches = products
+      .map((product) => {
+        const categoryName = product.category_id ? categoryById.get(product.category_id)?.name ?? '' : '';
+        return { product, categoryName, haystack: getDarikSearchHaystack(product, categoryName) };
+      })
+      .filter((entry) => entry.haystack.includes(cleanSearch))
+      .slice(0, 8);
+
+    return matches;
+  }, [products, categoryById, searchText]);
+
+  function openSearchSuggestion(product: Product) {
+    setSearchDropdownOpen(false);
+    setSearchText(product.name);
+    openProduct(product);
+  }
+
+
 
   const visibleCategoryProducts = useMemo(() => {
     if (selectedCategoryId === 'BestSellers') return filteredProducts;
@@ -2714,7 +2806,7 @@ export default function DarikCustomerWebHome() {
   ]);
 
   const visibleBestSellerDepartments = useMemo(() => {
-    const cleanSearch = searchText.trim().toLowerCase();
+    const cleanSearch = normalizeDarikSearchText(searchText);
 
     if (!cleanSearch) return visibleCategories;
 
@@ -2837,7 +2929,7 @@ export default function DarikCustomerWebHome() {
   }
 
   function getBestSellerDepartmentProducts(categoryId: string) {
-    const cleanSearch = searchText.trim().toLowerCase();
+    const cleanSearch = normalizeDarikSearchText(searchText);
 
     return products
       .filter((product) => {
@@ -3718,14 +3810,45 @@ export default function DarikCustomerWebHome() {
           </button>
         </header>
 
-        <section className="mobileSearchCard">
+        <section className="mobileSearchCard searchWithDropdown">
           <span>⌕</span>
           <input
             value={searchText}
-            onChange={(event) => setSearchText(event.target.value)}
-            onFocus={() => loadCatalogAfterScroll().catch(() => setCatalogDeferredLoading(false))}
+            onChange={(event) => {
+              setSearchText(event.target.value);
+              setSearchDropdownOpen(true);
+            }}
+            onFocus={() => {
+              setSearchDropdownOpen(true);
+              loadCatalogAfterScroll().catch(() => setCatalogDeferredLoading(false));
+            }}
             placeholder="Search Darik"
           />
+
+          {searchDropdownOpen && searchText.trim().length > 0 ? (
+            <div className="searchSuggestionsDropdown">
+              {catalogDeferredLoading && products.length === 0 ? (
+                <div className="searchSuggestionEmpty">Loading products...</div>
+              ) : searchSuggestions.length === 0 ? (
+                <div className="searchSuggestionEmpty">No matching products yet</div>
+              ) : (
+                searchSuggestions.map(({ product, categoryName }) => {
+                  const photoUrl = getProductPhotoUrl(product);
+                  return (
+                    <button key={product.id} type="button" className="searchSuggestionItem" onClick={() => openSearchSuggestion(product)}>
+                      <span className="searchSuggestionImage">
+                        {photoUrl ? <img src={photoUrl} alt={product.name} /> : <b>{shortCode(product.name)}</b>}
+                      </span>
+                      <span>
+                        <strong>{product.name}</strong>
+                        <small>{categoryName || product.subcategory_name || 'Darik product'} • {money(getCustomerPrice(product))} JOD</small>
+                      </span>
+                    </button>
+                  );
+                })
+              )}
+            </div>
+          ) : null}
         </section>
 
         <section className="mobileSponsoredBannerCarousel" aria-label="Darik sponsored store offers">
@@ -4044,13 +4167,45 @@ export default function DarikCustomerWebHome() {
           </button>
         </header>
 
-        <section className="searchBar">
+        <section className="searchBar searchWithDropdown">
           <span>⌕</span>
           <input
             value={searchText}
-            onChange={(event) => setSearchText(event.target.value)}
+            onChange={(event) => {
+              setSearchText(event.target.value);
+              setSearchDropdownOpen(true);
+            }}
+            onFocus={() => {
+              setSearchDropdownOpen(true);
+              loadCatalogAfterScroll().catch(() => setCatalogDeferredLoading(false));
+            }}
             placeholder="Search products..."
           />
+
+          {searchDropdownOpen && searchText.trim().length > 0 ? (
+            <div className="searchSuggestionsDropdown desktopSearchSuggestionsDropdown">
+              {catalogDeferredLoading && products.length === 0 ? (
+                <div className="searchSuggestionEmpty">Loading products...</div>
+              ) : searchSuggestions.length === 0 ? (
+                <div className="searchSuggestionEmpty">No matching products yet</div>
+              ) : (
+                searchSuggestions.map(({ product, categoryName }) => {
+                  const photoUrl = getProductPhotoUrl(product);
+                  return (
+                    <button key={product.id} type="button" className="searchSuggestionItem" onClick={() => openSearchSuggestion(product)}>
+                      <span className="searchSuggestionImage">
+                        {photoUrl ? <img src={photoUrl} alt={product.name} /> : <b>{shortCode(product.name)}</b>}
+                      </span>
+                      <span>
+                        <strong>{product.name}</strong>
+                        <small>{categoryName || product.subcategory_name || 'Darik product'} • {money(getCustomerPrice(product))} JOD</small>
+                      </span>
+                    </button>
+                  );
+                })
+              )}
+            </div>
+          ) : null}
         </section>
 
         <section className="sponsoredBannerCarousel" aria-label="Darik store offers">
