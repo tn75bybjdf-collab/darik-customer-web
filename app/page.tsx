@@ -199,6 +199,26 @@ type CustomerOrderItem = {
   created_at?: string | null;
 };
 
+type DarikReturnRequest = {
+  id: string;
+  customer_id: string | null;
+  order_id: string | null;
+  order_item_id: string | null;
+  product_id?: string | null;
+  product_variant_id?: string | null;
+  product_name?: string | null;
+  resolution_type?: string | null;
+  request_status?: string | null;
+  pickup_task_status?: string | null;
+  final_inspection_status?: string | null;
+  replacement_status?: string | null;
+  requested_at?: string | null;
+  customer_note?: string | null;
+  replacement_size_label?: string | null;
+  net_credit_amount?: number | string | null;
+  pickup_fee_deducted_from_credit?: number | string | null;
+};
+
 type SupportThread = {
   id: string;
   sender_type: string;
@@ -239,6 +259,8 @@ const CUSTOMER_VISIBLE_ORDER_STATUSES = [
   'cancelled_by_customer',
   'archived',
 ];
+
+const DARIK_RETURN_WINDOW_HOURS = 24;
 
 const CUSTOMER_SUPPORT_ISSUE_TYPES = [
   'General question',
@@ -318,6 +340,16 @@ const DARIK_WEB_TRANSLATIONS = {
   accountUpdated: { en: 'Account updated.', ar: 'تم تحديث الحساب.' },
   messageSent: { en: 'Darik support received your message.', ar: 'وصلت رسالتك إلى دعم Darik.' },
   replySent: { en: 'Reply sent.', ar: 'تم إرسال الرد.' },
+  returnReplaceThisItem: { en: 'Return / Replace This Item', ar: 'إرجاع / استبدال هذا المنتج' },
+  darikCreditReturn: { en: 'Darik Credit Return', ar: 'إرجاع كرصيد Darik' },
+  exactReplacement: { en: 'Exact Replacement', ar: 'استبدال بنفس المنتج' },
+  returnSubmitted: { en: 'Return request submitted.', ar: 'تم إرسال طلب الإرجاع.' },
+  returnAlreadyRequested: { en: 'Return already requested for this item.', ar: 'تم طلب إرجاع لهذا المنتج مسبقاً.' },
+  returnWindowClosed: { en: 'Return window closed.', ar: 'انتهت مدة الإرجاع.' },
+  deliveredOrdersOnly: { en: 'Returns are available after delivery.', ar: 'الإرجاع متاح بعد التوصيل.' },
+  returnStatus: { en: 'Return Status', ar: 'حالة الإرجاع' },
+  creditReturnNote: { en: 'Darik reviews the request, picks up the item, then issues credit after inspection.', ar: 'تراجع Darik الطلب، تستلم المنتج، ثم تصدر الرصيد بعد الفحص.' },
+  replacementReturnNote: { en: 'For defective items only. If approved, Darik sends the same item and collects the defective one.', ar: 'للمنتجات التالفة فقط. إذا تمت الموافقة، ترسل Darik نفس المنتج وتستلم المنتج التالف.' },
 } as const;
 
 type DarikWebTranslationKey = keyof typeof DARIK_WEB_TRANSLATIONS;
@@ -333,6 +365,9 @@ const DARIK_WEB_SAVE_FOR_LATER_STORAGE_KEY = 'DarikWebSaveForLaterStorageV1';
 const DARIK_WEB_SAVED_LOCATIONS_STORAGE_KEY = 'DarikWebSavedLocationsV1';
 const DARIK_WEB_CUSTOMER_SETTINGS_STORAGE_KEY = 'DarikWebCustomerSettingsV1';
 const DARIK_WEB_CUSTOMER_LANGUAGE_KEY = 'DarikWebCustomerLanguageV1';
+const DARIK_WEB_BOOT_TIMEOUT_MS = 3500;
+const DARIK_WEB_AUTH_TIMEOUT_MS = 3500;
+
 
 // L252 warehouse service radius settings.
 // Replace these two coordinates with the exact Darik warehouse GPS when ready.
@@ -899,6 +934,23 @@ function getProductPhotoUrl(product: Product | null | undefined) {
   );
 }
 
+function darikTimeout(ms: number) {
+  return new Promise<null>((resolve) => {
+    window.setTimeout(() => resolve(null), ms);
+  });
+}
+
+function safeReadDarikJson<T>(storageKey: string, fallbackValue: T): T {
+  try {
+    const rawValue = window.localStorage.getItem(storageKey);
+    if (!rawValue) return fallbackValue;
+    return JSON.parse(rawValue) as T;
+  } catch {
+    window.localStorage.removeItem(storageKey);
+    return fallbackValue;
+  }
+}
+
 export default function DarikCustomerWebHome() {
   const [loading, setLoading] = useState(true);
   const [catalogDeferredLoading, setCatalogDeferredLoading] = useState(false);
@@ -974,6 +1026,8 @@ export default function DarikCustomerWebHome() {
   const [customerProfile, setCustomerProfile] = useState<CustomerProfile | null>(null);
   const [customerOrders, setCustomerOrders] = useState<CustomerOrder[]>([]);
   const [customerOrderItems, setCustomerOrderItems] = useState<CustomerOrderItem[]>([]);
+  const [darikReturnRequests, setDarikReturnRequests] = useState<DarikReturnRequest[]>([]);
+  const [returnRequestBusyItemId, setReturnRequestBusyItemId] = useState('');
   const [settingsActiveTool, setSettingsActiveTool] = useState<SettingsTool>('account');
   const [settingsError, setSettingsError] = useState('');
   const [supportThreads, setSupportThreads] = useState<SupportThread[]>([]);
@@ -1057,6 +1111,101 @@ export default function DarikCustomerWebHome() {
     return customerOrderItems.filter((item) => item.order_id === orderId);
   }
 
+  function getReturnRequestForItem(orderId: string, itemId: string) {
+    return darikReturnRequests.find((request) => request.order_id === orderId && request.order_item_id === itemId) ?? null;
+  }
+
+  function getReturnWindowBaseTime(order: CustomerOrder) {
+    return order.delivered_at || order.created_at;
+  }
+
+  function isOrderDeliveredForReturn(order: CustomerOrder) {
+    const status = String(order.order_status ?? '').toLowerCase();
+    return status === 'delivered';
+  }
+
+  function isReturnWindowOpen(order: CustomerOrder) {
+    if (!isOrderDeliveredForReturn(order)) return false;
+    const baseTime = getReturnWindowBaseTime(order);
+    if (!baseTime) return false;
+    const startedAt = new Date(baseTime).getTime();
+    if (Number.isNaN(startedAt)) return false;
+    return Date.now() - startedAt <= DARIK_RETURN_WINDOW_HOURS * 60 * 60 * 1000;
+  }
+
+  function getReturnStatusLabel(request: DarikReturnRequest | null) {
+    if (!request) return '';
+    const resolution = String(request.resolution_type ?? '').replace(/_/g, ' ');
+    const requestStatus = String(request.request_status ?? 'requested').replace(/_/g, ' ');
+    const pickupStatus = request.pickup_task_status ? ` • Pickup: ${String(request.pickup_task_status).replace(/_/g, ' ')}` : '';
+    const replacementStatus = request.replacement_status ? ` • Replacement: ${String(request.replacement_status).replace(/_/g, ' ')}` : '';
+    return `${resolution || 'return'} • ${requestStatus}${pickupStatus}${replacementStatus}`;
+  }
+
+  async function submitDarikReturnRequestFromWeb(
+    order: CustomerOrder,
+    item: CustomerOrderItem,
+    resolutionType: 'credit_return' | 'exact_replacement',
+  ) {
+    if (!customerProfile) {
+      showSettingsError(t('loginRequiredText'));
+      return;
+    }
+
+    if (!isReturnWindowOpen(order)) {
+      showSettingsError(isOrderDeliveredForReturn(order) ? t('returnWindowClosed') : t('deliveredOrdersOnly'));
+      return;
+    }
+
+    const existingRequest = getReturnRequestForItem(order.id, item.id);
+    if (existingRequest && !['cancelled', 'denied', 'rejected'].includes(String(existingRequest.request_status ?? '').toLowerCase())) {
+      showSettingsError(t('returnAlreadyRequested'));
+      return;
+    }
+
+    const isReplacement = resolutionType === 'exact_replacement';
+    const confirmed = window.confirm(
+      isReplacement
+        ? `${t('exactReplacement')}\n\n${t('replacementReturnNote')}`
+        : `${t('darikCreditReturn')}\n\n${t('creditReturnNote')}`,
+    );
+
+    if (!confirmed) return;
+
+    setReturnRequestBusyItemId(item.id);
+
+    const replacementSizeText = item.size_label_snapshot ? ` Replacement size requested: ${item.size_label_snapshot}.` : '';
+    const { data, error } = await supabase.rpc('customer_request_darik_return_v3', {
+      p_customer_id: customerProfile.id,
+      p_order_id: order.id,
+      p_order_item_id: item.id,
+      p_resolution_type: resolutionType,
+      p_reason_category: isReplacement ? 'Defective item - wants exact replacement' : 'Customer requested Darik Credit return',
+      p_customer_note: isReplacement
+        ? `Customer chose free exact same item replacement from getdarik.com Order History.${replacementSizeText}`
+        : 'Customer chose Darik Credit return from getdarik.com Order History.',
+      p_customer_photo_url: null,
+      p_replacement_product_variant_id: isReplacement ? item.product_variant_id ?? null : null,
+      p_replacement_size_label: isReplacement ? item.size_label_snapshot ?? null : null,
+    });
+
+    setReturnRequestBusyItemId('');
+
+    if (error) {
+      showSettingsError(error.message);
+      return;
+    }
+
+    const result = Array.isArray(data) ? data[0] : data;
+    if (result?.success === false) {
+      showSettingsError(result.message || 'Could not submit return request.');
+      return;
+    }
+
+    showSettingsMessage(result?.message || t('returnSubmitted'));
+    await loadCustomerOrders(customerProfile.id);
+  }
+
   function getMessagesForSupportThread(threadId: string) {
     return supportMessages
       .filter((message) => message.thread_id === threadId)
@@ -1093,6 +1242,7 @@ export default function DarikCustomerWebHome() {
     if (!profileId) {
       setCustomerOrders([]);
       setCustomerOrderItems([]);
+      setDarikReturnRequests([]);
       return;
     }
 
@@ -1114,6 +1264,7 @@ export default function DarikCustomerWebHome() {
     const orderIds = loadedOrders.map((order) => order.id);
     if (orderIds.length === 0) {
       setCustomerOrderItems([]);
+      setDarikReturnRequests([]);
       return;
     }
 
@@ -1129,6 +1280,16 @@ export default function DarikCustomerWebHome() {
     }
 
     setCustomerOrderItems((itemsResult.data ?? []) as CustomerOrderItem[]);
+
+    const returnsResult = await supabase
+      .from('darik_return_requests')
+      .select('*')
+      .in('order_id', orderIds)
+      .order('requested_at', { ascending: false });
+
+    if (!returnsResult.error) {
+      setDarikReturnRequests((returnsResult.data ?? []) as DarikReturnRequest[]);
+    }
   }
 
   async function loadCustomerSavedLocations(profileId?: string | null) {
@@ -1243,18 +1404,39 @@ export default function DarikCustomerWebHome() {
   }
 
   async function initializeWebCustomerSession() {
+    const safetyTimer = window.setTimeout(() => {
+      setAuthLoading(false);
+    }, DARIK_WEB_AUTH_TIMEOUT_MS);
+
     try {
       setAuthLoading(true);
+
       const storedLanguage = window.localStorage.getItem(DARIK_WEB_CUSTOMER_LANGUAGE_KEY);
       if (storedLanguage === 'ar' || storedLanguage === 'en') {
         setCustomerLanguage(storedLanguage);
       }
 
-      const { data } = await supabase.auth.getSession();
+      const sessionResult = await Promise.race([
+        supabase.auth.getSession(),
+        darikTimeout(DARIK_WEB_AUTH_TIMEOUT_MS),
+      ]);
+
+      if (!sessionResult) {
+        setAuthLoading(false);
+        return;
+      }
+
+      const { data } = sessionResult;
 
       if (data.session?.user) {
         setCustomerSession(data.session);
-        await ensureWebCustomerProfile(data.session.user);
+
+        // Do not let profile/order/support loading keep the whole website stuck.
+        Promise.race([
+          ensureWebCustomerProfile(data.session.user),
+          darikTimeout(DARIK_WEB_AUTH_TIMEOUT_MS),
+        ]).catch(() => {});
+
         return;
       }
 
@@ -1264,6 +1446,7 @@ export default function DarikCustomerWebHome() {
       setCustomerSession(null);
       setCustomerProfile(null);
     } finally {
+      window.clearTimeout(safetyTimer);
       setAuthLoading(false);
     }
   }
@@ -1567,27 +1750,48 @@ export default function DarikCustomerWebHome() {
   }
 
   async function loadTopPageData() {
-    setLoading(true);
+    const safetyTimer = window.setTimeout(() => {
+      setLoading(false);
+    }, DARIK_WEB_BOOT_TIMEOUT_MS);
 
-    const [bannersResult, categoriesResult] = await Promise.all([
-      supabase
-        .from('active_customer_ad_banners')
-        .select('*')
-        .order('sort_order', { ascending: true })
-        .order('created_at', { ascending: false })
-        .limit(8),
-      supabase.from('categories').select('*').order('name', { ascending: true }),
-    ]);
+    try {
+      setLoading(true);
 
-    if (!bannersResult.error) {
-      setBanners((bannersResult.data ?? []) as CustomerAdBanner[]);
+      const topDataResult = await Promise.race([
+        Promise.all([
+          supabase
+            .from('active_customer_ad_banners')
+            .select('*')
+            .order('sort_order', { ascending: true })
+            .order('created_at', { ascending: false })
+            .limit(8),
+          supabase.from('categories').select('*').order('name', { ascending: true }),
+        ]),
+        darikTimeout(DARIK_WEB_BOOT_TIMEOUT_MS),
+      ]);
+
+      if (!topDataResult) {
+        setCategories((currentCategories) => currentCategories.length > 0 ? currentCategories : fallbackCategories);
+        return;
+      }
+
+      const [bannersResult, categoriesResult] = topDataResult;
+
+      if (!bannersResult.error) {
+        setBanners((bannersResult.data ?? []) as CustomerAdBanner[]);
+      }
+
+      if (!categoriesResult.error && (categoriesResult.data ?? []).length > 0) {
+        setCategories((categoriesResult.data ?? []) as Category[]);
+      } else {
+        setCategories((currentCategories) => currentCategories.length > 0 ? currentCategories : fallbackCategories);
+      }
+    } catch {
+      setCategories((currentCategories) => currentCategories.length > 0 ? currentCategories : fallbackCategories);
+    } finally {
+      window.clearTimeout(safetyTimer);
+      setLoading(false);
     }
-
-    if (!categoriesResult.error) {
-      setCategories((categoriesResult.data ?? []) as Category[]);
-    }
-
-    setLoading(false);
   }
 
   function appendUniqueProducts(nextProducts: Product[]) {
@@ -1720,28 +1924,58 @@ export default function DarikCustomerWebHome() {
   }
 
   useEffect(() => {
-    loadTopPageData().catch(() => setLoading(false));
+    const safetyTimer = window.setTimeout(() => {
+      setLoading(false);
+    }, DARIK_WEB_BOOT_TIMEOUT_MS + 1000);
+
+    loadTopPageData()
+      .catch(() => setLoading(false))
+      .finally(() => window.clearTimeout(safetyTimer));
+
+    return () => window.clearTimeout(safetyTimer);
   }, []);
+
+  useEffect(() => {
+    const resetRequested = new URLSearchParams(window.location.search).get('reset') === '1';
+
+    if (!resetRequested) return;
+
+    try {
+      Object.keys(window.localStorage)
+        .filter((key) => key.toLowerCase().includes('darik') || key.toLowerCase().includes('supabase'))
+        .forEach((key) => window.localStorage.removeItem(key));
+
+      Object.keys(window.sessionStorage)
+        .filter((key) => key.toLowerCase().includes('darik') || key.toLowerCase().includes('supabase'))
+        .forEach((key) => window.sessionStorage.removeItem(key));
+    } finally {
+      window.location.replace('/');
+    }
+  }, []);
+
 
   useEffect(() => {
     initializeWebCustomerSession().catch(() => setAuthLoading(false));
 
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (_event, session) => {
+    } = supabase.auth.onAuthStateChange((_event, session) => {
       setCustomerSession(session);
+      setAuthLoading(false);
 
       if (session?.user) {
-        await ensureWebCustomerProfile(session.user);
+        Promise.race([
+          ensureWebCustomerProfile(session.user),
+          darikTimeout(DARIK_WEB_AUTH_TIMEOUT_MS),
+        ]).catch(() => {});
       } else {
         setCustomerProfile(null);
         setCustomerOrders([]);
         setCustomerOrderItems([]);
+        setDarikReturnRequests([]);
         setSupportThreads([]);
         setSupportMessages([]);
       }
-
-      setAuthLoading(false);
     });
 
     return () => subscription.unsubscribe();
@@ -1758,26 +1992,18 @@ export default function DarikCustomerWebHome() {
 
   useEffect(() => {
     try {
-      const storedCart = window.localStorage.getItem(DARIK_WEB_CART_STORAGE_KEY);
-      const storedSavedForLater = window.localStorage.getItem(DARIK_WEB_SAVE_FOR_LATER_STORAGE_KEY);
-      const storedSavedLocations = window.localStorage.getItem(DARIK_WEB_SAVED_LOCATIONS_STORAGE_KEY);
-      const storedCustomerSettings = window.localStorage.getItem(DARIK_WEB_CUSTOMER_SETTINGS_STORAGE_KEY);
+      const storedCart = safeReadDarikJson(DARIK_WEB_CART_STORAGE_KEY, []);
+      const storedSavedForLater = safeReadDarikJson(DARIK_WEB_SAVE_FOR_LATER_STORAGE_KEY, []);
+      const storedSavedLocations = safeReadDarikJson(DARIK_WEB_SAVED_LOCATIONS_STORAGE_KEY, []);
+      const storedCustomerSettings = safeReadDarikJson<Record<string, unknown> | null>(DARIK_WEB_CUSTOMER_SETTINGS_STORAGE_KEY, null);
       const storedCustomerLanguage = window.localStorage.getItem(DARIK_WEB_CUSTOMER_LANGUAGE_KEY);
 
-      if (storedCart) {
-        setCartItems(normalizeStoredCartItems(JSON.parse(storedCart)));
-      }
-
-      if (storedSavedForLater) {
-        setSavedForLaterItems(normalizeStoredCartItems(JSON.parse(storedSavedForLater)));
-      }
-
-      if (storedSavedLocations) {
-        setSavedLocations(normalizeStoredLocations(JSON.parse(storedSavedLocations)));
-      }
+      setCartItems(normalizeStoredCartItems(storedCart));
+      setSavedForLaterItems(normalizeStoredCartItems(storedSavedForLater));
+      setSavedLocations(normalizeStoredLocations(storedSavedLocations));
 
       if (storedCustomerSettings) {
-        const profile = normalizeStoredCustomerSettings(JSON.parse(storedCustomerSettings));
+        const profile = normalizeStoredCustomerSettings(storedCustomerSettings);
         setCustomerName(profile.fullName);
         setCustomerPhone(profile.phone);
         setCustomerEmail(profile.email);
@@ -3044,6 +3270,10 @@ export default function DarikCustomerWebHome() {
             <img src={LOADING_SCREEN_LOGO} alt="Darik" />
           </div>
           <p>{t('loading')}</p>
+          <small className="loadingRecoveryText">If this takes more than a few seconds, Darik will open automatically.</small>
+          <button type="button" className="loadingRecoveryButton" onClick={() => window.location.href = '/?reset=1'}>
+            Reset Darik browser data
+          </button>
         </div>
       </main>
     );
@@ -4395,15 +4625,64 @@ export default function DarikCustomerWebHome() {
 
                               <div className="settingsOrderItems">
                                 <strong>{t('orderItems')}</strong>
-                                {getItemsForOrder(order.id).map((item) => (
-                                  <div key={item.id} className="settingsOrderItemRow">
-                                    <span>
-                                      {item.product_name || 'Item'}
-                                      {item.size_label_snapshot ? ` • Size ${item.size_label_snapshot}` : ''}
-                                    </span>
-                                    <small>x{Number(item.quantity ?? 0)} • {money(item.line_total ?? 0)} JOD</small>
-                                  </div>
-                                ))}
+                                {getItemsForOrder(order.id).map((item) => {
+                                  const returnRequest = getReturnRequestForItem(order.id, item.id);
+                                  const returnOpen = isReturnWindowOpen(order);
+                                  const deliveredForReturn = isOrderDeliveredForReturn(order);
+                                  const returnBusy = returnRequestBusyItemId === item.id;
+                                  const alreadyActiveReturn = Boolean(returnRequest && !['cancelled', 'denied', 'rejected'].includes(String(returnRequest.request_status ?? '').toLowerCase()));
+
+                                  return (
+                                    <div key={item.id} className="settingsOrderItemRow settingsOrderItemRowStacked">
+                                      <div className="settingsOrderItemMainLine">
+                                        <span>
+                                          {item.product_name || 'Item'}
+                                          {item.size_label_snapshot ? ` • Size ${item.size_label_snapshot}` : ''}
+                                        </span>
+                                        <small>x{Number(item.quantity ?? 0)} • {money(item.line_total ?? 0)} JOD</small>
+                                      </div>
+
+                                      {returnRequest ? (
+                                        <div className="settingsReturnStatusBox">
+                                          <strong>{t('returnStatus')}</strong>
+                                          <p>{getReturnStatusLabel(returnRequest)}</p>
+                                        </div>
+                                      ) : null}
+
+                                      {!alreadyActiveReturn ? (
+                                        <div className="settingsReturnActions">
+                                          <button
+                                            type="button"
+                                            className="settingsReturnButton"
+                                            disabled={!returnOpen || returnBusy}
+                                            onClick={() => submitDarikReturnRequestFromWeb(order, item, 'credit_return').catch(() => {})}
+                                            title={!deliveredForReturn ? t('deliveredOrdersOnly') : !returnOpen ? t('returnWindowClosed') : t('darikCreditReturn')}
+                                          >
+                                            {returnBusy ? t('pleaseWait') : t('darikCreditReturn')}
+                                          </button>
+
+                                          <button
+                                            type="button"
+                                            className="settingsReturnButton settingsReturnButtonAlt"
+                                            disabled={!returnOpen || returnBusy}
+                                            onClick={() => submitDarikReturnRequestFromWeb(order, item, 'exact_replacement').catch(() => {})}
+                                            title={!deliveredForReturn ? t('deliveredOrdersOnly') : !returnOpen ? t('returnWindowClosed') : t('exactReplacement')}
+                                          >
+                                            {t('exactReplacement')}
+                                          </button>
+
+                                          {!deliveredForReturn ? (
+                                            <span className="settingsReturnHelp">{t('deliveredOrdersOnly')}</span>
+                                          ) : !returnOpen ? (
+                                            <span className="settingsReturnHelp">{t('returnWindowClosed')}</span>
+                                          ) : (
+                                            <span className="settingsReturnHelp">{t('returnReplaceThisItem')}</span>
+                                          )}
+                                        </div>
+                                      ) : null}
+                                    </div>
+                                  );
+                                })}
                               </div>
 
                               <button
