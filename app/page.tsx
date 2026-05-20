@@ -1073,6 +1073,7 @@ export default function DarikCustomerWebHome() {
   const [cartStorageReady, setCartStorageReady] = useState(false);
   const [cartOpen, setCartOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [returnToCartAfterLogin, setReturnToCartAfterLogin] = useState(false);
   const [settingsSavedMessage, setSettingsSavedMessage] = useState('');
   const [checkoutOpen, setCheckoutOpen] = useState(false);
   const [orderPlacedOpen, setOrderPlacedOpen] = useState(false);
@@ -2034,6 +2035,20 @@ export default function DarikCustomerWebHome() {
       setCustomerSession(data.session);
       await ensureWebCustomerProfile(data.session.user);
       setLoginPassword('');
+
+      if (returnToCartAfterLogin) {
+        setReturnToCartAfterLogin(false);
+        setSettingsOpen(false);
+        setCheckoutOpen(false);
+        setCartOpen(true);
+        showSettingsMessage('');
+        window.setTimeout(() => {
+          const cartSheet = document.querySelector('.cleanAmazonCartSheet');
+          cartSheet?.scrollIntoView({ behavior: 'smooth', block: 'end' });
+        }, 150);
+        return;
+      }
+
       setSettingsActiveTool('account');
       showSettingsMessage('Logged in.');
     } finally {
@@ -2134,6 +2149,16 @@ export default function DarikCustomerWebHome() {
         setSignupEmailCode('');
         setSignupConfirmationCodeSent(false);
         setSignupCodeCooldownSeconds(0);
+
+        if (returnToCartAfterLogin) {
+          setReturnToCartAfterLogin(false);
+          setSettingsOpen(false);
+          setCheckoutOpen(false);
+          setCartOpen(true);
+          showSettingsMessage('');
+          return;
+        }
+
         setSettingsActiveTool('account');
         showSettingsMessage('Customer account created.');
         return;
@@ -2187,6 +2212,16 @@ export default function DarikCustomerWebHome() {
       setSignupEmailCode('');
       setSignupConfirmationCodeSent(false);
       setSignupCodeCooldownSeconds(0);
+
+      if (returnToCartAfterLogin) {
+        setReturnToCartAfterLogin(false);
+        setSettingsOpen(false);
+        setCheckoutOpen(false);
+        setCartOpen(true);
+        showSettingsMessage('');
+        return;
+      }
+
       setSettingsActiveTool('account');
       showSettingsMessage('Customer account created.');
     } finally {
@@ -3771,6 +3806,7 @@ export default function DarikCustomerWebHome() {
     setCheckoutError('');
     setCheckoutOpen(false);
     setCartOpen(false);
+    setReturnToCartAfterLogin(true);
     setAuthMode('login');
     setPasswordResetOpen(false);
     setSettingsOpen(true);
@@ -5189,7 +5225,10 @@ export default function DarikCustomerWebHome() {
         <div className="settingsFullScreenOverlay" dir={customerLanguage === 'ar' ? 'rtl' : 'ltr'}>
           <div className="settingsFullScreenPage">
             <div className="settingsTopBar">
-              <button type="button" className="checkoutBackButton" onClick={() => setSettingsOpen(false)}>
+              <button type="button" className="checkoutBackButton" onClick={() => {
+              setReturnToCartAfterLogin(false);
+              setSettingsOpen(false);
+            }}>
                 ← {t('back')}
               </button>
 
