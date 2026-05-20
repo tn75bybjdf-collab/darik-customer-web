@@ -10349,3 +10349,22 @@ button[class*="signOut"] {
   font-weight: 900;
   line-height: 1.35;
 }
+
+/* L381 password reset auto-scroll target */
+.passwordResetScrollAnchor,
+.passwordResetTargetPanel {
+  scroll-margin-top: 90px;
+}
+
+.passwordRecoveryBanner {
+  animation: passwordRecoveryPulse 1.4s ease-in-out 1;
+}
+
+@keyframes passwordRecoveryPulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(255, 210, 63, 0.55);
+  }
+  100% {
+    box-shadow: 0 0 0 14px rgba(255, 210, 63, 0);
+  }
+}

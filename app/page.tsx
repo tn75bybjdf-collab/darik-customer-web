@@ -1124,6 +1124,7 @@ export default function DarikCustomerWebHome() {
   const [passwordResetBusy, setPasswordResetBusy] = useState(false);
   const [passwordResetSent, setPasswordResetSent] = useState(false);
   const [passwordRecoveryMode, setPasswordRecoveryMode] = useState(false);
+  const passwordResetSectionRef = useRef<HTMLDivElement | null>(null);
   const [signupName, setSignupName] = useState('');
   const [signupPhone, setSignupPhone] = useState('');
   const [signupPhoneConfirm, setSignupPhoneConfirm] = useState('');
@@ -1946,6 +1947,26 @@ export default function DarikCustomerWebHome() {
     }
   }
 
+  function scrollToWebPasswordResetSection() {
+    window.setTimeout(() => {
+      const target = passwordResetSectionRef.current;
+
+      if (!target) return;
+
+      target.scrollIntoView({
+        behavior: 'smooth',
+        block: 'end',
+      });
+
+      window.setTimeout(() => {
+        target.scrollIntoView({
+          behavior: 'smooth',
+          block: 'end',
+        });
+      }, 450);
+    }, 350);
+  }
+
   function openWebPasswordRecoveryScreen() {
     setPasswordRecoveryMode(true);
     setSettingsOpen(true);
@@ -1953,6 +1974,7 @@ export default function DarikCustomerWebHome() {
     setNewCustomerPassword('');
     setConfirmCustomerPassword('');
     showSettingsMessage('Enter your new password below to finish resetting your Darik password.');
+    scrollToWebPasswordResetSection();
   }
 
   async function handleWebPasswordResetRequest() {
@@ -2644,6 +2666,11 @@ export default function DarikCustomerWebHome() {
 
     return () => window.clearTimeout(safetyTimer);
   }, []);
+
+  useEffect(() => {
+    if (!passwordRecoveryMode || !settingsOpen || settingsActiveTool !== 'password') return;
+    scrollToWebPasswordResetSection();
+  }, [passwordRecoveryMode, settingsOpen, settingsActiveTool]);
 
   useEffect(() => {
     const handleRecoveryUrl = async () => {
@@ -5468,7 +5495,8 @@ export default function DarikCustomerWebHome() {
                 }}
                 className={`settingsPanel savedLocationsSettingsPanel${getHighlightedSettingsClass('locations')}`}
               >
-                <div className="settingsPanelHeader">
+                <div ref={passwordResetSectionRef} className="passwordResetScrollAnchor" />
+                    <div className="settingsPanelHeader">
                   <span>📍</span>
                   <div>
                     <h3>{t('savedLocations')}</h3>
