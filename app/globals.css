@@ -10086,3 +10086,194 @@ button[class*="signOut"] {
     max-width: none !important;
   }
 }
+
+/* L371: make Saved Delivery Locations stand out clearly for customers */
+.settingsLocationCard,
+.settingsSavedLocationCard,
+.savedLocationCard,
+.savedLocationItem,
+.savedDeliveryLocationCard,
+.deliveryLocationCard {
+  position: relative !important;
+  border: 2px solid rgba(255, 210, 63, 0.95) !important;
+  border-radius: 18px !important;
+  background: linear-gradient(135deg, #fffbe8 0%, #ffffff 58%, #fff7cc 100%) !important;
+  box-shadow: 0 12px 28px rgba(255, 210, 63, 0.20), 0 6px 18px rgba(15, 23, 42, 0.08) !important;
+  padding: 16px 16px 16px 18px !important;
+  overflow: hidden !important;
+}
+
+.settingsLocationCard::before,
+.settingsSavedLocationCard::before,
+.savedLocationCard::before,
+.savedLocationItem::before,
+.savedDeliveryLocationCard::before,
+.deliveryLocationCard::before {
+  content: "Saved location";
+  display: inline-flex;
+  align-items: center;
+  width: max-content;
+  border-radius: 999px;
+  background: #111111;
+  color: #ffd23f;
+  padding: 5px 10px;
+  font-size: 10px;
+  font-weight: 950;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  margin-bottom: 10px;
+}
+
+.settingsLocationCard::after,
+.settingsSavedLocationCard::after,
+.savedLocationCard::after,
+.savedLocationItem::after,
+.savedDeliveryLocationCard::after,
+.deliveryLocationCard::after {
+  content: "📍";
+  position: absolute;
+  right: 14px;
+  top: 12px;
+  font-size: 24px;
+  opacity: 0.95;
+}
+
+.settingsLocationCard strong,
+.settingsSavedLocationCard strong,
+.savedLocationCard strong,
+.savedLocationItem strong,
+.savedDeliveryLocationCard strong,
+.deliveryLocationCard strong {
+  color: #111827 !important;
+  font-size: 16px !important;
+  font-weight: 950 !important;
+  line-height: 1.25 !important;
+}
+
+.settingsLocationCard p,
+.settingsSavedLocationCard p,
+.savedLocationCard p,
+.savedLocationItem p,
+.savedDeliveryLocationCard p,
+.deliveryLocationCard p,
+.settingsLocationCard small,
+.settingsSavedLocationCard small,
+.savedLocationCard small,
+.savedLocationItem small,
+.savedDeliveryLocationCard small,
+.deliveryLocationCard small {
+  color: #374151 !important;
+  font-size: 13px !important;
+  font-weight: 850 !important;
+  line-height: 1.45 !important;
+}
+
+.settingsLocationCard button,
+.settingsSavedLocationCard button,
+.savedLocationCard button,
+.savedLocationItem button,
+.savedDeliveryLocationCard button,
+.deliveryLocationCard button {
+  border-radius: 999px !important;
+  min-height: 36px !important;
+  font-size: 12px !important;
+  font-weight: 950 !important;
+}
+
+.settingsLocationCard:hover,
+.settingsSavedLocationCard:hover,
+.savedLocationCard:hover,
+.savedLocationItem:hover,
+.savedDeliveryLocationCard:hover,
+.deliveryLocationCard:hover {
+  transform: translateY(-1px) !important;
+  border-color: #111111 !important;
+  box-shadow: 0 14px 34px rgba(15, 23, 42, 0.12), 0 10px 26px rgba(255, 210, 63, 0.24) !important;
+}
+
+/* Highlight the saved locations section/header too */
+.savedLocationsList,
+.savedDeliveryLocationsList,
+.settingsLocationsList,
+.deliveryLocationsList {
+  border: 2px solid rgba(255, 210, 63, 0.65) !important;
+  border-radius: 18px !important;
+  background: #fffef5 !important;
+  padding: 12px !important;
+  box-shadow: 0 8px 22px rgba(255, 210, 63, 0.12) !important;
+}
+
+.savedLocationsList::before,
+.savedDeliveryLocationsList::before,
+.settingsLocationsList::before,
+.deliveryLocationsList::before {
+  content: "Your saved delivery locations";
+  display: block;
+  color: #111827;
+  font-size: 15px;
+  font-weight: 950;
+  margin-bottom: 10px;
+}
+
+/* Broad fallback: location-related settings panels should not blend in */
+.settingsSection[class*="Location"],
+.settingsSection[class*="location"],
+.settingsToolPanel[class*="Location"],
+.settingsToolPanel[class*="location"] {
+  border: 2px solid rgba(255, 210, 63, 0.55) !important;
+  background: linear-gradient(180deg, #fffef5 0%, #ffffff 26%) !important;
+}
+
+@media (max-width: 640px) {
+  .settingsLocationCard,
+  .settingsSavedLocationCard,
+  .savedLocationCard,
+  .savedLocationItem,
+  .savedDeliveryLocationCard,
+  .deliveryLocationCard {
+    padding: 15px !important;
+  }
+
+  .settingsLocationCard::after,
+  .settingsSavedLocationCard::after,
+  .savedLocationCard::after,
+  .savedLocationItem::after,
+  .savedDeliveryLocationCard::after,
+  .deliveryLocationCard::after {
+    font-size: 21px;
+    right: 12px;
+    top: 12px;
+  }
+}
+
+/* L372: use Darik final v3 logo in checkout header */
+.amazonCheckoutLogoImageBlock {
+  display: flex !important;
+  align-items: center !important;
+  gap: 12px !important;
+}
+
+.amazonCheckoutLogoImageBlock img {
+  display: block !important;
+  height: 44px !important;
+  width: auto !important;
+  object-fit: contain !important;
+  background: transparent !important;
+}
+
+.amazonCheckoutLogoImageBlock span {
+  color: #ffd23f !important;
+  font-size: 13px !important;
+  font-weight: 950 !important;
+  letter-spacing: 0.02em !important;
+}
+
+@media (max-width: 520px) {
+  .amazonCheckoutLogoImageBlock img {
+    height: 34px !important;
+  }
+
+  .amazonCheckoutLogoImageBlock span {
+    display: none !important;
+  }
+}

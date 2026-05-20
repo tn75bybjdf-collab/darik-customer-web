@@ -1045,6 +1045,12 @@ function getDarikSearchHaystack(product: Product, categoryName?: string | null) 
 }
 
 
+
+function getDarikLogoV3Src() {
+  return "/darik_logo_final_v3.png";
+}
+
+
 export default function DarikCustomerWebHome() {
   const [loading, setLoading] = useState(true);
   const [catalogDeferredLoading, setCatalogDeferredLoading] = useState(false);
@@ -5726,8 +5732,8 @@ export default function DarikCustomerWebHome() {
                 ← Cart
               </button>
 
-              <div className="amazonCheckoutLogoBlock">
-                <strong>DARIK</strong>
+              <div className="amazonCheckoutLogoBlock amazonCheckoutLogoImageBlock">
+                <img src={getDarikLogoV3Src()} alt="Darik Marketplace" />
                 <span>Checkout</span>
               </div>
 
