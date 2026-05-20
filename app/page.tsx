@@ -1951,37 +1951,63 @@ export default function DarikCustomerWebHome() {
   }
 
   function scrollToWebPasswordResetSection() {
-    const tryScroll = (delay: number) => {
-      window.setTimeout(() => {
-        const target =
-          passwordResetSectionRef.current ||
-          document.querySelector('.passwordResetScrollAnchor') ||
-          document.querySelector('.passwordResetTargetPanel') ||
-          document.querySelector('input[type="password"]');
+    let attempts = 0;
+    const maxAttempts = 32;
 
-        if (target && 'scrollIntoView' in target) {
-          (target as HTMLElement).scrollIntoView({
-            behavior: 'smooth',
-            block: 'end',
-          });
-        }
+    const tryScrollAfterRender = () => {
+      attempts += 1;
 
-        // Also force the settings page/window downward because the settings modal is long.
-        window.scrollTo({
-          top: document.body.scrollHeight,
-          behavior: 'smooth',
-        });
+      const target =
+        passwordResetSectionRef.current ||
+        document.querySelector('.passwordResetBottomAnchor') ||
+        document.querySelector('.passwordResetTargetPanel');
 
-        const passwordInputs = Array.from(document.querySelectorAll('input[type="password"]')) as HTMLInputElement[];
-        const lastPasswordInput = passwordInputs[passwordInputs.length - 1];
+      const passwordInputs = Array.from(document.querySelectorAll('input[type="password"]')) as HTMLInputElement[];
+      const visiblePasswordInputs = passwordInputs.filter((input) => {
+        const rect = input.getBoundingClientRect();
+        return rect.width > 0 && rect.height > 0;
+      });
 
-        if (lastPasswordInput) {
-          lastPasswordInput.focus({ preventScroll: false });
-        }
-      }, delay);
+      const lastPasswordInput = visiblePasswordInputs[visiblePasswordInputs.length - 1];
+      const targetIsReady =
+        Boolean(target) &&
+        Boolean(lastPasswordInput) &&
+        settingsOpen &&
+        settingsActiveTool === 'password';
+
+      if (targetIsReady) {
+        window.setTimeout(() => {
+          const finalTarget =
+            passwordResetSectionRef.current ||
+            document.querySelector('.passwordResetBottomAnchor') ||
+            document.querySelector('.passwordResetTargetPanel') ||
+            lastPasswordInput;
+
+          if (finalTarget && 'scrollIntoView' in finalTarget) {
+            (finalTarget as HTMLElement).scrollIntoView({
+              behavior: 'smooth',
+              block: 'center',
+            });
+          }
+
+          window.setTimeout(() => {
+            lastPasswordInput.focus({ preventScroll: false });
+            lastPasswordInput.scrollIntoView({
+              behavior: 'smooth',
+              block: 'center',
+            });
+          }, 250);
+        }, 250);
+
+        return;
+      }
+
+      if (attempts < maxAttempts) {
+        window.setTimeout(tryScrollAfterRender, 250);
+      }
     };
 
-    [150, 450, 900, 1400, 2200].forEach(tryScroll);
+    window.setTimeout(tryScrollAfterRender, 250);
   }
 
 
@@ -1993,7 +2019,11 @@ export default function DarikCustomerWebHome() {
     setConfirmCustomerPassword('');
     setPasswordRecoveryAutoScrollTick((tick) => tick + 1);
     showSettingsMessage('Enter your new password below to finish resetting your Darik password.');
-    scrollToWebPasswordResetSection();
+
+    // Wait for the real password panel to render before scrolling.
+    window.setTimeout(() => {
+      scrollToWebPasswordResetSection();
+    }, 900);
   }
 
   async function handleWebPasswordResetRequest() {
@@ -2732,7 +2762,16 @@ export default function DarikCustomerWebHome() {
 
   useEffect(() => {
     if (!passwordRecoveryMode || !settingsOpen || settingsActiveTool !== 'password') return;
-    scrollToWebPasswordResetSection();
+
+    const timers = [700, 1400, 2400, 3800].map((delay) =>
+      window.setTimeout(() => {
+        scrollToWebPasswordResetSection();
+      }, delay)
+    );
+
+    return () => {
+      timers.forEach((timer) => window.clearTimeout(timer));
+    };
   }, [passwordRecoveryMode, settingsOpen, settingsActiveTool, passwordRecoveryAutoScrollTick]);
 
   useEffect(() => {
@@ -6124,7 +6163,8 @@ export default function DarikCustomerWebHome() {
                   {customerSession ? (
                     <div className="settingsPasswordBox">
                       <div ref={passwordResetSectionRef} className="passwordResetBottomAnchor" />
-                      <label>
+                      <div ref={passwordResetSectionRef} className="passwordResetActualFormAnchor" />
+<label>
                         {t('newPassword')}
                         <input type="password" value={newCustomerPassword} onChange={(event) => setNewCustomerPassword(event.target.value)} placeholder={t('newPassword')} />
                       </label>

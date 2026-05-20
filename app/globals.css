@@ -10455,3 +10455,9 @@ button[class*="signOut"] {
     width: 100%;
   }
 }
+
+/* L397 reset-link scroll waits for real password form */
+.passwordResetActualFormAnchor {
+  scroll-margin-top: 120px;
+  min-height: 1px;
+}
