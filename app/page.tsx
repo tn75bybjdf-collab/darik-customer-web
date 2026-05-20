@@ -1946,6 +1946,15 @@ export default function DarikCustomerWebHome() {
     }
   }
 
+  function openWebPasswordRecoveryScreen() {
+    setPasswordRecoveryMode(true);
+    setSettingsOpen(true);
+    setSettingsActiveTool('password');
+    setNewCustomerPassword('');
+    setConfirmCustomerPassword('');
+    showSettingsMessage('Enter your new password below to finish resetting your Darik password.');
+  }
+
   async function handleWebPasswordResetRequest() {
     const email = passwordResetEmail.trim().toLowerCase() || loginEmail.trim().toLowerCase();
 
@@ -2232,7 +2241,11 @@ export default function DarikCustomerWebHome() {
     const cleanedConfirmPassword = confirmCustomerPassword.trim();
 
     if (!customerSession?.user) {
-      showSettingsError('Log in before changing your password.');
+      showSettingsError(
+        passwordRecoveryMode
+          ? 'Your reset link session was not detected. Open the latest reset email link again.'
+          : 'Log in before changing your password.'
+      );
       return;
     }
 
@@ -2255,9 +2268,11 @@ export default function DarikCustomerWebHome() {
         return;
       }
 
+      setPasswordRecoveryMode(false);
       setNewCustomerPassword('');
       setConfirmCustomerPassword('');
-      showSettingsMessage(t('passwordUpdated'));
+      window.history.replaceState({}, document.title, window.location.pathname);
+      showSettingsMessage(passwordRecoveryMode ? 'Password reset successfully. You can now log in.' : t('passwordUpdated'));
     } finally {
       setPasswordBusy(false);
     }
@@ -2631,31 +2646,65 @@ export default function DarikCustomerWebHome() {
   }, []);
 
   useEffect(() => {
-    const searchParams = new URLSearchParams(window.location.search);
-    const resetRequested = searchParams.get('reset') === '1';
-    const passwordResetRequested = searchParams.get('password-reset') === '1';
+    const handleRecoveryUrl = async () => {
+      const searchParams = new URLSearchParams(window.location.search);
+      const hashParams = new URLSearchParams(window.location.hash.replace(/^#/, ''));
 
-    if (passwordResetRequested) {
-      setPasswordRecoveryMode(true);
-      setSettingsOpen(true);
-      setSettingsActiveTool('password');
-      showSettingsMessage('Enter your new password below to finish resetting your Darik password.');
-      return;
-    }
+      const resetRequested = searchParams.get('reset') === '1';
+      const passwordResetRequested = searchParams.get('password-reset') === '1';
+      const recoveryType =
+        searchParams.get('type') === 'recovery' ||
+        hashParams.get('type') === 'recovery';
+      const recoveryCode = searchParams.get('code');
+      const recoveryAccessToken = hashParams.get('access_token');
+      const recoveryError =
+        searchParams.get('error_description') ||
+        hashParams.get('error_description') ||
+        searchParams.get('error') ||
+        hashParams.get('error');
 
-    if (!resetRequested) return;
+      if (recoveryError) {
+        setSettingsOpen(true);
+        setSettingsActiveTool('account');
+        showSettingsError(decodeURIComponent(recoveryError));
+        window.history.replaceState({}, document.title, window.location.pathname);
+        return;
+      }
 
-    try {
-      Object.keys(window.localStorage)
-        .filter((key) => key.toLowerCase().includes('darik') || key.toLowerCase().includes('supabase'))
-        .forEach((key) => window.localStorage.removeItem(key));
+      if (passwordResetRequested || recoveryType || recoveryCode || recoveryAccessToken) {
+        try {
+          if (recoveryCode) {
+            const { error } = await supabase.auth.exchangeCodeForSession(recoveryCode);
+            if (error) {
+              showSettingsError(error.message);
+            }
+          }
 
-      Object.keys(window.sessionStorage)
-        .filter((key) => key.toLowerCase().includes('darik') || key.toLowerCase().includes('supabase'))
-        .forEach((key) => window.sessionStorage.removeItem(key));
-    } finally {
-      window.location.replace('/');
-    }
+          openWebPasswordRecoveryScreen();
+          window.history.replaceState({}, document.title, window.location.pathname);
+        } catch (error) {
+          showSettingsError(error instanceof Error ? error.message : 'Could not open password reset.');
+        }
+
+        return;
+      }
+
+      if (!resetRequested) return;
+
+      try {
+        Object.keys(window.localStorage)
+          .filter((key) => key.toLowerCase().includes('darik') || key.toLowerCase().includes('supabase'))
+          .forEach((key) => window.localStorage.removeItem(key));
+
+        Object.keys(window.sessionStorage)
+          .filter((key) => key.toLowerCase().includes('darik') || key.toLowerCase().includes('supabase'))
+          .forEach((key) => window.sessionStorage.removeItem(key));
+      } finally {
+        window.location.replace('/');
+      }
+    };
+
+    handleRecoveryUrl().catch(() => {});
   }, []);
 
 
@@ -2669,10 +2718,7 @@ export default function DarikCustomerWebHome() {
       setAuthLoading(false);
 
       if (event === 'PASSWORD_RECOVERY') {
-        setPasswordRecoveryMode(true);
-        setSettingsOpen(true);
-        setSettingsActiveTool('password');
-        showSettingsMessage('Enter your new password below to finish resetting your Darik password.');
+        openWebPasswordRecoveryScreen();
       }
 
       if (session?.user) {

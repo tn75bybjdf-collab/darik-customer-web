@@ -10336,3 +10336,16 @@ button[class*="signOut"] {
   font-weight: 800;
   line-height: 1.35;
 }
+
+/* L380 password recovery link detection */
+.passwordRecoveryBanner {
+  margin: 0 0 14px;
+  border: 1px solid rgba(255, 210, 63, 0.75);
+  border-radius: 14px;
+  background: #fff7cc;
+  color: #111827;
+  padding: 12px 14px;
+  font-size: 13px;
+  font-weight: 900;
+  line-height: 1.35;
+}
