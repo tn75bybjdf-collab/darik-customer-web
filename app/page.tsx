@@ -3858,6 +3858,18 @@ export default function DarikCustomerWebHome() {
 
   function getReceiptProductImageUrl(product?: Product | null, cartItem?: CartItem | null) {
     const candidate =
+      getProductPhotoUrl(product) ||
+      (cartItem as any)?.photoUrl ||
+      (cartItem as any)?.photo_url ||
+      (cartItem as any)?.imageUrl ||
+      (cartItem as any)?.image_url ||
+      (product as any)?.official_product_thumbnail_url ||
+      (product as any)?.official_product_photo_url ||
+      (product as any)?.official_product_photo_url_2 ||
+      (product as any)?.official_product_photo_url_3 ||
+      (product as any)?.retailer_raw_photo_url ||
+      (product as any)?.retailer_raw_photo_url_2 ||
+      (product as any)?.retailer_raw_photo_url_3 ||
       (product as any)?.official_image_url ||
       (product as any)?.officialPhotoUrl ||
       (product as any)?.official_photo_url ||
@@ -3867,10 +3879,6 @@ export default function DarikCustomerWebHome() {
       (product as any)?.photoUrl ||
       (product as any)?.thumbnail_url ||
       (product as any)?.thumbnailUrl ||
-      (cartItem as any)?.image_url ||
-      (cartItem as any)?.imageUrl ||
-      (cartItem as any)?.photo_url ||
-      (cartItem as any)?.photoUrl ||
       '';
 
     return String(candidate || '').trim();

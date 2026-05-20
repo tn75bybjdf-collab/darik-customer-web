@@ -145,7 +145,7 @@ function buildReceiptHtml(payload: ReceiptPayload) {
         `
         : `
           <td width="78" valign="top" style="padding:14px 12px 14px 0;border-bottom:1px solid #eef0f3;">
-            <div style="width:66px;height:66px;border-radius:12px;border:1px solid #e5e7eb;background:#f9fafb;display:block;text-align:center;line-height:66px;color:#9ca3af;font-size:22px;">📦</div>
+            <div style="width:66px;height:66px;border-radius:12px;border:1px solid #e5e7eb;background:#f9fafb;display:block;text-align:center;line-height:66px;color:#9ca3af;font-size:10px;font-weight:800;">No image</div>
           </td>
         `;
 
@@ -308,6 +308,10 @@ export async function POST(request: Request) {
     }
 
     const payload = (await request.json()) as ReceiptPayload;
+    console.log('[Darik receipt] Payload image check', {
+      itemCount: Array.isArray(payload.items) ? payload.items.length : 0,
+      itemsWithImages: Array.isArray(payload.items) ? payload.items.filter((item) => Boolean(item.imageUrl)).length : 0,
+    });
     const recipient = String(payload.customerEmail || userData.user.email || '').trim().toLowerCase();
 
     if (!recipient || !recipient.includes('@')) {
