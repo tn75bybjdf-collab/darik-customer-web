@@ -3856,13 +3856,14 @@ export default function DarikCustomerWebHome() {
     setCheckoutOpen(true);
   }
 
-  function getReceiptProductImageUrl(product?: Product | null, cartItem?: CartItem | null) {
+  function getReceiptProductImageUrl(product?: Product | null, cartItem?: CartItem | null, dbImageUrl?: string | null) {
     const candidate =
-      getProductPhotoUrl(product) ||
+      dbImageUrl ||
       (cartItem as any)?.photoUrl ||
       (cartItem as any)?.photo_url ||
       (cartItem as any)?.imageUrl ||
       (cartItem as any)?.image_url ||
+      getProductPhotoUrl(product) ||
       (product as any)?.official_product_thumbnail_url ||
       (product as any)?.official_product_photo_url ||
       (product as any)?.official_product_photo_url_2 ||
@@ -3882,6 +3883,52 @@ export default function DarikCustomerWebHome() {
       '';
 
     return String(candidate || '').trim();
+  }
+
+  async function loadReceiptImageMapForCartItems(items: CartItem[]) {
+    const productIds = Array.from(new Set(items.map((item) => String(item.productId || '')).filter(Boolean)));
+    const imageByProductId = new Map<string, string>();
+
+    items.forEach((item) => {
+      const existingCartPhoto = String((item as any).photoUrl || '').trim();
+      if (item.productId && existingCartPhoto) {
+        imageByProductId.set(String(item.productId), existingCartPhoto);
+      }
+    });
+
+    if (productIds.length === 0) {
+      return imageByProductId;
+    }
+
+    try {
+      const { data, error } = await supabase
+        .from('products')
+        .select('id, official_product_thumbnail_url, official_product_photo_url, retailer_raw_photo_url')
+        .in('id', productIds);
+
+      if (error) {
+        console.warn('Could not load receipt product images:', error.message);
+        return imageByProductId;
+      }
+
+      (data ?? []).forEach((row: any) => {
+        const productId = String(row.id || '');
+        const imageUrl = String(
+          row.official_product_thumbnail_url ||
+            row.official_product_photo_url ||
+            row.retailer_raw_photo_url ||
+            ''
+        ).trim();
+
+        if (productId && imageUrl) {
+          imageByProductId.set(productId, imageUrl);
+        }
+      });
+    } catch (error) {
+      console.warn('Could not load receipt product images:', error);
+    }
+
+    return imageByProductId;
   }
 
   async function sendDarikOrderReceiptEmail(payload: {
@@ -4139,6 +4186,8 @@ export default function DarikCustomerWebHome() {
 
       setPlacedOrderPin(deliveryPin);
 
+      const receiptImageByProductId = await loadReceiptImageMapForCartItems(cartItems);
+
       await sendDarikOrderReceiptEmail({
         orderId: orderData.id,
         deliveryPin,
@@ -4160,7 +4209,7 @@ export default function DarikCustomerWebHome() {
           quantity: cartItem.quantity,
           unitPrice: roundMoney(cartItem.priceNumber),
           lineTotal: roundMoney(cartItem.priceNumber * cartItem.quantity),
-          imageUrl: getReceiptProductImageUrl(product, cartItem),
+          imageUrl: getReceiptProductImageUrl(product, cartItem, receiptImageByProductId.get(String(cartItem.productId || '')) || null),
         })),
       });
 
