@@ -10298,3 +10298,41 @@ button[class*="signOut"] {
   opacity: 0.55;
   cursor: not-allowed;
 }
+
+/* L378 login default + reset password */
+.forgotPasswordButton {
+  width: 100%;
+  margin-top: 10px;
+  border: 0;
+  background: transparent;
+  color: #0f62fe;
+  font-size: 13px;
+  font-weight: 900;
+  cursor: pointer;
+  text-align: center;
+}
+
+.forgotPasswordButton:hover {
+  text-decoration: underline;
+}
+
+.passwordResetBox {
+  margin-top: 12px;
+  border: 1px solid #e5e7eb;
+  border-radius: 14px;
+  background: #f9fafb;
+  padding: 12px;
+}
+
+.passwordResetBox .settingsSecondaryButton {
+  width: 100%;
+  margin-top: 10px;
+}
+
+.passwordResetHelpText {
+  margin: 9px 0 0;
+  color: #6b7280;
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1.35;
+}

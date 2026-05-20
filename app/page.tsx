@@ -1119,6 +1119,11 @@ export default function DarikCustomerWebHome() {
   const [authMode, setAuthMode] = useState<'login' | 'signup'>('login');
   const [loginEmail, setLoginEmail] = useState('');
   const [loginPassword, setLoginPassword] = useState('');
+  const [passwordResetOpen, setPasswordResetOpen] = useState(false);
+  const [passwordResetEmail, setPasswordResetEmail] = useState('');
+  const [passwordResetBusy, setPasswordResetBusy] = useState(false);
+  const [passwordResetSent, setPasswordResetSent] = useState(false);
+  const [passwordRecoveryMode, setPasswordRecoveryMode] = useState(false);
   const [signupName, setSignupName] = useState('');
   const [signupPhone, setSignupPhone] = useState('');
   const [signupPhoneConfirm, setSignupPhoneConfirm] = useState('');
@@ -1941,6 +1946,40 @@ export default function DarikCustomerWebHome() {
     }
   }
 
+  async function handleWebPasswordResetRequest() {
+    const email = passwordResetEmail.trim().toLowerCase() || loginEmail.trim().toLowerCase();
+
+    if (!email) {
+      showSettingsError('Enter your Darik account email first.');
+      return;
+    }
+
+    try {
+      setPasswordResetBusy(true);
+      setPasswordResetSent(false);
+
+      const redirectTo =
+        typeof window !== 'undefined'
+          ? `${window.location.origin}/?password-reset=1`
+          : undefined;
+
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo,
+      });
+
+      if (error) {
+        showSettingsError(error.message);
+        return;
+      }
+
+      setPasswordResetEmail(email);
+      setPasswordResetSent(true);
+      showSettingsMessage('Password reset link sent. Check your inbox and spam folder.');
+    } finally {
+      setPasswordResetBusy(false);
+    }
+  }
+
   async function handleWebCustomerLogin() {
     const email = loginEmail.trim().toLowerCase();
 
@@ -2592,7 +2631,17 @@ export default function DarikCustomerWebHome() {
   }, []);
 
   useEffect(() => {
-    const resetRequested = new URLSearchParams(window.location.search).get('reset') === '1';
+    const searchParams = new URLSearchParams(window.location.search);
+    const resetRequested = searchParams.get('reset') === '1';
+    const passwordResetRequested = searchParams.get('password-reset') === '1';
+
+    if (passwordResetRequested) {
+      setPasswordRecoveryMode(true);
+      setSettingsOpen(true);
+      setSettingsActiveTool('password');
+      showSettingsMessage('Enter your new password below to finish resetting your Darik password.');
+      return;
+    }
 
     if (!resetRequested) return;
 
@@ -2615,9 +2664,16 @@ export default function DarikCustomerWebHome() {
 
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
+    } = supabase.auth.onAuthStateChange((event, session) => {
       setCustomerSession(session);
       setAuthLoading(false);
+
+      if (event === 'PASSWORD_RECOVERY') {
+        setPasswordRecoveryMode(true);
+        setSettingsOpen(true);
+        setSettingsActiveTool('password');
+        showSettingsMessage('Enter your new password below to finish resetting your Darik password.');
+      }
 
       if (session?.user) {
         Promise.race([
@@ -3642,10 +3698,11 @@ export default function DarikCustomerWebHome() {
     setCheckoutError('');
     setCheckoutOpen(false);
     setCartOpen(false);
-    setAuthMode('signup');
+    setAuthMode('login');
+    setPasswordResetOpen(false);
     setSettingsOpen(true);
     setSettingsActiveTool('account');
-    showSettingsError('Create a Darik customer account or log in before checkout. Guest checkout is not available.');
+    showSettingsError('Log in to checkout. If you do not have a Darik account, you can create one from the Sign Up tab.');
 
     window.setTimeout(() => {
       scrollSettingsToolIntoView('account');
@@ -5175,6 +5232,51 @@ export default function DarikCustomerWebHome() {
                         <button type="button" className="settingsPrimaryButton" disabled={authBusy || authLoading} onClick={() => handleWebCustomerLogin().catch(() => {})}>
                           {authBusy || authLoading ? t('pleaseWait') : t('login')}
                         </button>
+
+                        <button
+                          type="button"
+                          className="forgotPasswordButton"
+                          onClick={() => {
+                            setPasswordResetOpen((open) => !open);
+                            setPasswordResetEmail(loginEmail);
+                            setPasswordResetSent(false);
+                          }}
+                        >
+                          Forgot password? Reset password
+                        </button>
+
+                        {passwordResetOpen ? (
+                          <div className="passwordResetBox">
+                            <label>
+                              Account Email
+                              <input
+                                value={passwordResetEmail}
+                                onChange={(event) => {
+                                  setPasswordResetEmail(event.target.value);
+                                  setPasswordResetSent(false);
+                                }}
+                                placeholder="customer@example.com"
+                              />
+                            </label>
+                            <button
+                              type="button"
+                              className="settingsSecondaryButton"
+                              disabled={passwordResetBusy}
+                              onClick={() => handleWebPasswordResetRequest().catch(() => {})}
+                            >
+                              {passwordResetBusy ? 'Sending...' : passwordResetSent ? 'Send Reset Link Again' : 'Send Reset Link'}
+                            </button>
+                            {passwordResetSent ? (
+                              <p className="passwordResetHelpText">
+                                Reset link sent. Check your inbox and spam folder, then open the link to set a new password.
+                              </p>
+                            ) : (
+                              <p className="passwordResetHelpText">
+                                Enter your Darik account email and we will send a secure reset link.
+                              </p>
+                            )}
+                          </div>
+                        ) : null}
                       </div>
                     ) : (
                       <div className="settingsAuthForm">
