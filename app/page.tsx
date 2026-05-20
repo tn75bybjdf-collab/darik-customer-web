@@ -3795,26 +3795,16 @@ export default function DarikCustomerWebHome() {
       return;
     }
 
-    if (!GOOGLE_PLACES_API_KEY) {
-      setPlaceSearchResults([]);
-      setPlaceSearchError('Google Places API key is missing in Vercel.');
-      return;
-    }
-
     try {
       setPlaceSearchLoading(true);
       setPlaceSearchError('');
 
       const params = new URLSearchParams({
         input: cleanQuery,
-        key: GOOGLE_PLACES_API_KEY,
-        components: 'country:jo',
         language: customerLanguage === 'ar' ? 'ar' : 'en',
-        location: '31.9539,35.9106',
-        radius: '60000',
       });
 
-      const response = await fetch(`https://maps.googleapis.com/maps/api/place/autocomplete/json?${params.toString()}`);
+      const response = await fetch(`/api/google-places/autocomplete?${params.toString()}`);
       const json = await response.json();
 
       if (json.status !== 'OK' && json.status !== 'ZERO_RESULTS') {
@@ -3838,23 +3828,16 @@ export default function DarikCustomerWebHome() {
   }
 
   async function useGooglePlaceForCheckout(place: GooglePlacePrediction) {
-    if (!GOOGLE_PLACES_API_KEY) {
-      setCheckoutError('Google Places API key is missing in Vercel.');
-      return;
-    }
-
     try {
       setPlaceSearchLoading(true);
       setPlaceSearchError('');
 
       const params = new URLSearchParams({
         place_id: place.place_id,
-        key: GOOGLE_PLACES_API_KEY,
-        fields: 'name,formatted_address,geometry',
         language: customerLanguage === 'ar' ? 'ar' : 'en',
       });
 
-      const response = await fetch(`https://maps.googleapis.com/maps/api/place/details/json?${params.toString()}`);
+      const response = await fetch(`/api/google-places/details?${params.toString()}`);
       const json = await response.json();
 
       if (json.status !== 'OK' || !json.result?.geometry?.location) {
