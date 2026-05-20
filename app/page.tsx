@@ -1074,6 +1074,7 @@ export default function DarikCustomerWebHome() {
   const [cartOpen, setCartOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [returnToCartAfterLogin, setReturnToCartAfterLogin] = useState(false);
+  const [checkoutLoginReturning, setCheckoutLoginReturning] = useState(false);
   const [settingsSavedMessage, setSettingsSavedMessage] = useState('');
   const [checkoutOpen, setCheckoutOpen] = useState(false);
   const [orderPlacedOpen, setOrderPlacedOpen] = useState(false);
@@ -2032,11 +2033,16 @@ export default function DarikCustomerWebHome() {
         return;
       }
 
+      if (returnToCartAfterLogin) {
+        setCheckoutLoginReturning(true);
+      }
+
       setCustomerSession(data.session);
       await ensureWebCustomerProfile(data.session.user);
       setLoginPassword('');
 
       if (returnToCartAfterLogin) {
+        setCheckoutLoginReturning(true);
         setReturnToCartAfterLogin(false);
         setSettingsOpen(false);
         setCheckoutOpen(false);
@@ -2045,6 +2051,7 @@ export default function DarikCustomerWebHome() {
         window.setTimeout(() => {
           const cartSheet = document.querySelector('.cleanAmazonCartSheet');
           cartSheet?.scrollIntoView({ behavior: 'smooth', block: 'end' });
+          setCheckoutLoginReturning(false);
         }, 150);
         return;
       }
@@ -2053,6 +2060,9 @@ export default function DarikCustomerWebHome() {
       showSettingsMessage('Logged in.');
     } finally {
       setAuthBusy(false);
+      if (!customerSession?.user) {
+        setCheckoutLoginReturning(false);
+      }
     }
   }
 
@@ -2151,6 +2161,7 @@ export default function DarikCustomerWebHome() {
         setSignupCodeCooldownSeconds(0);
 
         if (returnToCartAfterLogin) {
+          setCheckoutLoginReturning(true);
           setReturnToCartAfterLogin(false);
           setSettingsOpen(false);
           setCheckoutOpen(false);
@@ -3807,6 +3818,7 @@ export default function DarikCustomerWebHome() {
     setCheckoutOpen(false);
     setCartOpen(false);
     setReturnToCartAfterLogin(true);
+    setCheckoutLoginReturning(false);
     setAuthMode('login');
     setPasswordResetOpen(false);
     setSettingsOpen(true);
@@ -5221,6 +5233,16 @@ export default function DarikCustomerWebHome() {
         </div>
       ) : null}
 
+      {checkoutLoginReturning ? (
+        <div className="checkoutLoginReturningOverlay">
+          <div className="checkoutLoginReturningCard">
+            <div className="checkoutLoginSpinner" />
+            <strong>Signing you in...</strong>
+            <p>Taking you back to your cart.</p>
+          </div>
+        </div>
+      ) : null}
+
       {settingsOpen ? (
         <div className="settingsFullScreenOverlay" dir={customerLanguage === 'ar' ? 'rtl' : 'ltr'}>
           <div className="settingsFullScreenPage">
@@ -5341,8 +5363,8 @@ export default function DarikCustomerWebHome() {
                           <input type="password" value={loginPassword} onChange={(event) => setLoginPassword(event.target.value)} placeholder={t('password')} />
                         </label>
                         <p>{t('rememberPasswordNote')}</p>
-                        <button type="button" className="settingsPrimaryButton" disabled={authBusy || authLoading} onClick={() => handleWebCustomerLogin().catch(() => {})}>
-                          {authBusy || authLoading ? t('pleaseWait') : t('login')}
+                        <button type="button" className="settingsPrimaryButton" disabled={authBusy || authLoading || checkoutLoginReturning} onClick={() => handleWebCustomerLogin().catch(() => {})}>
+                          {checkoutLoginReturning ? 'Returning to cart...' : authBusy || authLoading ? t('pleaseWait') : t('login')}
                         </button>
 
                         <button

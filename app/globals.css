@@ -10368,3 +10368,54 @@ button[class*="signOut"] {
     box-shadow: 0 0 0 14px rgba(255, 210, 63, 0);
   }
 }
+
+/* L383 checkout login return loader */
+.checkoutLoginReturningOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 12000;
+  display: grid;
+  place-items: center;
+  background: rgba(255, 255, 255, 0.72);
+  backdrop-filter: blur(7px);
+}
+
+.checkoutLoginReturningCard {
+  width: min(340px, calc(100vw - 42px));
+  border: 1px solid #e5e7eb;
+  border-radius: 22px;
+  background: #ffffff;
+  padding: 24px;
+  text-align: center;
+  box-shadow: 0 22px 70px rgba(15, 23, 42, 0.18);
+}
+
+.checkoutLoginSpinner {
+  width: 42px;
+  height: 42px;
+  border-radius: 999px;
+  border: 4px solid #f3f4f6;
+  border-top-color: #ffd23f;
+  margin: 0 auto 14px;
+  animation: darikCheckoutSpin 0.8s linear infinite;
+}
+
+.checkoutLoginReturningCard strong {
+  display: block;
+  color: #111827;
+  font-size: 18px;
+  font-weight: 950;
+}
+
+.checkoutLoginReturningCard p {
+  margin: 7px 0 0;
+  color: #6b7280;
+  font-size: 13px;
+  font-weight: 850;
+}
+
+@keyframes darikCheckoutSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}
