@@ -5,6 +5,20 @@ import Image from 'next/image';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import './globals.css';
 
+const GOOGLE_PLACES_API_KEY =
+  process.env.NEXT_PUBLIC_GOOGLE_PLACES_API_KEY ||
+  process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY ||
+  '';
+
+type GooglePlacePrediction = {
+  place_id: string;
+  description: string;
+  structured_formatting?: {
+    main_text?: string;
+    secondary_text?: string;
+  };
+};
+
 const supabaseUrl = 'https://aarpjcfsnlasclxefdqj.supabase.co';
 const supabaseAnonKey = 'sb_publishable_NWoe1kqAaGr4Oxpjb7Y_ng_lQ7MjZH4';
 
@@ -1096,6 +1110,10 @@ export default function DarikCustomerWebHome() {
   const [newLocationName, setNewLocationName] = useState('');
   const [locationLoading, setLocationLoading] = useState(false);
   const [locationMessage, setLocationMessage] = useState('');
+  const [placeSearchText, setPlaceSearchText] = useState('');
+  const [placeSearchResults, setPlaceSearchResults] = useState<GooglePlacePrediction[]>([]);
+  const [placeSearchLoading, setPlaceSearchLoading] = useState(false);
+  const [placeSearchError, setPlaceSearchError] = useState('');
   const [selectedDeliveryOption, setSelectedDeliveryOption] = useState<'' | 'next_day_free' | 'express_2hr'>('');
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [productImageZoomOpen, setProductImageZoomOpen] = useState(false);
@@ -3749,6 +3767,129 @@ export default function DarikCustomerWebHome() {
 
     if (selectedSavedLocationId === locationId) {
       setSelectedSavedLocationId('');
+    }
+  }
+
+  useEffect(() => {
+    const query = placeSearchText.trim();
+
+    if (query.length < 3) {
+      setPlaceSearchResults([]);
+      setPlaceSearchError('');
+      return;
+    }
+
+    const timer = window.setTimeout(() => {
+      searchGooglePlaces(query).catch(() => {});
+    }, 450);
+
+    return () => window.clearTimeout(timer);
+  }, [placeSearchText]);
+
+  async function searchGooglePlaces(query: string) {
+    const cleanQuery = query.trim();
+
+    if (cleanQuery.length < 3) {
+      setPlaceSearchResults([]);
+      setPlaceSearchError('');
+      return;
+    }
+
+    if (!GOOGLE_PLACES_API_KEY) {
+      setPlaceSearchResults([]);
+      setPlaceSearchError('Google Places API key is missing in Vercel.');
+      return;
+    }
+
+    try {
+      setPlaceSearchLoading(true);
+      setPlaceSearchError('');
+
+      const params = new URLSearchParams({
+        input: cleanQuery,
+        key: GOOGLE_PLACES_API_KEY,
+        components: 'country:jo',
+        language: customerLanguage === 'ar' ? 'ar' : 'en',
+        location: '31.9539,35.9106',
+        radius: '60000',
+      });
+
+      const response = await fetch(`https://maps.googleapis.com/maps/api/place/autocomplete/json?${params.toString()}`);
+      const json = await response.json();
+
+      if (json.status !== 'OK' && json.status !== 'ZERO_RESULTS') {
+        setPlaceSearchResults([]);
+        setPlaceSearchError(json.error_message || `Google Places error: ${json.status}`);
+        return;
+      }
+
+      const predictions = Array.isArray(json.predictions) ? json.predictions.slice(0, 6) : [];
+      setPlaceSearchResults(predictions);
+
+      if (json.status === 'ZERO_RESULTS' || predictions.length === 0) {
+        setPlaceSearchError('No matching locations found.');
+      }
+    } catch (error) {
+      setPlaceSearchResults([]);
+      setPlaceSearchError(error instanceof Error ? error.message : 'Could not search Google Maps.');
+    } finally {
+      setPlaceSearchLoading(false);
+    }
+  }
+
+  async function useGooglePlaceForCheckout(place: GooglePlacePrediction) {
+    if (!GOOGLE_PLACES_API_KEY) {
+      setCheckoutError('Google Places API key is missing in Vercel.');
+      return;
+    }
+
+    try {
+      setPlaceSearchLoading(true);
+      setPlaceSearchError('');
+
+      const params = new URLSearchParams({
+        place_id: place.place_id,
+        key: GOOGLE_PLACES_API_KEY,
+        fields: 'name,formatted_address,geometry',
+        language: customerLanguage === 'ar' ? 'ar' : 'en',
+      });
+
+      const response = await fetch(`https://maps.googleapis.com/maps/api/place/details/json?${params.toString()}`);
+      const json = await response.json();
+
+      if (json.status !== 'OK' || !json.result?.geometry?.location) {
+        setPlaceSearchError(json.error_message || `Google Place details error: ${json.status}`);
+        return;
+      }
+
+      const latitude = Number(json.result.geometry.location.lat);
+      const longitude = Number(json.result.geometry.location.lng);
+
+      if (!Number.isFinite(latitude) || !Number.isFinite(longitude)) {
+        setPlaceSearchError('Google did not return valid GPS coordinates.');
+        return;
+      }
+
+      const placeName = String(json.result.name || place.structured_formatting?.main_text || '').trim();
+      const formattedAddress = String(json.result.formatted_address || place.description || '').trim();
+      const label =
+        placeName && formattedAddress && !formattedAddress.includes(placeName)
+          ? `${placeName} | ${formattedAddress}`
+          : formattedAddress || placeName || `GPS: ${latitude.toFixed(6)}, ${longitude.toFixed(6)}`;
+
+      setManualLatitude(latitude.toFixed(6));
+      setManualLongitude(longitude.toFixed(6));
+      setDeliveryAddressDetails(label);
+      setSelectedSavedLocationId('');
+      setPlaceSearchText(label);
+      setPlaceSearchResults([]);
+      setPlaceSearchError('');
+      setCheckoutError('');
+      setLocationMessage(`Using Google Maps location: ${placeName || label}.`);
+    } catch (error) {
+      setPlaceSearchError(error instanceof Error ? error.message : 'Could not use this Google Maps location.');
+    } finally {
+      setPlaceSearchLoading(false);
     }
   }
 
@@ -6453,6 +6594,52 @@ export default function DarikCustomerWebHome() {
                         {locationLoading ? 'Getting Location...' : 'Use current location'}
                       </button>
                       <span>or enter GPS manually below</span>
+                    </div>
+
+                    <div className="googlePlacesSearchBox">
+                      <label className="googlePlacesSearchLabel">
+                        Search Google Maps Location
+                        <span>Type a place name, then tap the correct Google result.</span>
+                      </label>
+
+                      <input
+                        className="googlePlacesSearchInput"
+                        value={placeSearchText}
+                        onChange={(event) => setPlaceSearchText(event.target.value)}
+                        onKeyDown={(event) => {
+                          if (event.key === 'Enter') {
+                            event.preventDefault();
+                            searchGooglePlaces(placeSearchText).catch(() => {});
+                          }
+                        }}
+                        placeholder="Example: Hilton Hotel"
+                      />
+
+                      {placeSearchLoading ? (
+                        <p className="googlePlacesStatusText">Searching Google Maps...</p>
+                      ) : null}
+
+                      {placeSearchError ? (
+                        <p className="googlePlacesErrorText">{placeSearchError}</p>
+                      ) : null}
+
+                      {placeSearchResults.length > 0 ? (
+                        <div className="googlePlacesResultsBox">
+                          {placeSearchResults.map((place) => (
+                            <button
+                              key={place.place_id}
+                              type="button"
+                              className="googlePlaceResultButton"
+                              onClick={() => useGooglePlaceForCheckout(place)}
+                            >
+                              <strong>{place.structured_formatting?.main_text || place.description}</strong>
+                              {place.structured_formatting?.secondary_text ? (
+                                <span>{place.structured_formatting.secondary_text}</span>
+                              ) : null}
+                            </button>
+                          ))}
+                        </div>
+                      ) : null}
                     </div>
 
                     {locationMessage ? <div className="locationMessage">{locationMessage}</div> : null}
