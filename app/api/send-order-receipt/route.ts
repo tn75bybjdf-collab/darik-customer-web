@@ -11,6 +11,7 @@ type ReceiptItem = {
   quantity?: number;
   unitPrice?: number;
   lineTotal?: number;
+  imageUrl?: string | null;
 };
 
 type ReceiptPayload = {
@@ -82,10 +83,36 @@ function getEnvStatus() {
     smtpFromNameSet: Boolean(smtp.fromName),
     supabaseUrlSet: Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL),
     supabaseAnonKeySet: Boolean(process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY),
+    receiptLogoUrl: getDarikReceiptLogoUrl(),
   };
 }
 
+function getDarikReceiptLogoUrl() {
+  return (
+    process.env.DARIK_RECEIPT_LOGO_URL ||
+    process.env.NEXT_PUBLIC_DARIK_RECEIPT_LOGO_URL ||
+    'https://www.getdarik.com/darik_logo_final_v3.png'
+  );
+}
+
+function normalizeReceiptImageUrl(value?: string | null) {
+  const raw = String(value || '').trim();
+
+  if (!raw) return '';
+
+  if (raw.startsWith('http://') || raw.startsWith('https://')) {
+    return raw;
+  }
+
+  if (raw.startsWith('/')) {
+    return `https://www.getdarik.com${raw}`;
+  }
+
+  return raw;
+}
+
 function buildReceiptHtml(payload: ReceiptPayload) {
+  const logoUrl = getDarikReceiptLogoUrl();
   const orderShort = shortOrderId(payload.orderId);
   const orderDate = new Date().toLocaleString('en-US', {
     timeZone: 'Asia/Amman',
@@ -103,13 +130,33 @@ function buildReceiptHtml(payload: ReceiptPayload) {
       const sizeLine = item.size
         ? `<div style="color:#6b7280;font-size:12px;margin-top:3px;">Size: ${escapeHtml(item.size)}</div>`
         : '';
+      const imageUrl = normalizeReceiptImageUrl(item.imageUrl);
+      const imageBlock = imageUrl
+        ? `
+          <td width="78" valign="top" style="padding:14px 12px 14px 0;border-bottom:1px solid #eef0f3;">
+            <img
+              src="${escapeHtml(imageUrl)}"
+              alt="${escapeHtml(item.name || 'Darik item')}"
+              width="66"
+              height="66"
+              style="display:block;width:66px;height:66px;object-fit:cover;border-radius:12px;border:1px solid #e5e7eb;background:#f9fafb;"
+            />
+          </td>
+        `
+        : `
+          <td width="78" valign="top" style="padding:14px 12px 14px 0;border-bottom:1px solid #eef0f3;">
+            <div style="width:66px;height:66px;border-radius:12px;border:1px solid #e5e7eb;background:#f9fafb;display:block;text-align:center;line-height:66px;color:#9ca3af;font-size:22px;">📦</div>
+          </td>
+        `;
 
       return `
         <tr>
+          ${imageBlock}
           <td style="padding:14px 0;border-bottom:1px solid #eef0f3;">
             <div style="font-weight:800;color:#111827;font-size:14px;line-height:1.35;">${escapeHtml(item.name || 'Darik item')}</div>
             ${sizeLine}
             <div style="color:#6b7280;font-size:12px;margin-top:3px;">Qty: ${Number(item.quantity || 0)}</div>
+            <div style="color:#6b7280;font-size:12px;margin-top:3px;">Unit: ${money(item.unitPrice)}</div>
           </td>
           <td align="right" style="padding:14px 0;border-bottom:1px solid #eef0f3;color:#111827;font-weight:800;white-space:nowrap;">
             ${money(item.lineTotal)}
@@ -143,9 +190,14 @@ function buildReceiptHtml(payload: ReceiptPayload) {
 <html>
   <body style="margin:0;background:#f3f4f6;font-family:Arial,Helvetica,sans-serif;color:#111827;">
     <div style="max-width:680px;margin:0 auto;padding:28px 14px;">
-      <div style="background:#111111;border-radius:22px 22px 0 0;padding:22px 24px;">
-        <div style="color:#ffd23f;font-size:26px;font-weight:900;letter-spacing:.08em;">DARIK</div>
-        <div style="color:#ffffff;font-size:14px;font-weight:700;margin-top:4px;">Your order receipt</div>
+      <div style="background:#111111;border-radius:22px 22px 0 0;padding:22px 24px;text-align:center;">
+        <img
+          src="${escapeHtml(logoUrl)}"
+          alt="Darik Marketplace"
+          width="190"
+          style="display:block;width:190px;max-width:70%;height:auto;margin:0 auto 8px;border:0;outline:none;text-decoration:none;"
+        />
+        <div style="color:#ffffff;font-size:14px;font-weight:800;margin-top:4px;">Your order receipt</div>
       </div>
 
       <div style="background:#ffffff;border:1px solid #e5e7eb;border-top:0;border-radius:0 0 22px 22px;padding:24px;">

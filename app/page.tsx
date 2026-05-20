@@ -3856,6 +3856,26 @@ export default function DarikCustomerWebHome() {
     setCheckoutOpen(true);
   }
 
+  function getReceiptProductImageUrl(product?: Product | null, cartItem?: CartItem | null) {
+    const candidate =
+      (product as any)?.official_image_url ||
+      (product as any)?.officialPhotoUrl ||
+      (product as any)?.official_photo_url ||
+      (product as any)?.image_url ||
+      (product as any)?.imageUrl ||
+      (product as any)?.photo_url ||
+      (product as any)?.photoUrl ||
+      (product as any)?.thumbnail_url ||
+      (product as any)?.thumbnailUrl ||
+      (cartItem as any)?.image_url ||
+      (cartItem as any)?.imageUrl ||
+      (cartItem as any)?.photo_url ||
+      (cartItem as any)?.photoUrl ||
+      '';
+
+    return String(candidate || '').trim();
+  }
+
   async function sendDarikOrderReceiptEmail(payload: {
     orderId: string;
     deliveryPin?: string;
@@ -3877,6 +3897,7 @@ export default function DarikCustomerWebHome() {
       quantity: number;
       unitPrice: number;
       lineTotal: number;
+      imageUrl?: string | null;
     }>;
   }) {
     const accessToken = customerSession?.access_token;
@@ -4131,6 +4152,7 @@ export default function DarikCustomerWebHome() {
           quantity: cartItem.quantity,
           unitPrice: roundMoney(cartItem.priceNumber),
           lineTotal: roundMoney(cartItem.priceNumber * cartItem.quantity),
+          imageUrl: getReceiptProductImageUrl(product, cartItem),
         })),
       });
 
