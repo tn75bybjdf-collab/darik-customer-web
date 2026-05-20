@@ -3856,6 +3856,49 @@ export default function DarikCustomerWebHome() {
     setCheckoutOpen(true);
   }
 
+  async function sendDarikOrderReceiptEmail(payload: {
+    orderId: string;
+    deliveryPin?: string;
+    customerEmail?: string | null;
+    customerName: string;
+    customerPhone: string;
+    paymentMethod: string;
+    deliveryLabel: string;
+    deliveryEtaLabel: string;
+    deliveryAddress: string;
+    deliveryNote?: string | null;
+    subtotal: number;
+    deliveryFee: number;
+    darikCreditAppliedAmount?: number;
+    total: number;
+    items: Array<{
+      name: string;
+      size?: string | null;
+      quantity: number;
+      unitPrice: number;
+      lineTotal: number;
+    }>;
+  }) {
+    const accessToken = customerSession?.access_token;
+
+    if (!accessToken || !payload.customerEmail) {
+      return;
+    }
+
+    try {
+      await fetch('/api/send-order-receipt', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${accessToken}`,
+        },
+        body: JSON.stringify(payload),
+      });
+    } catch (error) {
+      console.warn('Could not send Darik order receipt:', error);
+    }
+  }
+
   async function placeWebOrder() {
     setCheckoutError('');
 
@@ -4066,6 +4109,31 @@ export default function DarikCustomerWebHome() {
       }
 
       setPlacedOrderPin(deliveryPin);
+
+      await sendDarikOrderReceiptEmail({
+        orderId: orderData.id,
+        deliveryPin,
+        customerEmail: customerProfile.email ?? customerSession.user.email ?? null,
+        customerName: cleanName,
+        customerPhone: cleanPhone,
+        paymentMethod: 'Cash on Delivery',
+        deliveryLabel: selectedStoredLabel,
+        deliveryEtaLabel,
+        deliveryAddress: cleanAddress,
+        deliveryNote: deliveryNote.trim() || null,
+        subtotal: roundMoney(subtotal),
+        deliveryFee: roundMoney(deliveryFee),
+        darikCreditAppliedAmount: 0,
+        total: roundMoney(total),
+        items: orderItems.map(({ cartItem, product, selectedVariant }) => ({
+          name: product?.name ?? cartItem.name,
+          size: cartItem.selectedCartSize ?? selectedVariant?.size_label ?? null,
+          quantity: cartItem.quantity,
+          unitPrice: roundMoney(cartItem.priceNumber),
+          lineTotal: roundMoney(cartItem.priceNumber * cartItem.quantity),
+        })),
+      });
+
       setCartItems([]);
       setCheckoutOpen(false);
       setCartOpen(false);
