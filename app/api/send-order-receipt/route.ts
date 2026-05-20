@@ -2,6 +2,9 @@ import { NextResponse } from 'next/server';
 import nodemailer from 'nodemailer';
 import { createClient } from '@supabase/supabase-js';
 
+export const runtime = 'nodejs';
+export const dynamic = 'force-dynamic';
+
 type ReceiptItem = {
   name?: string;
   size?: string | null;
@@ -47,6 +50,41 @@ function shortOrderId(orderId?: string) {
   return orderId.length > 8 ? orderId.slice(0, 8).toUpperCase() : orderId.toUpperCase();
 }
 
+function getSmtpConfig() {
+  const smtpHost = process.env.SMTP_HOST || 'mail.privateemail.com';
+  const smtpPort = Number(process.env.SMTP_PORT || 465);
+  const smtpUser = process.env.SMTP_USER || '';
+  const smtpPass = process.env.SMTP_PASS || '';
+  const fromEmail = process.env.SMTP_FROM_EMAIL || smtpUser;
+  const fromName = process.env.SMTP_FROM_NAME || 'Darik Support';
+
+  return {
+    smtpHost,
+    smtpPort,
+    smtpUser,
+    smtpPass,
+    fromEmail,
+    fromName,
+  };
+}
+
+function getEnvStatus() {
+  const smtp = getSmtpConfig();
+
+  return {
+    route: 'send-order-receipt',
+    live: true,
+    smtpHostSet: Boolean(smtp.smtpHost),
+    smtpPort: smtp.smtpPort,
+    smtpUserSet: Boolean(smtp.smtpUser),
+    smtpPassSet: Boolean(smtp.smtpPass),
+    smtpFromEmailSet: Boolean(smtp.fromEmail),
+    smtpFromNameSet: Boolean(smtp.fromName),
+    supabaseUrlSet: Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL),
+    supabaseAnonKeySet: Boolean(process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY),
+  };
+}
+
 function buildReceiptHtml(payload: ReceiptPayload) {
   const orderShort = shortOrderId(payload.orderId);
   const orderDate = new Date().toLocaleString('en-US', {
@@ -62,7 +100,9 @@ function buildReceiptHtml(payload: ReceiptPayload) {
 
   const itemRows = items
     .map((item) => {
-      const sizeLine = item.size ? `<div style="color:#6b7280;font-size:12px;margin-top:3px;">Size: ${escapeHtml(item.size)}</div>` : '';
+      const sizeLine = item.size
+        ? `<div style="color:#6b7280;font-size:12px;margin-top:3px;">Size: ${escapeHtml(item.size)}</div>`
+        : '';
 
       return `
         <tr>
@@ -181,12 +221,19 @@ function buildReceiptHtml(payload: ReceiptPayload) {
 </html>`;
 }
 
+export async function GET() {
+  return NextResponse.json(getEnvStatus());
+}
+
 export async function POST(request: Request) {
   try {
+    console.log('[Darik receipt] POST started', getEnvStatus());
+
     const authHeader = request.headers.get('authorization') || '';
     const token = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : '';
 
     if (!token) {
+      console.error('[Darik receipt] Missing authorization token');
       return NextResponse.json({ success: false, error: 'Missing authorization token.' }, { status: 401 });
     }
 
@@ -194,6 +241,7 @@ export async function POST(request: Request) {
     const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
     if (!supabaseUrl || !supabaseAnonKey) {
+      console.error('[Darik receipt] Missing Supabase env vars', getEnvStatus());
       return NextResponse.json({ success: false, error: 'Missing Supabase environment variables.' }, { status: 500 });
     }
 
@@ -201,6 +249,9 @@ export async function POST(request: Request) {
     const { data: userData, error: userError } = await supabase.auth.getUser(token);
 
     if (userError || !userData.user) {
+      console.error('[Darik receipt] Invalid customer session', {
+        message: userError?.message,
+      });
       return NextResponse.json({ success: false, error: 'Invalid customer session.' }, { status: 401 });
     }
 
@@ -208,45 +259,92 @@ export async function POST(request: Request) {
     const recipient = String(payload.customerEmail || userData.user.email || '').trim().toLowerCase();
 
     if (!recipient || !recipient.includes('@')) {
+      console.error('[Darik receipt] Missing valid recipient', {
+        hasPayloadEmail: Boolean(payload.customerEmail),
+        hasUserEmail: Boolean(userData.user.email),
+      });
       return NextResponse.json({ success: false, error: 'Missing valid customer email.' }, { status: 400 });
     }
 
     if (userData.user.email && recipient !== userData.user.email.toLowerCase()) {
+      console.error('[Darik receipt] Recipient mismatch', {
+        recipient,
+        userEmail: userData.user.email,
+      });
       return NextResponse.json({ success: false, error: 'Receipt email must match logged-in customer email.' }, { status: 403 });
     }
 
-    const smtpHost = process.env.SMTP_HOST || 'mail.privateemail.com';
-    const smtpPort = Number(process.env.SMTP_PORT || 465);
-    const smtpUser = process.env.SMTP_USER;
-    const smtpPass = process.env.SMTP_PASS;
-    const fromEmail = process.env.SMTP_FROM_EMAIL || smtpUser;
-    const fromName = process.env.SMTP_FROM_NAME || 'Darik Support';
+    const smtp = getSmtpConfig();
 
-    if (!smtpUser || !smtpPass || !fromEmail) {
+    if (!smtp.smtpUser || !smtp.smtpPass || !smtp.fromEmail) {
+      console.error('[Darik receipt] Missing SMTP env vars', getEnvStatus());
       return NextResponse.json({ success: false, error: 'SMTP environment variables are missing.' }, { status: 500 });
     }
 
     const transporter = nodemailer.createTransport({
-      host: smtpHost,
-      port: smtpPort,
-      secure: smtpPort === 465,
+      host: smtp.smtpHost,
+      port: smtp.smtpPort,
+      secure: smtp.smtpPort === 465,
       auth: {
-        user: smtpUser,
-        pass: smtpPass,
+        user: smtp.smtpUser,
+        pass: smtp.smtpPass,
       },
+      connectionTimeout: 15000,
+      greetingTimeout: 15000,
+      socketTimeout: 20000,
     });
 
-    await transporter.sendMail({
-      from: `"${fromName}" <${fromEmail}>`,
+    console.log('[Darik receipt] Verifying SMTP connection', {
+      host: smtp.smtpHost,
+      port: smtp.smtpPort,
+      userSet: Boolean(smtp.smtpUser),
+      fromEmail: smtp.fromEmail,
+    });
+
+    await transporter.verify();
+
+    console.log('[Darik receipt] Sending email', {
+      to: recipient,
+      orderId: payload.orderId,
+    });
+
+    const info = await transporter.sendMail({
+      from: `"${smtp.fromName}" <${smtp.fromEmail}>`,
       to: recipient,
       subject: `Darik receipt for order #${shortOrderId(payload.orderId)}`,
       html: buildReceiptHtml(payload),
     });
 
-    return NextResponse.json({ success: true });
+    console.log('[Darik receipt] Email sent', {
+      messageId: info.messageId,
+      accepted: info.accepted,
+      rejected: info.rejected,
+    });
+
+    return NextResponse.json({ success: true, messageId: info.messageId });
   } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    const code = typeof error === 'object' && error && 'code' in error ? String((error as { code?: unknown }).code) : '';
+    const command = typeof error === 'object' && error && 'command' in error ? String((error as { command?: unknown }).command) : '';
+    const response = typeof error === 'object' && error && 'response' in error ? String((error as { response?: unknown }).response) : '';
+
+    console.error('[Darik receipt] Fatal error', {
+      message,
+      code,
+      command,
+      response,
+      env: getEnvStatus(),
+    });
+
     return NextResponse.json(
-      { success: false, error: error instanceof Error ? error.message : 'Could not send receipt email.' },
+      {
+        success: false,
+        error: message || 'Could not send receipt email.',
+        code,
+        command,
+        response,
+        env: getEnvStatus(),
+      },
       { status: 500 }
     );
   }
