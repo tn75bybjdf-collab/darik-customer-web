@@ -10277,3 +10277,24 @@ button[class*="signOut"] {
     display: none !important;
   }
 }
+
+/* L373 customer signup confirmation code */
+.signupCodeInlineButton {
+  width: 100%;
+  margin: 4px 0 10px;
+}
+
+.signupCodeHelpText {
+  display: block;
+  margin-top: 6px;
+  color: #6b7280;
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1.35;
+}
+
+/* L376 signup resend cooldown */
+.signupCodeInlineButton:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}

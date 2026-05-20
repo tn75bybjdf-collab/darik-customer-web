@@ -1121,8 +1121,13 @@ export default function DarikCustomerWebHome() {
   const [loginPassword, setLoginPassword] = useState('');
   const [signupName, setSignupName] = useState('');
   const [signupPhone, setSignupPhone] = useState('');
+  const [signupPhoneConfirm, setSignupPhoneConfirm] = useState('');
   const [signupEmail, setSignupEmail] = useState('');
+  const [signupEmailCode, setSignupEmailCode] = useState('');
+  const [signupConfirmationCodeSent, setSignupConfirmationCodeSent] = useState(false);
+  const [signupCodeCooldownSeconds, setSignupCodeCooldownSeconds] = useState(0);
   const [signupPassword, setSignupPassword] = useState('');
+  const [signupPasswordConfirm, setSignupPasswordConfirm] = useState('');
   const [customerSession, setCustomerSession] = useState<Session | null>(null);
   const [customerProfile, setCustomerProfile] = useState<CustomerProfile | null>(null);
   const [customerOrders, setCustomerOrders] = useState<CustomerOrder[]>([]);
@@ -1855,7 +1860,26 @@ export default function DarikCustomerWebHome() {
       .single();
 
     if (newProfileResult.error) {
-      showSettingsError(newProfileResult.error.message);
+      const rpcResult = await supabase.rpc('customer_ensure_profile_v1', {
+        p_email: email,
+        p_full_name: fallbackName?.trim() || email,
+        p_phone: fallbackPhone?.trim() || '',
+      });
+
+      if (!rpcResult.error && rpcResult.data) {
+        const rpcRow = Array.isArray(rpcResult.data) ? rpcResult.data[0] : rpcResult.data;
+        const profileFromRpc = ((rpcRow as any)?.profile ?? rpcRow) as CustomerProfile;
+
+        syncCustomerProfileToFields(profileFromRpc, user);
+        await Promise.all([
+          loadCustomerOrders(profileFromRpc.id),
+          loadCustomerSavedLocations(profileFromRpc.id),
+          loadCustomerSupport(profileFromRpc.id),
+        ]);
+        return profileFromRpc;
+      }
+
+      showSettingsError(rpcResult.error?.message || newProfileResult.error.message);
       return null;
     }
 
@@ -1947,46 +1971,166 @@ export default function DarikCustomerWebHome() {
     }
   }
 
-  async function handleWebCustomerSignup() {
+  function validateWebCustomerSignupBasics() {
     const email = signupEmail.trim().toLowerCase();
     const name = signupName.trim();
     const phone = signupPhone.trim();
+    const confirmPhone = signupPhoneConfirm.trim();
 
-    if (name.length < 2 || phone.length < 7 || !email || signupPassword.length < 6) {
-      showSettingsError('Enter name, phone, email, and a password with at least 6 characters.');
+    if (name.length < 2 || phone.length < 7 || confirmPhone.length < 7 || !email || signupPassword.length < 6 || signupPasswordConfirm.length < 6) {
+      showSettingsError('Enter name, phone twice, email, and password twice. Password must be at least 6 characters.');
+      return null;
+    }
+
+    if (phone !== confirmPhone) {
+      showSettingsError('Phone numbers do not match.');
+      return null;
+    }
+
+    if (signupPassword !== signupPasswordConfirm) {
+      showSettingsError('Passwords do not match.');
+      return null;
+    }
+
+    return { email, name, phone };
+  }
+
+  async function checkWebCustomerSignupAvailability(email: string, phone: string) {
+    const { data, error } = await supabase.rpc('customer_can_signup_v1', {
+      p_email: email,
+      p_phone: phone,
+    });
+
+    if (error) {
+      showSettingsError(error.message);
+      return false;
+    }
+
+    const result = Array.isArray(data) ? data[0] : data;
+    const allowed = Boolean((result as any)?.allowed);
+    const reason = String((result as any)?.reason || 'This email or phone number is already registered.');
+
+    if (!allowed) {
+      showSettingsError(reason);
+      return false;
+    }
+
+    return true;
+  }
+
+  async function sendWebCustomerSignupConfirmationCode() {
+    if (signupCodeCooldownSeconds > 0) {
+      showSettingsError(`You can resend the confirmation code in ${signupCodeCooldownSeconds} seconds.`);
       return;
     }
 
+    const signupDetails = validateWebCustomerSignupBasics();
+    if (!signupDetails) return;
+
     try {
       setAuthBusy(true);
+
+      const signupAllowed = await checkWebCustomerSignupAvailability(signupDetails.email, signupDetails.phone);
+      if (!signupAllowed) return;
       const { data, error } = await supabase.auth.signUp({
-        email,
+        email: signupDetails.email,
         password: signupPassword,
         options: {
           data: {
-            full_name: name,
-            phone,
+            full_name: signupDetails.name,
+            phone: signupDetails.phone,
           },
         },
       });
 
       if (error || !data.user) {
-        showSettingsError(error?.message ?? 'Could not create account.');
+        const message = String(error?.message ?? 'Could not send confirmation code.');
+        const duplicateAccount =
+          message.toLowerCase().includes('already') ||
+          message.toLowerCase().includes('registered') ||
+          message.toLowerCase().includes('exists');
+
+        showSettingsError(
+          duplicateAccount ? 'This email is already registered. Please log in instead.' : message
+        );
         return;
       }
 
       if (data.session) {
         setCustomerSession(data.session);
+        await ensureWebCustomerProfile(data.user, signupDetails.name, signupDetails.phone);
+        setSignupPassword('');
+        setSignupPasswordConfirm('');
+        setSignupEmailCode('');
+        setSignupConfirmationCodeSent(false);
+        setSignupCodeCooldownSeconds(0);
+        setSettingsActiveTool('account');
+        showSettingsMessage('Customer account created.');
+        return;
       }
 
-      await ensureWebCustomerProfile(data.user, name, phone);
+      setSignupConfirmationCodeSent(true);
+      setSignupCodeCooldownSeconds(60);
+      showSettingsMessage('Confirmation code sent. Check your email and enter the code under the email field.');
+    } finally {
+      setAuthBusy(false);
+    }
+  }
+
+  async function verifyWebCustomerSignupCodeAndCreateAccount() {
+    const signupDetails = validateWebCustomerSignupBasics();
+    if (!signupDetails) return;
+
+    const token = signupEmailCode.trim();
+
+    if (token.length < 4) {
+      showSettingsError('Enter the confirmation code sent to your email.');
+      return;
+    }
+
+    try {
+      setAuthBusy(true);
+
+      let verifyResult = await supabase.auth.verifyOtp({
+        email: signupDetails.email,
+        token,
+        type: 'signup',
+      });
+
+      if (verifyResult.error || !verifyResult.data.session?.user) {
+        verifyResult = await supabase.auth.verifyOtp({
+          email: signupDetails.email,
+          token,
+          type: 'email' as any,
+        });
+      }
+
+      if (verifyResult.error || !verifyResult.data.session?.user) {
+        showSettingsError(verifyResult.error?.message ?? 'Could not confirm this code.');
+        return;
+      }
+
+      setCustomerSession(verifyResult.data.session);
+      await ensureWebCustomerProfile(verifyResult.data.session.user, signupDetails.name, signupDetails.phone);
       setSignupPassword('');
-      setAuthMode('login');
+      setSignupPasswordConfirm('');
+      setSignupEmailCode('');
+      setSignupConfirmationCodeSent(false);
+      setSignupCodeCooldownSeconds(0);
       setSettingsActiveTool('account');
       showSettingsMessage('Customer account created.');
     } finally {
       setAuthBusy(false);
     }
+  }
+
+  async function handleWebCustomerSignup() {
+    if (signupConfirmationCodeSent) {
+      await verifyWebCustomerSignupCodeAndCreateAccount();
+      return;
+    }
+
+    await sendWebCustomerSignupConfirmationCode();
   }
 
   async function handleWebCustomerLogout() {
@@ -2393,6 +2537,16 @@ export default function DarikCustomerWebHome() {
       }
     }
   }
+
+  useEffect(() => {
+    if (signupCodeCooldownSeconds <= 0) return;
+
+    const timer = window.setTimeout(() => {
+      setSignupCodeCooldownSeconds((seconds) => Math.max(seconds - 1, 0));
+    }, 1000);
+
+    return () => window.clearTimeout(timer);
+  }, [signupCodeCooldownSeconds]);
 
   async function loadCatalogAfterScroll() {
     if (catalogLoadStartedRef.current || catalogLoaded) return;
@@ -5031,18 +5185,58 @@ export default function DarikCustomerWebHome() {
                         </label>
                         <label>
                           {t('phoneNumber')}
-                          <input value={signupPhone} onChange={(event) => setSignupPhone(event.target.value)} placeholder="Example: 0790000000" />
+                          <input value={signupPhone} onChange={(event) => {
+                            setSignupPhone(event.target.value);
+                            setSignupConfirmationCodeSent(false);
+                          }} placeholder="Example: 0790000000" />
+                        </label>
+                        <label>
+                          Confirm Phone Number
+                          <input value={signupPhoneConfirm} onChange={(event) => {
+                            setSignupPhoneConfirm(event.target.value);
+                            setSignupConfirmationCodeSent(false);
+                          }} placeholder="Re-enter phone number" />
                         </label>
                         <label>
                           {t('email')}
-                          <input value={signupEmail} onChange={(event) => setSignupEmail(event.target.value)} placeholder="customer@example.com" />
+                          <input value={signupEmail} onChange={(event) => {
+                            setSignupEmail(event.target.value);
+                            setSignupConfirmationCodeSent(false);
+                          }} placeholder="customer@example.com" />
                         </label>
+                        <button
+                          type="button"
+                          className="settingsSecondaryButton signupCodeInlineButton"
+                          disabled={authBusy || authLoading || signupCodeCooldownSeconds > 0}
+                          onClick={() => sendWebCustomerSignupConfirmationCode().catch(() => {})}
+                        >
+                          {signupCodeCooldownSeconds > 0 ? `Resend code in ${signupCodeCooldownSeconds}s` : signupConfirmationCodeSent ? 'Send Confirmation Code Again' : 'Send Confirmation Code'}
+                        </button>
+
+                        {signupConfirmationCodeSent ? (
+                          <label>
+                            Email Confirmation Code
+                            <input value={signupEmailCode} onChange={(event) => setSignupEmailCode(event.target.value)} placeholder="Enter code from email" />
+                            <span className="signupCodeHelpText">Check your inbox and spam folder, then enter the code here. You can resend after 60 seconds.</span>
+                          </label>
+                        ) : null}
+
                         <label>
                           {t('password')}
-                          <input type="password" value={signupPassword} onChange={(event) => setSignupPassword(event.target.value)} placeholder="Minimum 6 characters" />
+                          <input type="password" value={signupPassword} onChange={(event) => {
+                            setSignupPassword(event.target.value);
+                            setSignupConfirmationCodeSent(false);
+                          }} placeholder="Minimum 6 characters" />
+                        </label>
+                        <label>
+                          Confirm Password
+                          <input type="password" value={signupPasswordConfirm} onChange={(event) => {
+                            setSignupPasswordConfirm(event.target.value);
+                            setSignupConfirmationCodeSent(false);
+                          }} placeholder="Re-enter password" />
                         </label>
                         <button type="button" className="settingsPrimaryButton" disabled={authBusy || authLoading} onClick={() => handleWebCustomerSignup().catch(() => {})}>
-                          {authBusy || authLoading ? t('pleaseWait') : t('signUp')}
+                          {authBusy || authLoading ? t('pleaseWait') : signupConfirmationCodeSent ? 'Verify Code & Create Account' : 'Send Confirmation Code'}
                         </button>
                       </div>
                     )}
