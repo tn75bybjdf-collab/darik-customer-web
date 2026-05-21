@@ -10565,3 +10565,43 @@ button[class*="signOut"] {
   line-height: 1.35;
   margin-top: 3px;
 }
+
+/* L407 subcategory soft-search banner */
+.subcategoryActiveSearchBanner {
+  margin: 0 18px 14px;
+  border: 1px solid #facc15;
+  background: #fff7cc;
+  color: #111827;
+  border-radius: 16px;
+  padding: 12px 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 13px;
+  font-weight: 850;
+}
+
+.subcategoryActiveSearchBanner button {
+  border: 0;
+  background: #111111;
+  color: #ffd23f;
+  border-radius: 999px;
+  padding: 8px 12px;
+  font-weight: 950;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+@media (max-width: 640px) {
+  .subcategoryActiveSearchBanner {
+    margin-left: 12px;
+    margin-right: 12px;
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .subcategoryActiveSearchBanner button {
+    width: 100%;
+  }
+}

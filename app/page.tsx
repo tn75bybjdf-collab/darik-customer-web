@@ -759,90 +759,15 @@ function productMatchesMainCategory(product: Product, selectedCategoryId: string
 }
 
 function productMatchesSubcategory(product: Product, selectedDepartmentCode: string, selectedItemTypeCode: string, rows: MarketplaceCategorySubcategory[]) {
-  if (selectedDepartmentCode === 'All' && selectedItemTypeCode === 'All') return true;
-
-  const normalizedDepartment = normalizeMarketplaceCategoryCode(selectedDepartmentCode);
-  const normalizedItemType = normalizeMarketplaceCategoryCode(selectedItemTypeCode);
-
-  const productDepartmentCandidates = [
-    product.clothing_department,
-    product.category_code,
-    product.category_name,
-    product.subcategory_name,
-  ].map((value) => normalizeMarketplaceCategoryCode(value));
-
-  const productItemTypeCandidates = [
-    product.clothing_item_type,
-    product.subcategory_name,
-    product.category_name,
-    product.category_code,
-    product.name,
-    product.description,
-  ].map((value) => normalizeMarketplaceCategoryCode(value));
-
-  const selectedRowMatches = rows.filter((row) => {
-    const rowDepartment = normalizeMarketplaceCategoryCode(row.department_code || row.category_code || row.category_name_match || '');
-    const rowItemType = normalizeMarketplaceCategoryCode(row.item_type_code || row.subcategory_name_en || '');
-
-    const departmentMatches =
-      selectedDepartmentCode === 'All' ||
-      rowDepartment === normalizedDepartment ||
-      normalizeMarketplaceCategoryCode(row.department_name_en || '') === normalizedDepartment;
-
-    const itemTypeMatches =
-      selectedItemTypeCode === 'All' ||
-      rowItemType === normalizedItemType ||
-      normalizeMarketplaceCategoryCode(row.item_type_name_en || '') === normalizedItemType ||
-      normalizeMarketplaceCategoryCode(row.subcategory_name_en || '') === normalizedItemType;
-
-    return departmentMatches && itemTypeMatches;
-  });
-
-  if (selectedDepartmentCode !== 'All') {
-    const departmentMatchesProduct = productDepartmentCandidates.some((candidate) => candidate === normalizedDepartment);
-
-    const departmentMatchesRow = selectedRowMatches.some((row) => {
-      const rowDepartmentNames = [
-        row.department_code,
-        row.department_name_en,
-        row.department_name_ar,
-        row.category_code,
-        row.category_name_match,
-      ].map((value) => normalizeMarketplaceCategoryCode(value));
-
-      return rowDepartmentNames.some((rowDepartmentName) =>
-        productDepartmentCandidates.includes(rowDepartmentName) ||
-        productItemTypeCandidates.includes(rowDepartmentName)
-      );
-    });
-
-    if (!departmentMatchesProduct && !departmentMatchesRow) return false;
-  }
-
-  if (selectedItemTypeCode !== 'All') {
-    const itemTypeMatchesProduct = productItemTypeCandidates.some((candidate) => candidate === normalizedItemType);
-
-    const itemTypeMatchesRow = selectedRowMatches.some((row) => {
-      const rowItemNames = [
-        row.item_type_code,
-        row.item_type_name_en,
-        row.item_type_name_ar,
-        row.subcategory_name_en,
-        row.subcategory_name_ar,
-      ].map((value) => normalizeMarketplaceCategoryCode(value));
-
-      return rowItemNames.some((rowItemName) =>
-        productItemTypeCandidates.includes(rowItemName) ||
-        productDepartmentCandidates.includes(rowItemName)
-      );
-    });
-
-    if (!itemTypeMatchesProduct && !itemTypeMatchesRow) return false;
-  }
-
+  // L407 safety:
+  // Return true here and let subcategory chips narrow the category through searchText.
+  // This prevents "No live products" when Supabase product rows have inconsistent or blank
+  // clothing_department / clothing_item_type / subcategory_name values.
+  //
+  // Subcategory chips still work because clicking them now sets searchText to the chip label
+  // while keeping the selected main category.
   return true;
 }
-
 function parseSizeList(value: string[] | string | null | undefined) {
   if (!value) return [];
 
@@ -3151,8 +3076,20 @@ export default function DarikCustomerWebHome() {
   }, [selectedCategoryId]);
 
   useEffect(() => {
-    setSelectedSubcategoryCode('All');
-  }, [selectedDepartmentCode]);
+    if (selectedDepartmentCode === 'All') return;
+
+    const selectedItemStillBelongsToDepartment =
+      selectedSubcategoryCode === 'All' ||
+      selectedCategoryItemTypeOptions.some(
+        (itemType) =>
+          itemType.id === selectedSubcategoryCode &&
+          normalizeMarketplaceCategoryCode(itemType.departmentCode || '') === normalizeMarketplaceCategoryCode(selectedDepartmentCode)
+      );
+
+    if (!selectedItemStillBelongsToDepartment) {
+      setSelectedSubcategoryCode('All');
+    }
+  }, [selectedDepartmentCode, selectedSubcategoryCode, selectedCategoryItemTypeOptions]);
 
   const filteredProducts = useMemo(() => {
     const cleanSearch = normalizeDarikSearchText(searchText);
@@ -4655,6 +4592,8 @@ export default function DarikCustomerWebHome() {
                 setSelectedCategoryId('BestSellers');
                 setSelectedDepartmentCode('All');
                 setSelectedSubcategoryCode('All');
+                setSearchText('');
+                setSearchDropdownOpen(false);
                 loadCatalogAfterScroll().catch(() => setCatalogDeferredLoading(false));
               }}
             >
@@ -4671,6 +4610,8 @@ export default function DarikCustomerWebHome() {
                   setSelectedCategoryId(category.id);
                   setSelectedDepartmentCode('All');
                   setSelectedSubcategoryCode('All');
+                  setSearchText('');
+                  setSearchDropdownOpen(false);
                   loadCatalogAfterScroll().catch(() => setCatalogDeferredLoading(false));
                 }}
               >
@@ -4728,7 +4669,12 @@ export default function DarikCustomerWebHome() {
                         key={department.id}
                         type="button"
                         className={`mobileSubcategoryChip ${selectedDepartmentCode === department.id ? 'active' : ''}`}
-                        onClick={() => setSelectedDepartmentCode(department.id)}
+                        onClick={() => {
+                          setSelectedDepartmentCode(department.id);
+                          setSelectedSubcategoryCode('All');
+                          setSearchText(department.label);
+                          setSearchDropdownOpen(false);
+                        }}
                       >
                         {department.label}
                       </button>
@@ -4740,7 +4686,11 @@ export default function DarikCustomerWebHome() {
                   <button
                     type="button"
                     className={`mobileSubcategoryChip ${selectedSubcategoryCode === 'All' ? 'active' : ''}`}
-                    onClick={() => setSelectedSubcategoryCode('All')}
+                    onClick={() => {
+                      setSelectedSubcategoryCode('All');
+                      setSearchText('');
+                      setSearchDropdownOpen(false);
+                    }}
                   >
                     All items
                   </button>
@@ -4750,7 +4700,14 @@ export default function DarikCustomerWebHome() {
                       key={itemType.id}
                       type="button"
                       className={`mobileSubcategoryChip ${selectedSubcategoryCode === itemType.id ? 'active' : ''}`}
-                      onClick={() => setSelectedSubcategoryCode(itemType.id)}
+                      onClick={() => {
+                        if (selectedDepartmentCode === 'All' && itemType.departmentCode) {
+                          setSelectedDepartmentCode(itemType.departmentCode);
+                        }
+                        setSelectedSubcategoryCode(itemType.id);
+                        setSearchText(itemType.label);
+                        setSearchDropdownOpen(false);
+                      }}
                     >
                       {itemType.label}
                     </button>
@@ -5052,6 +5009,8 @@ export default function DarikCustomerWebHome() {
                 setSelectedCategoryId('BestSellers');
                 setSelectedDepartmentCode('All');
                 setSelectedSubcategoryCode('All');
+                setSearchText('');
+                setSearchDropdownOpen(false);
                 loadCatalogAfterScroll().catch(() => setCatalogDeferredLoading(false));
               }}
             >
@@ -5068,6 +5027,8 @@ export default function DarikCustomerWebHome() {
                   setSelectedCategoryId(category.id);
                   setSelectedDepartmentCode('All');
                   setSelectedSubcategoryCode('All');
+                  setSearchText('');
+                  setSearchDropdownOpen(false);
                   loadCatalogAfterScroll().catch(() => setCatalogDeferredLoading(false));
                 }}
               >
@@ -5133,6 +5094,8 @@ export default function DarikCustomerWebHome() {
                     onClick={() => {
                       setSelectedDepartmentCode(department.id);
                       setSelectedSubcategoryCode('All');
+                      setSearchText(department.label);
+                      setSearchDropdownOpen(false);
                     }}
                   >
                     {department.label}
@@ -5148,6 +5111,8 @@ export default function DarikCustomerWebHome() {
                 onClick={() => {
                   setSelectedDepartmentCode('All');
                   setSelectedSubcategoryCode('All');
+                  setSearchText('');
+                  setSearchDropdownOpen(false);
                 }}
               >
                 All Items
@@ -5163,6 +5128,8 @@ export default function DarikCustomerWebHome() {
                       setSelectedDepartmentCode(itemType.departmentCode);
                     }
                     setSelectedSubcategoryCode(itemType.id);
+                    setSearchText(itemType.label);
+                    setSearchDropdownOpen(false);
                   }}
                 >
                   {itemType.label}
@@ -5170,6 +5137,23 @@ export default function DarikCustomerWebHome() {
               ))}
             </div>
           </section>
+        ) : null}
+
+        {selectedCategoryId !== 'BestSellers' && searchText.trim() ? (
+          <div className="subcategoryActiveSearchBanner">
+            <span>Showing results for: <strong>{searchText}</strong></span>
+            <button
+              type="button"
+              onClick={() => {
+                setSelectedDepartmentCode('All');
+                setSelectedSubcategoryCode('All');
+                setSearchText('');
+                setSearchDropdownOpen(false);
+              }}
+            >
+              Clear filter
+            </button>
+          </div>
         ) : null}
 
         <section className={`sectionBlock ${selectedCategoryId === 'BestSellers' ? 'featuredItemsTightSection' : ''}`}>
