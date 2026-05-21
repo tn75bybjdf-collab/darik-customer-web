@@ -759,14 +759,168 @@ function productMatchesMainCategory(product: Product, selectedCategoryId: string
 }
 
 function productMatchesSubcategory(product: Product, selectedDepartmentCode: string, selectedItemTypeCode: string, rows: MarketplaceCategorySubcategory[]) {
-  // L407 safety:
-  // Return true here and let subcategory chips narrow the category through searchText.
-  // This prevents "No live products" when Supabase product rows have inconsistent or blank
-  // clothing_department / clothing_item_type / subcategory_name values.
-  //
-  // Subcategory chips still work because clicking them now sets searchText to the chip label
-  // while keeping the selected main category.
-  return true;
+  if (selectedDepartmentCode === 'All' && selectedItemTypeCode === 'All') return true;
+
+  const normalizeForTokens = (value: unknown) =>
+    String(value ?? '')
+      .toLowerCase()
+      .replace(/&/g, ' and ')
+      .replace(/['’]/g, '')
+      .replace(/[^a-z0-9]+/g, ' ')
+      .trim();
+
+  const tokenSet = (value: unknown) => new Set(normalizeForTokens(value).split(/\s+/g).filter(Boolean));
+
+  const hasAnyToken = (tokens: Set<string>, values: string[]) => values.some((value) => tokens.has(value));
+
+  const productText = normalizeForTokens([
+    product.name,
+    product.description,
+    product.subcategory_name,
+    product.clothing_department,
+    product.clothing_item_type,
+    product.category_name,
+    product.category_code,
+  ].filter(Boolean).join(' '));
+
+  const productTokens = tokenSet(productText);
+
+  const explicitDepartment = normalizeForTokens(product.clothing_department);
+  const explicitItemType = normalizeForTokens(product.clothing_item_type);
+  const explicitSubcategory = normalizeForTokens(product.subcategory_name);
+
+  const selectedDepartment = normalizeForTokens(selectedDepartmentCode);
+  const selectedItemType = normalizeForTokens(selectedItemTypeCode);
+
+  const selectedRows = rows.filter((row) => {
+    const rowDepartmentValues = [
+      row.department_code,
+      row.department_name_en,
+      row.department_name_ar,
+      row.category_code,
+      row.category_name_match,
+    ].map(normalizeForTokens);
+
+    const rowItemValues = [
+      row.item_type_code,
+      row.item_type_name_en,
+      row.item_type_name_ar,
+      row.subcategory_name_en,
+      row.subcategory_name_ar,
+    ].map(normalizeForTokens);
+
+    const departmentMatches =
+      selectedDepartmentCode === 'All' ||
+      rowDepartmentValues.includes(selectedDepartment);
+
+    const itemMatches =
+      selectedItemTypeCode === 'All' ||
+      rowItemValues.includes(selectedItemType);
+
+    return departmentMatches && itemMatches;
+  });
+
+  const rowDepartmentText = normalizeForTokens(
+    selectedRows
+      .flatMap((row) => [
+        row.department_code,
+        row.department_name_en,
+        row.department_name_ar,
+        row.category_code,
+        row.category_name_match,
+      ])
+      .filter(Boolean)
+      .join(' ')
+  );
+
+  const rowItemText = normalizeForTokens(
+    selectedRows
+      .flatMap((row) => [
+        row.item_type_code,
+        row.item_type_name_en,
+        row.item_type_name_ar,
+        row.subcategory_name_en,
+        row.subcategory_name_ar,
+      ])
+      .filter(Boolean)
+      .join(' ')
+  );
+
+  const departmentText = normalizeForTokens([selectedDepartment, rowDepartmentText].filter(Boolean).join(' '));
+  const itemText = normalizeForTokens([selectedItemType, rowItemText].filter(Boolean).join(' '));
+
+  const departmentTokens = tokenSet(departmentText);
+  const itemTokens = tokenSet(itemText);
+
+  function departmentMatches() {
+    if (selectedDepartmentCode === 'All') return true;
+
+    const isMen =
+      hasAnyToken(departmentTokens, ['men', 'mens', 'male', 'man']) ||
+      departmentText.includes('men clothing') ||
+      departmentText.includes('mens clothing');
+
+    const isWomen =
+      hasAnyToken(departmentTokens, ['women', 'womens', 'woman', 'female', 'ladies', 'lady']) ||
+      departmentText.includes('women clothing') ||
+      departmentText.includes('womens clothing');
+
+    const isBoy = hasAnyToken(departmentTokens, ['boy', 'boys']);
+    const isGirl = hasAnyToken(departmentTokens, ['girl', 'girls']);
+    const isBaby = hasAnyToken(departmentTokens, ['baby', 'infant', 'toddler', 'babies']);
+
+    const productSaysWomen = hasAnyToken(productTokens, ['women', 'womens', 'woman', 'female', 'ladies', 'lady']);
+    const productSaysMen = hasAnyToken(productTokens, ['men', 'mens', 'male', 'man']);
+    const productSaysBoy = hasAnyToken(productTokens, ['boy', 'boys']);
+    const productSaysGirl = hasAnyToken(productTokens, ['girl', 'girls']);
+    const productSaysBaby = hasAnyToken(productTokens, ['baby', 'infant', 'toddler', 'babies']);
+
+    // Critical fix:
+    // Do NOT allow "men" to match inside "women". We only match whole tokens.
+    if (isMen) return productSaysMen && !productSaysWomen;
+    if (isWomen) return productSaysWomen;
+    if (isBoy) return productSaysBoy;
+    if (isGirl) return productSaysGirl;
+    if (isBaby) return productSaysBaby;
+
+    const cleanDepartment = normalizeForTokens(selectedDepartmentCode);
+    if (explicitDepartment && explicitDepartment === cleanDepartment) return true;
+    if (explicitSubcategory && explicitSubcategory.split(/\s+/g).includes(cleanDepartment)) return true;
+
+    return Array.from(departmentTokens).some((token) => productTokens.has(token));
+  }
+
+  function itemTypeMatches() {
+    if (selectedItemTypeCode === 'All') return true;
+
+    const wantsShirts = hasAnyToken(itemTokens, ['shirt', 'shirts', 'tshirt', 'tshirts', 'tee', 'tees', 'top', 'tops']);
+    const wantsPants = hasAnyToken(itemTokens, ['pant', 'pants', 'trouser', 'trousers']);
+    const wantsJeans = hasAnyToken(itemTokens, ['jean', 'jeans', 'denim']);
+    const wantsSkirts = hasAnyToken(itemTokens, ['skirt', 'skirts']);
+    const wantsDresses = hasAnyToken(itemTokens, ['dress', 'dresses']);
+    const wantsLeggings = hasAnyToken(itemTokens, ['legging', 'leggings', 'tights']);
+    const wantsHoodies = hasAnyToken(itemTokens, ['hoodie', 'hoodies', 'sweatshirt', 'sweatshirts']);
+    const wantsJackets = hasAnyToken(itemTokens, ['jacket', 'jackets', 'coat', 'coats']);
+    const wantsUnderwear = hasAnyToken(itemTokens, ['underwear', 'boxer', 'boxers', 'brief', 'briefs']);
+    const wantsShoes = hasAnyToken(itemTokens, ['shoe', 'shoes', 'sneaker', 'sneakers', 'boot', 'boots']);
+
+    if (wantsJeans) return hasAnyToken(productTokens, ['jean', 'jeans', 'denim']);
+    if (wantsShirts) return hasAnyToken(productTokens, ['shirt', 'shirts', 'tshirt', 'tshirts', 'tee', 'tees', 'top', 'tops']);
+    if (wantsPants) return hasAnyToken(productTokens, ['pant', 'pants', 'trouser', 'trousers']);
+    if (wantsSkirts) return hasAnyToken(productTokens, ['skirt', 'skirts']);
+    if (wantsDresses) return hasAnyToken(productTokens, ['dress', 'dresses']);
+    if (wantsLeggings) return hasAnyToken(productTokens, ['legging', 'leggings', 'tights']);
+    if (wantsHoodies) return hasAnyToken(productTokens, ['hoodie', 'hoodies', 'sweatshirt', 'sweatshirts']);
+    if (wantsJackets) return hasAnyToken(productTokens, ['jacket', 'jackets', 'coat', 'coats']);
+    if (wantsUnderwear) return hasAnyToken(productTokens, ['underwear', 'boxer', 'boxers', 'brief', 'briefs']);
+    if (wantsShoes) return hasAnyToken(productTokens, ['shoe', 'shoes', 'sneaker', 'sneakers', 'boot', 'boots']);
+
+    if (explicitItemType && explicitItemType === normalizeForTokens(selectedItemTypeCode)) return true;
+
+    return Array.from(itemTokens).some((token) => productTokens.has(token));
+  }
+
+  return departmentMatches() && itemTypeMatches();
 }
 function parseSizeList(value: string[] | string | null | undefined) {
   if (!value) return [];
@@ -4672,7 +4826,7 @@ export default function DarikCustomerWebHome() {
                         onClick={() => {
                           setSelectedDepartmentCode(department.id);
                           setSelectedSubcategoryCode('All');
-                          setSearchText(department.label);
+                          setSearchText('');
                           setSearchDropdownOpen(false);
                         }}
                       >
@@ -4705,7 +4859,7 @@ export default function DarikCustomerWebHome() {
                           setSelectedDepartmentCode(itemType.departmentCode);
                         }
                         setSelectedSubcategoryCode(itemType.id);
-                        setSearchText(itemType.label);
+                        setSearchText('');
                         setSearchDropdownOpen(false);
                       }}
                     >
@@ -5094,7 +5248,7 @@ export default function DarikCustomerWebHome() {
                     onClick={() => {
                       setSelectedDepartmentCode(department.id);
                       setSelectedSubcategoryCode('All');
-                      setSearchText(department.label);
+                      setSearchText('');
                       setSearchDropdownOpen(false);
                     }}
                   >
@@ -5128,7 +5282,7 @@ export default function DarikCustomerWebHome() {
                       setSelectedDepartmentCode(itemType.departmentCode);
                     }
                     setSelectedSubcategoryCode(itemType.id);
-                    setSearchText(itemType.label);
+                    setSearchText('');
                     setSearchDropdownOpen(false);
                   }}
                 >
@@ -5139,9 +5293,19 @@ export default function DarikCustomerWebHome() {
           </section>
         ) : null}
 
-        {selectedCategoryId !== 'BestSellers' && searchText.trim() ? (
-          <div className="subcategoryActiveSearchBanner">
-            <span>Showing results for: <strong>{searchText}</strong></span>
+        {selectedCategoryId !== 'BestSellers' && (selectedDepartmentCode !== 'All' || selectedSubcategoryCode !== 'All') ? (
+          <div className="subcategoryActiveFilterBanner">
+            <div>
+              <span>Filtered by</span>
+              <strong>
+                {selectedDepartmentCode !== 'All'
+                  ? selectedCategoryDepartmentOptions.find((item) => item.id === selectedDepartmentCode)?.label || selectedDepartmentCode
+                  : selectedCategoryName}
+                {selectedSubcategoryCode !== 'All'
+                  ? ` / ${selectedCategoryItemTypeOptions.find((item) => item.id === selectedSubcategoryCode)?.label || selectedSubcategoryCode}`
+                  : ''}
+              </strong>
+            </div>
             <button
               type="button"
               onClick={() => {
