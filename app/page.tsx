@@ -759,21 +759,85 @@ function productMatchesMainCategory(product: Product, selectedCategoryId: string
 }
 
 function productMatchesSubcategory(product: Product, selectedDepartmentCode: string, selectedItemTypeCode: string, rows: MarketplaceCategorySubcategory[]) {
-  // Match the Customer App logic:
-  // selectedDepartmentCode is compared against products.clothing_department.
-  // selectedItemTypeCode is compared against products.clothing_item_type.
-  // Do not fuzzy-match names/descriptions, because that creates inaccurate filters.
   if (selectedDepartmentCode === 'All' && selectedItemTypeCode === 'All') return true;
 
-  const productDepartmentCode = normalizeMarketplaceCategoryCode(product.clothing_department);
-  const productItemTypeCode = normalizeMarketplaceCategoryCode(product.clothing_item_type);
+  const normalizedDepartment = normalizeMarketplaceCategoryCode(selectedDepartmentCode);
+  const normalizedItemType = normalizeMarketplaceCategoryCode(selectedItemTypeCode);
 
-  if (selectedDepartmentCode !== 'All' && productDepartmentCode !== normalizeMarketplaceCategoryCode(selectedDepartmentCode)) {
-    return false;
+  const productDepartmentCandidates = [
+    product.clothing_department,
+    product.category_code,
+    product.category_name,
+    product.subcategory_name,
+  ].map((value) => normalizeMarketplaceCategoryCode(value));
+
+  const productItemTypeCandidates = [
+    product.clothing_item_type,
+    product.subcategory_name,
+    product.category_name,
+    product.category_code,
+    product.name,
+    product.description,
+  ].map((value) => normalizeMarketplaceCategoryCode(value));
+
+  const selectedRowMatches = rows.filter((row) => {
+    const rowDepartment = normalizeMarketplaceCategoryCode(row.department_code || row.category_code || row.category_name_match || '');
+    const rowItemType = normalizeMarketplaceCategoryCode(row.item_type_code || row.subcategory_name_en || '');
+
+    const departmentMatches =
+      selectedDepartmentCode === 'All' ||
+      rowDepartment === normalizedDepartment ||
+      normalizeMarketplaceCategoryCode(row.department_name_en || '') === normalizedDepartment;
+
+    const itemTypeMatches =
+      selectedItemTypeCode === 'All' ||
+      rowItemType === normalizedItemType ||
+      normalizeMarketplaceCategoryCode(row.item_type_name_en || '') === normalizedItemType ||
+      normalizeMarketplaceCategoryCode(row.subcategory_name_en || '') === normalizedItemType;
+
+    return departmentMatches && itemTypeMatches;
+  });
+
+  if (selectedDepartmentCode !== 'All') {
+    const departmentMatchesProduct = productDepartmentCandidates.some((candidate) => candidate === normalizedDepartment);
+
+    const departmentMatchesRow = selectedRowMatches.some((row) => {
+      const rowDepartmentNames = [
+        row.department_code,
+        row.department_name_en,
+        row.department_name_ar,
+        row.category_code,
+        row.category_name_match,
+      ].map((value) => normalizeMarketplaceCategoryCode(value));
+
+      return rowDepartmentNames.some((rowDepartmentName) =>
+        productDepartmentCandidates.includes(rowDepartmentName) ||
+        productItemTypeCandidates.includes(rowDepartmentName)
+      );
+    });
+
+    if (!departmentMatchesProduct && !departmentMatchesRow) return false;
   }
 
-  if (selectedItemTypeCode !== 'All' && productItemTypeCode !== normalizeMarketplaceCategoryCode(selectedItemTypeCode)) {
-    return false;
+  if (selectedItemTypeCode !== 'All') {
+    const itemTypeMatchesProduct = productItemTypeCandidates.some((candidate) => candidate === normalizedItemType);
+
+    const itemTypeMatchesRow = selectedRowMatches.some((row) => {
+      const rowItemNames = [
+        row.item_type_code,
+        row.item_type_name_en,
+        row.item_type_name_ar,
+        row.subcategory_name_en,
+        row.subcategory_name_ar,
+      ].map((value) => normalizeMarketplaceCategoryCode(value));
+
+      return rowItemNames.some((rowItemName) =>
+        productItemTypeCandidates.includes(rowItemName) ||
+        productDepartmentCandidates.includes(rowItemName)
+      );
+    });
+
+    if (!itemTypeMatchesProduct && !itemTypeMatchesRow) return false;
   }
 
   return true;
@@ -4605,6 +4669,8 @@ export default function DarikCustomerWebHome() {
                 className={`mobileCategoryChip ${selectedCategoryId === category.id ? 'active' : ''}`}
                 onClick={() => {
                   setSelectedCategoryId(category.id);
+                  setSelectedDepartmentCode('All');
+                  setSelectedSubcategoryCode('All');
                   loadCatalogAfterScroll().catch(() => setCatalogDeferredLoading(false));
                 }}
               >
@@ -5000,6 +5066,8 @@ export default function DarikCustomerWebHome() {
                 className={`categoryButton ${selectedCategoryId === category.id ? 'active' : ''}`}
                 onClick={() => {
                   setSelectedCategoryId(category.id);
+                  setSelectedDepartmentCode('All');
+                  setSelectedSubcategoryCode('All');
                   loadCatalogAfterScroll().catch(() => setCatalogDeferredLoading(false));
                 }}
               >
