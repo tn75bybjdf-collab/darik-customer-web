@@ -761,29 +761,76 @@ function productMatchesMainCategory(product: Product, selectedCategoryId: string
 function productMatchesSubcategory(product: Product, selectedDepartmentCode: string, selectedItemTypeCode: string, rows: MarketplaceCategorySubcategory[]) {
   if (selectedDepartmentCode === 'All' && selectedItemTypeCode === 'All') return true;
 
-  const normalizeExactFilterValue = (value: unknown) =>
-    normalizeMarketplaceCategoryCode(String(value ?? ''));
+  const normalizeFilterCode = (value: unknown) => normalizeMarketplaceCategoryCode(String(value ?? ''));
 
-  const selectedDepartment = normalizeExactFilterValue(selectedDepartmentCode);
-  const selectedItemType = normalizeExactFilterValue(selectedItemTypeCode);
+  const makeTokenSet = (value: unknown) =>
+    new Set(
+      normalizeFilterCode(value)
+        .split('_')
+        .map((token) => token.trim())
+        .filter(Boolean)
+    );
 
-  const productDepartment = normalizeExactFilterValue(product.clothing_department);
-  const productItemType = normalizeExactFilterValue(product.clothing_item_type);
-  const productSubcategory = normalizeExactFilterValue(stripSubcategoryLeaf(product.subcategory_name));
-  const productCategoryName = normalizeExactFilterValue(product.category_name);
-  const productCategoryCode = normalizeExactFilterValue(product.category_code);
+  const hasAnyToken = (tokens: Set<string>, values: string[]) => values.some((value) => tokens.has(value));
+
+  const canonicalDepartmentCode = (value: unknown) => {
+    const code = normalizeFilterCode(value);
+    if (!code) return '';
+
+    const tokens = makeTokenSet(code);
+
+    // Important: women must be checked before men.
+    // The old bug happened because "women" can accidentally be treated like "men" when using loose text matching.
+    if (hasAnyToken(tokens, ['women', 'womens', 'woman', 'female', 'ladies', 'lady'])) return 'women';
+    if (hasAnyToken(tokens, ['men', 'mens', 'man', 'male'])) return 'men';
+
+    return code;
+  };
+
+  const canonicalItemTypeCode = (value: unknown) => {
+    const code = normalizeFilterCode(value);
+    if (!code) return '';
+
+    const tokens = makeTokenSet(code);
+
+    if (hasAnyToken(tokens, ['shirt', 'shirts', 'tshirt', 'tshirts', 'tee', 'tees', 'top', 'tops'])) return 'shirts';
+    if (hasAnyToken(tokens, ['pant', 'pants', 'trouser', 'trousers'])) return 'pants';
+    if (hasAnyToken(tokens, ['jean', 'jeans', 'denim'])) return 'jeans';
+    if (hasAnyToken(tokens, ['dress', 'dresses'])) return 'dresses';
+    if (hasAnyToken(tokens, ['skirt', 'skirts'])) return 'skirts';
+    if (hasAnyToken(tokens, ['legging', 'leggings', 'tight', 'tights'])) return 'leggings';
+    if (hasAnyToken(tokens, ['hoodie', 'hoodies', 'sweatshirt', 'sweatshirts'])) return 'hoodies';
+    if (hasAnyToken(tokens, ['jacket', 'jackets', 'coat', 'coats'])) return 'jackets';
+    if (hasAnyToken(tokens, ['underwear', 'boxer', 'boxers', 'brief', 'briefs'])) return 'underwear';
+    if (hasAnyToken(tokens, ['shoe', 'shoes', 'sneaker', 'sneakers', 'boot', 'boots'])) return 'shoes';
+
+    return code;
+  };
+
+  const selectedDepartment = canonicalDepartmentCode(selectedDepartmentCode);
+  const selectedItemType = canonicalItemTypeCode(selectedItemTypeCode);
 
   const selectedRows = rows.filter((row) => {
-    const rowDepartment = normalizeExactFilterValue(row.department_code);
-    const rowItemType = normalizeExactFilterValue(row.item_type_code);
+    const rowDepartmentValues = [
+      row.department_code,
+      row.department_name_en,
+      row.department_name_ar,
+      row.category_code,
+      row.category_name_match,
+    ].map(canonicalDepartmentCode);
 
-    const departmentMatches =
-      selectedDepartmentCode === 'All' ||
-      rowDepartment === selectedDepartment;
+    const rowItemValues = [
+      row.item_type_code,
+      row.item_type_name_en,
+      row.item_type_name_ar,
+      row.subcategory_name_en,
+      row.subcategory_name_ar,
+      stripSubcategoryLeaf(row.subcategory_name_en),
+      stripSubcategoryLeaf(row.subcategory_name_ar),
+    ].map(canonicalItemTypeCode);
 
-    const itemMatches =
-      selectedItemTypeCode === 'All' ||
-      rowItemType === selectedItemType;
+    const departmentMatches = selectedDepartmentCode === 'All' || rowDepartmentValues.includes(selectedDepartment);
+    const itemMatches = selectedItemTypeCode === 'All' || rowItemValues.includes(selectedItemType);
 
     return departmentMatches && itemMatches;
   });
@@ -795,9 +842,11 @@ function productMatchesSubcategory(product: Product, selectedDepartmentCode: str
         row.department_code,
         row.department_name_en,
         row.department_name_ar,
+        row.category_code,
+        row.category_name_match,
       ]),
     ]
-      .map(normalizeExactFilterValue)
+      .map(canonicalDepartmentCode)
       .filter(Boolean)
   );
 
@@ -808,68 +857,60 @@ function productMatchesSubcategory(product: Product, selectedDepartmentCode: str
         row.item_type_code,
         row.item_type_name_en,
         row.item_type_name_ar,
-        stripSubcategoryLeaf(row.subcategory_name_en),
-        stripSubcategoryLeaf(row.subcategory_name_ar),
-      ]),
-    ]
-      .map(normalizeExactFilterValue)
-      .filter(Boolean)
-  );
-
-  const selectedSubcategoryValues = new Set(
-    selectedRows
-      .flatMap((row) => [
         row.subcategory_name_en,
         row.subcategory_name_ar,
         stripSubcategoryLeaf(row.subcategory_name_en),
         stripSubcategoryLeaf(row.subcategory_name_ar),
-        row.item_type_code,
-        row.item_type_name_en,
-        row.item_type_name_ar,
-      ])
-      .map(normalizeExactFilterValue)
+      ]),
+    ]
+      .map(canonicalItemTypeCode)
       .filter(Boolean)
   );
 
-  const hasExplicitProductDepartment = Boolean(productDepartment);
-  const hasExplicitProductItemType = Boolean(productItemType);
+  const productDepartment = canonicalDepartmentCode(product.clothing_department);
+  const productItemType = canonicalItemTypeCode(product.clothing_item_type);
 
-  // Production-safe path:
-  // Supabase products already store exact codes like:
-  // clothing_department = "men" / "women"
-  // clothing_item_type = "shirts" / "pants"
-  // So do not infer from product name, description, or words like "men" inside "women".
-  if (hasExplicitProductDepartment || hasExplicitProductItemType) {
-    if (selectedDepartmentCode !== 'All') {
-      if (!hasExplicitProductDepartment) return false;
-      if (!selectedDepartmentValues.has(productDepartment)) return false;
+  // Main fixed path for the live Darik database:
+  // Your products table already stores clean values like:
+  // clothing_department = men / women
+  // clothing_item_type = shirts / pants
+  // So use these exact product fields first and do not search product names/descriptions.
+  if (productDepartment || productItemType) {
+    if (selectedDepartmentCode !== 'All' && (!productDepartment || !selectedDepartmentValues.has(productDepartment))) {
+      return false;
     }
 
-    if (selectedItemTypeCode !== 'All') {
-      if (!hasExplicitProductItemType) return false;
-      if (!selectedItemTypeValues.has(productItemType)) return false;
+    if (selectedItemTypeCode !== 'All' && (!productItemType || !selectedItemTypeValues.has(productItemType))) {
+      return false;
     }
 
     return true;
   }
 
-  // Legacy fallback for any old product rows that do not have exact department/item fields.
-  // This stays strict: exact normalized values only, no broad text searching.
-  if (selectedItemTypeCode !== 'All') {
-    return (
-      selectedItemTypeValues.has(productSubcategory) ||
-      selectedSubcategoryValues.has(productSubcategory) ||
-      selectedItemTypeValues.has(productCategoryName) ||
-      selectedItemTypeValues.has(productCategoryCode)
-    );
-  }
+  // Legacy fallback for any old rows that do not have department/item codes yet.
+  // This fallback intentionally avoids the men/women substring bug by using whole normalized tokens only.
+  const productTokens = makeTokenSet([
+    product.subcategory_name,
+    product.category_name,
+    product.category_code,
+  ].filter(Boolean).join(' '));
 
   if (selectedDepartmentCode !== 'All') {
-    return (
-      selectedDepartmentValues.has(productSubcategory) ||
-      selectedDepartmentValues.has(productCategoryName) ||
-      selectedDepartmentValues.has(productCategoryCode)
-    );
+    const productDepartmentFallback = canonicalDepartmentCode(product.subcategory_name || product.category_name || product.category_code);
+    const hasDepartmentToken = Array.from(selectedDepartmentValues).some((value) => productTokens.has(value));
+
+    if (!selectedDepartmentValues.has(productDepartmentFallback) && !hasDepartmentToken) {
+      return false;
+    }
+  }
+
+  if (selectedItemTypeCode !== 'All') {
+    const productItemFallback = canonicalItemTypeCode(product.subcategory_name || product.category_name || product.category_code);
+    const hasItemToken = Array.from(selectedItemTypeValues).some((value) => productTokens.has(value));
+
+    if (!selectedItemTypeValues.has(productItemFallback) && !hasItemToken) {
+      return false;
+    }
   }
 
   return true;
