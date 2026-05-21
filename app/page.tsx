@@ -5287,10 +5287,22 @@ export default function DarikCustomerWebHome() {
         ) : null}
 
         {selectedCategoryId !== 'BestSellers' && (selectedDepartmentCode !== 'All' || selectedSubcategoryCode !== 'All') ? (
-          <div className="subcategoryActiveFilterBanner">
-            <div>
-              <span>Filtered by</span>
-              <strong>
+          <div
+            className="subcategorySimpleFilterText"
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              gap: 12,
+              margin: '10px 0 4px',
+              padding: '0 2px',
+              fontSize: 13,
+              color: '#5f6368',
+            }}
+          >
+            <span>
+              Showing{' '}
+              <strong style={{ color: '#111827', fontWeight: 700 }}>
                 {selectedDepartmentCode !== 'All'
                   ? selectedCategoryDepartmentOptions.find((item) => item.id === selectedDepartmentCode)?.label || selectedDepartmentCode
                   : selectedCategoryName}
@@ -5298,9 +5310,20 @@ export default function DarikCustomerWebHome() {
                   ? ` / ${selectedCategoryItemTypeOptions.find((item) => item.id === selectedSubcategoryCode)?.label || selectedSubcategoryCode}`
                   : ''}
               </strong>
-            </div>
+            </span>
             <button
               type="button"
+              style={{
+                border: 0,
+                background: 'transparent',
+                padding: 0,
+                color: '#111827',
+                fontSize: 13,
+                fontWeight: 700,
+                cursor: 'pointer',
+                textDecoration: 'underline',
+                textUnderlineOffset: 3,
+              }}
               onClick={() => {
                 setSelectedDepartmentCode('All');
                 setSelectedSubcategoryCode('All');
@@ -5308,7 +5331,7 @@ export default function DarikCustomerWebHome() {
                 setSearchDropdownOpen(false);
               }}
             >
-              Clear filter
+              Clear
             </button>
           </div>
         ) : null}
