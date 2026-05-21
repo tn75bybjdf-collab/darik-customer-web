@@ -5067,13 +5067,9 @@ export default function DarikCustomerWebHome() {
         {selectedCategoryId !== 'BestSellers' && selectedCategoryHasSubcategories ? (
           <section className="subcategoryFilterBlock">
             <div className="subcategoryTitleRow">
-              <div className="subcategoryTitleCopy">
-                <span className="subcategoryEyebrow">Darik Filters</span>
-                <h3>Shop by Subcategory</h3>
-                <p>Quickly narrow {selectedCategoryName || 'this category'} by department or exact item type.</p>
-              </div>
-              <div className="subcategoryTitleMeta">
-                <span>{selectedCategoryItemTypeOptions.length} options</span>
+              <div>
+                <h3>Subcategories</h3>
+                <p>Narrow {selectedCategoryName || 'this category'} by exact item type</p>
               </div>
             </div>
 
@@ -5145,13 +5141,7 @@ export default function DarikCustomerWebHome() {
 
         {selectedCategoryId !== 'BestSellers' && searchText.trim() ? (
           <div className="subcategoryActiveSearchBanner">
-            <div className="subcategoryActiveSearchText">
-              <span className="subcategoryActiveSearchEyebrow">Filtered results</span>
-              <strong>Showing results for: {searchText}</strong>
-              <small>
-                Browsing inside {selectedCategoryName || 'this category'}.
-              </small>
-            </div>
+            <span>Showing results for: <strong>{searchText}</strong></span>
             <button
               type="button"
               onClick={() => {
