@@ -11256,3 +11256,87 @@ button[class*="signOut"] {
     box-shadow: 0 8px 14px rgba(17, 17, 17, 0.12);
   }
 }
+
+/* L375: Match Customer App page background.
+   The web page now uses the same soft white/grey floating-cards feel instead of the old blue/grey gradient. */
+
+:root {
+  --darik-app-page-bg: #f6f6f4;
+  --darik-app-card-white: #ffffff;
+}
+
+html,
+body {
+  background: var(--darik-app-page-bg) !important;
+}
+
+.darikPage {
+  background: var(--darik-app-page-bg) !important;
+}
+
+.webAppShell {
+  background: var(--darik-app-page-bg) !important;
+}
+
+/* Remove the old colored glow so the whole page feels like the Customer App. */
+.darikPage::before,
+.darikPage::after {
+  display: none !important;
+}
+
+/* Keep product/category/ad cards floating on the soft page. */
+.productImageWrap,
+.bestSellerCleanImageWrap,
+.categoryCircle,
+.imageCategoryCircle,
+.mobileCategoryImage,
+.trustCard,
+.cartSummary,
+.emptyCard,
+.detailImageBox,
+.detailCard,
+.checkoutBox,
+.cartItemsList {
+  background: var(--darik-app-card-white) !important;
+}
+
+/* Make the sponsored product banner sit on the same soft white/grey page. */
+.sponsoredProductAdCard {
+  background:
+    radial-gradient(circle at 12% 12%, rgba(255, 210, 63, 0.16), transparent 26%),
+    radial-gradient(circle at 88% 50%, rgba(255, 210, 63, 0.12), transparent 32%),
+    linear-gradient(135deg, rgba(255, 255, 255, 0.88), rgba(246, 246, 244, 0.96)) !important;
+}
+
+.sponsoredImageBannerCard {
+  background: var(--darik-app-page-bg) !important;
+}
+
+/* Search/header cards should float on the same app background. */
+.searchBar,
+.mobileSearchBar,
+.mobileTopBar,
+.mobileHeaderCard {
+  background: rgba(255, 255, 255, 0.92) !important;
+}
+
+/* Product detail/cart overlays keep the same soft app background. */
+.productModal,
+.cartSheet {
+  background: var(--darik-app-page-bg) !important;
+}
+
+@media (max-width: 700px) {
+  html,
+  body,
+  .darikPage,
+  .webAppShell {
+    background: var(--darik-app-page-bg) !important;
+  }
+
+  .mobileSponsoredProductAdCard {
+    background:
+      radial-gradient(circle at 16% 10%, rgba(255, 210, 63, 0.16), transparent 34%),
+      linear-gradient(135deg, rgba(255, 255, 255, 0.90), rgba(246, 246, 244, 0.98)) !important;
+  }
+}
