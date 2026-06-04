@@ -121,6 +121,14 @@ type CustomerAdBanner = {
   text_color: string | null;
   accent_color: string | null;
   sort_order: number | null;
+  ad_request_type?: string | null;
+  target_product_id?: string | null;
+  product_name_snapshot?: string | null;
+  product_app_price_snapshot?: number | string | null;
+  product_photo_url_snapshot?: string | null;
+  official_product_photo_url?: string | null;
+  official_product_thumbnail_url?: string | null;
+  retailer_raw_photo_url?: string | null;
 };
 
 type CartItem = {
@@ -3571,6 +3579,104 @@ export default function DarikCustomerWebHome() {
     return banners.length > 0 ? [...banners, darikPermanentBanner] : [darikPermanentBanner];
   }, [banners]);
 
+  function getSponsoredProductImageUrl(banner: CustomerAdBanner) {
+    return (
+      banner.product_photo_url_snapshot ||
+      banner.official_product_thumbnail_url ||
+      banner.official_product_photo_url ||
+      banner.retailer_raw_photo_url ||
+      ((banner.ad_request_type || '').toLowerCase() === 'product' ? banner.banner_image_url : null)
+    );
+  }
+
+  function isSponsoredProductAd(banner: CustomerAdBanner) {
+    if (banner.id === 'permanent-darik-delivery-banner') return false;
+
+    const adType = String(banner.ad_request_type ?? '').toLowerCase();
+    return Boolean(
+      adType === 'product' ||
+      banner.target_product_id ||
+      banner.product_name_snapshot ||
+      banner.product_app_price_snapshot ||
+      banner.product_photo_url_snapshot
+    );
+  }
+
+  function getSponsoredProductTitle(banner: CustomerAdBanner) {
+    return (
+      String(banner.product_name_snapshot || '').trim() ||
+      String(banner.headline || '').trim() ||
+      String(banner.sponsor_name || '').trim() ||
+      'Sponsored Darik Product'
+    );
+  }
+
+  function getSponsoredProductPriceText(banner: CustomerAdBanner) {
+    const price = Number(banner.product_app_price_snapshot ?? 0);
+    if (!Number.isFinite(price) || price <= 0) return '';
+    return `${money(price)} JOD`;
+  }
+
+  function getBannerImageSrc(banner: CustomerAdBanner, mobile = false) {
+    if (banner.id === 'permanent-darik-delivery-banner') {
+      return mobile ? '/darik_under_2_hours_banner1.png' : '/darik_under_2_hours_banner.png';
+    }
+
+    return banner.banner_image_url || '';
+  }
+
+  function preloadDarikWebImage(src: string | null | undefined) {
+    if (typeof window === 'undefined') return;
+
+    const cleanSrc = String(src ?? '').trim();
+    if (!cleanSrc) return;
+
+    const image = new window.Image();
+    image.decoding = 'async';
+    image.src = cleanSrc;
+  }
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+
+    const urls = new Set<string>();
+
+    visibleCategories.slice(0, 12).forEach((category) => {
+      const categoryImageUrl = getCategoryPreviewImageUrl(category.name);
+      if (categoryImageUrl) urls.add(categoryImageUrl);
+    });
+
+    visibleAdBanners.slice(0, 3).forEach((banner) => {
+      const bannerImageUrl = isSponsoredProductAd(banner)
+        ? getSponsoredProductImageUrl(banner)
+        : getBannerImageSrc(banner, true) || getBannerImageSrc(banner, false);
+
+      if (bannerImageUrl) urls.add(bannerImageUrl);
+    });
+
+    const preloadImages = () => {
+      urls.forEach((url) => preloadDarikWebImage(url));
+    };
+
+    const browserWindow = window as Window &
+      typeof globalThis & {
+        requestIdleCallback?: (callback: () => void, options?: { timeout?: number }) => number;
+        cancelIdleCallback?: (handle: number) => void;
+      };
+
+    const idleId = browserWindow.requestIdleCallback
+      ? browserWindow.requestIdleCallback(preloadImages, { timeout: 900 })
+      : globalThis.setTimeout(preloadImages, 120);
+
+    return () => {
+      if (browserWindow.cancelIdleCallback && browserWindow.requestIdleCallback) {
+        browserWindow.cancelIdleCallback(Number(idleId));
+      } else {
+        globalThis.clearTimeout(idleId as ReturnType<typeof setTimeout>);
+      }
+    };
+  }, [visibleCategories, visibleAdBanners]);
+
 
   useEffect(() => {
     function handleHeaderScroll() {
@@ -4669,38 +4775,88 @@ export default function DarikCustomerWebHome() {
             className="mobileSponsoredBannerTrack"
             style={{ transform: `translateX(-${activeBannerIndex * 100}%)` }}
           >
-            {visibleAdBanners.map((banner) => (
-              <button
-                key={banner.id}
-                type="button"
-                className="mobileSponsoredBannerCard"
-                onClick={() => {
-                  if (banner.retailer_id) {
-                    setSelectedCategoryId('BestSellers');
-                  }
-                }}
-                style={{
-                  backgroundColor: banner.background_color || '#111111',
-                }}
-              >
-                <img
-                  className="mobileSponsoredBannerImage"
-                  src="/darik_under_2_hours_banner1.png"
-                  alt="Darik under 2 hours delivery"
-                  onError={(event) => {
-                    if (banner.banner_image_url) {
-                      event.currentTarget.src = banner.banner_image_url;
-                    } else {
-                      event.currentTarget.style.display = 'none';
+            {visibleAdBanners.map((banner, index) => {
+              const productAd = isSponsoredProductAd(banner);
+              const productImageUrl = getSponsoredProductImageUrl(banner);
+              const productPriceText = getSponsoredProductPriceText(banner);
+              const bannerImageSrc = getBannerImageSrc(banner, true);
+
+              return (
+                <button
+                  key={banner.id}
+                  type="button"
+                  className={`mobileSponsoredBannerCard ${productAd ? 'mobileSponsoredProductAdCard' : 'mobileSponsoredImageBannerCard'}`}
+                  onClick={() => {
+                    if (banner.retailer_id) {
+                      setSelectedCategoryId('BestSellers');
                     }
                   }}
-                />
+                  style={{
+                    backgroundColor: banner.background_color || '#111111',
+                  }}
+                >
+                  {productAd ? (
+                    <>
+                      <span className="mobileSponsoredProductAdCopy">
+                        <b>Sponsored</b>
+                        <strong>{getSponsoredProductTitle(banner)}</strong>
+                        {productPriceText ? <em>{productPriceText}</em> : null}
+                        <small>{banner.subheadline || 'Available now on Darik'}</small>
+                      </span>
 
-                <span className="mobileSponsoredBannerCta">
-                  {banner.cta_label || 'CLICK TO SHOP'}
-                </span>
-              </button>
-            ))}
+                      <span className="mobileSponsoredProductAdVisual">
+                        {productImageUrl ? (
+                          <img
+                            src={productImageUrl}
+                            alt={getSponsoredProductTitle(banner)}
+                            loading={index === activeBannerIndex ? 'eager' : 'lazy'}
+                            decoding="async"
+                            width={220}
+                            height={220}
+                            onError={(event) => {
+                              event.currentTarget.style.display = 'none';
+                            }}
+                          />
+                        ) : (
+                          <b>{shortCode(getSponsoredProductTitle(banner))}</b>
+                        )}
+                      </span>
+
+                      <span className="mobileSponsoredProductAdCtaInline">
+                        {banner.cta_label || 'Shop Now'}
+                      </span>
+                    </>
+                  ) : (
+                    <>
+                      {bannerImageSrc ? (
+                        <img
+                          className="mobileSponsoredBannerImage"
+                          src={bannerImageSrc}
+                          alt={banner.headline || banner.sponsor_name || 'Darik sponsored offer'}
+                          loading={index === activeBannerIndex ? 'eager' : 'lazy'}
+                          decoding="async"
+                          width={720}
+                          height={300}
+                          onError={(event) => {
+                            event.currentTarget.style.display = 'none';
+                          }}
+                        />
+                      ) : (
+                        <div className="mobileSponsoredBannerFallback">
+                          <img src={MAIN_SHOPPING_SCREEN_LOGO} alt="Darik" loading="lazy" decoding="async" />
+                          <h2>{banner.headline || 'Darik Marketplace'}</h2>
+                          <p>{banner.subheadline || 'Essentials delivered fast around Amman.'}</p>
+                        </div>
+                      )}
+
+                      <span className="mobileSponsoredBannerCta">
+                        {banner.cta_label || 'CLICK TO SHOP'}
+                      </span>
+                    </>
+                  )}
+                </button>
+              );
+            })}
           </div>
 
           {visibleAdBanners.length > 1 ? (
@@ -4748,7 +4904,7 @@ export default function DarikCustomerWebHome() {
               <strong>Featured</strong>
             </button>
 
-            {visibleCategories.map((category) => (
+            {visibleCategories.map((category, categoryIndex) => (
               <button
                 key={category.id}
                 type="button"
@@ -4767,6 +4923,10 @@ export default function DarikCustomerWebHome() {
                     <img
                       src={getCategoryPreviewImageUrl(category.name)!}
                       alt={category.name}
+                      loading={categoryIndex < 8 ? 'eager' : 'lazy'}
+                      decoding="async"
+                      width={72}
+                      height={72}
                       onError={(event) => {
                         event.currentTarget.style.display = 'none';
                       }}
@@ -5048,37 +5208,86 @@ export default function DarikCustomerWebHome() {
             className="sponsoredBannerTrack"
             style={{ transform: `translateX(-${activeBannerIndex * 100}%)` }}
           >
-            {visibleAdBanners.map((banner) => (
-              <button
-                key={banner.id}
-                type="button"
-                className="sponsoredBannerCard"
-                onClick={() => {
-                  if (banner.retailer_id) setSelectedCategoryId('All');
-                }}
-                style={{
-                  backgroundColor: banner.background_color || '#111111',
-                }}
-              >
-                {banner.banner_image_url ? (
-                  <img
-                    className="sponsoredBannerImage"
-                    src={banner.banner_image_url}
-                    alt={banner.headline || banner.sponsor_name || 'Darik offer'}
-                  />
-                ) : (
-                  <div className="sponsoredBannerFallback">
-                    <img src={MAIN_SHOPPING_SCREEN_LOGO} alt="Darik" />
-                    <h2>{banner.headline || 'Darik Marketplace'}</h2>
-                    <p>{banner.subheadline || 'Essentials delivered fast around Amman.'}</p>
-                  </div>
-                )}
+            {visibleAdBanners.map((banner, index) => {
+              const productAd = isSponsoredProductAd(banner);
+              const productImageUrl = getSponsoredProductImageUrl(banner);
+              const productPriceText = getSponsoredProductPriceText(banner);
+              const bannerImageSrc = getBannerImageSrc(banner, false);
 
-                <span className="sponsoredBannerCta">
-                  {banner.cta_label || 'CLICK TO SHOP'}
-                </span>
-              </button>
-            ))}
+              return (
+                <button
+                  key={banner.id}
+                  type="button"
+                  className={`sponsoredBannerCard ${productAd ? 'sponsoredProductAdCard' : 'sponsoredImageBannerCard'}`}
+                  onClick={() => {
+                    if (banner.retailer_id) setSelectedCategoryId('All');
+                  }}
+                  style={{
+                    backgroundColor: banner.background_color || '#111111',
+                  }}
+                >
+                  {productAd ? (
+                    <>
+                      <div className="sponsoredProductAdCopy">
+                        <span>Sponsored Product</span>
+                        <h2>{getSponsoredProductTitle(banner)}</h2>
+                        <p>{banner.subheadline || 'Featured by a Darik retailer. Fast local delivery available.'}</p>
+                        <div className="sponsoredProductAdMetaRow">
+                          {productPriceText ? <strong>{productPriceText}</strong> : null}
+                          <em>{banner.sponsor_name || 'Darik Partner'}</em>
+                        </div>
+                        <b className="sponsoredProductAdCtaInline">{banner.cta_label || 'Shop Now'}</b>
+                      </div>
+
+                      <div className="sponsoredProductAdVisual">
+                        {productImageUrl ? (
+                          <img
+                            src={productImageUrl}
+                            alt={getSponsoredProductTitle(banner)}
+                            loading={index === activeBannerIndex ? 'eager' : 'lazy'}
+                            decoding="async"
+                            width={460}
+                            height={360}
+                            onError={(event) => {
+                              event.currentTarget.style.display = 'none';
+                            }}
+                          />
+                        ) : (
+                          <span>{shortCode(getSponsoredProductTitle(banner))}</span>
+                        )}
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      {bannerImageSrc ? (
+                        <img
+                          className="sponsoredBannerImage"
+                          src={bannerImageSrc}
+                          alt={banner.headline || banner.sponsor_name || 'Darik offer'}
+                          loading={index === activeBannerIndex ? 'eager' : 'lazy'}
+                          decoding="async"
+                          width={1400}
+                          height={420}
+                          onError={(event) => {
+                            event.currentTarget.style.display = 'none';
+                          }}
+                        />
+                      ) : (
+                        <div className="sponsoredBannerFallback">
+                          <img src={MAIN_SHOPPING_SCREEN_LOGO} alt="Darik" loading="lazy" decoding="async" />
+                          <h2>{banner.headline || 'Darik Marketplace'}</h2>
+                          <p>{banner.subheadline || 'Essentials delivered fast around Amman.'}</p>
+                        </div>
+                      )}
+
+                      <span className="sponsoredBannerCta">
+                        {banner.cta_label || 'CLICK TO SHOP'}
+                      </span>
+                    </>
+                  )}
+                </button>
+              );
+            })}
           </div>
 
           {visibleAdBanners.length > 1 ? (
@@ -5165,7 +5374,7 @@ export default function DarikCustomerWebHome() {
               <strong>Featured</strong>
             </button>
 
-            {visibleCategories.map((category) => (
+            {visibleCategories.map((category, categoryIndex) => (
               <button
                 key={category.id}
                 type="button"
@@ -5184,6 +5393,10 @@ export default function DarikCustomerWebHome() {
                     <img
                       src={getCategoryPreviewImageUrl(category.name)!}
                       alt={category.name}
+                      loading={categoryIndex < 10 ? 'eager' : 'lazy'}
+                      decoding="async"
+                      width={96}
+                      height={96}
                       onError={(event) => {
                         event.currentTarget.style.display = 'none';
                       }}
