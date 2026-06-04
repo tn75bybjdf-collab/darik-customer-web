@@ -11340,3 +11340,154 @@ body {
       linear-gradient(135deg, rgba(255, 255, 255, 0.90), rgba(246, 246, 244, 0.98)) !important;
   }
 }
+
+/* L376: HARD Customer App background override.
+   The previous background change was too subtle because old layout sections still carried light gradients/whites.
+   This forces the full web page to use the same soft off-white/grey canvas everywhere. */
+
+:root {
+  --darik-app-page-bg: #f5f5f2;
+  --darik-app-page-bg-2: #f7f7f4;
+  --darik-app-floating-white: #ffffff;
+}
+
+html,
+body,
+#__next,
+.darikPage,
+.webAppShell {
+  background: var(--darik-app-page-bg) !important;
+  background-color: var(--darik-app-page-bg) !important;
+  background-image: none !important;
+}
+
+/* Kill any old grey/blue gradient surfaces and make sections float on the app canvas. */
+main,
+section,
+.topHeader,
+.sectionBlock,
+.bestSellerDepartmentStack,
+.bestSellerDepartmentSection,
+.categoryRow,
+.bestSellerCarousel,
+.mobileHome,
+.mobileShell,
+.mobileMain,
+.mobileContent,
+.mobileSection,
+.mobileCategoryRow,
+.mobileBestSellerStack,
+.mobileBestSellerSection {
+  background: transparent !important;
+  background-image: none !important;
+}
+
+/* Header should float softly instead of looking like a separate white strip. */
+.topHeader,
+.mobileTopBar,
+.mobileHeaderCard {
+  background: rgba(245, 245, 242, 0.92) !important;
+  background-image: none !important;
+  box-shadow: none !important;
+}
+
+/* Keep only actual cards/images pure white so they float like the customer app. */
+.searchBar,
+.mobileSearchBar,
+.circleButton,
+.cartButton,
+.trustCard,
+.cartSummary,
+.productImageWrap,
+.bestSellerCleanImageWrap,
+.categoryCircle,
+.imageCategoryCircle,
+.mobileCategoryImage,
+.mobileCategoryChip,
+.emptyCard,
+.productModal,
+.cartSheet,
+.detailImageBox,
+.detailCard,
+.checkoutBox,
+.cartItemsList,
+.deliveryCard,
+.productInitials,
+.bestSellerCleanPlaceholder {
+  background: var(--darik-app-floating-white) !important;
+  background-color: var(--darik-app-floating-white) !important;
+  background-image: none !important;
+}
+
+/* Product text/info area should not create grey panels. */
+.productCard,
+.bestSellerCleanItem,
+.productInfo,
+.productBottom {
+  background: transparent !important;
+  background-image: none !important;
+}
+
+/* Sponsored banners now sit on the same app canvas. */
+.sponsoredBannerCarousel,
+.mobileSponsoredBannerCarousel {
+  background: transparent !important;
+  background-image: none !important;
+}
+
+.sponsoredProductAdCard {
+  background:
+    radial-gradient(circle at 12% 12%, rgba(255, 210, 63, 0.13), transparent 26%),
+    radial-gradient(circle at 88% 50%, rgba(255, 210, 63, 0.10), transparent 32%),
+    linear-gradient(135deg, rgba(255, 255, 255, 0.86), rgba(245, 245, 242, 0.97)) !important;
+  border: 1px solid rgba(17, 17, 17, 0.07) !important;
+}
+
+.sponsoredImageBannerCard {
+  background: var(--darik-app-page-bg) !important;
+  background-color: var(--darik-app-page-bg) !important;
+}
+
+/* Remove old visual tint from the huge page. */
+.darikPage::before,
+.darikPage::after,
+.webAppShell::before,
+.webAppShell::after {
+  display: none !important;
+  content: none !important;
+}
+
+/* The browser screenshot should read as one consistent soft canvas. */
+@media (min-width: 701px) {
+  .webAppShell {
+    padding-top: 30px !important;
+  }
+
+  .topHeader {
+    min-height: 170px !important;
+  }
+}
+
+@media (max-width: 700px) {
+  html,
+  body,
+  #__next,
+  .darikPage,
+  .webAppShell,
+  main,
+  section,
+  .mobileHome,
+  .mobileShell,
+  .mobileMain,
+  .mobileContent {
+    background: var(--darik-app-page-bg) !important;
+    background-color: var(--darik-app-page-bg) !important;
+    background-image: none !important;
+  }
+
+  .mobileSponsoredProductAdCard {
+    background:
+      radial-gradient(circle at 16% 10%, rgba(255, 210, 63, 0.13), transparent 34%),
+      linear-gradient(135deg, rgba(255, 255, 255, 0.88), rgba(245, 245, 242, 0.98)) !important;
+  }
+}
