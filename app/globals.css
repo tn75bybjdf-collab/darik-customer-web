@@ -10969,3 +10969,290 @@ button[class*="signOut"] {
     height: 100%;
   }
 }
+
+/* L373: Stop trust badges from covering the sponsored banner.
+   L371 made sponsored banners shorter and cleaner, but the old scaled layout still pulled
+   the trustGrid upward too aggressively. This gives the banner its own vertical space. */
+
+.topHeader ~ .sponsoredBannerCarousel {
+  --darik-section-pull: 22px !important;
+  margin-bottom: 26px !important;
+  position: relative;
+  z-index: 1;
+}
+
+.topHeader ~ .trustGrid {
+  --darik-section-pull: 34px !important;
+  margin-top: 0 !important;
+  position: relative;
+  z-index: 0;
+}
+
+/* Keep trust cards under the banner instead of floating over it */
+.trustGrid {
+  clear: both;
+  align-items: stretch;
+}
+
+.trustCard {
+  position: relative;
+  z-index: 0;
+}
+
+/* Give the carousel a stable box so the next section waits for it. */
+.sponsoredBannerCarousel {
+  display: block;
+  position: relative;
+  overflow: hidden;
+  margin-bottom: 30px !important;
+}
+
+.sponsoredBannerCard {
+  display: block;
+}
+
+/* Mobile has less vertical room, but still needs a gap under the banner. */
+@media (max-width: 700px) {
+  .topHeader ~ .sponsoredBannerCarousel {
+    --darik-section-pull: 14px !important;
+    margin-bottom: 18px !important;
+  }
+
+  .topHeader ~ .trustGrid {
+    --darik-section-pull: 18px !important;
+  }
+
+  .mobileSponsoredBannerCarousel {
+    margin-bottom: 18px !important;
+  }
+}
+
+/* Desktop: avoid old aggressive negative pulls after the banner. */
+@media (min-width: 701px) {
+  .topHeader ~ .trustGrid {
+    --darik-section-pull: 40px !important;
+  }
+
+  .topHeader ~ .cartSummary,
+  .topHeader ~ .sectionBlock,
+  .topHeader ~ .operationsPromise {
+    --darik-section-pull: 40px !important;
+  }
+}
+
+/* L374: Make web sponsored banners match the Customer App visual language.
+   White page, floating product card, transparent/frosted text backgrounds, soft shadows. */
+
+.sponsoredProductAdCard {
+  min-height: clamp(245px, 22vw, 340px) !important;
+  max-height: 360px !important;
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) minmax(250px, 0.76fr);
+  align-items: center;
+  gap: clamp(18px, 3vw, 44px);
+  padding: clamp(22px, 3vw, 40px) !important;
+  background:
+    radial-gradient(circle at 12% 12%, rgba(255, 210, 63, 0.20), transparent 26%),
+    radial-gradient(circle at 88% 50%, rgba(255, 210, 63, 0.16), transparent 32%),
+    linear-gradient(135deg, rgba(255, 255, 255, 0.94), rgba(247, 248, 250, 0.98)) !important;
+  border: 1px solid rgba(17, 17, 17, 0.08) !important;
+  box-shadow: 0 22px 46px rgba(17, 17, 17, 0.10) !important;
+}
+
+.sponsoredProductAdCard::before {
+  inset: 16px !important;
+  border: 1px solid rgba(17, 17, 17, 0.05) !important;
+  border-radius: 27px !important;
+  background: rgba(255, 255, 255, 0.28);
+  pointer-events: none;
+}
+
+.sponsoredProductAdCopy {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+  min-width: 0;
+}
+
+.sponsoredProductAdCopy span,
+.sponsoredProductAdCopy h2,
+.sponsoredProductAdCopy p,
+.sponsoredProductAdMetaRow,
+.sponsoredProductAdCtaInline {
+  position: relative;
+  z-index: 2;
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+}
+
+.sponsoredProductAdCopy span {
+  background: rgba(17, 17, 17, 0.08) !important;
+  border: 1px solid rgba(17, 17, 17, 0.08) !important;
+  color: #111111 !important;
+  box-shadow: 0 10px 22px rgba(17, 17, 17, 0.06);
+}
+
+.sponsoredProductAdCopy h2 {
+  width: fit-content;
+  max-width: min(720px, 100%);
+  margin: 0 !important;
+  padding: 10px 14px;
+  border-radius: 22px;
+  background: rgba(255, 255, 255, 0.58);
+  color: #111111 !important;
+  border: 1px solid rgba(255, 255, 255, 0.78);
+  box-shadow: 0 14px 28px rgba(17, 17, 17, 0.08);
+  font-size: clamp(30px, 3.1vw, 50px) !important;
+  line-height: 1.02 !important;
+}
+
+.sponsoredProductAdCopy p {
+  width: fit-content;
+  max-width: 560px;
+  margin: 0 !important;
+  padding: 9px 12px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.48);
+  color: #4b5563 !important;
+  border: 1px solid rgba(255, 255, 255, 0.70);
+  box-shadow: 0 10px 22px rgba(17, 17, 17, 0.06);
+}
+
+.sponsoredProductAdMetaRow {
+  width: fit-content;
+  margin-top: 2px !important;
+  padding: 8px 10px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.56);
+  border: 1px solid rgba(255, 255, 255, 0.76);
+  box-shadow: 0 10px 22px rgba(17, 17, 17, 0.06);
+}
+
+.sponsoredProductAdMetaRow strong {
+  color: #111111 !important;
+}
+
+.sponsoredProductAdMetaRow em {
+  color: #4b5563 !important;
+  opacity: 1 !important;
+}
+
+.sponsoredProductAdCtaInline {
+  margin-top: 2px !important;
+  background: rgba(255, 210, 63, 0.92) !important;
+  border: 1px solid rgba(17, 17, 17, 0.05);
+  color: #111111 !important;
+  box-shadow: 0 14px 24px rgba(17, 17, 17, 0.12);
+}
+
+.sponsoredProductAdVisual {
+  height: clamp(188px, 19vw, 292px) !important;
+  border-radius: 32px !important;
+  background:
+    radial-gradient(circle at 50% 42%, #ffffff 0%, #ffffff 48%, rgba(255, 210, 63, 0.18) 100%) !important;
+  border: 1px solid rgba(17, 17, 17, 0.08) !important;
+  box-shadow: 0 20px 38px rgba(17, 17, 17, 0.12) !important;
+  transform: translateZ(0);
+}
+
+.sponsoredProductAdVisual::before {
+  content: "";
+  position: absolute;
+  inset: 14px;
+  border-radius: 24px;
+  border: 1px solid rgba(17, 17, 17, 0.04);
+  pointer-events: none;
+}
+
+.sponsoredProductAdVisual img {
+  filter: drop-shadow(0 18px 22px rgba(17, 17, 17, 0.14));
+}
+
+/* Normal image banners should also feel like floating content on a white page, not a heavy black block. */
+.sponsoredImageBannerCard {
+  background:
+    linear-gradient(135deg, rgba(255,255,255,0.96), rgba(247,248,250,0.98)) !important;
+  border: 1px solid rgba(17, 17, 17, 0.08) !important;
+}
+
+.sponsoredImageBannerCard .sponsoredBannerImage {
+  object-fit: cover !important;
+  background: transparent !important;
+}
+
+/* Mobile Customer App-style sponsored product ad */
+@media (max-width: 700px) {
+  .mobileSponsoredProductAdCard {
+    min-height: 152px !important;
+    max-height: 170px !important;
+    grid-template-columns: minmax(0, 1fr) 108px !important;
+    background:
+      radial-gradient(circle at 16% 10%, rgba(255, 210, 63, 0.22), transparent 34%),
+      linear-gradient(135deg, rgba(255, 255, 255, 0.96), rgba(247, 248, 250, 0.98)) !important;
+    border: 1px solid rgba(17, 17, 17, 0.08) !important;
+    box-shadow: 0 14px 28px rgba(17, 17, 17, 0.10) !important;
+  }
+
+  .mobileSponsoredProductAdCopy b,
+  .mobileSponsoredProductAdCopy strong,
+  .mobileSponsoredProductAdCopy em,
+  .mobileSponsoredProductAdCopy small,
+  .mobileSponsoredProductAdCtaInline {
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+  }
+
+  .mobileSponsoredProductAdCopy b {
+    background: rgba(17, 17, 17, 0.08) !important;
+    color: #111111 !important;
+    border: 1px solid rgba(17, 17, 17, 0.08);
+  }
+
+  .mobileSponsoredProductAdCopy strong {
+    width: fit-content;
+    max-width: 100%;
+    padding: 6px 8px;
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.58);
+    color: #111111 !important;
+    border: 1px solid rgba(255, 255, 255, 0.76);
+    box-shadow: 0 8px 16px rgba(17, 17, 17, 0.07);
+  }
+
+  .mobileSponsoredProductAdCopy em {
+    width: fit-content;
+    padding: 4px 7px;
+    border-radius: 12px;
+    background: rgba(255, 210, 63, 0.78);
+    color: #111111 !important;
+    border: 1px solid rgba(255, 210, 63, 0.40);
+  }
+
+  .mobileSponsoredProductAdCopy small {
+    width: fit-content;
+    max-width: 100%;
+    padding: 4px 7px;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.50);
+    color: #4b5563 !important;
+  }
+
+  .mobileSponsoredProductAdVisual {
+    width: 106px !important;
+    height: 106px !important;
+    background: #ffffff !important;
+    border: 1px solid rgba(17, 17, 17, 0.08);
+    box-shadow: 0 12px 22px rgba(17, 17, 17, 0.12) !important;
+  }
+
+  .mobileSponsoredProductAdVisual img {
+    filter: drop-shadow(0 10px 14px rgba(17, 17, 17, 0.12));
+  }
+
+  .mobileSponsoredProductAdCtaInline {
+    background: rgba(255, 210, 63, 0.92) !important;
+    color: #111111 !important;
+    box-shadow: 0 8px 14px rgba(17, 17, 17, 0.12);
+  }
+}
