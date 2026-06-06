@@ -10664,830 +10664,1945 @@ button[class*="signOut"] {
     width: 100%;
   }
 }
+/* =========================================================
+   DARIK WHITE FLOATING ITEM BACKGROUND PATCH
+   Date: 2026-06-06
 
-/* L371: Premium sponsored product ad card + faster banner/category image loading.
-   Product ads no longer render as a giant raw image billboard.
-   They render as Darik-designed cards with product image, copy, price, and CTA. */
+   Goal:
+   Make the page background match the white product photo background
+   so items look like they are floating on the page.
 
-.sponsoredBannerCarousel,
-.mobileSponsoredBannerCarousel {
-  contain: layout paint;
+   Safe scope:
+   - Background/color only
+   - Does not touch header/search/banner/trust positioning
+   - Does not touch transform scale rules
+   - Does not touch margins/negative pulls
+   ========================================================= */
+
+html,
+body {
+  background: #ffffff !important;
 }
 
-.sponsoredBannerCard {
-  min-height: clamp(235px, 22vw, 340px) !important;
-  max-height: 360px !important;
-  isolation: isolate;
+.darikPage,
+.mobileAppWebLayout,
+.webAppShell,
+.desktopWebLayout {
+  background: #ffffff !important;
+  background-image: none !important;
 }
 
-.sponsoredImageBannerCard {
+/* Product listing areas */
+.sectionBlock,
+.featuredItemsTightSection,
+.bestSellerDepartmentSection,
+.bestSellerDepartmentStack,
+.bestSellerCarousel,
+.productGrid,
+.categoryProductsGrid,
+.mobileSection,
+.mobileFeaturedStack,
+.mobileFeaturedDepartment,
+.mobileProductRow,
+.mobileProductGrid {
+  background: #ffffff !important;
+  background-image: none !important;
+}
+
+/* Product cards stay invisible so the product photos float */
+.productCard,
+.productCard:hover,
+.bestSellerCleanItem,
+.mobileProductCard,
+.mobileGridProductCard {
+  background: transparent !important;
+  background-image: none !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
+}
+
+/* Product image boxes now blend into the page */
+.productImageWrap,
+.bestSellerCleanImageWrap,
+.mobileProductImageBox,
+.mobileGridImageButton {
+  background: #ffffff !important;
+  background-image: none !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
+}
+
+/* Keep actual product images transparent/clean inside the white field */
+.productImageWrap img,
+.bestSellerCleanImage,
+.mobileProductImageBox img,
+.mobileGridImageButton img {
+  background: transparent !important;
+}
+
+/* Empty image placeholders should still look clean, not grey */
+.productInitials,
+.bestSellerCleanPlaceholder,
+.mobileProductImageBox b,
+.mobileGridImageButton b {
+  background: #ffffff !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
+}
+
+/* Product detail page image areas also blend into white */
+.productFullScreenPage,
+.darikPdpFrame,
+.darikPdpImageStage,
+.darikPdpThumb,
+.productImageZoomShell {
+  background: #ffffff !important;
+  background-image: none !important;
+}
+
+.darikPdpImageStage,
+.darikPdpThumb {
+  border-color: transparent !important;
+  box-shadow: none !important;
+}
+
+/* Mobile override: remove the old grey gradient that was applied under 820px */
+@media (max-width: 820px) {
+  html,
+  body,
+  .darikPage,
+  .mobileAppWebLayout,
+  .webAppShell,
+  .desktopWebLayout {
+    background: #ffffff !important;
+    background-image: none !important;
+  }
+
+  .mobileSection,
+  .mobileFeaturedStack,
+  .mobileFeaturedDepartment,
+  .mobileProductRow,
+  .mobileProductGrid,
+  .productGrid,
+  .categoryProductsGrid {
+    background: #ffffff !important;
+    background-image: none !important;
+  }
+}
+
+/* =========================================================
+   DARIK LOCKED SEARCH BAR PATCH
+   Date: 2026-06-06
+
+   Goal:
+   Keep the search bar locked under the Darik header while scrolling.
+
+   Safe scope:
+   - CSS only
+   - Does not touch page.tsx
+   - Does not touch banner logic
+   - Does not touch product/category filtering
+   ========================================================= */
+
+/* Helps sticky work correctly while still preventing sideways scroll */
+.webAppShell {
+  overflow-x: clip !important;
+  overflow-y: visible !important;
+}
+
+/* Desktop search bar locks under the fixed/shrunk header */
+.topHeader ~ .searchBar.searchWithDropdown,
+.topHeader ~ .searchBar {
+  position: sticky !important;
+  top: 104px !important;
+  z-index: 4900 !important;
+  background: rgba(255, 255, 255, 0.98) !important;
+  backdrop-filter: blur(16px) !important;
+  -webkit-backdrop-filter: blur(16px) !important;
+  border: 1px solid rgba(229, 231, 235, 0.95) !important;
+  box-shadow: 0 14px 32px rgba(15, 23, 42, 0.12) !important;
+}
+
+/* When the header is fully shrunk, keep the search bar tucked directly under it */
+.topHeader.topHeaderShrunk ~ .searchBar.searchWithDropdown,
+.topHeader.topHeaderShrunk ~ .searchBar {
+  top: 102px !important;
+}
+
+/* Search suggestions must float above banners/products while search is locked */
+.topHeader ~ .searchBar.searchWithDropdown .searchSuggestionsDropdown {
+  z-index: 9999 !important;
+}
+
+/* Mobile search bar locks under the mobile header */
+@media (max-width: 700px) {
+  .mobileSearchCard.searchWithDropdown,
+  .mobileSearchCard {
+    position: sticky !important;
+    top: 78px !important;
+    z-index: 79 !important;
+    background: rgba(255, 255, 255, 0.98) !important;
+    backdrop-filter: blur(16px) !important;
+    -webkit-backdrop-filter: blur(16px) !important;
+    border: 1px solid rgba(229, 231, 235, 0.95) !important;
+    box-shadow: 0 12px 28px rgba(15, 23, 42, 0.12) !important;
+  }
+
+  .mobileAppHeader.shrunk ~ .mobileSearchCard.searchWithDropdown,
+  .mobileAppHeader.shrunk ~ .mobileSearchCard {
+    top: 74px !important;
+  }
+
+  .mobileSearchCard.searchWithDropdown .searchSuggestionsDropdown {
+    z-index: 9999 !important;
+  }
+}
+
+/* =========================================================
+   DARIK REAL SEARCH RESULTS PAGE + SEARCH BUTTON PATCH
+   Date: 2026-06-06
+
+   Fixes:
+   - Search button is visible on desktop and mobile.
+   - Enter/search opens a full-page search results screen.
+   - Search no longer filters the Best Sellers/home page.
+   ========================================================= */
+
+.searchBar.searchWithDropdown,
+.mobileSearchCard.searchWithDropdown {
+  display: flex !important;
+  align-items: center !important;
+  gap: 10px !important;
+}
+
+.searchBar.searchWithDropdown input,
+.mobileSearchCard.searchWithDropdown input {
+  min-width: 0 !important;
+  flex: 1 1 auto !important;
+}
+
+.darikSearchSubmitButton {
+  flex: 0 0 auto !important;
+  border: 0 !important;
+  border-radius: 999px !important;
   background: #111111 !important;
+  color: #ffffff !important;
+  font-size: 14px !important;
+  font-weight: 950 !important;
+  letter-spacing: -0.01em !important;
+  padding: 13px 20px !important;
+  min-height: 46px !important;
+  cursor: pointer !important;
+  box-shadow: 0 10px 22px rgba(17, 17, 17, 0.18) !important;
+  transition: transform 0.16s ease, box-shadow 0.16s ease, opacity 0.16s ease !important;
 }
 
-.sponsoredImageBannerCard .sponsoredBannerImage {
-  object-fit: cover !important;
-  background: #111111 !important;
+.darikSearchSubmitButton:hover {
+  transform: translateY(-1px) !important;
+  box-shadow: 0 14px 28px rgba(17, 17, 17, 0.22) !important;
 }
+
+.darikSearchSubmitButton:disabled {
+  opacity: 0.62 !important;
+  cursor: not-allowed !important;
+  transform: none !important;
+}
+
+.mobileSearchSubmitButton {
+  padding: 10px 13px !important;
+  min-height: 40px !important;
+  font-size: 12px !important;
+}
+
+.darikSearchResultsPage {
+  position: fixed !important;
+  inset: 0 !important;
+  z-index: 9500 !important;
+  background: #ffffff !important;
+  color: #111827 !important;
+  overflow-y: auto !important;
+  -webkit-overflow-scrolling: touch !important;
+  padding: clamp(18px, 3vw, 42px) !important;
+}
+
+.darikSearchResultsHeader {
+  max-width: 1240px !important;
+  margin: 0 auto 20px !important;
+  display: grid !important;
+  grid-template-columns: auto minmax(0, 1fr) !important;
+  align-items: center !important;
+  gap: 18px !important;
+  padding: 12px 0 18px !important;
+  border-bottom: 1px solid rgba(229, 231, 235, 0.9) !important;
+}
+
+.darikSearchResultsBackButton {
+  border: 1px solid rgba(229, 231, 235, 0.98) !important;
+  background: #ffffff !important;
+  color: #111827 !important;
+  border-radius: 999px !important;
+  padding: 12px 18px !important;
+  font-size: 14px !important;
+  font-weight: 950 !important;
+  cursor: pointer !important;
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.08) !important;
+}
+
+.darikSearchResultsHeader span {
+  display: inline-flex !important;
+  width: fit-content !important;
+  border-radius: 999px !important;
+  background: #fff8d8 !important;
+  color: #111827 !important;
+  padding: 7px 11px !important;
+  font-size: 12px !important;
+  font-weight: 950 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.06em !important;
+}
+
+.darikSearchResultsHeader h1 {
+  margin: 9px 0 0 !important;
+  font-size: clamp(28px, 4.6vw, 58px) !important;
+  line-height: 0.98 !important;
+  letter-spacing: -0.055em !important;
+  font-weight: 950 !important;
+  color: #111827 !important;
+}
+
+.darikSearchResultsHeader p {
+  margin: 8px 0 0 !important;
+  color: #6b7280 !important;
+  font-size: 15px !important;
+  font-weight: 800 !important;
+}
+
+.darikSearchResultsSearchBar {
+  max-width: 1240px !important;
+  margin: 0 auto 22px !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 10px !important;
+  border: 1px solid rgba(229, 231, 235, 0.95) !important;
+  border-radius: 999px !important;
+  background: #ffffff !important;
+  padding: 8px 8px 8px 18px !important;
+  box-shadow: 0 14px 38px rgba(15, 23, 42, 0.08) !important;
+}
+
+.darikSearchResultsSearchBar span {
+  color: #6b7280 !important;
+  font-size: 20px !important;
+  font-weight: 950 !important;
+}
+
+.darikSearchResultsSearchBar input {
+  min-width: 0 !important;
+  flex: 1 1 auto !important;
+  border: 0 !important;
+  outline: none !important;
+  background: transparent !important;
+  font-size: 17px !important;
+  font-weight: 800 !important;
+  color: #111827 !important;
+}
+
+.darikSearchResultsSearchBar button {
+  flex: 0 0 auto !important;
+  border: 0 !important;
+  border-radius: 999px !important;
+  background: #111111 !important;
+  color: #ffffff !important;
+  padding: 13px 22px !important;
+  font-size: 14px !important;
+  font-weight: 950 !important;
+  cursor: pointer !important;
+}
+
+.darikSearchResultsSearchBar button:disabled {
+  opacity: 0.62 !important;
+  cursor: not-allowed !important;
+}
+
+.darikSearchResultsNotice {
+  max-width: 1240px !important;
+  margin: 0 auto 18px !important;
+  border-radius: 18px !important;
+  background: #fff8d8 !important;
+  color: #4b3b00 !important;
+  padding: 14px 16px !important;
+  font-size: 14px !important;
+  font-weight: 850 !important;
+}
+
+.darikSearchResultsLoadingCard,
+.darikSearchResultsEmptyCard {
+  max-width: 760px !important;
+  margin: 50px auto !important;
+  border: 1px solid rgba(229, 231, 235, 0.95) !important;
+  border-radius: 30px !important;
+  background: #ffffff !important;
+  box-shadow: 0 20px 52px rgba(15, 23, 42, 0.08) !important;
+  padding: 38px !important;
+  text-align: center !important;
+}
+
+.darikSearchResultsLoadingCard strong,
+.darikSearchResultsEmptyCard h2 {
+  display: block !important;
+  margin: 12px 0 8px !important;
+  color: #111827 !important;
+  font-size: 28px !important;
+  font-weight: 950 !important;
+  letter-spacing: -0.035em !important;
+}
+
+.darikSearchResultsLoadingCard p,
+.darikSearchResultsEmptyCard p {
+  margin: 0 !important;
+  color: #6b7280 !important;
+  font-size: 15px !important;
+  font-weight: 800 !important;
+}
+
+.darikSearchResultsEmptyCard button {
+  margin-top: 22px !important;
+  border: 0 !important;
+  border-radius: 999px !important;
+  background: #111111 !important;
+  color: #ffffff !important;
+  padding: 13px 22px !important;
+  font-size: 14px !important;
+  font-weight: 950 !important;
+  cursor: pointer !important;
+}
+
+.darikSearchResultsGrid {
+  max-width: 1240px !important;
+  margin: 0 auto 50px !important;
+  display: grid !important;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)) !important;
+  gap: 18px !important;
+}
+
+.darikSearchResultCard {
+  border: 1px solid rgba(229, 231, 235, 0.92) !important;
+  border-radius: 28px !important;
+  background: #ffffff !important;
+  overflow: hidden !important;
+  cursor: pointer !important;
+  box-shadow: 0 16px 40px rgba(15, 23, 42, 0.07) !important;
+  transition: transform 0.18s ease, box-shadow 0.18s ease !important;
+}
+
+.darikSearchResultCard:hover {
+  transform: translateY(-3px) !important;
+  box-shadow: 0 22px 54px rgba(15, 23, 42, 0.12) !important;
+}
+
+.darikSearchResultImageButton {
+  position: relative !important;
+  width: 100% !important;
+  height: 220px !important;
+  border: 0 !important;
+  background: #ffffff !important;
+  padding: 18px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  cursor: pointer !important;
+}
+
+.darikSearchResultImageButton img {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: contain !important;
+  display: block !important;
+}
+
+.darikSearchResultImageButton span {
+  width: 84px !important;
+  height: 84px !important;
+  border-radius: 999px !important;
+  background: #f3f4f6 !important;
+  color: #111827 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-size: 25px !important;
+  font-weight: 950 !important;
+}
+
+.darikSearchResultImageButton b {
+  position: absolute !important;
+  top: 14px !important;
+  right: 14px !important;
+  border-radius: 999px !important;
+  background: #ffd23f !important;
+  color: #111111 !important;
+  padding: 7px 10px !important;
+  font-size: 11px !important;
+  font-weight: 950 !important;
+}
+
+.darikSearchResultInfo {
+  padding: 0 18px 20px !important;
+}
+
+.darikSearchResultInfo small {
+  display: block !important;
+  color: #6b7280 !important;
+  font-size: 12px !important;
+  font-weight: 850 !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+
+.darikSearchResultInfo h3 {
+  margin: 7px 0 0 !important;
+  color: #111827 !important;
+  font-size: 17px !important;
+  font-weight: 950 !important;
+  line-height: 1.15 !important;
+  letter-spacing: -0.025em !important;
+  display: -webkit-box !important;
+  overflow: hidden !important;
+  -webkit-line-clamp: 2 !important;
+  line-clamp: 2 !important;
+  -webkit-box-orient: vertical !important;
+}
+
+.darikSearchResultInfo p {
+  margin: 7px 0 0 !important;
+  color: #6b7280 !important;
+  font-size: 13px !important;
+  font-weight: 750 !important;
+  line-height: 1.35 !important;
+  display: -webkit-box !important;
+  overflow: hidden !important;
+  -webkit-line-clamp: 2 !important;
+  line-clamp: 2 !important;
+  -webkit-box-orient: vertical !important;
+}
+
+.darikSearchResultInfo strong {
+  display: block !important;
+  margin-top: 12px !important;
+  color: #111827 !important;
+  font-size: 18px !important;
+  font-weight: 950 !important;
+}
+
+.searchBar.searchWithDropdown .searchSuggestionsDropdown,
+.mobileSearchCard.searchWithDropdown .searchSuggestionsDropdown {
+  z-index: 9999 !important;
+}
+
+@media (max-width: 700px) {
+  .mobileSearchCard.searchWithDropdown {
+    gap: 7px !important;
+    padding-right: 8px !important;
+  }
+
+  .mobileSearchSubmitButton {
+    min-width: 72px !important;
+  }
+
+  .darikSearchResultsPage {
+    padding: 14px !important;
+  }
+
+  .darikSearchResultsHeader {
+    grid-template-columns: 1fr !important;
+    gap: 12px !important;
+    margin-bottom: 14px !important;
+  }
+
+  .darikSearchResultsBackButton {
+    width: fit-content !important;
+    padding: 10px 14px !important;
+    font-size: 13px !important;
+  }
+
+  .darikSearchResultsHeader h1 {
+    font-size: 34px !important;
+  }
+
+  .darikSearchResultsSearchBar {
+    border-radius: 24px !important;
+    padding: 10px !important;
+    align-items: stretch !important;
+  }
+
+  .darikSearchResultsSearchBar input {
+    font-size: 15px !important;
+  }
+
+  .darikSearchResultsSearchBar button {
+    padding: 11px 14px !important;
+  }
+
+  .darikSearchResultsGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 12px !important;
+  }
+
+  .darikSearchResultCard {
+    border-radius: 22px !important;
+  }
+
+  .darikSearchResultImageButton {
+    height: 150px !important;
+    padding: 12px !important;
+  }
+
+  .darikSearchResultInfo {
+    padding: 0 12px 14px !important;
+  }
+
+  .darikSearchResultInfo h3 {
+    font-size: 14px !important;
+  }
+
+  .darikSearchResultInfo p {
+    display: none !important;
+  }
+
+  .darikSearchResultInfo strong {
+    margin-top: 8px !important;
+    font-size: 15px !important;
+  }
+}
+
+/* =========================================================
+   DARIK SEARCH PAGE WHITE FLOATING ITEMS PATCH
+   Date: 2026-06-06
+
+   Goal:
+   Make the search results page match the main page white floating-product look.
+
+   Safe scope:
+   - CSS only
+   - Does not touch page.tsx
+   - Does not touch search logic
+   - Does not touch category/filter logic
+   ========================================================= */
+
+.darikSearchResultsPage {
+  background: #ffffff !important;
+  background-image: none !important;
+}
+
+.darikSearchResultsHeader {
+  background: #ffffff !important;
+  background-image: none !important;
+  border-bottom-color: rgba(229, 231, 235, 0.65) !important;
+}
+
+.darikSearchResultsSearchBar {
+  background: #ffffff !important;
+  background-image: none !important;
+}
+
+/* Search results grid should blend into the same white page */
+.darikSearchResultsGrid {
+  background: #ffffff !important;
+  background-image: none !important;
+}
+
+/* Search result cards now disappear into the white background */
+.darikSearchResultCard {
+  background: transparent !important;
+  background-image: none !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
+}
+
+.darikSearchResultCard:hover {
+  box-shadow: none !important;
+}
+
+/* Product photo area matches the page white so items float */
+.darikSearchResultImageButton {
+  background: #ffffff !important;
+  background-image: none !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
+}
+
+.darikSearchResultImageButton img {
+  background: transparent !important;
+}
+
+/* Placeholder initials stay clean white instead of grey */
+.darikSearchResultImageButton span {
+  background: #ffffff !important;
+  border: 1px solid transparent !important;
+  box-shadow: none !important;
+}
+
+/* Keep only the yellow stock badge visible */
+.darikSearchResultImageButton b {
+  box-shadow: none !important;
+}
+
+/* Info area has no card color behind it */
+.darikSearchResultInfo {
+  background: transparent !important;
+  background-image: none !important;
+}
+
+/* Empty/loading cards stay white and cleaner */
+.darikSearchResultsLoadingCard,
+.darikSearchResultsEmptyCard {
+  background: #ffffff !important;
+  background-image: none !important;
+  box-shadow: none !important;
+  border-color: rgba(229, 231, 235, 0.65) !important;
+}
+
+@media (max-width: 700px) {
+  .darikSearchResultsPage,
+  .darikSearchResultsGrid,
+  .darikSearchResultCard,
+  .darikSearchResultImageButton,
+  .darikSearchResultInfo {
+    background: #ffffff !important;
+    background-image: none !important;
+  }
+
+  .darikSearchResultCard {
+    border-color: transparent !important;
+    box-shadow: none !important;
+  }
+}
+
+/* =========================================================
+   DARIK V2 — Sponsored retailer product ads as designed cards
+   Safe append only. Does not touch header/search/trust/category layout.
+   ========================================================= */
 
 .sponsoredProductAdCard {
-  display: grid !important;
-  grid-template-columns: minmax(0, 1.12fr) minmax(260px, 0.88fr);
-  align-items: center;
-  gap: clamp(22px, 4vw, 54px);
-  padding: clamp(24px, 3vw, 42px) !important;
   background:
-    radial-gradient(circle at 82% 50%, rgba(255, 210, 63, 0.24), transparent 28%),
-    linear-gradient(135deg, #111111 0%, #171717 58%, #050505 100%) !important;
+    radial-gradient(circle at 82% 44%, rgba(255, 210, 63, 0.32), transparent 27%),
+    linear-gradient(135deg, #101010 0%, #191919 46%, #050505 100%) !important;
+  border: 1px solid rgba(255, 210, 63, 0.24) !important;
 }
 
-.sponsoredProductAdCard::before {
-  content: "";
-  position: absolute;
-  inset: 18px;
-  border: 1px solid rgba(255, 210, 63, 0.18);
-  border-radius: 26px;
-  pointer-events: none;
+.sponsoredProductAdContent {
+  position: relative;
+  z-index: 2;
+  min-height: clamp(330px, 32vw, 520px);
+  height: 100%;
+  display: grid;
+  grid-template-columns: minmax(0, 1.05fr) minmax(360px, 0.95fr);
+  align-items: center;
+  gap: 34px;
+  padding: clamp(34px, 4vw, 62px);
+  text-align: left;
 }
 
 .sponsoredProductAdCopy {
-  position: relative;
-  z-index: 2;
-  text-align: left;
   min-width: 0;
+  max-width: 760px;
+  color: #ffffff;
 }
 
-.sponsoredProductAdCopy span {
+.sponsoredProductAdLabel {
   display: inline-flex;
+  align-items: center;
   width: fit-content;
   border-radius: 999px;
-  background: rgba(255, 210, 63, 0.16);
-  border: 1px solid rgba(255, 210, 63, 0.36);
+  background: rgba(255, 210, 63, 0.14);
+  border: 1px solid rgba(255, 210, 63, 0.46);
   color: #ffd23f;
-  padding: 8px 12px;
-  font-size: 12px;
+  padding: 10px 16px;
+  font-size: clamp(14px, 1.2vw, 20px);
   font-weight: 950;
-  letter-spacing: 0.8px;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
 }
 
-.sponsoredProductAdCopy h2 {
-  max-width: 680px;
-  margin: 14px 0 0;
-  color: #ffffff;
-  font-size: clamp(30px, 3.4vw, 54px);
+.sponsoredProductAdSponsor {
+  display: block;
+  margin-top: 18px;
+  color: rgba(255, 255, 255, 0.72);
+  font-size: clamp(19px, 1.8vw, 30px);
   font-weight: 950;
-  line-height: 0.98;
-  letter-spacing: -1.2px;
+}
+
+.sponsoredProductAdCopy h2 {
+  margin: 12px 0 0;
+  color: #ffffff;
+  font-size: clamp(46px, 5vw, 84px);
+  font-weight: 950;
+  line-height: 0.95;
+  letter-spacing: -0.055em;
+  max-width: 800px;
 }
 
 .sponsoredProductAdCopy p {
-  max-width: 560px;
-  margin: 12px 0 0;
-  color: #d6d6d6;
-  font-size: clamp(15px, 1.4vw, 20px);
+  margin: 18px 0 0;
+  color: rgba(255, 255, 255, 0.76);
+  font-size: clamp(20px, 2vw, 32px);
   font-weight: 850;
-  line-height: 1.35;
+  line-height: 1.25;
+  max-width: 720px;
 }
 
-.sponsoredProductAdMetaRow {
-  margin-top: 18px;
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 12px;
-}
-
-.sponsoredProductAdMetaRow strong {
-  color: #ffd23f;
-  font-size: clamp(24px, 2.4vw, 36px);
-  font-weight: 950;
-}
-
-.sponsoredProductAdMetaRow em {
-  font-style: normal;
-  color: #ffffff;
-  opacity: 0.82;
-  font-size: 13px;
-  font-weight: 900;
-}
-
-.sponsoredProductAdCtaInline {
+.sponsoredProductAdButton {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: fit-content;
-  margin-top: 18px;
+  margin-top: 28px;
+  min-width: 190px;
   border-radius: 999px;
   background: #ffd23f;
   color: #111111;
-  padding: 12px 18px;
-  font-size: 13px;
+  padding: 16px 28px;
+  font-size: clamp(16px, 1.4vw, 23px);
   font-weight: 950;
-  letter-spacing: 0.6px;
-  box-shadow: 0 12px 20px rgba(0, 0, 0, 0.22);
+  letter-spacing: 0.02em;
+  box-shadow: 0 14px 30px rgba(0, 0, 0, 0.26);
 }
 
 .sponsoredProductAdVisual {
   position: relative;
-  z-index: 2;
-  height: clamp(190px, 20vw, 300px);
-  border-radius: 30px;
-  background:
-    radial-gradient(circle at 50% 46%, rgba(255, 255, 255, 1), rgba(245, 245, 245, 0.96) 50%, rgba(255, 210, 63, 0.22) 100%);
-  border: 1px solid rgba(255, 255, 255, 0.34);
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: clamp(18px, 2.5vw, 34px);
-  overflow: hidden;
-  box-shadow: 0 18px 42px rgba(0, 0, 0, 0.22);
+  min-width: 0;
 }
 
-.sponsoredProductAdVisual img {
+.sponsoredProductAdGlow {
+  position: absolute;
+  width: 78%;
+  aspect-ratio: 1 / 1;
+  border-radius: 999px;
+  background: rgba(255, 210, 63, 0.24);
+  filter: blur(34px);
+  opacity: 0.95;
+}
+
+.sponsoredProductAdImageFrame {
+  position: relative;
+  z-index: 2;
+  width: min(100%, 520px);
+  height: clamp(260px, 24vw, 410px);
+  border-radius: 34px;
+  background:
+    linear-gradient(180deg, #ffffff 0%, #f7f7f7 100%);
+  border: 1px solid rgba(255, 255, 255, 0.78);
+  box-shadow:
+    0 28px 60px rgba(0, 0, 0, 0.34),
+    inset 0 0 0 1px rgba(0, 0, 0, 0.03);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.sponsoredProductAdImageFrame img {
   width: 100%;
   height: 100%;
   object-fit: contain;
+  padding: clamp(20px, 3vw, 42px);
   display: block;
 }
 
-.sponsoredProductAdVisual span {
-  width: 96px;
-  height: 96px;
-  border-radius: 50%;
-  display: grid;
-  place-items: center;
+.sponsoredProductAdImageFrame span {
+  width: 120px;
+  height: 120px;
+  border-radius: 999px;
   background: #111111;
   color: #ffd23f;
-  font-size: 24px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 40px;
   font-weight: 950;
 }
 
-/* Keep static category artwork fast and stable */
-.imageCategoryCircle,
-.mobileCategoryImage {
-  contain: layout paint;
-  background: #ffffff;
-  will-change: auto;
+/* Mobile sponsored product card */
+.mobileSponsoredProductAdCard {
+  background:
+    radial-gradient(circle at 78% 32%, rgba(255, 210, 63, 0.28), transparent 31%),
+    linear-gradient(135deg, #101010 0%, #181818 52%, #050505 100%) !important;
+  border: 1px solid rgba(255, 210, 63, 0.24) !important;
 }
 
-.imageCategoryCircle img,
-.mobileCategoryChip img {
+.mobileSponsoredProductAdContent {
+  position: relative;
+  z-index: 2;
+  min-height: inherit;
+  height: 100%;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 40%;
+  align-items: center;
+  gap: 12px;
+  padding: 18px;
+  text-align: left;
+}
+
+.mobileSponsoredProductAdCopy {
+  min-width: 0;
+  color: #ffffff;
+}
+
+.mobileSponsoredProductAdLabel {
+  display: inline-flex;
+  width: fit-content;
+  border-radius: 999px;
+  background: rgba(255, 210, 63, 0.14);
+  border: 1px solid rgba(255, 210, 63, 0.45);
+  color: #ffd23f;
+  padding: 6px 9px;
+  font-size: 10px;
+  font-weight: 950;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.mobileSponsoredProductAdCopy strong {
   display: block;
-  transform: translateZ(0);
-  backface-visibility: hidden;
+  margin-top: 8px;
+  color: rgba(255, 255, 255, 0.72);
+  font-size: 12px;
+  font-weight: 950;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.mobileSponsoredProductAdCopy h2 {
+  margin: 5px 0 0;
+  color: #ffffff;
+  font-size: clamp(23px, 6vw, 34px);
+  font-weight: 950;
+  line-height: 0.98;
+  letter-spacing: -0.05em;
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+.mobileSponsoredProductAdCopy p {
+  margin: 7px 0 0;
+  color: rgba(255, 255, 255, 0.72);
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1.25;
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+.mobileSponsoredProductAdButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 10px;
+  border-radius: 999px;
+  background: #ffd23f;
+  color: #111111;
+  padding: 9px 13px;
+  font-size: 11px;
+  font-weight: 950;
+}
+
+.mobileSponsoredProductAdImageFrame {
+  width: 100%;
+  height: 160px;
+  border-radius: 22px;
+  background: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.78);
+  box-shadow: 0 16px 34px rgba(0, 0, 0, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.mobileSponsoredProductAdImageFrame img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  padding: 14px;
+  display: block;
+}
+
+.mobileSponsoredProductAdImageFrame span {
+  width: 66px;
+  height: 66px;
+  border-radius: 999px;
+  background: #111111;
+  color: #ffd23f;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  font-weight: 950;
+}
+
+@media (max-width: 900px) {
+  .sponsoredProductAdContent {
+    grid-template-columns: 1fr 0.82fr;
+    gap: 22px;
+    padding: 30px;
+  }
+
+  .sponsoredProductAdImageFrame {
+    height: 300px;
+    border-radius: 28px;
+  }
 }
 
 @media (max-width: 700px) {
-  .mobileSponsoredBannerCarousel {
-    margin: 6px 0 12px !important;
+  .sponsoredProductAdContent {
+    min-height: 260px;
+    grid-template-columns: 1fr 42%;
+    gap: 12px;
+    padding: 18px;
   }
 
-  .mobileSponsoredBannerCard {
-    min-height: 152px !important;
-    max-height: 168px !important;
-    border-radius: 22px !important;
-    isolation: isolate;
+  .sponsoredProductAdLabel {
+    padding: 7px 10px;
+    font-size: 10px;
   }
 
-  .mobileSponsoredImageBannerCard .mobileSponsoredBannerImage {
-    object-fit: cover !important;
-    background: #111111 !important;
+  .sponsoredProductAdSponsor {
+    margin-top: 8px;
+    font-size: 13px;
   }
 
-  .mobileSponsoredProductAdCard {
-    display: grid !important;
-    grid-template-columns: minmax(0, 1fr) 116px;
-    align-items: center;
-    gap: 10px;
-    padding: 14px !important;
-    background:
-      radial-gradient(circle at 84% 50%, rgba(255, 210, 63, 0.26), transparent 31%),
-      linear-gradient(135deg, #111111 0%, #171717 58%, #050505 100%) !important;
-  }
-
-  .mobileSponsoredProductAdCopy {
-    position: relative;
-    z-index: 2;
-    min-width: 0;
-    text-align: left;
-  }
-
-  .mobileSponsoredProductAdCopy b {
-    display: inline-flex;
-    width: fit-content;
-    border-radius: 999px;
-    background: rgba(255, 210, 63, 0.16);
-    color: #ffd23f;
-    padding: 5px 8px;
-    font-size: 9px;
-    font-weight: 950;
-    letter-spacing: 0.5px;
-    text-transform: uppercase;
-  }
-
-  .mobileSponsoredProductAdCopy strong {
+  .sponsoredProductAdCopy h2 {
+    font-size: 28px;
+    line-height: 0.98;
     display: -webkit-box;
-    margin-top: 7px;
-    color: #ffffff;
-    font-size: 18px;
-    font-weight: 950;
-    line-height: 1.02;
     overflow: hidden;
     -webkit-line-clamp: 2;
     line-clamp: 2;
     -webkit-box-orient: vertical;
   }
 
-  .mobileSponsoredProductAdCopy em {
-    display: block;
-    margin-top: 7px;
-    color: #ffd23f;
-    font-style: normal;
-    font-size: 17px;
-    font-weight: 950;
-  }
-
-  .mobileSponsoredProductAdCopy small {
-    display: block;
-    margin-top: 4px;
-    color: #d6d6d6;
-    font-size: 10px;
-    font-weight: 850;
-    white-space: nowrap;
+  .sponsoredProductAdCopy p {
+    margin-top: 8px;
+    font-size: 12px;
+    line-height: 1.25;
+    display: -webkit-box;
     overflow: hidden;
-    text-overflow: ellipsis;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
   }
 
-  .mobileSponsoredProductAdVisual {
-    position: relative;
-    z-index: 2;
-    width: 112px;
-    height: 112px;
+  .sponsoredProductAdButton {
+    margin-top: 10px;
+    min-width: 0;
+    padding: 9px 13px;
+    font-size: 11px;
+  }
+
+  .sponsoredProductAdImageFrame {
+    height: 155px;
     border-radius: 22px;
-    background: #ffffff;
-    display: grid;
-    place-items: center;
-    padding: 10px;
-    overflow: hidden;
-    box-shadow: 0 12px 22px rgba(0, 0, 0, 0.20);
   }
 
-  .mobileSponsoredProductAdVisual img {
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
-    display: block;
+  .sponsoredProductAdImageFrame img {
+    padding: 13px;
   }
 
-  .mobileSponsoredProductAdVisual b {
-    color: #111111;
-    font-size: 18px;
-    font-weight: 950;
-  }
-
-  .mobileSponsoredProductAdCtaInline {
-    position: absolute;
-    left: 14px;
-    bottom: 12px;
-    z-index: 3;
-    border-radius: 999px;
-    background: #ffd23f;
-    color: #111111;
-    padding: 7px 10px;
-    font-size: 10px;
-    font-weight: 950;
-    letter-spacing: 0.3px;
-  }
-
-  .mobileCategoryImage {
-    background: #ffffff !important;
-  }
-
-  .mobileCategoryChip img {
-    object-fit: cover;
-    width: 100%;
-    height: 100%;
+  .mobileSponsoredProductAdImageFrame {
+    height: 138px;
   }
 }
 
-/* L373: Stop trust badges from covering the sponsored banner.
-   L371 made sponsored banners shorter and cleaner, but the old scaled layout still pulled
-   the trustGrid upward too aggressively. This gives the banner its own vertical space. */
+/* =========================================================
+   DARIK SPONSORED AD — CUSTOMER APP STYLE
+   Date: 2026-06-06
 
-.topHeader ~ .sponsoredBannerCarousel {
-  --darik-section-pull: 22px !important;
-  margin-bottom: 26px !important;
-  position: relative;
-  z-index: 1;
-}
-
-.topHeader ~ .trustGrid {
-  --darik-section-pull: 34px !important;
-  margin-top: 0 !important;
-  position: relative;
-  z-index: 0;
-}
-
-/* Keep trust cards under the banner instead of floating over it */
-.trustGrid {
-  clear: both;
-  align-items: stretch;
-}
-
-.trustCard {
-  position: relative;
-  z-index: 0;
-}
-
-/* Give the carousel a stable box so the next section waits for it. */
-.sponsoredBannerCarousel {
-  display: block;
-  position: relative;
-  overflow: hidden;
-  margin-bottom: 30px !important;
-}
-
-.sponsoredBannerCard {
-  display: block;
-}
-
-/* Mobile has less vertical room, but still needs a gap under the banner. */
-@media (max-width: 700px) {
-  .topHeader ~ .sponsoredBannerCarousel {
-    --darik-section-pull: 14px !important;
-    margin-bottom: 18px !important;
-  }
-
-  .topHeader ~ .trustGrid {
-    --darik-section-pull: 18px !important;
-  }
-
-  .mobileSponsoredBannerCarousel {
-    margin-bottom: 18px !important;
-  }
-}
-
-/* Desktop: avoid old aggressive negative pulls after the banner. */
-@media (min-width: 701px) {
-  .topHeader ~ .trustGrid {
-    --darik-section-pull: 40px !important;
-  }
-
-  .topHeader ~ .cartSummary,
-  .topHeader ~ .sectionBlock,
-  .topHeader ~ .operationsPromise {
-    --darik-section-pull: 40px !important;
-  }
-}
-
-/* L374: Make web sponsored banners match the Customer App visual language.
-   White page, floating product card, transparent/frosted text backgrounds, soft shadows. */
+   Goal:
+   Make web sponsored product ads mimic the Customer App sponsored card:
+   - White background
+   - Yellow outline sponsored/price pills
+   - Large product image inside the banner
+   - Bottom product title + offer + Shop Now button
+   ========================================================= */
 
 .sponsoredProductAdCard {
-  min-height: clamp(245px, 22vw, 340px) !important;
-  max-height: 360px !important;
-  display: grid !important;
-  grid-template-columns: minmax(0, 1fr) minmax(250px, 0.76fr);
-  align-items: center;
-  gap: clamp(18px, 3vw, 44px);
-  padding: clamp(22px, 3vw, 40px) !important;
-  background:
-    radial-gradient(circle at 12% 12%, rgba(255, 210, 63, 0.20), transparent 26%),
-    radial-gradient(circle at 88% 50%, rgba(255, 210, 63, 0.16), transparent 32%),
-    linear-gradient(135deg, rgba(255, 255, 255, 0.94), rgba(247, 248, 250, 0.98)) !important;
-  border: 1px solid rgba(17, 17, 17, 0.08) !important;
-  box-shadow: 0 22px 46px rgba(17, 17, 17, 0.10) !important;
+  background: #ffffff !important;
+  background-image: none !important;
+  border: 1px solid rgba(255, 210, 63, 0.44) !important;
+  border-radius: 34px !important;
+  box-shadow: 0 18px 40px rgba(15, 23, 42, 0.08) !important;
+  min-height: clamp(420px, 33vw, 560px) !important;
+  overflow: hidden !important;
 }
 
-.sponsoredProductAdCard::before {
-  inset: 16px !important;
-  border: 1px solid rgba(17, 17, 17, 0.05) !important;
-  border-radius: 27px !important;
-  background: rgba(255, 255, 255, 0.28);
-  pointer-events: none;
+.sponsoredProductAdContent {
+  position: relative !important;
+  z-index: 2 !important;
+  min-height: clamp(420px, 33vw, 560px) !important;
+  height: 100% !important;
+  display: block !important;
+  padding: clamp(26px, 3.5vw, 48px) !important;
+  text-align: left !important;
+  background: #ffffff !important;
+  color: #111111 !important;
+}
+
+.sponsoredProductAdTopPills {
+  position: relative !important;
+  z-index: 4 !important;
+  display: flex !important;
+  align-items: flex-start !important;
+  justify-content: space-between !important;
+  gap: 16px !important;
+  width: 100% !important;
+}
+
+.sponsoredProductAdLabel {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: fit-content !important;
+  border-radius: 999px !important;
+  background: #ffffff !important;
+  border: 2px solid rgba(255, 210, 63, 0.72) !important;
+  color: #111111 !important;
+  padding: 11px 20px !important;
+  font-size: clamp(12px, 1vw, 16px) !important;
+  font-weight: 950 !important;
+  letter-spacing: 0.32em !important;
+  text-transform: uppercase !important;
+  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.06) !important;
+}
+
+.sponsoredProductAdPricePill {
+  display: inline-flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  min-width: 210px !important;
+  border-radius: 999px !important;
+  background: rgba(255, 255, 255, 0.9) !important;
+  border: 2px solid rgba(255, 210, 63, 0.72) !important;
+  padding: 11px 24px !important;
+  box-shadow: 0 14px 32px rgba(15, 23, 42, 0.08) !important;
+}
+
+.sponsoredProductAdPricePill small {
+  color: #8a8a8a !important;
+  font-size: clamp(10px, 0.9vw, 13px) !important;
+  line-height: 1 !important;
+  font-weight: 950 !important;
+  letter-spacing: 0.38em !important;
+  text-transform: uppercase !important;
+}
+
+.sponsoredProductAdPricePill strong {
+  margin-top: 6px !important;
+  color: #111111 !important;
+  font-size: clamp(24px, 2.35vw, 40px) !important;
+  line-height: 1 !important;
+  font-weight: 950 !important;
+  letter-spacing: 0.12em !important;
+}
+
+.sponsoredProductAdImageFrame {
+  position: absolute !important;
+  z-index: 2 !important;
+  left: 50% !important;
+  top: 48% !important;
+  transform: translate(-50%, -50%) !important;
+  width: min(78%, 760px) !important;
+  height: clamp(250px, 22vw, 370px) !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  overflow: visible !important;
+}
+
+.sponsoredProductAdImageFrame img {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: contain !important;
+  padding: 0 !important;
+  display: block !important;
+  transform: scale(1.18) !important;
+  transform-origin: center !important;
+  filter: drop-shadow(0 20px 30px rgba(15, 23, 42, 0.1)) !important;
+}
+
+.sponsoredProductAdImageFrame span {
+  width: 120px !important;
+  height: 120px !important;
+  border-radius: 999px !important;
+  background: #fff8d8 !important;
+  color: #111111 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-size: 40px !important;
+  font-weight: 950 !important;
 }
 
 .sponsoredProductAdCopy {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 10px;
-  min-width: 0;
-}
-
-.sponsoredProductAdCopy span,
-.sponsoredProductAdCopy h2,
-.sponsoredProductAdCopy p,
-.sponsoredProductAdMetaRow,
-.sponsoredProductAdCtaInline {
-  position: relative;
-  z-index: 2;
-  backdrop-filter: blur(18px);
-  -webkit-backdrop-filter: blur(18px);
-}
-
-.sponsoredProductAdCopy span {
-  background: rgba(17, 17, 17, 0.08) !important;
-  border: 1px solid rgba(17, 17, 17, 0.08) !important;
+  position: absolute !important;
+  z-index: 4 !important;
+  left: clamp(26px, 3.5vw, 48px) !important;
+  right: clamp(26px, 3.5vw, 48px) !important;
+  bottom: clamp(24px, 3vw, 42px) !important;
+  min-width: 0 !important;
+  max-width: none !important;
   color: #111111 !important;
-  box-shadow: 0 10px 22px rgba(17, 17, 17, 0.06);
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) auto !important;
+  grid-template-areas:
+    "line button"
+    "sponsor button"
+    "title button"
+    "sub button" !important;
+  align-items: end !important;
+  column-gap: 28px !important;
+}
+
+.sponsoredProductAdAccentLine {
+  grid-area: line !important;
+  width: 86px !important;
+  height: 5px !important;
+  border-radius: 999px !important;
+  background: #ffd23f !important;
+  margin-bottom: 16px !important;
+}
+
+.sponsoredProductAdSponsor {
+  grid-area: sponsor !important;
+  display: block !important;
+  margin: 0 !important;
+  color: #444444 !important;
+  font-size: clamp(14px, 1.15vw, 20px) !important;
+  font-weight: 950 !important;
+  letter-spacing: 0.28em !important;
+  text-transform: uppercase !important;
 }
 
 .sponsoredProductAdCopy h2 {
-  width: fit-content;
-  max-width: min(720px, 100%);
-  margin: 0 !important;
-  padding: 10px 14px;
-  border-radius: 22px;
-  background: rgba(255, 255, 255, 0.58);
+  grid-area: title !important;
+  margin: 10px 0 0 !important;
   color: #111111 !important;
-  border: 1px solid rgba(255, 255, 255, 0.78);
-  box-shadow: 0 14px 28px rgba(17, 17, 17, 0.08);
-  font-size: clamp(30px, 3.1vw, 50px) !important;
-  line-height: 1.02 !important;
+  font-size: clamp(28px, 3.1vw, 56px) !important;
+  font-weight: 950 !important;
+  line-height: 0.98 !important;
+  letter-spacing: -0.055em !important;
+  max-width: 860px !important;
+  display: -webkit-box !important;
+  overflow: hidden !important;
+  -webkit-line-clamp: 2 !important;
+  line-clamp: 2 !important;
+  -webkit-box-orient: vertical !important;
 }
 
 .sponsoredProductAdCopy p {
-  width: fit-content;
-  max-width: 560px;
+  grid-area: sub !important;
+  margin: 10px 0 0 !important;
+  color: #6b6b6b !important;
+  font-size: clamp(15px, 1.35vw, 22px) !important;
+  font-weight: 850 !important;
+  line-height: 1.25 !important;
+  max-width: 920px !important;
+  display: -webkit-box !important;
+  overflow: hidden !important;
+  -webkit-line-clamp: 2 !important;
+  line-clamp: 2 !important;
+  -webkit-box-orient: vertical !important;
+}
+
+.sponsoredProductAdButton {
+  grid-area: button !important;
+  align-self: end !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
   margin: 0 !important;
-  padding: 9px 12px;
-  border-radius: 18px;
-  background: rgba(255, 255, 255, 0.48);
-  color: #4b5563 !important;
-  border: 1px solid rgba(255, 255, 255, 0.70);
-  box-shadow: 0 10px 22px rgba(17, 17, 17, 0.06);
+  min-width: 166px !important;
+  border-radius: 999px !important;
+  background: #ffffff !important;
+  border: 1px solid rgba(17, 17, 17, 0.1) !important;
+  color: #111111 !important;
+  padding: 16px 26px !important;
+  font-size: clamp(15px, 1.3vw, 20px) !important;
+  font-weight: 950 !important;
+  letter-spacing: 0.04em !important;
+  box-shadow: 0 16px 32px rgba(15, 23, 42, 0.1) !important;
 }
 
-.sponsoredProductAdMetaRow {
-  width: fit-content;
-  margin-top: 2px !important;
-  padding: 8px 10px;
-  border-radius: 18px;
-  background: rgba(255, 255, 255, 0.56);
-  border: 1px solid rgba(255, 255, 255, 0.76);
-  box-shadow: 0 10px 22px rgba(17, 17, 17, 0.06);
+/* Mobile web sponsored ad now matches the Customer App card too */
+.mobileSponsoredProductAdCard {
+  background: #ffffff !important;
+  background-image: none !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  min-height: 490px !important;
+  border-radius: 28px !important;
+  overflow: hidden !important;
 }
 
-.sponsoredProductAdMetaRow strong {
+.mobileSponsoredProductAdContent {
+  position: relative !important;
+  z-index: 2 !important;
+  min-height: 490px !important;
+  height: 100% !important;
+  display: block !important;
+  padding: 18px !important;
+  text-align: left !important;
+  background: #ffffff !important;
   color: #111111 !important;
 }
 
-.sponsoredProductAdMetaRow em {
-  color: #4b5563 !important;
-  opacity: 1 !important;
+.mobileSponsoredProductAdTopPills {
+  position: relative !important;
+  z-index: 4 !important;
+  display: flex !important;
+  align-items: flex-start !important;
+  justify-content: space-between !important;
+  gap: 10px !important;
+  width: 100% !important;
 }
 
-.sponsoredProductAdCtaInline {
-  margin-top: 2px !important;
-  background: rgba(255, 210, 63, 0.92) !important;
-  border: 1px solid rgba(17, 17, 17, 0.05);
+.mobileSponsoredProductAdLabel {
+  display: inline-flex !important;
+  width: fit-content !important;
+  border-radius: 999px !important;
+  background: #ffffff !important;
+  border: 2px solid rgba(255, 210, 63, 0.72) !important;
   color: #111111 !important;
-  box-shadow: 0 14px 24px rgba(17, 17, 17, 0.12);
+  padding: 10px 16px !important;
+  font-size: 10px !important;
+  font-weight: 950 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.34em !important;
+  box-shadow: none !important;
 }
 
-.sponsoredProductAdVisual {
-  height: clamp(188px, 19vw, 292px) !important;
-  border-radius: 32px !important;
-  background:
-    radial-gradient(circle at 50% 42%, #ffffff 0%, #ffffff 48%, rgba(255, 210, 63, 0.18) 100%) !important;
-  border: 1px solid rgba(17, 17, 17, 0.08) !important;
-  box-shadow: 0 20px 38px rgba(17, 17, 17, 0.12) !important;
-  transform: translateZ(0);
+.mobileSponsoredProductAdPricePill {
+  display: inline-flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  min-width: 132px !important;
+  border-radius: 999px !important;
+  background: rgba(255, 255, 255, 0.88) !important;
+  border: 2px solid rgba(255, 210, 63, 0.72) !important;
+  padding: 8px 14px !important;
 }
 
-.sponsoredProductAdVisual::before {
-  content: "";
-  position: absolute;
-  inset: 14px;
-  border-radius: 24px;
-  border: 1px solid rgba(17, 17, 17, 0.04);
-  pointer-events: none;
+.mobileSponsoredProductAdPricePill small {
+  color: #8a8a8a !important;
+  font-size: 9px !important;
+  line-height: 1 !important;
+  font-weight: 950 !important;
+  letter-spacing: 0.3em !important;
+  text-transform: uppercase !important;
 }
 
-.sponsoredProductAdVisual img {
-  filter: drop-shadow(0 18px 22px rgba(17, 17, 17, 0.14));
+.mobileSponsoredProductAdPricePill strong {
+  margin-top: 5px !important;
+  color: #111111 !important;
+  font-size: 19px !important;
+  line-height: 1 !important;
+  font-weight: 950 !important;
+  letter-spacing: 0.11em !important;
 }
 
-/* Normal image banners should also feel like floating content on a white page, not a heavy black block. */
-.sponsoredImageBannerCard {
-  background:
-    linear-gradient(135deg, rgba(255,255,255,0.96), rgba(247,248,250,0.98)) !important;
-  border: 1px solid rgba(17, 17, 17, 0.08) !important;
-}
-
-.sponsoredImageBannerCard .sponsoredBannerImage {
-  object-fit: cover !important;
+.mobileSponsoredProductAdImageFrame {
+  position: absolute !important;
+  z-index: 2 !important;
+  left: 50% !important;
+  top: 42% !important;
+  transform: translate(-50%, -50%) !important;
+  width: 96% !important;
+  height: 270px !important;
+  border: 0 !important;
+  border-radius: 0 !important;
   background: transparent !important;
+  box-shadow: none !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  overflow: visible !important;
 }
 
-/* Mobile Customer App-style sponsored product ad */
+.mobileSponsoredProductAdImageFrame img {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: contain !important;
+  padding: 0 !important;
+  display: block !important;
+  transform: scale(1.18) !important;
+  transform-origin: center !important;
+  filter: drop-shadow(0 16px 24px rgba(15, 23, 42, 0.1)) !important;
+}
+
+.mobileSponsoredProductAdImageFrame span {
+  width: 86px !important;
+  height: 86px !important;
+  border-radius: 999px !important;
+  background: #fff8d8 !important;
+  color: #111111 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-size: 26px !important;
+  font-weight: 950 !important;
+}
+
+.mobileSponsoredProductAdCopy {
+  position: absolute !important;
+  z-index: 4 !important;
+  left: 18px !important;
+  right: 18px !important;
+  bottom: 18px !important;
+  min-width: 0 !important;
+  color: #111111 !important;
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) auto !important;
+  grid-template-areas:
+    "sponsor offer"
+    "title button"
+    "sub button" !important;
+  align-items: end !important;
+  column-gap: 12px !important;
+}
+
+.mobileSponsoredProductAdCopy::before {
+  content: "" !important;
+  position: absolute !important;
+  top: -18px !important;
+  left: 0 !important;
+  width: 82px !important;
+  height: 4px !important;
+  border-radius: 999px !important;
+  background: #ffd23f !important;
+}
+
+.mobileSponsoredProductAdCopy::after {
+  content: "OFFER" !important;
+  grid-area: offer !important;
+  justify-self: end !important;
+  color: #9a9a9a !important;
+  font-size: 11px !important;
+  font-weight: 950 !important;
+  letter-spacing: 0.34em !important;
+}
+
+.mobileSponsoredProductAdCopy strong {
+  grid-area: sponsor !important;
+  display: block !important;
+  margin: 0 !important;
+  color: #444444 !important;
+  font-size: 12px !important;
+  font-weight: 950 !important;
+  letter-spacing: 0.34em !important;
+  text-transform: uppercase !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+
+.mobileSponsoredProductAdCopy h2 {
+  grid-area: title !important;
+  margin: 10px 0 0 !important;
+  color: #111111 !important;
+  font-size: 22px !important;
+  font-weight: 950 !important;
+  line-height: 1.04 !important;
+  letter-spacing: -0.04em !important;
+  display: -webkit-box !important;
+  overflow: hidden !important;
+  -webkit-line-clamp: 2 !important;
+  line-clamp: 2 !important;
+  -webkit-box-orient: vertical !important;
+}
+
+.mobileSponsoredProductAdCopy p {
+  grid-area: sub !important;
+  margin: 5px 0 0 !important;
+  color: #696969 !important;
+  font-size: 13px !important;
+  font-weight: 850 !important;
+  line-height: 1.25 !important;
+  display: -webkit-box !important;
+  overflow: hidden !important;
+  -webkit-line-clamp: 2 !important;
+  line-clamp: 2 !important;
+  -webkit-box-orient: vertical !important;
+}
+
+.mobileSponsoredProductAdButton {
+  grid-area: button !important;
+  align-self: end !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  margin: 0 !important;
+  border-radius: 999px !important;
+  background: #ffffff !important;
+  border: 1px solid rgba(17, 17, 17, 0.1) !important;
+  color: #111111 !important;
+  padding: 12px 17px !important;
+  font-size: 14px !important;
+  font-weight: 950 !important;
+  box-shadow: 0 14px 26px rgba(15, 23, 42, 0.1) !important;
+  white-space: nowrap !important;
+}
+
+@media (max-width: 900px) {
+  .sponsoredProductAdCard,
+  .sponsoredProductAdContent {
+    min-height: 460px !important;
+  }
+
+  .sponsoredProductAdImageFrame {
+    width: 88% !important;
+    height: 270px !important;
+    top: 43% !important;
+  }
+
+  .sponsoredProductAdCopy {
+    grid-template-columns: 1fr !important;
+    grid-template-areas:
+      "line"
+      "sponsor"
+      "title"
+      "sub"
+      "button" !important;
+    row-gap: 0 !important;
+  }
+
+  .sponsoredProductAdButton {
+    width: fit-content !important;
+    margin-top: 14px !important;
+  }
+}
+
 @media (max-width: 700px) {
-  .mobileSponsoredProductAdCard {
-    min-height: 152px !important;
-    max-height: 170px !important;
-    grid-template-columns: minmax(0, 1fr) 108px !important;
-    background:
-      radial-gradient(circle at 16% 10%, rgba(255, 210, 63, 0.22), transparent 34%),
-      linear-gradient(135deg, rgba(255, 255, 255, 0.96), rgba(247, 248, 250, 0.98)) !important;
-    border: 1px solid rgba(17, 17, 17, 0.08) !important;
-    box-shadow: 0 14px 28px rgba(17, 17, 17, 0.10) !important;
-  }
-
-  .mobileSponsoredProductAdCopy b,
-  .mobileSponsoredProductAdCopy strong,
-  .mobileSponsoredProductAdCopy em,
-  .mobileSponsoredProductAdCopy small,
-  .mobileSponsoredProductAdCtaInline {
-    backdrop-filter: blur(14px);
-    -webkit-backdrop-filter: blur(14px);
-  }
-
-  .mobileSponsoredProductAdCopy b {
-    background: rgba(17, 17, 17, 0.08) !important;
-    color: #111111 !important;
-    border: 1px solid rgba(17, 17, 17, 0.08);
-  }
-
-  .mobileSponsoredProductAdCopy strong {
-    width: fit-content;
-    max-width: 100%;
-    padding: 6px 8px;
-    border-radius: 14px;
-    background: rgba(255, 255, 255, 0.58);
-    color: #111111 !important;
-    border: 1px solid rgba(255, 255, 255, 0.76);
-    box-shadow: 0 8px 16px rgba(17, 17, 17, 0.07);
-  }
-
-  .mobileSponsoredProductAdCopy em {
-    width: fit-content;
-    padding: 4px 7px;
-    border-radius: 12px;
-    background: rgba(255, 210, 63, 0.78);
-    color: #111111 !important;
-    border: 1px solid rgba(255, 210, 63, 0.40);
-  }
-
-  .mobileSponsoredProductAdCopy small {
-    width: fit-content;
-    max-width: 100%;
-    padding: 4px 7px;
-    border-radius: 12px;
-    background: rgba(255, 255, 255, 0.50);
-    color: #4b5563 !important;
-  }
-
-  .mobileSponsoredProductAdVisual {
-    width: 106px !important;
-    height: 106px !important;
-    background: #ffffff !important;
-    border: 1px solid rgba(17, 17, 17, 0.08);
-    box-shadow: 0 12px 22px rgba(17, 17, 17, 0.12) !important;
-  }
-
-  .mobileSponsoredProductAdVisual img {
-    filter: drop-shadow(0 10px 14px rgba(17, 17, 17, 0.12));
-  }
-
-  .mobileSponsoredProductAdCtaInline {
-    background: rgba(255, 210, 63, 0.92) !important;
-    color: #111111 !important;
-    box-shadow: 0 8px 14px rgba(17, 17, 17, 0.12);
+  .mobileSponsoredProductAdCard,
+  .mobileSponsoredProductAdContent {
+    min-height: 490px !important;
   }
 }
 
-/* L375: Match Customer App page background.
-   The web page now uses the same soft white/grey floating-cards feel instead of the old blue/grey gradient. */
+@media (max-width: 390px) {
+  .mobileSponsoredProductAdCard,
+  .mobileSponsoredProductAdContent {
+    min-height: 465px !important;
+  }
 
-:root {
-  --darik-app-page-bg: #f6f6f4;
-  --darik-app-card-white: #ffffff;
+  .mobileSponsoredProductAdImageFrame {
+    height: 248px !important;
+  }
+
+  .mobileSponsoredProductAdPricePill {
+    min-width: 118px !important;
+    padding: 7px 10px !important;
+  }
+
+  .mobileSponsoredProductAdPricePill strong {
+    font-size: 16px !important;
+  }
+
+  .mobileSponsoredProductAdCopy h2 {
+    font-size: 20px !important;
+  }
+
+  .mobileSponsoredProductAdButton {
+    padding: 11px 14px !important;
+    font-size: 13px !important;
+  }
 }
 
-html,
-body {
-  background: var(--darik-app-page-bg) !important;
+/* =========================================================
+   DARIK SPONSORED BANNER — PAGE-BLEND + BIGGER PRODUCT PHOTO
+   Date: 2026-06-06
+
+   Goal:
+   - Banner background matches the white page.
+   - Remove the weird dark/boxed banner feeling.
+   - Make the sponsored product image much bigger while staying inside the banner.
+   - Keep the Customer App style pills/text/button.
+   ========================================================= */
+
+/* Whole sponsored banner blends into the page */
+.sponsoredBannerCarousel,
+.mobileSponsoredBannerCarousel {
+  background: #ffffff !important;
+  background-image: none !important;
 }
 
-.darikPage {
-  background: var(--darik-app-page-bg) !important;
+/* Product sponsored banner card becomes part of the white page */
+.sponsoredProductAdCard,
+.mobileSponsoredProductAdCard {
+  background: #ffffff !important;
+  background-image: none !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
+  overflow: hidden !important;
 }
 
-.webAppShell {
-  background: var(--darik-app-page-bg) !important;
-}
-
-/* Remove the old colored glow so the whole page feels like the Customer App. */
-.darikPage::before,
-.darikPage::after {
-  display: none !important;
-}
-
-/* Keep product/category/ad cards floating on the soft page. */
-.productImageWrap,
-.bestSellerCleanImageWrap,
-.categoryCircle,
-.imageCategoryCircle,
-.mobileCategoryImage,
-.trustCard,
-.cartSummary,
-.emptyCard,
-.detailImageBox,
-.detailCard,
-.checkoutBox,
-.cartItemsList {
-  background: var(--darik-app-card-white) !important;
-}
-
-/* Make the sponsored product banner sit on the same soft white/grey page. */
+/* Desktop banner size gives the bigger photo room */
 .sponsoredProductAdCard {
-  background:
-    radial-gradient(circle at 12% 12%, rgba(255, 210, 63, 0.16), transparent 26%),
-    radial-gradient(circle at 88% 50%, rgba(255, 210, 63, 0.12), transparent 32%),
-    linear-gradient(135deg, rgba(255, 255, 255, 0.88), rgba(246, 246, 244, 0.96)) !important;
+  min-height: clamp(520px, 39vw, 690px) !important;
+  border-radius: 34px !important;
 }
 
-.sponsoredImageBannerCard {
-  background: var(--darik-app-page-bg) !important;
-}
-
-/* Search/header cards should float on the same app background. */
-.searchBar,
-.mobileSearchBar,
-.mobileTopBar,
-.mobileHeaderCard {
-  background: rgba(255, 255, 255, 0.92) !important;
-}
-
-/* Product detail/cart overlays keep the same soft app background. */
-.productModal,
-.cartSheet {
-  background: var(--darik-app-page-bg) !important;
-}
-
-@media (max-width: 700px) {
-  html,
-  body,
-  .darikPage,
-  .webAppShell {
-    background: var(--darik-app-page-bg) !important;
-  }
-
-  .mobileSponsoredProductAdCard {
-    background:
-      radial-gradient(circle at 16% 10%, rgba(255, 210, 63, 0.16), transparent 34%),
-      linear-gradient(135deg, rgba(255, 255, 255, 0.90), rgba(246, 246, 244, 0.98)) !important;
-  }
-}
-
-/* L376: HARD Customer App background override.
-   The previous background change was too subtle because old layout sections still carried light gradients/whites.
-   This forces the full web page to use the same soft off-white/grey canvas everywhere. */
-
-:root {
-  --darik-app-page-bg: #f5f5f2;
-  --darik-app-page-bg-2: #f7f7f4;
-  --darik-app-floating-white: #ffffff;
-}
-
-html,
-body,
-#__next,
-.darikPage,
-.webAppShell {
-  background: var(--darik-app-page-bg) !important;
-  background-color: var(--darik-app-page-bg) !important;
+.sponsoredProductAdContent {
+  background: #ffffff !important;
   background-image: none !important;
+  min-height: clamp(520px, 39vw, 690px) !important;
+  padding: clamp(26px, 3.4vw, 50px) !important;
+  overflow: hidden !important;
 }
 
-/* Kill any old grey/blue gradient surfaces and make sections float on the app canvas. */
-main,
-section,
-.topHeader,
-.sectionBlock,
-.bestSellerDepartmentStack,
-.bestSellerDepartmentSection,
-.categoryRow,
-.bestSellerCarousel,
-.mobileHome,
-.mobileShell,
-.mobileMain,
-.mobileContent,
-.mobileSection,
-.mobileCategoryRow,
-.mobileBestSellerStack,
-.mobileBestSellerSection {
+/* Keep top pills clean on white */
+.sponsoredProductAdTopPills {
+  position: relative !important;
+  z-index: 5 !important;
+}
+
+.sponsoredProductAdLabel,
+.sponsoredProductAdPricePill {
+  background: rgba(255, 255, 255, 0.92) !important;
+  border-color: rgba(255, 210, 63, 0.82) !important;
+  box-shadow: none !important;
+}
+
+/* Bigger desktop product photo, still inside the banner */
+.sponsoredProductAdImageFrame {
+  position: absolute !important;
+  z-index: 2 !important;
+  left: 50% !important;
+  top: 45% !important;
+  transform: translate(-50%, -50%) !important;
+  width: min(96%, 1060px) !important;
+  height: clamp(350px, 30vw, 530px) !important;
+  max-height: calc(100% - 160px) !important;
+  border: 0 !important;
+  border-radius: 0 !important;
   background: transparent !important;
   background-image: none !important;
+  box-shadow: none !important;
+  overflow: visible !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  pointer-events: none !important;
 }
 
-/* Header should float softly instead of looking like a separate white strip. */
-.topHeader,
-.mobileTopBar,
-.mobileHeaderCard {
-  background: rgba(245, 245, 242, 0.92) !important;
+.sponsoredProductAdImageFrame img {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: contain !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  background: transparent !important;
+  display: block !important;
+  transform: scale(1.34) !important;
+  transform-origin: center center !important;
+  filter: drop-shadow(0 24px 34px rgba(15, 23, 42, 0.10)) !important;
+}
+
+/* Keep bottom copy readable and away from the bigger photo */
+.sponsoredProductAdCopy {
+  z-index: 6 !important;
+  bottom: clamp(22px, 2.8vw, 42px) !important;
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.86) 22%,
+    rgba(255, 255, 255, 1) 100%
+  ) !important;
+  padding-top: 34px !important;
+}
+
+.sponsoredProductAdButton {
+  background: #ffffff !important;
+  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.08) !important;
+}
+
+/* Mobile: match page white and make image bigger like app */
+.mobileSponsoredProductAdCard {
+  min-height: 560px !important;
+  border-radius: 28px !important;
+}
+
+.mobileSponsoredProductAdContent {
+  background: #ffffff !important;
+  background-image: none !important;
+  min-height: 560px !important;
+  padding: 18px !important;
+  overflow: hidden !important;
+}
+
+.mobileSponsoredProductAdTopPills {
+  z-index: 5 !important;
+}
+
+.mobileSponsoredProductAdLabel,
+.mobileSponsoredProductAdPricePill {
+  background: rgba(255, 255, 255, 0.92) !important;
+  border-color: rgba(255, 210, 63, 0.82) !important;
+  box-shadow: none !important;
+}
+
+/* Bigger mobile product photo, still contained in banner */
+.mobileSponsoredProductAdImageFrame {
+  position: absolute !important;
+  z-index: 2 !important;
+  left: 50% !important;
+  top: 42% !important;
+  transform: translate(-50%, -50%) !important;
+  width: 112% !important;
+  height: 350px !important;
+  max-height: calc(100% - 170px) !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  background-image: none !important;
+  box-shadow: none !important;
+  overflow: visible !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  pointer-events: none !important;
+}
+
+.mobileSponsoredProductAdImageFrame img {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: contain !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  background: transparent !important;
+  display: block !important;
+  transform: scale(1.32) !important;
+  transform-origin: center center !important;
+  filter: drop-shadow(0 18px 26px rgba(15, 23, 42, 0.10)) !important;
+}
+
+.mobileSponsoredProductAdCopy {
+  z-index: 6 !important;
+  bottom: 18px !important;
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.86) 24%,
+    rgba(255, 255, 255, 1) 100%
+  ) !important;
+  padding-top: 32px !important;
+}
+
+.mobileSponsoredProductAdButton {
+  background: #ffffff !important;
+  box-shadow: 0 12px 24px rgba(15, 23, 42, 0.08) !important;
+}
+
+/* Small phone protection */
+@media (max-width: 390px) {
+  .mobileSponsoredProductAdCard,
+  .mobileSponsoredProductAdContent {
+    min-height: 535px !important;
+  }
+
+  .mobileSponsoredProductAdImageFrame {
+    width: 112% !important;
+    height: 325px !important;
+    top: 42% !important;
+  }
+
+  .mobileSponsoredProductAdImageFrame img {
+    transform: scale(1.28) !important;
+  }
+}
+
+/* Desktop medium protection */
+@media (max-width: 900px) and (min-width: 701px) {
+  .sponsoredProductAdCard,
+  .sponsoredProductAdContent {
+    min-height: 560px !important;
+  }
+
+  .sponsoredProductAdImageFrame {
+    width: 106% !important;
+    height: 360px !important;
+    top: 42% !important;
+  }
+
+  .sponsoredProductAdImageFrame img {
+    transform: scale(1.28) !important;
+  }
+}
+
+/* =========================================================
+   DARIK SPONSORED BANNER — REMOVE GREY WALLPAPER COMPLETELY
+   Date: 2026-06-06
+
+   Goal:
+   Kill every grey/gradient/wallpaper layer inside the sponsored product banner.
+   The banner should be the exact same white as the page.
+   ========================================================= */
+
+/* Kill grey/gradient layers on the banner containers */
+.sponsoredBannerCarousel,
+.sponsoredBannerTrack,
+.sponsoredProductAdCard,
+.sponsoredProductAdContent,
+.mobileSponsoredBannerCarousel,
+.mobileSponsoredBannerTrack,
+.mobileSponsoredProductAdCard,
+.mobileSponsoredProductAdContent {
+  background: #ffffff !important;
+  background-color: #ffffff !important;
   background-image: none !important;
   box-shadow: none !important;
 }
 
-/* Keep only actual cards/images pure white so they float like the customer app. */
-.searchBar,
-.mobileSearchBar,
-.circleButton,
-.cartButton,
-.trustCard,
-.cartSummary,
-.productImageWrap,
-.bestSellerCleanImageWrap,
-.categoryCircle,
-.imageCategoryCircle,
-.mobileCategoryImage,
-.mobileCategoryChip,
-.emptyCard,
-.productModal,
-.cartSheet,
-.detailImageBox,
-.detailCard,
-.checkoutBox,
-.cartItemsList,
-.deliveryCard,
-.productInitials,
-.bestSellerCleanPlaceholder {
-  background: var(--darik-app-floating-white) !important;
-  background-color: var(--darik-app-floating-white) !important;
-  background-image: none !important;
-}
-
-/* Product text/info area should not create grey panels. */
-.productCard,
-.bestSellerCleanItem,
-.productInfo,
-.productBottom {
-  background: transparent !important;
-  background-image: none !important;
-}
-
-/* Sponsored banners now sit on the same app canvas. */
-.sponsoredBannerCarousel,
-.mobileSponsoredBannerCarousel {
-  background: transparent !important;
-  background-image: none !important;
-}
-
-.sponsoredProductAdCard {
-  background:
-    radial-gradient(circle at 12% 12%, rgba(255, 210, 63, 0.13), transparent 26%),
-    radial-gradient(circle at 88% 50%, rgba(255, 210, 63, 0.10), transparent 32%),
-    linear-gradient(135deg, rgba(255, 255, 255, 0.86), rgba(245, 245, 242, 0.97)) !important;
-  border: 1px solid rgba(17, 17, 17, 0.07) !important;
-}
-
-.sponsoredImageBannerCard {
-  background: var(--darik-app-page-bg) !important;
-  background-color: var(--darik-app-page-bg) !important;
-}
-
-/* Remove old visual tint from the huge page. */
-.darikPage::before,
-.darikPage::after,
-.webAppShell::before,
-.webAppShell::after {
-  display: none !important;
+/* Kill pseudo-element wallpaper/overlays that may be coming from older banner CSS */
+.sponsoredBannerCarousel::before,
+.sponsoredBannerCarousel::after,
+.sponsoredBannerTrack::before,
+.sponsoredBannerTrack::after,
+.sponsoredBannerCard::before,
+.sponsoredBannerCard::after,
+.sponsoredProductAdCard::before,
+.sponsoredProductAdCard::after,
+.sponsoredProductAdContent::before,
+.sponsoredProductAdContent::after,
+.mobileSponsoredBannerCarousel::before,
+.mobileSponsoredBannerCarousel::after,
+.mobileSponsoredBannerTrack::before,
+.mobileSponsoredBannerTrack::after,
+.mobileSponsoredBannerCard::before,
+.mobileSponsoredBannerCard::after,
+.mobileSponsoredProductAdCard::before,
+.mobileSponsoredProductAdCard::after,
+.mobileSponsoredProductAdContent::before,
+.mobileSponsoredProductAdContent::after {
   content: none !important;
+  display: none !important;
+  background: transparent !important;
+  background-image: none !important;
+  opacity: 0 !important;
 }
 
-/* The browser screenshot should read as one consistent soft canvas. */
-@media (min-width: 701px) {
-  .webAppShell {
-    padding-top: 30px !important;
-  }
-
-  .topHeader {
-    min-height: 170px !important;
-  }
+/* Product image area must be transparent over the white page, not a grey wallpaper */
+.sponsoredProductAdImageFrame,
+.sponsoredProductAdImageFrame *,
+.mobileSponsoredProductAdImageFrame,
+.mobileSponsoredProductAdImageFrame * {
+  background: transparent !important;
+  background-color: transparent !important;
+  background-image: none !important;
 }
 
+/* Remove any grey fade behind bottom copy */
+.sponsoredProductAdCopy,
+.mobileSponsoredProductAdCopy {
+  background: transparent !important;
+  background-color: transparent !important;
+  background-image: none !important;
+}
+
+/* Remove leftover glow/wallpaper elements from the older black/yellow version */
+.sponsoredProductAdGlow,
+.mobileSponsoredProductAdGlow {
+  display: none !important;
+  opacity: 0 !important;
+  background: transparent !important;
+  background-image: none !important;
+}
+
+/* Keep the picture large, but don't create a dark/grey shadow wallpaper */
+.sponsoredProductAdImageFrame img {
+  transform: scale(1.42) !important;
+  filter: none !important;
+}
+
+.mobileSponsoredProductAdImageFrame img {
+  transform: scale(1.38) !important;
+  filter: none !important;
+}
+
+/* Keep only clean yellow outline pills and the button */
+.sponsoredProductAdLabel,
+.sponsoredProductAdPricePill,
+.mobileSponsoredProductAdLabel,
+.mobileSponsoredProductAdPricePill,
+.sponsoredProductAdButton,
+.mobileSponsoredProductAdButton {
+  background: #ffffff !important;
+  background-image: none !important;
+}
+
+/* If older card CSS gives every banner a dark/grey base, override only product ads */
+.sponsoredBannerCard.sponsoredProductAdCard,
+.mobileSponsoredBannerCard.mobileSponsoredProductAdCard {
+  background: #ffffff !important;
+  background-color: #ffffff !important;
+  background-image: none !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
+}
+
+/* Mobile small protection */
 @media (max-width: 700px) {
-  html,
-  body,
-  #__next,
-  .darikPage,
-  .webAppShell,
-  main,
-  section,
-  .mobileHome,
-  .mobileShell,
-  .mobileMain,
-  .mobileContent {
-    background: var(--darik-app-page-bg) !important;
-    background-color: var(--darik-app-page-bg) !important;
+  .mobileSponsoredBannerCarousel,
+  .mobileSponsoredBannerTrack,
+  .mobileSponsoredProductAdCard,
+  .mobileSponsoredProductAdContent,
+  .mobileSponsoredProductAdCopy {
+    background: #ffffff !important;
+    background-color: #ffffff !important;
     background-image: none !important;
+    box-shadow: none !important;
   }
+}
 
-  .mobileSponsoredProductAdCard {
-    background:
-      radial-gradient(circle at 16% 10%, rgba(255, 210, 63, 0.13), transparent 34%),
-      linear-gradient(135deg, rgba(255, 255, 255, 0.88), rgba(245, 245, 242, 0.98)) !important;
-  }
+/* =========================================================
+   DARIK SPONSORED BANNER — SHOP NOW MATCHES CHECKOUT BUTTON
+   Date: 2026-06-06
+
+   Goal:
+   Make sponsored banner Shop Now button match Proceed to Checkout:
+   background #ffd23f, text #111111, yellow glow.
+   ========================================================= */
+
+.sponsoredProductAdButton,
+.mobileSponsoredProductAdButton {
+  background: #ffd23f !important;
+  background-image: none !important;
+  color: #111111 !important;
+  border: 0 !important;
+  box-shadow: 0 10px 20px rgba(255, 210, 63, 0.22) !important;
+}
+
+.sponsoredProductAdButton:hover,
+.mobileSponsoredProductAdButton:hover {
+  background: #ffd23f !important;
+  color: #111111 !important;
+  box-shadow: 0 14px 26px rgba(255, 210, 63, 0.28) !important;
+}
+
+.sponsoredProductAdButton:active,
+.mobileSponsoredProductAdButton:active {
+  transform: translateY(1px) !important;
 }

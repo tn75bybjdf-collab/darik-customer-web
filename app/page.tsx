@@ -121,14 +121,23 @@ type CustomerAdBanner = {
   text_color: string | null;
   accent_color: string | null;
   sort_order: number | null;
-  ad_request_type?: string | null;
+  product_id?: string | null;
   target_product_id?: string | null;
+  product_name?: string | null;
   product_name_snapshot?: string | null;
   product_app_price_snapshot?: number | string | null;
+  app_price_snapshot?: number | string | null;
+  app_price?: number | string | null;
+  product_price_snapshot?: number | string | null;
   product_photo_url_snapshot?: string | null;
+  product_image_url?: string | null;
+  image_url?: string | null;
   official_product_photo_url?: string | null;
   official_product_thumbnail_url?: string | null;
   retailer_raw_photo_url?: string | null;
+  ad_request_type?: string | null;
+  ad_type?: string | null;
+  banner_type?: string | null;
 };
 
 type CartItem = {
@@ -1113,6 +1122,61 @@ function getProductPhotoUrl(product: Product | null | undefined) {
   );
 }
 
+function getSponsoredBannerImageUrl(banner: CustomerAdBanner) {
+  const rawBanner = banner as CustomerAdBanner & Record<string, unknown>;
+
+  return String(
+    rawBanner.product_photo_url_snapshot ||
+      rawBanner.official_product_thumbnail_url ||
+      rawBanner.official_product_photo_url ||
+      rawBanner.product_image_url ||
+      rawBanner.image_url ||
+      rawBanner.retailer_raw_photo_url ||
+      rawBanner.banner_image_url ||
+      '',
+  ).trim();
+}
+
+function getSponsoredBannerPriceLabel(banner: CustomerAdBanner) {
+  const rawBanner = banner as CustomerAdBanner & Record<string, unknown>;
+  const rawPrice =
+    rawBanner.product_app_price_snapshot ??
+    rawBanner.app_price_snapshot ??
+    rawBanner.app_price ??
+    rawBanner.product_price_snapshot ??
+    null;
+
+  const priceNumber = Number(rawPrice ?? 0);
+  if (Number.isFinite(priceNumber) && priceNumber > 0) {
+    return `${money(priceNumber)} JOD`;
+  }
+
+  const headlinePriceMatch = String(banner.headline || '').match(/(\d+(?:\.\d{1,2})?)\s*JOD/i);
+  if (headlinePriceMatch?.[1]) {
+    const parsedHeadlinePrice = Number(headlinePriceMatch[1]);
+    if (Number.isFinite(parsedHeadlinePrice) && parsedHeadlinePrice > 0) {
+      return `${money(parsedHeadlinePrice)} JOD`;
+    }
+  }
+
+  return '';
+}
+
+function getSponsoredBannerTitle(banner: CustomerAdBanner) {
+  const rawBanner = banner as CustomerAdBanner & Record<string, unknown>;
+  const rawTitle = String(
+    rawBanner.product_name_snapshot ||
+      rawBanner.product_name ||
+      banner.headline ||
+      'Sponsored product',
+  ).trim();
+
+  return rawTitle
+    .replace(/\s*[•|-]\s*\d+(?:\.\d{1,2})?\s*JOD\s*$/i, '')
+    .replace(/\s+\d+(?:\.\d{1,2})?\s*JOD\s*$/i, '')
+    .trim();
+}
+
 function darikTimeout(ms: number) {
   return new Promise<null>((resolve) => {
     window.setTimeout(() => resolve(null), ms);
@@ -1179,6 +1243,7 @@ function getDarikArabicSearchAliases(product: Product) {
   if (baseText.includes('tool') || baseText.includes('hardware')) add('عده', 'عدة', 'ادوات', 'أدوات');
   if (baseText.includes('gift')) add('هديه', 'هدية', 'هدايا');
   if (baseText.includes('clothing') || baseText.includes('shirt') || baseText.includes('pants') || baseText.includes('dress')) add('ملابس', 'قميص', 'بنطلون', 'فستان');
+  if (baseText.includes('sock') || baseText.includes('socks')) add('جرابات', 'جوارب', 'كلسات', 'كلس', 'شرابات');
   if (baseText.includes('perfume') || baseText.includes('cologne')) add('عطر', 'عطور', 'كولونيا', 'برفان');
 
   return aliases.join(' ');
@@ -1203,6 +1268,115 @@ function getDarikSearchHaystack(product: Product, categoryName?: string | null) 
 }
 
 
+const DARIK_SEARCH_STOP_WORDS = new Set([
+  'a',
+  'an',
+  'and',
+  'are',
+  'for',
+  'from',
+  'in',
+  'of',
+  'on',
+  'or',
+  'the',
+  'to',
+  'with',
+]);
+
+function getDarikKeywordSearchTokens(cleanSearch: string) {
+  return Array.from(
+    new Set(
+      normalizeDarikSearchText(cleanSearch)
+        .split(/\s+/g)
+        .map((token) => token.trim())
+        .filter((token) => token.length > 0 && !DARIK_SEARCH_STOP_WORDS.has(token))
+    )
+  );
+}
+
+function darikSearchTokenMatchesHaystack(token: string, haystack: string, haystackTokens: Set<string>) {
+  if (!token) return true;
+
+  // Keep men/women strict so "men" never accidentally matches "women".
+  if (token === 'men' || token === 'man' || token === 'mens') {
+    return haystackTokens.has('men') || haystackTokens.has('man') || haystackTokens.has('mens') || haystackTokens.has('male');
+  }
+
+  if (token === 'women' || token === 'woman' || token === 'womens') {
+    return haystackTokens.has('women') || haystackTokens.has('woman') || haystackTokens.has('womens') || haystackTokens.has('female') || haystackTokens.has('ladies');
+  }
+
+  if (haystackTokens.has(token)) return true;
+
+  // Singular/plural and simple prefix support: sock => socks, charger => chargers.
+  if (token.length >= 3) {
+    if (haystackTokens.has(`${token}s`) || haystackTokens.has(`${token}es`)) return true;
+
+    if (token.endsWith('s') && haystackTokens.has(token.slice(0, -1))) return true;
+    if (token.endsWith('es') && haystackTokens.has(token.slice(0, -2))) return true;
+
+    return Array.from(haystackTokens).some(
+      (haystackToken) =>
+        haystackToken.length >= 3 &&
+        (haystackToken.startsWith(token) || token.startsWith(haystackToken))
+    );
+  }
+
+  // Very short terms like Type C should match as real tokens only.
+  return haystackTokens.has(token) || haystack.includes(` ${token} `);
+}
+
+function darikHaystackMatchesKeywordSearch(haystack: string, cleanSearch: string) {
+  const normalizedSearch = normalizeDarikSearchText(cleanSearch);
+  const normalizedHaystack = ` ${normalizeDarikSearchText(haystack)} `;
+
+  if (!normalizedSearch) return true;
+  if (normalizedHaystack.includes(` ${normalizedSearch} `) || normalizedHaystack.includes(normalizedSearch)) return true;
+
+  const searchTokens = getDarikKeywordSearchTokens(normalizedSearch);
+  if (searchTokens.length === 0) return false;
+
+  const haystackTokens = new Set(
+    normalizedHaystack
+      .trim()
+      .split(/\s+/g)
+      .map((token) => token.trim())
+      .filter(Boolean)
+  );
+
+  // Real keyword search: every word can match anywhere in title/category/subcategory/description.
+  // Example: "baby socks" matches "Baby Girl Socks" because baby + socks both exist.
+  return searchTokens.every((token) => darikSearchTokenMatchesHaystack(token, normalizedHaystack, haystackTokens));
+}
+
+function getDarikKeywordSearchScore(haystack: string, cleanSearch: string) {
+  const normalizedSearch = normalizeDarikSearchText(cleanSearch);
+  const normalizedHaystack = ` ${normalizeDarikSearchText(haystack)} `;
+  if (!normalizedSearch) return 0;
+
+  let score = 0;
+  if (normalizedHaystack.includes(` ${normalizedSearch} `)) score += 100;
+  if (normalizedHaystack.includes(normalizedSearch)) score += 50;
+
+  const searchTokens = getDarikKeywordSearchTokens(normalizedSearch);
+  const haystackTokens = new Set(
+    normalizedHaystack
+      .trim()
+      .split(/\s+/g)
+      .map((token) => token.trim())
+      .filter(Boolean)
+  );
+
+  searchTokens.forEach((token) => {
+    if (haystackTokens.has(token)) score += 12;
+    else if (darikSearchTokenMatchesHaystack(token, normalizedHaystack, haystackTokens)) score += 6;
+  });
+
+  return score;
+}
+
+
 
 function getDarikLogoV3Src() {
   return "/darik_logo_final_v3.png";
@@ -1223,6 +1397,11 @@ export default function DarikCustomerWebHome() {
   const [headerShrunk, setHeaderShrunk] = useState(false);
   const [searchText, setSearchText] = useState('');
   const [searchDropdownOpen, setSearchDropdownOpen] = useState(false);
+  const [searchResultsOpen, setSearchResultsOpen] = useState(false);
+  const [submittedSearchText, setSubmittedSearchText] = useState('');
+  const [searchResultsLoading, setSearchResultsLoading] = useState(false);
+  const [searchResultsError, setSearchResultsError] = useState('');
+  const [searchResultsProducts, setSearchResultsProducts] = useState<Product[]>([]);
   const [selectedCategoryId, setSelectedCategoryId] = useState('BestSellers');
   const [selectedDepartmentCode, setSelectedDepartmentCode] = useState('All');
   const [selectedSubcategoryCode, setSelectedSubcategoryCode] = useState('All');
@@ -3247,7 +3426,9 @@ export default function DarikCustomerWebHome() {
   }, [selectedDepartmentCode, selectedSubcategoryCode, selectedCategoryItemTypeOptions]);
 
   const filteredProducts = useMemo(() => {
-    const cleanSearch = normalizeDarikSearchText(searchText);
+    // Search no longer filters the home/category product lists.
+    // Pressing Enter or tapping Search opens the dedicated search results page instead.
+    const cleanSearch = '';
 
     return products.filter((product) => {
       const matchesCategory = productMatchesMainCategory(
@@ -3275,7 +3456,6 @@ export default function DarikCustomerWebHome() {
     });
   }, [
     products,
-    searchText,
     selectedCategoryId,
     categoryById,
     selectedCategoryHasSubcategories,
@@ -3293,9 +3473,16 @@ export default function DarikCustomerWebHome() {
     const matches = products
       .map((product) => {
         const categoryName = product.category_id ? categoryById.get(product.category_id)?.name ?? '' : '';
-        return { product, categoryName, haystack: getDarikSearchHaystack(product, categoryName) };
+        const haystack = getDarikSearchHaystack(product, categoryName);
+        return {
+          product,
+          categoryName,
+          haystack,
+          score: getDarikKeywordSearchScore(haystack, cleanSearch),
+        };
       })
-      .filter((entry) => entry.haystack.includes(cleanSearch))
+      .filter((entry) => darikHaystackMatchesKeywordSearch(entry.haystack, cleanSearch))
+      .sort((left, right) => right.score - left.score)
       .slice(0, 8);
 
     return matches;
@@ -3304,6 +3491,114 @@ export default function DarikCustomerWebHome() {
   function openSearchSuggestion(product: Product) {
     setSearchDropdownOpen(false);
     setSearchText(product.name);
+    setSearchResultsOpen(false);
+    openProduct(product);
+  }
+
+  function productMatchesSubmittedSearch(product: Product, cleanSearch: string) {
+    const categoryName = product.category_id ? categoryById.get(product.category_id)?.name ?? '' : '';
+    const haystack = getDarikSearchHaystack(product, categoryName);
+    return darikHaystackMatchesKeywordSearch(haystack, cleanSearch);
+  }
+
+  function getSubmittedSearchScore(product: Product, cleanSearch: string) {
+    const categoryName = product.category_id ? categoryById.get(product.category_id)?.name ?? '' : '';
+    const haystack = getDarikSearchHaystack(product, categoryName);
+    return getDarikKeywordSearchScore(haystack, cleanSearch);
+  }
+
+  function closeSearchResultsPage() {
+    setSearchResultsOpen(false);
+    setSearchResultsLoading(false);
+    setSearchResultsError('');
+  }
+
+  async function submitDarikSearch() {
+    const cleanSearchInput = searchText.trim();
+    const cleanSearch = normalizeDarikSearchText(cleanSearchInput);
+
+    if (!cleanSearch) {
+      setSearchResultsOpen(false);
+      setSubmittedSearchText('');
+      setSearchResultsProducts([]);
+      setSearchResultsError('Type what you want to search for first.');
+      return;
+    }
+
+    setSubmittedSearchText(cleanSearchInput);
+    setSearchResultsOpen(true);
+    setSearchDropdownOpen(false);
+    setSelectedProduct(null);
+    setCartOpen(false);
+    setCheckoutOpen(false);
+    setSettingsOpen(false);
+    setSearchResultsLoading(true);
+    setSearchResultsError('');
+
+    if (typeof window !== 'undefined') {
+      window.scrollTo({ top: 0, behavior: 'auto' });
+    }
+
+    try {
+      const { data, error } = await supabase
+        .from('public_products')
+        .select('*')
+        .eq('product_status', 'live')
+        .gt('quantity_in_stock', 0)
+        .order('created_at', { ascending: false })
+        .limit(1000);
+
+      if (error) throw error;
+
+      const serverProducts = ((data ?? []) as Product[]).filter((product) => {
+        const quantity = Number(product.quantity_in_stock ?? 0);
+        const status = String(product.product_status ?? '').toLowerCase();
+        return status === 'live' && Number.isFinite(quantity) && quantity > 0;
+      });
+
+      const productMap = new Map<string, Product>();
+      products.forEach((product) => productMap.set(product.id, product));
+      serverProducts.forEach((product) => productMap.set(product.id, product));
+
+      const allSearchableProducts = Array.from(productMap.values());
+      const matches = allSearchableProducts
+        .map((product) => ({ product, score: getSubmittedSearchScore(product, cleanSearch) }))
+        .filter((entry) => entry.score > 0 && productMatchesSubmittedSearch(entry.product, cleanSearch))
+        .sort((left, right) => right.score - left.score)
+        .map((entry) => entry.product);
+
+      setSearchResultsProducts(matches);
+      appendUniqueProducts(serverProducts);
+
+      const matchedProductIds = matches.map((product) => product.id).filter(Boolean).slice(0, 250);
+      if (matchedProductIds.length > 0) {
+        const variantsResult = await supabase
+          .from('public_product_variants')
+          .select('*')
+          .in('product_id', matchedProductIds)
+          .gt('quantity_in_stock', 0)
+          .order('size_sort_order', { ascending: true });
+
+        if (!variantsResult.error) {
+          appendUniqueProductVariants((variantsResult.data ?? []) as ProductVariant[]);
+        }
+      }
+    } catch (error: any) {
+      const localMatches = products
+        .map((product) => ({ product, score: getSubmittedSearchScore(product, cleanSearch) }))
+        .filter((entry) => entry.score > 0 && productMatchesSubmittedSearch(entry.product, cleanSearch))
+        .sort((left, right) => right.score - left.score)
+        .map((entry) => entry.product);
+      setSearchResultsProducts(localMatches);
+      setSearchResultsError(error?.message ? `Showing loaded items only. ${error.message}` : 'Showing loaded items only. Could not refresh all products.');
+    } finally {
+      setSearchResultsLoading(false);
+    }
+  }
+
+  function openProductFromSearchResults(product: Product) {
+    setSearchResultsOpen(false);
+    setSearchDropdownOpen(false);
     openProduct(product);
   }
 
@@ -3371,25 +3666,10 @@ export default function DarikCustomerWebHome() {
   ]);
 
   const visibleBestSellerDepartments = useMemo(() => {
-    const cleanSearch = normalizeDarikSearchText(searchText);
-
-    if (!cleanSearch) return visibleCategories;
-
-    return visibleCategories.filter((category) => {
-      const categoryText = [category.name, category.description].filter(Boolean).join(' ').toLowerCase();
-      const categoryHasMatchingLoadedProducts = products.some((product) => {
-        if (product.category_id !== category.id) return false;
-
-        return [product.name, product.description, category.name]
-          .filter(Boolean)
-          .join(' ')
-          .toLowerCase()
-          .includes(cleanSearch);
-      });
-
-      return categoryText.includes(cleanSearch) || categoryHasMatchingLoadedProducts;
-    });
-  }, [visibleCategories, products, searchText]);
+    // Keep Best Sellers stable while typing in the search bar.
+    // Search results are shown only on the dedicated search page.
+    return visibleCategories;
+  }, [visibleCategories]);
 
   const visibleFeaturedDepartmentsToRender = useMemo(() => {
     return visibleBestSellerDepartments.slice(0, visibleFeaturedDepartmentCount);
@@ -3494,22 +3774,7 @@ export default function DarikCustomerWebHome() {
   }
 
   function getBestSellerDepartmentProducts(categoryId: string) {
-    const cleanSearch = normalizeDarikSearchText(searchText);
-
-    return products
-      .filter((product) => {
-        if (product.category_id !== categoryId) return false;
-
-        if (!cleanSearch) return true;
-
-        const categoryName = product.category_id ? categoryById.get(product.category_id)?.name ?? '' : '';
-
-        return [product.name, product.description, categoryName]
-          .filter(Boolean)
-          .join(' ')
-          .toLowerCase()
-          .includes(cleanSearch);
-      });
+    return products.filter((product) => product.category_id === categoryId);
   }
 
   const cartCount = useMemo(() => {
@@ -3576,106 +3841,9 @@ export default function DarikCustomerWebHome() {
       sort_order: 9999,
     };
 
+    // Show approved retailer sponsored ads first, then always keep the Darik banner in rotation.
     return banners.length > 0 ? [...banners, darikPermanentBanner] : [darikPermanentBanner];
   }, [banners]);
-
-  function getSponsoredProductImageUrl(banner: CustomerAdBanner) {
-    return (
-      banner.product_photo_url_snapshot ||
-      banner.official_product_thumbnail_url ||
-      banner.official_product_photo_url ||
-      banner.retailer_raw_photo_url ||
-      ((banner.ad_request_type || '').toLowerCase() === 'product' ? banner.banner_image_url : null)
-    );
-  }
-
-  function isSponsoredProductAd(banner: CustomerAdBanner) {
-    if (banner.id === 'permanent-darik-delivery-banner') return false;
-
-    const adType = String(banner.ad_request_type ?? '').toLowerCase();
-    return Boolean(
-      adType === 'product' ||
-      banner.target_product_id ||
-      banner.product_name_snapshot ||
-      banner.product_app_price_snapshot ||
-      banner.product_photo_url_snapshot
-    );
-  }
-
-  function getSponsoredProductTitle(banner: CustomerAdBanner) {
-    return (
-      String(banner.product_name_snapshot || '').trim() ||
-      String(banner.headline || '').trim() ||
-      String(banner.sponsor_name || '').trim() ||
-      'Sponsored Darik Product'
-    );
-  }
-
-  function getSponsoredProductPriceText(banner: CustomerAdBanner) {
-    const price = Number(banner.product_app_price_snapshot ?? 0);
-    if (!Number.isFinite(price) || price <= 0) return '';
-    return `${money(price)} JOD`;
-  }
-
-  function getBannerImageSrc(banner: CustomerAdBanner, mobile = false) {
-    if (banner.id === 'permanent-darik-delivery-banner') {
-      return mobile ? '/darik_under_2_hours_banner1.png' : '/darik_under_2_hours_banner.png';
-    }
-
-    return banner.banner_image_url || '';
-  }
-
-  function preloadDarikWebImage(src: string | null | undefined) {
-    if (typeof window === 'undefined') return;
-
-    const cleanSrc = String(src ?? '').trim();
-    if (!cleanSrc) return;
-
-    const image = new window.Image();
-    image.decoding = 'async';
-    image.src = cleanSrc;
-  }
-
-  useEffect(() => {
-    if (typeof window === 'undefined') return;
-
-    const urls = new Set<string>();
-
-    visibleCategories.slice(0, 12).forEach((category) => {
-      const categoryImageUrl = getCategoryPreviewImageUrl(category.name);
-      if (categoryImageUrl) urls.add(categoryImageUrl);
-    });
-
-    visibleAdBanners.slice(0, 3).forEach((banner) => {
-      const bannerImageUrl = isSponsoredProductAd(banner)
-        ? getSponsoredProductImageUrl(banner)
-        : getBannerImageSrc(banner, true) || getBannerImageSrc(banner, false);
-
-      if (bannerImageUrl) urls.add(bannerImageUrl);
-    });
-
-    const preloadImages = () => {
-      urls.forEach((url) => preloadDarikWebImage(url));
-    };
-
-    const browserWindow = window as Window &
-      typeof globalThis & {
-        requestIdleCallback?: (callback: () => void, options?: { timeout?: number }) => number;
-        cancelIdleCallback?: (handle: number) => void;
-      };
-
-    const idleId = browserWindow.requestIdleCallback
-      ? browserWindow.requestIdleCallback(preloadImages, { timeout: 900 })
-      : globalThis.setTimeout(preloadImages, 120);
-
-    return () => {
-      if (browserWindow.cancelIdleCallback && browserWindow.requestIdleCallback) {
-        browserWindow.cancelIdleCallback(Number(idleId));
-      } else {
-        globalThis.clearTimeout(idleId as ReturnType<typeof setTimeout>);
-      }
-    };
-  }, [visibleCategories, visibleAdBanners]);
 
 
   useEffect(() => {
@@ -4741,8 +4909,22 @@ export default function DarikCustomerWebHome() {
               setSearchDropdownOpen(true);
               loadCatalogAfterScroll().catch(() => setCatalogDeferredLoading(false));
             }}
+            onKeyDown={(event) => {
+              if (event.key === 'Enter') {
+                event.preventDefault();
+                submitDarikSearch().catch(() => undefined);
+              }
+            }}
             placeholder="Search Darik"
           />
+          <button
+            type="button"
+            className="darikSearchSubmitButton mobileSearchSubmitButton"
+            onClick={() => submitDarikSearch().catch(() => undefined)}
+            disabled={searchResultsLoading}
+          >
+            {searchResultsLoading ? 'Searching...' : 'Search'}
+          </button>
 
           {searchDropdownOpen && searchText.trim().length > 0 ? (
             <div className="searchSuggestionsDropdown">
@@ -4775,82 +4957,87 @@ export default function DarikCustomerWebHome() {
             className="mobileSponsoredBannerTrack"
             style={{ transform: `translateX(-${activeBannerIndex * 100}%)` }}
           >
-            {visibleAdBanners.map((banner, index) => {
-              const productAd = isSponsoredProductAd(banner);
-              const productImageUrl = getSponsoredProductImageUrl(banner);
-              const productPriceText = getSponsoredProductPriceText(banner);
-              const bannerImageSrc = getBannerImageSrc(banner, true);
+            {visibleAdBanners.map((banner) => {
+              const isRetailerProductAd = Boolean(banner.retailer_id);
+              const bannerImageUrl = isRetailerProductAd
+                ? getSponsoredBannerImageUrl(banner)
+                : String(banner.banner_image_url || '').trim();
+              const sponsorName = String(banner.sponsor_name || 'Darik Partner').trim();
+              const headline = isRetailerProductAd
+                ? getSponsoredBannerTitle(banner)
+                : String(banner.headline || 'Darik Marketplace').trim();
+              const subheadline = String(
+                banner.subheadline ||
+                  (isRetailerProductAd
+                    ? 'Available now on Darik. Fast local delivery while stock lasts.'
+                    : 'Essentials delivered fast around Amman.')
+              ).trim();
+              const ctaLabel = String(
+                banner.cta_label || (isRetailerProductAd ? 'Shop Now' : 'CLICK TO SHOP')
+              ).trim();
+              const priceLabel = isRetailerProductAd ? getSponsoredBannerPriceLabel(banner) : '';
 
               return (
                 <button
                   key={banner.id}
                   type="button"
-                  className={`mobileSponsoredBannerCard ${productAd ? 'mobileSponsoredProductAdCard' : 'mobileSponsoredImageBannerCard'}`}
+                  className={`mobileSponsoredBannerCard ${isRetailerProductAd ? 'mobileSponsoredProductAdCard' : ''}`}
                   onClick={() => {
                     if (banner.retailer_id) {
                       setSelectedCategoryId('BestSellers');
+                      loadCatalogAfterScroll().catch(() => setCatalogDeferredLoading(false));
                     }
                   }}
                   style={{
-                    backgroundColor: banner.background_color || '#111111',
+                    backgroundColor: isRetailerProductAd ? undefined : banner.background_color || '#111111',
                   }}
                 >
-                  {productAd ? (
-                    <>
-                      <span className="mobileSponsoredProductAdCopy">
-                        <b>Sponsored</b>
-                        <strong>{getSponsoredProductTitle(banner)}</strong>
-                        {productPriceText ? <em>{productPriceText}</em> : null}
-                        <small>{banner.subheadline || 'Available now on Darik'}</small>
-                      </span>
+                  {isRetailerProductAd ? (
+                    <div className="mobileSponsoredProductAdContent">
+                      <div className="mobileSponsoredProductAdTopPills">
+                        <span className="mobileSponsoredProductAdLabel">Sponsored</span>
+                        {priceLabel ? (
+                          <span className="mobileSponsoredProductAdPricePill">
+                            <small>Darik Price</small>
+                            <strong>{priceLabel}</strong>
+                          </span>
+                        ) : null}
+                      </div>
 
-                      <span className="mobileSponsoredProductAdVisual">
-                        {productImageUrl ? (
+                      <div className="mobileSponsoredProductAdImageFrame">
+                        {bannerImageUrl ? (
                           <img
-                            src={productImageUrl}
-                            alt={getSponsoredProductTitle(banner)}
-                            loading={index === activeBannerIndex ? 'eager' : 'lazy'}
-                            decoding="async"
-                            width={220}
-                            height={220}
+                            src={bannerImageUrl}
+                            alt={headline || sponsorName || 'Sponsored Darik product'}
                             onError={(event) => {
                               event.currentTarget.style.display = 'none';
                             }}
                           />
                         ) : (
-                          <b>{shortCode(getSponsoredProductTitle(banner))}</b>
+                          <span>{headline.slice(0, 2).toUpperCase()}</span>
                         )}
-                      </span>
+                      </div>
 
-                      <span className="mobileSponsoredProductAdCtaInline">
-                        {banner.cta_label || 'Shop Now'}
-                      </span>
-                    </>
+                      <div className="mobileSponsoredProductAdCopy">
+                        <strong>{sponsorName}</strong>
+                        <h2>{headline}</h2>
+                        <p>{subheadline}</p>
+                        <span className="mobileSponsoredProductAdButton">{ctaLabel} →</span>
+                      </div>
+                    </div>
                   ) : (
                     <>
-                      {bannerImageSrc ? (
-                        <img
-                          className="mobileSponsoredBannerImage"
-                          src={bannerImageSrc}
-                          alt={banner.headline || banner.sponsor_name || 'Darik sponsored offer'}
-                          loading={index === activeBannerIndex ? 'eager' : 'lazy'}
-                          decoding="async"
-                          width={720}
-                          height={300}
-                          onError={(event) => {
-                            event.currentTarget.style.display = 'none';
-                          }}
-                        />
-                      ) : (
-                        <div className="mobileSponsoredBannerFallback">
-                          <img src={MAIN_SHOPPING_SCREEN_LOGO} alt="Darik" loading="lazy" decoding="async" />
-                          <h2>{banner.headline || 'Darik Marketplace'}</h2>
-                          <p>{banner.subheadline || 'Essentials delivered fast around Amman.'}</p>
-                        </div>
-                      )}
+                      <img
+                        className="mobileSponsoredBannerImage"
+                        src={bannerImageUrl || '/darik_under_2_hours_banner1.png'}
+                        alt={banner.headline || banner.sponsor_name || 'Darik under 2 hours delivery'}
+                        onError={(event) => {
+                          event.currentTarget.src = '/darik_under_2_hours_banner1.png';
+                        }}
+                      />
 
                       <span className="mobileSponsoredBannerCta">
-                        {banner.cta_label || 'CLICK TO SHOP'}
+                        {ctaLabel}
                       </span>
                     </>
                   )}
@@ -4904,7 +5091,7 @@ export default function DarikCustomerWebHome() {
               <strong>Featured</strong>
             </button>
 
-            {visibleCategories.map((category, categoryIndex) => (
+            {visibleCategories.map((category) => (
               <button
                 key={category.id}
                 type="button"
@@ -4923,10 +5110,6 @@ export default function DarikCustomerWebHome() {
                     <img
                       src={getCategoryPreviewImageUrl(category.name)!}
                       alt={category.name}
-                      loading={categoryIndex < 8 ? 'eager' : 'lazy'}
-                      decoding="async"
-                      width={72}
-                      height={72}
                       onError={(event) => {
                         event.currentTarget.style.display = 'none';
                       }}
@@ -5174,8 +5357,22 @@ export default function DarikCustomerWebHome() {
               setSearchDropdownOpen(true);
               loadCatalogAfterScroll().catch(() => setCatalogDeferredLoading(false));
             }}
+            onKeyDown={(event) => {
+              if (event.key === 'Enter') {
+                event.preventDefault();
+                submitDarikSearch().catch(() => undefined);
+              }
+            }}
             placeholder="Search products..."
           />
+          <button
+            type="button"
+            className="darikSearchSubmitButton desktopSearchSubmitButton"
+            onClick={() => submitDarikSearch().catch(() => undefined)}
+            disabled={searchResultsLoading}
+          >
+            {searchResultsLoading ? 'Searching...' : 'Search'}
+          </button>
 
           {searchDropdownOpen && searchText.trim().length > 0 ? (
             <div className="searchSuggestionsDropdown desktopSearchSuggestionsDropdown">
@@ -5208,83 +5405,94 @@ export default function DarikCustomerWebHome() {
             className="sponsoredBannerTrack"
             style={{ transform: `translateX(-${activeBannerIndex * 100}%)` }}
           >
-            {visibleAdBanners.map((banner, index) => {
-              const productAd = isSponsoredProductAd(banner);
-              const productImageUrl = getSponsoredProductImageUrl(banner);
-              const productPriceText = getSponsoredProductPriceText(banner);
-              const bannerImageSrc = getBannerImageSrc(banner, false);
+            {visibleAdBanners.map((banner) => {
+              const isRetailerProductAd = Boolean(banner.retailer_id);
+              const bannerImageUrl = isRetailerProductAd
+                ? getSponsoredBannerImageUrl(banner)
+                : String(banner.banner_image_url || '').trim();
+              const sponsorName = String(banner.sponsor_name || 'Darik Partner').trim();
+              const headline = isRetailerProductAd
+                ? getSponsoredBannerTitle(banner)
+                : String(banner.headline || 'Darik Marketplace').trim();
+              const subheadline = String(
+                banner.subheadline ||
+                  (isRetailerProductAd
+                    ? 'Available now on Darik. Fast local delivery while stock lasts.'
+                    : 'Essentials delivered fast around Amman.')
+              ).trim();
+              const ctaLabel = String(
+                banner.cta_label || (isRetailerProductAd ? 'Shop Now' : 'CLICK TO SHOP')
+              ).trim();
+              const priceLabel = isRetailerProductAd ? getSponsoredBannerPriceLabel(banner) : '';
 
               return (
                 <button
                   key={banner.id}
                   type="button"
-                  className={`sponsoredBannerCard ${productAd ? 'sponsoredProductAdCard' : 'sponsoredImageBannerCard'}`}
+                  className={`sponsoredBannerCard ${isRetailerProductAd ? 'sponsoredProductAdCard' : ''}`}
                   onClick={() => {
-                    if (banner.retailer_id) setSelectedCategoryId('All');
+                    if (banner.retailer_id) {
+                      setSelectedCategoryId('All');
+                      loadCatalogAfterScroll().catch(() => setCatalogDeferredLoading(false));
+                    }
                   }}
                   style={{
-                    backgroundColor: banner.background_color || '#111111',
+                    backgroundColor: isRetailerProductAd ? undefined : banner.background_color || '#111111',
                   }}
                 >
-                  {productAd ? (
-                    <>
-                      <div className="sponsoredProductAdCopy">
-                        <span>Sponsored Product</span>
-                        <h2>{getSponsoredProductTitle(banner)}</h2>
-                        <p>{banner.subheadline || 'Featured by a Darik retailer. Fast local delivery available.'}</p>
-                        <div className="sponsoredProductAdMetaRow">
-                          {productPriceText ? <strong>{productPriceText}</strong> : null}
-                          <em>{banner.sponsor_name || 'Darik Partner'}</em>
-                        </div>
-                        <b className="sponsoredProductAdCtaInline">{banner.cta_label || 'Shop Now'}</b>
+                  {isRetailerProductAd ? (
+                    <div className="sponsoredProductAdContent">
+                      <div className="sponsoredProductAdTopPills">
+                        <span className="sponsoredProductAdLabel">Sponsored</span>
+                        {priceLabel ? (
+                          <span className="sponsoredProductAdPricePill">
+                            <small>Darik Price</small>
+                            <strong>{priceLabel}</strong>
+                          </span>
+                        ) : null}
                       </div>
 
-                      <div className="sponsoredProductAdVisual">
-                        {productImageUrl ? (
+                      <div className="sponsoredProductAdImageFrame">
+                        {bannerImageUrl ? (
                           <img
-                            src={productImageUrl}
-                            alt={getSponsoredProductTitle(banner)}
-                            loading={index === activeBannerIndex ? 'eager' : 'lazy'}
-                            decoding="async"
-                            width={460}
-                            height={360}
+                            src={bannerImageUrl}
+                            alt={headline || sponsorName || 'Sponsored Darik product'}
                             onError={(event) => {
                               event.currentTarget.style.display = 'none';
                             }}
                           />
                         ) : (
-                          <span>{shortCode(getSponsoredProductTitle(banner))}</span>
+                          <span>{headline.slice(0, 2).toUpperCase()}</span>
                         )}
                       </div>
-                    </>
-                  ) : (
-                    <>
-                      {bannerImageSrc ? (
-                        <img
-                          className="sponsoredBannerImage"
-                          src={bannerImageSrc}
-                          alt={banner.headline || banner.sponsor_name || 'Darik offer'}
-                          loading={index === activeBannerIndex ? 'eager' : 'lazy'}
-                          decoding="async"
-                          width={1400}
-                          height={420}
-                          onError={(event) => {
-                            event.currentTarget.style.display = 'none';
-                          }}
-                        />
-                      ) : (
-                        <div className="sponsoredBannerFallback">
-                          <img src={MAIN_SHOPPING_SCREEN_LOGO} alt="Darik" loading="lazy" decoding="async" />
-                          <h2>{banner.headline || 'Darik Marketplace'}</h2>
-                          <p>{banner.subheadline || 'Essentials delivered fast around Amman.'}</p>
-                        </div>
-                      )}
 
-                      <span className="sponsoredBannerCta">
-                        {banner.cta_label || 'CLICK TO SHOP'}
-                      </span>
-                    </>
+                      <div className="sponsoredProductAdCopy">
+                        <span className="sponsoredProductAdAccentLine" />
+                        <strong className="sponsoredProductAdSponsor">{sponsorName}</strong>
+                        <h2>{headline}</h2>
+                        <p>{subheadline}</p>
+                        <span className="sponsoredProductAdButton">{ctaLabel} →</span>
+                      </div>
+                    </div>
+                  ) : bannerImageUrl ? (
+                    <img
+                      className="sponsoredBannerImage"
+                      src={bannerImageUrl}
+                      alt={banner.headline || banner.sponsor_name || 'Darik offer'}
+                    />
+                  ) : (
+                    <div className="sponsoredBannerFallback">
+                      <img src={MAIN_SHOPPING_SCREEN_LOGO} alt="Darik" />
+                      <h2>{headline || 'Darik Marketplace'}</h2>
+                      <p>{subheadline || 'Essentials delivered fast around Amman.'}</p>
+                    </div>
                   )}
+
+                  {!isRetailerProductAd ? (
+                    <span className="sponsoredBannerCta">
+                      {ctaLabel}
+                    </span>
+                  ) : null}
                 </button>
               );
             })}
@@ -5374,7 +5582,7 @@ export default function DarikCustomerWebHome() {
               <strong>Featured</strong>
             </button>
 
-            {visibleCategories.map((category, categoryIndex) => (
+            {visibleCategories.map((category) => (
               <button
                 key={category.id}
                 type="button"
@@ -5393,10 +5601,6 @@ export default function DarikCustomerWebHome() {
                     <img
                       src={getCategoryPreviewImageUrl(category.name)!}
                       alt={category.name}
-                      loading={categoryIndex < 10 ? 'eager' : 'lazy'}
-                      decoding="async"
-                      width={96}
-                      height={96}
                       onError={(event) => {
                         event.currentTarget.style.display = 'none';
                       }}
@@ -7291,6 +7495,85 @@ export default function DarikCustomerWebHome() {
               </aside>
             </div>
           </div>
+        </div>
+      ) : null}
+
+      {searchResultsOpen ? (
+        <div className="darikSearchResultsPage" role="dialog" aria-modal="true" aria-label="Darik search results">
+          <div className="darikSearchResultsHeader">
+            <button type="button" className="darikSearchResultsBackButton" onClick={closeSearchResultsPage}>
+              ← Back
+            </button>
+            <div>
+              <span>Darik Search</span>
+              <h1>{submittedSearchText ? `Results for “${submittedSearchText}”` : 'Search results'}</h1>
+              <p>
+                {searchResultsLoading
+                  ? 'Searching all live Darik products...'
+                  : `${searchResultsProducts.length} matching item${searchResultsProducts.length === 1 ? '' : 's'}`}
+              </p>
+            </div>
+          </div>
+
+          <div className="darikSearchResultsSearchBar">
+            <span>⌕</span>
+            <input
+              value={searchText}
+              onChange={(event) => setSearchText(event.target.value)}
+              onKeyDown={(event) => {
+                if (event.key === 'Enter') {
+                  event.preventDefault();
+                  submitDarikSearch().catch(() => undefined);
+                }
+              }}
+              placeholder="Search Darik products..."
+              autoFocus
+            />
+            <button type="button" onClick={() => submitDarikSearch().catch(() => undefined)} disabled={searchResultsLoading}>
+              {searchResultsLoading ? 'Searching...' : 'Search'}
+            </button>
+          </div>
+
+          {searchResultsError ? <div className="darikSearchResultsNotice">{searchResultsError}</div> : null}
+
+          {searchResultsLoading && searchResultsProducts.length === 0 ? (
+            <div className="darikSearchResultsLoadingCard">
+              <div className="loadingSpinner" />
+              <strong>Searching Darik...</strong>
+              <p>Checking all live products for your keyword.</p>
+            </div>
+          ) : searchResultsProducts.length === 0 ? (
+            <div className="darikSearchResultsEmptyCard">
+              <h2>No matching products found</h2>
+              <p>Try a different keyword, Arabic word, brand, product type, or category.</p>
+              <button type="button" onClick={closeSearchResultsPage}>Back to Darik</button>
+            </div>
+          ) : (
+            <div className="darikSearchResultsGrid">
+              {searchResultsProducts.map((product) => {
+                const photoUrl = getProductPhotoUrl(product);
+                const categoryName = product.category_id
+                  ? categoryById.get(product.category_id)?.name ?? product.category_name ?? 'Darik product'
+                  : product.category_name ?? product.subcategory_name ?? 'Darik product';
+                const productSubcategoryLabel = stripSubcategoryLeaf(product.subcategory_name);
+
+                return (
+                  <article key={product.id} className="darikSearchResultCard" onClick={() => openProductFromSearchResults(product)}>
+                    <button type="button" className="darikSearchResultImageButton">
+                      {photoUrl ? <img src={photoUrl} alt={product.name} /> : <span>{shortCode(product.name)}</span>}
+                      {product.product_free_delivery_enabled ? <b>FREE</b> : null}
+                    </button>
+                    <div className="darikSearchResultInfo">
+                      <small>{productSubcategoryLabel || categoryName}</small>
+                      <h3>{product.name}</h3>
+                      <p>{product.description || 'Live Darik product ready for delivery.'}</p>
+                      <strong>{money(getCustomerPrice(product))} JOD</strong>
+                    </div>
+                  </article>
+                );
+              })}
+            </div>
+          )}
         </div>
       ) : null}
 
