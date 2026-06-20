@@ -14,6 +14,8 @@ type Purchase = {
 const DAILY_LIMIT = 10;
 const START_DATE_KEY = "darik-budget-start-date";
 const SECRET_PIN = "1122";
+const PASSKEY_ENABLED_KEY = "darik-budget-passkey-enabled";
+const PASSKEY_CREDENTIAL_ID_KEY = "darik-budget-passkey-credential-id";
 
 const supabaseUrl =
   process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.EXPO_PUBLIC_SUPABASE_URL;
@@ -51,15 +53,58 @@ function formatJod(value: number) {
   return `${value.toFixed(2)} JOD`;
 }
 
+
+function bufferToBase64Url(buffer: ArrayBuffer) {
+  const bytes = new Uint8Array(buffer);
+  let binary = "";
+
+  bytes.forEach((byte) => {
+    binary += String.fromCharCode(byte);
+  });
+
+  return btoa(binary).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/g, "");
+}
+
+function base64UrlToBuffer(value: string) {
+  const padding = "=".repeat((4 - (value.length % 4)) % 4);
+  const base64 = `${value}${padding}`.replace(/-/g, "+").replace(/_/g, "/");
+  const binary = atob(base64);
+  const bytes = new Uint8Array(binary.length);
+
+  for (let index = 0; index < binary.length; index += 1) {
+    bytes[index] = binary.charCodeAt(index);
+  }
+
+  return bytes.buffer;
+}
+
+function randomChallenge(length = 32) {
+  const challenge = new Uint8Array(length);
+  window.crypto.getRandomValues(challenge);
+  return challenge;
+}
+
+function isPasskeySupported() {
+  return typeof window !== "undefined" && !!window.PublicKeyCredential && !!navigator.credentials;
+}
+
 export default function BudgetPage() {
   const [unlocked, setUnlocked] = useState(false);
   const [pin, setPin] = useState("");
+  const [passkeySupported, setPasskeySupported] = useState(false);
+  const [passkeyEnabled, setPasskeyEnabled] = useState(false);
+  const [passkeyBusy, setPasskeyBusy] = useState(false);
   const [startDate, setStartDate] = useState(todayKey());
   const [purchases, setPurchases] = useState<Purchase[]>([]);
   const [amount, setAmount] = useState("");
   const [note, setNote] = useState("");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    setPasskeySupported(isPasskeySupported());
+    setPasskeyEnabled(window.localStorage.getItem(PASSKEY_ENABLED_KEY) === "true");
+  }, []);
 
   async function loadPurchases() {
     setLoading(true);
@@ -126,6 +171,114 @@ export default function BudgetPage() {
     }
 
     setUnlocked(true);
+  }
+
+  async function enableFaceIdUnlock() {
+    if (!isPasskeySupported()) {
+      alert("This browser does not support Face ID / passkeys.");
+      return;
+    }
+
+    setPasskeyBusy(true);
+
+    try {
+      const credential = (await navigator.credentials.create({
+        publicKey: {
+          challenge: randomChallenge(),
+          rp: {
+            name: "Darik Budget",
+          },
+          user: {
+            id: randomChallenge(16),
+            name: "jihad-budget",
+            displayName: "Jihad Budget",
+          },
+          pubKeyCredParams: [
+            { type: "public-key", alg: -7 },
+            { type: "public-key", alg: -257 },
+          ],
+          authenticatorSelection: {
+            userVerification: "required",
+            residentKey: "preferred",
+          },
+          timeout: 60000,
+          attestation: "none",
+        },
+      })) as PublicKeyCredential | null;
+
+      if (!credential) {
+        alert("Face ID setup was cancelled.");
+        setPasskeyBusy(false);
+        return;
+      }
+
+      window.localStorage.setItem(
+        PASSKEY_CREDENTIAL_ID_KEY,
+        bufferToBase64Url(credential.rawId)
+      );
+      window.localStorage.setItem(PASSKEY_ENABLED_KEY, "true");
+      setPasskeyEnabled(true);
+      alert("Face ID unlock enabled.");
+    } catch (error) {
+      console.log("PASSKEY CREATE ERROR:", error);
+      alert("Could not enable Face ID. Try again from Safari/Chrome on your phone.");
+    } finally {
+      setPasskeyBusy(false);
+    }
+  }
+
+  async function unlockWithFaceId() {
+    if (!isPasskeySupported()) {
+      alert("This browser does not support Face ID / passkeys.");
+      return;
+    }
+
+    const credentialId = window.localStorage.getItem(PASSKEY_CREDENTIAL_ID_KEY);
+
+    if (!credentialId) {
+      alert("Face ID is not enabled yet. Unlock with PIN first, then enable Face ID.");
+      return;
+    }
+
+    setPasskeyBusy(true);
+
+    try {
+      const credential = await navigator.credentials.get({
+        publicKey: {
+          challenge: randomChallenge(),
+          allowCredentials: [
+            {
+              type: "public-key",
+              id: base64UrlToBuffer(credentialId),
+            },
+          ],
+          userVerification: "required",
+          timeout: 60000,
+        },
+      });
+
+      if (!credential) {
+        alert("Face ID unlock was cancelled.");
+        setPasskeyBusy(false);
+        return;
+      }
+
+      setUnlocked(true);
+    } catch (error) {
+      console.log("PASSKEY UNLOCK ERROR:", error);
+      alert("Face ID unlock failed. Use PIN instead.");
+    } finally {
+      setPasskeyBusy(false);
+    }
+  }
+
+  function disableFaceIdUnlock() {
+    const confirmed = window.confirm("Disable Face ID unlock on this device?");
+    if (!confirmed) return;
+
+    window.localStorage.removeItem(PASSKEY_ENABLED_KEY);
+    window.localStorage.removeItem(PASSKEY_CREDENTIAL_ID_KEY);
+    setPasskeyEnabled(false);
   }
 
   async function addPurchase() {
@@ -220,8 +373,26 @@ export default function BudgetPage() {
             />
 
             <button style={styles.primaryButton} onClick={unlockBudget}>
-              Unlock
+              Unlock with PIN
             </button>
+
+            {passkeySupported && passkeyEnabled ? (
+              <>
+                <div style={styles.orLine}>
+                  <span style={styles.orLineBar} />
+                  <span style={styles.orLineText}>or</span>
+                  <span style={styles.orLineBar} />
+                </div>
+
+                <button
+                  style={styles.faceIdButton}
+                  onClick={unlockWithFaceId}
+                  disabled={passkeyBusy}
+                >
+                  {passkeyBusy ? "Opening..." : "Unlock with Face ID"}
+                </button>
+              </>
+            ) : null}
           </section>
         </section>
       </main>
@@ -237,9 +408,27 @@ export default function BudgetPage() {
             <h1 style={styles.title}>Daily 10 JOD Limit</h1>
           </div>
 
-          <button style={styles.resetButton} onClick={resetBudget}>
-            Reset
-          </button>
+          <div style={styles.headerButtons}>
+            {passkeySupported ? (
+              passkeyEnabled ? (
+                <button style={styles.resetButton} onClick={disableFaceIdUnlock}>
+                  Face ID On
+                </button>
+              ) : (
+                <button
+                  style={styles.resetButton}
+                  onClick={enableFaceIdUnlock}
+                  disabled={passkeyBusy}
+                >
+                  {passkeyBusy ? "..." : "Enable Face ID"}
+                </button>
+              )
+            ) : null}
+
+            <button style={styles.resetButton} onClick={resetBudget}>
+              Reset
+            </button>
+          </div>
         </div>
 
         <section style={styles.balanceCard}>
@@ -437,15 +626,22 @@ const styles: Record<string, React.CSSProperties> = {
     outline: "none",
     textAlign: "center",
   },
+  headerButtons: {
+    display: "flex",
+    flexDirection: "column",
+    gap: "8px",
+    alignItems: "flex-end",
+  },
   resetButton: {
     border: "1px solid rgba(255,255,255,0.18)",
     background: "rgba(255,255,255,0.08)",
     color: "#FFFFFF",
     borderRadius: "999px",
     padding: "10px 14px",
-    fontSize: "13px",
+    fontSize: "12px",
     fontWeight: 900,
     cursor: "pointer",
+    whiteSpace: "nowrap",
   },
   balanceCard: {
     background: "linear-gradient(135deg, #0B63F6, #0647B8)",
@@ -561,6 +757,34 @@ const styles: Record<string, React.CSSProperties> = {
     fontSize: "15px",
     fontWeight: 950,
     cursor: "pointer",
+  },
+  faceIdButton: {
+    width: "100%",
+    border: "1px solid #BFDBFE",
+    background: "#EFF6FF",
+    color: "#0B63F6",
+    borderRadius: "18px",
+    padding: "15px",
+    fontSize: "15px",
+    fontWeight: 950,
+    cursor: "pointer",
+  },
+  orLine: {
+    display: "flex",
+    alignItems: "center",
+    gap: "10px",
+    margin: "14px 0",
+  },
+  orLineBar: {
+    flex: 1,
+    height: "1px",
+    background: "#E5E7EB",
+  },
+  orLineText: {
+    color: "#9CA3AF",
+    fontSize: "12px",
+    fontWeight: 900,
+    textTransform: "uppercase",
   },
   statsRow: {
     display: "grid",
