@@ -369,6 +369,19 @@ export default function DarikTechPage() {
   return (
     <main className="dt-page">
       <style>{`
+
+        /* SAFE FIX: only prevent exposed body/bottom area from showing white */
+        html,
+        body {
+          margin: 0;
+          background: #07111f !important;
+          overflow-x: hidden;
+        }
+
+        body {
+          min-height: 100%;
+        }
+
         :root {
           --dt-bg: #07111f;
           --dt-bg-soft: #0d1b2e;
@@ -5442,6 +5455,24 @@ export default function DarikTechPage() {
             width: 100%;
             min-height: 100vh;
             transform: none;
+          }
+        }
+
+
+        /* Task 19: header/page-1 only, 10% more zoomed in, centered safely */
+        @media (min-width: 981px) {
+          .dt-hero {
+            zoom: 1.1;
+            width: calc(100% / 1.1);
+            margin-left: auto;
+            margin-right: auto;
+          }
+        }
+
+        @media (max-width: 980px) {
+          .dt-hero {
+            zoom: 1;
+            width: 100%;
           }
         }
 
