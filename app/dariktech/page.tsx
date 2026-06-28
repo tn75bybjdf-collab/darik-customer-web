@@ -12,6 +12,7 @@ type Service = {
   text: string;
   visual: ServiceVisual;
   chips: string[];
+  href: string;
 };
 
 const services: Service[] = [
@@ -21,6 +22,7 @@ const services: Service[] = [
     text: "Polished iOS and Android apps for customers, staff, drivers, suppliers, bookings, ordering, and daily business workflows.",
     visual: "mobile",
     chips: ["iOS", "Android", "Push Alerts", "Clean UX", "Expo"],
+    href: "/dariktech/services/mobile-web-admin#mobile-app",
   },
   {
     eyebrow: "02",
@@ -28,6 +30,7 @@ const services: Service[] = [
     text: "Clean admin panels and portals for approvals, reports, users, operations, and the controls your team needs every day.",
     visual: "dashboard",
     chips: ["Admin Panels", "Analytics", "Approvals", "Reports", "Roles"],
+    href: "/dariktech/services/mobile-web-admin#web-portal",
   },
   {
     eyebrow: "03",
@@ -35,6 +38,7 @@ const services: Service[] = [
     text: "Multi-sided platforms with customer flows, vendor portals, quote requests, orders, notifications, and backend logic.",
     visual: "marketplace",
     chips: ["Multi-vendor", "Orders", "Tracking", "Portals", "Payments"],
+    href: "/dariktech/work/darik-marketplace",
   },
   {
     eyebrow: "04",
@@ -42,6 +46,7 @@ const services: Service[] = [
     text: "Clear product planning for rough ideas: features, user journeys, launch scope, and what actually makes commercial sense.",
     visual: "strategy",
     chips: ["MVP Scope", "Feature Plan", "User Flow", "Launch Build", "Roadmap"],
+    href: "/dariktech/services/mobile-web-admin#process",
   },
 ];
 
@@ -151,6 +156,7 @@ const projects = [
     metric: "4 apps",
     metricLabel: "connected system",
     visual: "marketplace",
+    href: "/dariktech/work/darik-marketplace",
   },
   {
     name: "PartBid",
@@ -259,14 +265,14 @@ const process = [
   {
     phase: "01",
     title: "Understand the business",
-    text: "Before building screens, I map the actual problem, users, workflow, money flow, and operational requirements.",
+    text: "Before building screens, We map the actual problem, users, workflow, money flow, and operational requirements.",
     chips: ["Problem", "Users", "Workflow"],
     visual: "discover",
   },
   {
     phase: "02",
     title: "Design the product flow",
-    text: "I define the core features, user journeys, database needs, admin controls, and what should be included in the launch version.",
+    text: "We define the core features, user journeys, database needs, admin controls, and what should be included in the launch version.",
     chips: ["UX Flow", "Features", "Admin"],
     visual: "flow",
   },
@@ -280,7 +286,7 @@ const process = [
   {
     phase: "04",
     title: "Prepare for launch",
-    text: "I focus on testing, cleanup, real-world use cases, and making sure the product is ready for customers or internal teams.",
+    text: "We focus on testing, cleanup, real-world use cases, and making sure the product is ready for customers or internal teams.",
     chips: ["Testing", "Launch", "Support"],
     visual: "launch",
   },
@@ -5476,6 +5482,1744 @@ export default function DarikTechPage() {
           }
         }
 
+
+        /* Mobile header task 1: premium icon tabs, no letter icons */
+        .dt-mobile-tabs {
+          display: none;
+        }
+
+        @media (max-width: 720px) {
+          .dt-mobile-tabs {
+            position: relative;
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 9px;
+            margin: 4px 0 20px;
+            padding: 10px;
+            border-radius: 28px;
+            border: 1px solid rgba(98, 214, 255, 0.2);
+            background:
+              radial-gradient(circle at 18% 10%, rgba(98, 214, 255, 0.18), transparent 8rem),
+              radial-gradient(circle at 92% 8%, rgba(124, 92, 255, 0.16), transparent 8rem),
+              linear-gradient(180deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.035)),
+              rgba(7, 17, 31, 0.72);
+            box-shadow:
+              0 22px 70px rgba(0, 0, 0, 0.28),
+              inset 0 1px 0 rgba(255, 255, 255, 0.12);
+            backdrop-filter: blur(22px);
+            overflow: hidden;
+          }
+
+          .dt-mobile-tabs::before {
+            content: "";
+            position: absolute;
+            left: 18px;
+            right: 18px;
+            bottom: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(98, 214, 255, 0.62), rgba(124, 92, 255, 0.46), transparent);
+            box-shadow: 0 0 26px rgba(98, 214, 255, 0.34);
+          }
+
+          .dt-mobile-tab {
+            position: relative;
+            z-index: 2;
+            display: flex;
+            min-width: 0;
+            min-height: 86px;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 9px;
+            padding: 12px 7px 11px;
+            border-radius: 22px;
+            border: 1px solid rgba(255, 255, 255, 0.095);
+            color: rgba(247, 251, 255, 0.72);
+            text-decoration: none;
+            background:
+              linear-gradient(180deg, rgba(255, 255, 255, 0.075), rgba(255, 255, 255, 0.03)),
+              rgba(255, 255, 255, 0.035);
+            box-shadow:
+              inset 0 1px 0 rgba(255, 255, 255, 0.08),
+              0 12px 30px rgba(0, 0, 0, 0.16);
+          }
+
+          .dt-mobile-tab svg {
+            width: 27px;
+            height: 27px;
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 1.75;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            opacity: 0.92;
+          }
+
+          .dt-mobile-tab span {
+            display: block;
+            max-width: 100%;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            color: inherit;
+            font-size: 11.5px;
+            font-weight: 900;
+            line-height: 1;
+            letter-spacing: -0.02em;
+            white-space: nowrap;
+          }
+
+          .dt-mobile-tab-active {
+            color: #62d6ff;
+            border-color: rgba(98, 214, 255, 0.56);
+            background:
+              radial-gradient(circle at 50% 0%, rgba(98, 214, 255, 0.28), transparent 5.8rem),
+              linear-gradient(180deg, rgba(98, 214, 255, 0.18), rgba(255, 255, 255, 0.04)),
+              rgba(98, 214, 255, 0.055);
+            box-shadow:
+              0 0 0 1px rgba(98, 214, 255, 0.1),
+              0 16px 46px rgba(98, 214, 255, 0.18),
+              inset 0 1px 0 rgba(255, 255, 255, 0.15);
+          }
+
+          .dt-mobile-tab-active::after {
+            content: "";
+            position: absolute;
+            left: 22%;
+            right: 22%;
+            bottom: -1px;
+            height: 3px;
+            border-radius: 999px 999px 0 0;
+            background: #62d6ff;
+            box-shadow: 0 0 20px rgba(98, 214, 255, 0.88);
+          }
+        }
+
+        @media (max-width: 480px) {
+          .dt-mobile-tabs {
+            gap: 7px;
+            padding: 8px;
+            border-radius: 24px;
+          }
+
+          .dt-mobile-tab {
+            min-height: 76px;
+            border-radius: 19px;
+            gap: 8px;
+            padding: 10px 5px;
+          }
+
+          .dt-mobile-tab svg {
+            width: 24px;
+            height: 24px;
+          }
+
+          .dt-mobile-tab span {
+            font-size: 10.5px;
+          }
+        }
+
+
+        /* Mobile header task 2: premium brand row + menu button */
+        .dt-mobile-menu-button {
+          display: none;
+        }
+
+        @media (max-width: 720px) {
+          .dt-nav {
+            position: relative;
+            align-items: center;
+            padding: 22px 0 14px;
+          }
+
+          .dt-nav::before {
+            content: "";
+            position: absolute;
+            left: -18px;
+            right: -18px;
+            top: 2px;
+            height: 94px;
+            border-radius: 0 0 32px 32px;
+            background:
+              radial-gradient(circle at 18% 30%, rgba(98, 214, 255, 0.18), transparent 10rem),
+              radial-gradient(circle at 92% 18%, rgba(124, 92, 255, 0.14), transparent 9rem);
+            opacity: 0.9;
+            pointer-events: none;
+            z-index: -1;
+          }
+
+          .dt-brand {
+            gap: 12px;
+            min-width: 0;
+          }
+
+          .dt-brand .dt-logo-mark {
+            width: 52px;
+            height: 52px;
+            flex-basis: 52px;
+            border-radius: 18px;
+            padding: 7px;
+            border-color: rgba(98, 214, 255, 0.32);
+            background:
+              radial-gradient(circle at 35% 22%, rgba(255, 255, 255, 0.2), transparent 2rem),
+              linear-gradient(145deg, rgba(98, 214, 255, 0.24), rgba(124, 92, 255, 0.16)),
+              rgba(255, 255, 255, 0.075);
+            box-shadow:
+              0 0 0 1px rgba(98, 214, 255, 0.08),
+              0 18px 46px rgba(98, 214, 255, 0.14),
+              inset 0 1px 0 rgba(255, 255, 255, 0.15);
+          }
+
+          .dt-brand-text strong {
+            font-size: 15px;
+            line-height: 1;
+            letter-spacing: -0.02em;
+          }
+
+          .dt-brand-text span {
+            margin-top: 6px;
+            color: rgba(247, 251, 255, 0.52);
+            font-size: 10px;
+            font-weight: 900;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+          }
+
+          .dt-mobile-menu-button {
+            display: inline-flex;
+            position: relative;
+            flex: 0 0 50px;
+            width: 50px;
+            height: 50px;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            gap: 6px;
+            border-radius: 18px;
+            border: 1px solid rgba(98, 214, 255, 0.24);
+            background:
+              radial-gradient(circle at 50% 0%, rgba(98, 214, 255, 0.16), transparent 4rem),
+              linear-gradient(180deg, rgba(255, 255, 255, 0.095), rgba(255, 255, 255, 0.035)),
+              rgba(255, 255, 255, 0.045);
+            box-shadow:
+              0 18px 46px rgba(0, 0, 0, 0.24),
+              inset 0 1px 0 rgba(255, 255, 255, 0.12);
+            text-decoration: none;
+            overflow: hidden;
+          }
+
+          .dt-mobile-menu-button::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, rgba(98, 214, 255, 0.12), transparent 45%, rgba(124, 92, 255, 0.11));
+            opacity: 0.92;
+          }
+
+          .dt-mobile-menu-button span {
+            position: relative;
+            z-index: 2;
+            display: block;
+            width: 19px;
+            height: 2px;
+            border-radius: 999px;
+            background: rgba(247, 251, 255, 0.88);
+            box-shadow: 0 0 16px rgba(98, 214, 255, 0.26);
+          }
+
+          .dt-mobile-menu-button span:nth-child(2) {
+            width: 23px;
+            background: #62d6ff;
+            box-shadow: 0 0 20px rgba(98, 214, 255, 0.62);
+          }
+
+          .dt-mobile-tabs {
+            margin-top: 8px;
+          }
+        }
+
+        @media (max-width: 480px) {
+          .dt-nav {
+            padding: 18px 0 12px;
+          }
+
+          .dt-brand {
+            gap: 10px;
+          }
+
+          .dt-brand .dt-logo-mark {
+            width: 46px;
+            height: 46px;
+            flex-basis: 46px;
+            border-radius: 16px;
+          }
+
+          .dt-brand-text strong {
+            font-size: 13.5px;
+          }
+
+          .dt-brand-text span {
+            font-size: 9px;
+            letter-spacing: 0.1em;
+          }
+
+          .dt-mobile-menu-button {
+            width: 46px;
+            height: 46px;
+            flex-basis: 46px;
+            border-radius: 16px;
+          }
+        }
+
+
+        /* Mobile task 3: hero intro polish under the new tabs */
+        .dt-mobile-hero-strip,
+        .dt-mobile-hero-kicker {
+          display: none;
+        }
+
+        @media (max-width: 720px) {
+          .dt-hero {
+            padding-top: 12px;
+            gap: 24px;
+          }
+
+          .dt-hero-left {
+            display: flex;
+            flex-direction: column;
+            align-items: stretch;
+          }
+
+          .dt-hero-brand-chip {
+            display: none;
+          }
+
+          .dt-mobile-hero-strip {
+            position: relative;
+            display: grid;
+            grid-template-columns: 34px 1fr auto;
+            align-items: center;
+            gap: 12px;
+            min-height: 62px;
+            margin: 2px 0 24px;
+            padding: 12px 13px;
+            border-radius: 21px;
+            color: rgba(247, 251, 255, 0.86);
+            text-decoration: none;
+            background:
+              radial-gradient(circle at 18% 35%, rgba(98, 214, 255, 0.16), transparent 7rem),
+              linear-gradient(180deg, rgba(255, 255, 255, 0.085), rgba(255, 255, 255, 0.032)),
+              rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(98, 214, 255, 0.16);
+            box-shadow:
+              0 18px 48px rgba(0, 0, 0, 0.2),
+              inset 0 1px 0 rgba(255, 255, 255, 0.09);
+            overflow: hidden;
+          }
+
+          .dt-mobile-hero-strip::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(90deg, rgba(98, 214, 255, 0.08), transparent 50%, rgba(124, 92, 255, 0.08));
+            pointer-events: none;
+          }
+
+          .dt-mobile-hero-strip-icon {
+            position: relative;
+            z-index: 2;
+            display: grid;
+            place-items: center;
+            width: 34px;
+            height: 34px;
+            border-radius: 13px;
+            color: #62d6ff;
+            background: rgba(98, 214, 255, 0.105);
+            border: 1px solid rgba(98, 214, 255, 0.22);
+            box-shadow: 0 0 22px rgba(98, 214, 255, 0.13);
+          }
+
+          .dt-mobile-hero-strip-icon svg {
+            width: 19px;
+            height: 19px;
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 1.7;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+          }
+
+          .dt-mobile-hero-strip span:not(.dt-mobile-hero-strip-icon):not(.dt-mobile-hero-strip-arrow) {
+            position: relative;
+            z-index: 2;
+            min-width: 0;
+            color: rgba(247, 251, 255, 0.86);
+            font-size: 14px;
+            font-weight: 750;
+            line-height: 1.25;
+            letter-spacing: -0.02em;
+          }
+
+          .dt-mobile-hero-strip span:not(.dt-mobile-hero-strip-icon):not(.dt-mobile-hero-strip-arrow)::first-letter {
+            color: #ffffff;
+          }
+
+          .dt-mobile-hero-strip-arrow {
+            position: relative;
+            z-index: 2;
+            color: #62d6ff;
+            font-size: 22px;
+            font-weight: 850;
+            line-height: 1;
+            text-shadow: 0 0 18px rgba(98, 214, 255, 0.5);
+          }
+
+          .dt-mobile-hero-kicker {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            width: fit-content;
+            margin-bottom: 15px;
+            padding: 8px 11px;
+            border-radius: 999px;
+            color: rgba(247, 251, 255, 0.76);
+            background:
+              linear-gradient(90deg, rgba(98, 214, 255, 0.12), rgba(124, 92, 255, 0.08)),
+              rgba(255, 255, 255, 0.045);
+            border: 1px solid rgba(98, 214, 255, 0.14);
+            font-size: 11px;
+            font-weight: 950;
+            letter-spacing: 0.13em;
+            text-transform: uppercase;
+          }
+
+          .dt-mobile-hero-kicker span {
+            color: #62d6ff;
+            font-size: 13px;
+            line-height: 1;
+            text-shadow: 0 0 14px rgba(98, 214, 255, 0.58);
+          }
+
+          .dt-hero-title {
+            margin: 0 0 17px;
+            max-width: 100%;
+            font-size: clamp(41px, 11.5vw, 58px);
+            line-height: 0.98;
+            letter-spacing: -0.065em;
+            text-wrap: balance;
+          }
+
+          .dt-hero-title-mark {
+            display: inline;
+            background: linear-gradient(90deg, #62d6ff, #7bb8ff 52%, #b16cff);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            text-shadow: none;
+          }
+
+          .dt-hero-copy {
+            max-width: 100%;
+            color: rgba(247, 251, 255, 0.72);
+            font-size: 16px;
+            line-height: 1.62;
+          }
+
+          .dt-hero-actions {
+            margin-top: 24px;
+          }
+
+          .dt-hero-proof-row {
+            gap: 8px;
+            margin-top: 18px;
+          }
+
+          .dt-hero-proof {
+            padding: 8px 10px;
+            font-size: 11px;
+            line-height: 1;
+          }
+        }
+
+        @media (max-width: 480px) {
+          .dt-mobile-hero-strip {
+            grid-template-columns: 32px 1fr auto;
+            gap: 10px;
+            min-height: 58px;
+            margin-bottom: 21px;
+            padding: 11px;
+            border-radius: 19px;
+          }
+
+          .dt-mobile-hero-strip-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 12px;
+          }
+
+          .dt-mobile-hero-strip span:not(.dt-mobile-hero-strip-icon):not(.dt-mobile-hero-strip-arrow) {
+            font-size: 13px;
+          }
+
+          .dt-mobile-hero-kicker {
+            margin-bottom: 13px;
+            font-size: 10px;
+            letter-spacing: 0.11em;
+          }
+
+          .dt-hero-title {
+            font-size: clamp(38px, 11.7vw, 51px);
+          }
+        }
+
+
+        /* Mobile task 4: premium CTA buttons and proof chips */
+        @media (max-width: 720px) {
+          .dt-hero-actions {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 12px;
+            margin-top: 25px;
+          }
+
+          .dt-hero-actions .dt-button {
+            position: relative;
+            width: 100%;
+            min-height: 58px;
+            justify-content: space-between;
+            padding: 0 18px;
+            border-radius: 20px;
+            overflow: hidden;
+            font-size: 14px;
+            letter-spacing: -0.015em;
+            box-shadow:
+              0 18px 48px rgba(0, 0, 0, 0.22),
+              inset 0 1px 0 rgba(255, 255, 255, 0.14);
+          }
+
+          .dt-hero-actions .dt-button::after {
+            content: "→";
+            display: grid;
+            place-items: center;
+            width: 34px;
+            height: 34px;
+            flex: 0 0 34px;
+            border-radius: 999px;
+            font-size: 20px;
+            font-weight: 900;
+            line-height: 1;
+            transition: transform 160ms ease;
+          }
+
+          .dt-hero-actions .dt-button-primary {
+            color: #06101d;
+            background:
+              radial-gradient(circle at 16% 0%, rgba(255, 255, 255, 0.88), transparent 8rem),
+              linear-gradient(135deg, #9be9ff 0%, #62d6ff 42%, #8f7bff 100%);
+            border: 1px solid rgba(255, 255, 255, 0.34);
+            box-shadow:
+              0 22px 58px rgba(98, 214, 255, 0.24),
+              0 0 44px rgba(124, 92, 255, 0.13),
+              inset 0 1px 0 rgba(255, 255, 255, 0.45);
+          }
+
+          .dt-hero-actions .dt-button-primary::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(90deg, rgba(255, 255, 255, 0.25), transparent 42%, rgba(255, 255, 255, 0.18));
+            opacity: 0.7;
+            pointer-events: none;
+          }
+
+          .dt-hero-actions .dt-button-primary::after {
+            color: #06101d;
+            background: rgba(255, 255, 255, 0.42);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.38);
+          }
+
+          .dt-hero-actions .dt-button-secondary {
+            color: rgba(247, 251, 255, 0.9);
+            border: 1px solid rgba(98, 214, 255, 0.18);
+            background:
+              radial-gradient(circle at 16% 0%, rgba(98, 214, 255, 0.13), transparent 8rem),
+              linear-gradient(180deg, rgba(255, 255, 255, 0.075), rgba(255, 255, 255, 0.025)),
+              rgba(255, 255, 255, 0.035);
+          }
+
+          .dt-hero-actions .dt-button-secondary::after {
+            color: #62d6ff;
+            background: rgba(98, 214, 255, 0.105);
+            border: 1px solid rgba(98, 214, 255, 0.18);
+            text-shadow: 0 0 16px rgba(98, 214, 255, 0.6);
+          }
+
+          .dt-hero-actions .dt-button:hover::after {
+            transform: translateX(3px);
+          }
+
+          .dt-hero-proof-row {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 9px;
+            margin-top: 18px;
+          }
+
+          .dt-hero-proof {
+            position: relative;
+            justify-content: flex-start;
+            min-height: 42px;
+            padding: 10px 12px;
+            border-radius: 16px;
+            color: rgba(247, 251, 255, 0.84);
+            background:
+              linear-gradient(180deg, rgba(255, 255, 255, 0.074), rgba(255, 255, 255, 0.03)),
+              rgba(255, 255, 255, 0.035);
+            border: 1px solid rgba(255, 255, 255, 0.09);
+            box-shadow:
+              inset 0 1px 0 rgba(255, 255, 255, 0.07),
+              0 12px 32px rgba(0, 0, 0, 0.14);
+            font-size: 12px;
+            font-weight: 850;
+            letter-spacing: -0.01em;
+          }
+
+          .dt-hero-proof::before {
+            width: 8px;
+            height: 8px;
+            margin-right: 2px;
+            background: #62d6ff;
+            box-shadow: 0 0 0 6px rgba(98, 214, 255, 0.08), 0 0 18px rgba(98, 214, 255, 0.64);
+          }
+
+          .dt-hero-proof::after {
+            content: "";
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            width: 6px;
+            height: 6px;
+            border-top: 1.5px solid rgba(98, 214, 255, 0.75);
+            border-right: 1.5px solid rgba(98, 214, 255, 0.75);
+            transform: translateY(-50%) rotate(45deg);
+            opacity: 0.72;
+          }
+        }
+
+        @media (max-width: 480px) {
+          .dt-hero-actions .dt-button {
+            min-height: 56px;
+            padding: 0 16px;
+            border-radius: 18px;
+            font-size: 13.5px;
+          }
+
+          .dt-hero-actions .dt-button::after {
+            width: 32px;
+            height: 32px;
+            flex-basis: 32px;
+          }
+
+          .dt-hero-proof {
+            min-height: 40px;
+            font-size: 11.5px;
+          }
+        }
+
+
+        /* Mobile task 5: premium blueprint card, no letter-based icons */
+        .dt-blueprint-icon svg {
+          width: 22px;
+          height: 22px;
+          fill: none;
+          stroke: currentColor;
+          stroke-width: 1.75;
+          stroke-linecap: round;
+          stroke-linejoin: round;
+        }
+
+        .dt-blueprint-icon-apps {
+          color: #62d6ff;
+        }
+
+        .dt-blueprint-icon-data {
+          color: #7df7e7;
+        }
+
+        .dt-blueprint-icon-control {
+          color: #b8a8ff;
+        }
+
+        @media (max-width: 720px) {
+          .dt-hero-card-wrap {
+            margin-top: 2px;
+          }
+
+          .dt-product-card {
+            position: relative;
+            padding: 17px;
+            border-radius: 30px;
+            border-color: rgba(98, 214, 255, 0.22);
+            background:
+              radial-gradient(circle at 88% 8%, rgba(98, 214, 255, 0.2), transparent 12rem),
+              radial-gradient(circle at 14% 96%, rgba(124, 92, 255, 0.18), transparent 12rem),
+              linear-gradient(180deg, rgba(255, 255, 255, 0.095), rgba(255, 255, 255, 0.035)),
+              rgba(7, 17, 31, 0.72);
+            box-shadow:
+              0 28px 78px rgba(0, 0, 0, 0.3),
+              inset 0 1px 0 rgba(255, 255, 255, 0.12);
+          }
+
+          .dt-product-card::before {
+            left: 24px;
+            width: 118px;
+            height: 3px;
+          }
+
+          .dt-product-top {
+            margin-bottom: 13px;
+          }
+
+          .dt-product-dots span {
+            width: 8px;
+            height: 8px;
+          }
+
+          .dt-product-status {
+            color: rgba(247, 251, 255, 0.8);
+            padding: 6px 9px;
+            font-size: 10.5px;
+            font-weight: 850;
+            letter-spacing: -0.01em;
+          }
+
+          .dt-blueprint-hero {
+            min-height: 156px;
+            padding: 19px;
+            border-radius: 24px;
+            background:
+              radial-gradient(circle at 88% 18%, rgba(98, 214, 255, 0.24), transparent 8rem),
+              linear-gradient(135deg, rgba(98, 214, 255, 0.15), rgba(124, 92, 255, 0.12)),
+              rgba(255, 255, 255, 0.045);
+          }
+
+          .dt-blueprint-hero span {
+            font-size: 10px;
+            letter-spacing: 0.13em;
+          }
+
+          .dt-blueprint-hero h2 {
+            max-width: 290px;
+            margin-top: 11px;
+            font-size: clamp(29px, 8vw, 40px);
+            line-height: 0.98;
+            letter-spacing: -0.07em;
+          }
+
+          .dt-blueprint-logo {
+            width: 52px;
+            height: 52px;
+            border-radius: 18px;
+            right: 15px;
+            top: 15px;
+          }
+
+          .dt-blueprint-logo img {
+            width: 35px;
+            height: 35px;
+          }
+
+          .dt-blueprint-flow {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 10px;
+          }
+
+          .dt-blueprint-node {
+            min-height: auto;
+            display: grid;
+            grid-template-columns: 46px 1fr;
+            grid-template-rows: auto auto;
+            column-gap: 12px;
+            row-gap: 4px;
+            align-items: center;
+            padding: 13px;
+            border-radius: 20px;
+            background:
+              linear-gradient(180deg, rgba(255, 255, 255, 0.075), rgba(255, 255, 255, 0.032)),
+              rgba(255, 255, 255, 0.035);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+          }
+
+          .dt-blueprint-icon {
+            grid-row: 1 / span 2;
+            width: 46px;
+            height: 46px;
+            border-radius: 16px;
+            background:
+              radial-gradient(circle at 50% 0%, rgba(98, 214, 255, 0.16), transparent 3.5rem),
+              rgba(98, 214, 255, 0.08);
+            border-color: rgba(98, 214, 255, 0.2);
+            box-shadow:
+              0 13px 34px rgba(0, 0, 0, 0.18),
+              inset 0 1px 0 rgba(255, 255, 255, 0.08);
+            font-size: 0;
+          }
+
+          .dt-blueprint-icon svg {
+            width: 23px;
+            height: 23px;
+          }
+
+          .dt-blueprint-node strong {
+            margin-top: 0;
+            font-size: 20px;
+            line-height: 1;
+          }
+
+          .dt-blueprint-node span {
+            font-size: 10px;
+            line-height: 1.15;
+          }
+
+          .dt-blueprint-list {
+            gap: 9px;
+            padding: 12px;
+            border-radius: 22px;
+          }
+
+          .dt-blueprint-row {
+            grid-template-columns: 38px 1fr auto;
+            gap: 10px;
+            padding: 10px;
+            border-radius: 17px;
+          }
+
+          .dt-blueprint-row-icon {
+            width: 38px;
+            height: 38px;
+            border-radius: 14px;
+          }
+
+          .dt-blueprint-row strong {
+            font-size: 13px;
+          }
+
+          .dt-blueprint-row small {
+            font-size: 11px;
+            line-height: 1.25;
+          }
+
+          .dt-blueprint-pill {
+            padding: 6px 8px;
+            font-size: 10.5px;
+          }
+        }
+
+        @media (max-width: 480px) {
+          .dt-product-card {
+            padding: 15px;
+            border-radius: 28px;
+          }
+
+          .dt-blueprint-hero {
+            min-height: 148px;
+            padding: 17px;
+          }
+
+          .dt-blueprint-hero h2 {
+            max-width: 250px;
+            font-size: clamp(27px, 7.8vw, 36px);
+          }
+
+          .dt-blueprint-logo {
+            width: 46px;
+            height: 46px;
+            border-radius: 16px;
+          }
+
+          .dt-blueprint-logo img {
+            width: 31px;
+            height: 31px;
+          }
+
+          .dt-blueprint-node {
+            grid-template-columns: 42px 1fr;
+            padding: 11px;
+          }
+
+          .dt-blueprint-icon {
+            width: 42px;
+            height: 42px;
+            border-radius: 15px;
+          }
+
+          .dt-blueprint-icon svg {
+            width: 21px;
+            height: 21px;
+          }
+
+          .dt-blueprint-node strong {
+            font-size: 18px;
+          }
+
+          .dt-blueprint-row {
+            grid-template-columns: 36px 1fr;
+          }
+
+          .dt-blueprint-pill {
+            grid-column: 2;
+            width: fit-content;
+          }
+        }
+
+
+        /* Task 6: make Darik Marketplace selected-work card clickable */
+        .dt-work-card-link {
+          display: block;
+          color: inherit;
+          text-decoration: none;
+          cursor: pointer;
+        }
+
+        .dt-work-open {
+          position: relative;
+          z-index: 3;
+          display: inline-flex;
+          align-items: center;
+          gap: 8px;
+          width: fit-content;
+          margin-top: 22px;
+          padding: 10px 12px;
+          border-radius: 999px;
+          color: #06101d;
+          background: linear-gradient(135deg, #ffffff, #ffd83d);
+          box-shadow:
+            0 16px 42px rgba(255, 216, 61, 0.16),
+            inset 0 1px 0 rgba(255, 255, 255, 0.34);
+          font-size: 12px;
+          font-weight: 950;
+          letter-spacing: -0.01em;
+        }
+
+        .dt-work-open span {
+          color: inherit;
+          font-size: 13px;
+          letter-spacing: 0;
+          text-transform: none;
+          transition: transform 160ms ease;
+        }
+
+        .dt-work-card-link:hover .dt-work-open span {
+          transform: translateX(3px);
+        }
+
+        @media (max-width: 720px) {
+          .dt-work-open {
+            width: 100%;
+            justify-content: center;
+            min-height: 44px;
+            margin-top: 20px;
+          }
+        }
+
+
+        /* Quick fix: selected-work Darik features button contrast */
+        .dt-work-open {
+          color: #ffd83d !important;
+          background:
+            radial-gradient(circle at 20% 0%, rgba(255, 216, 61, 0.18), transparent 4rem),
+            linear-gradient(135deg, #141414, #050505) !important;
+          border: 1px solid rgba(255, 216, 61, 0.42);
+          box-shadow:
+            0 18px 46px rgba(0, 0, 0, 0.18),
+            0 0 28px rgba(255, 216, 61, 0.08),
+            inset 0 1px 0 rgba(255, 255, 255, 0.08) !important;
+          text-shadow: none !important;
+        }
+
+        .dt-work-open span {
+          color: #ffffff !important;
+          text-shadow: none !important;
+        }
+
+        .dt-work-card-link:hover .dt-work-open {
+          border-color: rgba(255, 216, 61, 0.72);
+          box-shadow:
+            0 22px 56px rgba(0, 0, 0, 0.22),
+            0 0 34px rgba(255, 216, 61, 0.14),
+            inset 0 1px 0 rgba(255, 255, 255, 0.11) !important;
+        }
+
+        @media (max-width: 720px) {
+          .dt-work-open {
+            min-height: 46px;
+            font-size: 12.5px;
+          }
+        }
+
+
+        /* Task 21: clickable hero system tabs */
+        .dt-hero-proof-nav {
+          display: grid;
+          grid-template-columns: repeat(3, minmax(0, 1fr));
+          gap: 12px;
+          max-width: 820px;
+          margin-top: 30px;
+        }
+
+        .dt-proof-link {
+          position: relative;
+          min-height: 74px;
+          justify-content: flex-start;
+          gap: 12px;
+          padding: 12px 13px;
+          border-radius: 23px;
+          color: rgba(247, 251, 255, 0.92);
+          text-decoration: none;
+          background:
+            radial-gradient(circle at 18% 0%, rgba(98, 214, 255, 0.13), transparent 7rem),
+            linear-gradient(180deg, rgba(255, 255, 255, 0.085), rgba(255, 255, 255, 0.03)),
+            rgba(255, 255, 255, 0.04);
+          border: 1px solid rgba(98, 214, 255, 0.16);
+          box-shadow:
+            0 18px 52px rgba(0, 0, 0, 0.18),
+            inset 0 1px 0 rgba(255, 255, 255, 0.1);
+          overflow: hidden;
+          transition:
+            transform 180ms ease,
+            border-color 180ms ease,
+            box-shadow 180ms ease,
+            background 180ms ease;
+        }
+
+        .dt-proof-link::before {
+          display: none;
+        }
+
+        .dt-proof-link::after {
+          content: "";
+          position: absolute;
+          inset: 0;
+          background:
+            linear-gradient(135deg, rgba(98, 214, 255, 0.08), transparent 48%, rgba(124, 92, 255, 0.08));
+          opacity: 0.85;
+          pointer-events: none;
+        }
+
+        .dt-proof-link:hover {
+          transform: translateY(-4px);
+          border-color: rgba(98, 214, 255, 0.38);
+          box-shadow:
+            0 26px 70px rgba(0, 0, 0, 0.24),
+            0 0 44px rgba(98, 214, 255, 0.12),
+            inset 0 1px 0 rgba(255, 255, 255, 0.14);
+        }
+
+        .dt-proof-link:active {
+          transform: translateY(-1px) scale(0.99);
+        }
+
+        .dt-proof-backend {
+          background:
+            radial-gradient(circle at 18% 0%, rgba(125, 247, 231, 0.13), transparent 7rem),
+            linear-gradient(180deg, rgba(255, 255, 255, 0.085), rgba(255, 255, 255, 0.03)),
+            rgba(255, 255, 255, 0.04);
+          border-color: rgba(125, 247, 231, 0.15);
+        }
+
+        .dt-proof-workflow {
+          background:
+            radial-gradient(circle at 18% 0%, rgba(177, 108, 255, 0.15), transparent 7rem),
+            linear-gradient(180deg, rgba(255, 255, 255, 0.085), rgba(255, 255, 255, 0.03)),
+            rgba(255, 255, 255, 0.04);
+          border-color: rgba(177, 108, 255, 0.17);
+        }
+
+        .dt-proof-icon {
+          position: relative;
+          z-index: 2;
+          display: grid;
+          place-items: center;
+          flex: 0 0 44px;
+          width: 44px;
+          height: 44px;
+          border-radius: 16px;
+          color: #62d6ff;
+          background:
+            radial-gradient(circle at 50% 0%, rgba(98, 214, 255, 0.18), transparent 3.5rem),
+            rgba(98, 214, 255, 0.08);
+          border: 1px solid rgba(98, 214, 255, 0.2);
+          box-shadow:
+            0 14px 34px rgba(0, 0, 0, 0.16),
+            0 0 24px rgba(98, 214, 255, 0.08),
+            inset 0 1px 0 rgba(255, 255, 255, 0.08);
+        }
+
+        .dt-proof-backend .dt-proof-icon {
+          color: #7df7e7;
+          background:
+            radial-gradient(circle at 50% 0%, rgba(125, 247, 231, 0.16), transparent 3.5rem),
+            rgba(125, 247, 231, 0.07);
+          border-color: rgba(125, 247, 231, 0.18);
+        }
+
+        .dt-proof-workflow .dt-proof-icon {
+          color: #b8a8ff;
+          background:
+            radial-gradient(circle at 50% 0%, rgba(184, 168, 255, 0.17), transparent 3.5rem),
+            rgba(184, 168, 255, 0.07);
+          border-color: rgba(184, 168, 255, 0.18);
+        }
+
+        .dt-proof-icon svg {
+          width: 23px;
+          height: 23px;
+          fill: none;
+          stroke: currentColor;
+          stroke-width: 1.8;
+          stroke-linecap: round;
+          stroke-linejoin: round;
+        }
+
+        .dt-proof-copy {
+          position: relative;
+          z-index: 2;
+          display: grid;
+          gap: 5px;
+          min-width: 0;
+        }
+
+        .dt-proof-copy strong {
+          display: block;
+          color: rgba(247, 251, 255, 0.94);
+          font-size: 13px;
+          line-height: 1.05;
+          letter-spacing: -0.02em;
+          white-space: nowrap;
+        }
+
+        .dt-proof-copy small {
+          display: block;
+          color: rgba(247, 251, 255, 0.48);
+          font-size: 10.5px;
+          font-weight: 850;
+          line-height: 1.15;
+          letter-spacing: -0.01em;
+        }
+
+        .dt-proof-arrow {
+          position: relative;
+          z-index: 2;
+          display: grid;
+          place-items: center;
+          flex: 0 0 28px;
+          width: 28px;
+          height: 28px;
+          margin-left: auto;
+          border-radius: 999px;
+          color: #06101d;
+          background: #62d6ff;
+          box-shadow: 0 0 22px rgba(98, 214, 255, 0.24);
+          font-size: 15px;
+          font-weight: 950;
+          line-height: 1;
+          transition: transform 180ms ease;
+        }
+
+        .dt-proof-backend .dt-proof-arrow {
+          background: #7df7e7;
+          box-shadow: 0 0 22px rgba(125, 247, 231, 0.2);
+        }
+
+        .dt-proof-workflow .dt-proof-arrow {
+          background: #b8a8ff;
+          box-shadow: 0 0 22px rgba(184, 168, 255, 0.2);
+        }
+
+        .dt-proof-link:hover .dt-proof-arrow {
+          transform: translateX(3px);
+        }
+
+        @media (max-width: 980px) {
+          .dt-hero-proof-nav {
+            grid-template-columns: 1fr;
+            max-width: 620px;
+          }
+
+          .dt-proof-link {
+            min-height: 68px;
+          }
+
+          .dt-proof-copy strong {
+            white-space: normal;
+          }
+        }
+
+        @media (max-width: 720px) {
+          .dt-hero-proof-nav {
+            gap: 10px;
+            margin-top: 18px;
+          }
+
+          .dt-proof-link {
+            min-height: 66px;
+            padding: 11px;
+            border-radius: 21px;
+          }
+
+          .dt-proof-icon {
+            flex-basis: 42px;
+            width: 42px;
+            height: 42px;
+            border-radius: 15px;
+          }
+
+          .dt-proof-arrow {
+            flex-basis: 26px;
+            width: 26px;
+            height: 26px;
+          }
+        }
+
+
+        /* Fix: hero quick links now route to exact service-page sections + API card */
+        .dt-hero-proof-nav {
+          grid-template-columns: repeat(4, minmax(0, 1fr));
+          max-width: 1120px;
+        }
+
+        .dt-proof-api {
+          background:
+            radial-gradient(circle at 18% 0%, rgba(255, 216, 61, 0.15), transparent 7rem),
+            linear-gradient(180deg, rgba(255, 255, 255, 0.085), rgba(255, 255, 255, 0.03)),
+            rgba(255, 255, 255, 0.04);
+          border-color: rgba(255, 216, 61, 0.18);
+        }
+
+        .dt-proof-api .dt-proof-icon {
+          color: #ffd83d;
+          background:
+            radial-gradient(circle at 50% 0%, rgba(255, 216, 61, 0.18), transparent 3.5rem),
+            rgba(255, 216, 61, 0.07);
+          border-color: rgba(255, 216, 61, 0.2);
+        }
+
+        .dt-proof-api .dt-proof-arrow {
+          background: #ffd83d;
+          box-shadow: 0 0 22px rgba(255, 216, 61, 0.22);
+        }
+
+        @media (max-width: 1180px) {
+          .dt-hero-proof-nav {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            max-width: 760px;
+          }
+        }
+
+        @media (max-width: 720px) {
+          .dt-hero-proof-nav {
+            grid-template-columns: 1fr;
+            max-width: 100%;
+          }
+        }
+
+
+        /* Logo cleanup: remove icon boxes and let transparent logo sit flush */
+        .dt-logo-mark,
+        .dt-logo-mark-large,
+        .dt-blueprint-logo,
+        .dt-hero-brand-chip .dt-logo-mark,
+        .dt-footer .dt-logo-mark,
+        .dt-brand .dt-logo-mark {
+          background: transparent !important;
+          border: 0 !important;
+          box-shadow: none !important;
+          outline: 0 !important;
+          padding: 0 !important;
+          border-radius: 0 !important;
+          overflow: visible !important;
+        }
+
+        .dt-logo-mark::before,
+        .dt-logo-mark::after,
+        .dt-logo-mark-large::before,
+        .dt-logo-mark-large::after,
+        .dt-blueprint-logo::before,
+        .dt-blueprint-logo::after {
+          display: none !important;
+          content: none !important;
+        }
+
+        .dt-logo-mark img,
+        .dt-logo-mark-large img,
+        .dt-blueprint-logo img {
+          display: block;
+          width: 100% !important;
+          height: 100% !important;
+          object-fit: contain !important;
+          filter: drop-shadow(0 10px 22px rgba(0, 0, 0, 0.18));
+        }
+
+        .dt-brand .dt-logo-mark {
+          width: 52px !important;
+          height: 52px !important;
+          flex: 0 0 52px !important;
+        }
+
+        .dt-hero-brand-chip .dt-logo-mark {
+          width: 42px !important;
+          height: 42px !important;
+          flex: 0 0 42px !important;
+        }
+
+        .dt-footer .dt-logo-mark {
+          width: 48px !important;
+          height: 48px !important;
+          flex: 0 0 48px !important;
+        }
+
+        @media (max-width: 720px) {
+          .dt-brand .dt-logo-mark {
+            width: 46px !important;
+            height: 46px !important;
+            flex-basis: 46px !important;
+          }
+
+          .dt-hero-brand-chip .dt-logo-mark {
+            width: 38px !important;
+            height: 38px !important;
+            flex-basis: 38px !important;
+          }
+        }
+
+
+        /* Logo size fix: double the new transparent logo */
+        .dt-nav {
+          padding-top: 18px !important;
+          padding-bottom: 18px !important;
+        }
+
+        .dt-brand .dt-logo-mark {
+          width: 104px !important;
+          height: 104px !important;
+          flex: 0 0 104px !important;
+        }
+
+        .dt-logo-mark-large {
+          width: 132px !important;
+          height: 132px !important;
+          flex: 0 0 132px !important;
+        }
+
+        .dt-hero-brand-chip .dt-logo-mark {
+          width: 84px !important;
+          height: 84px !important;
+          flex: 0 0 84px !important;
+        }
+
+        .dt-blueprint-logo {
+          width: 132px !important;
+          height: 132px !important;
+        }
+
+        .dt-footer .dt-logo-mark {
+          width: 96px !important;
+          height: 96px !important;
+          flex: 0 0 96px !important;
+        }
+
+        .dt-logo-mark img,
+        .dt-logo-mark-large img,
+        .dt-blueprint-logo img {
+          object-fit: contain !important;
+        }
+
+        @media (max-width: 720px) {
+          .dt-nav {
+            padding-top: 12px !important;
+            padding-bottom: 12px !important;
+          }
+
+          .dt-brand .dt-logo-mark {
+            width: 92px !important;
+            height: 92px !important;
+            flex-basis: 92px !important;
+          }
+
+          .dt-logo-mark-large {
+            width: 112px !important;
+            height: 112px !important;
+            flex-basis: 112px !important;
+          }
+
+          .dt-hero-brand-chip .dt-logo-mark {
+            width: 76px !important;
+            height: 76px !important;
+            flex-basis: 76px !important;
+          }
+
+          .dt-blueprint-logo {
+            width: 104px !important;
+            height: 104px !important;
+          }
+
+          .dt-footer .dt-logo-mark {
+            width: 86px !important;
+            height: 86px !important;
+            flex-basis: 86px !important;
+          }
+        }
+
+        @media (max-width: 480px) {
+          .dt-brand .dt-logo-mark {
+            width: 82px !important;
+            height: 82px !important;
+            flex-basis: 82px !important;
+          }
+
+          .dt-hero-brand-chip .dt-logo-mark {
+            width: 70px !important;
+            height: 70px !important;
+            flex-basis: 70px !important;
+          }
+        }
+
+
+        /* Mobile-only ChatGPT signature polish: not just rings */
+        @keyframes dt-mobile-aurora-drift {
+          0%, 100% { background-position: 0% 50%, 100% 50%, 50% 50%; }
+          50% { background-position: 100% 50%, 0% 50%, 50% 60%; }
+        }
+
+        @keyframes dt-mobile-scan-sweep {
+          0% { transform: translateX(-130%) rotate(10deg); opacity: 0; }
+          14% { opacity: 0.7; }
+          54% { opacity: 0.22; }
+          100% { transform: translateX(130%) rotate(10deg); opacity: 0; }
+        }
+
+        @keyframes dt-mobile-data-pulse {
+          0%, 100% { opacity: 0.42; filter: drop-shadow(0 0 0 rgba(98, 214, 255, 0)); }
+          50% { opacity: 1; filter: drop-shadow(0 0 14px rgba(98, 214, 255, 0.38)); }
+        }
+
+        @keyframes dt-mobile-card-breathe {
+          0%, 100% { box-shadow: 0 18px 52px rgba(0, 0, 0, 0.18), inset 0 1px 0 rgba(255,255,255,0.1); }
+          50% { box-shadow: 0 24px 66px rgba(98, 214, 255, 0.13), inset 0 1px 0 rgba(255,255,255,0.14); }
+        }
+
+        @media (max-width: 720px) {
+          .dt-hero,
+          .dt-service-card,
+          .dt-process-card,
+          .dt-work-card {
+            background-size: 180% 180%, 160% 160%, auto !important;
+            animation: dt-mobile-aurora-drift 14s ease-in-out infinite;
+          }
+
+          .dt-service-visual,
+          .dt-hero-blueprint,
+          .dt-work-visual,
+          .dt-process-rail {
+            position: relative;
+            overflow: hidden;
+          }
+
+          .dt-service-visual::after,
+          .dt-hero-blueprint::after,
+          .dt-work-visual::after {
+            content: "";
+            position: absolute;
+            top: -30%;
+            bottom: -30%;
+            width: 42%;
+            left: 0;
+            z-index: 8;
+            background: linear-gradient(90deg, transparent, rgba(98, 214, 255, 0.26), rgba(255, 255, 255, 0.18), transparent);
+            transform: translateX(-130%) rotate(10deg);
+            animation: dt-mobile-scan-sweep 5.8s ease-in-out infinite;
+            pointer-events: none;
+            mix-blend-mode: screen;
+          }
+
+          .dt-service-card:nth-child(2) .dt-service-visual::after {
+            background: linear-gradient(90deg, transparent, rgba(125, 247, 231, 0.24), rgba(255, 255, 255, 0.16), transparent);
+            animation-delay: -1.4s;
+          }
+
+          .dt-service-card:nth-child(3) .dt-service-visual::after {
+            background: linear-gradient(90deg, transparent, rgba(184, 168, 255, 0.24), rgba(255, 255, 255, 0.16), transparent);
+            animation-delay: -2.8s;
+          }
+
+          .dt-service-card:nth-child(4) .dt-service-visual::after {
+            background: linear-gradient(90deg, transparent, rgba(255, 216, 61, 0.24), rgba(255, 255, 255, 0.16), transparent);
+            animation-delay: -4.2s;
+          }
+
+          .dt-proof-link,
+          .dt-step-card,
+          .dt-work-card {
+            animation: dt-mobile-card-breathe 6s ease-in-out infinite;
+          }
+
+          .dt-proof-link:nth-child(2),
+          .dt-step-card:nth-child(2),
+          .dt-work-card:nth-child(2) {
+            animation-delay: -2s;
+          }
+
+          .dt-proof-link:nth-child(3),
+          .dt-step-card:nth-child(3),
+          .dt-work-card:nth-child(3) {
+            animation-delay: -4s;
+          }
+
+          .dt-proof-arrow,
+          .dt-visual-bubble,
+          .dt-floating-metric,
+          .dt-status-pill,
+          .dt-idea-dot {
+            animation: dt-mobile-data-pulse 3.4s ease-in-out infinite;
+          }
+
+          .dt-dashboard-layout span,
+          .dt-chart-bars span,
+          .dt-phone-screen-grid span,
+          .dt-plan-card span {
+            animation: dt-mobile-data-pulse 4.4s ease-in-out infinite;
+          }
+
+          .dt-dashboard-layout span:nth-child(2),
+          .dt-chart-bars span:nth-child(2),
+          .dt-phone-screen-grid span:nth-child(2),
+          .dt-plan-card span:nth-child(2) {
+            animation-delay: -1.4s;
+          }
+
+          .dt-dashboard-layout span:nth-child(3),
+          .dt-chart-bars span:nth-child(3),
+          .dt-phone-screen-grid span:nth-child(3),
+          .dt-plan-card span:nth-child(3) {
+            animation-delay: -2.8s;
+          }
+
+          .dt-pill-link,
+          .dt-button-primary,
+          .dt-work-open {
+            background-size: 220% 220% !important;
+            animation: dt-mobile-aurora-drift 8s ease-in-out infinite;
+          }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+          .dt-hero,
+          .dt-service-card,
+          .dt-process-card,
+          .dt-work-card,
+          .dt-service-visual::after,
+          .dt-hero-blueprint::after,
+          .dt-work-visual::after,
+          .dt-proof-link,
+          .dt-step-card,
+          .dt-proof-arrow,
+          .dt-visual-bubble,
+          .dt-floating-metric,
+          .dt-status-pill,
+          .dt-idea-dot,
+          .dt-dashboard-layout span,
+          .dt-chart-bars span,
+          .dt-phone-screen-grid span,
+          .dt-plan-card span,
+          .dt-pill-link,
+          .dt-button-primary,
+          .dt-work-open {
+            animation: none !important;
+          }
+        }
+
+
+        /* Header quote CTA attention polish */
+        @keyframes dt-header-cta-glow {
+          0%, 100% {
+            box-shadow:
+              0 18px 48px rgba(98, 214, 255, 0.18),
+              0 0 0 0 rgba(98, 214, 255, 0),
+              inset 0 1px 0 rgba(255, 255, 255, 0.18);
+          }
+          50% {
+            box-shadow:
+              0 24px 66px rgba(98, 214, 255, 0.3),
+              0 0 0 8px rgba(98, 214, 255, 0.07),
+              inset 0 1px 0 rgba(255, 255, 255, 0.28);
+          }
+        }
+
+        @keyframes dt-header-cta-shine {
+          0% { transform: translateX(-145%) skewX(-18deg); opacity: 0; }
+          16% { opacity: 0.82; }
+          52% { opacity: 0.24; }
+          100% { transform: translateX(145%) skewX(-18deg); opacity: 0; }
+        }
+
+        @keyframes dt-header-cta-comet {
+          to { transform: rotate(360deg); }
+        }
+
+        @keyframes dt-mobile-menu-dot {
+          0%, 100% { transform: scale(0.92); opacity: 0.55; }
+          50% { transform: scale(1.14); opacity: 1; }
+        }
+
+        .dt-pill-link {
+          position: relative;
+          isolation: isolate;
+          overflow: visible;
+          color: #06101d !important;
+          background:
+            radial-gradient(circle at 22% 0%, rgba(255, 255, 255, 0.8), transparent 4.5rem),
+            linear-gradient(135deg, #d9f7ff 0%, #62d6ff 46%, #b8a8ff 100%) !important;
+          border: 1px solid rgba(255, 255, 255, 0.26) !important;
+          animation: dt-header-cta-glow 4.6s ease-in-out infinite;
+        }
+
+        .dt-pill-link::before {
+          content: "";
+          position: absolute;
+          inset: -8px;
+          z-index: -1;
+          border-radius: 999px;
+          background:
+            conic-gradient(
+              from 0deg,
+              transparent 0deg,
+              transparent 48deg,
+              rgba(98, 214, 255, 0.82) 76deg,
+              rgba(125, 247, 231, 0.72) 104deg,
+              transparent 138deg,
+              transparent 360deg
+            );
+          opacity: 0.82;
+          animation: dt-header-cta-comet 3.9s linear infinite;
+          pointer-events: none;
+        }
+
+        .dt-pill-link::after {
+          content: "";
+          position: absolute;
+          top: -42%;
+          bottom: -42%;
+          left: 0;
+          z-index: 2;
+          width: 38%;
+          background:
+            linear-gradient(
+              90deg,
+              transparent,
+              rgba(255, 255, 255, 0.48),
+              rgba(255, 255, 255, 0.16),
+              transparent
+            );
+          transform: translateX(-145%) skewX(-18deg);
+          animation: dt-header-cta-shine 5.1s ease-in-out infinite;
+          pointer-events: none;
+          mix-blend-mode: screen;
+        }
+
+        .dt-pill-link:hover {
+          transform: translateY(-2px);
+          animation-duration: 2.8s;
+        }
+
+        .dt-pill-link:hover::after {
+          animation-duration: 2.2s;
+        }
+
+        .dt-mobile-menu-button {
+          position: relative;
+          isolation: isolate;
+          overflow: visible !important;
+          border: 1px solid rgba(98, 214, 255, 0.26) !important;
+          background:
+            radial-gradient(circle at 22% 0%, rgba(98, 214, 255, 0.2), transparent 4rem),
+            linear-gradient(180deg, rgba(255, 255, 255, 0.11), rgba(255, 255, 255, 0.045)) !important;
+          box-shadow:
+            0 18px 44px rgba(98, 214, 255, 0.16),
+            inset 0 1px 0 rgba(255, 255, 255, 0.12) !important;
+        }
+
+        .dt-mobile-menu-button::before {
+          content: "";
+          position: absolute;
+          inset: -7px;
+          z-index: -1;
+          border-radius: 999px;
+          background:
+            conic-gradient(
+              from 0deg,
+              transparent,
+              rgba(98, 214, 255, 0.75),
+              rgba(184, 168, 255, 0.58),
+              transparent 42%,
+              transparent
+            );
+          animation: dt-header-cta-comet 4.2s linear infinite;
+          opacity: 0.76;
+          pointer-events: none;
+        }
+
+        .dt-mobile-menu-button::after {
+          content: "Quote";
+          position: absolute;
+          left: 50%;
+          bottom: -19px;
+          transform: translateX(-50%);
+          color: rgba(247, 251, 255, 0.72);
+          font-size: 9px;
+          font-weight: 950;
+          letter-spacing: 0.08em;
+          text-transform: uppercase;
+          white-space: nowrap;
+        }
+
+        .dt-mobile-menu-button span {
+          background: #62d6ff !important;
+          box-shadow: 0 0 14px rgba(98, 214, 255, 0.38);
+          animation: dt-mobile-menu-dot 2.8s ease-in-out infinite;
+        }
+
+        .dt-mobile-menu-button span:nth-child(2) {
+          animation-delay: -0.9s;
+          background: #7df7e7 !important;
+        }
+
+        .dt-mobile-menu-button span:nth-child(3) {
+          animation-delay: -1.8s;
+          background: #b8a8ff !important;
+        }
+
+        @media (max-width: 720px) {
+          .dt-pill-link {
+            display: none;
+          }
+
+          .dt-mobile-menu-button {
+            width: 50px !important;
+            height: 50px !important;
+            border-radius: 999px !important;
+          }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+          .dt-pill-link,
+          .dt-pill-link::before,
+          .dt-pill-link::after,
+          .dt-mobile-menu-button::before,
+          .dt-mobile-menu-button span {
+            animation: none !important;
+          }
+        }
+
       `}</style>
 
       <div className="dt-grid-bg" aria-hidden="true" />
@@ -5484,7 +7228,7 @@ export default function DarikTechPage() {
         <nav className="dt-nav" aria-label="Darik Technologies navigation">
           <a className="dt-brand" href="#top" aria-label="Darik Technologies home">
             <span className="dt-logo-mark" aria-hidden="true">
-              <img src="/dariktech/logo.png" alt="" />
+              <img src="/dariktech/logo.png?v=dt-logo-v2" alt="" />
             </span>
             <span className="dt-brand-text">
               <strong>Darik Technologies</strong>
@@ -5500,13 +7244,80 @@ export default function DarikTechPage() {
               Free quote
             </a>
           </div>
+
+          <a className="dt-mobile-menu-button" href={quoteHref} aria-label="Start a free quote">
+            <span />
+            <span />
+            <span />
+          </a>
         </nav>
+
+          <div className="dt-mobile-tabs" aria-label="Mobile quick navigation">
+            <a className="dt-mobile-tab dt-mobile-tab-active" href="#services">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M4 5.5h6.5v6.5H4z" />
+                <path d="M13.5 5.5H20v6.5h-6.5z" />
+                <path d="M4 15h6.5v3.5H4z" />
+                <path d="M13.5 15H20v3.5h-6.5z" />
+              </svg>
+              <span>Services</span>
+            </a>
+
+            <a className="dt-mobile-tab" href="#work">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M8.5 7V5.8c0-1 0.8-1.8 1.8-1.8h3.4c1 0 1.8 0.8 1.8 1.8V7" />
+                <path d="M4.8 7h14.4c1 0 1.8 0.8 1.8 1.8v8.4c0 1-0.8 1.8-1.8 1.8H4.8c-1 0-1.8-0.8-1.8-1.8V8.8C3 7.8 3.8 7 4.8 7z" />
+                <path d="M3 11.2h18" />
+                <path d="M10 12.5h4" />
+              </svg>
+              <span>Work</span>
+            </a>
+
+            <a className="dt-mobile-tab" href="#process">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M7 8.5a3 3 0 1 0 0-6 3 3 0 0 0 0 6z" />
+                <path d="M17 21.5a3 3 0 1 0 0-6 3 3 0 0 0 0 6z" />
+                <path d="M17 8.5a3 3 0 1 0 0-6 3 3 0 0 0 0 6z" />
+                <path d="M9.8 6h4.4" />
+                <path d="M8.9 9.9 15.1 15.6" />
+              </svg>
+              <span>Process</span>
+            </a>
+
+            <a className="dt-mobile-tab" href={quoteHref}>
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M6.5 4h8.2L19 8.3v10.2c0 0.8-0.7 1.5-1.5 1.5h-11c-0.8 0-1.5-0.7-1.5-1.5v-13C5 4.7 5.7 4 6.5 4z" />
+                <path d="M14.5 4v4.5H19" />
+                <path d="M8 12h8" />
+                <path d="M8 15h5" />
+              </svg>
+              <span>Quote</span>
+            </a>
+          </div>
 
         <section className="dt-hero" id="top">
           <div className="dt-hero-left">
+            <a className="dt-mobile-hero-strip" href={quoteHref} aria-label="Start a free quote">
+              <span className="dt-mobile-hero-strip-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24">
+                  <path d="M12.8 3.7c3.4.5 6 3.1 6.6 6.5l-4.1 4.1-4.7-.9-.9-4.7 3.1-5z" />
+                  <path d="M9.2 9.2 5.5 11l3 1.5" />
+                  <path d="M14.8 14.8 13 18.5l-1.5-3" />
+                  <path d="M8.7 15.3 6.4 17.6" />
+                </svg>
+              </span>
+              <span>Digital products built to move your business.</span>
+              <span className="dt-mobile-hero-strip-arrow" aria-hidden="true">→</span>
+            </a>
+
+            <div className="dt-mobile-hero-kicker">
+              <span aria-hidden="true">✦</span>
+              Innovate • Build • Scale
+            </div>
+
             <div className="dt-hero-brand-chip">
               <span className="dt-logo-mark" aria-hidden="true">
-                <img src="/dariktech/logo.png" alt="" />
+                <img src="/dariktech/logo.png?v=dt-logo-v2" alt="" />
               </span>
               <div>
                 <strong>Darik Technologies</strong>
@@ -5531,10 +7342,71 @@ export default function DarikTechPage() {
               </a>
             </div>
 
-            <div className="dt-hero-proof-row" aria-label="Darik Technologies highlights">
-              <span className="dt-hero-proof">Mobile + web + admin</span>
-              <span className="dt-hero-proof">Backend and database logic</span>
-              <span className="dt-hero-proof">Built for real workflows</span>
+            <div className="dt-hero-proof-row dt-hero-proof-nav" aria-label="Darik Technologies quick links">
+              <a className="dt-hero-proof dt-proof-link dt-proof-mobile" href="/dariktech/services/mobile-web-admin">
+                <span className="dt-proof-icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24">
+                    <path d="M7.2 4.5h6.4c1 0 1.8.8 1.8 1.8v11.4c0 1-.8 1.8-1.8 1.8H7.2c-1 0-1.8-.8-1.8-1.8V6.3c0-1 .8-1.8 1.8-1.8z" />
+                    <path d="M8.6 7.5h3.8" />
+                    <path d="M9.2 16.6h3.2" />
+                    <path d="M17.2 8.2h2.2c.8 0 1.4.6 1.4 1.4v7c0 .8-.6 1.4-1.4 1.4h-2.2" />
+                  </svg>
+                </span>
+                <span className="dt-proof-copy">
+                  <strong>Mobile + web + admin</strong>
+                  <small>Full product systems</small>
+                </span>
+                <span className="dt-proof-arrow" aria-hidden="true">→</span>
+              </a>
+
+              <a className="dt-hero-proof dt-proof-link dt-proof-backend" href="/dariktech/services/mobile-web-admin#architecture">
+                <span className="dt-proof-icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24">
+                    <path d="M5 7c0-1.7 3.1-3 7-3s7 1.3 7 3-3.1 3-7 3-7-1.3-7-3z" />
+                    <path d="M5 7v5c0 1.7 3.1 3 7 3s7-1.3 7-3V7" />
+                    <path d="M5 12v5c0 1.7 3.1 3 7 3s7-1.3 7-3v-5" />
+                  </svg>
+                </span>
+                <span className="dt-proof-copy">
+                  <strong>Backend + database</strong>
+                  <small>Logic that actually works</small>
+                </span>
+                <span className="dt-proof-arrow" aria-hidden="true">→</span>
+              </a>
+
+              <a className="dt-hero-proof dt-proof-link dt-proof-workflow" href="/dariktech/services/mobile-web-admin#process">
+                <span className="dt-proof-icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24">
+                    <path d="M6 6.5h4.2v4.2H6z" />
+                    <path d="M13.8 6.5H18v4.2h-4.2z" />
+                    <path d="M9.8 15.2H14v4.2H9.8z" />
+                    <path d="M10.2 8.6h3.6" />
+                    <path d="m15.9 10.7-2.1 4.5" />
+                    <path d="m8.1 10.7 2.1 4.5" />
+                  </svg>
+                </span>
+                <span className="dt-proof-copy">
+                  <strong>Built for real workflows</strong>
+                  <small>Apps people can run daily</small>
+                </span>
+                <span className="dt-proof-arrow" aria-hidden="true">→</span>
+              </a>
+
+              <a className="dt-hero-proof dt-proof-link dt-proof-api" href="/dariktech/services/mobile-web-admin#api-integration">
+                <span className="dt-proof-icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24">
+                    <path d="M8.2 9.2 5.4 12l2.8 2.8" />
+                    <path d="m15.8 9.2 2.8 2.8-2.8 2.8" />
+                    <path d="m13.4 7.2-2.8 9.6" />
+                    <path d="M4.7 5.4h14.6c.8 0 1.5.7 1.5 1.5v10.2c0 .8-.7 1.5-1.5 1.5H4.7c-.8 0-1.5-.7-1.5-1.5V6.9c0-.8.7-1.5 1.5-1.5z" />
+                  </svg>
+                </span>
+                <span className="dt-proof-copy">
+                  <strong>API Integration</strong>
+                  <small>Connect outside systems</small>
+                </span>
+                <span className="dt-proof-arrow" aria-hidden="true">→</span>
+              </a>
             </div>
 
             <div className="dt-trust-row" aria-label="Darik Technologies approach">
@@ -5569,23 +7441,45 @@ export default function DarikTechPage() {
                   <span>Product Command Center</span>
                   <h2>One connected product, not scattered screens.</h2>
                   <div className="dt-blueprint-logo">
-                    <img src="/dariktech/logo.png" alt="" />
+                    <img src="/dariktech/logo.png?v=dt-logo-v2" alt="" />
                   </div>
                 </div>
 
                 <div className="dt-blueprint-flow">
                   <div className="dt-blueprint-node">
-                    <div className="dt-blueprint-icon">A</div>
+                    <div className="dt-blueprint-icon dt-blueprint-icon-apps" aria-hidden="true">
+                      <svg viewBox="0 0 24 24">
+                        <path d="M7 4.5h10a1.8 1.8 0 0 1 1.8 1.8v11.4a1.8 1.8 0 0 1-1.8 1.8H7a1.8 1.8 0 0 1-1.8-1.8V6.3A1.8 1.8 0 0 1 7 4.5z" />
+                        <path d="M9.4 7.5h5.2" />
+                        <path d="M9 16.5h6" />
+                        <path d="M10 10.5h4v3.2h-4z" />
+                      </svg>
+                    </div>
                     <strong>Apps</strong>
                     <span>Customer & staff</span>
                   </div>
                   <div className="dt-blueprint-node">
-                    <div className="dt-blueprint-icon">D</div>
+                    <div className="dt-blueprint-icon dt-blueprint-icon-data" aria-hidden="true">
+                      <svg viewBox="0 0 24 24">
+                        <path d="M5 7c0-1.7 3.1-3 7-3s7 1.3 7 3-3.1 3-7 3-7-1.3-7-3z" />
+                        <path d="M5 7v5c0 1.7 3.1 3 7 3s7-1.3 7-3V7" />
+                        <path d="M5 12v5c0 1.7 3.1 3 7 3s7-1.3 7-3v-5" />
+                      </svg>
+                    </div>
                     <strong>Data</strong>
                     <span>Backend logic</span>
                   </div>
                   <div className="dt-blueprint-node">
-                    <div className="dt-blueprint-icon">C</div>
+                    <div className="dt-blueprint-icon dt-blueprint-icon-control" aria-hidden="true">
+                      <svg viewBox="0 0 24 24">
+                        <path d="M4.5 6.5h15" />
+                        <path d="M4.5 12h15" />
+                        <path d="M4.5 17.5h15" />
+                        <path d="M9 4.8v3.4" />
+                        <path d="M15 10.3v3.4" />
+                        <path d="M11.5 15.8v3.4" />
+                      </svg>
+                    </div>
                     <strong>Control</strong>
                     <span>Admin dashboard</span>
                   </div>
@@ -5645,7 +7539,7 @@ export default function DarikTechPage() {
                     </span>
                   ))}
                 </div>
-                <a className="dt-service-link" href={quoteHref}>
+                <a className="dt-service-link" href={service.href}>
                   Learn more <span aria-hidden="true">→</span>
                 </a>
               </article>
@@ -5667,8 +7561,8 @@ export default function DarikTechPage() {
           </div>
 
           <div className="dt-work-grid">
-            {projects.map((project) => (
-              <article className="dt-work-card" key={project.name}>
+            {projects.map((project) => {
+              const cardContent = (
                 <div className="dt-work-content">
                   <div className="dt-work-topline">
                     <span className="dt-work-type">{project.type}</span>
@@ -5687,9 +7581,22 @@ export default function DarikTechPage() {
                       </span>
                     ))}
                   </div>
+                  {project.href ? (
+                    <span className="dt-work-open">View Darik features <span aria-hidden="true">→</span></span>
+                  ) : null}
                 </div>
-              </article>
-            ))}
+              );
+
+              return project.href ? (
+                <a className="dt-work-card dt-work-card-link" href={project.href} key={project.name}>
+                  {cardContent}
+                </a>
+              ) : (
+                <article className="dt-work-card" key={project.name}>
+                  {cardContent}
+                </article>
+              );
+            })}
           </div>
         </div>
       </section>
@@ -5700,9 +7607,9 @@ export default function DarikTechPage() {
             <div className="dt-proof-card">
               <div className="dt-proof-content">
                 <span className="dt-eyebrow">Why it feels different</span>
-                <h2>I think like a founder, not just a developer.</h2>
+                <h2>We think like founders, not just developers.</h2>
                 <p>
-                  I care about how the app will actually be used: who logs in, what each role sees, how orders or requests move, what admins need to control, what notifications matter, and what makes the product valuable after launch.
+                  We care about how the app will actually be used: who logs in, what each role sees, how orders or requests move, what admins need to control, what notifications matter, and what makes the product valuable after launch.
                 </p>
               </div>
 
@@ -5763,7 +7670,7 @@ export default function DarikTechPage() {
         <div className="dt-shell">
           <div className="dt-section-head">
             <div>
-              <span className="dt-eyebrow">How I work</span>
+              <span className="dt-eyebrow">How we work</span>
               <h2>A clear process from idea to launch.</h2>
             </div>
             <p>
@@ -5801,7 +7708,7 @@ export default function DarikTechPage() {
               <span className="dt-eyebrow">Start here</span>
               <h2>Have an app idea or business problem?</h2>
               <p>
-                Send the idea, the business goal, and what the app needs to do. I can help shape it into a real product plan and build the launch version the right way.
+                Send the idea, the business goal, and what the app needs to do. We can help shape it into a real product plan and build the launch version the right way.
               </p>
 
               <div className="dt-quote-actions">
@@ -5866,7 +7773,7 @@ export default function DarikTechPage() {
       <footer className="dt-shell dt-footer">
         <div className="dt-footer-left">
           <span className="dt-logo-mark" aria-hidden="true">
-            <img src="/dariktech/logo.png" alt="" />
+            <img src="/dariktech/logo.png?v=dt-logo-v2" alt="" />
           </span>
           <div className="dt-footer-brand-copy">
             <strong>Darik Technologies</strong>

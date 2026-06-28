@@ -142,7 +142,7 @@ export default function DarikTechQuotePage() {
             <p className="side-label">What happens next?</p>
             <ol>
               <li>Your request is saved securely.</li>
-              <li>I review the app idea and main workflow.</li>
+              <li>We review the app idea and main workflow.</li>
               <li>You receive a realistic quote or follow-up questions.</li>
             </ol>
           </aside>
