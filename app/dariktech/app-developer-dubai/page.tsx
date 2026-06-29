@@ -2,150 +2,143 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 const siteUrl = "https://getdarik.com";
-const pagePath = "/ar/dariktech/app-developer-dubai";
+const pagePath = "/dariktech/app-developer-dubai";
 const pageUrl = `${siteUrl}${pagePath}`;
-const englishUrl = `${siteUrl}/dariktech/app-developer-dubai`;
 
 export const metadata: Metadata = {
-  title: "شركة تطوير تطبيقات في دبي | تطبيقات جوال وأنظمة أعمال",
+  title: "App Developer in Dubai | Mobile Apps, Web Apps & Admin Systems",
   description:
-    "Darik Technologies تبني تطبيقات جوال، تطبيقات ويب، لوحات تحكم، أسواق رقمية، قواعد بيانات، وأنظمة أعمال كاملة للشركات التي تستهدف دبي والإمارات.",
+    "Darik Technologies builds complete app systems for Dubai businesses: mobile apps, web apps, marketplaces, admin dashboards, backend databases, booking platforms, and business automation.",
   alternates: {
     canonical: pageUrl,
-    languages: {
-      "ar-AE": pageUrl,
-      "en-US": englishUrl,
-    },
   },
   openGraph: {
-    title: "شركة تطوير تطبيقات في دبي | تطبيقات جوال وأنظمة أعمال",
+    title: "App Developer in Dubai | Mobile Apps, Web Apps & Admin Systems",
     description:
-      "تطوير تطبيقات جوال وتطبيقات ويب ولوحات تحكم وأسواق رقمية وأنظمة Backend للشركات في دبي والإمارات.",
+      "Custom mobile apps, web apps, dashboards, marketplaces, and backend systems built for Dubai businesses and regional companies.",
     url: pageUrl,
     siteName: "Darik Technologies",
     type: "website",
-    locale: "ar_AE",
   },
   keywords: [
-    "تطوير تطبيقات في دبي",
-    "شركة تطوير تطبيقات في دبي",
-    "مبرمج تطبيقات في دبي",
-    "مطور تطبيقات في دبي",
-    "تطوير تطبيقات جوال في دبي",
-    "شركة برمجة تطبيقات في دبي",
-    "تطبيقات أعمال في دبي",
-    "تطوير تطبيقات في الإمارات",
-    "مطور تطبيقات في الإمارات",
-    "لوحات تحكم للشركات",
-    "تطبيقات أسواق رقمية",
-    "تطوير مواقع وتطبيقات في دبي",
+    "app developer Dubai",
+    "mobile app developer Dubai",
+    "app development company Dubai",
+    "mobile app development Dubai",
+    "business app developer Dubai",
+    "marketplace app developer Dubai",
+    "admin dashboard developer Dubai",
+    "web app developer Dubai",
+    "custom software developer Dubai",
+    "software development company Dubai",
+    "UAE app developer",
   ],
 };
 
 const services = [
   {
-    title: "تطبيقات جوال للشركات في دبي",
-    text: "تطبيقات iOS و Android للعملاء، الموظفين، السائقين، الموردين، الحجوزات، الطلبات، والخدمات اليومية.",
-    tags: ["iOS", "Android", "تطبيقات أعمال", "React Native"],
+    title: "Mobile Apps for Dubai Businesses",
+    text: "Customer apps, staff apps, driver apps, supplier apps, booking apps, marketplace apps, and business apps built for iOS and Android.",
+    tags: ["iOS", "Android", "Business Apps", "React Native"],
   },
   {
-    title: "تطبيقات ويب وبوابات",
-    text: "بوابات ويب للعملاء، الموظفين، الموردين، الفروع، الشركاء، والمدراء الذين يحتاجون وصولاً واضحاً من المتصفح.",
-    tags: ["Web App", "بوابة عملاء", "بوابة موظفين", "Next.js"],
+    title: "Web Apps + Portals",
+    text: "Browser-based portals for clients, employees, vendors, managers, branches, and partners who need clean access from desktop or mobile.",
+    tags: ["Next.js", "Client Portals", "Staff Portals", "Web Apps"],
   },
   {
-    title: "لوحات تحكم إدارية",
-    text: "لوحات خاصة لإدارة المستخدمين، الطلبات، الحجوزات، العروض، الموافقات، التقارير، الدعم، والصلاحيات.",
-    tags: ["Admin", "تقارير", "موافقات", "عمليات"],
+    title: "Admin Dashboards",
+    text: "Private control panels for users, orders, quotes, bookings, approvals, payments, reports, support, and internal operations.",
+    tags: ["Admin", "Operations", "Reports", "Approvals"],
   },
   {
-    title: "أسواق رقمية ومنصات عروض",
-    text: "منصات تربط العملاء بالبائعين أو الموردين، مع طلبات منظمة، عروض أسعار، رسائل، صور، وإدارة من لوحة التحكم.",
+    title: "Marketplace Platforms",
+    text: "Multi-sided platforms where customers submit requests, vendors respond, admins control quality, and the business owns the workflow.",
     tags: ["Marketplace", "Vendors", "Quotes", "Orders"],
   },
   {
-    title: "Backend وقواعد بيانات",
-    text: "تسجيل دخول، أدوار مستخدمين، صلاحيات، تخزين ملفات، إشعارات، قواعد بيانات، وتكاملات API حسب حاجة المشروع.",
+    title: "Backend + Database Systems",
+    text: "Secure databases, login systems, user roles, permissions, storage, notifications, API integrations, and real business logic.",
     tags: ["Database", "Auth", "Storage", "Backend"],
   },
   {
-    title: "أتمتة أعمال",
-    text: "أنظمة داخلية تستبدل إكسل وواتساب والورق بنظام واضح لإدارة الموافقات، الطلبات، التقارير، وسير العمل.",
+    title: "Business Automation",
+    text: "Custom tools that replace spreadsheets, manual approvals, WhatsApp chaos, and disconnected paperwork with one organized system.",
     tags: ["Automation", "Workflow", "Internal Tools", "Control"],
   },
 ];
 
 const industries = [
-  "العيادات والمراكز الطبية",
-  "المطاعم والضيافة",
-  "المتاجر والتجارة الإلكترونية",
-  "التوصيل والخدمات اللوجستية",
-  "العقارات وخدمات الممتلكات",
-  "تأجير السيارات وقطاع السيارات",
-  "شركات الخدمات",
-  "الأنظمة الداخلية للشركات",
+  "Clinics and dental centers",
+  "Restaurants and hospitality",
+  "Retail and ecommerce",
+  "Delivery and logistics",
+  "Real estate and property services",
+  "Car rental and automotive",
+  "Service companies",
+  "Internal company operations",
 ];
 
 const projects = [
   {
     name: "Darik Marketplace",
-    type: "منصة تجارة وتوصيل",
-    text: "نظام Marketplace كامل فيه تطبيق عملاء، تطبيق تجار، تطبيق سائقين، مخزون، طلبات، مرتجعات، دعم، ولوحة تحكم.",
+    type: "Commerce + delivery platform",
+    text: "A complete marketplace ecosystem with customer shopping, retailer inventory, driver delivery, returns, support, admin operations, and finance controls.",
     href: "/dariktech/work/darik-marketplace",
   },
   {
     name: "PartBid",
-    type: "منصة عروض لقطع السيارات",
-    text: "منصة منظمة يرسل فيها العميل طلباً واحداً، ثم يستقبل عروضاً من الموردين مع السعر، الصور، التوصيل، والتفاصيل.",
+    type: "Quote-request marketplace",
+    text: "A structured request-and-quote platform where buyers post one request and suppliers respond with organized offers, photos, warranty, and delivery terms.",
     href: "/dariktech/work/partbid",
   },
   {
     name: "Business Operations Tools",
-    type: "أنظمة داخلية للشركات",
-    text: "لوحات تحكم وأدوات سير عمل للموافقات، التقارير، متابعة الطلبات، الدعم، وإدارة العمليات اليومية.",
+    type: "Internal company systems",
+    text: "Custom dashboards and workflow tools for approvals, reporting, discrepancy tracking, quote requests, support, and daily operational control.",
     href: "/dariktech#work",
   },
 ];
 
 const process = [
   {
-    title: "نحدد نموذج العمل",
-    text: "نفهم من سيستخدم التطبيق، ما هي الأدوار، كيف تتحرك الطلبات أو الأموال، وما الذي تحتاج الإدارة أن تتحكم به.",
+    title: "Define the business model",
+    text: "We clarify who uses the app, what each role needs, how the company makes money, and what the system must control.",
   },
   {
-    title: "نخطط بنية النظام",
-    text: "نرتب الشاشات، قاعدة البيانات، الصلاحيات، لوحة التحكم، التقارير، الإشعارات، ونطاق نسخة الإطلاق.",
+    title: "Plan the product structure",
+    text: "We map screens, user journeys, database tables, admin actions, notifications, reports, and launch scope before development.",
   },
   {
-    title: "نبني المنتج المتصل",
-    text: "التطبيق، الموقع، لوحة التحكم، Backend، قاعدة البيانات، التخزين، والصلاحيات يتم بناؤها كنظام واحد.",
+    title: "Build the connected system",
+    text: "Mobile app, web portal, admin dashboard, backend, database, storage, and permissions are built as one product.",
   },
   {
-    title: "نجهز للإطلاق",
-    text: "نختبر سيناريوهات حقيقية، نرتب التفاصيل، ونجهز النظام ليكون عملياً للشركة والعملاء بعد الإطلاق.",
+    title: "Prepare for launch",
+    text: "We test real workflows, clean up edge cases, prepare the admin side, and make the system practical for daily use.",
   },
 ];
 
 const faqs = [
   {
-    q: "هل تقومون بتطوير تطبيقات للشركات في دبي؟",
-    a: "نعم. Darik Technologies تبني تطبيقات جوال، تطبيقات ويب، لوحات تحكم، أسواق رقمية، وأنظمة Backend للشركات التي تستهدف دبي والإمارات.",
+    q: "Do you build mobile apps for Dubai businesses?",
+    a: "Yes. Darik Technologies builds custom mobile apps, web apps, admin dashboards, marketplaces, and backend systems for businesses targeting Dubai and the wider UAE market.",
   },
   {
-    q: "هل يمكن بناء نظام كامل وليس تطبيق جوال فقط؟",
-    a: "نعم. كثير من المشاريع تحتاج تطبيق جوال، بوابة ويب، لوحة تحكم، قاعدة بيانات، صلاحيات، إشعارات، تخزين، تقارير، ومنطق تشغيل. لذلك نركز على بناء نظام كامل.",
+    q: "Can you build a full app system, not just the mobile app?",
+    a: "Yes. Many business apps need a mobile app, web portal, admin dashboard, database, user roles, notifications, storage, reports, and backend logic. We focus on the full system.",
   },
   {
-    q: "هل يجب أن تكون الشركة موجودة فعلياً في دبي؟",
-    a: "لا. يمكن تخطيط وبناء النظام عن بعد للشركات التي تستهدف دبي أو الإمارات. المهم هو فهم السوق، المستخدمين، وسير العمل المطلوب.",
+    q: "Do you need to be physically in Dubai to build the app?",
+    a: "No. Most planning, development, testing, and delivery can be handled remotely. If the project requires local launch planning, the workflow can still be structured around the Dubai market.",
   },
   {
-    q: "هل تبنون تطبيقات Marketplace في دبي؟",
-    a: "نعم. يمكن بناء منصات Marketplace، منصات عروض أسعار، أنظمة حجز، بوابات موردين، أنظمة توصيل، ولوحات تحكم إدارية.",
+    q: "Can you build marketplace apps for Dubai?",
+    a: "Yes. We can build marketplaces, quote platforms, booking systems, delivery systems, vendor portals, and admin dashboards for Dubai-focused businesses.",
   },
   {
-    q: "كم تكلفة تطوير تطبيق في دبي؟",
-    a: "التكلفة تعتمد على نطاق المشروع. تطبيق بسيط يختلف عن نظام كامل فيه قاعدة بيانات، مستخدمين متعددين، لوحة تحكم، إشعارات، تقارير، وتكاملات دفع أو API. أفضل خطوة هي تحديد نطاق العمل ثم إصدار عرض سعر واضح.",
+    q: "How much does app development in Dubai cost?",
+    a: "Cost depends on the scope. A basic app is different from a full platform with backend logic, multiple user roles, admin controls, notifications, reports, and payment or API integrations. The best first step is a scope-based quote.",
   },
 ];
 
@@ -174,18 +167,19 @@ const jsonLd = {
         },
       ],
       knowsAbout: [
-        "تطوير تطبيقات جوال",
-        "تطوير تطبيقات ويب",
-        "لوحات تحكم",
-        "أسواق رقمية",
-        "أنظمة أعمال",
-        "قواعد بيانات",
+        "mobile app development",
+        "web app development",
+        "admin dashboards",
+        "marketplace platforms",
+        "business automation",
+        "backend systems",
+        "database design",
       ],
     },
     {
       "@type": "Service",
       "@id": `${pageUrl}#service`,
-      name: "تطوير تطبيقات في دبي",
+      name: "App Development in Dubai",
       provider: {
         "@id": `${siteUrl}/#organization`,
       },
@@ -218,51 +212,50 @@ const jsonLd = {
   ],
 };
 
-export default function ArabicAppDeveloperDubaiPage() {
+export default function AppDeveloperDubaiPage() {
   return (
-    <main className="seo-page" dir="rtl" lang="ar-AE">
+    <main className="seo-page">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
 
       <header className="nav">
-        <Link className="brand" href="/dariktech" aria-label="العودة إلى Darik Technologies">
+        <Link className="brand" href="/dariktech" aria-label="Darik Technologies home">
           <span className="logo-wrap">
-            <img src="/dariktech/logo.png" alt="شعار Darik Technologies" />
+            <img src="/dariktech/logo.png" alt="Darik Technologies logo" />
           </span>
           <span>
             <strong>Darik Technologies</strong>
-            <small>أنظمة تطبيقات للشركات</small>
+            <small>Business apps built properly</small>
           </span>
         </Link>
 
-        <nav className="nav-links" aria-label="أقسام الصفحة">
-          <a href="#services">الخدمات</a>
-          <a href="#industries">القطاعات</a>
-          <a href="#work">الأعمال</a>
-          <a href="#process">الطريقة</a>
-          <a href="#faq">الأسئلة</a>
-          <Link href="/dariktech/app-developer-dubai">English</Link>
+        <nav className="nav-links" aria-label="Page sections">
+          <a href="#services">Services</a>
+          <a href="#industries">Industries</a>
+          <a href="#work">Work</a>
+          <a href="#process">Process</a>
+          <a href="#faq">FAQ</a>
           <a
             className="quote-link"
             href="mailto:jjasaleh14@aol.com?subject=App%20Development%20Quote%20in%20Dubai"
           >
-            عرض مجاني
+            Free quote
           </a>
         </nav>
       </header>
 
       <section className="hero">
         <div className="hero-copy">
-          <p className="eyebrow">شركة تطوير تطبيقات في دبي</p>
+          <p className="eyebrow">App developer in Dubai</p>
           <h1>
-            أنظمة تطبيقات كاملة للشركات التي تحتاج أكثر من مجرد تصميم شاشات.
+            Complete app systems for Dubai businesses that need more than screens.
           </h1>
           <p className="hero-text">
-            Darik Technologies تبني تطبيقات جوال، تطبيقات ويب، لوحات تحكم،
-            أسواق رقمية، قواعد بيانات، أنظمة حجز، منصات عروض، وأدوات تشغيل
-            للشركات التي تستهدف دبي والإمارات.
+            Darik Technologies builds mobile apps, web apps, admin dashboards,
+            marketplaces, backend databases, booking systems, quote platforms,
+            and workflow tools for businesses targeting Dubai and the UAE market.
           </p>
 
           <div className="hero-actions">
@@ -270,46 +263,47 @@ export default function ArabicAppDeveloperDubaiPage() {
               className="primary"
               href="mailto:jjasaleh14@aol.com?subject=App%20Development%20Quote%20in%20Dubai"
             >
-              اطلب عرض سعر لتطبيقك في دبي
+              Start your Dubai app quote
             </a>
             <a className="secondary" href="#work">
-              شاهد أمثلة الأعمال
+              View examples
             </a>
           </div>
 
-          <div className="hero-points" aria-label="خدمات تطوير التطبيقات في دبي">
-            <span>تطبيقات جوال</span>
-            <span>بوابات ويب</span>
-            <span>لوحات تحكم</span>
-            <span>أسواق رقمية</span>
-            <span>Backend</span>
+          <div className="hero-points" aria-label="Dubai app development services">
+            <span>Mobile apps</span>
+            <span>Web portals</span>
+            <span>Admin dashboards</span>
+            <span>Marketplaces</span>
+            <span>Backend systems</span>
           </div>
         </div>
 
-        <div className="hero-visual" aria-label="نظام تطبيق أعمال في دبي">
+        <div className="hero-visual" aria-label="Dubai business app system preview">
           <div className="system-card main-card">
-            <span>نظام تطبيق لسوق دبي</span>
-            <strong>تطبيق + لوحة تحكم + قاعدة بيانات</strong>
+            <span>Dubai business app build</span>
+            <strong>App + Dashboard + Backend</strong>
             <p>
-              منتج واحد متصل للعملاء، الموظفين، الموردين، الإدارة، والعمليات.
+              A complete product system for customers, staff, vendors, admins,
+              and operations.
             </p>
           </div>
           <div className="mini-grid">
             <div>
-              <small>العميل</small>
-              <strong>تجربة جوال ممتازة</strong>
+              <small>Customer</small>
+              <strong>Mobile experience</strong>
             </div>
             <div>
-              <small>الشركة</small>
-              <strong>لوحة تحكم واضحة</strong>
+              <small>Company</small>
+              <strong>Admin dashboard</strong>
             </div>
             <div>
-              <small>النظام</small>
-              <strong>صلاحيات وقاعدة بيانات</strong>
+              <small>Backend</small>
+              <strong>Roles + database</strong>
             </div>
             <div>
-              <small>النمو</small>
-              <strong>مبني للتوسع</strong>
+              <small>Growth</small>
+              <strong>Built to scale</strong>
             </div>
           </div>
         </div>
@@ -317,26 +311,27 @@ export default function ArabicAppDeveloperDubaiPage() {
 
       <section className="section intro-section">
         <div>
-          <p className="eyebrow">تطوير تطبيقات في دبي</p>
+          <p className="eyebrow">Dubai app development</p>
           <h2>
-            سوق دبي يحتاج تطبيقات مصقولة، واضحة، وقادرة على تشغيل العمليات.
+            A premium market needs apps that feel like real operating systems.
           </h2>
         </div>
         <p>
-          الشركات التي تستهدف دبي تحتاج سرعة، مظهر احترافي، إدارة واضحة، ونظام
-          قابل للتوسع. التطبيق الجدي ليس واجهة فقط، بل تجربة عميل، لوحة إدارة،
-          قاعدة بيانات، صلاحيات، إشعارات، تقارير، ومنطق تشغيل يطابق طريقة
-          عمل الشركة.
+          Dubai businesses often need speed, polish, clear operations, and room
+          to scale. A serious app should not be just a front-end design. It
+          should include the customer experience, internal controls, backend
+          structure, data flow, admin actions, and the business logic that keeps
+          everything working.
         </p>
       </section>
 
       <section className="section" id="services">
         <div className="section-head">
-          <p className="eyebrow">الخدمات</p>
-          <h2>خدمات تطوير تطبيقات للشركات التي تستهدف دبي والإمارات.</h2>
+          <p className="eyebrow">Services</p>
+          <h2>App development services for Dubai and UAE-focused businesses.</h2>
           <p>
-            نبني التطبيق، بوابة الويب، لوحة التحكم، قاعدة البيانات، وسير العمل
-            كنظام واحد متصل.
+            Build the app, portal, admin dashboard, backend, and operational
+            workflow as one connected system.
           </p>
         </div>
 
@@ -357,12 +352,12 @@ export default function ArabicAppDeveloperDubaiPage() {
 
       <section className="section industries-section" id="industries">
         <div className="industry-copy">
-          <p className="eyebrow">قطاعات مناسبة</p>
-          <h2>أفكار تطبيقات في دبي تحتاج بنية تشغيل واضحة.</h2>
+          <p className="eyebrow">Built for real businesses</p>
+          <h2>Dubai app ideas that need operational structure.</h2>
           <p>
-            نفس طريقة البناء يمكن استخدامها للخدمات، المطاعم، العيادات،
-            الأسواق الرقمية، التوصيل، أنظمة الحجز، الأدوات الداخلية، ومنتجات
-            MVP الجاهزة للعرض على المستثمرين.
+            The same development approach can be used for service businesses,
+            restaurants, clinics, marketplaces, logistics, booking platforms,
+            internal company tools, and investor-ready MVPs.
           </p>
         </div>
 
@@ -375,11 +370,12 @@ export default function ArabicAppDeveloperDubaiPage() {
 
       <section className="section dark-section" id="work">
         <div className="section-head">
-          <p className="eyebrow">أمثلة أعمال</p>
-          <h2>أمثلة على أنظمة تستطيع Darik Technologies بناءها.</h2>
+          <p className="eyebrow">Selected work</p>
+          <h2>Examples of systems Darik Technologies can build.</h2>
           <p>
-            هذه المشاريع توضح الفرق بين تطبيق بسيط ونظام أعمال كامل فيه أدوار،
-            سير عمل، Backend، بيانات، ولوحة تحكم.
+            These projects show the difference between a basic app and a full
+            business platform with roles, workflows, backend data, and admin
+            control.
           </p>
         </div>
 
@@ -389,7 +385,7 @@ export default function ArabicAppDeveloperDubaiPage() {
               <span>{project.type}</span>
               <h3>{project.name}</h3>
               <p>{project.text}</p>
-              <strong>شاهد المشروع ←</strong>
+              <strong>View project →</strong>
             </Link>
           ))}
         </div>
@@ -397,11 +393,11 @@ export default function ArabicAppDeveloperDubaiPage() {
 
       <section className="section process-section" id="process">
         <div className="section-head">
-          <p className="eyebrow">طريقة العمل</p>
-          <h2>كيف تتحول فكرة تطبيق لدبي إلى نظام جاهز للإطلاق.</h2>
+          <p className="eyebrow">Process</p>
+          <h2>How a Dubai app idea becomes a real launch-ready system.</h2>
           <p>
-            الهدف هو بناء المنتج الصحيح من البداية، وليس مجموعة ميزات يصعب
-            تشغيلها لاحقاً.
+            The goal is to build the right product from the start, not a pile of
+            features that becomes hard to operate later.
           </p>
         </div>
 
@@ -418,28 +414,30 @@ export default function ArabicAppDeveloperDubaiPage() {
 
       <section className="section location-section">
         <div className="location-card">
-          <p className="eyebrow">تركيز SEO لدبي</p>
-          <h2>صفحة مخصصة للباحثين عن تطوير تطبيقات في دبي.</h2>
+          <p className="eyebrow">Dubai SEO focus</p>
+          <h2>Built for businesses searching for app development in Dubai.</h2>
           <p>
-            هذه الصفحة تستهدف عبارات مثل شركة تطوير تطبيقات في دبي، مبرمج
-            تطبيقات في دبي، تطوير تطبيقات جوال في دبي، تطبيقات أعمال، أسواق
-            رقمية، لوحات تحكم، وأنظمة Backend للشركات في الإمارات.
+            This page targets app developer Dubai, mobile app development Dubai,
+            app development company Dubai, web app developer Dubai, admin
+            dashboard developer Dubai, marketplace app developer Dubai, and
+            custom software development for UAE-focused businesses.
           </p>
         </div>
         <div className="keyword-card">
-          <strong>عبارات البحث المستهدفة</strong>
-          <span>تطوير تطبيقات في دبي</span>
-          <span>شركة تطوير تطبيقات في دبي</span>
-          <span>مبرمج تطبيقات في دبي</span>
-          <span>تطبيقات أعمال في دبي</span>
-          <span>تطوير تطبيقات في الإمارات</span>
+          <strong>Target searches</strong>
+          <span>app developer Dubai</span>
+          <span>mobile app developer Dubai</span>
+          <span>app development company Dubai</span>
+          <span>marketplace app developer Dubai</span>
+          <span>admin dashboard developer Dubai</span>
+          <span>UAE app developer</span>
         </div>
       </section>
 
       <section className="section faq-section" id="faq">
         <div className="section-head">
-          <p className="eyebrow">أسئلة شائعة</p>
-          <h2>أسئلة قبل بناء تطبيق لسوق دبي.</h2>
+          <p className="eyebrow">FAQ</p>
+          <h2>Questions before building an app for Dubai.</h2>
         </div>
 
         <div className="faq-list">
@@ -453,22 +451,22 @@ export default function ArabicAppDeveloperDubaiPage() {
       </section>
 
       <section className="final-cta">
-        <p className="eyebrow">عرض سعر مجاني</p>
-        <h2>تحتاج شركة تطوير تطبيقات في دبي؟</h2>
+        <p className="eyebrow">Free quote</p>
+        <h2>Need an app developer for Dubai?</h2>
         <p>
-          أرسل فكرة التطبيق، هدف المشروع، من سيستخدمه، وما الذي يجب أن يفعله
-          النظام. Darik Technologies يمكنها تحويل الفكرة إلى نطاق واضح ونسخة
-          إطلاق عملية.
+          Send the app idea, the business goal, the users, and what the platform
+          needs to do. Darik Technologies can help shape the scope and build the
+          launch version.
         </p>
         <div className="hero-actions">
           <a
             className="primary"
             href="mailto:jjasaleh14@aol.com?subject=App%20Development%20Quote%20in%20Dubai"
           >
-            اطلب عرض سعر لتطبيقك في دبي
+            Request a Dubai app quote
           </a>
           <Link className="secondary" href="/dariktech">
-            العودة إلى Darik Technologies
+            Back to Darik Technologies
           </Link>
         </div>
       </section>
@@ -487,11 +485,11 @@ export default function ArabicAppDeveloperDubaiPage() {
           min-height: 100vh;
           color: #f8fbff;
           background:
-            radial-gradient(circle at 86% 8%, rgba(245, 158, 11, 0.24), transparent 26rem),
-            radial-gradient(circle at 12% 12%, rgba(103, 232, 249, 0.16), transparent 30rem),
-            radial-gradient(circle at 40% 100%, rgba(37, 99, 235, 0.22), transparent 34rem),
+            radial-gradient(circle at 12% 8%, rgba(245, 158, 11, 0.22), transparent 26rem),
+            radial-gradient(circle at 86% 12%, rgba(103, 232, 249, 0.16), transparent 30rem),
+            radial-gradient(circle at 60% 100%, rgba(37, 99, 235, 0.22), transparent 34rem),
             linear-gradient(180deg, #050b14 0%, #081827 48%, #050b14 100%);
-          font-family: Inter, "Segoe UI", Tahoma, Arial, sans-serif;
+          font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
           overflow: hidden;
         }
 
@@ -612,7 +610,7 @@ export default function ArabicAppDeveloperDubaiPage() {
           color: #fbbf24;
           font-size: 12px;
           font-weight: 950;
-          letter-spacing: 0.12em;
+          letter-spacing: 0.16em;
           text-transform: uppercase;
           margin: 0 0 12px;
         }
@@ -625,17 +623,17 @@ export default function ArabicAppDeveloperDubaiPage() {
         }
 
         h1 {
-          font-size: clamp(46px, 7vw, 82px);
-          line-height: 1.02;
-          letter-spacing: -0.055em;
+          font-size: clamp(48px, 7vw, 86px);
+          line-height: 0.92;
+          letter-spacing: -0.075em;
           margin-bottom: 22px;
         }
 
         .hero-text {
           color: rgba(248, 251, 255, 0.72);
           font-size: 18px;
-          line-height: 1.9;
-          max-width: 690px;
+          line-height: 1.72;
+          max-width: 680px;
         }
 
         .hero-actions {
@@ -664,7 +662,7 @@ export default function ArabicAppDeveloperDubaiPage() {
           position: relative;
           border: 1px solid rgba(255, 255, 255, 0.12);
           background:
-            radial-gradient(circle at top left, rgba(251, 191, 36, 0.18), transparent 18rem),
+            radial-gradient(circle at top right, rgba(251, 191, 36, 0.18), transparent 18rem),
             rgba(255, 255, 255, 0.07);
           border-radius: 42px;
           padding: 24px;
@@ -688,21 +686,21 @@ export default function ArabicAppDeveloperDubaiPage() {
           color: #d97706;
           font-size: 12px;
           font-weight: 950;
-          letter-spacing: 0.08em;
+          letter-spacing: 0.12em;
           text-transform: uppercase;
         }
 
         .main-card strong {
           display: block;
-          font-size: 40px;
-          line-height: 1.05;
-          letter-spacing: -0.05em;
+          font-size: 42px;
+          line-height: 0.95;
+          letter-spacing: -0.06em;
           margin: 20px 0 12px;
         }
 
         .main-card p {
           color: #475467;
-          line-height: 1.75;
+          line-height: 1.55;
           margin-bottom: 0;
         }
 
@@ -765,8 +763,8 @@ export default function ArabicAppDeveloperDubaiPage() {
         .location-card h2,
         .final-cta h2 {
           font-size: clamp(34px, 5vw, 58px);
-          line-height: 1.08;
-          letter-spacing: -0.055em;
+          line-height: 0.98;
+          letter-spacing: -0.065em;
           margin-bottom: 14px;
         }
 
@@ -776,7 +774,7 @@ export default function ArabicAppDeveloperDubaiPage() {
         .location-card p,
         .final-cta p {
           color: rgba(248, 251, 255, 0.68);
-          line-height: 1.9;
+          line-height: 1.75;
           font-size: 16px;
         }
 
@@ -805,7 +803,7 @@ export default function ArabicAppDeveloperDubaiPage() {
         .work-card h3,
         .process-list h3 {
           font-size: 25px;
-          letter-spacing: -0.035em;
+          letter-spacing: -0.045em;
           margin-bottom: 12px;
         }
 
@@ -814,7 +812,7 @@ export default function ArabicAppDeveloperDubaiPage() {
         .process-list p,
         details p {
           color: rgba(248, 251, 255, 0.66);
-          line-height: 1.85;
+          line-height: 1.65;
         }
 
         .tag-row {
@@ -865,7 +863,7 @@ export default function ArabicAppDeveloperDubaiPage() {
           color: #fbbf24;
           font-size: 12px;
           font-weight: 950;
-          letter-spacing: 0.08em;
+          letter-spacing: 0.11em;
           text-transform: uppercase;
         }
 
@@ -894,6 +892,10 @@ export default function ArabicAppDeveloperDubaiPage() {
           color: #06101d;
           font-weight: 950;
           margin-bottom: 16px;
+        }
+
+        .process-list p {
+          margin-bottom: 0;
         }
 
         .location-section {
@@ -929,7 +931,7 @@ export default function ArabicAppDeveloperDubaiPage() {
           cursor: pointer;
           font-size: 18px;
           font-weight: 950;
-          letter-spacing: -0.02em;
+          letter-spacing: -0.03em;
         }
 
         details p {
@@ -941,9 +943,9 @@ export default function ArabicAppDeveloperDubaiPage() {
           margin: 20px auto 80px;
           padding: clamp(28px, 5vw, 54px);
           background:
-            radial-gradient(circle at top left, rgba(251, 191, 36, 0.18), transparent 22rem),
+            radial-gradient(circle at top right, rgba(251, 191, 36, 0.18), transparent 22rem),
             rgba(255, 255, 255, 0.08);
-          text-align: right;
+          text-align: left;
         }
 
         @media (max-width: 940px) {

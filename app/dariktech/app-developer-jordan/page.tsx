@@ -2,138 +2,121 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 const siteUrl = "https://getdarik.com";
-const pagePath = "/ar/dariktech/app-developer-jordan";
+const pagePath = "/dariktech/app-developer-jordan";
 const pageUrl = `${siteUrl}${pagePath}`;
-const englishUrl = `${siteUrl}/dariktech/app-developer-jordan`;
 
 export const metadata: Metadata = {
-  title: "شركة تطوير تطبيقات في الأردن | تطبيقات أعمال ولوحات تحكم",
+  title:
+    "App Developer in Jordan | Business Apps, Marketplaces & Admin Dashboards",
   description:
-    "Darik Technologies تبني تطبيقات جوال، تطبيقات ويب، لوحات تحكم، أسواق رقمية، أنظمة حجز، قواعد بيانات، وأنظمة أعمال كاملة للشركات في الأردن.",
+    "Darik Technologies builds complete business app systems in Jordan: mobile apps, web apps, admin dashboards, marketplaces, booking systems, quote platforms, and backend databases.",
   alternates: {
     canonical: pageUrl,
-    languages: {
-      "ar-JO": pageUrl,
-      "en-US": englishUrl,
-    },
   },
   openGraph: {
-    title: "شركة تطوير تطبيقات في الأردن | تطبيقات أعمال ولوحات تحكم",
+    title:
+      "App Developer in Jordan | Business Apps, Marketplaces & Admin Dashboards",
     description:
-      "تطوير تطبيقات جوال وتطبيقات ويب ولوحات تحكم وأسواق رقمية وأنظمة خلفية للشركات في الأردن وعمّان.",
+      "Mobile apps, web apps, dashboards, marketplaces, and backend systems built for real business operations in Jordan.",
     url: pageUrl,
     siteName: "Darik Technologies",
     type: "website",
-    locale: "ar_JO",
   },
   keywords: [
-    "تطوير تطبيقات في الأردن",
-    "شركة تطوير تطبيقات في الأردن",
-    "مبرمج تطبيقات في الأردن",
-    "مطور تطبيقات في الأردن",
-    "تطوير تطبيقات جوال في الأردن",
-    "شركة برمجة تطبيقات في الأردن",
-    "تطبيقات أعمال في الأردن",
-    "تطوير تطبيقات في عمان",
-    "لوحات تحكم للشركات",
-    "تطبيقات أسواق رقمية",
-    "تطوير مواقع وتطبيقات في الأردن",
+    "app developer Jordan",
+    "mobile app developer Jordan",
+    "app development company Jordan",
+    "app developer Amman",
+    "business app developer Jordan",
+    "marketplace app developer Jordan",
+    "admin dashboard developer Jordan",
+    "web app developer Jordan",
+    "custom software developer Jordan",
+    "software company Jordan",
   ],
 };
 
 const services = [
   {
-    title: "تطبيقات جوال",
-    text: "تطبيقات iOS و Android للعملاء، الموظفين، السائقين، الموردين، الحجوزات، الطلبات، وإدارة العمليات اليومية.",
-    tags: ["iOS", "Android", "تطبيقات أعمال", "تجربة مستخدم"],
+    title: "Mobile Apps",
+    text: "iOS and Android apps for customers, staff, drivers, suppliers, clinics, restaurants, retailers, and internal teams.",
+    tags: ["iOS", "Android", "Expo", "React Native"],
   },
   {
-    title: "تطبيقات ويب وبوابات",
-    text: "بوابات ويب سهلة الاستخدام للعملاء، الموظفين، الإدارة، الموردين، الفروع، والفرق الداخلية.",
-    tags: ["Web App", "بوابة عملاء", "بوابة موظفين", "Next.js"],
+    title: "Web Apps",
+    text: "Fast browser-based portals for customers, employees, vendors, managers, and public users who need desktop access.",
+    tags: ["Next.js", "Portals", "Dashboards", "Forms"],
   },
   {
-    title: "لوحات تحكم إدارية",
-    text: "لوحات خاصة لإدارة الطلبات، المستخدمين، العروض، الموافقات، التقارير، الدعم، والصلاحيات.",
-    tags: ["Admin", "تقارير", "موافقات", "عمليات"],
+    title: "Admin Dashboards",
+    text: "Private control panels for orders, approvals, users, payouts, reports, support, quote requests, and daily operations.",
+    tags: ["Admin", "Reports", "Approvals", "Operations"],
   },
   {
-    title: "أسواق رقمية ومنصات عروض",
-    text: "منصات تربط العملاء بالموردين أو البائعين، مع طلبات منظمة، عروض أسعار، رسائل، وإدارة كاملة من لوحة التحكم.",
-    tags: ["Marketplace", "موردين", "عروض أسعار", "طلبات"],
+    title: "Marketplaces",
+    text: "Two-sided and multi-vendor platforms where customers request, suppliers respond, admins control quality, and data stays organized.",
+    tags: ["Vendors", "Quotes", "Orders", "Revenue"],
   },
   {
-    title: "Backend وقواعد بيانات",
-    text: "تسجيل دخول، صلاحيات، أدوار مستخدمين، تخزين ملفات، إشعارات، قواعد بيانات، ومنطق عمل مبني حسب طريقة شغلك.",
-    tags: ["Database", "Auth", "Storage", "Backend"],
+    title: "Backend + Database",
+    text: "Authentication, roles, permissions, storage, real-time data, notifications, and business logic built around your workflow.",
+    tags: ["Supabase", "Database", "Storage", "Auth"],
   },
   {
-    title: "أنظمة داخلية للشركات",
-    text: "أدوات داخلية تقلل العمل اليدوي، تنظم الموافقات، تكشف الأخطاء، وتحول شغل الشركة من واتساب وإكسل إلى نظام واضح.",
-    tags: ["Automation", "Workflow", "Internal Tools", "Control"],
+    title: "Business Automation",
+    text: "Internal tools that reduce manual work, track discrepancies, organize approvals, and make company operations easier to run.",
+    tags: ["Workflow", "Automation", "Internal Tools", "Control"],
   },
 ];
 
 const projects = [
   {
     name: "Darik Marketplace",
-    type: "منصة تجارة وتوصيل",
-    text: "نظام Marketplace كامل فيه تطبيق عملاء، تطبيق تجار، تطبيق سائقين، إدارة مخزون، طلبات، مرتجعات، دعم، ولوحة تحكم.",
+    type: "Retail marketplace platform",
+    text: "A multi-app marketplace system with customer shopping, retailer inventory, driver delivery, returns, support, admin operations, and finance controls.",
     href: "/dariktech/work/darik-marketplace",
   },
   {
     name: "PartBid",
-    type: "منصة طلب عروض لقطع السيارات",
-    text: "منصة يرسل فيها العميل طلب واحد منظم، ويستقبل عروض من الموردين مع السعر، الصور، حالة القطعة، والتوصيل.",
+    type: "Auto parts quote platform",
+    text: "A quote-request marketplace where buyers submit one structured request and suppliers send organized offers with price, delivery, warranty, and photos.",
     href: "/dariktech/work/partbid",
   },
   {
     name: "Tawleh Manager",
-    type: "نظام طلبات للمطاعم",
-    text: "نظام QR للطلبات داخل المطعم، يساعد الإدارة والموظفين على متابعة الطاولات والطلبات بطريقة أوضح.",
+    type: "Restaurant ordering system",
+    text: "A QR-based dine-in ordering system built around tables, orders, waiter visibility, and branch operations.",
     href: "/dariktech#work",
   },
 ];
 
 const process = [
-  {
-    title: "نفهم طريقة الشغل",
-    text: "نحدد من سيستخدم النظام، ما هي أدوارهم، أين يدخل المال، وما الذي تحتاج الإدارة أن تتحكم به.",
-  },
-  {
-    title: "نخطط النظام",
-    text: "نرتب الشاشات، قاعدة البيانات، الصلاحيات، لوحة التحكم، الإشعارات، والتقارير قبل بدء البرمجة.",
-  },
-  {
-    title: "نبني المنتج الكامل",
-    text: "التطبيق، الموقع، لوحة التحكم، قاعدة البيانات، التخزين، والصلاحيات يتم بناؤها كنظام واحد متصل.",
-  },
-  {
-    title: "نجهز للإطلاق",
-    text: "نختبر سيناريوهات حقيقية، نصلح التفاصيل، ونجهز النظام ليكون عملياً للاستخدام اليومي.",
-  },
+  "Understand the business workflow, users, roles, and money flow.",
+  "Plan the screens, database, admin controls, and launch scope.",
+  "Build the mobile app, web app, backend, and dashboard as one connected system.",
+  "Test real scenarios before launch, then improve based on how people actually use it.",
 ];
 
 const faqs = [
   {
-    q: "هل تقومون بتطوير تطبيقات جوال في الأردن؟",
-    a: "نعم. Darik Technologies تبني تطبيقات جوال للشركات في الأردن، مثل تطبيقات العملاء، الموظفين، السائقين، الموردين، الحجوزات، الطلبات، والأسواق الرقمية.",
+    q: "Do you build mobile apps in Jordan?",
+    a: "Yes. Darik Technologies builds mobile apps for Jordan-based businesses, including customer apps, staff apps, supplier apps, driver apps, booking apps, ordering systems, and internal tools.",
   },
   {
-    q: "هل يمكن بناء لوحة تحكم وقاعدة بيانات مع التطبيق؟",
-    a: "نعم. التطبيق الجدي يحتاج أكثر من واجهة جميلة. نستطيع بناء لوحة تحكم، قاعدة بيانات، صلاحيات، إشعارات، تقارير، وتخزين ملفات حسب حاجة المشروع.",
+    q: "Can you build the backend and admin dashboard too?",
+    a: "Yes. A serious business app usually needs more than screens. We can build the backend, database, user roles, permissions, storage, notifications, reports, and admin dashboard.",
   },
   {
-    q: "هل تبنون تطبيقات Marketplace أو منصات عروض أسعار؟",
-    a: "نعم. يمكن بناء منصات تربط العملاء بالبائعين أو الموردين، مع طلبات منظمة، عروض أسعار، دردشة، صور، صلاحيات، ولوحة تحكم للإدارة.",
+    q: "Do you build marketplace apps?",
+    a: "Yes. We build marketplace platforms where customers, vendors, suppliers, drivers, admins, or support teams each have their own workflows.",
   },
   {
-    q: "هل تخدمون الشركات خارج عمّان؟",
-    a: "نعم. يمكن تخطيط وبناء النظام عن بعد للشركات في عمّان وباقي محافظات الأردن، وكذلك للشركات التي تستهدف السوق الإقليمي.",
+    q: "Can you work with businesses outside Amman?",
+    a: "Yes. The system can be planned remotely, and the product can be built for businesses across Jordan and the wider region.",
   },
   {
-    q: "كم تكلفة تطوير تطبيق في الأردن؟",
-    a: "التكلفة تعتمد على حجم المشروع. تطبيق بسيط يختلف عن نظام كامل فيه تطبيق جوال، لوحة تحكم، قاعدة بيانات، إشعارات، صلاحيات، تقارير، وتكاملات. أفضل خطوة هي تحديد نطاق العمل ثم إعطاء عرض سعر واضح.",
+    q: "How much does an app cost in Jordan?",
+    a: "The price depends on the scope. A simple app is very different from a full system with mobile apps, dashboards, backend logic, database, notifications, and admin controls. The first step is a clear quote based on what the business needs.",
   },
 ];
 
@@ -158,18 +141,18 @@ const jsonLd = {
         },
       ],
       knowsAbout: [
-        "تطوير تطبيقات جوال",
-        "تطوير تطبيقات ويب",
-        "لوحات تحكم",
-        "أسواق رقمية",
-        "أنظمة أعمال",
-        "قواعد بيانات",
+        "mobile app development",
+        "web app development",
+        "admin dashboards",
+        "marketplace apps",
+        "business automation",
+        "backend systems",
       ],
     },
     {
       "@type": "Service",
       "@id": `${pageUrl}#service`,
-      name: "تطوير تطبيقات في الأردن",
+      name: "App Development in Jordan",
       provider: {
         "@id": `${siteUrl}/#organization`,
       },
@@ -183,7 +166,6 @@ const jsonLd = {
         "Admin dashboard development",
         "Marketplace app development",
         "Backend development",
-        "Business automation",
       ],
       url: pageUrl,
     },
@@ -202,95 +184,90 @@ const jsonLd = {
   ],
 };
 
-export default function ArabicAppDeveloperJordanPage() {
+export default function AppDeveloperJordanPage() {
   return (
-    <main className="seo-page" dir="rtl" lang="ar-JO">
+    <main className="seo-page">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
 
       <header className="nav">
-        <Link className="brand" href="/dariktech" aria-label="العودة إلى Darik Technologies">
+        <Link className="brand" href="/dariktech" aria-label="Darik Technologies home">
           <span className="logo-wrap">
-            <img src="/dariktech/logo.png" alt="شعار Darik Technologies" />
+            <img src="/dariktech/logo.png" alt="Darik Technologies logo" />
           </span>
           <span>
             <strong>Darik Technologies</strong>
-            <small>أنظمة تطبيقات للشركات</small>
+            <small>Business apps built properly</small>
           </span>
         </Link>
 
-        <nav className="nav-links" aria-label="أقسام الصفحة">
-          <a href="#services">الخدمات</a>
-          <a href="#work">الأعمال</a>
-          <a href="#process">الطريقة</a>
-          <a href="#faq">الأسئلة</a>
-          <Link href="/dariktech/app-developer-jordan">English</Link>
-          <a
-            className="quote-link"
-            href="mailto:jjasaleh14@aol.com?subject=App%20Development%20Quote%20in%20Jordan"
-          >
-            عرض مجاني
+        <nav className="nav-links" aria-label="Page sections">
+          <a href="#services">Services</a>
+          <a href="#work">Work</a>
+          <a href="#process">Process</a>
+          <a href="#faq">FAQ</a>
+          <a className="quote-link" href="mailto:jjasaleh14@aol.com?subject=App%20Development%20Quote%20in%20Jordan">
+            Free quote
           </a>
         </nav>
       </header>
 
       <section className="hero">
         <div className="hero-copy">
-          <p className="eyebrow">شركة تطوير تطبيقات في الأردن</p>
+          <p className="eyebrow">App developer in Jordan</p>
           <h1>
-            تطبيقات أعمال، أسواق رقمية، ولوحات تحكم مبنية لتشغيل الشركة فعلاً.
+            Business apps, marketplaces, and admin dashboards built for real
+            operations.
           </h1>
           <p className="hero-text">
-            Darik Technologies تبني أنظمة تطبيقات كاملة للشركات في الأردن:
-            تطبيقات جوال، تطبيقات ويب، قواعد بيانات، لوحات تحكم، منصات عروض،
-            أنظمة حجز، سير عمل داخلي، وأنظمة تشغيل يومية.
+            Darik Technologies builds complete app systems for businesses in
+            Jordan: mobile apps, web apps, backend databases, admin dashboards,
+            quote platforms, booking systems, delivery workflows, and internal
+            company tools.
           </p>
 
           <div className="hero-actions">
-            <a
-              className="primary"
-              href="mailto:jjasaleh14@aol.com?subject=App%20Development%20Quote%20in%20Jordan"
-            >
-              اطلب عرض سعر مجاني
+            <a className="primary" href="mailto:jjasaleh14@aol.com?subject=App%20Development%20Quote%20in%20Jordan">
+              Start your free quote
             </a>
             <a className="secondary" href="#work">
-              شاهد أمثلة الأعمال
+              View examples
             </a>
           </div>
 
-          <div className="hero-points" aria-label="خدمات تطوير التطبيقات في الأردن">
-            <span>تطبيقات جوال</span>
-            <span>تطبيقات ويب</span>
-            <span>لوحات تحكم</span>
-            <span>أسواق رقمية</span>
-            <span>قواعد بيانات</span>
+          <div className="hero-points" aria-label="App development services in Jordan">
+            <span>Mobile apps</span>
+            <span>Web apps</span>
+            <span>Admin dashboards</span>
+            <span>Marketplaces</span>
+            <span>Backend systems</span>
           </div>
         </div>
 
-        <div className="hero-visual" aria-label="نظام تطبيق أعمال">
+        <div className="hero-visual" aria-label="Business app system preview">
           <div className="system-card main-card">
-            <span>نظام تطبيق للشركات في الأردن</span>
-            <strong>تطبيق + لوحة تحكم + Backend</strong>
-            <p>منتج واحد متصل، وليس مجرد شاشات منفصلة.</p>
+            <span>Jordan business app system</span>
+            <strong>Mobile + Web + Admin</strong>
+            <p>One connected product, not scattered screens.</p>
           </div>
           <div className="mini-grid">
             <div>
-              <small>العميل</small>
-              <strong>تجربة جوال واضحة</strong>
+              <small>App</small>
+              <strong>Customer flow</strong>
             </div>
             <div>
-              <small>الإدارة</small>
-              <strong>تحكم كامل</strong>
+              <small>Dashboard</small>
+              <strong>Admin control</strong>
             </div>
             <div>
-              <small>النظام</small>
-              <strong>قاعدة بيانات وصلاحيات</strong>
+              <small>Backend</small>
+              <strong>Database logic</strong>
             </div>
             <div>
-              <small>الإطلاق</small>
-              <strong>جاهز للاستخدام اليومي</strong>
+              <small>Launch</small>
+              <strong>Real workflow</strong>
             </div>
           </div>
         </div>
@@ -298,26 +275,24 @@ export default function ArabicAppDeveloperJordanPage() {
 
       <section className="section intro-section">
         <div>
-          <p className="eyebrow">لماذا هذه الصفحة؟</p>
-          <h2>
-            البحث عن مبرمج تطبيقات في الأردن لا يجب أن يعني شخصاً يصمم شاشات فقط.
-          </h2>
+          <p className="eyebrow">Why this page exists</p>
+          <h2>Looking for an app developer in Jordan should not mean hiring someone who only makes screens.</h2>
         </div>
         <p>
-          التطبيق الجدي يحتاج طريقة تفكير كاملة: مستخدمين، صلاحيات، قاعدة
-          بيانات، لوحة تحكم، إشعارات، تقارير، تخزين، وسير عمل يناسب طريقة
-          تشغيل الشركة. الهدف هو بناء نظام يستخدم يومياً، وليس نموذجاً شكله
-          جميل لكنه غير عملي.
+          A serious business app needs user roles, database structure, backend
+          logic, admin controls, notifications, files, reports, and a workflow
+          that matches how the company actually operates. Darik Technologies
+          focuses on complete business app systems, not unfinished prototypes.
         </p>
       </section>
 
       <section className="section" id="services">
         <div className="section-head">
-          <p className="eyebrow">الخدمات</p>
-          <h2>خدمات تطوير تطبيقات للشركات في الأردن.</h2>
+          <p className="eyebrow">Services</p>
+          <h2>App development services for Jordan-based businesses.</h2>
           <p>
-            نبني التطبيق، الموقع، لوحة التحكم، قاعدة البيانات، والصلاحيات كنظام
-            واحد متصل يخدم طريقة شغل الشركة.
+            Build the customer-facing app, internal dashboard, backend database,
+            and operational logic as one connected system.
           </p>
         </div>
 
@@ -338,11 +313,11 @@ export default function ArabicAppDeveloperJordanPage() {
 
       <section className="section dark-section" id="work">
         <div className="section-head">
-          <p className="eyebrow">أمثلة أعمال</p>
-          <h2>أمثلة على أنظمة تطبيقات يمكن لـ Darik Technologies بناؤها.</h2>
+          <p className="eyebrow">Selected work</p>
+          <h2>Examples of business app systems Darik Technologies can build.</h2>
           <p>
-            هذه الأمثلة توضح الفرق بين تطبيق بسيط ونظام أعمال كامل فيه أدوار،
-            قواعد بيانات، عمليات، ولوحة تحكم.
+            Use these case studies to understand the level of product thinking,
+            backend logic, and admin control that can go into your project.
           </p>
         </div>
 
@@ -352,7 +327,7 @@ export default function ArabicAppDeveloperJordanPage() {
               <span>{project.type}</span>
               <h3>{project.name}</h3>
               <p>{project.text}</p>
-              <strong>شاهد المشروع ←</strong>
+              <strong>View project →</strong>
             </Link>
           ))}
         </div>
@@ -360,20 +335,19 @@ export default function ArabicAppDeveloperJordanPage() {
 
       <section className="section process-section" id="process">
         <div className="section-head">
-          <p className="eyebrow">طريقة العمل</p>
-          <h2>من فكرة تطبيق إلى نظام جاهز للاستخدام.</h2>
+          <p className="eyebrow">Process</p>
+          <h2>How we turn an app idea into a real product.</h2>
           <p>
-            الهدف هو تقليل الهدر، ترتيب الفكرة، وبناء شيء عملي يخدم الشركة
-            بعد الإطلاق.
+            The goal is to avoid wasted money, confusing features, and apps that
+            look nice but cannot run daily business operations.
           </p>
         </div>
 
         <div className="process-list">
           {process.map((item, index) => (
-            <article key={item.title}>
+            <article key={item}>
               <span>{String(index + 1).padStart(2, "0")}</span>
-              <h3>{item.title}</h3>
-              <p>{item.text}</p>
+              <p>{item}</p>
             </article>
           ))}
         </div>
@@ -381,28 +355,29 @@ export default function ArabicAppDeveloperJordanPage() {
 
       <section className="section location-section">
         <div className="location-card">
-          <p className="eyebrow">تركيز SEO للأردن وعمّان</p>
-          <h2>صفحة مخصصة للباحثين عن تطوير تطبيقات في الأردن.</h2>
+          <p className="eyebrow">Jordan + Amman SEO focus</p>
+          <h2>Built for businesses searching for app development in Jordan.</h2>
           <p>
-            هذه الصفحة تستهدف عبارات مثل شركة تطوير تطبيقات في الأردن، مبرمج
-            تطبيقات في الأردن، تطوير تطبيقات جوال في عمّان، تطبيقات أعمال،
-            لوحات تحكم، أسواق رقمية، وأنظمة Backend للشركات.
+            This page is intentionally focused on app development in Jordan,
+            mobile app development in Jordan, web app development in Jordan,
+            admin dashboard development, marketplace apps, and business
+            automation for local and regional companies.
           </p>
         </div>
         <div className="keyword-card">
-          <strong>عبارات البحث المستهدفة</strong>
-          <span>تطوير تطبيقات في الأردن</span>
-          <span>شركة تطوير تطبيقات في الأردن</span>
-          <span>مبرمج تطبيقات في الأردن</span>
-          <span>تطبيقات أعمال في الأردن</span>
-          <span>لوحات تحكم للشركات</span>
+          <strong>Target searches</strong>
+          <span>app developer Jordan</span>
+          <span>mobile app developer Jordan</span>
+          <span>app development company Jordan</span>
+          <span>admin dashboard developer Jordan</span>
+          <span>marketplace app developer Jordan</span>
         </div>
       </section>
 
       <section className="section faq-section" id="faq">
         <div className="section-head">
-          <p className="eyebrow">أسئلة شائعة</p>
-          <h2>أسئلة قبل بناء تطبيق للشركة.</h2>
+          <p className="eyebrow">FAQ</p>
+          <h2>Questions businesses ask before building an app.</h2>
         </div>
 
         <div className="faq-list">
@@ -416,21 +391,19 @@ export default function ArabicAppDeveloperJordanPage() {
       </section>
 
       <section className="final-cta">
-        <p className="eyebrow">عرض سعر مجاني</p>
-        <h2>تحتاج شركة تطوير تطبيقات في الأردن؟</h2>
+        <p className="eyebrow">Free quote</p>
+        <h2>Need an app developer in Jordan?</h2>
         <p>
-          أرسل فكرة التطبيق، من سيستخدمه، وما الذي يجب أن يفعله النظام. Darik
-          Technologies يمكنها تحويل الفكرة إلى خطة واضحة ونسخة إطلاق عملية.
+          Send the business idea, who will use the app, and what the system
+          needs to do. Darik Technologies can help shape it into a real launch
+          plan.
         </p>
         <div className="hero-actions">
-          <a
-            className="primary"
-            href="mailto:jjasaleh14@aol.com?subject=App%20Development%20Quote%20in%20Jordan"
-          >
-            اطلب عرض سعر مجاني
+          <a className="primary" href="mailto:jjasaleh14@aol.com?subject=App%20Development%20Quote%20in%20Jordan">
+            Request a free quote
           </a>
           <Link className="secondary" href="/dariktech">
-            العودة إلى Darik Technologies
+            Back to Darik Technologies
           </Link>
         </div>
       </section>
@@ -449,10 +422,10 @@ export default function ArabicAppDeveloperJordanPage() {
           min-height: 100vh;
           color: #f8fbff;
           background:
-            radial-gradient(circle at 86% 6%, rgba(37, 99, 235, 0.4), transparent 26rem),
-            radial-gradient(circle at 10% 18%, rgba(103, 232, 249, 0.14), transparent 30rem),
+            radial-gradient(circle at 14% 6%, rgba(37, 99, 235, 0.4), transparent 26rem),
+            radial-gradient(circle at 90% 18%, rgba(103, 232, 249, 0.14), transparent 30rem),
             linear-gradient(180deg, #06101d 0%, #081827 48%, #050b13 100%);
-          font-family: Inter, "Segoe UI", Tahoma, Arial, sans-serif;
+          font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
           overflow: hidden;
         }
 
@@ -573,7 +546,7 @@ export default function ArabicAppDeveloperJordanPage() {
           color: #67e8f9;
           font-size: 12px;
           font-weight: 950;
-          letter-spacing: 0.12em;
+          letter-spacing: 0.16em;
           text-transform: uppercase;
           margin: 0 0 12px;
         }
@@ -586,17 +559,17 @@ export default function ArabicAppDeveloperJordanPage() {
         }
 
         h1 {
-          font-size: clamp(46px, 7vw, 82px);
-          line-height: 1.02;
-          letter-spacing: -0.055em;
+          font-size: clamp(48px, 7vw, 86px);
+          line-height: 0.92;
+          letter-spacing: -0.075em;
           margin-bottom: 22px;
         }
 
         .hero-text {
           color: rgba(248, 251, 255, 0.72);
           font-size: 18px;
-          line-height: 1.9;
-          max-width: 690px;
+          line-height: 1.72;
+          max-width: 680px;
         }
 
         .hero-actions {
@@ -625,7 +598,7 @@ export default function ArabicAppDeveloperJordanPage() {
           position: relative;
           border: 1px solid rgba(255, 255, 255, 0.12);
           background:
-            radial-gradient(circle at top left, rgba(103, 232, 249, 0.18), transparent 18rem),
+            radial-gradient(circle at top right, rgba(103, 232, 249, 0.18), transparent 18rem),
             rgba(255, 255, 255, 0.07);
           border-radius: 42px;
           padding: 24px;
@@ -649,21 +622,21 @@ export default function ArabicAppDeveloperJordanPage() {
           color: #2563eb;
           font-size: 12px;
           font-weight: 950;
-          letter-spacing: 0.08em;
+          letter-spacing: 0.12em;
           text-transform: uppercase;
         }
 
         .main-card strong {
           display: block;
-          font-size: 40px;
-          line-height: 1.05;
-          letter-spacing: -0.05em;
+          font-size: 42px;
+          line-height: 0.95;
+          letter-spacing: -0.06em;
           margin: 20px 0 12px;
         }
 
         .main-card p {
           color: #475467;
-          line-height: 1.75;
+          line-height: 1.55;
           margin-bottom: 0;
         }
 
@@ -720,8 +693,8 @@ export default function ArabicAppDeveloperJordanPage() {
         .section-head h2,
         .final-cta h2 {
           font-size: clamp(34px, 5vw, 58px);
-          line-height: 1.08;
-          letter-spacing: -0.055em;
+          line-height: 0.98;
+          letter-spacing: -0.065em;
           margin-bottom: 14px;
         }
 
@@ -729,7 +702,7 @@ export default function ArabicAppDeveloperJordanPage() {
         .section-head p,
         .final-cta p {
           color: rgba(248, 251, 255, 0.68);
-          line-height: 1.9;
+          line-height: 1.75;
           font-size: 16px;
         }
 
@@ -753,19 +726,17 @@ export default function ArabicAppDeveloperJordanPage() {
         }
 
         .service-card h3,
-        .work-card h3,
-        .process-list h3 {
+        .work-card h3 {
           font-size: 25px;
-          letter-spacing: -0.035em;
+          letter-spacing: -0.045em;
           margin-bottom: 12px;
         }
 
         .service-card p,
         .work-card p,
-        .process-list p,
         details p {
           color: rgba(248, 251, 255, 0.66);
-          line-height: 1.85;
+          line-height: 1.65;
         }
 
         .tag-row {
@@ -782,7 +753,7 @@ export default function ArabicAppDeveloperJordanPage() {
         }
 
         .work-card {
-          min-height: 280px;
+          min-height: 260px;
           display: flex;
           flex-direction: column;
           justify-content: space-between;
@@ -802,7 +773,7 @@ export default function ArabicAppDeveloperJordanPage() {
           color: #67e8f9;
           font-size: 12px;
           font-weight: 950;
-          letter-spacing: 0.08em;
+          letter-spacing: 0.11em;
           text-transform: uppercase;
         }
 
@@ -833,6 +804,12 @@ export default function ArabicAppDeveloperJordanPage() {
           margin-bottom: 16px;
         }
 
+        .process-list p {
+          color: rgba(248, 251, 255, 0.72);
+          line-height: 1.62;
+          margin-bottom: 0;
+        }
+
         .location-section {
           display: grid;
           grid-template-columns: 1.1fr 0.9fr;
@@ -846,13 +823,13 @@ export default function ArabicAppDeveloperJordanPage() {
 
         .location-card h2 {
           font-size: clamp(32px, 4vw, 50px);
-          line-height: 1.1;
-          letter-spacing: -0.055em;
+          line-height: 1;
+          letter-spacing: -0.06em;
         }
 
         .location-card p {
           color: rgba(248, 251, 255, 0.68);
-          line-height: 1.9;
+          line-height: 1.75;
         }
 
         .keyword-card {
@@ -887,7 +864,7 @@ export default function ArabicAppDeveloperJordanPage() {
           cursor: pointer;
           font-size: 18px;
           font-weight: 950;
-          letter-spacing: -0.02em;
+          letter-spacing: -0.03em;
         }
 
         details p {
@@ -899,9 +876,9 @@ export default function ArabicAppDeveloperJordanPage() {
           margin: 20px auto 80px;
           padding: clamp(28px, 5vw, 54px);
           background:
-            radial-gradient(circle at top left, rgba(103, 232, 249, 0.18), transparent 22rem),
+            radial-gradient(circle at top right, rgba(103, 232, 249, 0.18), transparent 22rem),
             rgba(255, 255, 255, 0.08);
-          text-align: right;
+          text-align: left;
         }
 
         @media (max-width: 940px) {
