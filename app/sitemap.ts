@@ -14,6 +14,11 @@ const pages = [
     priority: 1,
   },
   {
+    path: "/dariktech/portfolio",
+    changeFrequency: "monthly",
+    priority: 0.9,
+  },
+  {
     path: "/dariktech/services/mobile-web-admin",
     changeFrequency: "monthly",
     priority: 0.82,
