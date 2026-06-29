@@ -19,6 +19,21 @@ const pages = [
     priority: 0.82,
   },
   {
+    path: "/dariktech/mobile-app-development-jordan",
+    changeFrequency: "weekly",
+    priority: 0.94,
+  },
+  {
+    path: "/dariktech/website-development-jordan",
+    changeFrequency: "weekly",
+    priority: 0.94,
+  },
+  {
+    path: "/dariktech/admin-dashboard-development-jordan",
+    changeFrequency: "weekly",
+    priority: 0.94,
+  },
+  {
     path: "/dariktech/work/darik-marketplace",
     changeFrequency: "monthly",
     priority: 0.76,
