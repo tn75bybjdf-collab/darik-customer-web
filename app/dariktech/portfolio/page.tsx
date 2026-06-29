@@ -102,7 +102,7 @@ const portfolioCases = [
   {
     "label": "Restaurant ordering system",
     "title": "Tawleh Manager",
-    "href": "/dariktech",
+    "href": "/dariktech/work/tawleh-manager",
     "summary": "A QR table ordering and restaurant management system where customers order from the table and staff manage items, tables, payments, reports, and branch-level operations.",
     "stack": [
       "QR ordering",

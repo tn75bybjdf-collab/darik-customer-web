@@ -49,6 +49,11 @@ const pages = [
     priority: 0.76,
   },
   {
+    path: "/dariktech/work/tawleh-manager",
+    changeFrequency: "monthly",
+    priority: 0.78,
+  },
+  {
     path: "/dariktech/app-developer-jordan",
     changeFrequency: "weekly",
     priority: 0.95,
