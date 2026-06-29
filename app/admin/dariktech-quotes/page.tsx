@@ -34,18 +34,39 @@ type QuoteRequest = {
   admin_notes: string | null;
 };
 
+type TabKey = "active" | "reviewing" | "closed";
+
 type PageProps = {
   searchParams?:
-    Promise<{ pin?: string | string[] }> | { pin?: string | string[] };
+    | Promise<{ pin?: string | string[]; tab?: string | string[] }>
+    | { pin?: string | string[]; tab?: string | string[] };
 };
 
 const quoteAccessCookie = "dariktech_quotes_access";
 
+const tabOptions: { value: TabKey; label: string; description: string }[] = [
+  {
+    value: "active",
+    label: "Active",
+    description: "New leads and contacted leads that are still alive.",
+  },
+  {
+    value: "reviewing",
+    label: "Reviewing",
+    description: "Quotes you are currently checking or preparing.",
+  },
+  {
+    value: "closed",
+    label: "Closed",
+    description: "Finished, won, rejected, or old quote requests.",
+  },
+];
+
 const statusOptions = [
-  { value: "new", label: "New" },
+  { value: "new", label: "Active / New" },
   { value: "reviewing", label: "Reviewing" },
-  { value: "contacted", label: "Contacted" },
-  { value: "won", label: "Won" },
+  { value: "contacted", label: "Active / Contacted" },
+  { value: "won", label: "Closed / Won" },
   { value: "closed", label: "Closed" },
 ];
 
@@ -117,7 +138,7 @@ async function supabaseFetch(path: string, init?: RequestInit) {
 
 async function getQuotes() {
   const response = await supabaseFetch(
-    "dariktech_quote_requests?select=*&order=created_at.desc&limit=100",
+    "dariktech_quote_requests?select=*&order=created_at.desc&limit=200",
   );
 
   if (!response.ok) {
@@ -202,6 +223,7 @@ async function updateQuote(formData: FormData) {
   }
 
   revalidatePath("/admin/dariktech-quotes");
+  revalidatePath(`/admin/dariktech-quotes/${id}/invoice`);
 }
 
 function formatDate(value: string) {
@@ -222,14 +244,50 @@ function statusLabel(value: string) {
   return statusOptions.find((option) => option.value === value)?.label || value;
 }
 
+function quoteNumber(id: string) {
+  return `DTQ-${id.slice(0, 8).toUpperCase()}`;
+}
+
 function waLink(value: string | null) {
   if (!value) return "";
   const digits = value.replace(/[^0-9]/g, "");
   return digits ? `https://wa.me/${digits}` : "";
 }
 
-function stat(quotes: QuoteRequest[], status: string) {
-  return quotes.filter((quote) => quote.status === status).length;
+function emailLink(quote: QuoteRequest) {
+  if (!quote.email) return "";
+  const subject = encodeURIComponent(
+    `Darik Technologies quote request ${quoteNumber(quote.id)}`,
+  );
+  const body = encodeURIComponent(
+    `Hi ${quote.full_name},\n\nThank you for requesting a quote from Darik Technologies.\n\nI am reviewing your project and will follow up with next steps.\n\nBest,\nDarik Technologies`,
+  );
+
+  return `mailto:${quote.email}?subject=${subject}&body=${body}`;
+}
+
+function invoiceEmailLink(quote: QuoteRequest) {
+  const subject = encodeURIComponent(
+    `Darik Technologies quote invoice ${quoteNumber(quote.id)}`,
+  );
+  const body = encodeURIComponent(
+    `Hi ${quote.full_name},\n\nAttached is the professional quote PDF for your project.\n\nBest,\nDarik Technologies`,
+  );
+
+  return `mailto:${quote.email || ""}?subject=${subject}&body=${body}`;
+}
+
+function stat(quotes: QuoteRequest[], tab: TabKey) {
+  return quotes.filter((quote) => quoteTab(quote) === tab).length;
+}
+
+function quoteTab(quote: QuoteRequest): TabKey {
+  const status = String(quote.status || "new").toLowerCase();
+
+  if (status === "reviewing") return "reviewing";
+  if (status === "closed" || status === "won") return "closed";
+
+  return "active";
 }
 
 function getPinState(params?: { pin?: string | string[] }) {
@@ -237,11 +295,17 @@ function getPinState(params?: { pin?: string | string[] }) {
   return pin || "";
 }
 
+function getTabState(params?: { tab?: string | string[] }): TabKey {
+  const tab = Array.isArray(params?.tab) ? params?.tab[0] : params?.tab;
+  return tab === "reviewing" || tab === "closed" ? tab : "active";
+}
+
 export default async function DarikTechAdminQuotesPage({
   searchParams,
 }: PageProps) {
   const resolvedParams = searchParams ? await searchParams : undefined;
   const pinState = getPinState(resolvedParams);
+  const activeTab = getTabState(resolvedParams);
   const unlocked = await hasQuoteAccess();
 
   if (!unlocked) {
@@ -260,11 +324,14 @@ export default async function DarikTechAdminQuotesPage({
         : "Could not load quote requests.";
   }
 
+  const visibleQuotes = quotes.filter((quote) => quoteTab(quote) === activeTab);
+  const currentTab = tabOptions.find((tab) => tab.value === activeTab) || tabOptions[0];
+
   const stats = [
     { label: "Total requests", value: quotes.length },
-    { label: "New", value: stat(quotes, "new") },
+    { label: "Active", value: stat(quotes, "active") },
     { label: "Reviewing", value: stat(quotes, "reviewing") },
-    { label: "Contacted", value: stat(quotes, "contacted") },
+    { label: "Closed", value: stat(quotes, "closed") },
   ];
 
   return (
@@ -274,8 +341,9 @@ export default async function DarikTechAdminQuotesPage({
           <p className="eyebrow">Darik Technologies</p>
           <h1>Quote Requests</h1>
           <p className="subtitle">
-            Free quote submissions from getdarik.com/dariktech/quote. Review
-            leads, contact them, and track status from one admin page.
+            Review new quote submissions, move them through Active, Reviewing,
+            and Closed tabs, then open a professional quote invoice page for PDF
+            export and email.
           </p>
         </div>
         <div className="top-actions">
@@ -304,6 +372,28 @@ export default async function DarikTechAdminQuotesPage({
         ))}
       </section>
 
+      <nav className="quote-tabs" aria-label="Quote status tabs">
+        {tabOptions.map((tab) => {
+          const count = stat(quotes, tab.value);
+          const href =
+            tab.value === "active"
+              ? "/admin/dariktech-quotes"
+              : `/admin/dariktech-quotes?tab=${tab.value}`;
+
+          return (
+            <a
+              className={`quote-tab ${activeTab === tab.value ? "is-active" : ""}`}
+              href={href}
+              key={tab.value}
+            >
+              <span>{tab.label}</span>
+              <strong>{count}</strong>
+              <small>{tab.description}</small>
+            </a>
+          );
+        })}
+      </nav>
+
       {error ? (
         <section className="error-card">
           <h2>Quote dashboard is not connected yet.</h2>
@@ -321,10 +411,29 @@ export default async function DarikTechAdminQuotesPage({
             appear here.
           </p>
         </section>
+      ) : visibleQuotes.length === 0 ? (
+        <section className="empty-card">
+          <h2>No {currentTab.label.toLowerCase()} quote requests.</h2>
+          <p>
+            This tab is empty. Move a quote into {currentTab.label} using the
+            status selector on any quote card.
+          </p>
+        </section>
       ) : (
         <section className="quote-list">
-          {quotes.map((quote) => {
+          <div className="section-label">
+            <div>
+              <p className="eyebrow">{currentTab.label} quotes</p>
+              <h2>{visibleQuotes.length} request{visibleQuotes.length === 1 ? "" : "s"}</h2>
+            </div>
+            <p>{currentTab.description}</p>
+          </div>
+
+          {visibleQuotes.map((quote) => {
             const whatsappHref = waLink(quote.whatsapp);
+            const emailHref = emailLink(quote);
+            const invoiceHref = `/admin/dariktech-quotes/${quote.id}/invoice`;
+            const invoiceEmailHref = invoiceEmailLink(quote);
 
             return (
               <article
@@ -334,9 +443,12 @@ export default async function DarikTechAdminQuotesPage({
                 <div className="quote-main">
                   <div className="quote-head">
                     <div>
-                      <span className="status-pill">
-                        {statusLabel(quote.status)}
-                      </span>
+                      <div className="quote-meta-row">
+                        <span className="status-pill">
+                          {statusLabel(quote.status)}
+                        </span>
+                        <span className="quote-number">{quoteNumber(quote.id)}</span>
+                      </div>
                       <h2>{quote.full_name}</h2>
                       <p className="muted">
                         {quote.company || "No company listed"} ·{" "}
@@ -344,14 +456,18 @@ export default async function DarikTechAdminQuotesPage({
                       </p>
                     </div>
                     <div className="contact-actions">
+                      <a className="invoice-link" href={invoiceHref}>
+                        Open invoice
+                      </a>
+                      {quote.email ? (
+                        <a href={invoiceEmailHref}>Email PDF</a>
+                      ) : null}
                       {whatsappHref ? (
                         <a href={whatsappHref} target="_blank" rel="noreferrer">
                           WhatsApp
                         </a>
                       ) : null}
-                      {quote.email ? (
-                        <a href={`mailto:${quote.email}`}>Email</a>
-                      ) : null}
+                      {emailHref ? <a href={emailHref}>Email</a> : null}
                     </div>
                   </div>
 
@@ -392,6 +508,17 @@ export default async function DarikTechAdminQuotesPage({
 
                 <form className="admin-panel" action={updateQuote}>
                   <input name="id" type="hidden" value={quote.id} />
+
+                  <div className="invoice-box">
+                    <span>Professional PDF</span>
+                    <strong>Quote invoice page ready</strong>
+                    <p>
+                      Open the invoice, print or save as PDF, then attach it to
+                      the email.
+                    </p>
+                    <a href={invoiceHref}>Open invoice page</a>
+                  </div>
+
                   <label>
                     Status
                     <select name="status" defaultValue={quote.status}>
@@ -593,7 +720,9 @@ function AdminStyles() {
       .public-link,
       .contact-actions a,
       .admin-panel button,
-      .lock-button {
+      .lock-button,
+      .quote-tab,
+      .invoice-box a {
         border: 0;
         border-radius: 999px;
         background: #111827;
@@ -621,6 +750,7 @@ function AdminStyles() {
 
       .topbar,
       .stats-grid,
+      .quote-tabs,
       .quote-list,
       .error-card,
       .empty-card {
@@ -676,7 +806,7 @@ function AdminStyles() {
 
       .subtitle {
         color: #667085;
-        max-width: 760px;
+        max-width: 790px;
         line-height: 1.65;
         margin-bottom: 0;
       }
@@ -685,13 +815,14 @@ function AdminStyles() {
         display: grid;
         grid-template-columns: repeat(4, minmax(0, 1fr));
         gap: 14px;
-        margin-bottom: 24px;
+        margin-bottom: 18px;
       }
 
       .stat-card,
       .quote-card,
       .error-card,
-      .empty-card {
+      .empty-card,
+      .quote-tab {
         border: 1px solid rgba(15, 23, 42, 0.08);
         background: rgba(255, 255, 255, 0.92);
         border-radius: 26px;
@@ -715,6 +846,78 @@ function AdminStyles() {
         letter-spacing: -0.04em;
       }
 
+      .quote-tabs {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 14px;
+        margin-bottom: 24px;
+      }
+
+      .quote-tab {
+        display: grid;
+        gap: 7px;
+        color: #111827;
+        padding: 18px;
+        box-shadow: none;
+        transition:
+          border-color 160ms ease,
+          transform 160ms ease,
+          box-shadow 160ms ease;
+      }
+
+      .quote-tab:hover {
+        transform: translateY(-1px);
+        border-color: rgba(37, 99, 235, 0.32);
+        box-shadow: 0 18px 46px rgba(15, 23, 42, 0.08);
+      }
+
+      .quote-tab.is-active {
+        border-color: rgba(37, 99, 235, 0.44);
+        background:
+          radial-gradient(circle at top right, rgba(37, 99, 235, 0.13), transparent 13rem),
+          #ffffff;
+        box-shadow: 0 22px 60px rgba(37, 99, 235, 0.12);
+      }
+
+      .quote-tab span {
+        color: #344054;
+        font-size: 14px;
+      }
+
+      .quote-tab strong {
+        font-size: 34px;
+        line-height: 1;
+        letter-spacing: -0.05em;
+      }
+
+      .quote-tab small {
+        color: #667085;
+        line-height: 1.45;
+        white-space: normal;
+      }
+
+      .section-label {
+        display: flex;
+        align-items: flex-end;
+        justify-content: space-between;
+        gap: 18px;
+        margin-bottom: 14px;
+      }
+
+      .section-label h2 {
+        margin-bottom: 0;
+        font-size: 28px;
+        letter-spacing: -0.04em;
+      }
+
+      .section-label > p {
+        max-width: 440px;
+        color: #667085;
+        line-height: 1.55;
+        margin-bottom: 0;
+        text-align: right;
+      }
+
       .quote-list {
         display: grid;
         gap: 18px;
@@ -722,7 +925,7 @@ function AdminStyles() {
 
       .quote-card {
         display: grid;
-        grid-template-columns: minmax(0, 1fr) 320px;
+        grid-template-columns: minmax(0, 1fr) 330px;
         gap: 20px;
         padding: 22px;
       }
@@ -738,6 +941,26 @@ function AdminStyles() {
         font-size: 28px;
         letter-spacing: -0.04em;
         margin: 8px 0 6px;
+      }
+
+      .quote-meta-row {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex-wrap: wrap;
+      }
+
+      .quote-number {
+        display: inline-flex;
+        align-items: center;
+        min-height: 30px;
+        padding: 0 10px;
+        border-radius: 999px;
+        background: #f2f4f7;
+        color: #475467;
+        font-size: 11px;
+        font-weight: 950;
+        letter-spacing: 0.08em;
       }
 
       .muted {
@@ -756,6 +979,16 @@ function AdminStyles() {
         font-weight: 950;
         text-transform: uppercase;
         letter-spacing: 0.08em;
+      }
+
+      .status-reviewing .status-pill {
+        background: #fff7ed;
+        color: #c2410c;
+      }
+
+      .status-contacted .status-pill {
+        background: #ecfeff;
+        color: #0e7490;
       }
 
       .status-won .status-pill {
@@ -781,6 +1014,12 @@ function AdminStyles() {
         color: #0f172a;
         box-shadow: none;
         padding: 10px 12px;
+      }
+
+      .contact-actions .invoice-link {
+        background: #111827;
+        color: #ffffff;
+        box-shadow: 0 14px 32px rgba(17, 24, 39, 0.12);
       }
 
       .info-grid {
@@ -865,6 +1104,47 @@ function AdminStyles() {
         top: 16px;
       }
 
+      .invoice-box {
+        border: 1px solid #dbeafe;
+        border-radius: 22px;
+        background:
+          radial-gradient(circle at top right, rgba(37, 99, 235, 0.13), transparent 10rem),
+          #ffffff;
+        padding: 14px;
+        margin-bottom: 15px;
+      }
+
+      .invoice-box span {
+        display: block;
+        color: #2563eb;
+        font-size: 11px;
+        font-weight: 950;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        margin-bottom: 6px;
+      }
+
+      .invoice-box strong {
+        display: block;
+        font-size: 16px;
+        letter-spacing: -0.03em;
+      }
+
+      .invoice-box p {
+        color: #667085;
+        font-size: 12px;
+        line-height: 1.55;
+        margin: 7px 0 12px;
+      }
+
+      .invoice-box a {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+        padding: 11px 13px;
+      }
+
       .admin-panel label {
         display: grid;
         gap: 8px;
@@ -918,8 +1198,14 @@ function AdminStyles() {
         }
 
         .topbar,
-        .quote-head {
+        .quote-head,
+        .section-label {
           flex-direction: column;
+          align-items: flex-start;
+        }
+
+        .section-label > p {
+          text-align: left;
         }
 
         .top-actions,
@@ -928,6 +1214,7 @@ function AdminStyles() {
         }
 
         .stats-grid,
+        .quote-tabs,
         .quote-card,
         .info-grid {
           grid-template-columns: 1fr;
