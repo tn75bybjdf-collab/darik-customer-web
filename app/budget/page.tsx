@@ -552,9 +552,8 @@ export default function BudgetPage() {
         <section style={styles.card}>
           <h3 style={styles.cardTitle}>How it works</h3>
           <p style={styles.explainText}>
-            You get <strong>10 JOD per day</strong>. Whatever you do not spend rolls forward.
-            If you spend 5 JOD today, tomorrow you can spend 15 JOD. Spend 5 JOD tomorrow,
-            then the next day you can spend 20 JOD.
+            You get <strong>20 JOD per day</strong>. Whatever you do not spend rolls forward.
+           
           </p>
         </section>
       </section>
