@@ -405,7 +405,7 @@ export default function BudgetPage() {
         <div style={styles.header}>
           <div>
             <p style={styles.kicker}>Private Budget</p>
-            <h1 style={styles.title}>Daily 10 JOD Limit</h1>
+            <h1 style={styles.title}>Daily 20 JOD Limit</h1>
           </div>
 
           <div style={styles.headerButtons}>
