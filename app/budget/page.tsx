@@ -11,7 +11,7 @@ type Purchase = {
   created_at: string;
 };
 
-const DAILY_LIMIT = 10;
+const DAILY_LIMIT = 20;
 const START_DATE_KEY = "darik-budget-start-date";
 const SECRET_PIN = "1122";
 const PASSKEY_ENABLED_KEY = "darik-budget-passkey-enabled";

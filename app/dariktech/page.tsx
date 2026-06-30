@@ -180,8 +180,6 @@ const projects = [
     metric: "QR",
     metricLabel: "table ordering",
     visual: "restaurant",
-    href: "/dariktech/work/tawleh-manager",
-    cta: "View Tawleh Manager",
   },
   {
     name: "Business Operations Tools",
