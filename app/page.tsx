@@ -1,3 +1,5 @@
+"use client";
+
 export default function ComingSoonPage() {
   return (
     <main className="page">
