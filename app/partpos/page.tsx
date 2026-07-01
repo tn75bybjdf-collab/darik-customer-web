@@ -12,6 +12,52 @@ type PartPOSProduct = {
   price: number;
 };
 
+type PartPOSCustomer = {
+  id: string;
+  customer_name: string;
+  phone_number: string;
+  credit_allowance: number;
+  credit_pin_code?: string | null;
+  credit_pin_required?: boolean;
+};
+
+type CustomerCreditInvoice = {
+  id: string;
+  sale_number: number | null;
+  sale_total: number;
+  amount_paid: number;
+  created_at: string;
+};
+
+type CustomerCreditPaymentRecord = {
+  id: string;
+  payment_number: number | null;
+  customer_name: string;
+  customer_phone: string;
+  amount_paid: number;
+  balance_before: number;
+  balance_after: number;
+  created_at: string;
+};
+
+type ExpenseMode = "utility" | "vendor";
+type ExpensePaidBy = "cash" | "credit";
+
+type ExpenseForm = {
+  details: string;
+  company: string;
+  amount: string;
+  paidBy: ExpensePaidBy;
+};
+
+type CustomerForm = {
+  customerName: string;
+  phoneNumber: string;
+  creditAllowance: string;
+  customerPin: string;
+  customerPinConfirm: string;
+};
+
 type POSRow = {
   lineId: string;
   productName: string;
@@ -171,12 +217,146 @@ function percentText(value: number) {
   return `${value.toFixed(1)}%`;
 }
 
+function cleanPhone(value: string) {
+  return value.replace(/[^0-9+]/g, "").trim();
+}
+
+function cleanFourDigitPin(value: string) {
+  return value.replace(/\D/g, "").slice(0, 4);
+}
+
+function readSupabaseError(error: unknown) {
+  if (error instanceof Error) return error.message;
+
+  if (typeof error === "object" && error !== null) {
+    const record = error as Record<string, unknown>;
+    const message = record.message ? String(record.message) : "";
+    const details = record.details ? String(record.details) : "";
+    const hint = record.hint ? String(record.hint) : "";
+    const code = record.code ? String(record.code) : "";
+
+    const parts = [message, details, hint, code].filter(Boolean);
+    if (parts.length > 0) return parts.join(" | ");
+
+    try {
+      return JSON.stringify(record);
+    } catch {
+      return "حدث خطأ غير معروف من Supabase.";
+    }
+  }
+
+  return String(error || "حدث خطأ غير معروف.");
+}
+
+type CreditInvoiceLookupRow = {
+  id?: string | number | null;
+  sale_number?: string | number | null;
+  sale_total?: string | number | null;
+  amount_paid?: string | number | null;
+  created_at?: string | null;
+};
+
+async function loadCustomerCreditBalanceForClient(
+  supabaseClient: ReturnType<typeof createClient<any, "public", any>> | null,
+  customerId: string,
+): Promise<CustomerCreditInvoice[]> {
+  if (!supabaseClient || !customerId) return [];
+
+  const { data, error } = await supabaseClient
+    .from("partpos_sales")
+    .select("id, sale_number, sale_total, amount_paid, created_at")
+    .eq("payment_method", "credit")
+    .eq("customer_id", customerId)
+    .order("created_at", { ascending: true })
+    .limit(5000);
+
+  if (error) throw error;
+
+  const rows = (data ?? []) as CreditInvoiceLookupRow[];
+
+  return rows
+    .map((invoice) => ({
+      id: String(invoice.id ?? ""),
+      sale_number:
+        invoice.sale_number === null || invoice.sale_number === undefined
+          ? null
+          : Number(invoice.sale_number),
+      sale_total: Number(invoice.sale_total ?? 0),
+      amount_paid: Number(invoice.amount_paid ?? 0),
+      created_at: String(invoice.created_at ?? ""),
+    }))
+    .filter(
+      (invoice) =>
+        Number(invoice.sale_total || 0) - Number(invoice.amount_paid || 0) > 0.0001,
+    );
+}
+
+function customerLabel(customer: PartPOSCustomer) {
+  const name = customer.customer_name?.trim() || "زبون بدون اسم";
+  const phone = customer.phone_number?.trim();
+
+  return phone ? `${name} - ${phone}` : name;
+}
+
+function emptyCustomerForm(): CustomerForm {
+  return {
+    customerName: "",
+    phoneNumber: "",
+    creditAllowance: "",
+    customerPin: "",
+    customerPinConfirm: "",
+  };
+}
+
+function emptyExpenseForm(): ExpenseForm {
+  return {
+    details: "",
+    company: "",
+    amount: "",
+    paidBy: "cash",
+  };
+}
+
 export default function PartPOSPage() {
   const [rows, setRows] = useState<POSRow[]>([emptyRow(), emptyRow()]);
   const [search, setSearch] = useState("");
   const [suggestions, setSuggestions] = useState<PartPOSProduct[]>([]);
   const [isSearching, setIsSearching] = useState(false);
   const [searchError, setSearchError] = useState("");
+  const [customerSearch, setCustomerSearch] = useState("");
+  const [customerSuggestions, setCustomerSuggestions] = useState<PartPOSCustomer[]>([]);
+  const [isCustomerSearching, setIsCustomerSearching] = useState(false);
+  const [customerSearchError, setCustomerSearchError] = useState("");
+  const [selectedCustomer, setSelectedCustomer] = useState<PartPOSCustomer | null>(null);
+  const [isCustomerPopupOpen, setIsCustomerPopupOpen] = useState(false);
+  const [customerForm, setCustomerForm] = useState<CustomerForm>(emptyCustomerForm());
+  const [customerSaveStatus, setCustomerSaveStatus] = useState<
+    "idle" | "saving" | "error"
+  >("idle");
+  const [customerSaveError, setCustomerSaveError] = useState("");
+  const [isCreditPinPopupOpen, setIsCreditPinPopupOpen] = useState(false);
+  const [creditPinEntry, setCreditPinEntry] = useState("");
+  const [creditPinError, setCreditPinError] = useState("");
+  const [creditCashoutStatus, setCreditCashoutStatus] = useState<
+    "idle" | "checking" | "saving" | "error"
+  >("idle");
+  const [customerCreditInvoices, setCustomerCreditInvoices] = useState<
+    CustomerCreditInvoice[]
+  >([]);
+  const [creditBalanceLoading, setCreditBalanceLoading] = useState(false);
+  const [isCreditPaymentPopupOpen, setIsCreditPaymentPopupOpen] = useState(false);
+  const [creditPaymentAmount, setCreditPaymentAmount] = useState("");
+  const [creditPaymentError, setCreditPaymentError] = useState("");
+  const [creditPaymentStatus, setCreditPaymentStatus] = useState<
+    "idle" | "saving" | "error"
+  >("idle");
+  const [isExpensePopupOpen, setIsExpensePopupOpen] = useState(false);
+  const [expenseMode, setExpenseMode] = useState<ExpenseMode>("utility");
+  const [expenseForm, setExpenseForm] = useState<ExpenseForm>(emptyExpenseForm());
+  const [expenseSaveStatus, setExpenseSaveStatus] = useState<
+    "idle" | "saving" | "success" | "error"
+  >("idle");
+  const [expenseSaveMessage, setExpenseSaveMessage] = useState("");
   const [cashReceived, setCashReceived] = useState("");
   const [cashoutStatus, setCashoutStatus] = useState<
     "idle" | "saving" | "success" | "error"
@@ -240,6 +420,12 @@ export default function PartPOSPage() {
   const paidAmount = parseMoney(cashReceived);
   const changeDue = Math.max(paidAmount - saleTotal, 0);
   const remainingDue = Math.max(saleTotal - paidAmount, 0);
+  const selectedCustomerCreditBalance = customerCreditInvoices.reduce(
+    (sum, invoice) =>
+      sum +
+      Math.max(Number(invoice.sale_total || 0) - Number(invoice.amount_paid || 0), 0),
+    0,
+  );
   const canCashOut = Boolean(
     supabase &&
     saleTotal > 0 &&
@@ -403,6 +589,550 @@ export default function PartPOSPage() {
     setSuggestions([]);
   }
 
+  async function loadCustomerCreditBalance(customerId: string) {
+    if (!supabase || !customerId) {
+      setCustomerCreditInvoices([]);
+      return;
+    }
+
+    setCreditBalanceLoading(true);
+
+    try {
+      const invoices = await loadCustomerCreditBalanceForClient(supabase, customerId);
+      setCustomerCreditInvoices(invoices);
+    } catch {
+      setCustomerCreditInvoices([]);
+    } finally {
+      setCreditBalanceLoading(false);
+    }
+  }
+
+  async function searchCustomers(value: string) {
+    setCustomerSearch(value);
+    setCustomerSearchError("");
+    setCustomerSaveError("");
+
+    if (selectedCustomer && value !== customerLabel(selectedCustomer)) {
+      setSelectedCustomer(null);
+      setCustomerCreditInvoices([]);
+    }
+
+    const term = value.trim();
+
+    if (!supabase || term.length < 2) {
+      setCustomerSuggestions([]);
+      return;
+    }
+
+    setIsCustomerSearching(true);
+
+    const { data, error } = await supabase
+      .from("partpos_customers")
+      .select("id, customer_name, phone_number, credit_allowance, credit_pin_code, credit_pin_required")
+      .or(`customer_name.ilike.%${term}%,phone_number.ilike.%${term}%`)
+      .order("updated_at", { ascending: false })
+      .limit(8);
+
+    setIsCustomerSearching(false);
+
+    if (error) {
+      setCustomerSearchError(error.message);
+      setCustomerSuggestions([]);
+      return;
+    }
+
+    setCustomerSuggestions(
+      (data ?? []).map((customer) => ({
+        id: String(customer.id),
+        customer_name: String(customer.customer_name ?? ""),
+        phone_number: String(customer.phone_number ?? ""),
+        credit_allowance: Number(customer.credit_allowance ?? 0),
+        credit_pin_code:
+          customer.credit_pin_code === null || customer.credit_pin_code === undefined
+            ? null
+            : String(customer.credit_pin_code),
+        credit_pin_required: Boolean(customer.credit_pin_required ?? false),
+      })),
+    );
+  }
+
+  function selectCustomer(customer: PartPOSCustomer) {
+    setSelectedCustomer(customer);
+    setCustomerSearch(customerLabel(customer));
+    setCustomerSuggestions([]);
+    setCustomerSearchError("");
+    setCustomerSaveError("");
+    void loadCustomerCreditBalance(customer.id);
+  }
+
+  function clearCustomerSelection() {
+    setSelectedCustomer(null);
+    setCustomerSearch("");
+    setCustomerSuggestions([]);
+    setCustomerCreditInvoices([]);
+    setCustomerSearchError("");
+    setCustomerSaveError("");
+  }
+
+  function openCustomerPopup() {
+    const existingText = customerSearch.trim();
+
+    setCustomerForm({
+      customerName: selectedCustomer?.customer_name || existingText,
+      phoneNumber: selectedCustomer?.phone_number || "",
+      creditAllowance:
+        selectedCustomer && Number(selectedCustomer.credit_allowance) > 0
+          ? money(Number(selectedCustomer.credit_allowance)) || ""
+          : "",
+      customerPin: "",
+      customerPinConfirm: "",
+    });
+    setCustomerSaveStatus("idle");
+    setCustomerSaveError("");
+    setIsCustomerPopupOpen(true);
+  }
+
+  function closeCustomerPopup() {
+    if (customerSaveStatus === "saving") return;
+    setIsCustomerPopupOpen(false);
+    setCustomerSaveError("");
+  }
+
+  async function saveNewCustomer() {
+    if (!supabase) {
+      setCustomerSaveStatus("error");
+      setCustomerSaveError("Supabase غير مربوط. لا يمكن حفظ الزبون.");
+      return;
+    }
+
+    const customerName = customerForm.customerName.trim();
+    const phoneNumber = cleanPhone(customerForm.phoneNumber);
+    const creditAllowance = parseMoney(customerForm.creditAllowance);
+    const customerPin = cleanFourDigitPin(customerForm.customerPin);
+    const customerPinConfirm = cleanFourDigitPin(customerForm.customerPinConfirm);
+    const needsCreditPin = creditAllowance > 0;
+
+    if (!customerName) {
+      setCustomerSaveStatus("error");
+      setCustomerSaveError("أدخل اسم الزبون أو اسم الشركة.");
+      return;
+    }
+
+    if (needsCreditPin && customerPin.length !== 4) {
+      setCustomerSaveStatus("error");
+      setCustomerSaveError("الزبون لديه سقف ائتمان. أدخل رمز ائتمان من 4 أرقام.");
+      return;
+    }
+
+    if (needsCreditPin && customerPin !== customerPinConfirm) {
+      setCustomerSaveStatus("error");
+      setCustomerSaveError("رمز الائتمان غير متطابق. أدخله مرتين بنفس الرقم.");
+      return;
+    }
+
+    setCustomerSaveStatus("saving");
+    setCustomerSaveError("");
+
+    try {
+      const payload = {
+        customer_name: customerName,
+        phone_number: phoneNumber || null,
+        credit_allowance: creditAllowance,
+        credit_pin_code: needsCreditPin ? customerPin : null,
+        credit_pin_required: needsCreditPin,
+        search_key: normalizeArabicText(`${customerName} ${phoneNumber}`),
+        updated_at: new Date().toISOString(),
+      };
+
+      let data:
+        | {
+            id: string;
+            customer_name: string | null;
+            phone_number: string | null;
+            credit_allowance: number | null;
+            credit_pin_code?: string | null;
+            credit_pin_required?: boolean | null;
+          }
+        | null = null;
+
+      if (phoneNumber) {
+        const { data: existingCustomer, error: lookupError } = await supabase
+          .from("partpos_customers")
+          .select("id")
+          .eq("phone_number", phoneNumber)
+          .maybeSingle();
+
+        if (lookupError) throw lookupError;
+
+        if (existingCustomer?.id) {
+          const { data: updatedCustomer, error: updateError } = await supabase
+            .from("partpos_customers")
+            .update(payload)
+            .eq("id", existingCustomer.id)
+            .select("id, customer_name, phone_number, credit_allowance, credit_pin_code, credit_pin_required")
+            .single();
+
+          if (updateError) throw updateError;
+          data = updatedCustomer;
+        } else {
+          const { data: insertedCustomer, error: insertError } = await supabase
+            .from("partpos_customers")
+            .insert(payload)
+            .select("id, customer_name, phone_number, credit_allowance, credit_pin_code, credit_pin_required")
+            .single();
+
+          if (insertError) throw insertError;
+          data = insertedCustomer;
+        }
+      } else {
+        const { data: insertedCustomer, error: insertError } = await supabase
+          .from("partpos_customers")
+          .insert(payload)
+          .select("id, customer_name, phone_number, credit_allowance, credit_pin_code, credit_pin_required")
+          .single();
+
+        if (insertError) throw insertError;
+        data = insertedCustomer;
+      }
+
+      if (!data) {
+        throw new Error("لم يرجع Supabase بيانات الزبون بعد الحفظ.");
+      }
+
+      const savedCustomer: PartPOSCustomer = {
+        id: String(data.id),
+        customer_name: String(data.customer_name ?? ""),
+        phone_number: String(data.phone_number ?? ""),
+        credit_allowance: Number(data.credit_allowance ?? 0),
+        credit_pin_code:
+          data.credit_pin_code === null || data.credit_pin_code === undefined
+            ? null
+            : String(data.credit_pin_code),
+        credit_pin_required: Boolean(data.credit_pin_required ?? false),
+      };
+
+      selectCustomer(savedCustomer);
+      setIsCustomerPopupOpen(false);
+      setCustomerForm(emptyCustomerForm());
+      setCustomerSaveStatus("idle");
+    } catch (error) {
+      const rawMessage = readSupabaseError(error);
+      setCustomerSaveStatus("error");
+      setCustomerSaveError(`خطأ Supabase: ${rawMessage}`);
+    }
+  }
+
+  function buildCreditPaymentReceiptHtml(payment: CustomerCreditPaymentRecord) {
+    const now = new Date(payment.created_at);
+    const dateText = now.toLocaleDateString("ar-JO", {
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+    });
+    const timeText = now.toLocaleTimeString("ar-JO", {
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+
+    return `<!doctype html>
+<html dir="rtl" lang="ar">
+  <head>
+    <meta charset="utf-8" />
+    <title>سند قبض ائتمان</title>
+    <style>
+      * { box-sizing: border-box; }
+      body { margin: 0; background: #fff; color: #111827; font-family: Arial, sans-serif; direction: rtl; }
+      .receipt { width: 80mm; padding: 10px; }
+      .header { text-align: center; border-bottom: 1px dashed #111827; padding-bottom: 8px; margin-bottom: 8px; }
+      .header img { display: block; max-width: 64mm; max-height: 24mm; object-fit: contain; margin: 0 auto 6px; }
+      h1 { margin: 0; font-size: 18px; }
+      .muted { color: #6b7280; font-size: 11px; }
+      .row { display: flex; justify-content: space-between; gap: 8px; font-size: 12px; margin: 5px 0; }
+      .box { border: 1px solid #111827; border-radius: 8px; padding: 8px; margin: 10px 0; }
+      .amount { text-align: center; font-size: 20px; font-weight: 900; margin: 4px 0; }
+      .footer { border-top: 1px dashed #111827; margin-top: 10px; padding-top: 8px; text-align: center; font-size: 11px; }
+      @page { size: 80mm auto; margin: 0; }
+    </style>
+  </head>
+  <body>
+    <div class="receipt">
+      <div class="header">
+        <img src="/partpos/receipt-header.png" alt="" />
+        <h1>سند قبض ائتمان</h1>
+        <div class="muted">Credit Account Payment</div>
+      </div>
+
+      <div class="row"><strong>رقم السند</strong><span>${payment.payment_number ?? "—"}</span></div>
+      <div class="row"><strong>التاريخ</strong><span>${dateText}</span></div>
+      <div class="row"><strong>الوقت</strong><span>${timeText}</span></div>
+      <div class="row"><strong>الزبون</strong><span>${escapeReceiptText(payment.customer_name)}</span></div>
+      <div class="row"><strong>الهاتف</strong><span>${escapeReceiptText(payment.customer_phone || "—")}</span></div>
+
+      <div class="box">
+        <div class="muted">المبلغ المدفوع</div>
+        <div class="amount">${money(payment.amount_paid)} د.أ</div>
+      </div>
+
+      <div class="row"><strong>الرصيد قبل الدفع</strong><span>${money(payment.balance_before)} د.أ</span></div>
+      <div class="row"><strong>الرصيد بعد الدفع</strong><span>${money(payment.balance_after)} د.أ</span></div>
+
+      <div class="footer">
+        شكراً لكم<br />
+        تم تسجيل الدفعة على حساب الائتمان
+      </div>
+    </div>
+    <script>
+      window.onload = () => { window.focus(); window.print(); };
+    </script>
+  </body>
+</html>`;
+  }
+
+  function printCreditPaymentReceipt(payment: CustomerCreditPaymentRecord) {
+    if (typeof window === "undefined") return false;
+
+    const printWindow = window.open("", "_blank", "width=460,height=760");
+    if (!printWindow) return false;
+
+    printWindow.document.open();
+    printWindow.document.write(buildCreditPaymentReceiptHtml(payment));
+    printWindow.document.close();
+
+    return true;
+  }
+
+  function openCreditPaymentPopup() {
+    setCashoutStatus("idle");
+    setCashoutMessage("");
+
+    if (!selectedCustomer) {
+      setCashoutStatus("error");
+      setCashoutMessage("اختر زبون أولاً قبل تسجيل دفعة ائتمان.");
+      return;
+    }
+
+    if (creditBalanceLoading) {
+      setCashoutStatus("error");
+      setCashoutMessage("جاري حساب رصيد الزبون. حاول بعد ثانية.");
+      return;
+    }
+
+    if (selectedCustomerCreditBalance <= 0) {
+      setCashoutStatus("error");
+      setCashoutMessage("لا يوجد رصيد ائتمان مستحق على هذا الزبون.");
+      return;
+    }
+
+    setCreditPaymentAmount(money(selectedCustomerCreditBalance));
+    setCreditPaymentError("");
+    setCreditPaymentStatus("idle");
+    setIsCreditPaymentPopupOpen(true);
+  }
+
+  function closeCreditPaymentPopup() {
+    if (creditPaymentStatus === "saving") return;
+    setIsCreditPaymentPopupOpen(false);
+    setCreditPaymentAmount("");
+    setCreditPaymentError("");
+    setCreditPaymentStatus("idle");
+  }
+
+  async function saveCreditAccountPayment(payFullBalance = false) {
+    if (!supabase) {
+      setCreditPaymentError("Supabase غير متصل.");
+      return;
+    }
+
+    if (!selectedCustomer) {
+      setCreditPaymentError("اختر زبون أولاً.");
+      return;
+    }
+
+    const balanceBefore = selectedCustomerCreditBalance;
+    const requestedAmount = payFullBalance
+      ? balanceBefore
+      : parseMoney(creditPaymentAmount);
+
+    if (balanceBefore <= 0) {
+      setCreditPaymentError("لا يوجد رصيد مستحق على هذا الزبون.");
+      return;
+    }
+
+    if (requestedAmount <= 0) {
+      setCreditPaymentError("أدخل مبلغ الدفع.");
+      return;
+    }
+
+    if (requestedAmount > balanceBefore) {
+      setCreditPaymentError("مبلغ الدفع أكبر من الرصيد المستحق.");
+      return;
+    }
+
+    setCreditPaymentStatus("saving");
+    setCreditPaymentError("");
+
+    try {
+      let remainingPayment = requestedAmount;
+
+      for (const invoice of customerCreditInvoices) {
+        if (remainingPayment <= 0) break;
+
+        const invoiceBalance = Math.max(
+          Number(invoice.sale_total || 0) - Number(invoice.amount_paid || 0),
+          0,
+        );
+
+        if (invoiceBalance <= 0) continue;
+
+        const appliedAmount = Math.min(invoiceBalance, remainingPayment);
+        const nextAmountPaid = Number(invoice.amount_paid || 0) + appliedAmount;
+
+        const { error: updateError } = await supabase
+          .from("partpos_sales")
+          .update({ amount_paid: nextAmountPaid })
+          .eq("id", invoice.id);
+
+        if (updateError) throw updateError;
+        remainingPayment -= appliedAmount;
+      }
+
+      const balanceAfter = Math.max(balanceBefore - requestedAmount, 0);
+
+      const { data: paymentRow, error: paymentError } = await supabase
+        .from("partpos_credit_payments")
+        .insert({
+          customer_id: selectedCustomer.id,
+          customer_name: selectedCustomer.customer_name,
+          customer_phone: selectedCustomer.phone_number || null,
+          amount_paid: requestedAmount,
+          balance_before: balanceBefore,
+          balance_after: balanceAfter,
+          payment_method: "cash",
+        })
+        .select(
+          "id, payment_number, customer_name, customer_phone, amount_paid, balance_before, balance_after, created_at",
+        )
+        .single();
+
+      if (paymentError) throw paymentError;
+
+      const savedPayment: CustomerCreditPaymentRecord = {
+        id: String(paymentRow.id),
+        payment_number:
+          paymentRow.payment_number === null || paymentRow.payment_number === undefined
+            ? null
+            : Number(paymentRow.payment_number),
+        customer_name: String(paymentRow.customer_name ?? selectedCustomer.customer_name),
+        customer_phone: String(paymentRow.customer_phone ?? selectedCustomer.phone_number ?? ""),
+        amount_paid: Number(paymentRow.amount_paid ?? requestedAmount),
+        balance_before: Number(paymentRow.balance_before ?? balanceBefore),
+        balance_after: Number(paymentRow.balance_after ?? balanceAfter),
+        created_at: String(paymentRow.created_at ?? new Date().toISOString()),
+      };
+
+      printCreditPaymentReceipt(savedPayment);
+      await loadCustomerCreditBalance(selectedCustomer.id);
+
+      setCashoutStatus("success");
+      setCashoutMessage(
+        `تم تسجيل دفعة ائتمان ${money(requestedAmount)} د.أ. الرصيد المتبقي: ${money(
+          balanceAfter,
+        )} د.أ`,
+      );
+
+      closeCreditPaymentPopup();
+    } catch (error) {
+      setCreditPaymentStatus("error");
+      setCreditPaymentError(`خطأ Supabase: ${readSupabaseError(error)}`);
+    }
+  }
+
+  function selectedCustomerCanUseCredit() {
+    return Boolean(selectedCustomer && Number(selectedCustomer.credit_allowance) > 0);
+  }
+
+  function resetCreditPinPopup() {
+    setCreditPinEntry("");
+    setCreditPinError("");
+    setCreditCashoutStatus("idle");
+  }
+
+  function openCreditPinPopup() {
+    setCashoutStatus("idle");
+    setCashoutMessage("");
+
+    if (!selectedCustomer) {
+      setCashoutStatus("error");
+      setCashoutMessage("اختر زبون للفاتورة قبل البيع على الائتمان.");
+      return;
+    }
+
+    if (Number(selectedCustomer.credit_allowance) <= 0) {
+      setCashoutStatus("error");
+      setCashoutMessage("هذا الزبون لا يملك سقف ائتمان.");
+      return;
+    }
+
+    if (saleRows.length === 0) {
+      setCashoutStatus("error");
+      setCashoutMessage("أدخل قطعة واحدة على الأقل قبل إتمام البيع.");
+      return;
+    }
+
+    if (saleTotal > Number(selectedCustomer.credit_allowance)) {
+      setCashoutStatus("error");
+      setCashoutMessage(
+        `قيمة الفاتورة أعلى من سقف الائتمان. السقف: ${money(
+          Number(selectedCustomer.credit_allowance),
+        )} د.أ`,
+      );
+      return;
+    }
+
+    resetCreditPinPopup();
+    setIsCreditPinPopupOpen(true);
+  }
+
+  function closeCreditPinPopup() {
+    if (creditCashoutStatus === "saving" || creditCashoutStatus === "checking") return;
+    setIsCreditPinPopupOpen(false);
+    resetCreditPinPopup();
+  }
+
+  async function confirmCreditPinAndCashout() {
+    if (!selectedCustomer) {
+      setCreditPinError("اختر زبون قبل البيع على الائتمان.");
+      return;
+    }
+
+    const expectedPin = String(selectedCustomer.credit_pin_code || "");
+
+    if (expectedPin.length !== 4) {
+      setCreditPinError("لا يوجد رمز ائتمان محفوظ لهذا الزبون. عدّل بيانات الزبون أولاً.");
+      return;
+    }
+
+    if (creditPinEntry.length !== 4) {
+      setCreditPinError("أدخل رمز الائتمان من 4 أرقام.");
+      return;
+    }
+
+    setCreditCashoutStatus("checking");
+    setCreditPinError("");
+
+    if (creditPinEntry !== expectedPin) {
+      setCreditPinEntry("");
+      setCreditCashoutStatus("error");
+      setCreditPinError("رمز الائتمان غير صحيح. البيع متوقف.");
+      return;
+    }
+
+    setCreditCashoutStatus("saving");
+    await cashOutSale(true, "credit");
+    setIsCreditPinPopupOpen(false);
+    resetCreditPinPopup();
+  }
+
   function escapeReceiptText(value: string) {
     return value
       .replace(/&/g, "&amp;")
@@ -420,6 +1150,7 @@ export default function PartPOSPage() {
     paid: number;
     change: number;
     tender: string;
+    customer?: PartPOSCustomer | null;
   }) {
     const receiptDate = args.createdAt ? new Date(args.createdAt) : new Date();
     const dateText = receiptDate.toLocaleDateString("ar-JO", {
@@ -454,6 +1185,38 @@ export default function PartPOSPage() {
         `;
       })
       .join("");
+
+    const customerHtml = args.customer
+      ? `
+    <section class="customerBox">
+      <div>
+        <span>الزبون</span>
+        <strong>${escapeReceiptText(args.customer.customer_name)}</strong>
+      </div>
+      <div>
+        <span>رقم الهاتف</span>
+        <strong>${escapeReceiptText(args.customer.phone_number || "—")}</strong>
+      </div>
+      <div>
+        <span>سقف الائتمان</span>
+        <strong>${money(Number(args.customer.credit_allowance)) || "0.00"} د.أ</strong>
+      </div>
+    </section>`
+      : `
+    <section class="customerBox">
+      <div>
+        <span>الزبون</span>
+        <strong>زبون نقدي</strong>
+      </div>
+      <div>
+        <span>رقم الهاتف</span>
+        <strong>—</strong>
+      </div>
+      <div>
+        <span>سقف الائتمان</span>
+        <strong>0.00 د.أ</strong>
+      </div>
+    </section>`;
 
     return `<!doctype html>
 <html lang="ar" dir="rtl">
@@ -512,6 +1275,26 @@ export default function PartPOSPage() {
       margin: 4px 0;
       color: #4b5563;
       font-size: 13px;
+    }
+    .customerBox {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      border: 1px solid #e5e7eb;
+      border-radius: 14px;
+      padding: 12px;
+      background: #f9fafb;
+    }
+    .customerBox span {
+      display: block;
+      color: #6b7280;
+      font-size: 12px;
+      margin-bottom: 4px;
+    }
+    .customerBox strong {
+      display: block;
+      color: #111827;
+      font-size: 14px;
     }
     .meta {
       text-align: left;
@@ -631,6 +1414,8 @@ export default function PartPOSPage() {
       </div>
     </section>
 
+    ${customerHtml}
+
     <section>
       <table>
         <thead>
@@ -690,6 +1475,89 @@ export default function PartPOSPage() {
     return true;
   }
 
+  function openExpensePopup() {
+    setExpenseMode("utility");
+    setExpenseForm(emptyExpenseForm());
+    setExpenseSaveStatus("idle");
+    setExpenseSaveMessage("");
+    setIsExpensePopupOpen(true);
+  }
+
+  function closeExpensePopup() {
+    if (expenseSaveStatus === "saving") return;
+    setIsExpensePopupOpen(false);
+    setExpenseSaveStatus("idle");
+    setExpenseSaveMessage("");
+  }
+
+  function switchExpenseMode(nextMode: ExpenseMode) {
+    setExpenseMode(nextMode);
+    setExpenseSaveStatus("idle");
+    setExpenseSaveMessage("");
+    setExpenseForm((current) => ({
+      ...current,
+      details: nextMode === "utility" ? current.details : "",
+      company: nextMode === "vendor" ? current.company : "",
+      paidBy: current.paidBy || "cash",
+    }));
+  }
+
+  async function saveExpense() {
+    if (!supabase) {
+      setExpenseSaveStatus("error");
+      setExpenseSaveMessage("Supabase غير مربوط. لا يمكن حفظ المصروف.");
+      return;
+    }
+
+    const amount = parseMoney(expenseForm.amount);
+    const details = expenseForm.details.trim();
+    const company = expenseForm.company.trim();
+
+    if (amount <= 0) {
+      setExpenseSaveStatus("error");
+      setExpenseSaveMessage("أدخل مبلغ المصروف.");
+      return;
+    }
+
+    if (expenseMode === "utility" && !details) {
+      setExpenseSaveStatus("error");
+      setExpenseSaveMessage("أدخل تفاصيل المصروف.");
+      return;
+    }
+
+    if (expenseMode === "vendor" && !company) {
+      setExpenseSaveStatus("error");
+      setExpenseSaveMessage("أدخل اسم الشركة أو المورد.");
+      return;
+    }
+
+    setExpenseSaveStatus("saving");
+    setExpenseSaveMessage("");
+
+    try {
+      const { error } = await supabase.from("partpos_expenses").insert({
+        expense_type: expenseMode,
+        details: expenseMode === "utility" ? details : null,
+        company_name: expenseMode === "vendor" ? company : null,
+        amount,
+        paid_by: expenseForm.paidBy,
+      });
+
+      if (error) throw error;
+
+      setExpenseSaveStatus("success");
+      setExpenseSaveMessage(
+        expenseMode === "utility"
+          ? `تم حفظ المصروف بقيمة ${money(amount)} د.أ (${expenseForm.paidBy === "cash" ? "نقداً" : "على الحساب"}).`
+          : `تم حفظ دفعة المورد بقيمة ${money(amount)} د.أ (${expenseForm.paidBy === "cash" ? "نقداً" : "على الحساب"}).`,
+      );
+      setExpenseForm(emptyExpenseForm());
+    } catch (error) {
+      setExpenseSaveStatus("error");
+      setExpenseSaveMessage(`خطأ Supabase: ${readSupabaseError(error)}`);
+    }
+  }
+
   function openSalesHistory() {
     if (typeof window === "undefined") return;
     window.open("/partpos/history", "_blank", "noopener,noreferrer");
@@ -709,8 +1577,16 @@ export default function PartPOSPage() {
     setRows([emptyRow(), emptyRow()]);
     setSearch("");
     setSuggestions([]);
+    setCustomerSearch("");
+    setCustomerSuggestions([]);
+    setSelectedCustomer(null);
+    setCustomerCreditInvoices([]);
+    setCustomerSearchError("");
+    setCustomerSaveError("");
     setCashReceived("");
     setMarginPopup(null);
+    setIsCreditPinPopupOpen(false);
+    resetCreditPinPopup();
   }
 
   function clearSale() {
@@ -719,7 +1595,10 @@ export default function PartPOSPage() {
     setCashoutMessage("");
   }
 
-  async function cashOutSale(printAfterSave = false) {
+  async function cashOutSale(
+    printAfterSave = false,
+    paymentMethod: "cash" | "credit" = "cash",
+  ) {
     if (!supabase) {
       setCashoutStatus("error");
       setCashoutMessage("Supabase غير مربوط. لا يمكن حفظ البيع.");
@@ -732,9 +1611,31 @@ export default function PartPOSPage() {
       return;
     }
 
-    if (paidAmount < saleTotal) {
+    const isCreditSale = paymentMethod === "credit";
+    const salePaidAmount = isCreditSale ? 0 : paidAmount;
+    const saleChangeDue = isCreditSale ? 0 : changeDue;
+
+    if (!isCreditSale && paidAmount < saleTotal) {
       setCashoutStatus("error");
       setCashoutMessage("المبلغ المدفوع أقل من الإجمالي.");
+      return;
+    }
+
+    if (isCreditSale && !selectedCustomer) {
+      setCashoutStatus("error");
+      setCashoutMessage("اختر زبون قبل البيع على الائتمان.");
+      return;
+    }
+
+    if (isCreditSale && Number(selectedCustomer?.credit_allowance ?? 0) <= 0) {
+      setCashoutStatus("error");
+      setCashoutMessage("هذا الزبون لا يملك سقف ائتمان.");
+      return;
+    }
+
+    if (isCreditSale && saleTotal > Number(selectedCustomer?.credit_allowance ?? 0)) {
+      setCashoutStatus("error");
+      setCashoutMessage("قيمة الفاتورة أعلى من سقف الائتمان.");
       return;
     }
 
@@ -753,16 +1654,25 @@ export default function PartPOSPage() {
         productIds[row.lineId] = await saveProductAndReturnId(row);
       }
 
+      const salePayload: Record<string, unknown> = {
+        payment_method: paymentMethod,
+        status: "cashed_out",
+        sale_total: saleTotal,
+        amount_paid: salePaidAmount,
+        change_due: saleChangeDue,
+        item_count: saleRows.length,
+      };
+
+      if (selectedCustomer) {
+        salePayload.customer_id = selectedCustomer.id;
+        salePayload.customer_name = selectedCustomer.customer_name;
+        salePayload.customer_phone = selectedCustomer.phone_number;
+        salePayload.customer_credit_allowance = selectedCustomer.credit_allowance;
+      }
+
       const { data: sale, error: saleError } = await supabase
         .from("partpos_sales")
-        .insert({
-          payment_method: "cash",
-          status: "cashed_out",
-          sale_total: saleTotal,
-          amount_paid: paidAmount,
-          change_due: changeDue,
-          item_count: saleRows.length,
-        })
+        .insert(salePayload)
         .select("id, sale_number, created_at")
         .single();
 
@@ -800,17 +1710,22 @@ export default function PartPOSPage() {
           createdAt: sale.created_at,
           rows: saleRows,
           total: saleTotal,
-          paid: paidAmount,
-          change: changeDue,
-          tender: "نقداً",
+          paid: salePaidAmount,
+          change: saleChangeDue,
+          tender: isCreditSale ? "ائتمان" : "نقداً",
+          customer: selectedCustomer,
         });
 
         printBlocked = !printed;
       }
 
-      const successMessage = printBlocked
-        ? `تم حفظ البيع رقم ${sale.sale_number ?? ""}، لكن المتصفح منع نافذة الطباعة. اسمح بالـ popups. الراجع: ${money(changeDue) || "0.00"} د.أ`
-        : `تم حفظ البيع رقم ${sale.sale_number ?? ""}. الراجع: ${money(changeDue) || "0.00"} د.أ`;
+      const successMessage = isCreditSale
+        ? printBlocked
+          ? `تم حفظ البيع على الائتمان رقم ${sale.sale_number ?? ""}، لكن المتصفح منع نافذة الطباعة. اسمح بالـ popups.`
+          : `تم حفظ البيع على الائتمان رقم ${sale.sale_number ?? ""}.`
+        : printBlocked
+          ? `تم حفظ البيع رقم ${sale.sale_number ?? ""}، لكن المتصفح منع نافذة الطباعة. اسمح بالـ popups. الراجع: ${money(saleChangeDue) || "0.00"} د.أ`
+          : `تم حفظ البيع رقم ${sale.sale_number ?? ""}. الراجع: ${money(saleChangeDue) || "0.00"} د.أ`;
 
       clearCurrentSaleInputs();
       setCashoutStatus("success");
@@ -1064,6 +1979,13 @@ export default function PartPOSPage() {
           >
             سجل المبيعات
           </button>
+          <button
+            className="expenseTopButton"
+            onClick={openExpensePopup}
+            type="button"
+          >
+            إضافة مصروف
+          </button>
           <button className="clearButton" onClick={clearSale} type="button">
             فاتورة جديدة
           </button>
@@ -1103,6 +2025,80 @@ export default function PartPOSPage() {
                 <b>{money(Number(product.price))} د.أ</b>
               </button>
             ))}
+          </div>
+        )}
+      </section>
+
+      <section className="customerCard">
+        <div className="customerBarHeader">
+          <div>
+            <label htmlFor="customer-search">إضافة زبون للفاتورة</label>
+            <p>ابحث بالاسم، اسم الشركة، أو رقم الهاتف.</p>
+          </div>
+          {selectedCustomer && (
+            <button type="button" className="removeCustomerButton" onClick={clearCustomerSelection}>
+              إزالة الزبون
+            </button>
+          )}
+        </div>
+
+        <div className="customerBar">
+          <div className="customerSearchBox">
+            <input
+              id="customer-search"
+              value={customerSearch}
+              onChange={(event) => void searchCustomers(event.target.value)}
+              placeholder="اسم الزبون / اسم الشركة / رقم الهاتف"
+              autoComplete="off"
+            />
+
+            {isCustomerSearching && <div className="hint">جاري البحث عن الزبون...</div>}
+            {customerSearchError && <div className="error">{customerSearchError}</div>}
+
+            {customerSuggestions.length > 0 && (
+              <div className="customerSuggestions">
+                {customerSuggestions.map((customer) => (
+                  <button
+                    key={customer.id}
+                    type="button"
+                    onClick={() => selectCustomer(customer)}
+                  >
+                    <strong>{customer.customer_name}</strong>
+                    <span>{customer.phone_number || "بدون رقم"}</span>
+                    <b>{money(Number(customer.credit_allowance)) || "0.00"} د.أ</b>
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+
+          <button type="button" className="addCustomerButton" onClick={openCustomerPopup}>
+            إضافة زبون جديد
+          </button>
+        </div>
+
+        {selectedCustomer && (
+          <div className="selectedCustomerBox">
+            <div>
+              <span>الزبون على الفاتورة</span>
+              <strong>{selectedCustomer.customer_name}</strong>
+            </div>
+            <div>
+              <span>رقم الهاتف</span>
+              <strong>{selectedCustomer.phone_number || "—"}</strong>
+            </div>
+            <div>
+              <span>سقف الائتمان</span>
+              <strong>{money(Number(selectedCustomer.credit_allowance)) || "0.00"} د.أ</strong>
+            </div>
+            <div>
+              <span>الرصيد المستحق</span>
+              <strong className={selectedCustomerCreditBalance > 0 ? "remainingNumber" : "changeNumber"}>
+                {creditBalanceLoading
+                  ? "جاري الحساب..."
+                  : `${money(selectedCustomerCreditBalance)} د.أ`}
+              </strong>
+            </div>
           </div>
         )}
       </section>
@@ -1262,7 +2258,7 @@ export default function PartPOSPage() {
             <button
               className="cashoutButton"
               disabled={!canCashOut}
-              onClick={() => void cashOutSale(false)}
+              onClick={() => void cashOutSale(false, "cash")}
               type="button"
             >
               {cashoutStatus === "saving" ? "جاري الحفظ..." : "إتمام البيع"}
@@ -1270,10 +2266,38 @@ export default function PartPOSPage() {
             <button
               className="printCashoutButton"
               disabled={!canCashOut}
-              onClick={() => void cashOutSale(true)}
+              onClick={() => void cashOutSale(true, "cash")}
               type="button"
             >
               إتمام البيع وطباعة الفاتورة
+            </button>
+            <button
+              className="creditCashoutButton"
+              disabled={!supabase || saleRows.length === 0 || saleTotal <= 0 || cashoutStatus === "saving"}
+              onClick={openCreditPinPopup}
+              type="button"
+            >
+              إتمام البيع على الائتمان وطباعة الفاتورة
+            </button>
+
+            <button
+              className="creditPaymentButton"
+              disabled={
+                !supabase ||
+                !selectedCustomer ||
+                selectedCustomerCreditBalance <= 0 ||
+                creditBalanceLoading ||
+                creditPaymentStatus === "saving" ||
+                cashoutStatus === "saving"
+              }
+              onClick={openCreditPaymentPopup}
+              type="button"
+            >
+              {creditBalanceLoading
+                ? "جاري حساب رصيد الزبون..."
+                : selectedCustomerCreditBalance > 0
+                  ? `دفع على حساب الائتمان • ${money(selectedCustomerCreditBalance)} د.أ`
+                  : "دفع على حساب الائتمان"}
             </button>
           </div>
 
@@ -1285,6 +2309,421 @@ export default function PartPOSPage() {
         </div>
       </section>
 
+
+      {isExpensePopupOpen && (
+        <div className="popupBackdrop" role="dialog" aria-modal="true">
+          <div className="expensePopupCard">
+            <p className="popupEyebrow">مصروفات</p>
+            <h2>إضافة مصروف</h2>
+
+            <div className="expenseTabs">
+              <button
+                type="button"
+                className={expenseMode === "utility" ? "expenseTab activeExpenseTab" : "expenseTab"}
+                onClick={() => switchExpenseMode("utility")}
+              >
+                خدمات / مرافق
+              </button>
+              <button
+                type="button"
+                className={expenseMode === "vendor" ? "expenseTab activeExpenseTab" : "expenseTab"}
+                onClick={() => switchExpenseMode("vendor")}
+              >
+                دفع مورد
+              </button>
+            </div>
+
+            <div className="expenseCashNote">
+              نقداً = يخصم من تقرير نهاية اليوم. على الحساب = يبقى مستحق ولا يلمس الكاش.
+            </div>
+
+            {expenseMode === "utility" ? (
+              <div className="expenseFormGrid">
+                <div>
+                  <label htmlFor="expense-details">التفاصيل</label>
+                  <input
+                    id="expense-details"
+                    value={expenseForm.details}
+                    onChange={(event) =>
+                      setExpenseForm((current) => ({
+                        ...current,
+                        details: event.target.value,
+                      }))
+                    }
+                    placeholder="مثال: راتب موظف، كهرباء، ماء، إنترنت، إيجار"
+                    autoComplete="off"
+                    autoFocus
+                  />
+                </div>
+
+                <div>
+                  <label htmlFor="expense-amount">المبلغ</label>
+                  <input
+                    id="expense-amount"
+                    value={expenseForm.amount}
+                    onChange={(event) =>
+                      setExpenseForm((current) => ({
+                        ...current,
+                        amount: event.target.value,
+                      }))
+                    }
+                    placeholder="0.00"
+                    inputMode="decimal"
+                    autoComplete="off"
+                  />
+                </div>
+
+                <div>
+                  <label htmlFor="expense-paid-by">طريقة الدفع</label>
+                  <select
+                    id="expense-paid-by"
+                    value={expenseForm.paidBy}
+                    onChange={(event) =>
+                      setExpenseForm((current) => ({
+                        ...current,
+                        paidBy: event.target.value as ExpensePaidBy,
+                      }))
+                    }
+                  >
+                    <option value="cash">نقداً - يخصم من صندوق اليوم</option>
+                    <option value="credit">على الحساب - لا يخصم من الكاش</option>
+                  </select>
+                </div>
+              </div>
+            ) : (
+              <div className="expenseFormGrid">
+                <div>
+                  <label htmlFor="vendor-company">الشركة / المورد</label>
+                  <input
+                    id="vendor-company"
+                    value={expenseForm.company}
+                    onChange={(event) =>
+                      setExpenseForm((current) => ({
+                        ...current,
+                        company: event.target.value,
+                      }))
+                    }
+                    placeholder="اسم الشركة أو المورد"
+                    autoComplete="off"
+                    autoFocus
+                  />
+                </div>
+
+                <div>
+                  <label htmlFor="vendor-amount">المبلغ</label>
+                  <input
+                    id="vendor-amount"
+                    value={expenseForm.amount}
+                    onChange={(event) =>
+                      setExpenseForm((current) => ({
+                        ...current,
+                        amount: event.target.value,
+                      }))
+                    }
+                    placeholder="0.00"
+                    inputMode="decimal"
+                    autoComplete="off"
+                  />
+                </div>
+
+                <div>
+                  <label htmlFor="vendor-paid-by">طريقة الدفع</label>
+                  <select
+                    id="vendor-paid-by"
+                    value={expenseForm.paidBy}
+                    onChange={(event) =>
+                      setExpenseForm((current) => ({
+                        ...current,
+                        paidBy: event.target.value as ExpensePaidBy,
+                      }))
+                    }
+                  >
+                    <option value="cash">نقداً - يخصم من صندوق اليوم</option>
+                    <option value="credit">على الحساب - يبقى مستحق</option>
+                  </select>
+                </div>
+              </div>
+            )}
+
+            {expenseSaveMessage && (
+              <div className={`expenseSaveMessage ${expenseSaveStatus}`}>
+                {expenseSaveMessage}
+              </div>
+            )}
+
+            <div className="customerPopupActions">
+              <button
+                type="button"
+                className="cancelCustomerButton"
+                onClick={closeExpensePopup}
+                disabled={expenseSaveStatus === "saving"}
+              >
+                إغلاق
+              </button>
+              <button
+                type="button"
+                className="saveCustomerButton"
+                onClick={() => void saveExpense()}
+                disabled={expenseSaveStatus === "saving"}
+              >
+                {expenseSaveStatus === "saving" ? "جاري الحفظ..." : "حفظ المصروف"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {isCreditPaymentPopupOpen && (
+        <div className="popupBackdrop" role="dialog" aria-modal="true">
+          <div className="creditPaymentPopupCard">
+            <p className="popupEyebrow">دفعة ائتمان</p>
+            <h2>دفع على حساب الزبون</h2>
+
+            <div className="creditCustomerSummary">
+              <div>
+                <span>الزبون</span>
+                <strong>{selectedCustomer?.customer_name || "—"}</strong>
+              </div>
+              <div>
+                <span>الرصيد المستحق</span>
+                <strong>{money(selectedCustomerCreditBalance)} د.أ</strong>
+              </div>
+              <div>
+                <span>عدد الفواتير المفتوحة</span>
+                <strong>{customerCreditInvoices.length}</strong>
+              </div>
+            </div>
+
+            <label htmlFor="credit-payment-amount">مبلغ الدفع</label>
+            <input
+              id="credit-payment-amount"
+              value={creditPaymentAmount}
+              onChange={(event) => setCreditPaymentAmount(event.target.value)}
+              placeholder="0.00"
+              inputMode="decimal"
+              autoComplete="off"
+              autoFocus
+            />
+
+            {creditPaymentError && (
+              <div className="customerPopupError">{creditPaymentError}</div>
+            )}
+
+            <div className="customerPopupActions creditPaymentActions">
+              <button
+                type="button"
+                className="cancelCustomerButton"
+                onClick={closeCreditPaymentPopup}
+                disabled={creditPaymentStatus === "saving"}
+              >
+                إلغاء
+              </button>
+              <button
+                type="button"
+                className="saveCustomerButton"
+                onClick={() => void saveCreditAccountPayment(false)}
+                disabled={creditPaymentStatus === "saving"}
+              >
+                {creditPaymentStatus === "saving" ? "جاري الحفظ..." : "تسجيل دفعة جزئية"}
+              </button>
+              <button
+                type="button"
+                className="saveFullCreditPaymentButton"
+                onClick={() => void saveCreditAccountPayment(true)}
+                disabled={creditPaymentStatus === "saving"}
+              >
+                دفع كامل الرصيد
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {isCreditPinPopupOpen && (
+        <div className="popupBackdrop" role="dialog" aria-modal="true">
+          <div className="creditPinPopupCard">
+            <p className="popupEyebrow">بيع على الائتمان</p>
+            <h2>تأكيد رمز الزبون</h2>
+
+            <div className="creditCustomerSummary">
+              <div>
+                <span>الزبون</span>
+                <strong>{selectedCustomer?.customer_name || "—"}</strong>
+              </div>
+              <div>
+                <span>إجمالي الفاتورة</span>
+                <strong>{money(saleTotal)} د.أ</strong>
+              </div>
+              <div>
+                <span>سقف الائتمان</span>
+                <strong>{money(Number(selectedCustomer?.credit_allowance ?? 0))} د.أ</strong>
+              </div>
+            </div>
+
+            <label htmlFor="credit-sale-pin">رمز الائتمان</label>
+            <input
+              id="credit-sale-pin"
+              value={creditPinEntry}
+              onChange={(event) =>
+                setCreditPinEntry(cleanFourDigitPin(event.target.value))
+              }
+              placeholder="أدخل 4 أرقام"
+              inputMode="numeric"
+              autoComplete="off"
+              maxLength={4}
+              autoFocus
+            />
+
+            {creditPinError && <div className="customerPopupError">{creditPinError}</div>}
+
+            <div className="customerPopupActions">
+              <button
+                type="button"
+                className="cancelCustomerButton"
+                onClick={closeCreditPinPopup}
+                disabled={
+                  creditCashoutStatus === "saving" || creditCashoutStatus === "checking"
+                }
+              >
+                إلغاء
+              </button>
+              <button
+                type="button"
+                className="saveCustomerButton"
+                onClick={() => void confirmCreditPinAndCashout()}
+                disabled={
+                  creditCashoutStatus === "saving" || creditCashoutStatus === "checking"
+                }
+              >
+                {creditCashoutStatus === "saving"
+                  ? "جاري الحفظ..."
+                  : creditCashoutStatus === "checking"
+                    ? "جاري التحقق..."
+                    : "تأكيد وإتمام البيع"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {isCustomerPopupOpen && (
+        <div className="popupBackdrop" role="dialog" aria-modal="true">
+          <div className="customerPopupCard">
+            <p className="popupEyebrow">زبون جديد</p>
+            <h2>إضافة زبون للفاتورة</h2>
+
+            <label htmlFor="customer-name">الاسم أو اسم الشركة</label>
+            <input
+              id="customer-name"
+              value={customerForm.customerName}
+              onChange={(event) =>
+                setCustomerForm((current) => ({
+                  ...current,
+                  customerName: event.target.value,
+                }))
+              }
+              placeholder="مثال: شركة المدينة / محمد أحمد"
+              autoComplete="off"
+            />
+
+            <label htmlFor="customer-phone">رقم الهاتف</label>
+            <input
+              id="customer-phone"
+              value={customerForm.phoneNumber}
+              onChange={(event) =>
+                setCustomerForm((current) => ({
+                  ...current,
+                  phoneNumber: event.target.value,
+                }))
+              }
+              placeholder="079..."
+              inputMode="tel"
+              autoComplete="off"
+            />
+
+            <label htmlFor="credit-allowance">سقف الائتمان</label>
+            <input
+              id="credit-allowance"
+              value={customerForm.creditAllowance}
+              onChange={(event) =>
+                setCustomerForm((current) => ({
+                  ...current,
+                  creditAllowance: event.target.value,
+                  customerPin:
+                    parseMoney(event.target.value) > 0 ? current.customerPin : "",
+                  customerPinConfirm:
+                    parseMoney(event.target.value) > 0
+                      ? current.customerPinConfirm
+                      : "",
+                }))
+              }
+              placeholder="0.00"
+              inputMode="decimal"
+            />
+
+            {parseMoney(customerForm.creditAllowance) > 0 && (
+              <div className="creditPinBox">
+                <div className="creditPinNotice">
+                  هذا الزبون لديه سقف ائتمان. لازم الزبون ينشئ رمز من 4 أرقام.
+                </div>
+
+                <label htmlFor="customer-pin">رمز الائتمان من الزبون</label>
+                <input
+                  id="customer-pin"
+                  value={customerForm.customerPin}
+                  onChange={(event) =>
+                    setCustomerForm((current) => ({
+                      ...current,
+                      customerPin: cleanFourDigitPin(event.target.value),
+                    }))
+                  }
+                  placeholder="4 أرقام"
+                  inputMode="numeric"
+                  autoComplete="off"
+                  maxLength={4}
+                />
+
+                <label htmlFor="customer-pin-confirm">تأكيد رمز الائتمان</label>
+                <input
+                  id="customer-pin-confirm"
+                  value={customerForm.customerPinConfirm}
+                  onChange={(event) =>
+                    setCustomerForm((current) => ({
+                      ...current,
+                      customerPinConfirm: cleanFourDigitPin(event.target.value),
+                    }))
+                  }
+                  placeholder="أدخل نفس الرمز مرة ثانية"
+                  inputMode="numeric"
+                  autoComplete="off"
+                  maxLength={4}
+                />
+              </div>
+            )}
+
+            {customerSaveError && <div className="customerPopupError">{customerSaveError}</div>}
+
+            <div className="customerPopupActions">
+              <button
+                type="button"
+                className="cancelCustomerButton"
+                onClick={closeCustomerPopup}
+                disabled={customerSaveStatus === "saving"}
+              >
+                إلغاء
+              </button>
+              <button
+                type="button"
+                className="saveCustomerButton"
+                onClick={() => void saveNewCustomer()}
+                disabled={customerSaveStatus === "saving"}
+              >
+                {customerSaveStatus === "saving" ? "جاري الحفظ..." : "حفظ الزبون"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {marginPopup && (
         <div className="popupBackdrop" role="dialog" aria-modal="true">
@@ -1386,6 +2825,21 @@ export default function PartPOSPage() {
           background: #f9fafb;
         }
 
+        .expenseTopButton {
+          border: 1px solid #b45309;
+          background: #b45309;
+          color: white;
+          padding: 12px 18px;
+          border-radius: 12px;
+          font-weight: 800;
+          cursor: pointer;
+          white-space: nowrap;
+        }
+
+        .expenseTopButton:hover {
+          background: #92400e;
+        }
+
         .clearButton {
           border: 0;
           background: #111827;
@@ -1471,6 +2925,322 @@ export default function PartPOSPage() {
 
         .suggestions span {
           color: #6b7280;
+        }
+
+        .customerCard {
+          max-width: 1200px;
+          margin: 0 auto 16px;
+          background: white;
+          border: 1px solid #e5e7eb;
+          border-radius: 18px;
+          box-shadow: 0 12px 30px rgba(15, 23, 42, 0.06);
+          padding: 18px;
+        }
+
+        .customerBarHeader {
+          display: flex;
+          align-items: flex-start;
+          justify-content: space-between;
+          gap: 14px;
+          margin-bottom: 12px;
+        }
+
+        .customerBarHeader p {
+          margin: -3px 0 0;
+          color: #6b7280;
+          font-size: 13px;
+        }
+
+        .customerBar {
+          display: grid;
+          grid-template-columns: 1fr auto;
+          gap: 12px;
+          align-items: start;
+        }
+
+        .customerSearchBox {
+          position: relative;
+        }
+
+        .customerSuggestions {
+          margin-top: 10px;
+          display: grid;
+          gap: 8px;
+        }
+
+        .customerSuggestions button {
+          display: grid;
+          grid-template-columns: 1fr auto auto;
+          gap: 14px;
+          align-items: center;
+          text-align: right;
+          border: 1px solid #e5e7eb;
+          background: #f9fafb;
+          padding: 12px;
+          border-radius: 12px;
+          cursor: pointer;
+        }
+
+        .customerSuggestions span {
+          color: #6b7280;
+        }
+
+        .addCustomerButton,
+        .removeCustomerButton {
+          border: 0;
+          border-radius: 12px;
+          padding: 12px 16px;
+          font-weight: 900;
+          cursor: pointer;
+          white-space: nowrap;
+        }
+
+        .addCustomerButton {
+          background: #111827;
+          color: white;
+        }
+
+        .removeCustomerButton {
+          background: #fee2e2;
+          color: #991b1b;
+        }
+
+        .selectedCustomerBox {
+          display: grid;
+          grid-template-columns: repeat(3, minmax(0, 1fr));
+          gap: 10px;
+          margin-top: 14px;
+        }
+
+        .selectedCustomerBox div {
+          border: 1px solid #e5e7eb;
+          border-radius: 14px;
+          padding: 12px;
+          background: #f9fafb;
+        }
+
+        .selectedCustomerBox span {
+          display: block;
+          color: #6b7280;
+          font-size: 12px;
+          margin-bottom: 5px;
+        }
+
+        .selectedCustomerBox strong {
+          display: block;
+          color: #111827;
+          font-size: 16px;
+        }
+
+        .customerPopupCard,
+        .creditPinPopupCard,
+        .creditPaymentPopupCard,
+        .expensePopupCard {
+          width: min(520px, 100%);
+          background: white;
+          border-radius: 20px;
+          box-shadow: 0 24px 80px rgba(15, 23, 42, 0.28);
+          padding: 22px;
+          border: 1px solid #e5e7eb;
+        }
+
+        .customerPopupCard h2,
+        .creditPinPopupCard h2,
+        .creditPaymentPopupCard h2,
+        .expensePopupCard h2 {
+          margin: 0 0 16px;
+          color: #111827;
+          font-size: 24px;
+          line-height: 1.25;
+        }
+
+        .customerPopupCard label,
+        .creditPinPopupCard label,
+        .creditPaymentPopupCard label,
+        .expensePopupCard label {
+          margin-top: 12px;
+          font-size: 13px;
+        }
+
+        .expenseTabs {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 10px;
+          margin-bottom: 16px;
+        }
+
+        .expenseTab {
+          border: 1px solid #e5e7eb;
+          border-radius: 14px;
+          padding: 12px 14px;
+          background: #f9fafb;
+          color: #374151;
+          font-weight: 900;
+          cursor: pointer;
+        }
+
+        .activeExpenseTab {
+          background: #111827;
+          color: white;
+          border-color: #111827;
+        }
+
+        .expenseCashNote {
+          margin: -4px 0 14px;
+          border: 1px solid #fed7aa;
+          border-radius: 12px;
+          padding: 10px 12px;
+          background: #fff7ed;
+          color: #9a3412;
+          font-weight: 800;
+          font-size: 13px;
+        }
+
+        .expenseFormGrid {
+          display: grid;
+          grid-template-columns: 1fr;
+          gap: 12px;
+        }
+
+        .expenseFormGrid input,
+        .expenseFormGrid select {
+          width: 100%;
+          border: 1px solid #d1d5db;
+          border-radius: 12px;
+          padding: 12px 14px;
+          font-size: 16px;
+          outline: none;
+          background: white;
+        }
+
+        .expenseSaveMessage {
+          margin-top: 12px;
+          border-radius: 12px;
+          padding: 10px 12px;
+          font-weight: 800;
+        }
+
+        .expenseSaveMessage.success {
+          background: #dcfce7;
+          color: #166534;
+          border: 1px solid #bbf7d0;
+        }
+
+        .expenseSaveMessage.error {
+          background: #fee2e2;
+          color: #991b1b;
+          border: 1px solid #fecaca;
+        }
+
+        .expenseSaveMessage.saving,
+        .expenseSaveMessage.idle {
+          background: #eff6ff;
+          color: #1d4ed8;
+          border: 1px solid #bfdbfe;
+        }
+
+        .creditCustomerSummary {
+          display: grid;
+          grid-template-columns: repeat(3, minmax(0, 1fr));
+          gap: 10px;
+          margin-bottom: 14px;
+        }
+
+        .creditCustomerSummary div {
+          border: 1px solid #e5e7eb;
+          border-radius: 14px;
+          padding: 10px;
+          background: #f9fafb;
+        }
+
+        .creditCustomerSummary span {
+          display: block;
+          color: #6b7280;
+          font-size: 12px;
+          margin-bottom: 4px;
+        }
+
+        .creditCustomerSummary strong {
+          display: block;
+          font-size: 15px;
+          color: #111827;
+        }
+
+        .creditPaymentActions {
+          grid-template-columns: 1fr 1fr 1fr;
+        }
+
+        .saveFullCreditPaymentButton {
+          border: 0;
+          border-radius: 12px;
+          padding: 13px 16px;
+          background: #b45309;
+          color: white;
+          font-weight: 900;
+          cursor: pointer;
+        }
+
+        .saveFullCreditPaymentButton:disabled {
+          background: #9ca3af;
+          cursor: not-allowed;
+        }
+
+        .creditPinBox {
+          margin-top: 14px;
+          border: 1px solid #fbbf24;
+          background: #fffbeb;
+          border-radius: 16px;
+          padding: 14px;
+        }
+
+        .creditPinNotice {
+          color: #92400e;
+          font-weight: 900;
+          font-size: 13px;
+          margin-bottom: 10px;
+        }
+
+        .customerPopupActions {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 10px;
+          margin-top: 16px;
+        }
+
+        .saveCustomerButton,
+        .cancelCustomerButton {
+          border: 0;
+          border-radius: 14px;
+          padding: 13px 16px;
+          font-size: 16px;
+          font-weight: 900;
+          cursor: pointer;
+        }
+
+        .saveCustomerButton {
+          background: #15803d;
+          color: white;
+        }
+
+        .cancelCustomerButton {
+          background: #f3f4f6;
+          color: #111827;
+        }
+
+        .saveCustomerButton:disabled,
+        .cancelCustomerButton:disabled {
+          opacity: 0.6;
+          cursor: not-allowed;
+        }
+
+        .customerPopupError {
+          margin-top: 12px;
+          background: #fee2e2;
+          color: #991b1b;
+          border: 1px solid #fecaca;
+          border-radius: 12px;
+          padding: 10px 12px;
+          font-weight: 800;
         }
 
         .tableCard {
@@ -1614,7 +3384,9 @@ export default function PartPOSPage() {
         }
 
         .cashoutButton,
-        .printCashoutButton {
+        .printCashoutButton,
+        .creditCashoutButton,
+        .creditPaymentButton {
           border: 0;
           color: white;
           padding: 13px 18px;
@@ -1632,8 +3404,18 @@ export default function PartPOSPage() {
           background: #111827;
         }
 
+        .creditCashoutButton {
+          background: #7c3aed;
+        }
+
+        .creditPaymentButton {
+          background: #b45309;
+        }
+
         .cashoutButton:disabled,
-        .printCashoutButton:disabled {
+        .printCashoutButton:disabled,
+        .creditCashoutButton:disabled,
+        .creditPaymentButton:disabled {
           background: #9ca3af;
           cursor: not-allowed;
         }
@@ -1872,8 +3654,15 @@ export default function PartPOSPage() {
             flex-direction: column;
           }
 
-          .cashoutPanel {
+          .cashoutPanel,
+          .customerBar,
+          .selectedCustomerBox {
             grid-template-columns: 1fr;
+          }
+
+          .customerBarHeader {
+            flex-direction: column;
+            align-items: stretch;
           }
 
           .historyHeader,

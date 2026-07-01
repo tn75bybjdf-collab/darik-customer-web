@@ -1,7 +1,7 @@
 "use client";
 
 import { createClient } from "@supabase/supabase-js";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 type SaleRow = {
   id: string;
@@ -24,6 +24,38 @@ type SaleItem = {
   cost: number;
   line_total: number;
   created_at: string;
+};
+
+type CreditPaymentRow = {
+  id: string;
+  payment_number: number | null;
+  customer_name: string;
+  customer_phone: string;
+  amount_paid: number;
+  balance_before: number;
+  balance_after: number;
+  created_at: string;
+};
+
+type CashExpenseRow = {
+  id: string;
+  expense_number: number | null;
+  expense_type: "utility" | "vendor";
+  details: string;
+  company_name: string;
+  amount: number;
+  paid_by: "cash" | "credit";
+  created_at: string;
+};
+
+type CashCountStatus = "short" | "over" | "matched";
+
+type SubmittedCashCount = {
+  report_date: string;
+  expected_cash: number;
+  actual_cash: number;
+  difference: number;
+  status: CashCountStatus;
 };
 
 type DepartmentSummary = {
@@ -88,9 +120,52 @@ function formatArabicTime(value: string) {
   });
 }
 
+function normalizedPaymentMethod(value: string) {
+  return String(value || "cash").toLowerCase();
+}
+
+function isCreditPaymentMethod(value: string) {
+  return normalizedPaymentMethod(value) === "credit";
+}
+
+function isCashPaymentMethod(value: string) {
+  return !isCreditPaymentMethod(value);
+}
+
 function tenderLabel(value: string) {
-  if (value === "cash") return "نقداً";
+  if (isCreditPaymentMethod(value)) return "ائتمان";
+  if (isCashPaymentMethod(value)) return "نقداً";
   return value || "نقداً";
+}
+
+function readSupabaseError(error: unknown) {
+  if (error instanceof Error) return error.message;
+
+  if (typeof error === "object" && error !== null) {
+    const record = error as Record<string, unknown>;
+    const parts = [
+      record.message ? String(record.message) : "",
+      record.details ? String(record.details) : "",
+      record.hint ? String(record.hint) : "",
+      record.code ? String(record.code) : "",
+    ].filter(Boolean);
+
+    if (parts.length > 0) return parts.join(" | ");
+
+    try {
+      return JSON.stringify(record);
+    } catch {
+      return "Unknown Supabase error";
+    }
+  }
+
+  return String(error || "Unknown error");
+}
+
+function cashCountStatusLabel(status: CashCountStatus) {
+  if (status === "short") return "نقص";
+  if (status === "over") return "زيادة";
+  return "الصندوق مطابق";
 }
 
 function backToPOS() {
@@ -107,10 +182,20 @@ export default function PartPOSEndOfDayReportPage() {
   const [dateValue, setDateValue] = useState(localDateInputValue());
   const [sales, setSales] = useState<SaleRow[]>([]);
   const [items, setItems] = useState<SaleItem[]>([]);
+  const [creditPayments, setCreditPayments] = useState<CreditPaymentRow[]>([]);
+  const [cashExpenses, setCashExpenses] = useState<CashExpenseRow[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [lastUpdated, setLastUpdated] = useState("");
-  const [actualCashText, setActualCashText] = useState("");
+  const actualCashInputRef = useRef<HTMLInputElement | null>(null);
+  const [actualCashSnapshot, setActualCashSnapshot] = useState("");
+  const [cashCountSubmitStatus, setCashCountSubmitStatus] = useState<
+    "idle" | "saving" | "error"
+  >("idle");
+  const [cashCountSubmitError, setCashCountSubmitError] = useState("");
+  const [submittedCashCount, setSubmittedCashCount] =
+    useState<SubmittedCashCount | null>(null);
+  const [isCashCountResultOpen, setIsCashCountResultOpen] = useState(false);
 
   const supabase = useMemo(() => {
     const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -183,8 +268,63 @@ export default function PartPOSEndOfDayReportPage() {
         }));
       }
 
+      const { data: creditPaymentRows, error: creditPaymentsError } = await supabase
+        .from("partpos_credit_payments")
+        .select(
+          "id, payment_number, customer_name, customer_phone, amount_paid, balance_before, balance_after, created_at",
+        )
+        .gte("created_at", start.toISOString())
+        .lt("created_at", end.toISOString())
+        .order("created_at", { ascending: false })
+        .limit(5000);
+
+      if (creditPaymentsError) throw creditPaymentsError;
+
+      const cleanCreditPayments: CreditPaymentRow[] = (creditPaymentRows ?? []).map(
+        (payment) => ({
+          id: String(payment.id),
+          payment_number:
+            payment.payment_number === null || payment.payment_number === undefined
+              ? null
+              : Number(payment.payment_number),
+          customer_name: String(payment.customer_name ?? ""),
+          customer_phone: String(payment.customer_phone ?? ""),
+          amount_paid: Number(payment.amount_paid ?? 0),
+          balance_before: Number(payment.balance_before ?? 0),
+          balance_after: Number(payment.balance_after ?? 0),
+          created_at: String(payment.created_at),
+        }),
+      );
+
+      const { data: cashExpenseRows, error: cashExpensesError } = await supabase
+        .from("partpos_expenses")
+        .select("id, expense_number, expense_type, details, company_name, amount, paid_by, created_at")
+        .eq("paid_by", "cash")
+        .gte("created_at", start.toISOString())
+        .lt("created_at", end.toISOString())
+        .order("created_at", { ascending: false })
+        .limit(5000);
+
+      if (cashExpensesError) throw cashExpensesError;
+
+      const cleanCashExpenses: CashExpenseRow[] = (cashExpenseRows ?? []).map((expense) => ({
+        id: String(expense.id),
+        expense_number:
+          expense.expense_number === null || expense.expense_number === undefined
+            ? null
+            : Number(expense.expense_number),
+        expense_type: expense.expense_type === "vendor" ? "vendor" : "utility",
+        details: String(expense.details ?? ""),
+        company_name: String(expense.company_name ?? ""),
+        amount: Number(expense.amount ?? 0),
+        paid_by: "cash",
+        created_at: String(expense.created_at),
+      }));
+
       setSales(cleanSales);
       setItems(cleanItems);
+      setCreditPayments(cleanCreditPayments);
+      setCashExpenses(cleanCashExpenses);
       setLastUpdated(
         new Date().toLocaleTimeString("ar-JO", {
           hour: "2-digit",
@@ -255,15 +395,109 @@ export default function PartPOSEndOfDayReportPage() {
   }, [items, saleIdsByDepartment]);
 
   const totalSales = sales.reduce((sum, sale) => sum + Number(sale.sale_total || 0), 0);
-  const totalCashSales = sales
-    .filter((sale) => sale.payment_method === "cash" || !sale.payment_method)
-    .reduce((sum, sale) => sum + Number(sale.sale_total || 0), 0);
-  const totalPaid = sales.reduce((sum, sale) => sum + Number(sale.amount_paid || 0), 0);
-  const totalChange = sales.reduce((sum, sale) => sum + Number(sale.change_due || 0), 0);
-  const expectedDrawerCash = STARTING_BANK + totalCashSales;
-  const depositAmount = Math.max(expectedDrawerCash - STARTING_BANK, 0);
-  const actualCash = Number(actualCashText || 0);
-  const hasActualCash = actualCashText.trim() !== "" && Number.isFinite(actualCash);
+
+  const cashSales = sales.filter((sale) => isCashPaymentMethod(sale.payment_method));
+  const creditSales = sales.filter((sale) => isCreditPaymentMethod(sale.payment_method));
+
+  const totalCashSales = cashSales.reduce(
+    (sum, sale) => sum + Number(sale.sale_total || 0),
+    0,
+  );
+  const totalCreditSales = creditSales.reduce(
+    (sum, sale) => sum + Number(sale.sale_total || 0),
+    0,
+  );
+
+  const totalCreditAccountPayments = creditPayments.reduce(
+    (sum, payment) => sum + Number(payment.amount_paid || 0),
+    0,
+  );
+
+  const totalCashExpenses = cashExpenses.reduce(
+    (sum, expense) => sum + Number(expense.amount || 0),
+    0,
+  );
+
+  const realCashCollectedToday = totalCashSales + totalCreditAccountPayments;
+  const netCashAfterExpenses = realCashCollectedToday - totalCashExpenses;
+  const totalPaid = cashSales.reduce((sum, sale) => sum + Number(sale.amount_paid || 0), 0);
+  const totalChange = cashSales.reduce((sum, sale) => sum + Number(sale.change_due || 0), 0);
+  const expectedDrawerCash = Math.max(netCashAfterExpenses, 0);
+  const depositAmount = Math.max(netCashAfterExpenses, 0);
+  const actualCash = Number(actualCashSnapshot || 0);
+  const hasActualCash = actualCashSnapshot.trim() !== "" && Number.isFinite(actualCash);
+
+  async function submitActualCashCount() {
+    if (!supabase) {
+      setCashCountSubmitStatus("error");
+      setCashCountSubmitError("Supabase غير مربوط. لا يمكن حفظ العد.");
+      return;
+    }
+
+    const rawValue = actualCashInputRef.current?.value ?? "";
+    const parsedActualCash = Number(rawValue || 0);
+
+    if (rawValue.trim() === "" || !Number.isFinite(parsedActualCash) || parsedActualCash < 0) {
+      setCashCountSubmitStatus("error");
+      setCashCountSubmitError("أدخل المبلغ الموجود بالصندوق بشكل صحيح.");
+      return;
+    }
+
+    const difference = parsedActualCash - expectedDrawerCash;
+    const status: CashCountStatus =
+      Math.abs(difference) < 0.005 ? "matched" : difference < 0 ? "short" : "over";
+
+    const result: SubmittedCashCount = {
+      report_date: dateValue,
+      expected_cash: expectedDrawerCash,
+      actual_cash: parsedActualCash,
+      difference,
+      status,
+    };
+
+    setCashCountSubmitStatus("saving");
+    setCashCountSubmitError("");
+    setActualCashSnapshot(rawValue);
+
+    try {
+      const { error } = await supabase.from("partpos_daily_counts").upsert(
+        {
+          report_date: dateValue,
+          expected_cash: expectedDrawerCash,
+          actual_cash: parsedActualCash,
+          difference,
+          status,
+          starting_bank: STARTING_BANK,
+          cash_sales: totalCashSales,
+          credit_sales: totalCreditSales,
+          credit_account_payments: totalCreditAccountPayments,
+          cash_expenses: totalCashExpenses,
+          deposit_amount: depositAmount,
+          sales_total: totalSales,
+          updated_at: new Date().toISOString(),
+        },
+        { onConflict: "report_date" },
+      );
+
+      if (error) throw error;
+
+      setSubmittedCashCount(result);
+      setIsCashCountResultOpen(true);
+      setCashCountSubmitStatus("idle");
+    } catch (error) {
+      setCashCountSubmitStatus("error");
+      setCashCountSubmitError(`خطأ Supabase: ${readSupabaseError(error)}`);
+    }
+  }
+
+  function clearActualCashCount() {
+    if (actualCashInputRef.current) actualCashInputRef.current.value = "";
+    setActualCashSnapshot("");
+    setSubmittedCashCount(null);
+    setIsCashCountResultOpen(false);
+    setCashCountSubmitStatus("idle");
+    setCashCountSubmitError("");
+  }
   const shortOverAmount = hasActualCash ? actualCash - expectedDrawerCash : 0;
   const cashStatus =
     !hasActualCash || Math.abs(shortOverAmount) < 0.005
@@ -285,7 +519,7 @@ export default function PartPOSEndOfDayReportPage() {
           <p className="eyebrow">PartPOS</p>
           <h1>تقرير نهاية اليوم</h1>
           <p className="subtext">
-            التقرير يحسب اليوم من 12:00 صباحاً إلى 11:59 مساءً.
+            التقرير يحسب اليوم من 12:00 صباحاً إلى 11:59 مساءً. مبيعات الائتمان لا تدخل الصندوق، والمصروفات النقدية تخصم من كاش اليوم.
           </p>
         </div>
 
@@ -334,16 +568,33 @@ export default function PartPOSEndOfDayReportPage() {
           <label htmlFor="actual-cash">إجمالي النقد الموجود بالصندوق</label>
           <input
             id="actual-cash"
+            ref={actualCashInputRef}
             type="number"
             min="0"
             step="0.01"
             inputMode="decimal"
             placeholder="مثال: 235.00"
-            value={actualCashText}
-            onChange={(event) => setActualCashText(event.target.value)}
+            defaultValue=""
           />
+          <div className="cashCountActions">
+            <button
+              type="button"
+              className="applyCashCountButton"
+              onClick={() => void submitActualCashCount()}
+              disabled={cashCountSubmitStatus === "saving"}
+            >
+              {cashCountSubmitStatus === "saving" ? "جاري الحفظ..." : "تثبيت العد"}
+            </button>
+            <button
+              type="button"
+              className="clearCashCountButton"
+              onClick={clearActualCashCount}
+            >
+              مسح
+            </button>
+          </div>
           <p>
-            اكتب كامل النقد الموجود بالصندوق، شامل بنك البداية اليومي 50 د.أ.
+            اكتب النقد المتوقع من عمليات اليوم بعد المصروفات النقدية. لا تشمل مبيعات الائتمان غير المحصلة.
           </p>
         </div>
 
@@ -366,8 +617,11 @@ export default function PartPOSEndOfDayReportPage() {
           ) : (
             <strong>الصندوق مطابق</strong>
           )}
+          {cashCountSubmitError && (
+            <div className="cashCountSubmitError">{cashCountSubmitError}</div>
+          )}
           <small>
-            المتوقع بالصندوق: {money(expectedDrawerCash)} د.أ
+            المتوقع بعد المصروفات: {money(expectedDrawerCash)} د.أ — نقد فعلي فقط
           </small>
         </div>
       </section>
@@ -392,14 +646,27 @@ export default function PartPOSEndOfDayReportPage() {
           <div className="summaryBox redBox">
             <span>إجمالي المبيعات</span>
             <strong>{money(totalSales)} د.أ</strong>
+            <small>نقد + ائتمان</small>
+          </div>
+          <div className="summaryBox greenBox">
+            <span>مبيعات نقدية دخلت الصندوق</span>
+            <strong>{money(totalCashSales)} د.أ</strong>
+          </div>
+          <div className="summaryBox orangeBox">
+            <span>مبيعات ائتمان لم تدخل الصندوق</span>
+            <strong>{money(totalCreditSales)} د.أ</strong>
+          </div>
+          <div className="summaryBox greenBox">
+            <span>تحصيل حسابات ائتمان</span>
+            <strong>{money(totalCreditAccountPayments)} د.أ</strong>
+          </div>
+          <div className="summaryBox redBox">
+            <span>مصروفات نقدية خرجت من الصندوق</span>
+            <strong>{money(totalCashExpenses)} د.أ</strong>
           </div>
           <div className="summaryBox">
             <span>عدد الفواتير</span>
             <strong>{sales.length}</strong>
-          </div>
-          <div className="summaryBox">
-            <span>عدد القطع المباعة</span>
-            <strong>{money(totalQuantity)}</strong>
           </div>
           <div className="summaryBox">
             <span>إجمالي الربح التقريبي</span>
@@ -411,20 +678,37 @@ export default function PartPOSEndOfDayReportPage() {
           <div className="depositBox">
             <span>البنك الافتتاحي اليومي</span>
             <strong>{money(STARTING_BANK)} د.أ</strong>
-          </div>
-          <div className="depositBox">
-            <span>إجمالي المبيعات النقدية</span>
-            <strong>{money(totalCashSales)} د.أ</strong>
+            <small>معلومة فقط، لا يدخل في حساب كاش اليوم</small>
           </div>
           <div className="depositBox greenBox">
-            <span>المبلغ المتوقع داخل الصندوق</span>
-            <strong>{money(expectedDrawerCash)} د.أ</strong>
-            <small>المبيعات النقدية + بنك البداية</small>
+            <span>مبيعات نقدية</span>
+            <strong>{money(totalCashSales)} د.أ</strong>
+            <small>دخلت الصندوق اليوم</small>
+          </div>
+          <div className="depositBox greenBox">
+            <span>تحصيل من حسابات ائتمان</span>
+            <strong>{money(totalCreditAccountPayments)} د.أ</strong>
+            <small>دفعات حقيقية دخلت الصندوق</small>
           </div>
           <div className="depositBox redBox">
-            <span>المبلغ المطلوب للإيداع</span>
+            <span>مصروفات نقدية</span>
+            <strong>- {money(totalCashExpenses)} د.أ</strong>
+            <small>دفعات خرجت من الصندوق اليوم</small>
+          </div>
+          <div className="depositBox orangeBox">
+            <span>مبيعات ائتمان</span>
+            <strong>{money(totalCreditSales)} د.أ</strong>
+            <small>بيع تم اليوم لكن cash مش موجود</small>
+          </div>
+          <div className="depositBox greenBox">
+            <span>النقد المتوقع بعد المصروفات</span>
+            <strong>{money(expectedDrawerCash)} د.أ</strong>
+            <small>مبيعات نقدية + تحصيل ائتمان - مصروفات نقدية</small>
+          </div>
+          <div className="depositBox redBox">
+            <span>المبلغ المتوقع للإيداع</span>
             <strong>{money(depositAmount)} د.أ</strong>
-            <small>بعد إبقاء 50 د.أ كبنك لليوم التالي</small>
+            <small>مثال: 300 مبيعات نقدية - 300 مصروف نقدي = 0 د.أ</small>
           </div>
         </div>
 
@@ -432,7 +716,7 @@ export default function PartPOSEndOfDayReportPage() {
           <div className="depositBox">
             <span>النقد المعدود فعلياً</span>
             <strong>{hasActualCash ? money(actualCash) : "—"} د.أ</strong>
-            <small>يشمل بنك البداية 50 د.أ</small>
+            <small>نقد اليوم بعد خصم المصروفات النقدية</small>
           </div>
           <div
             className={
@@ -453,19 +737,19 @@ export default function PartPOSEndOfDayReportPage() {
             ) : (
               <strong>مطابق</strong>
             )}
-            <small>مقارنة بالمبلغ المتوقع داخل الصندوق</small>
+            <small>مقارنة بالنقد المتوقع بعد خصم المصروفات</small>
           </div>
           <div className="depositBox">
             <span>يتم إخراج هذا المبلغ للإيداع</span>
             <strong>{money(depositAmount)} د.أ</strong>
-            <small>ثم يبقى 50 د.أ كبنك لبداية اليوم التالي</small>
+            <small>ثم يبقى 50 د.أ كبنك لبداية اليوم التالي. مبيعات الائتمان غير المحصلة لا تودع.</small>
           </div>
         </div>
 
         <section className="sectionBlock">
           <div className="sectionTitle">
             <h3>ملخص حسب القسم</h3>
-            <p>مرتب من الأعلى مبيعاً إلى الأقل.</p>
+            <p>مرتب من الأعلى مبيعاً إلى الأقل. يشمل النقد والائتمان لأن البيع حصل.</p>
           </div>
 
           {departmentSummary.length === 0 ? (
@@ -523,6 +807,67 @@ export default function PartPOSEndOfDayReportPage() {
           )}
         </section>
 
+        <section className="sectionBlock cashExpensesSection">
+          <div className="sectionTitle">
+            <h3>المصروفات النقدية من الصندوق</h3>
+            <p>هذه المبالغ خرجت نقداً اليوم وتخصم من الكاش المتوقع.</p>
+          </div>
+
+          {cashExpenses.length === 0 ? (
+            <div className="emptyState">لا يوجد مصروفات نقدية لهذا اليوم.</div>
+          ) : (
+            <div className="receiptsList">
+              {cashExpenses.map((expense) => (
+                <div className="receiptRow" key={expense.id}>
+                  <div>
+                    <strong>{expense.expense_number ? `قيد ${expense.expense_number}` : "مصروف نقدي"}</strong>
+                    <span>
+                      {formatArabicTime(expense.created_at)} •{" "}
+                      {expense.expense_type === "vendor"
+                        ? expense.company_name || "مورد غير محدد"
+                        : expense.details || "مصروف بدون تفاصيل"}
+                    </span>
+                  </div>
+                  <div>
+                    <strong className="redText">- {money(expense.amount)} د.أ</strong>
+                    <span>خصم من الصندوق</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </section>
+
+        <section className="sectionBlock creditPaymentsSection">
+          <div className="sectionTitle">
+            <h3>تحصيل حسابات ائتمان الزبائن</h3>
+            <p>هذه دفعات نقدية دخلت الصندوق اليوم، وليست مبيعات جديدة.</p>
+          </div>
+
+          {creditPayments.length === 0 ? (
+            <div className="emptyState">لا يوجد دفعات ائتمان محصلة لهذا اليوم.</div>
+          ) : (
+            <div className="receiptsList">
+              {creditPayments.map((payment) => (
+                <div className="receiptRow" key={payment.id}>
+                  <div>
+                    <strong>سند قبض رقم {payment.payment_number ?? "—"}</strong>
+                    <span>
+                      {formatArabicTime(payment.created_at)} • {payment.customer_name || "زبون غير محدد"}
+                    </span>
+                    {payment.customer_phone && <span>{payment.customer_phone}</span>}
+                  </div>
+                  <div>
+                    <strong className="greenText">{money(payment.amount_paid)} د.أ</strong>
+                    <span>الرصيد قبل: {money(payment.balance_before)} د.أ</span>
+                    <span>الرصيد بعد: {money(payment.balance_after)} د.أ</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </section>
+
         <section className="sectionBlock receiptsSection">
           <div className="sectionTitle">
             <h3>الفواتير داخل التقرير</h3>
@@ -541,11 +886,20 @@ export default function PartPOSEndOfDayReportPage() {
                       {formatArabicTime(sale.created_at)} • {sale.item_count} أصناف •{" "}
                       {tenderLabel(sale.payment_method)}
                     </span>
+                    {isCreditPaymentMethod(sale.payment_method) && (
+                      <span className="orangeText">ائتمان — لم يدخل الصندوق</span>
+                    )}
                   </div>
                   <div>
                     <strong className="redText">{money(sale.sale_total)} د.أ</strong>
-                    <span>مدفوع: {money(sale.amount_paid)} د.أ</span>
-                    <span className="greenText">راجع: {money(sale.change_due)} د.أ</span>
+                    {isCreditPaymentMethod(sale.payment_method) ? (
+                      <span className="orangeText">دخل الصندوق: 0.00 د.أ</span>
+                    ) : (
+                      <>
+                        <span>مدفوع: {money(sale.amount_paid)} د.أ</span>
+                        <span className="greenText">راجع: {money(sale.change_due)} د.أ</span>
+                      </>
+                    )}
                   </div>
                 </div>
               ))}
@@ -562,6 +916,64 @@ export default function PartPOSEndOfDayReportPage() {
           </div>
         </div>
       </section>
+
+      {isCashCountResultOpen && submittedCashCount && (
+        <div className="popupBackdrop noPrint" role="dialog" aria-modal="true">
+          <div className="cashCountResultCard">
+            <p className="eyebrow">نتيجة عد الصندوق</p>
+            <h2>{cashCountStatusLabel(submittedCashCount.status)}</h2>
+
+            <div className="cashCountResultGrid">
+              <div>
+                <span>المتوقع بالصندوق</span>
+                <strong>{money(submittedCashCount.expected_cash)} د.أ</strong>
+              </div>
+              <div>
+                <span>الموجود فعلياً</span>
+                <strong>{money(submittedCashCount.actual_cash)} د.أ</strong>
+              </div>
+              <div>
+                <span>الفرق</span>
+                <strong
+                  className={
+                    submittedCashCount.status === "matched"
+                      ? "greenText"
+                      : submittedCashCount.status === "short"
+                        ? "redText"
+                        : "orangeText"
+                  }
+                >
+                  {money(Math.abs(submittedCashCount.difference))} د.أ
+                </strong>
+              </div>
+            </div>
+
+            <div
+              className={
+                submittedCashCount.status === "matched"
+                  ? "cashCountResultMessage matched"
+                  : submittedCashCount.status === "short"
+                    ? "cashCountResultMessage short"
+                    : "cashCountResultMessage over"
+              }
+            >
+              {submittedCashCount.status === "matched"
+                ? "الصندوق مطابق. لا يوجد نقص أو زيادة."
+                : submittedCashCount.status === "short"
+                  ? `الصندوق ناقص ${money(Math.abs(submittedCashCount.difference))} د.أ.`
+                  : `الصندوق زائد ${money(Math.abs(submittedCashCount.difference))} د.أ.`}
+            </div>
+
+            <button
+              type="button"
+              className="closeResultButton"
+              onClick={() => setIsCashCountResultOpen(false)}
+            >
+              إغلاق
+            </button>
+          </div>
+        </div>
+      )}
 
       <style jsx>{`
         .reportPage {
@@ -687,8 +1099,139 @@ export default function PartPOSEndOfDayReportPage() {
         }
 
         input:focus {
+          outline: none;
           border-color: #111827;
           box-shadow: 0 0 0 3px rgba(17, 24, 39, 0.08);
+        }
+
+        .popupBackdrop {
+          position: fixed;
+          inset: 0;
+          z-index: 80;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          padding: 20px;
+          background: rgba(15, 23, 42, 0.55);
+        }
+
+        .cashCountResultCard {
+          width: min(520px, 100%);
+          background: white;
+          border-radius: 22px;
+          padding: 24px;
+          border: 1px solid #e5e7eb;
+          box-shadow: 0 24px 80px rgba(15, 23, 42, 0.28);
+        }
+
+        .cashCountResultCard h2 {
+          margin: 0 0 16px;
+          font-size: 34px;
+          color: #111827;
+        }
+
+        .cashCountResultGrid {
+          display: grid;
+          grid-template-columns: repeat(3, minmax(0, 1fr));
+          gap: 10px;
+          margin: 14px 0;
+        }
+
+        .cashCountResultGrid div {
+          border: 1px solid #e5e7eb;
+          border-radius: 14px;
+          padding: 12px;
+          background: #f9fafb;
+        }
+
+        .cashCountResultGrid span {
+          display: block;
+          color: #6b7280;
+          font-size: 12px;
+          margin-bottom: 4px;
+        }
+
+        .cashCountResultGrid strong {
+          display: block;
+          font-size: 18px;
+          font-weight: 950;
+        }
+
+        .cashCountResultMessage {
+          border-radius: 14px;
+          padding: 14px;
+          font-weight: 900;
+          margin: 14px 0;
+        }
+
+        .cashCountResultMessage.matched {
+          background: #dcfce7;
+          color: #166534;
+          border: 1px solid #bbf7d0;
+        }
+
+        .cashCountResultMessage.short {
+          background: #fee2e2;
+          color: #991b1b;
+          border: 1px solid #fecaca;
+        }
+
+        .cashCountResultMessage.over {
+          background: #fff7ed;
+          color: #b45309;
+          border: 1px solid #fed7aa;
+        }
+
+        .closeResultButton {
+          width: 100%;
+          border: 0;
+          border-radius: 12px;
+          padding: 13px 16px;
+          background: #111827;
+          color: white;
+          font-weight: 900;
+          cursor: pointer;
+        }
+
+        .cashCountSubmitError {
+          margin-top: 10px;
+          background: #fee2e2;
+          border: 1px solid #fecaca;
+          color: #991b1b;
+          padding: 10px 12px;
+          border-radius: 12px;
+          font-weight: 800;
+        }
+
+        .cashCountActions {
+          display: flex;
+          gap: 8px;
+          margin-top: 10px;
+          flex-wrap: wrap;
+        }
+
+        .applyCashCountButton,
+        .clearCashCountButton {
+          border: 0;
+          border-radius: 10px;
+          padding: 10px 12px;
+          font-weight: 900;
+          cursor: pointer;
+        }
+
+        .applyCashCountButton {
+          background: #111827;
+          color: white;
+        }
+
+        .applyCashCountButton:disabled {
+          background: #9ca3af;
+          cursor: not-allowed;
+        }
+
+        .clearCashCountButton {
+          background: #e5e7eb;
+          color: #111827;
         }
 
         .cashInputBlock {
@@ -807,7 +1350,7 @@ export default function PartPOSEndOfDayReportPage() {
         .summaryGrid,
         .depositGrid {
           display: grid;
-          grid-template-columns: repeat(4, minmax(0, 1fr));
+          grid-template-columns: repeat(3, minmax(0, 1fr));
           gap: 12px;
           margin-top: 18px;
         }
@@ -853,6 +1396,23 @@ export default function PartPOSEndOfDayReportPage() {
         .greenBox strong,
         .greenText {
           color: #15803d;
+        }
+
+        .orangeBox {
+          background: #fff7ed;
+          border-color: #fed7aa;
+        }
+
+        .orangeBox strong,
+        .orangeText {
+          color: #b45309;
+        }
+
+        .summaryBox small {
+          display: block;
+          color: #6b7280;
+          font-size: 12px;
+          margin-top: 4px;
         }
 
         .sectionBlock {
@@ -998,6 +1558,8 @@ export default function PartPOSEndOfDayReportPage() {
 
           .noPrint,
           .receiptsSection,
+          .cashExpensesSection,
+          .creditPaymentsSection,
           button {
             display: none !important;
           }
@@ -1057,7 +1619,7 @@ export default function PartPOSEndOfDayReportPage() {
 
           .summaryGrid,
           .depositGrid {
-            grid-template-columns: repeat(4, 1fr);
+            grid-template-columns: repeat(3, 1fr);
             gap: 6px;
             margin-top: 8px;
           }

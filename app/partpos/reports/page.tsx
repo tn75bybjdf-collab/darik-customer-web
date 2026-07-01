@@ -3,8 +3,21 @@
 import { createClient } from "@supabase/supabase-js";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
-type ReportMode = "department" | "items";
-type ReportRange = "today" | "this_week" | "this_month" | "last_month" | "year_to_date" | "custom";
+type ReportMode =
+  | "department"
+  | "items"
+  | "credit"
+  | "expenses"
+  | "vendorCredit"
+  | "dailyCount";
+
+type ReportRange =
+  | "today"
+  | "this_week"
+  | "this_month"
+  | "last_month"
+  | "year_to_date"
+  | "custom";
 
 type SaleRow = {
   id: string;
@@ -12,6 +25,11 @@ type SaleRow = {
   sale_total: number;
   amount_paid: number;
   change_due: number;
+  payment_method: string;
+  customer_id: string | null;
+  customer_name: string;
+  customer_phone: string;
+  customer_credit_allowance: number;
   created_at: string;
 };
 
@@ -25,6 +43,34 @@ type SaleItem = {
   sale_price: number;
   line_total: number;
   created_at: string;
+};
+
+type ExpenseRow = {
+  id: string;
+  expense_number: number | null;
+  expense_type: "utility" | "vendor";
+  details: string;
+  company_name: string;
+  amount: number;
+  paid_by: "cash" | "credit";
+  created_at: string;
+};
+
+type DailyCountRow = {
+  id: string;
+  report_date: string;
+  expected_cash: number;
+  actual_cash: number;
+  difference: number;
+  status: "short" | "over" | "matched";
+  starting_bank: number;
+  cash_sales: number;
+  credit_sales: number;
+  credit_account_payments: number;
+  cash_expenses: number;
+  deposit_amount: number;
+  sales_total: number;
+  updated_at: string;
 };
 
 type DepartmentReportRow = {
@@ -50,6 +96,28 @@ type ItemReportRow = {
   marginPercent: number;
 };
 
+type CreditCustomerRow = {
+  customerKey: string;
+  customerName: string;
+  customerPhone: string;
+  creditAllowance: number;
+  invoiceCount: number;
+  amountOwed: number;
+  outstandingSince: string;
+  oldestSaleNumber: number | null;
+  newestSaleNumber: number | null;
+};
+
+type VendorCreditRow = {
+  companyKey: string;
+  companyName: string;
+  entryCount: number;
+  amountOwed: number;
+  outstandingSince: string;
+  oldestExpenseNumber: number | null;
+  newestExpenseNumber: number | null;
+};
+
 function money(value: number) {
   const numeric = Number(value);
   if (!Number.isFinite(numeric)) return "0.00";
@@ -71,10 +139,6 @@ function startOfLocalDay(date: Date) {
   return new Date(date.getFullYear(), date.getMonth(), date.getDate(), 0, 0, 0, 0);
 }
 
-function endDateInputValue(date: Date) {
-  return localDateInputValue(date);
-}
-
 function getPresetRange(range: ReportRange) {
   const today = startOfLocalDay(new Date());
 
@@ -87,7 +151,7 @@ function getPresetRange(range: ReportRange) {
 
   if (range === "this_week") {
     const start = new Date(today);
-    const day = start.getDay(); // Sunday = 0
+    const day = start.getDay();
     start.setDate(today.getDate() - day);
 
     return {
@@ -111,7 +175,7 @@ function getPresetRange(range: ReportRange) {
 
     return {
       startDate: localDateInputValue(start),
-      endDate: endDateInputValue(end),
+      endDate: localDateInputValue(end),
     };
   }
 
@@ -139,7 +203,7 @@ function rangeLabel(range: ReportRange) {
   return "تخصيص";
 }
 
-function dayRange(dateValue: string, endDateValue: string) {
+function dayRange(startDateValue: string, endDateValue: string) {
   const parseDate = (value: string) => {
     const [yearText, monthText, dayText] = value.split("-");
     return {
@@ -149,13 +213,14 @@ function dayRange(dateValue: string, endDateValue: string) {
     };
   };
 
-  const startParts = parseDate(dateValue);
-  const endParts = parseDate(endDateValue || dateValue);
+  const startParts = parseDate(startDateValue);
+  const endParts = parseDate(endDateValue || startDateValue);
+  const today = new Date();
 
   const start =
     startParts.year && startParts.month && startParts.day
       ? new Date(startParts.year, startParts.month - 1, startParts.day, 0, 0, 0, 0)
-      : new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate(), 0, 0, 0, 0);
+      : new Date(today.getFullYear(), today.getMonth(), today.getDate(), 0, 0, 0, 0);
 
   const end =
     endParts.year && endParts.month && endParts.day
@@ -166,8 +231,15 @@ function dayRange(dateValue: string, endDateValue: string) {
 }
 
 function formatArabicDate(value: string) {
-  const { start } = dayRange(value, value);
-  return start.toLocaleDateString("ar-JO", {
+  if (!value) return "—";
+  const [yearText, monthText, dayText] = value.slice(0, 10).split("-");
+  const year = Number(yearText);
+  const month = Number(monthText);
+  const day = Number(dayText);
+
+  if (!year || !month || !day) return "—";
+
+  return new Date(year, month - 1, day).toLocaleDateString("ar-JO", {
     year: "numeric",
     month: "long",
     day: "2-digit",
@@ -177,6 +249,70 @@ function formatArabicDate(value: string) {
 function formatArabicDateRange(startDate: string, endDate: string) {
   if (startDate === endDate) return formatArabicDate(startDate);
   return `${formatArabicDate(startDate)} - ${formatArabicDate(endDate)}`;
+}
+
+function formatArabicDateTime(value: string) {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "—";
+
+  return date.toLocaleString("ar-JO", {
+    year: "numeric",
+    month: "long",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+}
+
+function daysOutstanding(value: string) {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return 0;
+
+  const diff = Date.now() - date.getTime();
+  return Math.max(0, Math.floor(diff / (1000 * 60 * 60 * 24)));
+}
+
+function reportTitle(mode: ReportMode) {
+  if (mode === "department") return "تقرير حسب القسم";
+  if (mode === "items") return "تقرير حسب القطع";
+  if (mode === "credit") return "المبالغ المستحقة على الزبائن";
+  if (mode === "expenses") return "المصروفات";
+  if (mode === "vendorCredit") return "ائتمان الموردين";
+  return "عد الصندوق اليومي";
+}
+
+function isAllTimeMode(mode: ReportMode) {
+  return mode === "credit" || mode === "vendorCredit";
+}
+
+function dailyCountStatusLabel(status: DailyCountRow["status"]) {
+  if (status === "short") return "نقص";
+  if (status === "over") return "زيادة";
+  return "مطابق";
+}
+
+function readSupabaseError(error: unknown) {
+  if (error instanceof Error) return error.message;
+
+  if (typeof error === "object" && error !== null) {
+    const record = error as Record<string, unknown>;
+    const parts = [
+      record.message ? String(record.message) : "",
+      record.details ? String(record.details) : "",
+      record.hint ? String(record.hint) : "",
+      record.code ? String(record.code) : "",
+    ].filter(Boolean);
+
+    if (parts.length > 0) return parts.join(" | ");
+
+    try {
+      return JSON.stringify(record);
+    } catch {
+      return "Unknown Supabase error";
+    }
+  }
+
+  return String(error || "Unknown error");
 }
 
 function backToPOS() {
@@ -189,6 +325,43 @@ function openEndOfDayReport() {
   window.open("/partpos/end-of-day", "_blank", "noopener,noreferrer");
 }
 
+function StatBox({
+  label,
+  value,
+  tone = "plain",
+  small,
+}: {
+  label: string;
+  value: string | number;
+  tone?: "plain" | "red" | "green" | "orange" | "purple";
+  small?: string;
+}) {
+  return (
+    <div className={`statBox ${tone}Box`}>
+      <span>{label}</span>
+      <strong>{value}</strong>
+      {small && <small>{small}</small>}
+    </div>
+  );
+}
+
+function DetailCell({
+  label,
+  value,
+  tone = "plain",
+}: {
+  label: string;
+  value: string | number;
+  tone?: "plain" | "red" | "green" | "orange" | "purple";
+}) {
+  return (
+    <div className="detailCell">
+      <span>{label}</span>
+      <strong className={tone === "plain" ? "" : `${tone}Text`}>{value}</strong>
+    </div>
+  );
+}
+
 export default function PartPOSReportsPage() {
   const [mode, setMode] = useState<ReportMode>("department");
   const [rangePreset, setRangePreset] = useState<ReportRange>("today");
@@ -196,6 +369,10 @@ export default function PartPOSReportsPage() {
   const [endDate, setEndDate] = useState(() => getPresetRange("today").endDate);
   const [sales, setSales] = useState<SaleRow[]>([]);
   const [items, setItems] = useState<SaleItem[]>([]);
+  const [creditSales, setCreditSales] = useState<SaleRow[]>([]);
+  const [expenses, setExpenses] = useState<ExpenseRow[]>([]);
+  const [vendorCreditExpenses, setVendorCreditExpenses] = useState<ExpenseRow[]>([]);
+  const [dailyCounts, setDailyCounts] = useState<DailyCountRow[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [lastUpdated, setLastUpdated] = useState("");
@@ -205,7 +382,7 @@ export default function PartPOSReportsPage() {
     const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
     if (!url || !anonKey) return null;
-    return createClient(url, anonKey);
+    return createClient<any>(url, anonKey);
   }, []);
 
   function handleRangeChange(nextRange: ReportRange) {
@@ -232,9 +409,11 @@ export default function PartPOSReportsPage() {
     try {
       const { start, end } = dayRange(startDate, endDate);
 
-      const { data: saleRows, error: salesError } = await supabase
+      const { data: saleRowsRaw, error: salesError } = await supabase
         .from("partpos_sales")
-        .select("id, sale_number, sale_total, amount_paid, change_due, created_at")
+        .select(
+          "id, sale_number, sale_total, amount_paid, change_due, payment_method, customer_id, customer_name, customer_phone, customer_credit_allowance, created_at",
+        )
         .gte("created_at", start.toISOString())
         .lt("created_at", end.toISOString())
         .order("created_at", { ascending: false })
@@ -242,8 +421,8 @@ export default function PartPOSReportsPage() {
 
       if (salesError) throw salesError;
 
-      const cleanSales: SaleRow[] = (saleRows ?? []).map((sale) => ({
-        id: String(sale.id),
+      const cleanSales: SaleRow[] = ((saleRowsRaw ?? []) as any[]).map((sale) => ({
+        id: String(sale.id ?? ""),
         sale_number:
           sale.sale_number === null || sale.sale_number === undefined
             ? null
@@ -251,14 +430,22 @@ export default function PartPOSReportsPage() {
         sale_total: Number(sale.sale_total ?? 0),
         amount_paid: Number(sale.amount_paid ?? 0),
         change_due: Number(sale.change_due ?? 0),
-        created_at: String(sale.created_at),
+        payment_method: String(sale.payment_method ?? "cash"),
+        customer_id:
+          sale.customer_id === null || sale.customer_id === undefined
+            ? null
+            : String(sale.customer_id),
+        customer_name: String(sale.customer_name ?? ""),
+        customer_phone: String(sale.customer_phone ?? ""),
+        customer_credit_allowance: Number(sale.customer_credit_allowance ?? 0),
+        created_at: String(sale.created_at ?? ""),
       }));
 
-      const saleIds = cleanSales.map((sale) => sale.id);
+      const saleIds = cleanSales.map((sale) => sale.id).filter(Boolean);
       let cleanItems: SaleItem[] = [];
 
       if (saleIds.length > 0) {
-        const { data: itemRows, error: itemsError } = await supabase
+        const { data: itemRowsRaw, error: itemsError } = await supabase
           .from("partpos_sale_items")
           .select(
             "id, sale_id, product_name_ar, department_ar, quantity, cost, sale_price, line_total, created_at",
@@ -269,21 +456,138 @@ export default function PartPOSReportsPage() {
 
         if (itemsError) throw itemsError;
 
-        cleanItems = (itemRows ?? []).map((item) => ({
-          id: String(item.id),
-          sale_id: String(item.sale_id),
+        cleanItems = ((itemRowsRaw ?? []) as any[]).map((item) => ({
+          id: String(item.id ?? ""),
+          sale_id: String(item.sale_id ?? ""),
           product_name_ar: String(item.product_name_ar ?? ""),
           department_ar: String(item.department_ar ?? ""),
           quantity: Number(item.quantity ?? 0),
           cost: Number(item.cost ?? 0),
           sale_price: Number(item.sale_price ?? 0),
           line_total: Number(item.line_total ?? 0),
-          created_at: String(item.created_at),
+          created_at: String(item.created_at ?? ""),
         }));
       }
 
+      const { data: creditRowsRaw, error: creditError } = await supabase
+        .from("partpos_sales")
+        .select(
+          "id, sale_number, sale_total, amount_paid, change_due, payment_method, customer_id, customer_name, customer_phone, customer_credit_allowance, created_at",
+        )
+        .eq("payment_method", "credit")
+        .order("created_at", { ascending: true })
+        .limit(50000);
+
+      if (creditError) throw creditError;
+
+      const cleanCreditSales: SaleRow[] = ((creditRowsRaw ?? []) as any[]).map((sale) => ({
+        id: String(sale.id ?? ""),
+        sale_number:
+          sale.sale_number === null || sale.sale_number === undefined
+            ? null
+            : Number(sale.sale_number),
+        sale_total: Number(sale.sale_total ?? 0),
+        amount_paid: Number(sale.amount_paid ?? 0),
+        change_due: Number(sale.change_due ?? 0),
+        payment_method: "credit",
+        customer_id:
+          sale.customer_id === null || sale.customer_id === undefined
+            ? null
+            : String(sale.customer_id),
+        customer_name: String(sale.customer_name ?? ""),
+        customer_phone: String(sale.customer_phone ?? ""),
+        customer_credit_allowance: Number(sale.customer_credit_allowance ?? 0),
+        created_at: String(sale.created_at ?? ""),
+      }));
+
+      const { data: expenseRowsRaw, error: expenseError } = await supabase
+        .from("partpos_expenses")
+        .select("id, expense_number, expense_type, details, company_name, amount, paid_by, created_at")
+        .gte("created_at", start.toISOString())
+        .lt("created_at", end.toISOString())
+        .order("created_at", { ascending: false })
+        .limit(50000);
+
+      if (expenseError) throw expenseError;
+
+      const cleanExpenses: ExpenseRow[] = ((expenseRowsRaw ?? []) as any[]).map((expense) => ({
+        id: String(expense.id ?? ""),
+        expense_number:
+          expense.expense_number === null || expense.expense_number === undefined
+            ? null
+            : Number(expense.expense_number),
+        expense_type: expense.expense_type === "vendor" ? "vendor" : "utility",
+        details: String(expense.details ?? ""),
+        company_name: String(expense.company_name ?? ""),
+        amount: Number(expense.amount ?? 0),
+        paid_by: expense.paid_by === "credit" ? "credit" : "cash",
+        created_at: String(expense.created_at ?? ""),
+      }));
+
+      const { data: vendorCreditRowsRaw, error: vendorCreditError } = await supabase
+        .from("partpos_expenses")
+        .select("id, expense_number, expense_type, details, company_name, amount, paid_by, created_at")
+        .eq("expense_type", "vendor")
+        .eq("paid_by", "credit")
+        .order("created_at", { ascending: true })
+        .limit(50000);
+
+      if (vendorCreditError) throw vendorCreditError;
+
+      const cleanVendorCreditExpenses: ExpenseRow[] = ((vendorCreditRowsRaw ?? []) as any[]).map(
+        (expense) => ({
+          id: String(expense.id ?? ""),
+          expense_number:
+            expense.expense_number === null || expense.expense_number === undefined
+              ? null
+              : Number(expense.expense_number),
+          expense_type: "vendor",
+          details: String(expense.details ?? ""),
+          company_name: String(expense.company_name ?? ""),
+          amount: Number(expense.amount ?? 0),
+          paid_by: "credit",
+          created_at: String(expense.created_at ?? ""),
+        }),
+      );
+
+      const { data: dailyRowsRaw, error: dailyError } = await supabase
+        .from("partpos_daily_counts")
+        .select(
+          "id, report_date, expected_cash, actual_cash, difference, status, starting_bank, cash_sales, credit_sales, credit_account_payments, cash_expenses, deposit_amount, sales_total, updated_at",
+        )
+        .gte("report_date", startDate)
+        .lte("report_date", endDate)
+        .order("report_date", { ascending: false })
+        .limit(10000);
+
+      if (dailyError) throw dailyError;
+
+      const cleanDailyCounts: DailyCountRow[] = ((dailyRowsRaw ?? []) as any[]).map((row) => ({
+        id: String(row.id ?? ""),
+        report_date: String(row.report_date ?? ""),
+        expected_cash: Number(row.expected_cash ?? 0),
+        actual_cash: Number(row.actual_cash ?? 0),
+        difference: Number(row.difference ?? 0),
+        status:
+          row.status === "short" || row.status === "over" || row.status === "matched"
+            ? row.status
+            : "matched",
+        starting_bank: Number(row.starting_bank ?? 0),
+        cash_sales: Number(row.cash_sales ?? 0),
+        credit_sales: Number(row.credit_sales ?? 0),
+        credit_account_payments: Number(row.credit_account_payments ?? 0),
+        cash_expenses: Number(row.cash_expenses ?? 0),
+        deposit_amount: Number(row.deposit_amount ?? 0),
+        sales_total: Number(row.sales_total ?? 0),
+        updated_at: String(row.updated_at ?? ""),
+      }));
+
       setSales(cleanSales);
       setItems(cleanItems);
+      setCreditSales(cleanCreditSales);
+      setExpenses(cleanExpenses);
+      setVendorCreditExpenses(cleanVendorCreditExpenses);
+      setDailyCounts(cleanDailyCounts);
       setLastUpdated(
         new Date().toLocaleTimeString("ar-JO", {
           hour: "2-digit",
@@ -291,9 +595,7 @@ export default function PartPOSReportsPage() {
         }),
       );
     } catch (caught) {
-      const message =
-        caught instanceof Error ? caught.message : "حدث خطأ أثناء تحميل التقارير.";
-      setError(message);
+      setError(readSupabaseError(caught));
     } finally {
       setLoading(false);
     }
@@ -409,6 +711,101 @@ export default function PartPOSReportsPage() {
       .sort((a, b) => b.totalSales - a.totalSales);
   }, [items, receiptSetsByItem]);
 
+  const creditCustomerRows = useMemo<CreditCustomerRow[]>(() => {
+    const groups: Record<string, CreditCustomerRow> = {};
+
+    for (const sale of creditSales) {
+      const amountOwed = Number(sale.sale_total || 0) - Number(sale.amount_paid || 0);
+      if (amountOwed <= 0) continue;
+
+      const customerName = sale.customer_name.trim() || "زبون غير محدد";
+      const customerPhone = sale.customer_phone.trim();
+      const customerKey =
+        sale.customer_id || `${customerName}__${customerPhone || "no-phone"}`.toLowerCase();
+
+      if (!groups[customerKey]) {
+        groups[customerKey] = {
+          customerKey,
+          customerName,
+          customerPhone,
+          creditAllowance: Number(sale.customer_credit_allowance || 0),
+          invoiceCount: 0,
+          amountOwed: 0,
+          outstandingSince: sale.created_at,
+          oldestSaleNumber: sale.sale_number,
+          newestSaleNumber: sale.sale_number,
+        };
+      }
+
+      const group = groups[customerKey];
+      group.invoiceCount += 1;
+      group.amountOwed += amountOwed;
+      group.creditAllowance = Math.max(
+        Number(group.creditAllowance || 0),
+        Number(sale.customer_credit_allowance || 0),
+      );
+
+      if (new Date(sale.created_at).getTime() < new Date(group.outstandingSince).getTime()) {
+        group.outstandingSince = sale.created_at;
+        group.oldestSaleNumber = sale.sale_number;
+      }
+
+      if (
+        group.newestSaleNumber === null ||
+        (sale.sale_number !== null && sale.sale_number > group.newestSaleNumber)
+      ) {
+        group.newestSaleNumber = sale.sale_number;
+      }
+    }
+
+    return Object.values(groups).sort(
+      (a, b) =>
+        new Date(a.outstandingSince).getTime() - new Date(b.outstandingSince).getTime(),
+    );
+  }, [creditSales]);
+
+  const vendorCreditRows = useMemo<VendorCreditRow[]>(() => {
+    const groups: Record<string, VendorCreditRow> = {};
+
+    for (const expense of vendorCreditExpenses) {
+      const companyName = expense.company_name.trim() || "مورد غير محدد";
+      const companyKey = companyName.toLowerCase();
+
+      if (!groups[companyKey]) {
+        groups[companyKey] = {
+          companyKey,
+          companyName,
+          entryCount: 0,
+          amountOwed: 0,
+          outstandingSince: expense.created_at,
+          oldestExpenseNumber: expense.expense_number,
+          newestExpenseNumber: expense.expense_number,
+        };
+      }
+
+      const group = groups[companyKey];
+      group.entryCount += 1;
+      group.amountOwed += Number(expense.amount || 0);
+
+      if (new Date(expense.created_at).getTime() < new Date(group.outstandingSince).getTime()) {
+        group.outstandingSince = expense.created_at;
+        group.oldestExpenseNumber = expense.expense_number;
+      }
+
+      if (
+        group.newestExpenseNumber === null ||
+        (expense.expense_number !== null && expense.expense_number > group.newestExpenseNumber)
+      ) {
+        group.newestExpenseNumber = expense.expense_number;
+      }
+    }
+
+    return Object.values(groups).sort(
+      (a, b) =>
+        new Date(a.outstandingSince).getTime() - new Date(b.outstandingSince).getTime(),
+    );
+  }, [vendorCreditExpenses]);
+
   const totalCost = items.reduce(
     (sum, item) => sum + (Number(item.cost) || 0) * (Number(item.quantity) || 0),
     0,
@@ -418,16 +815,70 @@ export default function PartPOSReportsPage() {
   const totalMarginPercent = totalSales > 0 ? (totalProfit / totalSales) * 100 : 0;
   const totalQuantity = items.reduce((sum, item) => sum + (Number(item.quantity) || 0), 0);
 
-  const activeRowsCount = mode === "department" ? departmentRows.length : itemRows.length;
+  const totalCreditOwed = creditCustomerRows.reduce(
+    (sum, row) => sum + Number(row.amountOwed || 0),
+    0,
+  );
+  const totalCreditInvoices = creditCustomerRows.reduce(
+    (sum, row) => sum + Number(row.invoiceCount || 0),
+    0,
+  );
+
+  const totalExpenses = expenses.reduce((sum, row) => sum + Number(row.amount || 0), 0);
+  const utilityExpenses = expenses
+    .filter((row) => row.expense_type === "utility")
+    .reduce((sum, row) => sum + Number(row.amount || 0), 0);
+  const vendorCashExpenses = expenses
+    .filter((row) => row.expense_type === "vendor" && row.paid_by === "cash")
+    .reduce((sum, row) => sum + Number(row.amount || 0), 0);
+  const vendorCreditExpensesForPeriod = expenses
+    .filter((row) => row.expense_type === "vendor" && row.paid_by === "credit")
+    .reduce((sum, row) => sum + Number(row.amount || 0), 0);
+
+  const totalVendorCreditOwed = vendorCreditRows.reduce(
+    (sum, row) => sum + Number(row.amountOwed || 0),
+    0,
+  );
+  const totalVendorCreditEntries = vendorCreditRows.reduce(
+    (sum, row) => sum + Number(row.entryCount || 0),
+    0,
+  );
+
+  const totalDailyShort = dailyCounts
+    .filter((row) => row.status === "short")
+    .reduce((sum, row) => sum + Math.abs(Number(row.difference || 0)), 0);
+  const totalDailyOver = dailyCounts
+    .filter((row) => row.status === "over")
+    .reduce((sum, row) => sum + Math.abs(Number(row.difference || 0)), 0);
+  const shortDayCount = dailyCounts.filter((row) => row.status === "short").length;
+  const overDayCount = dailyCounts.filter((row) => row.status === "over").length;
+  const matchedDayCount = dailyCounts.filter((row) => row.status === "matched").length;
+  const totalDailyCashExpenses = dailyCounts.reduce(
+    (sum, row) => sum + Number(row.cash_expenses || 0),
+    0,
+  );
+
+  const activeRowsCount =
+    mode === "department"
+      ? departmentRows.length
+      : mode === "items"
+        ? itemRows.length
+        : mode === "credit"
+          ? creditCustomerRows.length
+          : mode === "expenses"
+            ? expenses.length
+            : mode === "vendorCredit"
+              ? vendorCreditRows.length
+              : dailyCounts.length;
 
   return (
-    <main className="reportsPage" dir="rtl">
+    <main className="reportsPage" dir="rtl" suppressHydrationWarning>
       <section className="topCard noPrint">
         <div>
           <p className="eyebrow">PartPOS</p>
           <h1>التقارير</h1>
           <p className="subtext">
-            التقرير مرتب من الأعلى مبيعاً إلى الأقل، مع التكلفة والمبيعات والربح.
+            نسخة مستقرة بدون جداول HTML حتى لا يتكرر خطأ removeChild عند تغيير الفترة.
           </p>
         </div>
 
@@ -458,6 +909,7 @@ export default function PartPOSReportsPage() {
               id="range-preset"
               value={rangePreset}
               onChange={(event) => handleRangeChange(event.target.value as ReportRange)}
+              disabled={isAllTimeMode(mode)}
             >
               <option value="today">اليوم</option>
               <option value="this_week">هذا الأسبوع</option>
@@ -468,7 +920,7 @@ export default function PartPOSReportsPage() {
             </select>
           </div>
 
-          {rangePreset === "custom" ? (
+          {rangePreset === "custom" && !isAllTimeMode(mode) ? (
             <>
               <div>
                 <label htmlFor="start-date">من تاريخ</label>
@@ -493,7 +945,7 @@ export default function PartPOSReportsPage() {
           ) : (
             <div className="selectedPeriodBox">
               <label>الفترة المحددة</label>
-              <strong>{selectedRangeText}</strong>
+              <strong>{isAllTimeMode(mode) ? "كل الفترات" : selectedRangeText}</strong>
             </div>
           )}
 
@@ -522,6 +974,44 @@ export default function PartPOSReportsPage() {
           >
             تقرير حسب القطع
           </button>
+          <button
+            type="button"
+            className={mode === "credit" ? "tabButton activeTab creditTab" : "tabButton creditTab"}
+            onClick={() => setMode("credit")}
+          >
+            المبالغ المستحقة على الزبائن
+          </button>
+          <button
+            type="button"
+            className={
+              mode === "expenses" ? "tabButton activeTab expenseTab" : "tabButton expenseTab"
+            }
+            onClick={() => setMode("expenses")}
+          >
+            المصروفات
+          </button>
+          <button
+            type="button"
+            className={
+              mode === "vendorCredit"
+                ? "tabButton activeTab vendorCreditTab"
+                : "tabButton vendorCreditTab"
+            }
+            onClick={() => setMode("vendorCredit")}
+          >
+            ائتمان الموردين
+          </button>
+          <button
+            type="button"
+            className={
+              mode === "dailyCount"
+                ? "tabButton activeTab dailyCountTab"
+                : "tabButton dailyCountTab"
+            }
+            onClick={() => setMode("dailyCount")}
+          >
+            عد الصندوق اليومي
+          </button>
         </div>
       </section>
 
@@ -531,174 +1021,342 @@ export default function PartPOSReportsPage() {
         <div className="printHeader">
           <div>
             <p className="eyebrow">PartPOS</p>
-            <h2>{mode === "department" ? "تقرير حسب القسم" : "تقرير حسب القطع"}</h2>
-            <p>{formatArabicDateRange(startDate, endDate)}</p>
+            <h2>{reportTitle(mode)}</h2>
+            <p>{isAllTimeMode(mode) ? "كل الفترات" : formatArabicDateRange(startDate, endDate)}</p>
           </div>
 
           <div className="reportMeta">
-            <span>عدد الفواتير</span>
-            <strong>{sales.length}</strong>
+            <span>
+              {mode === "credit"
+                ? "عدد الزبائن"
+                : mode === "vendorCredit"
+                  ? "عدد الموردين"
+                  : mode === "expenses"
+                    ? "عدد المصروفات"
+                    : mode === "dailyCount"
+                      ? "عدد الأيام"
+                      : "عدد الفواتير"}
+            </span>
+            <strong>{mode === "department" || mode === "items" ? sales.length : activeRowsCount}</strong>
             <small>{lastUpdated ? `آخر تحديث: ${lastUpdated}` : ""}</small>
           </div>
         </div>
 
-        <div className="summaryGrid">
-          <div className="summaryBox">
-            <span>عدد السطور</span>
-            <strong>{activeRowsCount}</strong>
+        {mode === "department" || mode === "items" ? (
+          <div className="summaryGrid">
+            <StatBox label="عدد السطور" value={activeRowsCount} />
+            <StatBox label="إجمالي الكمية" value={money(totalQuantity)} />
+            <StatBox label="إجمالي التكلفة" value={`${money(totalCost)} د.أ`} />
+            <StatBox label="إجمالي البيع" value={`${money(totalSales)} د.أ`} tone="red" />
+            <StatBox label="إجمالي الربح" value={`${money(totalProfit)} د.أ`} tone="green" />
+            <StatBox label="هامش الربح" value={percent(totalMarginPercent)} />
           </div>
-          <div className="summaryBox">
-            <span>إجمالي الكمية</span>
-            <strong>{money(totalQuantity)}</strong>
-          </div>
-          <div className="summaryBox">
-            <span>إجمالي التكلفة</span>
-            <strong>{money(totalCost)} د.أ</strong>
-          </div>
-          <div className="summaryBox redBox">
-            <span>إجمالي البيع</span>
-            <strong>{money(totalSales)} د.أ</strong>
-          </div>
-          <div className="summaryBox greenBox">
-            <span>إجمالي الربح</span>
-            <strong>{money(totalProfit)} د.أ</strong>
-          </div>
-          <div className="summaryBox">
-            <span>هامش الربح</span>
-            <strong>{percent(totalMarginPercent)}</strong>
-          </div>
-        </div>
+        ) : null}
 
-        <section className="tableSection">
+        {mode === "credit" ? (
+          <div className="summaryGrid three">
+            <StatBox label="عدد الزبائن الذين عليهم مبالغ" value={creditCustomerRows.length} />
+            <StatBox label="عدد فواتير الائتمان المفتوحة" value={totalCreditInvoices} />
+            <StatBox label="إجمالي المبالغ المستحقة" value={`${money(totalCreditOwed)} د.أ`} tone="red" />
+          </div>
+        ) : null}
+
+        {mode === "expenses" ? (
+          <div className="summaryGrid four">
+            <StatBox label="إجمالي المصروفات" value={`${money(totalExpenses)} د.أ`} tone="red" />
+            <StatBox label="خدمات / مرافق" value={`${money(utilityExpenses)} د.أ`} />
+            <StatBox label="موردين نقداً" value={`${money(vendorCashExpenses)} د.أ`} />
+            <StatBox label="موردين على الائتمان" value={`${money(vendorCreditExpensesForPeriod)} د.أ`} tone="orange" />
+          </div>
+        ) : null}
+
+        {mode === "vendorCredit" ? (
+          <div className="summaryGrid three">
+            <StatBox label="عدد الموردين الذين لهم رصيد" value={vendorCreditRows.length} />
+            <StatBox label="عدد قيود ائتمان الموردين" value={totalVendorCreditEntries} />
+            <StatBox label="إجمالي المستحق للموردين" value={`${money(totalVendorCreditOwed)} د.أ`} tone="orange" />
+          </div>
+        ) : null}
+
+        {mode === "dailyCount" ? (
+          <div className="summaryGrid">
+            <StatBox label="عدد الأيام المحفوظة" value={dailyCounts.length} />
+            <StatBox label="أيام فيها نقص" value={shortDayCount} tone="red" />
+            <StatBox label="أيام فيها زيادة" value={overDayCount} tone="orange" />
+            <StatBox label="أيام مطابقة" value={matchedDayCount} tone="green" />
+            <StatBox label="إجمالي النقص" value={`${money(totalDailyShort)} د.أ`} tone="red" />
+            <StatBox label="إجمالي الزيادة" value={`${money(totalDailyOver)} د.أ`} tone="orange" />
+            <StatBox label="إجمالي مصروفات نقدية" value={`${money(totalDailyCashExpenses)} د.أ`} tone="red" />
+          </div>
+        ) : null}
+
+        <section className="recordsSection">
           {mode === "department" ? (
             departmentRows.length === 0 ? (
               <div className="emptyState">لا يوجد مبيعات ضمن الفترة المحددة.</div>
             ) : (
-              <div className="tableWrap">
-                <table>
-                  <thead>
-                    <tr>
-                      <th>القسم</th>
-                      <th>عدد الفواتير</th>
-                      <th>عدد السطور</th>
-                      <th>الكمية</th>
-                      <th>إجمالي التكلفة</th>
-                      <th>إجمالي البيع</th>
-                      <th>الربح</th>
-                      <th>الهامش</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {departmentRows.map((row) => (
-                      <tr key={row.department}>
-                        <td>
-                          <strong>{row.department}</strong>
-                        </td>
-                        <td>{row.receiptCount}</td>
-                        <td>{row.itemLines}</td>
-                        <td>{money(row.quantity)}</td>
-                        <td>{money(row.totalCost)} د.أ</td>
-                        <td>
-                          <strong className="redText">{money(row.totalSales)} د.أ</strong>
-                        </td>
-                        <td>
-                          <strong className={row.profit >= 0 ? "greenText" : "redText"}>
-                            {money(row.profit)} د.أ
-                          </strong>
-                        </td>
-                        <td>{percent(row.marginPercent)}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                  <tfoot>
-                    <tr>
-                      <td>الإجمالي</td>
-                      <td>{sales.length}</td>
-                      <td>{items.length}</td>
-                      <td>{money(totalQuantity)}</td>
-                      <td>{money(totalCost)} د.أ</td>
-                      <td>{money(totalSales)} د.أ</td>
-                      <td>{money(totalProfit)} د.أ</td>
-                      <td>{percent(totalMarginPercent)}</td>
-                    </tr>
-                  </tfoot>
-                </table>
+              <div className="recordList">
+                {departmentRows.map((row) => (
+                  <article className="recordCard" key={row.department}>
+                    <div className="recordMain">
+                      <p>القسم</p>
+                      <h3>{row.department}</h3>
+                    </div>
+                    <div className="detailGrid">
+                      <DetailCell label="عدد الفواتير" value={row.receiptCount} />
+                      <DetailCell label="عدد السطور" value={row.itemLines} />
+                      <DetailCell label="الكمية" value={money(row.quantity)} />
+                      <DetailCell label="إجمالي التكلفة" value={`${money(row.totalCost)} د.أ`} />
+                      <DetailCell label="إجمالي البيع" value={`${money(row.totalSales)} د.أ`} tone="red" />
+                      <DetailCell label="الربح" value={`${money(row.profit)} د.أ`} tone={row.profit >= 0 ? "green" : "red"} />
+                      <DetailCell label="الهامش" value={percent(row.marginPercent)} />
+                    </div>
+                  </article>
+                ))}
               </div>
             )
-          ) : itemRows.length === 0 ? (
-            <div className="emptyState">لا يوجد مبيعات ضمن الفترة المحددة.</div>
-          ) : (
-            <div className="tableWrap">
-              <table>
-                <thead>
-                  <tr>
-                    <th>اسم القطعة</th>
-                    <th>القسم</th>
-                    <th>عدد الفواتير</th>
-                    <th>الكمية</th>
-                    <th>متوسط سعر البيع</th>
-                    <th>إجمالي التكلفة</th>
-                    <th>إجمالي البيع</th>
-                    <th>الربح</th>
-                    <th>الهامش</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {itemRows.map((row) => (
-                    <tr key={`${row.productName}-${row.department}`}>
-                      <td>
-                        <strong>{row.productName}</strong>
-                      </td>
-                      <td>{row.department}</td>
-                      <td>{row.receiptCount}</td>
-                      <td>{money(row.quantity)}</td>
-                      <td>{money(row.averageSalePrice)} د.أ</td>
-                      <td>{money(row.totalCost)} د.أ</td>
-                      <td>
-                        <strong className="redText">{money(row.totalSales)} د.أ</strong>
-                      </td>
-                      <td>
-                        <strong className={row.profit >= 0 ? "greenText" : "redText"}>
-                          {money(row.profit)} د.أ
-                        </strong>
-                      </td>
-                      <td>{percent(row.marginPercent)}</td>
-                    </tr>
-                  ))}
-                </tbody>
-                <tfoot>
-                  <tr>
-                    <td>الإجمالي</td>
-                    <td>—</td>
-                    <td>{sales.length}</td>
-                    <td>{money(totalQuantity)}</td>
-                    <td>—</td>
-                    <td>{money(totalCost)} د.أ</td>
-                    <td>{money(totalSales)} د.أ</td>
-                    <td>{money(totalProfit)} د.أ</td>
-                    <td>{percent(totalMarginPercent)}</td>
-                  </tr>
-                </tfoot>
-              </table>
-            </div>
-          )}
+          ) : null}
+
+          {mode === "items" ? (
+            itemRows.length === 0 ? (
+              <div className="emptyState">لا يوجد مبيعات ضمن الفترة المحددة.</div>
+            ) : (
+              <div className="recordList">
+                {itemRows.map((row) => (
+                  <article className="recordCard" key={`${row.productName}-${row.department}`}>
+                    <div className="recordMain">
+                      <p>{row.department}</p>
+                      <h3>{row.productName}</h3>
+                    </div>
+                    <div className="detailGrid">
+                      <DetailCell label="عدد الفواتير" value={row.receiptCount} />
+                      <DetailCell label="الكمية" value={money(row.quantity)} />
+                      <DetailCell label="متوسط سعر البيع" value={`${money(row.averageSalePrice)} د.أ`} />
+                      <DetailCell label="إجمالي التكلفة" value={`${money(row.totalCost)} د.أ`} />
+                      <DetailCell label="إجمالي البيع" value={`${money(row.totalSales)} د.أ`} tone="red" />
+                      <DetailCell label="الربح" value={`${money(row.profit)} د.أ`} tone={row.profit >= 0 ? "green" : "red"} />
+                      <DetailCell label="الهامش" value={percent(row.marginPercent)} />
+                    </div>
+                  </article>
+                ))}
+              </div>
+            )
+          ) : null}
+
+          {mode === "credit" ? (
+            creditCustomerRows.length === 0 ? (
+              <div className="emptyState">لا يوجد زبائن عليهم مبالغ ائتمان حالياً.</div>
+            ) : (
+              <div className="recordList">
+                {creditCustomerRows.map((row) => (
+                  <article className="recordCard" key={row.customerKey}>
+                    <div className="recordMain">
+                      <p>{row.customerPhone || "بدون رقم"}</p>
+                      <h3>{row.customerName}</h3>
+                    </div>
+                    <div className="detailGrid">
+                      <DetailCell label="عدد الفواتير" value={row.invoiceCount} />
+                      <DetailCell label="المبلغ المستحق" value={`${money(row.amountOwed)} د.أ`} tone="red" />
+                      <DetailCell label="سقف الائتمان" value={`${money(row.creditAllowance)} د.أ`} />
+                      <DetailCell label="مستحق منذ" value={formatArabicDateTime(row.outstandingSince)} />
+                      <DetailCell label="مدة الاستحقاق" value={`${daysOutstanding(row.outstandingSince)} يوم`} />
+                      <DetailCell label="أول فاتورة" value={row.oldestSaleNumber ? `فاتورة ${row.oldestSaleNumber}` : "—"} />
+                      <DetailCell label="آخر فاتورة" value={row.newestSaleNumber ? `فاتورة ${row.newestSaleNumber}` : "—"} />
+                    </div>
+                  </article>
+                ))}
+              </div>
+            )
+          ) : null}
+
+          {mode === "expenses" ? (
+            expenses.length === 0 ? (
+              <div className="emptyState">لا يوجد مصروفات ضمن الفترة المحددة.</div>
+            ) : (
+              <div className="recordList">
+                {expenses.map((row) => (
+                  <article className="recordCard" key={row.id}>
+                    <div className="recordMain">
+                      <p>{row.expense_number ? `قيد ${row.expense_number}` : "قيد بدون رقم"}</p>
+                      <h3>
+                        {row.expense_type === "vendor"
+                          ? row.company_name || "مورد غير محدد"
+                          : row.details || "مصروف بدون تفاصيل"}
+                      </h3>
+                    </div>
+                    <div className="detailGrid">
+                      <DetailCell label="النوع" value={row.expense_type === "vendor" ? "دفع مورد" : "خدمات / مرافق"} />
+                      <DetailCell label="طريقة الدفع" value={row.paid_by === "credit" ? "على الائتمان" : "نقداً"} />
+                      <DetailCell label="المبلغ" value={`${money(row.amount)} د.أ`} tone={row.paid_by === "credit" ? "orange" : "red"} />
+                      <DetailCell label="التاريخ" value={formatArabicDateTime(row.created_at)} />
+                    </div>
+                  </article>
+                ))}
+              </div>
+            )
+          ) : null}
+
+          {mode === "vendorCredit" ? (
+            vendorCreditRows.length === 0 ? (
+              <div className="emptyState">لا يوجد مبالغ ائتمان مستحقة للموردين حالياً.</div>
+            ) : (
+              <div className="recordList">
+                {vendorCreditRows.map((row) => (
+                  <article className="recordCard" key={row.companyKey}>
+                    <div className="recordMain">
+                      <p>مورد</p>
+                      <h3>{row.companyName}</h3>
+                    </div>
+                    <div className="detailGrid">
+                      <DetailCell label="عدد القيود" value={row.entryCount} />
+                      <DetailCell label="المبلغ المستحق" value={`${money(row.amountOwed)} د.أ`} tone="orange" />
+                      <DetailCell label="مستحق منذ" value={formatArabicDateTime(row.outstandingSince)} />
+                      <DetailCell label="مدة الاستحقاق" value={`${daysOutstanding(row.outstandingSince)} يوم`} />
+                      <DetailCell label="أول قيد" value={row.oldestExpenseNumber ? `قيد ${row.oldestExpenseNumber}` : "—"} />
+                      <DetailCell label="آخر قيد" value={row.newestExpenseNumber ? `قيد ${row.newestExpenseNumber}` : "—"} />
+                    </div>
+                  </article>
+                ))}
+              </div>
+            )
+          ) : null}
+
+          {mode === "dailyCount" ? (
+            dailyCounts.length === 0 ? (
+              <div className="emptyState">لا يوجد عد صندوق محفوظ ضمن الفترة المحددة.</div>
+            ) : (
+              <div className="recordList">
+                {dailyCounts.map((row) => (
+                  <article className="recordCard" key={row.id || row.report_date}>
+                    <div className="recordMain">
+                      <p>{formatArabicDate(row.report_date)}</p>
+                      <h3
+                        className={
+                          row.status === "matched"
+                            ? "greenText"
+                            : row.status === "short"
+                              ? "redText"
+                              : "orangeText"
+                        }
+                      >
+                        {dailyCountStatusLabel(row.status)}
+                      </h3>
+                    </div>
+                    <div className="detailGrid">
+                      <DetailCell label="المتوقع" value={`${money(row.expected_cash)} د.أ`} />
+                      <DetailCell label="الموجود فعلياً" value={`${money(row.actual_cash)} د.أ`} />
+                      <DetailCell
+                        label="الفرق"
+                        value={`${money(Math.abs(row.difference))} د.أ`}
+                        tone={
+                          row.status === "matched"
+                            ? "green"
+                            : row.status === "short"
+                              ? "red"
+                              : "orange"
+                        }
+                      />
+                      <DetailCell label="مبيعات نقدية" value={`${money(row.cash_sales)} د.أ`} />
+                      <DetailCell label="مبيعات ائتمان" value={`${money(row.credit_sales)} د.أ`} />
+                      <DetailCell label="تحصيل ائتمان" value={`${money(row.credit_account_payments)} د.أ`} />
+                      <DetailCell label="مصروفات نقدية" value={`${money(row.cash_expenses)} د.أ`} tone="red" />
+                      <DetailCell label="الإيداع" value={`${money(row.deposit_amount)} د.أ`} />
+                      <DetailCell label="آخر تحديث" value={formatArabicDateTime(row.updated_at)} />
+                    </div>
+                  </article>
+                ))}
+              </div>
+            )
+          ) : null}
         </section>
 
         <div className="bottomTotals">
-          <div>
-            <span>إجمالي التكلفة</span>
-            <strong>{money(totalCost)} د.أ</strong>
-          </div>
-          <div>
-            <span>إجمالي البيع</span>
-            <strong className="redText">{money(totalSales)} د.أ</strong>
-          </div>
-          <div>
-            <span>إجمالي الربح / الهامش</span>
-            <strong className={totalProfit >= 0 ? "greenText" : "redText"}>
-              {money(totalProfit)} د.أ • {percent(totalMarginPercent)}
-            </strong>
-          </div>
+          {mode === "department" || mode === "items" ? (
+            <>
+              <div>
+                <span>إجمالي التكلفة</span>
+                <strong>{money(totalCost)} د.أ</strong>
+              </div>
+              <div>
+                <span>إجمالي البيع</span>
+                <strong className="redText">{money(totalSales)} د.أ</strong>
+              </div>
+              <div>
+                <span>إجمالي الربح / الهامش</span>
+                <strong className={totalProfit >= 0 ? "greenText" : "redText"}>
+                  {money(totalProfit)} د.أ • {percent(totalMarginPercent)}
+                </strong>
+              </div>
+            </>
+          ) : null}
+
+          {mode === "credit" ? (
+            <>
+              <div>
+                <span>إجمالي الزبائن عليهم مبالغ</span>
+                <strong>{creditCustomerRows.length}</strong>
+              </div>
+              <div>
+                <span>إجمالي فواتير الائتمان المفتوحة</span>
+                <strong>{totalCreditInvoices}</strong>
+              </div>
+              <div>
+                <span>إجمالي المبالغ المستحقة</span>
+                <strong className="redText">{money(totalCreditOwed)} د.أ</strong>
+              </div>
+            </>
+          ) : null}
+
+          {mode === "expenses" ? (
+            <>
+              <div>
+                <span>إجمالي المصروفات</span>
+                <strong className="redText">{money(totalExpenses)} د.أ</strong>
+              </div>
+              <div>
+                <span>مصروفات نقدية</span>
+                <strong>{money(utilityExpenses + vendorCashExpenses)} د.أ</strong>
+              </div>
+              <div>
+                <span>مصروفات على الائتمان</span>
+                <strong className="orangeText">{money(vendorCreditExpensesForPeriod)} د.أ</strong>
+              </div>
+            </>
+          ) : null}
+
+          {mode === "vendorCredit" ? (
+            <>
+              <div>
+                <span>إجمالي الموردين لهم رصيد</span>
+                <strong>{vendorCreditRows.length}</strong>
+              </div>
+              <div>
+                <span>إجمالي قيود ائتمان الموردين</span>
+                <strong>{totalVendorCreditEntries}</strong>
+              </div>
+              <div>
+                <span>إجمالي المستحق للموردين</span>
+                <strong className="orangeText">{money(totalVendorCreditOwed)} د.أ</strong>
+              </div>
+            </>
+          ) : null}
+
+          {mode === "dailyCount" ? (
+            <>
+              <div>
+                <span>عدد الأيام المحفوظة</span>
+                <strong>{dailyCounts.length}</strong>
+              </div>
+              <div>
+                <span>إجمالي النقص</span>
+                <strong className="redText">{money(totalDailyShort)} د.أ</strong>
+              </div>
+              <div>
+                <span>إجمالي الزيادة</span>
+                <strong className="orangeText">{money(totalDailyOver)} د.أ</strong>
+              </div>
+            </>
+          ) : null}
         </div>
       </section>
 
@@ -741,6 +1399,7 @@ export default function PartPOSReportsPage() {
 
         h1,
         h2,
+        h3,
         p {
           margin-top: 0;
         }
@@ -820,6 +1479,26 @@ export default function PartPOSReportsPage() {
           background: #111827;
           color: white;
           border-color: #111827;
+        }
+
+        .creditTab.activeTab {
+          background: #7c3aed;
+          border-color: #7c3aed;
+        }
+
+        .expenseTab.activeTab {
+          background: #b91c1c;
+          border-color: #b91c1c;
+        }
+
+        .vendorCreditTab.activeTab {
+          background: #b45309;
+          border-color: #b45309;
+        }
+
+        .dailyCountTab.activeTab {
+          background: #0f766e;
+          border-color: #0f766e;
         }
 
         label {
@@ -907,8 +1586,9 @@ export default function PartPOSReportsPage() {
 
         .reportMeta span,
         .reportMeta small,
-        .summaryBox span,
-        .bottomTotals span {
+        .statBox span,
+        .bottomTotals span,
+        .detailCell span {
           display: block;
           color: #6b7280;
           font-size: 13px;
@@ -927,18 +1607,32 @@ export default function PartPOSReportsPage() {
           margin-top: 18px;
         }
 
-        .summaryBox {
+        .summaryGrid.three {
+          grid-template-columns: repeat(3, minmax(0, 1fr));
+        }
+
+        .summaryGrid.four {
+          grid-template-columns: repeat(4, minmax(0, 1fr));
+        }
+
+        .statBox {
           border: 1px solid #e5e7eb;
           border-radius: 16px;
           padding: 16px;
           background: #ffffff;
         }
 
-        .summaryBox strong {
+        .statBox strong {
           display: block;
           margin-top: 6px;
           font-size: 22px;
           font-weight: 950;
+        }
+
+        .statBox small {
+          display: block;
+          color: #6b7280;
+          margin-top: 4px;
         }
 
         .redBox {
@@ -951,6 +1645,16 @@ export default function PartPOSReportsPage() {
           border-color: #bbf7d0;
         }
 
+        .orangeBox {
+          background: #fff7ed;
+          border-color: #fed7aa;
+        }
+
+        .purpleBox {
+          background: #f5f3ff;
+          border-color: #ddd6fe;
+        }
+
         .redText,
         .redBox strong {
           color: #b91c1c;
@@ -961,42 +1665,70 @@ export default function PartPOSReportsPage() {
           color: #15803d;
         }
 
-        .tableSection {
+        .orangeText,
+        .orangeBox strong {
+          color: #b45309;
+        }
+
+        .purpleText,
+        .purpleBox strong {
+          color: #7c3aed;
+        }
+
+        .recordsSection {
           margin-top: 22px;
         }
 
-        .tableWrap {
-          overflow-x: auto;
+        .recordList {
+          display: grid;
+          gap: 12px;
+        }
+
+        .recordCard {
+          display: grid;
+          grid-template-columns: minmax(220px, 1.1fr) minmax(0, 3fr);
+          gap: 16px;
           border: 1px solid #e5e7eb;
-          border-radius: 16px;
+          border-radius: 18px;
+          padding: 16px;
+          background: #ffffff;
         }
 
-        table {
-          width: 100%;
-          min-width: 1000px;
-          border-collapse: collapse;
-          background: white;
+        .recordMain {
+          border-left: 1px solid #e5e7eb;
+          padding-left: 14px;
         }
 
-        th,
-        td {
-          border-bottom: 1px solid #e5e7eb;
-          padding: 12px;
-          text-align: right;
-          vertical-align: top;
-        }
-
-        th {
-          background: #f9fafb;
-          color: #4b5563;
+        .recordMain p {
+          margin-bottom: 6px;
+          color: #6b7280;
           font-size: 13px;
         }
 
-        tfoot td {
-          background: #111827;
-          color: white;
-          font-weight: 900;
-          border-bottom: 0;
+        .recordMain h3 {
+          margin-bottom: 0;
+          font-size: 20px;
+          line-height: 1.35;
+        }
+
+        .detailGrid {
+          display: grid;
+          grid-template-columns: repeat(4, minmax(0, 1fr));
+          gap: 10px;
+        }
+
+        .detailCell {
+          background: #f9fafb;
+          border: 1px solid #f3f4f6;
+          border-radius: 14px;
+          padding: 10px 12px;
+        }
+
+        .detailCell strong {
+          display: block;
+          margin-top: 4px;
+          font-size: 15px;
+          line-height: 1.35;
         }
 
         .emptyState {
@@ -1037,7 +1769,24 @@ export default function PartPOSReportsPage() {
             align-items: stretch;
           }
 
-          .summaryGrid {
+          .summaryGrid,
+          .summaryGrid.three,
+          .summaryGrid.four {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+          }
+
+          .recordCard {
+            grid-template-columns: 1fr;
+          }
+
+          .recordMain {
+            border-left: 0;
+            border-bottom: 1px solid #e5e7eb;
+            padding-left: 0;
+            padding-bottom: 12px;
+          }
+
+          .detailGrid {
             grid-template-columns: repeat(2, minmax(0, 1fr));
           }
 
@@ -1051,7 +1800,10 @@ export default function PartPOSReportsPage() {
             padding: 14px;
           }
 
-          .summaryGrid {
+          .summaryGrid,
+          .summaryGrid.three,
+          .summaryGrid.four,
+          .detailGrid {
             grid-template-columns: 1fr;
           }
 
@@ -1105,43 +1857,60 @@ export default function PartPOSReportsPage() {
             margin-bottom: 4px;
           }
 
-          .summaryGrid {
-            grid-template-columns: repeat(6, 1fr);
+          .summaryGrid,
+          .summaryGrid.three,
+          .summaryGrid.four {
+            grid-template-columns: repeat(3, 1fr);
             gap: 5px;
             margin-top: 8px;
           }
 
-          .summaryBox {
+          .statBox {
             padding: 7px;
             border-radius: 8px;
           }
 
-          .summaryBox strong {
+          .statBox strong {
             font-size: 12px;
           }
 
-          .tableSection {
+          .recordsSection {
             margin-top: 8px;
           }
 
-          .tableWrap {
+          .recordList {
+            gap: 5px;
+          }
+
+          .recordCard {
+            grid-template-columns: 1fr 3fr;
+            gap: 6px;
+            padding: 7px;
             border-radius: 8px;
-            overflow: visible;
+            break-inside: avoid;
           }
 
-          table {
-            min-width: 0;
+          .recordMain h3 {
+            font-size: 11px;
+          }
+
+          .recordMain p,
+          .detailCell span {
+            font-size: 7px;
+          }
+
+          .detailGrid {
+            grid-template-columns: repeat(4, 1fr);
+            gap: 4px;
+          }
+
+          .detailCell {
+            padding: 4px;
+            border-radius: 6px;
+          }
+
+          .detailCell strong {
             font-size: 8px;
-          }
-
-          th,
-          td {
-            padding: 4px 5px;
-            line-height: 1.2;
-          }
-
-          th {
-            font-size: 7.5px;
           }
 
           .bottomTotals {
