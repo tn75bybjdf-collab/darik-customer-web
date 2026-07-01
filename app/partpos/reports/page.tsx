@@ -9,7 +9,8 @@ type ReportMode =
   | "credit"
   | "expenses"
   | "vendorCredit"
-  | "dailyCount";
+  | "dailyCount"
+  | "profitLoss";
 
 type ReportRange =
   | "today"
@@ -278,7 +279,8 @@ function reportTitle(mode: ReportMode) {
   if (mode === "credit") return "المبالغ المستحقة على الزبائن";
   if (mode === "expenses") return "المصروفات";
   if (mode === "vendorCredit") return "ائتمان الموردين";
-  return "عد الصندوق اليومي";
+  if (mode === "dailyCount") return "عد الصندوق اليومي";
+  return "الربح والخسارة";
 }
 
 function isAllTimeMode(mode: ReportMode) {
@@ -825,6 +827,14 @@ export default function PartPOSReportsPage() {
   );
 
   const totalExpenses = expenses.reduce((sum, row) => sum + Number(row.amount || 0), 0);
+  const profitLossSales = sales.reduce(
+    (sum, sale) => sum + Number(sale.sale_total || 0),
+    0,
+  );
+  const profitLossExpenses = totalExpenses;
+  const profitLossNet = profitLossSales - profitLossExpenses;
+  const profitLossLabel = profitLossNet >= 0 ? "ربح" : "خسارة";
+
   const utilityExpenses = expenses
     .filter((row) => row.expense_type === "utility")
     .reduce((sum, row) => sum + Number(row.amount || 0), 0);
@@ -869,7 +879,9 @@ export default function PartPOSReportsPage() {
             ? expenses.length
             : mode === "vendorCredit"
               ? vendorCreditRows.length
-              : dailyCounts.length;
+              : mode === "dailyCount"
+                ? dailyCounts.length
+                : 1;
 
   return (
     <main className="reportsPage" dir="rtl" suppressHydrationWarning>
@@ -1012,6 +1024,17 @@ export default function PartPOSReportsPage() {
           >
             عد الصندوق اليومي
           </button>
+          <button
+            type="button"
+            className={
+              mode === "profitLoss"
+                ? "tabButton activeTab profitLossTab"
+                : "tabButton profitLossTab"
+            }
+            onClick={() => setMode("profitLoss")}
+          >
+            الربح والخسارة
+          </button>
         </div>
       </section>
 
@@ -1035,7 +1058,9 @@ export default function PartPOSReportsPage() {
                     ? "عدد المصروفات"
                     : mode === "dailyCount"
                       ? "عدد الأيام"
-                      : "عدد الفواتير"}
+                      : mode === "profitLoss"
+                        ? "نتيجة الفترة"
+                        : "عدد الفواتير"}
             </span>
             <strong>{mode === "department" || mode === "items" ? sales.length : activeRowsCount}</strong>
             <small>{lastUpdated ? `آخر تحديث: ${lastUpdated}` : ""}</small>
@@ -1087,6 +1112,29 @@ export default function PartPOSReportsPage() {
             <StatBox label="إجمالي النقص" value={`${money(totalDailyShort)} د.أ`} tone="red" />
             <StatBox label="إجمالي الزيادة" value={`${money(totalDailyOver)} د.أ`} tone="orange" />
             <StatBox label="إجمالي مصروفات نقدية" value={`${money(totalDailyCashExpenses)} د.أ`} tone="red" />
+          </div>
+        ) : null}
+
+        {mode === "profitLoss" ? (
+          <div className="summaryGrid three">
+            <StatBox
+              label="إجمالي المبيعات"
+              value={`${money(profitLossSales)} د.أ`}
+              tone="green"
+              small="حسب الفترة المختارة"
+            />
+            <StatBox
+              label="إجمالي المصروفات"
+              value={`${money(profitLossExpenses)} د.أ`}
+              tone="red"
+              small="نقداً + على الحساب"
+            />
+            <StatBox
+              label={profitLossLabel}
+              value={`${money(Math.abs(profitLossNet))} د.أ`}
+              tone={profitLossNet >= 0 ? "green" : "red"}
+              small="المبيعات - المصروفات"
+            />
           </div>
         ) : null}
 
@@ -1268,6 +1316,42 @@ export default function PartPOSReportsPage() {
               </div>
             )
           ) : null}
+
+          {mode === "profitLoss" ? (
+            <div className="recordList">
+              <article className="recordCard profitLossCard">
+                <div className="recordMain">
+                  <p>{formatArabicDateRange(startDate, endDate)}</p>
+                  <h3 className={profitLossNet >= 0 ? "greenText" : "redText"}>
+                    {profitLossLabel}: {money(Math.abs(profitLossNet))} د.أ
+                  </h3>
+                </div>
+                <div className="detailGrid">
+                  <DetailCell
+                    label="إجمالي المبيعات"
+                    value={`${money(profitLossSales)} د.أ`}
+                    tone="green"
+                  />
+                  <DetailCell
+                    label="إجمالي المصروفات"
+                    value={`${money(profitLossExpenses)} د.أ`}
+                    tone="red"
+                  />
+                  <DetailCell
+                    label="المعادلة"
+                    value="المبيعات - المصروفات"
+                  />
+                  <DetailCell
+                    label="النتيجة"
+                    value={`${money(profitLossSales)} - ${money(profitLossExpenses)} = ${money(profitLossNet)} د.أ`}
+                    tone={profitLossNet >= 0 ? "green" : "red"}
+                  />
+                  <DetailCell label="عدد الفواتير" value={sales.length} />
+                  <DetailCell label="عدد المصروفات" value={expenses.length} />
+                </div>
+              </article>
+            </div>
+          ) : null}
         </section>
 
         <div className="bottomTotals">
@@ -1354,6 +1438,25 @@ export default function PartPOSReportsPage() {
               <div>
                 <span>إجمالي الزيادة</span>
                 <strong className="orangeText">{money(totalDailyOver)} د.أ</strong>
+              </div>
+            </>
+          ) : null}
+
+          {mode === "profitLoss" ? (
+            <>
+              <div>
+                <span>إجمالي المبيعات</span>
+                <strong className="greenText">{money(profitLossSales)} د.أ</strong>
+              </div>
+              <div>
+                <span>إجمالي المصروفات</span>
+                <strong className="redText">{money(profitLossExpenses)} د.أ</strong>
+              </div>
+              <div>
+                <span>{profitLossLabel}</span>
+                <strong className={profitLossNet >= 0 ? "greenText" : "redText"}>
+                  {money(Math.abs(profitLossNet))} د.أ
+                </strong>
               </div>
             </>
           ) : null}
@@ -1499,6 +1602,11 @@ export default function PartPOSReportsPage() {
         .dailyCountTab.activeTab {
           background: #0f766e;
           border-color: #0f766e;
+        }
+
+        .profitLossTab.activeTab {
+          background: #15803d;
+          border-color: #15803d;
         }
 
         label {
@@ -1692,6 +1800,11 @@ export default function PartPOSReportsPage() {
           border-radius: 18px;
           padding: 16px;
           background: #ffffff;
+        }
+
+        .profitLossCard {
+          border-color: #bbf7d0;
+          background: #fbfffd;
         }
 
         .recordMain {
