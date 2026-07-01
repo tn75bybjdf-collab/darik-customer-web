@@ -1,7 +1,7 @@
 "use client";
 
 import { createClient } from "@supabase/supabase-js";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 type PartPOSProduct = {
   id: string;
@@ -319,6 +319,11 @@ function emptyExpenseForm(): ExpenseForm {
 
 export default function PartPOSPage() {
   const [rows, setRows] = useState<POSRow[]>([emptyRow(), emptyRow()]);
+  const [departmentOptions, setDepartmentOptions] = useState<string[]>([]);
+  const [departmentLoadError, setDepartmentLoadError] = useState("");
+  const [customDepartmentRows, setCustomDepartmentRows] = useState<
+    Record<string, boolean>
+  >({});
   const [search, setSearch] = useState("");
   const [suggestions, setSuggestions] = useState<PartPOSProduct[]>([]);
   const [isSearching, setIsSearching] = useState(false);
@@ -375,6 +380,90 @@ export default function PartPOSPage() {
     if (!url || !anonKey) return null;
     return createClient(url, anonKey);
   }, []);
+
+  useEffect(() => {
+    if (!supabase) return;
+
+    let isMounted = true;
+
+    async function loadSavedDepartments() {
+      setDepartmentLoadError("");
+
+      const { data, error } = await supabase
+        .from("partpos_products")
+        .select("department_ar")
+        .not("department_ar", "is", null)
+        .limit(2000);
+
+      if (!isMounted) return;
+
+      if (error) {
+        setDepartmentLoadError(error.message);
+        return;
+      }
+
+      const uniqueDepartments = new Map<string, string>();
+
+      for (const item of data ?? []) {
+        const department = String(item.department_ar ?? "").trim();
+        const key = normalizeArabicText(department);
+
+        if (!department || !key || uniqueDepartments.has(key)) continue;
+        uniqueDepartments.set(key, department);
+      }
+
+      setDepartmentOptions(
+        Array.from(uniqueDepartments.values()).sort((a, b) =>
+          a.localeCompare(b, "ar"),
+        ),
+      );
+    }
+
+    void loadSavedDepartments();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [supabase]);
+
+  function addDepartmentOption(departmentValue: string) {
+    const department = departmentValue.trim();
+    if (!department) return;
+
+    setDepartmentOptions((current) => {
+      const key = normalizeArabicText(department);
+      const alreadyExists = current.some(
+        (existing) => normalizeArabicText(existing) === key,
+      );
+
+      if (alreadyExists) return current;
+
+      return [...current, department].sort((a, b) => a.localeCompare(b, "ar"));
+    });
+  }
+
+  function departmentExists(departmentValue: string) {
+    const key = normalizeArabicText(departmentValue);
+    if (!key) return false;
+
+    return departmentOptions.some(
+      (department) => normalizeArabicText(department) === key,
+    );
+  }
+
+  function useCustomDepartmentForRow(lineId: string) {
+    setCustomDepartmentRows((current) => ({
+      ...current,
+      [lineId]: true,
+    }));
+  }
+
+  function useSavedDepartmentForRow(lineId: string) {
+    setCustomDepartmentRows((current) => ({
+      ...current,
+      [lineId]: false,
+    }));
+  }
 
   function handlePinChange(value: string) {
     const cleanValue = value.replace(/\D/g, "").slice(0, DEFAULT_PIN.length);
@@ -456,6 +545,8 @@ export default function PartPOSPage() {
       .single();
 
     if (error) throw error;
+
+    addDepartmentOption(payload.department_ar);
 
     return data?.id ?? row.savedProductId ?? null;
   }
@@ -2104,6 +2195,11 @@ export default function PartPOSPage() {
       </section>
 
       <section className="tableCard">
+        {departmentLoadError && (
+          <div className="departmentLoadError">
+            لم يتم تحميل قائمة الأقسام: {departmentLoadError}
+          </div>
+        )}
         <div className="tableWrap">
           <table>
             <thead>
@@ -2130,14 +2226,67 @@ export default function PartPOSPage() {
                         placeholder="اسم المنتج بالعربي"
                       />
                     </td>
-                    <td>
-                      <input
-                        value={row.department}
-                        onChange={(event) =>
-                          updateRow(index, "department", event.target.value)
-                        }
-                        placeholder="القسم"
-                      />
+                    <td className="departmentCell">
+                      {departmentOptions.length > 0 &&
+                      !customDepartmentRows[row.lineId] ? (
+                        <>
+                          <select
+                            className="departmentSelect"
+                            value={departmentExists(row.department) ? row.department : ""}
+                            onChange={(event) => {
+                              const selectedValue = event.target.value;
+
+                              if (selectedValue === "__new_department__") {
+                                useCustomDepartmentForRow(row.lineId);
+                                updateRow(index, "department", "");
+                                return;
+                              }
+
+                              useSavedDepartmentForRow(row.lineId);
+                              updateRow(index, "department", selectedValue);
+                            }}
+                          >
+                            <option value="">اختر القسم</option>
+                            {departmentOptions.map((department) => (
+                              <option value={department} key={department}>
+                                {department}
+                              </option>
+                            ))}
+                            <option value="__new_department__">
+                              + قسم جديد
+                            </option>
+                          </select>
+                          <small className="departmentHint">
+                            اختر من الأقسام المحفوظة حتى لا يتكرر نفس القسم بتهجئة مختلفة.
+                          </small>
+                        </>
+                      ) : (
+                        <div className="departmentCustomWrap">
+                          <input
+                            value={row.department}
+                            onChange={(event) =>
+                              updateRow(index, "department", event.target.value)
+                            }
+                            placeholder={
+                              departmentOptions.length > 0
+                                ? "اكتب اسم القسم الجديد"
+                                : "القسم"
+                            }
+                          />
+                          {departmentOptions.length > 0 && (
+                            <button
+                              type="button"
+                              className="departmentBackButton"
+                              onClick={() => {
+                                useSavedDepartmentForRow(row.lineId);
+                                updateRow(index, "department", "");
+                              }}
+                            >
+                              اختيار من القائمة
+                            </button>
+                          )}
+                        </div>
+                      )}
                     </td>
                     <td>
                       <input
@@ -2869,7 +3018,8 @@ export default function PartPOSPage() {
           font-weight: 700;
         }
 
-        input {
+        input,
+        select {
           width: 100%;
           border: 1px solid #d1d5db;
           border-radius: 12px;
@@ -2879,7 +3029,8 @@ export default function PartPOSPage() {
           background: white;
         }
 
-        input:focus {
+        input:focus,
+        select:focus {
           border-color: #111827;
           box-shadow: 0 0 0 3px rgba(17, 24, 39, 0.08);
         }
@@ -3248,6 +3399,50 @@ export default function PartPOSPage() {
           overflow: hidden;
         }
 
+        .departmentLoadError {
+          margin: 14px 14px 0;
+          border: 1px solid #fecaca;
+          background: #fef2f2;
+          color: #991b1b;
+          border-radius: 12px;
+          padding: 10px 12px;
+          font-weight: 800;
+          font-size: 13px;
+        }
+
+        .departmentCell {
+          min-width: 220px;
+        }
+
+        .departmentSelect {
+          font-weight: 800;
+          cursor: pointer;
+        }
+
+        .departmentHint {
+          display: block;
+          margin-top: 6px;
+          color: #6b7280;
+          font-size: 11px;
+          line-height: 1.35;
+        }
+
+        .departmentCustomWrap {
+          display: grid;
+          gap: 7px;
+        }
+
+        .departmentBackButton {
+          border: 0;
+          border-radius: 10px;
+          padding: 8px 10px;
+          background: #f3f4f6;
+          color: #111827;
+          font-weight: 800;
+          cursor: pointer;
+          font-size: 12px;
+        }
+
         .tableWrap {
           overflow-x: auto;
         }
@@ -3255,7 +3450,7 @@ export default function PartPOSPage() {
         table {
           width: 100%;
           border-collapse: collapse;
-          min-width: 1080px;
+          min-width: 1160px;
         }
 
         th,
