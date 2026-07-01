@@ -115,6 +115,10 @@ function normalizeArabicText(value: string) {
     .toLowerCase();
 }
 
+function isUsedDepartment(value: string) {
+  return normalizeArabicText(value) === normalizeArabicText("مستعمل");
+}
+
 function parseMoney(value: string) {
   const cleaned = value.replace(/,/g, ".").replace(/[^0-9.]/g, "");
   const parsed = Number(cleaned);
@@ -163,6 +167,11 @@ function rowLineTotalText(row: POSRow) {
 }
 
 function rowBasePrice(row: POSRow) {
+  if (isUsedDepartment(row.department)) {
+    const usedPrice = parseMoney(row.price);
+    return usedPrice > 0 ? usedPrice : 0;
+  }
+
   const savedBase = parseMoney(row.basePrice);
   if (savedBase > 0) return savedBase;
 
@@ -171,19 +180,24 @@ function rowBasePrice(row: POSRow) {
 }
 
 function rowIsSaveReady(row: POSRow) {
+  const isUsed = isUsedDepartment(row.department);
+
   return Boolean(
     row.productName.trim() &&
     row.department.trim() &&
-    parseMoney(row.cost) > 0 &&
+    (isUsed || parseMoney(row.cost) > 0) &&
+    parseMoney(row.price) > 0 &&
     rowBasePrice(row) > 0,
   );
 }
 
 function rowIsCashoutReady(row: POSRow) {
+  const isUsed = isUsedDepartment(row.department);
+
   return Boolean(
     row.productName.trim() &&
     row.department.trim() &&
-    parseMoney(row.cost) > 0 &&
+    (isUsed || parseMoney(row.cost) > 0) &&
     parseMoney(row.price) > 0 &&
     rowQuantity(row) > 0,
   );
@@ -204,6 +218,8 @@ function discountPercent(row: POSRow) {
 }
 
 function marginPercentNumber(row: POSRow) {
+  if (isUsedDepartment(row.department)) return 0;
+
   const cost = parseMoney(row.cost);
   const currentPrice = parseMoney(row.price);
 
@@ -533,7 +549,7 @@ export default function PartPOSPage() {
       product_key: productKey,
       product_name_ar: row.productName.trim(),
       department_ar: row.department.trim(),
-      cost: parseMoney(row.cost),
+      cost: isUsedDepartment(row.department) ? 0 : parseMoney(row.cost),
       price: savedPrice,
       updated_at: new Date().toISOString(),
     };
@@ -567,16 +583,26 @@ export default function PartPOSPage() {
           errorMessage: "",
         };
 
-        if (field === "cost") {
-          const cost = parseMoney(value);
-          const calculatedPrice =
-            cost > 0 ? money(priceFromThirtyPercentMargin(cost)) : "";
+        if (field === "department" && isUsedDepartment(value)) {
+          updated.cost = "";
+          updated.basePrice = "";
+        }
 
-          // Store the original calculated price separately, then copy it into
-          // the editable sale price. Later edits to sale price will not overwrite
-          // this saved base price.
-          updated.basePrice = calculatedPrice;
-          updated.price = calculatedPrice;
+        if (field === "cost") {
+          if (isUsedDepartment(updated.department)) {
+            updated.cost = "";
+            updated.basePrice = "";
+          } else {
+            const cost = parseMoney(value);
+            const calculatedPrice =
+              cost > 0 ? money(priceFromThirtyPercentMargin(cost)) : "";
+
+            // Store the original calculated price separately, then copy it into
+            // the editable sale price. Later edits to sale price will not overwrite
+            // this saved base price.
+            updated.basePrice = calculatedPrice;
+            updated.price = calculatedPrice;
+          }
         }
 
         updated.total = rowLineTotalText(updated);
@@ -595,6 +621,7 @@ export default function PartPOSPage() {
   function showManualPricePopup(index: number) {
     const row = rows[index];
     if (!row) return;
+    if (isUsedDepartment(row.department)) return;
 
     const originalPrice = rowBasePrice(row);
     const currentPrice = parseMoney(row.price);
@@ -659,8 +686,8 @@ export default function PartPOSPage() {
         lineId: makeId(),
         productName: product.product_name_ar,
         department: product.department_ar,
-        cost: money(Number(product.cost)),
-        basePrice: savedPrice,
+        cost: isUsedDepartment(product.department_ar) ? "" : money(Number(product.cost)),
+        basePrice: isUsedDepartment(product.department_ar) ? "" : savedPrice,
         price: savedPrice,
         quantity: "1",
         total: savedPrice,
@@ -1779,7 +1806,7 @@ export default function PartPOSPage() {
           product_name_ar: row.productName.trim(),
           department_ar: row.department.trim(),
           quantity,
-          cost: parseMoney(row.cost),
+          cost: isUsedDepartment(row.department) ? 0 : parseMoney(row.cost),
           base_price: rowBasePrice(row),
           sale_price: parseMoney(row.price),
           discount_percent: discountPercentNumber(row),
@@ -2290,13 +2317,29 @@ export default function PartPOSPage() {
                     </td>
                     <td>
                       <input
-                        value={row.cost}
+                        className={isUsedDepartment(row.department) ? "disabledCostInput" : ""}
+                        value={isUsedDepartment(row.department) ? "" : row.cost}
                         onChange={(event) =>
                           updateRow(index, "cost", event.target.value)
                         }
-                        placeholder="0.00"
+                        placeholder={
+                          isUsedDepartment(row.department)
+                            ? "لا يوجد تكلفة للمستعمل"
+                            : "0.00"
+                        }
                         inputMode="decimal"
+                        disabled={isUsedDepartment(row.department)}
+                        title={
+                          isUsedDepartment(row.department)
+                            ? "قسم مستعمل بدون تكلفة - أدخل السعر فقط"
+                            : "تكلفة القطعة"
+                        }
                       />
+                      {isUsedDepartment(row.department) && (
+                        <small className="usedCostHint">
+                          مستعمل: أدخل سعر البيع فقط
+                        </small>
+                      )}
                     </td>
                     <td>
                       <input
@@ -3441,6 +3484,21 @@ export default function PartPOSPage() {
           font-weight: 800;
           cursor: pointer;
           font-size: 12px;
+        }
+
+        .disabledCostInput {
+          background: #f3f4f6;
+          color: #9ca3af;
+          cursor: not-allowed;
+          border-style: dashed;
+        }
+
+        .usedCostHint {
+          display: block;
+          margin-top: 6px;
+          color: #b45309;
+          font-size: 11px;
+          font-weight: 800;
         }
 
         .tableWrap {
