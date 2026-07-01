@@ -327,6 +327,13 @@ function openEndOfDayReport() {
   window.open("/partpos/end-of-day", "_blank", "noopener,noreferrer");
 }
 
+function logoutReportsOnly() {
+  if (typeof window === "undefined") return;
+
+  window.localStorage.removeItem("partpos_access_mode");
+  window.location.href = "/partpos";
+}
+
 function StatBox({
   label,
   value,
@@ -366,6 +373,7 @@ function DetailCell({
 
 export default function PartPOSReportsPage() {
   const [mode, setMode] = useState<ReportMode>("department");
+  const [isReportsOnlyAccess, setIsReportsOnlyAccess] = useState(false);
   const [rangePreset, setRangePreset] = useState<ReportRange>("today");
   const [startDate, setStartDate] = useState(() => getPresetRange("today").startDate);
   const [endDate, setEndDate] = useState(() => getPresetRange("today").endDate);
@@ -385,6 +393,18 @@ export default function PartPOSReportsPage() {
 
     if (!url || !anonKey) return null;
     return createClient<any>(url, anonKey);
+  }, []);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const params = new URLSearchParams(window.location.search);
+    const accessParam = params.get("access");
+    const savedAccessMode = window.localStorage.getItem("partpos_access_mode");
+
+    setIsReportsOnlyAccess(
+      accessParam === "reports_only" || savedAccessMode === "reports_only",
+    );
   }, []);
 
   function handleRangeChange(nextRange: ReportRange) {
@@ -883,27 +903,102 @@ export default function PartPOSReportsPage() {
                 ? dailyCounts.length
                 : 1;
 
+  const reportsOnlyReportButtons: {
+    value: ReportMode;
+    label: string;
+    helper: string;
+  }[] = [
+    {
+      value: "department",
+      label: "المبيعات حسب القسم",
+      helper: "الافتراضي",
+    },
+    {
+      value: "items",
+      label: "المبيعات حسب القطع",
+      helper: "أفضل القطع",
+    },
+    {
+      value: "profitLoss",
+      label: "الربح والخسارة",
+      helper: "مبيعات - مصروفات",
+    },
+    {
+      value: "expenses",
+      label: "المصروفات",
+      helper: "نقداً وعلى الحساب",
+    },
+    {
+      value: "dailyCount",
+      label: "عد الصندوق",
+      helper: "نقص / زيادة",
+    },
+    {
+      value: "credit",
+      label: "ديون الزبائن",
+      helper: "كل الفترات",
+    },
+    {
+      value: "vendorCredit",
+      label: "ديون الموردين",
+      helper: "كل الفترات",
+    },
+  ];
+
+  const reportsOnlyRangeButtons: {
+    value: ReportRange;
+    label: string;
+    helper: string;
+  }[] = [
+    { value: "today", label: "اليوم", helper: "تقرير اليوم" },
+    { value: "this_week", label: "الأسبوع", helper: "الأسبوع الحالي" },
+    { value: "this_month", label: "الشهر", helper: "الشهر الحالي" },
+    { value: "last_month", label: "الشهر الماضي", helper: "الفترة السابقة" },
+    { value: "year_to_date", label: "السنة", helper: "من بداية السنة" },
+    { value: "custom", label: "تخصيص", helper: "اختر التاريخ" },
+  ];
+
   return (
-    <main className="reportsPage" dir="rtl" suppressHydrationWarning>
+    <main
+      className={isReportsOnlyAccess ? "reportsPage reportsOnlyMode" : "reportsPage"}
+      dir="rtl"
+      suppressHydrationWarning
+    >
       <section className="topCard noPrint">
         <div>
           <p className="eyebrow">PartPOS</p>
-          <h1>التقارير</h1>
+          <h1>{isReportsOnlyAccess ? "لوحة التقارير" : "التقارير"}</h1>
           <p className="subtext">
-            نسخة مستقرة بدون جداول HTML حتى لا يتكرر خطأ removeChild عند تغيير الفترة.
+            {isReportsOnlyAccess
+              ? "عرض تقارير فقط. اختر التقرير والفترة بسهولة من الموبايل."
+              : "نسخة مستقرة بدون جداول HTML حتى لا يتكرر خطأ removeChild عند تغيير الفترة."}
           </p>
+          {isReportsOnlyAccess && (
+            <div className="reportsOnlyBadge">
+              دخول تقارير فقط — لا يوجد صلاحية للكاشير أو البيع
+            </div>
+          )}
         </div>
 
         <div className="topActions">
-          <button type="button" className="secondaryButton" onClick={backToPOS}>
-            الرجوع للكاشير
-          </button>
-          <button type="button" className="secondaryButton" onClick={openEndOfDayReport}>
-            تقرير نهاية اليوم
-          </button>
+          {!isReportsOnlyAccess && (
+            <>
+              <button type="button" className="secondaryButton" onClick={backToPOS}>
+                الرجوع للكاشير
+              </button>
+              <button type="button" className="secondaryButton" onClick={openEndOfDayReport}>
+                تقرير نهاية اليوم
+              </button>
+            </>
+          )}
           <button type="button" className="printButton" onClick={() => window.print()}>
             طباعة التقرير
           </button>
+          {isReportsOnlyAccess && (
+            <button type="button" className="secondaryButton" onClick={logoutReportsOnly}>
+              خروج
+            </button>
+          )}
         </div>
       </section>
 
@@ -914,6 +1009,128 @@ export default function PartPOSReportsPage() {
       )}
 
       <section className="controlsCard noPrint">
+        {isReportsOnlyAccess && (
+          <div className="reportsOnlyPicker">
+            <div className="reportsOnlyHero">
+              <div>
+                <p className="eyebrow">عرض التقارير فقط</p>
+                <h2>{reportTitle(mode)}</h2>
+                <p>
+                  {isAllTimeMode(mode)
+                    ? "هذا التقرير يعرض كل الفترات."
+                    : selectedRangeText}
+                </p>
+              </div>
+              <div className="reportsOnlyHeroStat">
+                <span>السجلات</span>
+                <strong>{activeRowsCount}</strong>
+              </div>
+            </div>
+
+            <div className="reportsOnlyMiniStats">
+              <div>
+                <span>التقرير</span>
+                <strong>{reportTitle(mode)}</strong>
+              </div>
+              <div>
+                <span>الفترة</span>
+                <strong>{isAllTimeMode(mode) ? "كل الفترات" : rangeLabel(rangePreset)}</strong>
+              </div>
+              <div>
+                <span>آخر تحديث</span>
+                <strong>{lastUpdated || "—"}</strong>
+              </div>
+            </div>
+
+            <div className="pickerGroup">
+              <div className="pickerTitleRow">
+                <strong>نوع التقرير</strong>
+                <span>المبيعات حسب القسم هي الافتراضية</span>
+              </div>
+              <div className="mobileReportGrid">
+                {reportsOnlyReportButtons.map((option) => (
+                  <button
+                    type="button"
+                    key={option.value}
+                    className={
+                      mode === option.value
+                        ? "mobileReportButton activeMobileReport"
+                        : "mobileReportButton"
+                    }
+                    onClick={() => setMode(option.value)}
+                  >
+                    <span>{option.label}</span>
+                    <small>{option.helper}</small>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="pickerGroup">
+              <div className="pickerTitleRow">
+                <strong>الفترة</strong>
+                <span>{isAllTimeMode(mode) ? "كل الفترات لهذا التقرير" : "اختر بسرعة"}</span>
+              </div>
+
+              {isAllTimeMode(mode) ? (
+                <div className="allTimeMobileNotice">
+                  هذا التقرير غير مرتبط بيوم معين ويعرض كل المبالغ المستحقة.
+                </div>
+              ) : (
+                <div className="mobileRangeGrid">
+                  {reportsOnlyRangeButtons.map((option) => (
+                    <button
+                      type="button"
+                      key={option.value}
+                      className={
+                        rangePreset === option.value
+                          ? "mobileRangeButton activeMobileRange"
+                          : "mobileRangeButton"
+                      }
+                      onClick={() => handleRangeChange(option.value)}
+                    >
+                      <span>{option.label}</span>
+                      <small>{option.helper}</small>
+                    </button>
+                  ))}
+                </div>
+              )}
+
+              {rangePreset === "custom" && !isAllTimeMode(mode) && (
+                <div className="reportsOnlyCustomDates">
+                  <div>
+                    <label htmlFor="mobile-start-date">من تاريخ</label>
+                    <input
+                      id="mobile-start-date"
+                      type="date"
+                      value={startDate}
+                      onChange={(event) => setStartDate(event.target.value)}
+                    />
+                  </div>
+                  <div>
+                    <label htmlFor="mobile-end-date">إلى تاريخ</label>
+                    <input
+                      id="mobile-end-date"
+                      type="date"
+                      value={endDate}
+                      onChange={(event) => setEndDate(event.target.value)}
+                    />
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <button
+              type="button"
+              className="reportsOnlyRefreshButton"
+              onClick={() => void loadReports()}
+              disabled={!supabase || loading}
+            >
+              {loading ? "جاري تحديث التقرير..." : "تحديث التقرير"}
+            </button>
+          </div>
+        )}
+
         <div className="dateControls">
           <div>
             <label htmlFor="range-preset">فترة التقرير</label>
@@ -974,6 +1191,17 @@ export default function PartPOSReportsPage() {
         <div className="modeTabs">
           <button
             type="button"
+            className={
+              mode === "profitLoss"
+                ? "tabButton activeTab profitLossTab"
+                : "tabButton profitLossTab"
+            }
+            onClick={() => setMode("profitLoss")}
+          >
+            الربح والخسارة
+          </button>
+          <button
+            type="button"
             className={mode === "department" ? "tabButton activeTab" : "tabButton"}
             onClick={() => setMode("department")}
           >
@@ -1023,17 +1251,6 @@ export default function PartPOSReportsPage() {
             onClick={() => setMode("dailyCount")}
           >
             عد الصندوق اليومي
-          </button>
-          <button
-            type="button"
-            className={
-              mode === "profitLoss"
-                ? "tabButton activeTab profitLossTab"
-                : "tabButton profitLossTab"
-            }
-            onClick={() => setMode("profitLoss")}
-          >
-            الربح والخسارة
           </button>
         </div>
       </section>
@@ -1523,6 +1740,284 @@ export default function PartPOSReportsPage() {
           color: #4b5563;
         }
 
+        .reportsOnlyBadge {
+          width: fit-content;
+          margin-top: 12px;
+          border: 1px solid #bfdbfe;
+          border-radius: 999px;
+          padding: 8px 12px;
+          background: #eff6ff;
+          color: #1d4ed8;
+          font-weight: 900;
+          font-size: 13px;
+        }
+
+        .reportsOnlyMode {
+          background:
+            radial-gradient(circle at top right, rgba(37, 99, 235, 0.12), transparent 30%),
+            #eef2f7;
+        }
+
+        .reportsOnlyMode .controlsCard {
+          display: block;
+          padding: 18px;
+          border-radius: 26px;
+        }
+
+        .reportsOnlyMode .dateControls,
+        .reportsOnlyMode .modeTabs {
+          display: none;
+        }
+
+        .reportsOnlyPicker {
+          display: grid;
+          gap: 18px;
+          width: 100%;
+        }
+
+        .reportsOnlyHero {
+          display: flex;
+          align-items: flex-start;
+          justify-content: space-between;
+          gap: 16px;
+          padding: 18px;
+          border-radius: 24px;
+          background: linear-gradient(135deg, #111827, #1d4ed8);
+          color: white;
+          box-shadow: 0 18px 45px rgba(37, 99, 235, 0.18);
+        }
+
+        .reportsOnlyHero h2 {
+          margin: 0 0 6px;
+          font-size: 30px;
+          line-height: 1.15;
+        }
+
+        .reportsOnlyHero p {
+          margin: 0;
+          color: rgba(255, 255, 255, 0.82);
+          line-height: 1.5;
+        }
+
+        .reportsOnlyHero .eyebrow {
+          color: rgba(255, 255, 255, 0.68);
+        }
+
+        .reportsOnlyHeroStat {
+          min-width: 96px;
+          border: 1px solid rgba(255, 255, 255, 0.22);
+          border-radius: 18px;
+          padding: 12px;
+          background: rgba(255, 255, 255, 0.1);
+          text-align: center;
+        }
+
+        .reportsOnlyHeroStat span,
+        .reportsOnlyMiniStats span,
+        .mobileReportButton small,
+        .mobileRangeButton small,
+        .pickerTitleRow span {
+          display: block;
+          font-size: 12px;
+        }
+
+        .reportsOnlyHeroStat span {
+          color: rgba(255, 255, 255, 0.75);
+          margin-bottom: 6px;
+          font-weight: 800;
+        }
+
+        .reportsOnlyHeroStat strong {
+          font-size: 26px;
+        }
+
+        .reportsOnlyMiniStats {
+          display: grid;
+          grid-template-columns: repeat(3, minmax(0, 1fr));
+          gap: 10px;
+        }
+
+        .reportsOnlyMiniStats div {
+          border: 1px solid #e5e7eb;
+          border-radius: 18px;
+          padding: 14px;
+          background: #f9fafb;
+        }
+
+        .reportsOnlyMiniStats span {
+          margin-bottom: 6px;
+          color: #6b7280;
+          font-weight: 800;
+        }
+
+        .reportsOnlyMiniStats strong {
+          display: block;
+          color: #111827;
+          font-size: 15px;
+          line-height: 1.4;
+        }
+
+        .pickerGroup {
+          display: grid;
+          gap: 10px;
+        }
+
+        .pickerTitleRow {
+          display: flex;
+          justify-content: space-between;
+          gap: 10px;
+          align-items: center;
+        }
+
+        .pickerTitleRow strong {
+          font-size: 18px;
+        }
+
+        .pickerTitleRow span {
+          color: #6b7280;
+          font-weight: 800;
+        }
+
+        .mobileReportGrid {
+          display: grid;
+          grid-template-columns: repeat(3, minmax(0, 1fr));
+          gap: 10px;
+        }
+
+        .mobileReportButton {
+          min-height: 88px;
+          display: flex;
+          flex-direction: column;
+          align-items: flex-start;
+          justify-content: center;
+          gap: 6px;
+          border: 1px solid #e5e7eb;
+          border-radius: 18px;
+          padding: 14px;
+          background: white;
+          color: #111827;
+          text-align: right;
+          white-space: normal;
+          box-shadow: 0 8px 22px rgba(15, 23, 42, 0.04);
+        }
+
+        .mobileReportButton span {
+          font-weight: 900;
+          font-size: 15px;
+          line-height: 1.35;
+        }
+
+        .mobileReportButton small {
+          color: #6b7280;
+          font-weight: 800;
+          line-height: 1.35;
+        }
+
+        .activeMobileReport {
+          background: #eff6ff;
+          border-color: #2563eb;
+          color: #1d4ed8;
+          box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+        }
+
+        .activeMobileReport small {
+          color: #1d4ed8;
+        }
+
+        .mobileRangeGrid {
+          display: grid;
+          grid-template-columns: repeat(6, minmax(0, 1fr));
+          gap: 8px;
+        }
+
+        .mobileRangeButton {
+          min-height: 74px;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          gap: 5px;
+          border: 1px solid #e5e7eb;
+          border-radius: 16px;
+          padding: 10px;
+          background: white;
+          color: #111827;
+          text-align: center;
+          white-space: normal;
+        }
+
+        .mobileRangeButton span {
+          font-weight: 900;
+          font-size: 14px;
+        }
+
+        .mobileRangeButton small {
+          color: #6b7280;
+          font-weight: 800;
+          line-height: 1.25;
+        }
+
+        .activeMobileRange {
+          background: #dcfce7;
+          border-color: #16a34a;
+          color: #166534;
+          box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.12);
+        }
+
+        .activeMobileRange small {
+          color: #166534;
+        }
+
+        .allTimeMobileNotice {
+          border: 1px solid #fed7aa;
+          border-radius: 18px;
+          padding: 14px;
+          background: #fff7ed;
+          color: #9a3412;
+          font-weight: 900;
+        }
+
+        .reportsOnlyCustomDates {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 10px;
+          margin-top: 10px;
+        }
+
+        .reportsOnlyCustomDates label {
+          display: block;
+          margin-bottom: 7px;
+          color: #374151;
+          font-weight: 900;
+          font-size: 13px;
+        }
+
+        .reportsOnlyCustomDates input {
+          width: 100%;
+          border: 1px solid #d1d5db;
+          border-radius: 14px;
+          padding: 14px;
+          font-size: 16px;
+          background: white;
+        }
+
+        .reportsOnlyRefreshButton {
+          min-height: 54px;
+          border: 0;
+          border-radius: 18px;
+          background: #111827;
+          color: white;
+          font-size: 17px;
+          font-weight: 900;
+          cursor: pointer;
+          box-shadow: 0 12px 30px rgba(17, 24, 39, 0.18);
+        }
+
+        .reportsOnlyRefreshButton:disabled {
+          opacity: 0.55;
+          cursor: not-allowed;
+        }
+
         .topActions,
         .dateControls,
         .modeTabs {
@@ -1604,9 +2099,16 @@ export default function PartPOSReportsPage() {
           border-color: #0f766e;
         }
 
+        .profitLossTab {
+          background: #dcfce7;
+          color: #14532d;
+          border-color: #86efac;
+        }
+
         .profitLossTab.activeTab {
           background: #15803d;
           border-color: #15803d;
+          color: white;
         }
 
         label {
@@ -1928,6 +2430,88 @@ export default function PartPOSReportsPage() {
         @page {
           size: A4 landscape;
           margin: 8mm;
+        }
+
+        @media (max-width: 900px) {
+          .mobileReportGrid {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+          }
+
+          .mobileRangeGrid {
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+          }
+        }
+
+        @media (max-width: 540px) {
+          .reportsOnlyMode {
+            padding: 10px;
+          }
+
+          .reportsOnlyMode .topCard {
+            border-radius: 22px;
+            padding: 18px;
+          }
+
+          .reportsOnlyMode .controlsCard {
+            padding: 12px;
+            border-radius: 22px;
+          }
+
+          .reportsOnlyHero {
+            flex-direction: column;
+            border-radius: 20px;
+            padding: 16px;
+          }
+
+          .reportsOnlyHero h2 {
+            font-size: 25px;
+          }
+
+          .reportsOnlyHeroStat {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            text-align: right;
+          }
+
+          .reportsOnlyMiniStats {
+            grid-template-columns: 1fr;
+          }
+
+          .pickerTitleRow {
+            align-items: flex-start;
+            flex-direction: column;
+          }
+
+          .mobileReportGrid {
+            grid-template-columns: 1fr;
+          }
+
+          .mobileReportButton {
+            min-height: 74px;
+            border-radius: 16px;
+          }
+
+          .mobileRangeGrid {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+          }
+
+          .mobileRangeButton {
+            min-height: 68px;
+          }
+
+          .reportsOnlyCustomDates {
+            grid-template-columns: 1fr;
+          }
+
+          .topActions {
+            width: 100%;
+          }
+
+          .topActions button {
+            flex: 1;
+          }
         }
 
         @media print {

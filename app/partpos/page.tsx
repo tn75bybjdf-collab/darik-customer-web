@@ -82,6 +82,7 @@ type MarginPopup = {
 
 const MARGIN = 0.3;
 const DEFAULT_PIN = "079300";
+const REPORTS_ONLY_PIN = "079079";
 
 function makeId() {
   if (typeof crypto !== "undefined" && "randomUUID" in crypto) {
@@ -489,7 +490,19 @@ export default function PartPOSPage() {
 
     if (cleanValue.length !== DEFAULT_PIN.length) return;
 
+    if (cleanValue === REPORTS_ONLY_PIN) {
+      if (typeof window !== "undefined") {
+        window.localStorage.setItem("partpos_access_mode", "reports_only");
+        window.location.href = "/partpos/reports?access=reports_only";
+      }
+      return;
+    }
+
     if (cleanValue === DEFAULT_PIN) {
+      if (typeof window !== "undefined") {
+        window.localStorage.setItem("partpos_access_mode", "cashier");
+      }
+
       setIsUnlocked(true);
       setPinEntry("");
       setPinError("");
@@ -1871,7 +1884,9 @@ export default function PartPOSPage() {
         <section className="pinCard">
           <p className="pinEyebrow">PartPOS</p>
           <h1>شاشة الدخول</h1>
-          <p className="pinSubtext">أدخل الرمز. سيتم الدخول تلقائياً بعد آخر رقم.</p>
+          <p className="pinSubtext">
+            أدخل رمز الكاشير للبيع أو رمز التقارير للعرض فقط.
+          </p>
 
           {lockNotice && <div className="lockNotice">{lockNotice}</div>}
 
