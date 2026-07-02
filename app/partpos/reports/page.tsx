@@ -438,6 +438,7 @@ export default function PartPOSReportsPage() {
         )
         .gte("created_at", start.toISOString())
         .lt("created_at", end.toISOString())
+        .or("status.is.null,status.neq.voided")
         .order("created_at", { ascending: false })
         .limit(10000);
 
@@ -497,6 +498,7 @@ export default function PartPOSReportsPage() {
           "id, sale_number, sale_total, amount_paid, change_due, payment_method, customer_id, customer_name, customer_phone, customer_credit_allowance, created_at",
         )
         .eq("payment_method", "credit")
+        .or("status.is.null,status.neq.voided")
         .order("created_at", { ascending: true })
         .limit(50000);
 
@@ -970,8 +972,8 @@ export default function PartPOSReportsPage() {
           <h1>{isReportsOnlyAccess ? "لوحة التقارير" : "التقارير"}</h1>
           <p className="subtext">
             {isReportsOnlyAccess
-              ? "عرض تقارير فقط. اختر التقرير والفترة بسهولة من الموبايل."
-              : "نسخة مستقرة بدون جداول HTML حتى لا يتكرر خطأ removeChild عند تغيير الفترة."}
+              ? "عرض تقارير فقط. اختر التقرير والفترة بسهولة من الموبايل. الفواتير الملغاة VOID لا تُحسب."
+              : "الفواتير الملغاة VOID لا تدخل في المبيعات أو الأرباح أو نهاية اليوم."}
           </p>
           {isReportsOnlyAccess && (
             <div className="reportsOnlyBadge">

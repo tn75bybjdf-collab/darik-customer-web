@@ -221,6 +221,7 @@ export default function PartPOSEndOfDayReportPage() {
         )
         .gte("created_at", start.toISOString())
         .lt("created_at", end.toISOString())
+        .or("status.is.null,status.neq.voided")
         .order("created_at", { ascending: false })
         .limit(5000);
 
@@ -519,7 +520,7 @@ export default function PartPOSEndOfDayReportPage() {
           <p className="eyebrow">PartPOS</p>
           <h1>تقرير نهاية اليوم</h1>
           <p className="subtext">
-            التقرير يحسب اليوم من 12:00 صباحاً إلى 11:59 مساءً. مبيعات الائتمان لا تدخل الصندوق، والمصروفات النقدية تخصم من كاش اليوم.
+            التقرير يحسب اليوم من 12:00 صباحاً إلى 11:59 مساءً. الفواتير الملغاة VOID لا تدخل في أي حساب. مبيعات الائتمان لا تدخل الصندوق، والمصروفات النقدية تخصم من كاش اليوم.
           </p>
         </div>
 
