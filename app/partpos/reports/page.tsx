@@ -22,6 +22,8 @@ type ReportRange =
   | "year_to_date"
   | "custom";
 
+type ReportLanguage = "ar" | "en";
+
 type SaleRow = {
   id: string;
   sale_number: number | null;
@@ -33,7 +35,6 @@ type SaleRow = {
   customer_name: string;
   customer_phone: string;
   customer_credit_allowance: number;
-  status: string;
   created_at: string;
 };
 
@@ -88,36 +89,6 @@ type DepartmentReportRow = {
   totalSales: number;
   profit: number;
   marginPercent: number;
-  voidReceiptCount: number;
-  voidItemLines: number;
-  voidQuantity: number;
-  voidTotalSales: number;
-};
-
-type DepartmentItemDetailRow = {
-  productName: string;
-  receiptCount: number;
-  quantity: number;
-  totalCost: number;
-  totalSales: number;
-  profit: number;
-  marginPercent: number;
-};
-
-type DepartmentVoidDetailRow = {
-  id: string;
-  saleNumber: number | null;
-  productName: string;
-  quantity: number;
-  salePrice: number;
-  lineTotal: number;
-  paymentMethod: string;
-  createdAt: string;
-};
-
-type DepartmentDetails = {
-  active: DepartmentItemDetailRow[];
-  voided: DepartmentVoidDetailRow[];
 };
 
 type ItemReportRow = {
@@ -239,6 +210,19 @@ function rangeLabel(range: ReportRange) {
   return "تخصيص";
 }
 
+function englishRangeLabel(range: ReportRange) {
+  if (range === "today") return "Today";
+  if (range === "this_week") return "This week";
+  if (range === "this_month") return "This month";
+  if (range === "last_month") return "Last month";
+  if (range === "year_to_date") return "Year to date";
+  return "Custom";
+}
+
+function rangeLabelByLanguage(range: ReportRange, language: ReportLanguage) {
+  return language === "en" ? englishRangeLabel(range) : rangeLabel(range);
+}
+
 function dayRange(startDateValue: string, endDateValue: string) {
   const parseDate = (value: string) => {
     const [yearText, monthText, dayText] = value.split("-");
@@ -287,6 +271,32 @@ function formatArabicDateRange(startDate: string, endDate: string) {
   return `${formatArabicDate(startDate)} - ${formatArabicDate(endDate)}`;
 }
 
+function formatEnglishDate(value: string) {
+  if (!value) return "—";
+  const [yearText, monthText, dayText] = value.slice(0, 10).split("-");
+  const year = Number(yearText);
+  const month = Number(monthText);
+  const day = Number(dayText);
+
+  if (!year || !month || !day) return "—";
+
+  return new Date(year, month - 1, day).toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "short",
+    day: "2-digit",
+  });
+}
+
+function formatDateRangeByLanguage(
+  startDate: string,
+  endDate: string,
+  language: ReportLanguage,
+) {
+  if (language !== "en") return formatArabicDateRange(startDate, endDate);
+  if (startDate === endDate) return formatEnglishDate(startDate);
+  return `${formatEnglishDate(startDate)} - ${formatEnglishDate(endDate)}`;
+}
+
 function formatArabicDateTime(value: string) {
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return "—";
@@ -316,6 +326,20 @@ function reportTitle(mode: ReportMode) {
   if (mode === "vendorCredit") return "ائتمان الموردين";
   if (mode === "dailyCount") return "عد الصندوق اليومي";
   return "الربح والخسارة";
+}
+
+function englishReportTitle(mode: ReportMode) {
+  if (mode === "department") return "Sales by Department";
+  if (mode === "items") return "Sales by Item";
+  if (mode === "credit") return "Customer Credit";
+  if (mode === "expenses") return "Expenses";
+  if (mode === "vendorCredit") return "Vendor Credit";
+  if (mode === "dailyCount") return "Daily Cash Count";
+  return "Profit & Loss";
+}
+
+function reportTitleByLanguage(mode: ReportMode, language: ReportLanguage) {
+  return language === "en" ? englishReportTitle(mode) : reportTitle(mode);
 }
 
 function isAllTimeMode(mode: ReportMode) {
@@ -369,6 +393,14 @@ function logoutReportsOnly() {
   window.location.href = "/partpos";
 }
 
+function setReportsLanguage(language: ReportLanguage) {
+  setReportsOnlyLanguage(language);
+
+  if (typeof window !== "undefined") {
+    window.localStorage.setItem("partpos_reports_language", language);
+  }
+}
+
 function StatBox({
   label,
   value,
@@ -409,14 +441,12 @@ function DetailCell({
 export default function PartPOSReportsPage() {
   const [mode, setMode] = useState<ReportMode>("department");
   const [isReportsOnlyAccess, setIsReportsOnlyAccess] = useState(false);
+  const [reportsOnlyLanguage, setReportsOnlyLanguage] = useState<ReportLanguage>("ar");
   const [rangePreset, setRangePreset] = useState<ReportRange>("today");
   const [startDate, setStartDate] = useState(() => getPresetRange("today").startDate);
   const [endDate, setEndDate] = useState(() => getPresetRange("today").endDate);
   const [sales, setSales] = useState<SaleRow[]>([]);
   const [items, setItems] = useState<SaleItem[]>([]);
-  const [voidedSales, setVoidedSales] = useState<SaleRow[]>([]);
-  const [voidedItems, setVoidedItems] = useState<SaleItem[]>([]);
-  const [expandedDepartments, setExpandedDepartments] = useState<Record<string, boolean>>({});
   const [creditSales, setCreditSales] = useState<SaleRow[]>([]);
   const [expenses, setExpenses] = useState<ExpenseRow[]>([]);
   const [voidedExpenses, setVoidedExpenses] = useState<ExpenseRow[]>([]);
@@ -449,6 +479,11 @@ export default function PartPOSReportsPage() {
     setIsReportsOnlyAccess(
       accessParam === "reports_only" || savedAccessMode === "reports_only",
     );
+
+    const savedLanguage = window.localStorage.getItem("partpos_reports_language");
+    if (savedLanguage === "en" || savedLanguage === "ar") {
+      setReportsOnlyLanguage(savedLanguage);
+    }
   }, []);
 
   function handleRangeChange(nextRange: ReportRange) {
@@ -466,6 +501,16 @@ export default function PartPOSReportsPage() {
       ? formatArabicDateRange(startDate, endDate)
       : `${rangeLabel(rangePreset)} • ${formatArabicDateRange(startDate, endDate)}`;
 
+  const reportsOnlyIsEnglish = reportsOnlyLanguage === "en";
+  const reportsOnlySelectedRangeText =
+    rangePreset === "custom"
+      ? formatDateRangeByLanguage(startDate, endDate, reportsOnlyLanguage)
+      : `${rangeLabelByLanguage(rangePreset, reportsOnlyLanguage)} • ${formatDateRangeByLanguage(
+          startDate,
+          endDate,
+          reportsOnlyLanguage,
+        )}`;
+
   const loadReports = useCallback(async () => {
     if (!supabase) return;
 
@@ -479,7 +524,7 @@ export default function PartPOSReportsPage() {
       const { data: saleRowsRaw, error: salesError } = await supabase
         .from("partpos_sales")
         .select(
-          "id, sale_number, sale_total, amount_paid, change_due, payment_method, customer_id, customer_name, customer_phone, customer_credit_allowance, status, created_at",
+          "id, sale_number, sale_total, amount_paid, change_due, payment_method, customer_id, customer_name, customer_phone, customer_credit_allowance, created_at",
         )
         .gte("created_at", start.toISOString())
         .lt("created_at", end.toISOString())
@@ -506,7 +551,6 @@ export default function PartPOSReportsPage() {
         customer_name: String(sale.customer_name ?? ""),
         customer_phone: String(sale.customer_phone ?? ""),
         customer_credit_allowance: Number(sale.customer_credit_allowance ?? 0),
-        status: String(sale.status ?? ""),
         created_at: String(sale.created_at ?? ""),
       }));
 
@@ -538,72 +582,10 @@ export default function PartPOSReportsPage() {
         }));
       }
 
-      const { data: voidedSaleRowsRaw, error: voidedSalesError } = await supabase
-        .from("partpos_sales")
-        .select(
-          "id, sale_number, sale_total, amount_paid, change_due, payment_method, customer_id, customer_name, customer_phone, customer_credit_allowance, status, created_at",
-        )
-        .eq("status", "voided")
-        .gte("created_at", start.toISOString())
-        .lt("created_at", end.toISOString())
-        .order("created_at", { ascending: false })
-        .limit(10000);
-
-      if (voidedSalesError) throw voidedSalesError;
-
-      const cleanVoidedSales: SaleRow[] = ((voidedSaleRowsRaw ?? []) as any[]).map((sale) => ({
-        id: String(sale.id ?? ""),
-        sale_number:
-          sale.sale_number === null || sale.sale_number === undefined
-            ? null
-            : Number(sale.sale_number),
-        sale_total: Number(sale.sale_total ?? 0),
-        amount_paid: Number(sale.amount_paid ?? 0),
-        change_due: Number(sale.change_due ?? 0),
-        payment_method: String(sale.payment_method ?? "cash"),
-        customer_id:
-          sale.customer_id === null || sale.customer_id === undefined
-            ? null
-            : String(sale.customer_id),
-        customer_name: String(sale.customer_name ?? ""),
-        customer_phone: String(sale.customer_phone ?? ""),
-        customer_credit_allowance: Number(sale.customer_credit_allowance ?? 0),
-        status: String(sale.status ?? "voided"),
-        created_at: String(sale.created_at ?? ""),
-      }));
-
-      const voidedSaleIds = cleanVoidedSales.map((sale) => sale.id).filter(Boolean);
-      let cleanVoidedItems: SaleItem[] = [];
-
-      if (voidedSaleIds.length > 0) {
-        const { data: voidedItemRowsRaw, error: voidedItemsError } = await supabase
-          .from("partpos_sale_items")
-          .select(
-            "id, sale_id, product_name_ar, department_ar, quantity, cost, sale_price, line_total, created_at",
-          )
-          .in("sale_id", voidedSaleIds)
-          .order("created_at", { ascending: true })
-          .limit(50000);
-
-        if (voidedItemsError) throw voidedItemsError;
-
-        cleanVoidedItems = ((voidedItemRowsRaw ?? []) as any[]).map((item) => ({
-          id: String(item.id ?? ""),
-          sale_id: String(item.sale_id ?? ""),
-          product_name_ar: String(item.product_name_ar ?? ""),
-          department_ar: String(item.department_ar ?? ""),
-          quantity: Number(item.quantity ?? 0),
-          cost: Number(item.cost ?? 0),
-          sale_price: Number(item.sale_price ?? 0),
-          line_total: Number(item.line_total ?? 0),
-          created_at: String(item.created_at ?? ""),
-        }));
-      }
-
       const { data: creditRowsRaw, error: creditError } = await supabase
         .from("partpos_sales")
         .select(
-          "id, sale_number, sale_total, amount_paid, change_due, payment_method, customer_id, customer_name, customer_phone, customer_credit_allowance, status, created_at",
+          "id, sale_number, sale_total, amount_paid, change_due, payment_method, customer_id, customer_name, customer_phone, customer_credit_allowance, created_at",
         )
         .eq("payment_method", "credit")
         .or("status.is.null,status.neq.voided")
@@ -629,7 +611,6 @@ export default function PartPOSReportsPage() {
         customer_name: String(sale.customer_name ?? ""),
         customer_phone: String(sale.customer_phone ?? ""),
         customer_credit_allowance: Number(sale.customer_credit_allowance ?? 0),
-        status: String(sale.status ?? ""),
         created_at: String(sale.created_at ?? ""),
       }));
 
@@ -759,8 +740,6 @@ export default function PartPOSReportsPage() {
 
       setSales(cleanSales);
       setItems(cleanItems);
-      setVoidedSales(cleanVoidedSales);
-      setVoidedItems(cleanVoidedItems);
       setCreditSales(cleanCreditSales);
       setExpenses(cleanExpenses);
       setVoidedExpenses(cleanVoidedExpenses);
@@ -783,16 +762,6 @@ export default function PartPOSReportsPage() {
     void loadReports();
   }, [loadReports]);
 
-  const voidedSaleById = useMemo(() => {
-    const map = new Map<string, SaleRow>();
-
-    for (const sale of voidedSales) {
-      map.set(sale.id, sale);
-    }
-
-    return map;
-  }, [voidedSales]);
-
   const receiptSetsByDepartment = useMemo(() => {
     const groups: Record<string, Set<string>> = {};
 
@@ -804,18 +773,6 @@ export default function PartPOSReportsPage() {
 
     return groups;
   }, [items]);
-
-  const voidReceiptSetsByDepartment = useMemo(() => {
-    const groups: Record<string, Set<string>> = {};
-
-    for (const item of voidedItems) {
-      const department = item.department_ar.trim() || "غير محدد";
-      if (!groups[department]) groups[department] = new Set<string>();
-      groups[department].add(item.sale_id);
-    }
-
-    return groups;
-  }, [voidedItems]);
 
   const receiptSetsByItem = useMemo(() => {
     const groups: Record<string, Set<string>> = {};
@@ -851,10 +808,6 @@ export default function PartPOSReportsPage() {
           totalSales: 0,
           profit: 0,
           marginPercent: 0,
-          voidReceiptCount: 0,
-          voidItemLines: 0,
-          voidQuantity: 0,
-          voidTotalSales: 0,
         };
       }
 
@@ -865,127 +818,14 @@ export default function PartPOSReportsPage() {
       groups[department].profit += totalSales - totalCost;
     }
 
-    for (const item of voidedItems) {
-      const department = item.department_ar.trim() || "غير محدد";
-      const quantity = Number(item.quantity) || 0;
-      const totalSales = Number(item.line_total) || 0;
-
-      if (!groups[department]) {
-        groups[department] = {
-          department,
-          receiptCount: 0,
-          itemLines: 0,
-          quantity: 0,
-          totalCost: 0,
-          totalSales: 0,
-          profit: 0,
-          marginPercent: 0,
-          voidReceiptCount: 0,
-          voidItemLines: 0,
-          voidQuantity: 0,
-          voidTotalSales: 0,
-        };
-      }
-
-      groups[department].voidItemLines += 1;
-      groups[department].voidQuantity += quantity;
-      groups[department].voidTotalSales += totalSales;
-    }
-
     return Object.values(groups)
       .map((row) => ({
         ...row,
         receiptCount: receiptSetsByDepartment[row.department]?.size ?? 0,
-        voidReceiptCount: voidReceiptSetsByDepartment[row.department]?.size ?? 0,
         marginPercent: row.totalSales > 0 ? (row.profit / row.totalSales) * 100 : 0,
       }))
       .sort((a, b) => b.totalSales - a.totalSales);
-  }, [items, receiptSetsByDepartment, voidReceiptSetsByDepartment, voidedItems]);
-
-  const departmentDetailsByDepartment = useMemo<Record<string, DepartmentDetails>>(() => {
-    const details: Record<string, DepartmentDetails> = {};
-    const activeGroups: Record<
-      string,
-      DepartmentItemDetailRow & { department: string; receiptIds: Set<string> }
-    > = {};
-
-    function ensureDepartment(department: string) {
-      if (!details[department]) {
-        details[department] = { active: [], voided: [] };
-      }
-      return details[department];
-    }
-
-    for (const item of items) {
-      const department = item.department_ar.trim() || "غير محدد";
-      const productName = item.product_name_ar.trim() || "قطعة بدون اسم";
-      const key = `${department}__${productName}`;
-      const quantity = Number(item.quantity) || 0;
-      const totalCost = (Number(item.cost) || 0) * quantity;
-      const totalSales = Number(item.line_total) || 0;
-
-      ensureDepartment(department);
-
-      if (!activeGroups[key]) {
-        activeGroups[key] = {
-          productName,
-          department,
-          receiptCount: 0,
-          quantity: 0,
-          totalCost: 0,
-          totalSales: 0,
-          profit: 0,
-          marginPercent: 0,
-          receiptIds: new Set<string>(),
-        };
-      }
-
-      activeGroups[key].receiptIds.add(item.sale_id);
-      activeGroups[key].quantity += quantity;
-      activeGroups[key].totalCost += totalCost;
-      activeGroups[key].totalSales += totalSales;
-      activeGroups[key].profit += totalSales - totalCost;
-    }
-
-    for (const group of Object.values(activeGroups)) {
-      const row: DepartmentItemDetailRow = {
-        productName: group.productName,
-        receiptCount: group.receiptIds.size,
-        quantity: group.quantity,
-        totalCost: group.totalCost,
-        totalSales: group.totalSales,
-        profit: group.profit,
-        marginPercent: group.totalSales > 0 ? (group.profit / group.totalSales) * 100 : 0,
-      };
-
-      ensureDepartment(group.department).active.push(row);
-    }
-
-    for (const item of voidedItems) {
-      const department = item.department_ar.trim() || "غير محدد";
-      const sale = voidedSaleById.get(item.sale_id);
-
-      ensureDepartment(department).voided.push({
-        id: item.id,
-        saleNumber: sale?.sale_number ?? null,
-        productName: item.product_name_ar.trim() || "قطعة بدون اسم",
-        quantity: Number(item.quantity) || 0,
-        salePrice: Number(item.sale_price) || 0,
-        lineTotal: Number(item.line_total) || 0,
-        paymentMethod: sale?.payment_method || "cash",
-        createdAt: sale?.created_at || item.created_at,
-      });
-    }
-
-    for (const detail of Object.values(details)) {
-      detail.active.sort((a, b) => b.totalSales - a.totalSales);
-      detail.voided.sort(
-        (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
-      );
-    }
-
-    return details;
-  }, [items, voidedItems, voidedSaleById]);
+  }, [items, receiptSetsByDepartment]);
 
   const itemRows = useMemo<ItemReportRow[]>(() => {
     const groups: Record<string, ItemReportRow> = {};
@@ -1187,22 +1027,6 @@ export default function PartPOSReportsPage() {
     0,
   );
 
-  const totalVoidedReceiptCount = useMemo(() => {
-    return new Set(voidedItems.map((item) => item.sale_id)).size;
-  }, [voidedItems]);
-
-  const totalVoidedDepartmentSales = voidedItems.reduce(
-    (sum, item) => sum + Number(item.line_total || 0),
-    0,
-  );
-
-  function toggleDepartment(department: string) {
-    setExpandedDepartments((current) => ({
-      ...current,
-      [department]: !current[department],
-    }));
-  }
-
   function openVoidExpenseConfirm(expense: ExpenseRow) {
     if (isReportsOnlyAccess) return;
 
@@ -1276,38 +1100,38 @@ export default function PartPOSReportsPage() {
   }[] = [
     {
       value: "department",
-      label: "المبيعات حسب القسم",
-      helper: "الافتراضي",
+      label: reportsOnlyIsEnglish ? "Sales by Department" : "المبيعات حسب القسم",
+      helper: reportsOnlyIsEnglish ? "Default" : "الافتراضي",
     },
     {
       value: "items",
-      label: "المبيعات حسب القطع",
-      helper: "أفضل القطع",
+      label: reportsOnlyIsEnglish ? "Sales by Item" : "المبيعات حسب القطع",
+      helper: reportsOnlyIsEnglish ? "Best sellers" : "أفضل القطع",
     },
     {
       value: "profitLoss",
-      label: "الربح والخسارة",
-      helper: "مبيعات - مصروفات",
+      label: reportsOnlyIsEnglish ? "Profit & Loss" : "الربح والخسارة",
+      helper: reportsOnlyIsEnglish ? "Sales - expenses" : "مبيعات - مصروفات",
     },
     {
       value: "expenses",
-      label: "المصروفات",
-      helper: "نقداً وعلى الحساب",
+      label: reportsOnlyIsEnglish ? "Expenses" : "المصروفات",
+      helper: reportsOnlyIsEnglish ? "Cash + account" : "نقداً وعلى الحساب",
     },
     {
       value: "dailyCount",
-      label: "عد الصندوق",
-      helper: "نقص / زيادة",
+      label: reportsOnlyIsEnglish ? "Daily Cash Count" : "عد الصندوق",
+      helper: reportsOnlyIsEnglish ? "Short / over" : "نقص / زيادة",
     },
     {
       value: "credit",
-      label: "ديون الزبائن",
-      helper: "كل الفترات",
+      label: reportsOnlyIsEnglish ? "Customer Credit" : "ديون الزبائن",
+      helper: reportsOnlyIsEnglish ? "All time" : "كل الفترات",
     },
     {
       value: "vendorCredit",
-      label: "ديون الموردين",
-      helper: "كل الفترات",
+      label: reportsOnlyIsEnglish ? "Vendor Credit" : "ديون الموردين",
+      helper: reportsOnlyIsEnglish ? "All time" : "كل الفترات",
     },
   ];
 
@@ -1316,32 +1140,66 @@ export default function PartPOSReportsPage() {
     label: string;
     helper: string;
   }[] = [
-    { value: "today", label: "اليوم", helper: "تقرير اليوم" },
-    { value: "this_week", label: "الأسبوع", helper: "الأسبوع الحالي" },
-    { value: "this_month", label: "الشهر", helper: "الشهر الحالي" },
-    { value: "last_month", label: "الشهر الماضي", helper: "الفترة السابقة" },
-    { value: "year_to_date", label: "السنة", helper: "من بداية السنة" },
-    { value: "custom", label: "تخصيص", helper: "اختر التاريخ" },
+    {
+      value: "today",
+      label: reportsOnlyIsEnglish ? "Today" : "اليوم",
+      helper: reportsOnlyIsEnglish ? "Today only" : "تقرير اليوم",
+    },
+    {
+      value: "this_week",
+      label: reportsOnlyIsEnglish ? "Week" : "الأسبوع",
+      helper: reportsOnlyIsEnglish ? "Current week" : "الأسبوع الحالي",
+    },
+    {
+      value: "this_month",
+      label: reportsOnlyIsEnglish ? "Month" : "الشهر",
+      helper: reportsOnlyIsEnglish ? "Current month" : "الشهر الحالي",
+    },
+    {
+      value: "last_month",
+      label: reportsOnlyIsEnglish ? "Last Month" : "الشهر الماضي",
+      helper: reportsOnlyIsEnglish ? "Previous period" : "الفترة السابقة",
+    },
+    {
+      value: "year_to_date",
+      label: reportsOnlyIsEnglish ? "Year" : "السنة",
+      helper: reportsOnlyIsEnglish ? "Year to date" : "من بداية السنة",
+    },
+    {
+      value: "custom",
+      label: reportsOnlyIsEnglish ? "Custom" : "تخصيص",
+      helper: reportsOnlyIsEnglish ? "Choose dates" : "اختر التاريخ",
+    },
   ];
 
   return (
     <main
       className={isReportsOnlyAccess ? "reportsPage reportsOnlyMode" : "reportsPage"}
-      dir="rtl"
+      dir={isReportsOnlyAccess && reportsOnlyIsEnglish ? "ltr" : "rtl"}
       suppressHydrationWarning
     >
       <section className="topCard noPrint">
         <div>
           <p className="eyebrow">PartPOS</p>
-          <h1>{isReportsOnlyAccess ? "لوحة التقارير" : "التقارير"}</h1>
+          <h1>
+            {isReportsOnlyAccess
+              ? reportsOnlyIsEnglish
+                ? "Reports Dashboard"
+                : "لوحة التقارير"
+              : "التقارير"}
+          </h1>
           <p className="subtext">
             {isReportsOnlyAccess
-              ? "عرض تقارير فقط. اختر التقرير والفترة بسهولة من الموبايل. الفواتير الملغاة VOID لا تُحسب."
+              ? reportsOnlyIsEnglish
+                ? "Reports-only access. Choose report type and dates easily from mobile. VOID receipts are not counted."
+                : "عرض تقارير فقط. اختر التقرير والفترة بسهولة من الموبايل. الفواتير الملغاة VOID لا تُحسب."
               : "الفواتير الملغاة VOID لا تدخل في المبيعات أو الأرباح أو نهاية اليوم."}
           </p>
           {isReportsOnlyAccess && (
             <div className="reportsOnlyBadge">
-              دخول تقارير فقط — لا يوجد صلاحية للكاشير أو البيع
+              {reportsOnlyIsEnglish
+                ? "Reports only — no cashier or sale access"
+                : "دخول تقارير فقط — لا يوجد صلاحية للكاشير أو البيع"}
             </div>
           )}
         </div>
@@ -1358,11 +1216,11 @@ export default function PartPOSReportsPage() {
             </>
           )}
           <button type="button" className="printButton" onClick={() => window.print()}>
-            طباعة التقرير
+            {isReportsOnlyAccess && reportsOnlyIsEnglish ? "Print Report" : "طباعة التقرير"}
           </button>
           {isReportsOnlyAccess && (
             <button type="button" className="secondaryButton" onClick={logoutReportsOnly}>
-              خروج
+              {reportsOnlyIsEnglish ? "Logout" : "خروج"}
             </button>
           )}
         </div>
@@ -1377,41 +1235,83 @@ export default function PartPOSReportsPage() {
       <section className="controlsCard noPrint">
         {isReportsOnlyAccess && (
           <div className="reportsOnlyPicker">
+            <div className="reportsLanguageSwitch" dir="ltr">
+              <span>{reportsOnlyIsEnglish ? "Language" : "اللغة"}</span>
+              <div>
+                <button
+                  type="button"
+                  className={
+                    reportsOnlyLanguage === "ar"
+                      ? "languageButton activeLanguageButton"
+                      : "languageButton"
+                  }
+                  onClick={() => setReportsLanguage("ar")}
+                >
+                  عربي
+                </button>
+                <button
+                  type="button"
+                  className={
+                    reportsOnlyLanguage === "en"
+                      ? "languageButton activeLanguageButton"
+                      : "languageButton"
+                  }
+                  onClick={() => setReportsLanguage("en")}
+                >
+                  English
+                </button>
+              </div>
+            </div>
+
             <div className="reportsOnlyHero">
               <div>
-                <p className="eyebrow">عرض التقارير فقط</p>
-                <h2>{reportTitle(mode)}</h2>
+                <p className="eyebrow">
+                  {reportsOnlyIsEnglish ? "Reports-only view" : "عرض التقارير فقط"}
+                </p>
+                <h2>{reportTitleByLanguage(mode, reportsOnlyLanguage)}</h2>
                 <p>
                   {isAllTimeMode(mode)
-                    ? "هذا التقرير يعرض كل الفترات."
-                    : selectedRangeText}
+                    ? reportsOnlyIsEnglish
+                      ? "This report shows all-time balances."
+                      : "هذا التقرير يعرض كل الفترات."
+                    : reportsOnlySelectedRangeText}
                 </p>
               </div>
               <div className="reportsOnlyHeroStat">
-                <span>السجلات</span>
+                <span>{reportsOnlyIsEnglish ? "Records" : "السجلات"}</span>
                 <strong>{activeRowsCount}</strong>
               </div>
             </div>
 
             <div className="reportsOnlyMiniStats">
               <div>
-                <span>التقرير</span>
-                <strong>{reportTitle(mode)}</strong>
+                <span>{reportsOnlyIsEnglish ? "Report" : "التقرير"}</span>
+                <strong>{reportTitleByLanguage(mode, reportsOnlyLanguage)}</strong>
               </div>
               <div>
-                <span>الفترة</span>
-                <strong>{isAllTimeMode(mode) ? "كل الفترات" : rangeLabel(rangePreset)}</strong>
+                <span>{reportsOnlyIsEnglish ? "Period" : "الفترة"}</span>
+                <strong>
+                  {isAllTimeMode(mode)
+                    ? reportsOnlyIsEnglish
+                      ? "All time"
+                      : "كل الفترات"
+                    : rangeLabelByLanguage(rangePreset, reportsOnlyLanguage)}
+                </strong>
               </div>
               <div>
-                <span>آخر تحديث</span>
+                <span>{reportsOnlyIsEnglish ? "Last update" : "آخر تحديث"}</span>
                 <strong>{lastUpdated || "—"}</strong>
               </div>
             </div>
 
             <div className="pickerGroup">
               <div className="pickerTitleRow">
-                <strong>نوع التقرير</strong>
-                <span>المبيعات حسب القسم هي الافتراضية</span>
+                <strong>{reportsOnlyIsEnglish ? "Report Type" : "نوع التقرير"}</strong>
+                <span>
+                  {reportsOnlyIsEnglish
+                    ? "Sales by Department is the default"
+                    : "المبيعات حسب القسم هي الافتراضية"}
+                </span>
               </div>
               <div className="mobileReportGrid">
                 {reportsOnlyReportButtons.map((option) => (
@@ -1434,13 +1334,23 @@ export default function PartPOSReportsPage() {
 
             <div className="pickerGroup">
               <div className="pickerTitleRow">
-                <strong>الفترة</strong>
-                <span>{isAllTimeMode(mode) ? "كل الفترات لهذا التقرير" : "اختر بسرعة"}</span>
+                <strong>{reportsOnlyIsEnglish ? "Period" : "الفترة"}</strong>
+                <span>
+                  {isAllTimeMode(mode)
+                    ? reportsOnlyIsEnglish
+                      ? "All-time report"
+                      : "كل الفترات لهذا التقرير"
+                    : reportsOnlyIsEnglish
+                      ? "Quick select"
+                      : "اختر بسرعة"}
+                </span>
               </div>
 
               {isAllTimeMode(mode) ? (
                 <div className="allTimeMobileNotice">
-                  هذا التقرير غير مرتبط بيوم معين ويعرض كل المبالغ المستحقة.
+                  {reportsOnlyIsEnglish
+                    ? "This report is not tied to one day. It shows all outstanding balances."
+                    : "هذا التقرير غير مرتبط بيوم معين ويعرض كل المبالغ المستحقة."}
                 </div>
               ) : (
                 <div className="mobileRangeGrid">
@@ -1465,7 +1375,9 @@ export default function PartPOSReportsPage() {
               {rangePreset === "custom" && !isAllTimeMode(mode) && (
                 <div className="reportsOnlyCustomDates">
                   <div>
-                    <label htmlFor="mobile-start-date">من تاريخ</label>
+                    <label htmlFor="mobile-start-date">
+                      {reportsOnlyIsEnglish ? "Start Date" : "من تاريخ"}
+                    </label>
                     <input
                       id="mobile-start-date"
                       type="date"
@@ -1474,7 +1386,9 @@ export default function PartPOSReportsPage() {
                     />
                   </div>
                   <div>
-                    <label htmlFor="mobile-end-date">إلى تاريخ</label>
+                    <label htmlFor="mobile-end-date">
+                      {reportsOnlyIsEnglish ? "End Date" : "إلى تاريخ"}
+                    </label>
                     <input
                       id="mobile-end-date"
                       type="date"
@@ -1492,7 +1406,13 @@ export default function PartPOSReportsPage() {
               onClick={() => void loadReports()}
               disabled={!supabase || loading}
             >
-              {loading ? "جاري تحديث التقرير..." : "تحديث التقرير"}
+              {loading
+                ? reportsOnlyIsEnglish
+                  ? "Updating report..."
+                  : "جاري تحديث التقرير..."
+                : reportsOnlyIsEnglish
+                  ? "Update Report"
+                  : "تحديث التقرير"}
             </button>
           </div>
         )}
@@ -1628,8 +1548,20 @@ export default function PartPOSReportsPage() {
         <div className="printHeader">
           <div>
             <p className="eyebrow">PartPOS</p>
-            <h2>{reportTitle(mode)}</h2>
-            <p>{isAllTimeMode(mode) ? "كل الفترات" : formatArabicDateRange(startDate, endDate)}</p>
+            <h2>
+              {isReportsOnlyAccess
+                ? reportTitleByLanguage(mode, reportsOnlyLanguage)
+                : reportTitle(mode)}
+            </h2>
+            <p>
+              {isAllTimeMode(mode)
+                ? isReportsOnlyAccess && reportsOnlyIsEnglish
+                  ? "All time"
+                  : "كل الفترات"
+                : isReportsOnlyAccess
+                  ? formatDateRangeByLanguage(startDate, endDate, reportsOnlyLanguage)
+                  : formatArabicDateRange(startDate, endDate)}
+            </p>
           </div>
 
           <div className="reportMeta">
@@ -1659,14 +1591,6 @@ export default function PartPOSReportsPage() {
             <StatBox label="إجمالي البيع" value={`${money(totalSales)} د.أ`} tone="red" />
             <StatBox label="إجمالي الربح" value={`${money(totalProfit)} د.أ`} tone="green" />
             <StatBox label="هامش الربح" value={percent(totalMarginPercent)} />
-            {mode === "department" ? (
-              <StatBox
-                label="VOID"
-                value={totalVoidedReceiptCount}
-                tone="orange"
-                small={`${money(totalVoidedDepartmentSales)} د.أ غير محسوبة`}
-              />
-            ) : null}
           </div>
         ) : null}
 
@@ -1742,123 +1666,23 @@ export default function PartPOSReportsPage() {
               <div className="emptyState">لا يوجد مبيعات ضمن الفترة المحددة.</div>
             ) : (
               <div className="recordList">
-                {departmentRows.map((row) => {
-                  const expanded = Boolean(expandedDepartments[row.department]);
-                  const details = departmentDetailsByDepartment[row.department] ?? {
-                    active: [],
-                    voided: [],
-                  };
-
-                  return (
-                    <article
-                      className={
-                        expanded
-                          ? "recordCard departmentRecord expandedDepartmentRecord"
-                          : "recordCard departmentRecord"
-                      }
-                      key={row.department}
-                    >
-                      <button
-                        type="button"
-                        className="departmentToggleButton"
-                        onClick={() => toggleDepartment(row.department)}
-                      >
-                        <div className="recordMain">
-                          <p>القسم</p>
-                          <h3>{row.department}</h3>
-                          <span className="expandHint">
-                            {expanded ? "إخفاء التفاصيل" : "اضغط لعرض القطع والفواتير الملغاة"}
-                          </span>
-                        </div>
-
-                        <div className="detailGrid">
-                          <DetailCell label="عدد الفواتير" value={row.receiptCount} />
-                          <DetailCell label="عدد السطور" value={row.itemLines} />
-                          <DetailCell label="الكمية" value={money(row.quantity)} />
-                          <DetailCell label="إجمالي التكلفة" value={`${money(row.totalCost)} د.أ`} />
-                          <DetailCell label="إجمالي البيع" value={`${money(row.totalSales)} د.أ`} tone="red" />
-                          <DetailCell label="الربح" value={`${money(row.profit)} د.أ`} tone={row.profit >= 0 ? "green" : "red"} />
-                          <DetailCell label="الهامش" value={percent(row.marginPercent)} />
-                          <DetailCell
-                            label="VOID داخل القسم"
-                            value={row.voidReceiptCount}
-                            tone={row.voidReceiptCount > 0 ? "orange" : undefined}
-                          />
-                        </div>
-                      </button>
-
-                      {expanded ? (
-                        <div className="departmentExpandPanel">
-                          <div className="departmentDetailSection">
-                            <div className="departmentDetailHeader">
-                              <h4>القطع المباعة في هذا القسم</h4>
-                              <span>{details.active.length} قطع</span>
-                            </div>
-
-                            {details.active.length === 0 ? (
-                              <div className="emptyState smallEmptyState">
-                                لا يوجد قطع مباعة غير ملغاة في هذا القسم.
-                              </div>
-                            ) : (
-                              <div className="departmentItemList">
-                                {details.active.map((item) => (
-                                  <div className="departmentItemRow" key={item.productName}>
-                                    <div>
-                                      <strong>{item.productName}</strong>
-                                      <span>
-                                        {item.receiptCount} فواتير • كمية {money(item.quantity)}
-                                      </span>
-                                    </div>
-                                    <div className="departmentItemNumbers">
-                                      <strong>{money(item.totalSales)} د.أ</strong>
-                                      <span>
-                                        ربح {money(item.profit)} د.أ • هامش {percent(item.marginPercent)}
-                                      </span>
-                                    </div>
-                                  </div>
-                                ))}
-                              </div>
-                            )}
-                          </div>
-
-                          <div className="departmentDetailSection voidDetailSection">
-                            <div className="departmentDetailHeader">
-                              <h4>VOID / الفواتير الملغاة في هذا القسم</h4>
-                              <span>{details.voided.length} سطور ملغاة</span>
-                            </div>
-
-                            {details.voided.length === 0 ? (
-                              <div className="emptyState smallEmptyState">
-                                لا يوجد VOID داخل هذا القسم ضمن الفترة المختارة.
-                              </div>
-                            ) : (
-                              <div className="departmentItemList">
-                                {details.voided.map((voidItem) => (
-                                  <div className="departmentItemRow voidItemRow" key={voidItem.id}>
-                                    <div>
-                                      <strong>{voidItem.productName}</strong>
-                                      <span>
-                                        فاتورة {voidItem.saleNumber ?? "—"} •{" "}
-                                        {formatArabicDateTime(voidItem.createdAt)} •{" "}
-                                        {voidItem.paymentMethod === "credit" ? "ائتمان" : "نقداً"}
-                                      </span>
-                                    </div>
-                                    <div className="departmentItemNumbers">
-                                      <strong>{money(voidItem.lineTotal)} د.أ</strong>
-                                      <span>
-                                        كمية {money(voidItem.quantity)} • سعر {money(voidItem.salePrice)} د.أ
-                                      </span>
-                                    </div>
-                                  </div>
-                                ))}
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                      ) : null}
-                    </article>
-                  );
-                })}
+                {departmentRows.map((row) => (
+                  <article className="recordCard" key={row.department}>
+                    <div className="recordMain">
+                      <p>القسم</p>
+                      <h3>{row.department}</h3>
+                    </div>
+                    <div className="detailGrid">
+                      <DetailCell label="عدد الفواتير" value={row.receiptCount} />
+                      <DetailCell label="عدد السطور" value={row.itemLines} />
+                      <DetailCell label="الكمية" value={money(row.quantity)} />
+                      <DetailCell label="إجمالي التكلفة" value={`${money(row.totalCost)} د.أ`} />
+                      <DetailCell label="إجمالي البيع" value={`${money(row.totalSales)} د.أ`} tone="red" />
+                      <DetailCell label="الربح" value={`${money(row.profit)} د.أ`} tone={row.profit >= 0 ? "green" : "red"} />
+                      <DetailCell label="الهامش" value={percent(row.marginPercent)} />
+                    </div>
+                  </article>
+                ))}
               </div>
             )
           ) : null}
@@ -2347,6 +2171,48 @@ export default function PartPOSReportsPage() {
           display: grid;
           gap: 18px;
           width: 100%;
+        }
+
+        .reportsLanguageSwitch {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 12px;
+          border: 1px solid #e5e7eb;
+          border-radius: 18px;
+          padding: 10px;
+          background: #f9fafb;
+        }
+
+        .reportsLanguageSwitch span {
+          padding-inline-start: 6px;
+          color: #374151;
+          font-weight: 900;
+          font-size: 13px;
+        }
+
+        .reportsLanguageSwitch div {
+          display: inline-flex;
+          gap: 6px;
+          padding: 4px;
+          border-radius: 14px;
+          background: #e5e7eb;
+        }
+
+        .languageButton {
+          border: 0;
+          border-radius: 11px;
+          padding: 10px 14px;
+          background: transparent;
+          color: #374151;
+          font-weight: 900;
+          cursor: pointer;
+        }
+
+        .activeLanguageButton {
+          background: white;
+          color: #111827;
+          box-shadow: 0 2px 8px rgba(15, 23, 42, 0.12);
         }
 
         .reportsOnlyHero {
@@ -2886,136 +2752,6 @@ export default function PartPOSReportsPage() {
           background: #ffffff;
         }
 
-        .departmentRecord {
-          display: block;
-          padding: 0;
-          overflow: hidden;
-        }
-
-        .departmentToggleButton {
-          width: 100%;
-          display: grid;
-          grid-template-columns: minmax(220px, 1.1fr) minmax(0, 3fr);
-          gap: 16px;
-          border: 0;
-          padding: 16px;
-          background: transparent;
-          color: inherit;
-          text-align: right;
-          cursor: pointer;
-        }
-
-        .departmentToggleButton:hover {
-          background: #f8fafc;
-        }
-
-        .expandedDepartmentRecord {
-          border-color: #bfdbfe;
-          box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.08);
-        }
-
-        .expandHint {
-          display: inline-flex;
-          margin-top: 10px;
-          border-radius: 999px;
-          padding: 6px 10px;
-          background: #eff6ff;
-          color: #1d4ed8;
-          font-weight: 900;
-          font-size: 12px;
-        }
-
-        .departmentExpandPanel {
-          border-top: 1px solid #e5e7eb;
-          padding: 16px;
-          background: #f8fafc;
-          display: grid;
-          gap: 14px;
-        }
-
-        .departmentDetailSection {
-          border: 1px solid #e5e7eb;
-          border-radius: 16px;
-          background: white;
-          overflow: hidden;
-        }
-
-        .voidDetailSection {
-          border-color: #fed7aa;
-          background: #fffaf3;
-        }
-
-        .departmentDetailHeader {
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          gap: 12px;
-          padding: 14px 16px;
-          border-bottom: 1px solid #e5e7eb;
-        }
-
-        .departmentDetailHeader h4 {
-          margin: 0;
-          font-size: 16px;
-        }
-
-        .departmentDetailHeader span {
-          color: #6b7280;
-          font-size: 13px;
-          font-weight: 900;
-        }
-
-        .departmentItemList {
-          display: grid;
-        }
-
-        .departmentItemRow {
-          display: grid;
-          grid-template-columns: minmax(0, 1.4fr) minmax(180px, 0.8fr);
-          gap: 12px;
-          padding: 14px 16px;
-          border-bottom: 1px solid #f3f4f6;
-        }
-
-        .departmentItemRow:last-child {
-          border-bottom: 0;
-        }
-
-        .departmentItemRow strong {
-          display: block;
-          margin-bottom: 4px;
-          color: #111827;
-        }
-
-        .departmentItemRow span {
-          color: #6b7280;
-          font-size: 13px;
-          font-weight: 800;
-          line-height: 1.45;
-        }
-
-        .departmentItemNumbers {
-          text-align: left;
-        }
-
-        .departmentItemNumbers strong {
-          font-size: 16px;
-        }
-
-        .voidItemRow {
-          background: #fff7ed;
-        }
-
-        .voidItemRow strong {
-          color: #9a3412;
-        }
-
-        .smallEmptyState {
-          margin: 14px;
-          padding: 12px;
-          font-size: 13px;
-        }
-
         .profitLossCard {
           border-color: #bbf7d0;
           background: #fbfffd;
@@ -3102,17 +2838,8 @@ export default function PartPOSReportsPage() {
             grid-template-columns: repeat(2, minmax(0, 1fr));
           }
 
-          .recordCard,
-          .departmentToggleButton {
+          .recordCard {
             grid-template-columns: 1fr;
-          }
-
-          .departmentItemRow {
-            grid-template-columns: 1fr;
-          }
-
-          .departmentItemNumbers {
-            text-align: right;
           }
 
           .recordMain {
@@ -3224,6 +2951,16 @@ export default function PartPOSReportsPage() {
 
           .reportsOnlyCustomDates {
             grid-template-columns: 1fr;
+          }
+
+          .reportsLanguageSwitch {
+            align-items: stretch;
+            flex-direction: column;
+          }
+
+          .reportsLanguageSwitch div {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
           }
 
           .topActions {
