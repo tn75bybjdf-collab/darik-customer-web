@@ -16,6 +16,7 @@ type ReportMode =
 
 type ReportRange =
   | "today"
+  | "yesterday"
   | "this_week"
   | "this_month"
   | "last_month"
@@ -187,6 +188,16 @@ function getPresetRange(range: ReportRange) {
     };
   }
 
+  if (range === "yesterday") {
+    const yesterday = new Date(today);
+    yesterday.setDate(today.getDate() - 1);
+
+    return {
+      startDate: localDateInputValue(yesterday),
+      endDate: localDateInputValue(yesterday),
+    };
+  }
+
   if (range === "this_week") {
     const start = new Date(today);
     const day = start.getDay();
@@ -234,6 +245,7 @@ function getPresetRange(range: ReportRange) {
 
 function rangeLabel(range: ReportRange) {
   if (range === "today") return "اليوم";
+  if (range === "yesterday") return "أمس";
   if (range === "this_week") return "هذا الأسبوع";
   if (range === "this_month") return "هذا الشهر";
   if (range === "last_month") return "الشهر الماضي";
@@ -243,6 +255,7 @@ function rangeLabel(range: ReportRange) {
 
 function englishRangeLabel(range: ReportRange) {
   if (range === "today") return "Today";
+  if (range === "yesterday") return "Yesterday";
   if (range === "this_week") return "This week";
   if (range === "this_month") return "This month";
   if (range === "last_month") return "Last month";
@@ -1401,6 +1414,11 @@ export default function PartPOSReportsPage() {
       helper: reportsOnlyIsEnglish ? "Today only" : "تقرير اليوم",
     },
     {
+      value: "yesterday",
+      label: reportsOnlyIsEnglish ? "Yesterday" : "أمس",
+      helper: reportsOnlyIsEnglish ? "Yesterday only" : "تقرير أمس",
+    },
+    {
       value: "this_week",
       label: reportsOnlyIsEnglish ? "Week" : "الأسبوع",
       helper: reportsOnlyIsEnglish ? "Current week" : "الأسبوع الحالي",
@@ -1682,6 +1700,7 @@ export default function PartPOSReportsPage() {
               disabled={isAllTimeMode(mode)}
             >
               <option value="today">اليوم</option>
+              <option value="yesterday">أمس</option>
               <option value="this_week">هذا الأسبوع</option>
               <option value="this_month">هذا الشهر</option>
               <option value="last_month">الشهر الماضي</option>
