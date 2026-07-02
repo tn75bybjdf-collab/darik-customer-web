@@ -3,6 +3,8 @@
 import { createClient } from "@supabase/supabase-js";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
+const EXPENSE_VOID_PIN = "079300";
+
 type ReportMode =
   | "department"
   | "items"
@@ -54,6 +56,8 @@ type ExpenseRow = {
   company_name: string;
   amount: number;
   paid_by: "cash" | "credit";
+  status: string;
+  voided_at: string | null;
   created_at: string;
 };
 
@@ -83,36 +87,6 @@ type DepartmentReportRow = {
   totalSales: number;
   profit: number;
   marginPercent: number;
-  voidReceiptCount: number;
-  voidItemLines: number;
-  voidQuantity: number;
-  voidTotalSales: number;
-};
-
-type DepartmentItemDetailRow = {
-  productName: string;
-  receiptCount: number;
-  quantity: number;
-  totalCost: number;
-  totalSales: number;
-  profit: number;
-  marginPercent: number;
-};
-
-type DepartmentVoidDetailRow = {
-  id: string;
-  saleNumber: number | null;
-  productName: string;
-  quantity: number;
-  salePrice: number;
-  lineTotal: number;
-  paymentMethod: string;
-  createdAt: string;
-};
-
-type DepartmentDetails = {
-  active: DepartmentItemDetailRow[];
-  voided: DepartmentVoidDetailRow[];
 };
 
 type ItemReportRow = {
@@ -409,15 +383,18 @@ export default function PartPOSReportsPage() {
   const [endDate, setEndDate] = useState(() => getPresetRange("today").endDate);
   const [sales, setSales] = useState<SaleRow[]>([]);
   const [items, setItems] = useState<SaleItem[]>([]);
-  const [voidedSales, setVoidedSales] = useState<SaleRow[]>([]);
-  const [voidedItems, setVoidedItems] = useState<SaleItem[]>([]);
-  const [expandedDepartments, setExpandedDepartments] = useState<Record<string, boolean>>({});
   const [creditSales, setCreditSales] = useState<SaleRow[]>([]);
   const [expenses, setExpenses] = useState<ExpenseRow[]>([]);
+  const [voidedExpenses, setVoidedExpenses] = useState<ExpenseRow[]>([]);
   const [vendorCreditExpenses, setVendorCreditExpenses] = useState<ExpenseRow[]>([]);
   const [dailyCounts, setDailyCounts] = useState<DailyCountRow[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [actionMessage, setActionMessage] = useState("");
+  const [voidExpense, setVoidExpense] = useState<ExpenseRow | null>(null);
+  const [voidExpensePin, setVoidExpensePin] = useState("");
+  const [voidExpenseError, setVoidExpenseError] = useState("");
+  const [voidingExpenseId, setVoidingExpenseId] = useState<string | null>(null);
   const [lastUpdated, setLastUpdated] = useState("");
 
   const supabase = useMemo(() => {
@@ -460,6 +437,7 @@ export default function PartPOSReportsPage() {
 
     setLoading(true);
     setError("");
+    setActionMessage("");
 
     try {
       const { start, end } = dayRange(startDate, endDate);
@@ -525,67 +503,6 @@ export default function PartPOSReportsPage() {
         }));
       }
 
-      const { data: voidedSaleRowsRaw, error: voidedSalesError } = await supabase
-        .from("partpos_sales")
-        .select(
-          "id, sale_number, sale_total, amount_paid, change_due, payment_method, customer_id, customer_name, customer_phone, customer_credit_allowance, created_at",
-        )
-        .eq("status", "voided")
-        .gte("created_at", start.toISOString())
-        .lt("created_at", end.toISOString())
-        .order("created_at", { ascending: false })
-        .limit(10000);
-
-      if (voidedSalesError) throw voidedSalesError;
-
-      const cleanVoidedSales: SaleRow[] = ((voidedSaleRowsRaw ?? []) as any[]).map((sale) => ({
-        id: String(sale.id ?? ""),
-        sale_number:
-          sale.sale_number === null || sale.sale_number === undefined
-            ? null
-            : Number(sale.sale_number),
-        sale_total: Number(sale.sale_total ?? 0),
-        amount_paid: Number(sale.amount_paid ?? 0),
-        change_due: Number(sale.change_due ?? 0),
-        payment_method: String(sale.payment_method ?? "cash"),
-        customer_id:
-          sale.customer_id === null || sale.customer_id === undefined
-            ? null
-            : String(sale.customer_id),
-        customer_name: String(sale.customer_name ?? ""),
-        customer_phone: String(sale.customer_phone ?? ""),
-        customer_credit_allowance: Number(sale.customer_credit_allowance ?? 0),
-        created_at: String(sale.created_at ?? ""),
-      }));
-
-      const voidedSaleIds = cleanVoidedSales.map((sale) => sale.id).filter(Boolean);
-      let cleanVoidedItems: SaleItem[] = [];
-
-      if (voidedSaleIds.length > 0) {
-        const { data: voidedItemRowsRaw, error: voidedItemsError } = await supabase
-          .from("partpos_sale_items")
-          .select(
-            "id, sale_id, product_name_ar, department_ar, quantity, cost, sale_price, line_total, created_at",
-          )
-          .in("sale_id", voidedSaleIds)
-          .order("created_at", { ascending: true })
-          .limit(50000);
-
-        if (voidedItemsError) throw voidedItemsError;
-
-        cleanVoidedItems = ((voidedItemRowsRaw ?? []) as any[]).map((item) => ({
-          id: String(item.id ?? ""),
-          sale_id: String(item.sale_id ?? ""),
-          product_name_ar: String(item.product_name_ar ?? ""),
-          department_ar: String(item.department_ar ?? ""),
-          quantity: Number(item.quantity ?? 0),
-          cost: Number(item.cost ?? 0),
-          sale_price: Number(item.sale_price ?? 0),
-          line_total: Number(item.line_total ?? 0),
-          created_at: String(item.created_at ?? ""),
-        }));
-      }
-
       const { data: creditRowsRaw, error: creditError } = await supabase
         .from("partpos_sales")
         .select(
@@ -620,9 +537,10 @@ export default function PartPOSReportsPage() {
 
       const { data: expenseRowsRaw, error: expenseError } = await supabase
         .from("partpos_expenses")
-        .select("id, expense_number, expense_type, details, company_name, amount, paid_by, created_at")
+        .select("id, expense_number, expense_type, details, company_name, amount, paid_by, status, voided_at, created_at")
         .gte("created_at", start.toISOString())
         .lt("created_at", end.toISOString())
+        .or("status.is.null,status.neq.voided")
         .order("created_at", { ascending: false })
         .limit(50000);
 
@@ -639,14 +557,50 @@ export default function PartPOSReportsPage() {
         company_name: String(expense.company_name ?? ""),
         amount: Number(expense.amount ?? 0),
         paid_by: expense.paid_by === "credit" ? "credit" : "cash",
+        status: String(expense.status ?? ""),
+        voided_at:
+          expense.voided_at === null || expense.voided_at === undefined
+            ? null
+            : String(expense.voided_at),
+        created_at: String(expense.created_at ?? ""),
+      }));
+
+      const { data: voidedExpenseRowsRaw, error: voidedExpenseError } = await supabase
+        .from("partpos_expenses")
+        .select("id, expense_number, expense_type, details, company_name, amount, paid_by, status, voided_at, created_at")
+        .eq("status", "voided")
+        .gte("created_at", start.toISOString())
+        .lt("created_at", end.toISOString())
+        .order("voided_at", { ascending: false })
+        .limit(50000);
+
+      if (voidedExpenseError) throw voidedExpenseError;
+
+      const cleanVoidedExpenses: ExpenseRow[] = ((voidedExpenseRowsRaw ?? []) as any[]).map((expense) => ({
+        id: String(expense.id ?? ""),
+        expense_number:
+          expense.expense_number === null || expense.expense_number === undefined
+            ? null
+            : Number(expense.expense_number),
+        expense_type: expense.expense_type === "vendor" ? "vendor" : "utility",
+        details: String(expense.details ?? ""),
+        company_name: String(expense.company_name ?? ""),
+        amount: Number(expense.amount ?? 0),
+        paid_by: expense.paid_by === "credit" ? "credit" : "cash",
+        status: String(expense.status ?? "voided"),
+        voided_at:
+          expense.voided_at === null || expense.voided_at === undefined
+            ? null
+            : String(expense.voided_at),
         created_at: String(expense.created_at ?? ""),
       }));
 
       const { data: vendorCreditRowsRaw, error: vendorCreditError } = await supabase
         .from("partpos_expenses")
-        .select("id, expense_number, expense_type, details, company_name, amount, paid_by, created_at")
+        .select("id, expense_number, expense_type, details, company_name, amount, paid_by, status, voided_at, created_at")
         .eq("expense_type", "vendor")
         .eq("paid_by", "credit")
+        .or("status.is.null,status.neq.voided")
         .order("created_at", { ascending: true })
         .limit(50000);
 
@@ -664,6 +618,11 @@ export default function PartPOSReportsPage() {
           company_name: String(expense.company_name ?? ""),
           amount: Number(expense.amount ?? 0),
           paid_by: "credit",
+          status: String(expense.status ?? ""),
+          voided_at:
+            expense.voided_at === null || expense.voided_at === undefined
+              ? null
+              : String(expense.voided_at),
           created_at: String(expense.created_at ?? ""),
         }),
       );
@@ -702,10 +661,9 @@ export default function PartPOSReportsPage() {
 
       setSales(cleanSales);
       setItems(cleanItems);
-      setVoidedSales(cleanVoidedSales);
-      setVoidedItems(cleanVoidedItems);
       setCreditSales(cleanCreditSales);
       setExpenses(cleanExpenses);
+      setVoidedExpenses(cleanVoidedExpenses);
       setVendorCreditExpenses(cleanVendorCreditExpenses);
       setDailyCounts(cleanDailyCounts);
       setLastUpdated(
@@ -725,16 +683,6 @@ export default function PartPOSReportsPage() {
     void loadReports();
   }, [loadReports]);
 
-  const voidedSaleById = useMemo(() => {
-    const map = new Map<string, SaleRow>();
-
-    for (const sale of voidedSales) {
-      map.set(sale.id, sale);
-    }
-
-    return map;
-  }, [voidedSales]);
-
   const receiptSetsByDepartment = useMemo(() => {
     const groups: Record<string, Set<string>> = {};
 
@@ -746,18 +694,6 @@ export default function PartPOSReportsPage() {
 
     return groups;
   }, [items]);
-
-  const voidReceiptSetsByDepartment = useMemo(() => {
-    const groups: Record<string, Set<string>> = {};
-
-    for (const item of voidedItems) {
-      const department = item.department_ar.trim() || "غير محدد";
-      if (!groups[department]) groups[department] = new Set<string>();
-      groups[department].add(item.sale_id);
-    }
-
-    return groups;
-  }, [voidedItems]);
 
   const receiptSetsByItem = useMemo(() => {
     const groups: Record<string, Set<string>> = {};
@@ -777,7 +713,12 @@ export default function PartPOSReportsPage() {
   const departmentRows = useMemo<DepartmentReportRow[]>(() => {
     const groups: Record<string, DepartmentReportRow> = {};
 
-    function ensureDepartment(department: string) {
+    for (const item of items) {
+      const department = item.department_ar.trim() || "غير محدد";
+      const quantity = Number(item.quantity) || 0;
+      const totalCost = (Number(item.cost) || 0) * quantity;
+      const totalSales = Number(item.line_total) || 0;
+
       if (!groups[department]) {
         groups[department] = {
           department,
@@ -788,134 +729,24 @@ export default function PartPOSReportsPage() {
           totalSales: 0,
           profit: 0,
           marginPercent: 0,
-          voidReceiptCount: 0,
-          voidItemLines: 0,
-          voidQuantity: 0,
-          voidTotalSales: 0,
         };
       }
 
-      return groups[department];
-    }
-
-    for (const item of items) {
-      const department = item.department_ar.trim() || "غير محدد";
-      const quantity = Number(item.quantity) || 0;
-      const totalCost = (Number(item.cost) || 0) * quantity;
-      const totalSales = Number(item.line_total) || 0;
-      const row = ensureDepartment(department);
-
-      row.itemLines += 1;
-      row.quantity += quantity;
-      row.totalCost += totalCost;
-      row.totalSales += totalSales;
-      row.profit += totalSales - totalCost;
-    }
-
-    for (const item of voidedItems) {
-      const department = item.department_ar.trim() || "غير محدد";
-      const quantity = Number(item.quantity) || 0;
-      const totalSales = Number(item.line_total) || 0;
-      const row = ensureDepartment(department);
-
-      row.voidItemLines += 1;
-      row.voidQuantity += quantity;
-      row.voidTotalSales += totalSales;
+      groups[department].itemLines += 1;
+      groups[department].quantity += quantity;
+      groups[department].totalCost += totalCost;
+      groups[department].totalSales += totalSales;
+      groups[department].profit += totalSales - totalCost;
     }
 
     return Object.values(groups)
       .map((row) => ({
         ...row,
         receiptCount: receiptSetsByDepartment[row.department]?.size ?? 0,
-        voidReceiptCount: voidReceiptSetsByDepartment[row.department]?.size ?? 0,
         marginPercent: row.totalSales > 0 ? (row.profit / row.totalSales) * 100 : 0,
       }))
       .sort((a, b) => b.totalSales - a.totalSales);
-  }, [items, receiptSetsByDepartment, voidReceiptSetsByDepartment, voidedItems]);
-
-  const departmentDetailsByDepartment = useMemo<Record<string, DepartmentDetails>>(() => {
-    const details: Record<string, DepartmentDetails> = {};
-    const activeGroups: Record<
-      string,
-      DepartmentItemDetailRow & { department: string; receiptIds: Set<string> }
-    > = {};
-
-    function ensureDepartment(department: string) {
-      if (!details[department]) {
-        details[department] = { active: [], voided: [] };
-      }
-
-      return details[department];
-    }
-
-    for (const item of items) {
-      const department = item.department_ar.trim() || "غير محدد";
-      const productName = item.product_name_ar.trim() || "قطعة بدون اسم";
-      const key = `${department}__${productName}`;
-      const quantity = Number(item.quantity) || 0;
-      const totalCost = (Number(item.cost) || 0) * quantity;
-      const totalSales = Number(item.line_total) || 0;
-
-      ensureDepartment(department);
-
-      if (!activeGroups[key]) {
-        activeGroups[key] = {
-          productName,
-          department,
-          receiptCount: 0,
-          quantity: 0,
-          totalCost: 0,
-          totalSales: 0,
-          profit: 0,
-          marginPercent: 0,
-          receiptIds: new Set<string>(),
-        };
-      }
-
-      activeGroups[key].receiptIds.add(item.sale_id);
-      activeGroups[key].quantity += quantity;
-      activeGroups[key].totalCost += totalCost;
-      activeGroups[key].totalSales += totalSales;
-      activeGroups[key].profit += totalSales - totalCost;
-    }
-
-    for (const group of Object.values(activeGroups)) {
-      ensureDepartment(group.department).active.push({
-        productName: group.productName,
-        receiptCount: group.receiptIds.size,
-        quantity: group.quantity,
-        totalCost: group.totalCost,
-        totalSales: group.totalSales,
-        profit: group.profit,
-        marginPercent: group.totalSales > 0 ? (group.profit / group.totalSales) * 100 : 0,
-      });
-    }
-
-    for (const item of voidedItems) {
-      const department = item.department_ar.trim() || "غير محدد";
-      const sale = voidedSaleById.get(item.sale_id);
-
-      ensureDepartment(department).voided.push({
-        id: item.id,
-        saleNumber: sale?.sale_number ?? null,
-        productName: item.product_name_ar.trim() || "قطعة بدون اسم",
-        quantity: Number(item.quantity) || 0,
-        salePrice: Number(item.sale_price) || 0,
-        lineTotal: Number(item.line_total) || 0,
-        paymentMethod: sale?.payment_method || "cash",
-        createdAt: sale?.created_at || item.created_at,
-      });
-    }
-
-    for (const detail of Object.values(details)) {
-      detail.active.sort((a, b) => b.totalSales - a.totalSales);
-      detail.voided.sort(
-        (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
-      );
-    }
-
-    return details;
-  }, [items, voidedItems, voidedSaleById]);
+  }, [items, receiptSetsByDepartment]);
 
   const itemRows = useMemo<ItemReportRow[]>(() => {
     const groups: Record<string, ItemReportRow> = {};
@@ -1072,6 +903,10 @@ export default function PartPOSReportsPage() {
   );
 
   const totalExpenses = expenses.reduce((sum, row) => sum + Number(row.amount || 0), 0);
+  const totalVoidedExpenses = voidedExpenses.reduce(
+    (sum, row) => sum + Number(row.amount || 0),
+    0,
+  );
   const profitLossSales = sales.reduce(
     (sum, sale) => sum + Number(sale.sale_total || 0),
     0,
@@ -1113,20 +948,55 @@ export default function PartPOSReportsPage() {
     0,
   );
 
-  const totalVoidedReceiptCount = useMemo(() => {
-    return new Set(voidedItems.map((item) => item.sale_id)).size;
-  }, [voidedItems]);
+  function openVoidExpenseConfirm(expense: ExpenseRow) {
+    if (isReportsOnlyAccess) return;
 
-  const totalVoidedDepartmentSales = voidedItems.reduce(
-    (sum, item) => sum + Number(item.line_total || 0),
-    0,
-  );
+    setVoidExpense(expense);
+    setVoidExpensePin("");
+    setVoidExpenseError("");
+    setActionMessage("");
+  }
 
-  function toggleDepartment(department: string) {
-    setExpandedDepartments((current) => ({
-      ...current,
-      [department]: !current[department],
-    }));
+  function closeVoidExpenseConfirm() {
+    if (voidingExpenseId) return;
+
+    setVoidExpense(null);
+    setVoidExpensePin("");
+    setVoidExpenseError("");
+  }
+
+  async function confirmVoidExpense() {
+    if (!supabase || !voidExpense) return;
+
+    if (voidExpensePin !== EXPENSE_VOID_PIN) {
+      setVoidExpenseError("الرمز غير صحيح. أدخل رمز الدخول لإلغاء المصروف.");
+      setVoidExpensePin("");
+      return;
+    }
+
+    setVoidingExpenseId(voidExpense.id);
+    setVoidExpenseError("");
+
+    try {
+      const { error: updateError } = await supabase
+        .from("partpos_expenses")
+        .update({
+          status: "voided",
+          voided_at: new Date().toISOString(),
+        })
+        .eq("id", voidExpense.id);
+
+      if (updateError) throw updateError;
+
+      setActionMessage(`تم إلغاء المصروف رقم ${voidExpense.expense_number ?? "—"}.`);
+      setVoidExpense(null);
+      setVoidExpensePin("");
+      await loadReports();
+    } catch (caught) {
+      setVoidExpenseError(`خطأ Supabase: ${readSupabaseError(caught)}`);
+    } finally {
+      setVoidingExpenseId(null);
+    }
   }
 
   const activeRowsCount =
@@ -1497,6 +1367,7 @@ export default function PartPOSReportsPage() {
       </section>
 
       {error && <div className="errorBox noPrint">{error}</div>}
+      {actionMessage && <div className="successBox noPrint">{actionMessage}</div>}
 
       <section className="reportSheet">
         <div className="printHeader">
@@ -1533,14 +1404,6 @@ export default function PartPOSReportsPage() {
             <StatBox label="إجمالي البيع" value={`${money(totalSales)} د.أ`} tone="red" />
             <StatBox label="إجمالي الربح" value={`${money(totalProfit)} د.أ`} tone="green" />
             <StatBox label="هامش الربح" value={percent(totalMarginPercent)} />
-            {mode === "department" ? (
-              <StatBox
-                label="VOID"
-                value={totalVoidedReceiptCount}
-                tone="orange"
-                small={`${money(totalVoidedDepartmentSales)} د.أ غير محسوبة`}
-              />
-            ) : null}
           </div>
         ) : null}
 
@@ -1558,6 +1421,12 @@ export default function PartPOSReportsPage() {
             <StatBox label="خدمات / مرافق" value={`${money(utilityExpenses)} د.أ`} />
             <StatBox label="موردين نقداً" value={`${money(vendorCashExpenses)} د.أ`} />
             <StatBox label="موردين على الائتمان" value={`${money(vendorCreditExpensesForPeriod)} د.أ`} tone="orange" />
+            <StatBox
+              label="مصروفات VOID"
+              value={`${money(totalVoidedExpenses)} د.أ`}
+              tone="orange"
+              small="غير محسوبة"
+            />
           </div>
         ) : null}
 
@@ -1610,123 +1479,23 @@ export default function PartPOSReportsPage() {
               <div className="emptyState">لا يوجد مبيعات ضمن الفترة المحددة.</div>
             ) : (
               <div className="recordList">
-                {departmentRows.map((row) => {
-                  const expanded = Boolean(expandedDepartments[row.department]);
-                  const details = departmentDetailsByDepartment[row.department] ?? {
-                    active: [],
-                    voided: [],
-                  };
-
-                  return (
-                    <article
-                      className={
-                        expanded
-                          ? "recordCard departmentRecord expandedDepartmentRecord"
-                          : "recordCard departmentRecord"
-                      }
-                      key={row.department}
-                    >
-                      <button
-                        type="button"
-                        className="departmentToggleButton"
-                        onClick={() => toggleDepartment(row.department)}
-                      >
-                        <div className="recordMain">
-                          <p>القسم</p>
-                          <h3>{row.department}</h3>
-                          <span className="expandHint">
-                            {expanded ? "إخفاء التفاصيل" : "اضغط لعرض القطع والفواتير الملغاة"}
-                          </span>
-                        </div>
-
-                        <div className="detailGrid">
-                          <DetailCell label="عدد الفواتير" value={row.receiptCount} />
-                          <DetailCell label="عدد السطور" value={row.itemLines} />
-                          <DetailCell label="الكمية" value={money(row.quantity)} />
-                          <DetailCell label="إجمالي التكلفة" value={`${money(row.totalCost)} د.أ`} />
-                          <DetailCell label="إجمالي البيع" value={`${money(row.totalSales)} د.أ`} tone="red" />
-                          <DetailCell label="الربح" value={`${money(row.profit)} د.أ`} tone={row.profit >= 0 ? "green" : "red"} />
-                          <DetailCell label="الهامش" value={percent(row.marginPercent)} />
-                          <DetailCell
-                            label="VOID داخل القسم"
-                            value={row.voidReceiptCount}
-                            tone={row.voidReceiptCount > 0 ? "orange" : undefined}
-                          />
-                        </div>
-                      </button>
-
-                      {expanded ? (
-                        <div className="departmentExpandPanel">
-                          <div className="departmentDetailSection">
-                            <div className="departmentDetailHeader">
-                              <h4>القطع المباعة في هذا القسم</h4>
-                              <span>{details.active.length} قطع</span>
-                            </div>
-
-                            {details.active.length === 0 ? (
-                              <div className="emptyState smallEmptyState">
-                                لا يوجد قطع مباعة غير ملغاة في هذا القسم.
-                              </div>
-                            ) : (
-                              <div className="departmentItemList">
-                                {details.active.map((item) => (
-                                  <div className="departmentItemRow" key={item.productName}>
-                                    <div>
-                                      <strong>{item.productName}</strong>
-                                      <span>
-                                        {item.receiptCount} فواتير • كمية {money(item.quantity)}
-                                      </span>
-                                    </div>
-                                    <div className="departmentItemNumbers">
-                                      <strong>{money(item.totalSales)} د.أ</strong>
-                                      <span>
-                                        ربح {money(item.profit)} د.أ • هامش {percent(item.marginPercent)}
-                                      </span>
-                                    </div>
-                                  </div>
-                                ))}
-                              </div>
-                            )}
-                          </div>
-
-                          <div className="departmentDetailSection voidDetailSection">
-                            <div className="departmentDetailHeader">
-                              <h4>VOID / الفواتير الملغاة في هذا القسم</h4>
-                              <span>{details.voided.length} سطور ملغاة</span>
-                            </div>
-
-                            {details.voided.length === 0 ? (
-                              <div className="emptyState smallEmptyState">
-                                لا يوجد VOID داخل هذا القسم ضمن الفترة المختارة.
-                              </div>
-                            ) : (
-                              <div className="departmentItemList">
-                                {details.voided.map((voidItem) => (
-                                  <div className="departmentItemRow voidItemRow" key={voidItem.id}>
-                                    <div>
-                                      <strong>{voidItem.productName}</strong>
-                                      <span>
-                                        فاتورة {voidItem.saleNumber ?? "—"} •{" "}
-                                        {formatArabicDateTime(voidItem.createdAt)} •{" "}
-                                        {voidItem.paymentMethod === "credit" ? "ائتمان" : "نقداً"}
-                                      </span>
-                                    </div>
-                                    <div className="departmentItemNumbers">
-                                      <strong>{money(voidItem.lineTotal)} د.أ</strong>
-                                      <span>
-                                        كمية {money(voidItem.quantity)} • سعر {money(voidItem.salePrice)} د.أ
-                                      </span>
-                                    </div>
-                                  </div>
-                                ))}
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                      ) : null}
-                    </article>
-                  );
-                })}
+                {departmentRows.map((row) => (
+                  <article className="recordCard" key={row.department}>
+                    <div className="recordMain">
+                      <p>القسم</p>
+                      <h3>{row.department}</h3>
+                    </div>
+                    <div className="detailGrid">
+                      <DetailCell label="عدد الفواتير" value={row.receiptCount} />
+                      <DetailCell label="عدد السطور" value={row.itemLines} />
+                      <DetailCell label="الكمية" value={money(row.quantity)} />
+                      <DetailCell label="إجمالي التكلفة" value={`${money(row.totalCost)} د.أ`} />
+                      <DetailCell label="إجمالي البيع" value={`${money(row.totalSales)} د.أ`} tone="red" />
+                      <DetailCell label="الربح" value={`${money(row.profit)} د.أ`} tone={row.profit >= 0 ? "green" : "red"} />
+                      <DetailCell label="الهامش" value={percent(row.marginPercent)} />
+                    </div>
+                  </article>
+                ))}
               </div>
             )
           ) : null}
@@ -1784,7 +1553,7 @@ export default function PartPOSReportsPage() {
           ) : null}
 
           {mode === "expenses" ? (
-            expenses.length === 0 ? (
+            expenses.length === 0 && voidedExpenses.length === 0 ? (
               <div className="emptyState">لا يوجد مصروفات ضمن الفترة المحددة.</div>
             ) : (
               <div className="recordList">
@@ -1804,8 +1573,49 @@ export default function PartPOSReportsPage() {
                       <DetailCell label="المبلغ" value={`${money(row.amount)} د.أ`} tone={row.paid_by === "credit" ? "orange" : "red"} />
                       <DetailCell label="التاريخ" value={formatArabicDateTime(row.created_at)} />
                     </div>
+                    {!isReportsOnlyAccess && (
+                      <div className="expenseActions noPrint">
+                        <button
+                          type="button"
+                          className="voidExpenseButton"
+                          onClick={() => openVoidExpenseConfirm(row)}
+                          disabled={voidingExpenseId === row.id}
+                        >
+                          {voidingExpenseId === row.id ? "جاري الإلغاء..." : "إلغاء المصروف / VOID"}
+                        </button>
+                      </div>
+                    )}
                   </article>
                 ))}
+
+                {voidedExpenses.length > 0 && (
+                  <div className="voidedExpensesBlock">
+                    <div className="voidedExpensesHeader">
+                      <strong>مصروفات ملغاة / VOID</strong>
+                      <span>{voidedExpenses.length} قيود • {money(totalVoidedExpenses)} د.أ غير محسوبة</span>
+                    </div>
+                    {voidedExpenses.map((row) => (
+                      <article className="recordCard voidedExpenseCard" key={row.id}>
+                        <div className="recordMain">
+                          <p>{row.expense_number ? `قيد ${row.expense_number}` : "قيد بدون رقم"}</p>
+                          <h3>
+                            {row.expense_type === "vendor"
+                              ? row.company_name || "مورد غير محدد"
+                              : row.details || "مصروف بدون تفاصيل"}
+                          </h3>
+                          <span className="voidBadge">VOID / ملغى</span>
+                        </div>
+                        <div className="detailGrid">
+                          <DetailCell label="النوع" value={row.expense_type === "vendor" ? "دفع مورد" : "خدمات / مرافق"} />
+                          <DetailCell label="طريقة الدفع" value={row.paid_by === "credit" ? "على الائتمان" : "نقداً"} />
+                          <DetailCell label="المبلغ الملغى" value={`${money(row.amount)} د.أ`} tone="orange" />
+                          <DetailCell label="تاريخ الإدخال" value={formatArabicDateTime(row.created_at)} />
+                          <DetailCell label="تاريخ الإلغاء" value={row.voided_at ? formatArabicDateTime(row.voided_at) : "—"} />
+                        </div>
+                      </article>
+                    ))}
+                  </div>
+                )}
               </div>
             )
           ) : null}
@@ -2029,6 +1839,57 @@ export default function PartPOSReportsPage() {
         </div>
       </section>
 
+      {voidExpense && (
+        <div className="popupBackdrop noPrint" role="dialog" aria-modal="true">
+          <div className="voidConfirmCard">
+            <p className="eyebrow">تأكيد إلغاء المصروف</p>
+            <h2>إلغاء مصروف رقم {voidExpense.expense_number ?? "—"}</h2>
+            <p className="voidConfirmText">
+              المصروف سيبقى ظاهر كـ VOID للمراجعة، لكنه لن يدخل في المصروفات أو الربح والخسارة أو نهاية اليوم.
+            </p>
+
+            <label htmlFor="void-expense-pin">رمز الدخول</label>
+            <input
+              id="void-expense-pin"
+              value={voidExpensePin}
+              onChange={(event) =>
+                setVoidExpensePin(event.target.value.replace(/\D/g, "").slice(0, 6))
+              }
+              placeholder="أدخل رمز الدخول"
+              inputMode="numeric"
+              type="password"
+              autoFocus
+              onKeyDown={(event) => {
+                if (event.key === "Enter") {
+                  void confirmVoidExpense();
+                }
+              }}
+            />
+
+            {voidExpenseError && <div className="voidError">{voidExpenseError}</div>}
+
+            <div className="voidPopupActions">
+              <button
+                type="button"
+                className="cancelVoidButton"
+                onClick={closeVoidExpenseConfirm}
+                disabled={Boolean(voidingExpenseId)}
+              >
+                رجوع
+              </button>
+              <button
+                type="button"
+                className="confirmVoidButton"
+                onClick={() => void confirmVoidExpense()}
+                disabled={Boolean(voidingExpenseId)}
+              >
+                {voidingExpenseId ? "جاري الإلغاء..." : "تأكيد الإلغاء"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <style jsx>{`
         .reportsPage {
           min-height: 100vh;
@@ -2042,7 +1903,8 @@ export default function PartPOSReportsPage() {
         .controlsCard,
         .reportSheet,
         .warning,
-        .errorBox {
+        .errorBox,
+        .successBox {
           max-width: 1280px;
           margin: 0 auto 16px;
           background: white;
@@ -2522,6 +2384,14 @@ export default function PartPOSReportsPage() {
           font-weight: 800;
         }
 
+        .successBox {
+          padding: 14px 18px;
+          background: #dcfce7;
+          border-color: #bbf7d0;
+          color: #166534;
+          font-weight: 900;
+        }
+
         .reportSheet {
           padding: 24px;
         }
@@ -2653,136 +2523,6 @@ export default function PartPOSReportsPage() {
           background: #ffffff;
         }
 
-        .departmentRecord {
-          display: block;
-          padding: 0;
-          overflow: hidden;
-        }
-
-        .departmentToggleButton {
-          width: 100%;
-          display: grid;
-          grid-template-columns: minmax(220px, 1.1fr) minmax(0, 3fr);
-          gap: 16px;
-          border: 0;
-          padding: 16px;
-          background: transparent;
-          color: inherit;
-          text-align: right;
-          cursor: pointer;
-        }
-
-        .departmentToggleButton:hover {
-          background: #f8fafc;
-        }
-
-        .expandedDepartmentRecord {
-          border-color: #bfdbfe;
-          box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.08);
-        }
-
-        .expandHint {
-          display: inline-flex;
-          margin-top: 10px;
-          border-radius: 999px;
-          padding: 6px 10px;
-          background: #eff6ff;
-          color: #1d4ed8;
-          font-weight: 900;
-          font-size: 12px;
-        }
-
-        .departmentExpandPanel {
-          border-top: 1px solid #e5e7eb;
-          padding: 16px;
-          background: #f8fafc;
-          display: grid;
-          gap: 14px;
-        }
-
-        .departmentDetailSection {
-          border: 1px solid #e5e7eb;
-          border-radius: 16px;
-          background: white;
-          overflow: hidden;
-        }
-
-        .voidDetailSection {
-          border-color: #fed7aa;
-          background: #fffaf3;
-        }
-
-        .departmentDetailHeader {
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          gap: 12px;
-          padding: 14px 16px;
-          border-bottom: 1px solid #e5e7eb;
-        }
-
-        .departmentDetailHeader h4 {
-          margin: 0;
-          font-size: 16px;
-        }
-
-        .departmentDetailHeader span {
-          color: #6b7280;
-          font-size: 13px;
-          font-weight: 900;
-        }
-
-        .departmentItemList {
-          display: grid;
-        }
-
-        .departmentItemRow {
-          display: grid;
-          grid-template-columns: minmax(0, 1.4fr) minmax(180px, 0.8fr);
-          gap: 12px;
-          padding: 14px 16px;
-          border-bottom: 1px solid #f3f4f6;
-        }
-
-        .departmentItemRow:last-child {
-          border-bottom: 0;
-        }
-
-        .departmentItemRow strong {
-          display: block;
-          margin-bottom: 4px;
-          color: #111827;
-        }
-
-        .departmentItemRow span {
-          color: #6b7280;
-          font-size: 13px;
-          font-weight: 800;
-          line-height: 1.45;
-        }
-
-        .departmentItemNumbers {
-          text-align: left;
-        }
-
-        .departmentItemNumbers strong {
-          font-size: 16px;
-        }
-
-        .voidItemRow {
-          background: #fff7ed;
-        }
-
-        .voidItemRow strong {
-          color: #9a3412;
-        }
-
-        .smallEmptyState {
-          margin: 14px;
-          padding: 12px;
-          font-size: 13px;
-        }
-
         .profitLossCard {
           border-color: #bbf7d0;
           background: #fbfffd;
@@ -2869,17 +2609,8 @@ export default function PartPOSReportsPage() {
             grid-template-columns: repeat(2, minmax(0, 1fr));
           }
 
-          .recordCard,
-          .departmentToggleButton {
+          .recordCard {
             grid-template-columns: 1fr;
-          }
-
-          .departmentItemRow {
-            grid-template-columns: 1fr;
-          }
-
-          .departmentItemNumbers {
-            text-align: right;
           }
 
           .recordMain {
@@ -3000,6 +2731,149 @@ export default function PartPOSReportsPage() {
           .topActions button {
             flex: 1;
           }
+        }
+
+        .expenseActions {
+          border-top: 1px solid #f3f4f6;
+          padding: 12px 16px 16px;
+          display: flex;
+          justify-content: flex-end;
+        }
+
+        .voidExpenseButton {
+          border: 1px solid #fecaca;
+          border-radius: 12px;
+          padding: 10px 12px;
+          background: #fee2e2;
+          color: #991b1b;
+          font-weight: 900;
+          cursor: pointer;
+        }
+
+        .voidExpenseButton:disabled {
+          opacity: 0.55;
+          cursor: not-allowed;
+        }
+
+        .voidedExpensesBlock {
+          display: grid;
+          gap: 12px;
+          border: 1px solid #fed7aa;
+          border-radius: 18px;
+          padding: 14px;
+          background: #fff7ed;
+        }
+
+        .voidedExpensesHeader {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 12px;
+          color: #9a3412;
+          font-weight: 900;
+        }
+
+        .voidedExpensesHeader span {
+          color: #b45309;
+          font-size: 13px;
+        }
+
+        .voidedExpenseCard {
+          border-color: #fed7aa;
+          background: #fffbeb;
+        }
+
+        .voidBadge {
+          display: inline-flex;
+          width: fit-content;
+          margin-top: 8px;
+          border: 1px solid #fed7aa;
+          border-radius: 999px;
+          padding: 5px 9px;
+          background: white;
+          color: #9a3412;
+          font-size: 12px;
+          font-weight: 900;
+        }
+
+        .popupBackdrop {
+          position: fixed;
+          inset: 0;
+          z-index: 90;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          padding: 20px;
+          background: rgba(15, 23, 42, 0.58);
+        }
+
+        .voidConfirmCard {
+          width: min(520px, 100%);
+          background: white;
+          border-radius: 22px;
+          padding: 24px;
+          border: 1px solid #e5e7eb;
+          box-shadow: 0 24px 80px rgba(15, 23, 42, 0.28);
+        }
+
+        .voidConfirmCard h2 {
+          margin: 0 0 10px;
+          font-size: 26px;
+        }
+
+        .voidConfirmCard label {
+          display: block;
+          margin-bottom: 7px;
+          color: #374151;
+          font-weight: 900;
+        }
+
+        .voidConfirmCard input {
+          width: 100%;
+          border: 1px solid #d1d5db;
+          border-radius: 14px;
+          padding: 14px;
+          font-size: 18px;
+          outline: none;
+        }
+
+        .voidConfirmText {
+          color: #4b5563;
+          margin-bottom: 16px;
+          line-height: 1.6;
+        }
+
+        .voidError {
+          margin-top: 10px;
+          border: 1px solid #fecaca;
+          border-radius: 12px;
+          padding: 10px 12px;
+          background: #fef2f2;
+          color: #991b1b;
+          font-weight: 800;
+        }
+
+        .voidPopupActions {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 10px;
+          margin-top: 16px;
+        }
+
+        .cancelVoidButton {
+          background: #f3f4f6;
+          color: #111827;
+        }
+
+        .confirmVoidButton {
+          background: #b91c1c;
+          color: white;
+        }
+
+        .confirmVoidButton:disabled,
+        .cancelVoidButton:disabled {
+          opacity: 0.55;
+          cursor: not-allowed;
         }
 
         @media print {
