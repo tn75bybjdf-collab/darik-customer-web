@@ -35,6 +35,7 @@ type SaleRow = {
   customer_name: string;
   customer_phone: string;
   customer_credit_allowance: number;
+  status: string;
   created_at: string;
 };
 
@@ -89,6 +90,36 @@ type DepartmentReportRow = {
   totalSales: number;
   profit: number;
   marginPercent: number;
+  voidReceiptCount: number;
+  voidItemLines: number;
+  voidQuantity: number;
+  voidTotalSales: number;
+};
+
+type DepartmentItemDetailRow = {
+  productName: string;
+  receiptCount: number;
+  quantity: number;
+  totalCost: number;
+  totalSales: number;
+  profit: number;
+  marginPercent: number;
+};
+
+type DepartmentVoidDetailRow = {
+  id: string;
+  saleNumber: number | null;
+  productName: string;
+  quantity: number;
+  salePrice: number;
+  lineTotal: number;
+  paymentMethod: string;
+  createdAt: string;
+};
+
+type DepartmentDetails = {
+  active: DepartmentItemDetailRow[];
+  voided: DepartmentVoidDetailRow[];
 };
 
 type ItemReportRow = {
@@ -393,14 +424,6 @@ function logoutReportsOnly() {
   window.location.href = "/partpos";
 }
 
-function setReportsLanguage(language: ReportLanguage) {
-  setReportsOnlyLanguage(language);
-
-  if (typeof window !== "undefined") {
-    window.localStorage.setItem("partpos_reports_language", language);
-  }
-}
-
 function StatBox({
   label,
   value,
@@ -447,6 +470,9 @@ export default function PartPOSReportsPage() {
   const [endDate, setEndDate] = useState(() => getPresetRange("today").endDate);
   const [sales, setSales] = useState<SaleRow[]>([]);
   const [items, setItems] = useState<SaleItem[]>([]);
+  const [voidedSales, setVoidedSales] = useState<SaleRow[]>([]);
+  const [voidedItems, setVoidedItems] = useState<SaleItem[]>([]);
+  const [expandedDepartments, setExpandedDepartments] = useState<Record<string, boolean>>({});
   const [creditSales, setCreditSales] = useState<SaleRow[]>([]);
   const [expenses, setExpenses] = useState<ExpenseRow[]>([]);
   const [voidedExpenses, setVoidedExpenses] = useState<ExpenseRow[]>([]);
@@ -486,6 +512,14 @@ export default function PartPOSReportsPage() {
     }
   }, []);
 
+  function setReportsLanguage(language: ReportLanguage) {
+    setReportsOnlyLanguage(language);
+
+    if (typeof window !== "undefined") {
+      window.localStorage.setItem("partpos_reports_language", language);
+    }
+  }
+
   function handleRangeChange(nextRange: ReportRange) {
     setRangePreset(nextRange);
 
@@ -524,7 +558,7 @@ export default function PartPOSReportsPage() {
       const { data: saleRowsRaw, error: salesError } = await supabase
         .from("partpos_sales")
         .select(
-          "id, sale_number, sale_total, amount_paid, change_due, payment_method, customer_id, customer_name, customer_phone, customer_credit_allowance, created_at",
+          "id, sale_number, sale_total, amount_paid, change_due, payment_method, customer_id, customer_name, customer_phone, customer_credit_allowance, status, created_at",
         )
         .gte("created_at", start.toISOString())
         .lt("created_at", end.toISOString())
@@ -551,6 +585,7 @@ export default function PartPOSReportsPage() {
         customer_name: String(sale.customer_name ?? ""),
         customer_phone: String(sale.customer_phone ?? ""),
         customer_credit_allowance: Number(sale.customer_credit_allowance ?? 0),
+        status: String(sale.status ?? ""),
         created_at: String(sale.created_at ?? ""),
       }));
 
@@ -582,10 +617,72 @@ export default function PartPOSReportsPage() {
         }));
       }
 
+      const { data: voidedSaleRowsRaw, error: voidedSalesError } = await supabase
+        .from("partpos_sales")
+        .select(
+          "id, sale_number, sale_total, amount_paid, change_due, payment_method, customer_id, customer_name, customer_phone, customer_credit_allowance, status, created_at",
+        )
+        .eq("status", "voided")
+        .gte("created_at", start.toISOString())
+        .lt("created_at", end.toISOString())
+        .order("created_at", { ascending: false })
+        .limit(10000);
+
+      if (voidedSalesError) throw voidedSalesError;
+
+      const cleanVoidedSales: SaleRow[] = ((voidedSaleRowsRaw ?? []) as any[]).map((sale) => ({
+        id: String(sale.id ?? ""),
+        sale_number:
+          sale.sale_number === null || sale.sale_number === undefined
+            ? null
+            : Number(sale.sale_number),
+        sale_total: Number(sale.sale_total ?? 0),
+        amount_paid: Number(sale.amount_paid ?? 0),
+        change_due: Number(sale.change_due ?? 0),
+        payment_method: String(sale.payment_method ?? "cash"),
+        customer_id:
+          sale.customer_id === null || sale.customer_id === undefined
+            ? null
+            : String(sale.customer_id),
+        customer_name: String(sale.customer_name ?? ""),
+        customer_phone: String(sale.customer_phone ?? ""),
+        customer_credit_allowance: Number(sale.customer_credit_allowance ?? 0),
+        status: String(sale.status ?? "voided"),
+        created_at: String(sale.created_at ?? ""),
+      }));
+
+      const voidedSaleIds = cleanVoidedSales.map((sale) => sale.id).filter(Boolean);
+      let cleanVoidedItems: SaleItem[] = [];
+
+      if (voidedSaleIds.length > 0) {
+        const { data: voidedItemRowsRaw, error: voidedItemsError } = await supabase
+          .from("partpos_sale_items")
+          .select(
+            "id, sale_id, product_name_ar, department_ar, quantity, cost, sale_price, line_total, created_at",
+          )
+          .in("sale_id", voidedSaleIds)
+          .order("created_at", { ascending: true })
+          .limit(50000);
+
+        if (voidedItemsError) throw voidedItemsError;
+
+        cleanVoidedItems = ((voidedItemRowsRaw ?? []) as any[]).map((item) => ({
+          id: String(item.id ?? ""),
+          sale_id: String(item.sale_id ?? ""),
+          product_name_ar: String(item.product_name_ar ?? ""),
+          department_ar: String(item.department_ar ?? ""),
+          quantity: Number(item.quantity ?? 0),
+          cost: Number(item.cost ?? 0),
+          sale_price: Number(item.sale_price ?? 0),
+          line_total: Number(item.line_total ?? 0),
+          created_at: String(item.created_at ?? ""),
+        }));
+      }
+
       const { data: creditRowsRaw, error: creditError } = await supabase
         .from("partpos_sales")
         .select(
-          "id, sale_number, sale_total, amount_paid, change_due, payment_method, customer_id, customer_name, customer_phone, customer_credit_allowance, created_at",
+          "id, sale_number, sale_total, amount_paid, change_due, payment_method, customer_id, customer_name, customer_phone, customer_credit_allowance, status, created_at",
         )
         .eq("payment_method", "credit")
         .or("status.is.null,status.neq.voided")
@@ -611,6 +708,7 @@ export default function PartPOSReportsPage() {
         customer_name: String(sale.customer_name ?? ""),
         customer_phone: String(sale.customer_phone ?? ""),
         customer_credit_allowance: Number(sale.customer_credit_allowance ?? 0),
+        status: String(sale.status ?? ""),
         created_at: String(sale.created_at ?? ""),
       }));
 
@@ -740,6 +838,8 @@ export default function PartPOSReportsPage() {
 
       setSales(cleanSales);
       setItems(cleanItems);
+      setVoidedSales(cleanVoidedSales);
+      setVoidedItems(cleanVoidedItems);
       setCreditSales(cleanCreditSales);
       setExpenses(cleanExpenses);
       setVoidedExpenses(cleanVoidedExpenses);
@@ -762,6 +862,16 @@ export default function PartPOSReportsPage() {
     void loadReports();
   }, [loadReports]);
 
+  const voidedSaleById = useMemo(() => {
+    const map = new Map<string, SaleRow>();
+
+    for (const sale of voidedSales) {
+      map.set(sale.id, sale);
+    }
+
+    return map;
+  }, [voidedSales]);
+
   const receiptSetsByDepartment = useMemo(() => {
     const groups: Record<string, Set<string>> = {};
 
@@ -773,6 +883,18 @@ export default function PartPOSReportsPage() {
 
     return groups;
   }, [items]);
+
+  const voidReceiptSetsByDepartment = useMemo(() => {
+    const groups: Record<string, Set<string>> = {};
+
+    for (const item of voidedItems) {
+      const department = item.department_ar.trim() || "غير محدد";
+      if (!groups[department]) groups[department] = new Set<string>();
+      groups[department].add(item.sale_id);
+    }
+
+    return groups;
+  }, [voidedItems]);
 
   const receiptSetsByItem = useMemo(() => {
     const groups: Record<string, Set<string>> = {};
@@ -808,6 +930,10 @@ export default function PartPOSReportsPage() {
           totalSales: 0,
           profit: 0,
           marginPercent: 0,
+          voidReceiptCount: 0,
+          voidItemLines: 0,
+          voidQuantity: 0,
+          voidTotalSales: 0,
         };
       }
 
@@ -818,14 +944,127 @@ export default function PartPOSReportsPage() {
       groups[department].profit += totalSales - totalCost;
     }
 
+    for (const item of voidedItems) {
+      const department = item.department_ar.trim() || "غير محدد";
+      const quantity = Number(item.quantity) || 0;
+      const totalSales = Number(item.line_total) || 0;
+
+      if (!groups[department]) {
+        groups[department] = {
+          department,
+          receiptCount: 0,
+          itemLines: 0,
+          quantity: 0,
+          totalCost: 0,
+          totalSales: 0,
+          profit: 0,
+          marginPercent: 0,
+          voidReceiptCount: 0,
+          voidItemLines: 0,
+          voidQuantity: 0,
+          voidTotalSales: 0,
+        };
+      }
+
+      groups[department].voidItemLines += 1;
+      groups[department].voidQuantity += quantity;
+      groups[department].voidTotalSales += totalSales;
+    }
+
     return Object.values(groups)
       .map((row) => ({
         ...row,
         receiptCount: receiptSetsByDepartment[row.department]?.size ?? 0,
+        voidReceiptCount: voidReceiptSetsByDepartment[row.department]?.size ?? 0,
         marginPercent: row.totalSales > 0 ? (row.profit / row.totalSales) * 100 : 0,
       }))
       .sort((a, b) => b.totalSales - a.totalSales);
-  }, [items, receiptSetsByDepartment]);
+  }, [items, receiptSetsByDepartment, voidReceiptSetsByDepartment, voidedItems]);
+
+  const departmentDetailsByDepartment = useMemo<Record<string, DepartmentDetails>>(() => {
+    const details: Record<string, DepartmentDetails> = {};
+    const activeGroups: Record<
+      string,
+      DepartmentItemDetailRow & { department: string; receiptIds: Set<string> }
+    > = {};
+
+    function ensureDepartment(department: string) {
+      if (!details[department]) {
+        details[department] = { active: [], voided: [] };
+      }
+      return details[department];
+    }
+
+    for (const item of items) {
+      const department = item.department_ar.trim() || "غير محدد";
+      const productName = item.product_name_ar.trim() || "قطعة بدون اسم";
+      const key = `${department}__${productName}`;
+      const quantity = Number(item.quantity) || 0;
+      const totalCost = (Number(item.cost) || 0) * quantity;
+      const totalSales = Number(item.line_total) || 0;
+
+      ensureDepartment(department);
+
+      if (!activeGroups[key]) {
+        activeGroups[key] = {
+          productName,
+          department,
+          receiptCount: 0,
+          quantity: 0,
+          totalCost: 0,
+          totalSales: 0,
+          profit: 0,
+          marginPercent: 0,
+          receiptIds: new Set<string>(),
+        };
+      }
+
+      activeGroups[key].receiptIds.add(item.sale_id);
+      activeGroups[key].quantity += quantity;
+      activeGroups[key].totalCost += totalCost;
+      activeGroups[key].totalSales += totalSales;
+      activeGroups[key].profit += totalSales - totalCost;
+    }
+
+    for (const group of Object.values(activeGroups)) {
+      const row: DepartmentItemDetailRow = {
+        productName: group.productName,
+        receiptCount: group.receiptIds.size,
+        quantity: group.quantity,
+        totalCost: group.totalCost,
+        totalSales: group.totalSales,
+        profit: group.profit,
+        marginPercent: group.totalSales > 0 ? (group.profit / group.totalSales) * 100 : 0,
+      };
+
+      ensureDepartment(group.department).active.push(row);
+    }
+
+    for (const item of voidedItems) {
+      const department = item.department_ar.trim() || "غير محدد";
+      const sale = voidedSaleById.get(item.sale_id);
+
+      ensureDepartment(department).voided.push({
+        id: item.id,
+        saleNumber: sale?.sale_number ?? null,
+        productName: item.product_name_ar.trim() || "قطعة بدون اسم",
+        quantity: Number(item.quantity) || 0,
+        salePrice: Number(item.sale_price) || 0,
+        lineTotal: Number(item.line_total) || 0,
+        paymentMethod: sale?.payment_method || "cash",
+        createdAt: sale?.created_at || item.created_at,
+      });
+    }
+
+    for (const detail of Object.values(details)) {
+      detail.active.sort((a, b) => b.totalSales - a.totalSales);
+      detail.voided.sort(
+        (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+      );
+    }
+
+    return details;
+  }, [items, voidedItems, voidedSaleById]);
 
   const itemRows = useMemo<ItemReportRow[]>(() => {
     const groups: Record<string, ItemReportRow> = {};
@@ -1026,6 +1265,22 @@ export default function PartPOSReportsPage() {
     (sum, row) => sum + Number(row.cash_expenses || 0),
     0,
   );
+
+  const totalVoidedReceiptCount = useMemo(() => {
+    return new Set(voidedItems.map((item) => item.sale_id)).size;
+  }, [voidedItems]);
+
+  const totalVoidedDepartmentSales = voidedItems.reduce(
+    (sum, item) => sum + Number(item.line_total || 0),
+    0,
+  );
+
+  function toggleDepartment(department: string) {
+    setExpandedDepartments((current) => ({
+      ...current,
+      [department]: !current[department],
+    }));
+  }
 
   function openVoidExpenseConfirm(expense: ExpenseRow) {
     if (isReportsOnlyAccess) return;
@@ -1591,6 +1846,14 @@ export default function PartPOSReportsPage() {
             <StatBox label="إجمالي البيع" value={`${money(totalSales)} د.أ`} tone="red" />
             <StatBox label="إجمالي الربح" value={`${money(totalProfit)} د.أ`} tone="green" />
             <StatBox label="هامش الربح" value={percent(totalMarginPercent)} />
+            {mode === "department" ? (
+              <StatBox
+                label="VOID"
+                value={totalVoidedReceiptCount}
+                tone="orange"
+                small={`${money(totalVoidedDepartmentSales)} د.أ غير محسوبة`}
+              />
+            ) : null}
           </div>
         ) : null}
 
@@ -1666,23 +1929,133 @@ export default function PartPOSReportsPage() {
               <div className="emptyState">لا يوجد مبيعات ضمن الفترة المحددة.</div>
             ) : (
               <div className="recordList">
-                {departmentRows.map((row) => (
-                  <article className="recordCard" key={row.department}>
-                    <div className="recordMain">
-                      <p>القسم</p>
-                      <h3>{row.department}</h3>
-                    </div>
-                    <div className="detailGrid">
-                      <DetailCell label="عدد الفواتير" value={row.receiptCount} />
-                      <DetailCell label="عدد السطور" value={row.itemLines} />
-                      <DetailCell label="الكمية" value={money(row.quantity)} />
-                      <DetailCell label="إجمالي التكلفة" value={`${money(row.totalCost)} د.أ`} />
-                      <DetailCell label="إجمالي البيع" value={`${money(row.totalSales)} د.أ`} tone="red" />
-                      <DetailCell label="الربح" value={`${money(row.profit)} د.أ`} tone={row.profit >= 0 ? "green" : "red"} />
-                      <DetailCell label="الهامش" value={percent(row.marginPercent)} />
-                    </div>
-                  </article>
-                ))}
+                {departmentRows.map((row) => {
+                  const expanded = Boolean(expandedDepartments[row.department]);
+                  const details = departmentDetailsByDepartment[row.department] ?? {
+                    active: [],
+                    voided: [],
+                  };
+
+                  return (
+                    <article
+                      className={
+                        expanded
+                          ? "recordCard departmentRecord expandedDepartmentRecord"
+                          : "recordCard departmentRecord"
+                      }
+                      key={row.department}
+                    >
+                      <button
+                        type="button"
+                        className="departmentToggleButton"
+                        onClick={() => toggleDepartment(row.department)}
+                      >
+                        <div className="recordMain">
+                          <p>القسم</p>
+                          <h3>{row.department}</h3>
+                          <span className="expandHint">
+                            {expanded
+                              ? reportsOnlyIsEnglish
+                                ? "Hide details"
+                                : "إخفاء التفاصيل"
+                              : reportsOnlyIsEnglish
+                                ? "Tap to view items and VOID receipts"
+                                : "اضغط لعرض القطع والفواتير الملغاة"}
+                          </span>
+                        </div>
+
+                        <div className="detailGrid">
+                          <DetailCell label="عدد الفواتير" value={row.receiptCount} />
+                          <DetailCell label="عدد السطور" value={row.itemLines} />
+                          <DetailCell label="الكمية" value={money(row.quantity)} />
+                          <DetailCell label="إجمالي التكلفة" value={`${money(row.totalCost)} د.أ`} />
+                          <DetailCell label="إجمالي البيع" value={`${money(row.totalSales)} د.أ`} tone="red" />
+                          <DetailCell label="الربح" value={`${money(row.profit)} د.أ`} tone={row.profit >= 0 ? "green" : "red"} />
+                          <DetailCell label="الهامش" value={percent(row.marginPercent)} />
+                          <DetailCell
+                            label="VOID داخل القسم"
+                            value={row.voidReceiptCount}
+                            tone={row.voidReceiptCount > 0 ? "orange" : undefined}
+                          />
+                        </div>
+                      </button>
+
+                      {expanded ? (
+                        <div className="departmentExpandPanel">
+                          <div className="departmentDetailSection">
+                            <div className="departmentDetailHeader">
+                              <h4>{reportsOnlyIsEnglish ? "Items sold in this department" : "القطع المباعة في هذا القسم"}</h4>
+                              <span>{reportsOnlyIsEnglish ? `${details.active.length} items` : `${details.active.length} قطع`}</span>
+                            </div>
+
+                            {details.active.length === 0 ? (
+                              <div className="emptyState smallEmptyState">
+                                {reportsOnlyIsEnglish
+                                  ? "No active sold items in this department."
+                                  : "لا يوجد قطع مباعة غير ملغاة في هذا القسم."}
+                              </div>
+                            ) : (
+                              <div className="departmentItemList">
+                                {details.active.map((item) => (
+                                  <div className="departmentItemRow" key={item.productName}>
+                                    <div>
+                                      <strong>{item.productName}</strong>
+                                      <span>
+                                        {item.receiptCount} فواتير • كمية {money(item.quantity)}
+                                      </span>
+                                    </div>
+                                    <div className="departmentItemNumbers">
+                                      <strong>{money(item.totalSales)} د.أ</strong>
+                                      <span>
+                                        ربح {money(item.profit)} د.أ • هامش {percent(item.marginPercent)}
+                                      </span>
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+
+                          <div className="departmentDetailSection voidDetailSection">
+                            <div className="departmentDetailHeader">
+                              <h4>{reportsOnlyIsEnglish ? "VOID receipts in this department" : "VOID / الفواتير الملغاة في هذا القسم"}</h4>
+                              <span>{reportsOnlyIsEnglish ? `${details.voided.length} void lines` : `${details.voided.length} سطور ملغاة`}</span>
+                            </div>
+
+                            {details.voided.length === 0 ? (
+                              <div className="emptyState smallEmptyState">
+                                {reportsOnlyIsEnglish
+                                  ? "No VOID receipts in this department for the selected period."
+                                  : "لا يوجد VOID داخل هذا القسم ضمن الفترة المختارة."}
+                              </div>
+                            ) : (
+                              <div className="departmentItemList">
+                                {details.voided.map((voidItem) => (
+                                  <div className="departmentItemRow voidItemRow" key={voidItem.id}>
+                                    <div>
+                                      <strong>{voidItem.productName}</strong>
+                                      <span>
+                                        فاتورة {voidItem.saleNumber ?? "—"} •{" "}
+                                        {formatArabicDateTime(voidItem.createdAt)} •{" "}
+                                        {voidItem.paymentMethod === "credit" ? "ائتمان" : "نقداً"}
+                                      </span>
+                                    </div>
+                                    <div className="departmentItemNumbers">
+                                      <strong>{money(voidItem.lineTotal)} د.أ</strong>
+                                      <span>
+                                        كمية {money(voidItem.quantity)} • سعر {money(voidItem.salePrice)} د.أ
+                                      </span>
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      ) : null}
+                    </article>
+                  );
+                })}
               </div>
             )
           ) : null}
@@ -2752,6 +3125,136 @@ export default function PartPOSReportsPage() {
           background: #ffffff;
         }
 
+        .departmentRecord {
+          display: block;
+          padding: 0;
+          overflow: hidden;
+        }
+
+        .departmentToggleButton {
+          width: 100%;
+          display: grid;
+          grid-template-columns: minmax(220px, 1.1fr) minmax(0, 3fr);
+          gap: 16px;
+          border: 0;
+          padding: 16px;
+          background: transparent;
+          color: inherit;
+          text-align: right;
+          cursor: pointer;
+        }
+
+        .departmentToggleButton:hover {
+          background: #f8fafc;
+        }
+
+        .expandedDepartmentRecord {
+          border-color: #bfdbfe;
+          box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.08);
+        }
+
+        .expandHint {
+          display: inline-flex;
+          margin-top: 10px;
+          border-radius: 999px;
+          padding: 6px 10px;
+          background: #eff6ff;
+          color: #1d4ed8;
+          font-weight: 900;
+          font-size: 12px;
+        }
+
+        .departmentExpandPanel {
+          border-top: 1px solid #e5e7eb;
+          padding: 16px;
+          background: #f8fafc;
+          display: grid;
+          gap: 14px;
+        }
+
+        .departmentDetailSection {
+          border: 1px solid #e5e7eb;
+          border-radius: 16px;
+          background: white;
+          overflow: hidden;
+        }
+
+        .voidDetailSection {
+          border-color: #fed7aa;
+          background: #fffaf3;
+        }
+
+        .departmentDetailHeader {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 12px;
+          padding: 14px 16px;
+          border-bottom: 1px solid #e5e7eb;
+        }
+
+        .departmentDetailHeader h4 {
+          margin: 0;
+          font-size: 16px;
+        }
+
+        .departmentDetailHeader span {
+          color: #6b7280;
+          font-size: 13px;
+          font-weight: 900;
+        }
+
+        .departmentItemList {
+          display: grid;
+        }
+
+        .departmentItemRow {
+          display: grid;
+          grid-template-columns: minmax(0, 1.4fr) minmax(180px, 0.8fr);
+          gap: 12px;
+          padding: 14px 16px;
+          border-bottom: 1px solid #f3f4f6;
+        }
+
+        .departmentItemRow:last-child {
+          border-bottom: 0;
+        }
+
+        .departmentItemRow strong {
+          display: block;
+          margin-bottom: 4px;
+          color: #111827;
+        }
+
+        .departmentItemRow span {
+          color: #6b7280;
+          font-size: 13px;
+          font-weight: 800;
+          line-height: 1.45;
+        }
+
+        .departmentItemNumbers {
+          text-align: left;
+        }
+
+        .departmentItemNumbers strong {
+          font-size: 16px;
+        }
+
+        .voidItemRow {
+          background: #fff7ed;
+        }
+
+        .voidItemRow strong {
+          color: #9a3412;
+        }
+
+        .smallEmptyState {
+          margin: 14px;
+          padding: 12px;
+          font-size: 13px;
+        }
+
         .profitLossCard {
           border-color: #bbf7d0;
           background: #fbfffd;
@@ -2838,8 +3341,17 @@ export default function PartPOSReportsPage() {
             grid-template-columns: repeat(2, minmax(0, 1fr));
           }
 
-          .recordCard {
+          .recordCard,
+          .departmentToggleButton {
             grid-template-columns: 1fr;
+          }
+
+          .departmentItemRow {
+            grid-template-columns: 1fr;
+          }
+
+          .departmentItemNumbers {
+            text-align: right;
           }
 
           .recordMain {
