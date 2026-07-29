@@ -46,6 +46,7 @@ type CashExpenseRow = {
   amount: number;
   paid_by: "cash" | "credit";
   created_at: string;
+  source_kind?: "expense" | "credit_expense_payment";
 };
 
 type CashCountStatus = "short" | "over" | "matched";
@@ -321,12 +322,46 @@ export default function PartPOSEndOfDayReportPage() {
         amount: Number(expense.amount ?? 0),
         paid_by: "cash",
         created_at: String(expense.created_at),
+        source_kind: "expense",
       }));
+
+      const { data: cashExpensePaymentRows, error: cashExpensePaymentsError } = await supabase
+        .from("partpos_expense_payments")
+        .select("id, payment_number, expense_number, expense_type, company_name, details, amount, paid_by, status, created_at")
+        .eq("paid_by", "cash")
+        .gte("created_at", start.toISOString())
+        .lt("created_at", end.toISOString())
+        .or("status.is.null,status.neq.voided")
+        .order("created_at", { ascending: false })
+        .limit(5000);
+
+      if (cashExpensePaymentsError) throw cashExpensePaymentsError;
+
+      const cleanCashExpensePayments: CashExpenseRow[] = (cashExpensePaymentRows ?? []).map(
+        (payment) => ({
+          id: `credit-payment-${String(payment.id)}`,
+          expense_number:
+            payment.expense_number === null || payment.expense_number === undefined
+              ? null
+              : Number(payment.expense_number),
+          expense_type: payment.expense_type === "utility" ? "utility" : "vendor",
+          details: String(payment.details ?? "دفعة على ائتمان مورد"),
+          company_name: String(payment.company_name ?? ""),
+          amount: Number(payment.amount ?? 0),
+          paid_by: "cash",
+          created_at: String(payment.created_at),
+          source_kind: "credit_expense_payment",
+        }),
+      );
+
+      const allCashExpenses = [...cleanCashExpenses, ...cleanCashExpensePayments].sort(
+        (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
+      );
 
       setSales(cleanSales);
       setItems(cleanItems);
       setCreditPayments(cleanCreditPayments);
-      setCashExpenses(cleanCashExpenses);
+      setCashExpenses(allCashExpenses);
       setLastUpdated(
         new Date().toLocaleTimeString("ar-JO", {
           hour: "2-digit",
@@ -812,11 +847,11 @@ export default function PartPOSEndOfDayReportPage() {
         <section className="sectionBlock cashExpensesSection">
           <div className="sectionTitle">
             <h3>المصروفات النقدية من الصندوق</h3>
-            <p>هذه المبالغ خرجت نقداً اليوم وتخصم من الكاش المتوقع.</p>
+            <p>هذه المبالغ خرجت نقداً اليوم وتخصم من الكاش المتوقع، وتشمل دفعات ائتمان الموردين النقدية.</p>
           </div>
 
           {cashExpenses.length === 0 ? (
-            <div className="emptyState">لا يوجد مصروفات نقدية لهذا اليوم.</div>
+            <div className="emptyState">لا يوجد مصروفات أو دفعات ائتمان نقدية لهذا اليوم.</div>
           ) : (
             <div className="receiptsList">
               {cashExpenses.map((expense) => (
@@ -825,9 +860,11 @@ export default function PartPOSEndOfDayReportPage() {
                     <strong>{expense.expense_number ? `قيد ${expense.expense_number}` : "مصروف نقدي"}</strong>
                     <span>
                       {formatArabicTime(expense.created_at)} •{" "}
-                      {expense.expense_type === "vendor"
-                        ? expense.company_name || "مورد غير محدد"
-                        : expense.details || "مصروف بدون تفاصيل"}
+                      {expense.source_kind === "credit_expense_payment"
+                        ? `دفعة ائتمان مورد • ${expense.company_name || expense.details || "مورد غير محدد"}`
+                        : expense.expense_type === "vendor"
+                          ? expense.company_name || "مورد غير محدد"
+                          : expense.details || "مصروف بدون تفاصيل"}
                     </span>
                   </div>
                   <div>

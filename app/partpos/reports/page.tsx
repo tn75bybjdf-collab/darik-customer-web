@@ -65,6 +65,21 @@ type ExpenseRow = {
   created_at: string;
 };
 
+type ExpensePaymentRow = {
+  id: string;
+  payment_number: number | null;
+  expense_id: string;
+  expense_number: number | null;
+  expense_type: "utility" | "vendor";
+  company_name: string;
+  details: string;
+  amount: number;
+  paid_by: "cash" | "account";
+  status: string;
+  voided_at: string | null;
+  created_at: string;
+};
+
 type DailyCountRow = {
   id: string;
   report_date: string;
@@ -155,6 +170,15 @@ type VendorCreditRow = {
   outstandingSince: string;
   oldestExpenseNumber: number | null;
   newestExpenseNumber: number | null;
+};
+
+type CreditExpenseBalanceRow = {
+  expense: ExpenseRow;
+  paidAmount: number;
+  remainingAmount: number;
+  activePaymentCount: number;
+  paymentEverCount: number;
+  payments: ExpensePaymentRow[];
 };
 
 function money(value: number) {
@@ -474,6 +498,32 @@ function DetailCell({
   );
 }
 
+function cleanExpensePayment(payment: any): ExpensePaymentRow {
+  return {
+    id: String(payment.id ?? ""),
+    payment_number:
+      payment.payment_number === null || payment.payment_number === undefined
+        ? null
+        : Number(payment.payment_number),
+    expense_id: String(payment.expense_id ?? ""),
+    expense_number:
+      payment.expense_number === null || payment.expense_number === undefined
+        ? null
+        : Number(payment.expense_number),
+    expense_type: payment.expense_type === "utility" ? "utility" : "vendor",
+    company_name: String(payment.company_name ?? ""),
+    details: String(payment.details ?? ""),
+    amount: Number(payment.amount ?? 0),
+    paid_by: payment.paid_by === "account" ? "account" : "cash",
+    status: String(payment.status ?? ""),
+    voided_at:
+      payment.voided_at === null || payment.voided_at === undefined
+        ? null
+        : String(payment.voided_at),
+    created_at: String(payment.created_at ?? ""),
+  };
+}
+
 export default function PartPOSReportsPage() {
   const [mode, setMode] = useState<ReportMode>("department");
   const [isReportsOnlyAccess, setIsReportsOnlyAccess] = useState(false);
@@ -490,6 +540,9 @@ export default function PartPOSReportsPage() {
   const [expenses, setExpenses] = useState<ExpenseRow[]>([]);
   const [voidedExpenses, setVoidedExpenses] = useState<ExpenseRow[]>([]);
   const [vendorCreditExpenses, setVendorCreditExpenses] = useState<ExpenseRow[]>([]);
+  const [expensePayments, setExpensePayments] = useState<ExpensePaymentRow[]>([]);
+  const [voidedExpensePayments, setVoidedExpensePayments] = useState<ExpensePaymentRow[]>([]);
+  const [allExpensePayments, setAllExpensePayments] = useState<ExpensePaymentRow[]>([]);
   const [dailyCounts, setDailyCounts] = useState<DailyCountRow[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -498,6 +551,16 @@ export default function PartPOSReportsPage() {
   const [voidExpensePin, setVoidExpensePin] = useState("");
   const [voidExpenseError, setVoidExpenseError] = useState("");
   const [voidingExpenseId, setVoidingExpenseId] = useState<string | null>(null);
+  const [payExpense, setPayExpense] = useState<ExpenseRow | null>(null);
+  const [payExpenseAmount, setPayExpenseAmount] = useState("");
+  const [payExpensePaidBy, setPayExpensePaidBy] = useState<"cash" | "account">("cash");
+  const [payExpensePin, setPayExpensePin] = useState("");
+  const [payExpenseError, setPayExpenseError] = useState("");
+  const [payingExpenseId, setPayingExpenseId] = useState<string | null>(null);
+  const [voidExpensePayment, setVoidExpensePayment] = useState<ExpensePaymentRow | null>(null);
+  const [voidExpensePaymentPin, setVoidExpensePaymentPin] = useState("");
+  const [voidExpensePaymentError, setVoidExpensePaymentError] = useState("");
+  const [voidingExpensePaymentId, setVoidingExpensePaymentId] = useState<string | null>(null);
   const [lastUpdated, setLastUpdated] = useState("");
 
   const supabase = useMemo(() => {
@@ -785,6 +848,51 @@ export default function PartPOSReportsPage() {
         created_at: String(expense.created_at ?? ""),
       }));
 
+      const paymentSelect =
+        "id, payment_number, expense_id, expense_number, expense_type, company_name, details, amount, paid_by, status, voided_at, created_at";
+
+      const { data: paymentRowsRaw, error: paymentError } = await supabase
+        .from("partpos_expense_payments")
+        .select(paymentSelect)
+        .gte("created_at", start.toISOString())
+        .lt("created_at", end.toISOString())
+        .or("status.is.null,status.neq.voided")
+        .order("created_at", { ascending: false })
+        .limit(50000);
+
+      if (paymentError) throw paymentError;
+
+      const cleanExpensePayments: ExpensePaymentRow[] = ((paymentRowsRaw ?? []) as any[]).map(
+        cleanExpensePayment,
+      );
+
+      const { data: voidedPaymentRowsRaw, error: voidedPaymentError } = await supabase
+        .from("partpos_expense_payments")
+        .select(paymentSelect)
+        .eq("status", "voided")
+        .gte("created_at", start.toISOString())
+        .lt("created_at", end.toISOString())
+        .order("voided_at", { ascending: false })
+        .limit(50000);
+
+      if (voidedPaymentError) throw voidedPaymentError;
+
+      const cleanVoidedExpensePayments: ExpensePaymentRow[] = (
+        (voidedPaymentRowsRaw ?? []) as any[]
+      ).map(cleanExpensePayment);
+
+      const { data: allPaymentRowsRaw, error: allPaymentError } = await supabase
+        .from("partpos_expense_payments")
+        .select(paymentSelect)
+        .order("created_at", { ascending: false })
+        .limit(50000);
+
+      if (allPaymentError) throw allPaymentError;
+
+      const cleanAllExpensePayments: ExpensePaymentRow[] = ((allPaymentRowsRaw ?? []) as any[])
+        .map(cleanExpensePayment)
+        .filter((payment) => payment.expense_id);
+
       const { data: vendorCreditRowsRaw, error: vendorCreditError } = await supabase
         .from("partpos_expenses")
         .select("id, expense_number, expense_type, details, company_name, amount, paid_by, status, voided_at, created_at")
@@ -857,6 +965,9 @@ export default function PartPOSReportsPage() {
       setExpenses(cleanExpenses);
       setVoidedExpenses(cleanVoidedExpenses);
       setVendorCreditExpenses(cleanVendorCreditExpenses);
+      setExpensePayments(cleanExpensePayments);
+      setVoidedExpensePayments(cleanVoidedExpensePayments);
+      setAllExpensePayments(cleanAllExpensePayments);
       setDailyCounts(cleanDailyCounts);
       setLastUpdated(
         new Date().toLocaleTimeString("ar-JO", {
@@ -1173,10 +1284,72 @@ export default function PartPOSReportsPage() {
     );
   }, [creditSales]);
 
+  const activeExpensePaymentsAll = useMemo(() => {
+    return allExpensePayments.filter((payment) => payment.status !== "voided");
+  }, [allExpensePayments]);
+
+  const paymentHistoryByExpenseId = useMemo(() => {
+    const groups: Record<string, ExpensePaymentRow[]> = {};
+
+    for (const payment of allExpensePayments) {
+      if (!payment.expense_id) continue;
+      if (!groups[payment.expense_id]) groups[payment.expense_id] = [];
+      groups[payment.expense_id].push(payment);
+    }
+
+    for (const key of Object.keys(groups)) {
+      groups[key].sort(
+        (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
+      );
+    }
+
+    return groups;
+  }, [allExpensePayments]);
+
+  const paidAmountByExpenseId = useMemo(() => {
+    const totals: Record<string, number> = {};
+
+    for (const payment of activeExpensePaymentsAll) {
+      if (!payment.expense_id) continue;
+      totals[payment.expense_id] =
+        Number(totals[payment.expense_id] || 0) + Number(payment.amount || 0);
+    }
+
+    return totals;
+  }, [activeExpensePaymentsAll]);
+
+  const vendorCreditExpenseBalanceRows = useMemo<CreditExpenseBalanceRow[]>(() => {
+    return vendorCreditExpenses
+      .map((expense) => {
+        const payments = paymentHistoryByExpenseId[expense.id] ?? [];
+        const activePayments = payments.filter((payment) => payment.status !== "voided");
+        const paidAmount = activePayments.reduce(
+          (sum, payment) => sum + Number(payment.amount || 0),
+          0,
+        );
+        const remainingAmount = Math.max(Number(expense.amount || 0) - paidAmount, 0);
+
+        return {
+          expense,
+          paidAmount,
+          remainingAmount,
+          activePaymentCount: activePayments.length,
+          paymentEverCount: payments.length,
+          payments,
+        };
+      })
+      .filter((row) => row.remainingAmount > 0.0001)
+      .sort(
+        (a, b) =>
+          new Date(a.expense.created_at).getTime() - new Date(b.expense.created_at).getTime(),
+      );
+  }, [vendorCreditExpenses, paymentHistoryByExpenseId]);
+
   const vendorCreditRows = useMemo<VendorCreditRow[]>(() => {
     const groups: Record<string, VendorCreditRow> = {};
 
-    for (const expense of vendorCreditExpenses) {
+    for (const balance of vendorCreditExpenseBalanceRows) {
+      const expense = balance.expense;
       const companyName = expense.company_name.trim() || "مورد غير محدد";
       const companyKey = companyName.toLowerCase();
 
@@ -1194,7 +1367,7 @@ export default function PartPOSReportsPage() {
 
       const group = groups[companyKey];
       group.entryCount += 1;
-      group.amountOwed += Number(expense.amount || 0);
+      group.amountOwed += balance.remainingAmount;
 
       if (new Date(expense.created_at).getTime() < new Date(group.outstandingSince).getTime()) {
         group.outstandingSince = expense.created_at;
@@ -1213,7 +1386,7 @@ export default function PartPOSReportsPage() {
       (a, b) =>
         new Date(a.outstandingSince).getTime() - new Date(b.outstandingSince).getTime(),
     );
-  }, [vendorCreditExpenses]);
+  }, [vendorCreditExpenseBalanceRows]);
 
   const totalCost = items.reduce(
     (sum, item) => sum + (Number(item.cost) || 0) * (Number(item.quantity) || 0),
@@ -1233,8 +1406,19 @@ export default function PartPOSReportsPage() {
     0,
   );
 
-  const totalExpenses = expenses.reduce((sum, row) => sum + Number(row.amount || 0), 0);
+  const cashExpensesForPeriod = expenses
+    .filter((row) => row.paid_by === "cash")
+    .reduce((sum, row) => sum + Number(row.amount || 0), 0);
+  const creditExpensePaymentsForPeriod = expensePayments.reduce(
+    (sum, row) => sum + Number(row.amount || 0),
+    0,
+  );
+  const totalExpenses = cashExpensesForPeriod + creditExpensePaymentsForPeriod;
   const totalVoidedExpenses = voidedExpenses.reduce(
+    (sum, row) => sum + Number(row.amount || 0),
+    0,
+  );
+  const totalVoidedExpensePayments = voidedExpensePayments.reduce(
     (sum, row) => sum + Number(row.amount || 0),
     0,
   );
@@ -1247,7 +1431,7 @@ export default function PartPOSReportsPage() {
   const profitLossLabel = profitLossNet >= 0 ? "ربح" : "خسارة";
 
   const utilityExpenses = expenses
-    .filter((row) => row.expense_type === "utility")
+    .filter((row) => row.expense_type === "utility" && row.paid_by === "cash")
     .reduce((sum, row) => sum + Number(row.amount || 0), 0);
   const vendorCashExpenses = expenses
     .filter((row) => row.expense_type === "vendor" && row.paid_by === "cash")
@@ -1295,8 +1479,150 @@ export default function PartPOSReportsPage() {
     }));
   }
 
+  function creditExpenseBalance(expense: ExpenseRow) {
+    const paidAmount = Number(paidAmountByExpenseId[expense.id] || 0);
+    return {
+      paidAmount,
+      remainingAmount: Math.max(Number(expense.amount || 0) - paidAmount, 0),
+      paymentEverCount: paymentHistoryByExpenseId[expense.id]?.length ?? 0,
+    };
+  }
+
+  function openPayExpensePopup(expense: ExpenseRow) {
+    const balance = creditExpenseBalance(expense);
+    if (expense.paid_by !== "credit" || balance.remainingAmount <= 0) return;
+
+    setPayExpense(expense);
+    setPayExpenseAmount(money(balance.remainingAmount));
+    setPayExpensePaidBy("cash");
+    setPayExpensePin("");
+    setPayExpenseError("");
+    setActionMessage("");
+  }
+
+  function closePayExpensePopup() {
+    if (payingExpenseId) return;
+
+    setPayExpense(null);
+    setPayExpenseAmount("");
+    setPayExpensePin("");
+    setPayExpenseError("");
+  }
+
+  async function confirmPayExpense() {
+    if (!supabase || !payExpense) return;
+
+    const amount = Number(payExpenseAmount);
+    const balance = creditExpenseBalance(payExpense);
+
+    if (!Number.isFinite(amount) || amount <= 0) {
+      setPayExpenseError("أدخل مبلغ دفع صحيح.");
+      return;
+    }
+
+    if (amount > balance.remainingAmount + 0.0001) {
+      setPayExpenseError(`المبلغ أكبر من المتبقي: ${money(balance.remainingAmount)} د.أ`);
+      return;
+    }
+
+    if (payExpensePin !== EXPENSE_VOID_PIN) {
+      setPayExpenseError("الرمز غير صحيح. أدخل رمز الدخول لتسجيل الدفعة.");
+      setPayExpensePin("");
+      return;
+    }
+
+    setPayingExpenseId(payExpense.id);
+    setPayExpenseError("");
+
+    try {
+      const { error: insertError } = await supabase.from("partpos_expense_payments").insert({
+        expense_id: payExpense.id,
+        expense_number: payExpense.expense_number,
+        expense_type: payExpense.expense_type,
+        company_name: payExpense.company_name || "مورد غير محدد",
+        details: payExpense.details || "دفعة على ائتمان مورد",
+        amount,
+        paid_by: payExpensePaidBy,
+        status: "active",
+      });
+
+      if (insertError) throw insertError;
+
+      setActionMessage(
+        `تم تسجيل دفعة ${money(amount)} د.أ على قيد ${payExpense.expense_number ?? "—"}.`,
+      );
+      setPayExpense(null);
+      setPayExpenseAmount("");
+      setPayExpensePin("");
+      await loadReports();
+    } catch (caught) {
+      setPayExpenseError(`خطأ Supabase: ${readSupabaseError(caught)}`);
+    } finally {
+      setPayingExpenseId(null);
+    }
+  }
+
+  function openVoidExpensePaymentConfirm(payment: ExpensePaymentRow) {
+    if (isReportsOnlyAccess) return;
+
+    setVoidExpensePayment(payment);
+    setVoidExpensePaymentPin("");
+    setVoidExpensePaymentError("");
+    setActionMessage("");
+  }
+
+  function closeVoidExpensePaymentConfirm() {
+    if (voidingExpensePaymentId) return;
+
+    setVoidExpensePayment(null);
+    setVoidExpensePaymentPin("");
+    setVoidExpensePaymentError("");
+  }
+
+  async function confirmVoidExpensePayment() {
+    if (!supabase || !voidExpensePayment) return;
+
+    if (voidExpensePaymentPin !== EXPENSE_VOID_PIN) {
+      setVoidExpensePaymentError("الرمز غير صحيح. أدخل رمز الدخول لإلغاء الدفعة.");
+      setVoidExpensePaymentPin("");
+      return;
+    }
+
+    setVoidingExpensePaymentId(voidExpensePayment.id);
+    setVoidExpensePaymentError("");
+
+    try {
+      const { error: updateError } = await supabase
+        .from("partpos_expense_payments")
+        .update({
+          status: "voided",
+          voided_at: new Date().toISOString(),
+        })
+        .eq("id", voidExpensePayment.id);
+
+      if (updateError) throw updateError;
+
+      setActionMessage(`تم إلغاء دفعة رقم ${voidExpensePayment.payment_number ?? "—"}.`);
+      setVoidExpensePayment(null);
+      setVoidExpensePaymentPin("");
+      await loadReports();
+    } catch (caught) {
+      setVoidExpensePaymentError(`خطأ Supabase: ${readSupabaseError(caught)}`);
+    } finally {
+      setVoidingExpensePaymentId(null);
+    }
+  }
+
   function openVoidExpenseConfirm(expense: ExpenseRow) {
     if (isReportsOnlyAccess) return;
+
+    const balance = creditExpenseBalance(expense);
+    if (expense.paid_by === "credit" && balance.paymentEverCount > 0) {
+      setActionMessage(
+        "لا يمكن إلغاء هذا المصروف لأنه يوجد دفعات عليه. قم بإلغاء الدفعات أولاً، وبعد وجود سجل دفعات سابق سيبقى القيد محفوظاً للمراجعة.",
+      );
+      return;
+    }
 
     setVoidExpense(expense);
     setVoidExpensePin("");
@@ -1354,9 +1680,9 @@ export default function PartPOSReportsPage() {
         : mode === "credit"
           ? creditCustomerRows.length
           : mode === "expenses"
-            ? expenses.length
+            ? expenses.length + expensePayments.length
             : mode === "vendorCredit"
-              ? vendorCreditRows.length
+              ? vendorCreditExpenseBalanceRows.length
               : mode === "dailyCount"
                 ? dailyCounts.length
                 : 1;
@@ -1886,15 +2212,30 @@ export default function PartPOSReportsPage() {
 
         {mode === "expenses" ? (
           <div className="summaryGrid four">
-            <StatBox label="إجمالي المصروفات" value={`${money(totalExpenses)} د.أ`} tone="red" />
-            <StatBox label="خدمات / مرافق" value={`${money(utilityExpenses)} د.أ`} />
-            <StatBox label="موردين نقداً" value={`${money(vendorCashExpenses)} د.أ`} />
-            <StatBox label="موردين على الائتمان" value={`${money(vendorCreditExpensesForPeriod)} د.أ`} tone="orange" />
             <StatBox
-              label="مصروفات VOID"
-              value={`${money(totalVoidedExpenses)} د.أ`}
+              label="إجمالي المصروفات المحتسبة"
+              value={`${money(totalExpenses)} د.أ`}
+              tone="red"
+              small="نقداً + دفعات ائتمان الموردين"
+            />
+            <StatBox label="خدمات / مرافق نقداً" value={`${money(utilityExpenses)} د.أ`} />
+            <StatBox label="موردين نقداً" value={`${money(vendorCashExpenses)} د.أ`} />
+            <StatBox
+              label="دفعات ائتمان الموردين"
+              value={`${money(creditExpensePaymentsForPeriod)} د.أ`}
+              tone="red"
+            />
+            <StatBox
+              label="مشتريات ائتمان جديدة"
+              value={`${money(vendorCreditExpensesForPeriod)} د.أ`}
               tone="orange"
-              small="غير محسوبة"
+              small="لا تُحسب حتى يتم الدفع"
+            />
+            <StatBox
+              label="VOID"
+              value={`${money(totalVoidedExpenses + totalVoidedExpensePayments)} د.أ`}
+              tone="orange"
+              small="مصروفات ودفعات غير محسوبة"
             />
           </div>
         ) : null}
@@ -1902,7 +2243,7 @@ export default function PartPOSReportsPage() {
         {mode === "vendorCredit" ? (
           <div className="summaryGrid three">
             <StatBox label="عدد الموردين الذين لهم رصيد" value={vendorCreditRows.length} />
-            <StatBox label="عدد قيود ائتمان الموردين" value={totalVendorCreditEntries} />
+            <StatBox label="عدد قيود ائتمان مفتوحة" value={totalVendorCreditEntries} />
             <StatBox label="إجمالي المستحق للموردين" value={`${money(totalVendorCreditOwed)} د.أ`} tone="orange" />
           </div>
         ) : null}
@@ -1931,7 +2272,7 @@ export default function PartPOSReportsPage() {
               label="إجمالي المصروفات"
               value={`${money(profitLossExpenses)} د.أ`}
               tone="red"
-              small="نقداً + على الحساب"
+              small="نقداً + دفعات ائتمان الموردين"
             />
             <StatBox
               label={profitLossLabel}
@@ -2150,6 +2491,11 @@ export default function PartPOSReportsPage() {
                       <DetailCell label="النوع" value={row.expense_type === "vendor" ? "دفع مورد" : "خدمات / مرافق"} />
                       <DetailCell label="طريقة الدفع" value={row.paid_by === "credit" ? "على الائتمان" : "نقداً"} />
                       <DetailCell label="المبلغ" value={`${money(row.amount)} د.أ`} tone={row.paid_by === "credit" ? "orange" : "red"} />
+                      <DetailCell
+                        label="المحتسب على الربح"
+                        value={row.paid_by === "credit" ? "0.00 د.أ حتى الدفع" : `${money(row.amount)} د.أ`}
+                        tone={row.paid_by === "credit" ? "orange" : "red"}
+                      />
                       <DetailCell label="التاريخ" value={formatArabicDateTime(row.created_at)} />
                     </div>
                     {!isReportsOnlyAccess && (
@@ -2166,6 +2512,66 @@ export default function PartPOSReportsPage() {
                     )}
                   </article>
                 ))}
+
+                {expensePayments.length > 0 && (
+                  <div className="expensePaymentsBlock">
+                    <div className="expensePaymentsHeader">
+                      <strong>دفعات على مصروفات ائتمان الموردين</strong>
+                      <span>{expensePayments.length} دفعات • {money(creditExpensePaymentsForPeriod)} د.أ محسوبة</span>
+                    </div>
+                    {expensePayments.map((payment) => (
+                      <article className="recordCard expensePaymentCard" key={payment.id}>
+                        <div className="recordMain">
+                          <p>{payment.payment_number ? `دفعة ${payment.payment_number}` : "دفعة بدون رقم"}</p>
+                          <h3>{payment.company_name || payment.details || "مورد غير محدد"}</h3>
+                        </div>
+                        <div className="detailGrid">
+                          <DetailCell label="على قيد" value={payment.expense_number ? `قيد ${payment.expense_number}` : "—"} />
+                          <DetailCell label="طريقة الدفع" value={payment.paid_by === "cash" ? "نقداً" : "من الحساب / البنك"} />
+                          <DetailCell label="المبلغ المحتسب" value={`${money(payment.amount)} د.أ`} tone="red" />
+                          <DetailCell label="التاريخ" value={formatArabicDateTime(payment.created_at)} />
+                        </div>
+                        {!isReportsOnlyAccess && (
+                          <div className="expenseActions noPrint">
+                            <button
+                              type="button"
+                              className="voidExpenseButton"
+                              onClick={() => openVoidExpensePaymentConfirm(payment)}
+                              disabled={voidingExpensePaymentId === payment.id}
+                            >
+                              {voidingExpensePaymentId === payment.id ? "جاري الإلغاء..." : "إلغاء الدفعة / VOID"}
+                            </button>
+                          </div>
+                        )}
+                      </article>
+                    ))}
+                  </div>
+                )}
+
+                {voidedExpensePayments.length > 0 && (
+                  <div className="voidedExpensesBlock">
+                    <div className="voidedExpensesHeader">
+                      <strong>دفعات مصروفات ملغاة / VOID</strong>
+                      <span>{voidedExpensePayments.length} دفعات • {money(totalVoidedExpensePayments)} د.أ غير محسوبة</span>
+                    </div>
+                    {voidedExpensePayments.map((payment) => (
+                      <article className="recordCard voidedExpenseCard" key={payment.id}>
+                        <div className="recordMain">
+                          <p>{payment.payment_number ? `دفعة ${payment.payment_number}` : "دفعة بدون رقم"}</p>
+                          <h3>{payment.company_name || payment.details || "مورد غير محدد"}</h3>
+                          <span className="voidBadge">VOID / ملغاة</span>
+                        </div>
+                        <div className="detailGrid">
+                          <DetailCell label="على قيد" value={payment.expense_number ? `قيد ${payment.expense_number}` : "—"} />
+                          <DetailCell label="طريقة الدفع" value={payment.paid_by === "cash" ? "نقداً" : "من الحساب / البنك"} />
+                          <DetailCell label="المبلغ الملغى" value={`${money(payment.amount)} د.أ`} tone="orange" />
+                          <DetailCell label="تاريخ الدفع" value={formatArabicDateTime(payment.created_at)} />
+                          <DetailCell label="تاريخ الإلغاء" value={payment.voided_at ? formatArabicDateTime(payment.voided_at) : "—"} />
+                        </div>
+                      </article>
+                    ))}
+                  </div>
+                )}
 
                 {voidedExpenses.length > 0 && (
                   <div className="voidedExpensesBlock">
@@ -2200,26 +2606,100 @@ export default function PartPOSReportsPage() {
           ) : null}
 
           {mode === "vendorCredit" ? (
-            vendorCreditRows.length === 0 ? (
+            vendorCreditExpenseBalanceRows.length === 0 ? (
               <div className="emptyState">لا يوجد مبالغ ائتمان مستحقة للموردين حالياً.</div>
             ) : (
               <div className="recordList">
-                {vendorCreditRows.map((row) => (
-                  <article className="recordCard" key={row.companyKey}>
-                    <div className="recordMain">
-                      <p>مورد</p>
-                      <h3>{row.companyName}</h3>
-                    </div>
-                    <div className="detailGrid">
-                      <DetailCell label="عدد القيود" value={row.entryCount} />
-                      <DetailCell label="المبلغ المستحق" value={`${money(row.amountOwed)} د.أ`} tone="orange" />
-                      <DetailCell label="مستحق منذ" value={formatArabicDateTime(row.outstandingSince)} />
-                      <DetailCell label="مدة الاستحقاق" value={`${daysOutstanding(row.outstandingSince)} يوم`} />
-                      <DetailCell label="أول قيد" value={row.oldestExpenseNumber ? `قيد ${row.oldestExpenseNumber}` : "—"} />
-                      <DetailCell label="آخر قيد" value={row.newestExpenseNumber ? `قيد ${row.newestExpenseNumber}` : "—"} />
-                    </div>
-                  </article>
-                ))}
+                {vendorCreditExpenseBalanceRows.map((row) => {
+                  const expense = row.expense;
+
+                  return (
+                    <article className="recordCard vendorCreditExpenseCard" key={expense.id}>
+                      <div className="recordMain">
+                        <p>{expense.expense_number ? `قيد ${expense.expense_number}` : "قيد ائتمان"}</p>
+                        <h3>{expense.company_name || "مورد غير محدد"}</h3>
+                        {row.paymentEverCount > 0 ? (
+                          <span className="paymentHistoryBadge">يوجد دفعات — لا يمكن إلغاء القيد</span>
+                        ) : (
+                          <span className="payableBadge">لم يتم الدفع بعد</span>
+                        )}
+                      </div>
+                      <div className="detailGrid">
+                        <DetailCell label="قيمة الشراء على الائتمان" value={`${money(expense.amount)} د.أ`} tone="orange" />
+                        <DetailCell label="المدفوع" value={`${money(row.paidAmount)} د.أ`} tone={row.paidAmount > 0 ? "green" : "plain"} />
+                        <DetailCell label="المتبقي" value={`${money(row.remainingAmount)} د.أ`} tone="red" />
+                        <DetailCell label="عدد الدفعات" value={row.activePaymentCount} />
+                        <DetailCell label="تاريخ القيد" value={formatArabicDateTime(expense.created_at)} />
+                        <DetailCell label="الوصف" value={expense.details || "—"} />
+                      </div>
+
+                      <div className="expenseActions noPrint vendorCreditActions">
+                        <button
+                          type="button"
+                          className="payExpenseButton"
+                          onClick={() => openPayExpensePopup(expense)}
+                          disabled={payingExpenseId === expense.id || row.remainingAmount <= 0}
+                        >
+                          {payingExpenseId === expense.id ? "جاري الدفع..." : "دفع على القيد / PAY"}
+                        </button>
+
+                        {!isReportsOnlyAccess ? (
+                          <button
+                            type="button"
+                            className="voidExpenseButton"
+                            onClick={() => openVoidExpenseConfirm(expense)}
+                            disabled={voidingExpenseId === expense.id || row.paymentEverCount > 0}
+                            title={
+                              row.paymentEverCount > 0
+                                ? "لا يمكن الإلغاء لأن هناك دفعات سابقة على هذا القيد"
+                                : "إلغاء القيد"
+                            }
+                          >
+                            {voidingExpenseId === expense.id ? "جاري الإلغاء..." : "إلغاء القيد / VOID"}
+                          </button>
+                        ) : null}
+                      </div>
+
+                      {row.payments.length > 0 && (
+                        <div className="paymentHistoryList">
+                          <div className="paymentHistoryTitle">سجل الدفعات</div>
+                          {row.payments.map((payment) => (
+                            <div
+                              className={
+                                payment.status === "voided"
+                                  ? "paymentHistoryRow voidedPaymentHistoryRow"
+                                  : "paymentHistoryRow"
+                              }
+                              key={payment.id}
+                            >
+                              <div>
+                                <strong>
+                                  {payment.payment_number ? `دفعة ${payment.payment_number}` : "دفعة"}
+                                  {payment.status === "voided" ? " • VOID" : ""}
+                                </strong>
+                                <span>
+                                  {formatArabicDateTime(payment.created_at)} • {payment.paid_by === "cash" ? "نقداً" : "من الحساب / البنك"}
+                                </span>
+                              </div>
+                              <div className="paymentHistoryAmount">
+                                <strong>{money(payment.amount)} د.أ</strong>
+                                {!isReportsOnlyAccess && payment.status !== "voided" && (
+                                  <button
+                                    type="button"
+                                    className="smallVoidButton noPrint"
+                                    onClick={() => openVoidExpensePaymentConfirm(payment)}
+                                  >
+                                    VOID
+                                  </button>
+                                )}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </article>
+                  );
+                })}
               </div>
             )
           ) : null}
@@ -2417,6 +2897,133 @@ export default function PartPOSReportsPage() {
           ) : null}
         </div>
       </section>
+
+      {payExpense && (
+        <div className="popupBackdrop noPrint" role="dialog" aria-modal="true">
+          <div className="voidConfirmCard">
+            <p className="eyebrow">دفع مورد / Supplier Payment</p>
+            <h2>{payExpense.company_name || "مورد غير محدد"}</h2>
+            <p className="selectedSupplierLine">
+              قيد رقم {payExpense.expense_number ?? "—"} • المتبقي{" "}
+              {money(creditExpenseBalance(payExpense).remainingAmount)} د.أ
+            </p>
+            <p className="voidConfirmText">
+              هذه الدفعة ستُحسب كمصروف في تاريخ الدفع. إذا كانت نقداً، ستخصم من صندوق نهاية اليوم.
+            </p>
+
+            <label htmlFor="pay-expense-amount">مبلغ الدفعة</label>
+            <input
+              id="pay-expense-amount"
+              value={payExpenseAmount}
+              onChange={(event) => setPayExpenseAmount(event.target.value.replace(/[^0-9.]/g, ""))}
+              placeholder="0.00"
+              inputMode="decimal"
+              autoFocus
+            />
+
+            <label htmlFor="pay-expense-method">طريقة الدفع</label>
+            <select
+              id="pay-expense-method"
+              value={payExpensePaidBy}
+              onChange={(event) =>
+                setPayExpensePaidBy(event.target.value === "account" ? "account" : "cash")
+              }
+            >
+              <option value="cash">نقداً من الصندوق</option>
+              <option value="account">من الحساب / البنك</option>
+            </select>
+
+            <label htmlFor="pay-expense-pin">رمز الدخول</label>
+            <input
+              id="pay-expense-pin"
+              value={payExpensePin}
+              onChange={(event) =>
+                setPayExpensePin(event.target.value.replace(/\D/g, "").slice(0, 6))
+              }
+              placeholder="أدخل رمز الدخول"
+              inputMode="numeric"
+              type="password"
+              onKeyDown={(event) => {
+                if (event.key === "Enter") {
+                  void confirmPayExpense();
+                }
+              }}
+            />
+
+            {payExpenseError && <div className="voidError">{payExpenseError}</div>}
+
+            <div className="voidPopupActions">
+              <button
+                type="button"
+                className="cancelVoidButton"
+                onClick={closePayExpensePopup}
+                disabled={Boolean(payingExpenseId)}
+              >
+                رجوع
+              </button>
+              <button
+                type="button"
+                className="confirmPayButton"
+                onClick={() => void confirmPayExpense()}
+                disabled={Boolean(payingExpenseId)}
+              >
+                {payingExpenseId ? "جاري الحفظ..." : "تسجيل الدفعة"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {voidExpensePayment && (
+        <div className="popupBackdrop noPrint" role="dialog" aria-modal="true">
+          <div className="voidConfirmCard">
+            <p className="eyebrow">تأكيد إلغاء دفعة</p>
+            <h2>إلغاء دفعة رقم {voidExpensePayment.payment_number ?? "—"}</h2>
+            <p className="voidConfirmText">
+              الدفعة ستبقى ظاهرة كـ VOID للمراجعة، لكنها لن تُحسب كمصروف ولن تخصم من صندوق اليوم.
+            </p>
+
+            <label htmlFor="void-expense-payment-pin">رمز الدخول</label>
+            <input
+              id="void-expense-payment-pin"
+              value={voidExpensePaymentPin}
+              onChange={(event) =>
+                setVoidExpensePaymentPin(event.target.value.replace(/\D/g, "").slice(0, 6))
+              }
+              placeholder="أدخل رمز الدخول"
+              inputMode="numeric"
+              type="password"
+              autoFocus
+              onKeyDown={(event) => {
+                if (event.key === "Enter") {
+                  void confirmVoidExpensePayment();
+                }
+              }}
+            />
+
+            {voidExpensePaymentError && <div className="voidError">{voidExpensePaymentError}</div>}
+
+            <div className="voidPopupActions">
+              <button
+                type="button"
+                className="cancelVoidButton"
+                onClick={closeVoidExpensePaymentConfirm}
+                disabled={Boolean(voidingExpensePaymentId)}
+              >
+                رجوع
+              </button>
+              <button
+                type="button"
+                className="confirmVoidButton"
+                onClick={() => void confirmVoidExpensePayment()}
+                disabled={Boolean(voidingExpensePaymentId)}
+              >
+                {voidingExpensePaymentId ? "جاري الإلغاء..." : "تأكيد إلغاء الدفعة"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {voidExpense && (
         <div className="popupBackdrop noPrint" role="dialog" aria-modal="true">
@@ -3508,6 +4115,29 @@ export default function PartPOSReportsPage() {
           padding: 12px 16px 16px;
           display: flex;
           justify-content: flex-end;
+          gap: 10px;
+          flex-wrap: wrap;
+        }
+
+        .vendorCreditActions {
+          justify-content: flex-start;
+        }
+
+        .payExpenseButton,
+        .confirmPayButton {
+          border: 1px solid #bbf7d0;
+          border-radius: 12px;
+          padding: 10px 12px;
+          background: #dcfce7;
+          color: #166534;
+          font-weight: 900;
+          cursor: pointer;
+        }
+
+        .payExpenseButton:disabled,
+        .confirmPayButton:disabled {
+          opacity: 0.55;
+          cursor: not-allowed;
         }
 
         .voidExpenseButton {
@@ -3523,6 +4153,116 @@ export default function PartPOSReportsPage() {
         .voidExpenseButton:disabled {
           opacity: 0.55;
           cursor: not-allowed;
+        }
+
+        .expensePaymentsBlock {
+          display: grid;
+          gap: 12px;
+          border: 1px solid #bbf7d0;
+          border-radius: 18px;
+          padding: 14px;
+          background: #f0fdf4;
+        }
+
+        .expensePaymentsHeader {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 12px;
+          color: #166534;
+          font-weight: 900;
+        }
+
+        .expensePaymentsHeader span {
+          color: #15803d;
+          font-size: 13px;
+        }
+
+        .expensePaymentCard {
+          border-color: #bbf7d0;
+          background: #ffffff;
+        }
+
+        .vendorCreditExpenseCard {
+          border-color: #fed7aa;
+        }
+
+        .paymentHistoryBadge,
+        .payableBadge {
+          display: inline-flex;
+          width: fit-content;
+          margin-top: 8px;
+          border-radius: 999px;
+          padding: 6px 9px;
+          font-size: 12px;
+          font-weight: 900;
+        }
+
+        .paymentHistoryBadge {
+          background: #fff7ed;
+          color: #9a3412;
+        }
+
+        .payableBadge {
+          background: #f0fdf4;
+          color: #166534;
+        }
+
+        .paymentHistoryList {
+          border-top: 1px solid #f3f4f6;
+          padding: 12px 16px 16px;
+          display: grid;
+          gap: 8px;
+        }
+
+        .paymentHistoryTitle {
+          color: #374151;
+          font-size: 13px;
+          font-weight: 900;
+        }
+
+        .paymentHistoryRow {
+          display: flex;
+          justify-content: space-between;
+          gap: 12px;
+          border: 1px solid #e5e7eb;
+          border-radius: 12px;
+          padding: 10px;
+          background: #f9fafb;
+        }
+
+        .paymentHistoryRow strong,
+        .paymentHistoryRow span {
+          display: block;
+        }
+
+        .paymentHistoryRow span {
+          margin-top: 3px;
+          color: #6b7280;
+          font-size: 12px;
+          font-weight: 800;
+        }
+
+        .paymentHistoryAmount {
+          display: grid;
+          justify-items: end;
+          gap: 5px;
+          white-space: nowrap;
+        }
+
+        .voidedPaymentHistoryRow {
+          background: #fff7ed;
+          color: #9a3412;
+        }
+
+        .smallVoidButton {
+          border: 1px solid #fecaca;
+          border-radius: 9px;
+          padding: 5px 8px;
+          background: #fee2e2;
+          color: #991b1b;
+          font-weight: 900;
+          cursor: pointer;
         }
 
         .voidedExpensesBlock {
@@ -3598,7 +4338,8 @@ export default function PartPOSReportsPage() {
           font-weight: 900;
         }
 
-        .voidConfirmCard input {
+        .voidConfirmCard input,
+        .voidConfirmCard select {
           width: 100%;
           border: 1px solid #d1d5db;
           border-radius: 14px;
@@ -3611,6 +4352,16 @@ export default function PartPOSReportsPage() {
           color: #4b5563;
           margin-bottom: 16px;
           line-height: 1.6;
+        }
+
+        .selectedSupplierLine {
+          margin: -4px 0 14px;
+          border-radius: 12px;
+          padding: 10px 12px;
+          background: #eff6ff;
+          color: #1d4ed8;
+          font-size: 13px;
+          font-weight: 900;
         }
 
         .voidError {
