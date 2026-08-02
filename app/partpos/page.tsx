@@ -64,7 +64,7 @@ type POSRow = {
   department: string;
   cost: string;
   basePrice: string;
-  price: string; // Editable sale price for this customer only.
+  price: string; // Editable sale price. After cashout, this becomes the saved last-sold price.
   quantity: string;
   total: string;
   savedProductId?: string;
@@ -557,14 +557,19 @@ export default function PartPOSPage() {
     if (!supabase || !rowIsSaveReady(row)) return row.savedProductId ?? null;
 
     const productKey = normalizeArabicText(row.productName);
-    const savedPrice = rowBasePrice(row);
+
+    // Save the LAST ACTUAL SELLING PRICE, not the automatic 30% margin price.
+    // Example:
+    // If cost is 10 and system suggests 14.29, but cashier sells for 20,
+    // the next time this product is selected it should load 20.
+    const lastSoldPrice = parseMoney(row.price);
 
     const payload = {
       product_key: productKey,
       product_name_ar: row.productName.trim(),
       department_ar: row.department.trim(),
       cost: isUsedDepartment(row.department) ? 0 : parseMoney(row.cost),
-      price: savedPrice,
+      price: lastSoldPrice,
       updated_at: new Date().toISOString(),
     };
 
