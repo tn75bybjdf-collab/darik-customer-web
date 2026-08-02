@@ -122,11 +122,26 @@ function formatArabicTime(value: string) {
 }
 
 function normalizedPaymentMethod(value: string) {
-  return String(value || "cash").toLowerCase();
+  return String(value || "cash").toLowerCase().trim();
+}
+
+function isReturnStatus(value: string) {
+  const normalized = String(value || "").toLowerCase().trim();
+  return normalized === "return" || normalized === "returned";
+}
+
+function isReturnCreditPaymentMethod(value: string) {
+  return normalizedPaymentMethod(value) === "return_credit";
+}
+
+function isReturnCashPaymentMethod(value: string) {
+  const normalized = normalizedPaymentMethod(value);
+  return normalized === "return_cash" || normalized === "return";
 }
 
 function isCreditPaymentMethod(value: string) {
-  return normalizedPaymentMethod(value) === "credit";
+  const normalized = normalizedPaymentMethod(value);
+  return normalized === "credit" || normalized === "return_credit";
 }
 
 function isCashPaymentMethod(value: string) {
@@ -134,6 +149,8 @@ function isCashPaymentMethod(value: string) {
 }
 
 function tenderLabel(value: string) {
+  if (isReturnCreditPaymentMethod(value)) return "مرتجع ائتمان";
+  if (isReturnCashPaymentMethod(value)) return "مرتجع نقدي";
   if (isCreditPaymentMethod(value)) return "ائتمان";
   if (isCashPaymentMethod(value)) return "نقداً";
   return value || "نقداً";
@@ -236,12 +253,18 @@ export default function PartPOSEndOfDayReportPage() {
             : Number(sale.sale_number),
         payment_method: String(sale.payment_method ?? "cash"),
         status: String(sale.status ?? "cashed_out"),
-        sale_total: Number(sale.sale_total ?? 0),
+        sale_total: isReturnStatus(String(sale.status ?? ""))
+          ? -Math.abs(Number(sale.sale_total ?? 0))
+          : Number(sale.sale_total ?? 0),
         amount_paid: Number(sale.amount_paid ?? 0),
         change_due: Number(sale.change_due ?? 0),
         item_count: Number(sale.item_count ?? 0),
         created_at: String(sale.created_at),
       }));
+
+      const returnSaleIds = new Set(
+        cleanSales.filter((sale) => isReturnStatus(sale.status)).map((sale) => sale.id),
+      );
 
       const saleIds = cleanSales.map((sale) => sale.id);
       let cleanItems: SaleItem[] = [];
@@ -258,16 +281,23 @@ export default function PartPOSEndOfDayReportPage() {
 
         if (itemsError) throw itemsError;
 
-        cleanItems = (itemRows ?? []).map((item) => ({
-          id: String(item.id),
-          sale_id: String(item.sale_id),
-          product_name_ar: String(item.product_name_ar ?? ""),
-          department_ar: String(item.department_ar ?? ""),
-          quantity: Number(item.quantity ?? 0),
-          cost: Number(item.cost ?? 0),
-          line_total: Number(item.line_total ?? 0),
-          created_at: String(item.created_at),
-        }));
+        cleanItems = (itemRows ?? []).map((item) => {
+          const saleId = String(item.sale_id);
+          const isReturnItem = returnSaleIds.has(saleId);
+          const rawQuantity = Number(item.quantity ?? 0);
+          const rawLineTotal = Number(item.line_total ?? 0);
+
+          return {
+            id: String(item.id),
+            sale_id: saleId,
+            product_name_ar: String(item.product_name_ar ?? ""),
+            department_ar: String(item.department_ar ?? ""),
+            quantity: isReturnItem ? -Math.abs(rawQuantity) : rawQuantity,
+            cost: Number(item.cost ?? 0),
+            line_total: isReturnItem ? -Math.abs(rawLineTotal) : rawLineTotal,
+            created_at: String(item.created_at),
+          };
+        });
       }
 
       const { data: creditPaymentRows, error: creditPaymentsError } = await supabase

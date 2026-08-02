@@ -414,6 +414,11 @@ function isAllTimeMode(mode: ReportMode) {
   return mode === "credit" || mode === "vendorCredit";
 }
 
+function isReturnStatus(value: string) {
+  const normalized = String(value || "").toLowerCase().trim();
+  return normalized === "return" || normalized === "returned";
+}
+
 function dailyCountStatusLabel(status: DailyCountRow["status"]) {
   if (status === "short") return "نقص";
   if (status === "over") return "زيادة";
@@ -650,7 +655,9 @@ export default function PartPOSReportsPage() {
           sale.sale_number === null || sale.sale_number === undefined
             ? null
             : Number(sale.sale_number),
-        sale_total: Number(sale.sale_total ?? 0),
+        sale_total: isReturnStatus(String(sale.status ?? ""))
+          ? -Math.abs(Number(sale.sale_total ?? 0))
+          : Number(sale.sale_total ?? 0),
         amount_paid: Number(sale.amount_paid ?? 0),
         change_due: Number(sale.change_due ?? 0),
         payment_method: String(sale.payment_method ?? "cash"),
@@ -664,6 +671,10 @@ export default function PartPOSReportsPage() {
         status: String(sale.status ?? ""),
         created_at: String(sale.created_at ?? ""),
       }));
+
+      const returnSaleIds = new Set(
+        cleanSales.filter((sale) => isReturnStatus(sale.status)).map((sale) => sale.id),
+      );
 
       const saleIds = cleanSales.map((sale) => sale.id).filter(Boolean);
       let cleanItems: SaleItem[] = [];
@@ -680,17 +691,24 @@ export default function PartPOSReportsPage() {
 
         if (itemsError) throw itemsError;
 
-        cleanItems = ((itemRowsRaw ?? []) as any[]).map((item) => ({
-          id: String(item.id ?? ""),
-          sale_id: String(item.sale_id ?? ""),
-          product_name_ar: String(item.product_name_ar ?? ""),
-          department_ar: String(item.department_ar ?? ""),
-          quantity: Number(item.quantity ?? 0),
-          cost: Number(item.cost ?? 0),
-          sale_price: Number(item.sale_price ?? 0),
-          line_total: Number(item.line_total ?? 0),
-          created_at: String(item.created_at ?? ""),
-        }));
+        cleanItems = ((itemRowsRaw ?? []) as any[]).map((item) => {
+          const saleId = String(item.sale_id ?? "");
+          const isReturnItem = returnSaleIds.has(saleId);
+          const rawQuantity = Number(item.quantity ?? 0);
+          const rawLineTotal = Number(item.line_total ?? 0);
+
+          return {
+            id: String(item.id ?? ""),
+            sale_id: saleId,
+            product_name_ar: String(item.product_name_ar ?? ""),
+            department_ar: String(item.department_ar ?? ""),
+            quantity: isReturnItem ? -Math.abs(rawQuantity) : rawQuantity,
+            cost: Number(item.cost ?? 0),
+            sale_price: Number(item.sale_price ?? 0),
+            line_total: isReturnItem ? -Math.abs(rawLineTotal) : rawLineTotal,
+            created_at: String(item.created_at ?? ""),
+          };
+        });
       }
 
       const { data: voidedSaleRowsRaw, error: voidedSalesError } = await supabase
@@ -762,6 +780,8 @@ export default function PartPOSReportsPage() {
         )
         .eq("payment_method", "credit")
         .or("status.is.null,status.neq.voided")
+        .not("status", "eq", "return")
+        .not("status", "eq", "returned")
         .order("created_at", { ascending: true })
         .limit(50000);
 
