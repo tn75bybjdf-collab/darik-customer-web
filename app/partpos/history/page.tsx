@@ -33,6 +33,10 @@ type Sale = {
   change_due: number;
   item_count: number;
   created_at: string;
+  customer_id: string | null;
+  customer_name: string;
+  customer_phone: string;
+  customer_credit_allowance: number;
   items: SaleItem[];
 };
 
@@ -58,7 +62,10 @@ function tenderLabel(value: string) {
 }
 
 function statusLabel(value: string) {
-  if (String(value || "").toLowerCase() === "voided") return "ملغاة / VOID";
+  const normalized = String(value || "").toLowerCase();
+
+  if (normalized === "voided") return "ملغاة / VOID";
+  if (normalized === "return" || normalized === "returned") return "مرتجع / Return";
   if (value === "credit") return "ائتمان";
   if (value === "cashed_out") return "مكتملة";
   return value || "مكتملة";
@@ -66,6 +73,23 @@ function statusLabel(value: string) {
 
 function isVoidedSale(sale: Sale) {
   return String(sale.status || "").toLowerCase() === "voided";
+}
+
+function isReturnSale(sale: Sale) {
+  const status = String(sale.status || "").toLowerCase();
+  return status === "return" || status === "returned" || Number(sale.sale_total || 0) < 0;
+}
+
+function normalizeQuantityInput(value: string) {
+  const normalized = normalizeDigits(value).replace(/[^\d.]/g, "");
+  const parts = normalized.split(".");
+  if (parts.length <= 1) return normalized;
+  return `${parts[0]}.${parts.slice(1).join("")}`;
+}
+
+function parsePositiveQuantity(value: string) {
+  const parsed = Number(normalizeQuantityInput(value));
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : 0;
 }
 
 function escapeReceiptText(value: string | number | null | undefined) {
@@ -214,6 +238,15 @@ export default function PartPOSSalesHistoryPage() {
   const [voidingSaleId, setVoidingSaleId] = useState<string | null>(null);
   const [openSaleId, setOpenSaleId] = useState<string | null>(null);
 
+  const [returnedQuantitiesByItemId, setReturnedQuantitiesByItemId] = useState<
+    Record<string, number>
+  >({});
+  const [returnSale, setReturnSale] = useState<Sale | null>(null);
+  const [returnQuantities, setReturnQuantities] = useState<Record<string, string>>({});
+  const [returnPin, setReturnPin] = useState("");
+  const [returnError, setReturnError] = useState("");
+  const [returningSaleId, setReturningSaleId] = useState<string | null>(null);
+
   const offsetRef = useRef(0);
   const loadingRef = useRef(false);
   const searchRef = useRef("");
@@ -307,7 +340,7 @@ export default function PartPOSSalesHistoryPage() {
         let salesQuery = supabase
           .from("partpos_sales")
           .select(
-            "id, sale_number, payment_method, status, sale_total, amount_paid, change_due, item_count, created_at",
+            "id, sale_number, payment_method, status, sale_total, amount_paid, change_due, item_count, created_at, customer_id, customer_name, customer_phone, customer_credit_allowance",
           )
           .order("created_at", { ascending: false });
 
@@ -347,6 +380,28 @@ export default function PartPOSSalesHistoryPage() {
           {},
         );
 
+        const loadedItemIds = items.map((item) => String(item.id)).filter(Boolean);
+        const nextReturnedQuantities: Record<string, number> = {};
+
+        if (loadedItemIds.length > 0) {
+          const { data: returnRows, error: returnsError } = await supabase
+            .from("partpos_item_returns")
+            .select("original_sale_item_id, quantity_returned")
+            .in("original_sale_item_id", loadedItemIds)
+            .limit(50000);
+
+          if (!returnsError) {
+            for (const row of returnRows ?? []) {
+              const itemId = String((row as any).original_sale_item_id ?? "");
+              if (!itemId) continue;
+
+              nextReturnedQuantities[itemId] =
+                (nextReturnedQuantities[itemId] ?? 0) +
+                Number((row as any).quantity_returned ?? 0);
+            }
+          }
+        }
+
         const nextSales: Sale[] = (saleRows ?? []).map((sale) => ({
           id: String(sale.id),
           sale_number:
@@ -360,8 +415,19 @@ export default function PartPOSSalesHistoryPage() {
           change_due: Number(sale.change_due ?? 0),
           item_count: Number(sale.item_count ?? 0),
           created_at: String(sale.created_at),
+          customer_id:
+            sale.customer_id === null || sale.customer_id === undefined
+              ? null
+              : String(sale.customer_id),
+          customer_name: String(sale.customer_name ?? ""),
+          customer_phone: String(sale.customer_phone ?? ""),
+          customer_credit_allowance: Number(sale.customer_credit_allowance ?? 0),
           items: itemsBySaleId[String(sale.id)] ?? [],
         }));
+
+        setReturnedQuantitiesByItemId((current) =>
+          reset ? nextReturnedQuantities : { ...current, ...nextReturnedQuantities },
+        );
 
         setSales((current) => (reset ? nextSales : [...current, ...nextSales]));
         offsetRef.current = nextOffset + nextSales.length;
@@ -550,6 +616,162 @@ export default function PartPOSSalesHistoryPage() {
     setVoidError("");
   }
 
+  function returnedQuantityForItem(item: SaleItem) {
+    return Number(returnedQuantitiesByItemId[item.id] ?? 0);
+  }
+
+  function availableReturnQuantity(item: SaleItem) {
+    const soldQuantity = Number(item.quantity || 0);
+    if (soldQuantity <= 0) return 0;
+
+    return Math.max(soldQuantity - returnedQuantityForItem(item), 0);
+  }
+
+  function returnableItemsForSale(sale: Sale) {
+    if (isVoidedSale(sale) || isReturnSale(sale)) return [];
+    return sale.items.filter((item) => availableReturnQuantity(item) > 0.0001);
+  }
+
+  function openReturnPopup(sale: Sale) {
+    if (isVoidedSale(sale) || isReturnSale(sale)) return;
+
+    setReturnSale(sale);
+    setReturnQuantities({});
+    setReturnPin("");
+    setReturnError("");
+    setActionMessage("");
+  }
+
+  function closeReturnPopup() {
+    if (returningSaleId) return;
+
+    setReturnSale(null);
+    setReturnQuantities({});
+    setReturnPin("");
+    setReturnError("");
+  }
+
+  function updateReturnQuantity(itemId: string, value: string) {
+    setReturnQuantities((current) => ({
+      ...current,
+      [itemId]: normalizeQuantityInput(value),
+    }));
+  }
+
+  function selectedReturnLines() {
+    if (!returnSale) return [];
+
+    return returnSale.items
+      .map((item) => {
+        const quantity = parsePositiveQuantity(returnQuantities[item.id] ?? "");
+        const available = availableReturnQuantity(item);
+        const safeQuantity = Math.min(quantity, available);
+
+        return {
+          item,
+          quantity,
+          safeQuantity,
+          available,
+          lineTotal: safeQuantity * Number(item.sale_price || 0),
+        };
+      })
+      .filter((line) => line.safeQuantity > 0.0001);
+  }
+
+  const returnPreviewTotal = useMemo(
+    () =>
+      selectedReturnLines().reduce(
+        (sum, line) => sum + line.safeQuantity * Number(line.item.sale_price || 0),
+        0,
+      ),
+    [returnQuantities, returnSale, returnedQuantitiesByItemId],
+  );
+
+  async function confirmReturnItems() {
+    if (!supabase || !returnSale) return;
+
+    if (returnPin !== EMPLOYEE_LOGIN_PIN) {
+      setReturnError("الرمز غير صحيح. أدخل رمز الدخول لتأكيد المرتجع.");
+      setReturnPin("");
+      return;
+    }
+
+    const selectedLines = selectedReturnLines();
+
+    if (selectedLines.length === 0) {
+      setReturnError("اختر صنف واحد على الأقل وأدخل كمية المرتجع.");
+      return;
+    }
+
+    const invalidLine = selectedLines.find(
+      (line) =>
+        line.quantity <= 0 ||
+        line.quantity > line.available + 0.0001 ||
+        line.safeQuantity !== line.quantity,
+    );
+
+    if (invalidLine) {
+      setReturnError(`كمية المرتجع أكبر من المتاح للصنف: ${invalidLine.item.product_name_ar}`);
+      return;
+    }
+
+    setReturningSaleId(returnSale.id);
+    setReturnError("");
+
+    try {
+      const returnLines = selectedLines.map((line) => ({
+        sale_item_id: line.item.id,
+        quantity: line.quantity,
+      }));
+
+      const { data, error: rpcError } = await supabase.rpc("partpos_create_item_return", {
+        p_original_sale_id: returnSale.id,
+        p_return_lines: returnLines,
+      });
+
+      if (rpcError) throw rpcError;
+
+      const returnData = (data ?? {}) as Record<string, unknown>;
+      const returnSaleNumber =
+        returnData.return_sale_number === null || returnData.return_sale_number === undefined
+          ? "—"
+          : String(returnData.return_sale_number);
+      const returnTotal = Number(returnData.return_total ?? returnPreviewTotal);
+
+      setReturnedQuantitiesByItemId((current) => {
+        const next = { ...current };
+
+        for (const line of selectedLines) {
+          next[line.item.id] = Number(next[line.item.id] ?? 0) + line.quantity;
+        }
+
+        return next;
+      });
+
+      setActionMessage(
+        `تم تسجيل مرتجع رقم ${returnSaleNumber} بقيمة ${money(
+          returnTotal,
+        )} د.أ. سيظهر على مبيعات اليوم كرقم سالب حسب القسم.`,
+      );
+
+      setReturnSale(null);
+      setReturnQuantities({});
+      setReturnPin("");
+
+      offsetRef.current = 0;
+      setHasMore(true);
+      void loadHistory(true);
+    } catch (caught) {
+      setReturnError(
+        `خطأ Supabase: ${readSupabaseError(
+          caught,
+        )}. تأكد أنك شغّلت SQL الخاص بالمرتجعات أولاً.`,
+      );
+    } finally {
+      setReturningSaleId(null);
+    }
+  }
+
   async function confirmVoidSale() {
     if (!supabase || !voidSale) return;
 
@@ -713,6 +935,23 @@ export default function PartPOSSalesHistoryPage() {
                     </button>
                     <button
                       type="button"
+                      className="returnSaleButton"
+                      onClick={() => openReturnPopup(sale)}
+                      disabled={
+                        isVoidedSale(sale) ||
+                        isReturnSale(sale) ||
+                        Boolean(returningSaleId) ||
+                        returnableItemsForSale(sale).length === 0
+                      }
+                    >
+                      {isReturnSale(sale)
+                        ? "هذه فاتورة مرتجع"
+                        : returnableItemsForSale(sale).length === 0
+                          ? "لا يوجد أصناف قابلة للمرتجع"
+                          : "مرتجع أصناف"}
+                    </button>
+                    <button
+                      type="button"
                       className="voidSaleButton"
                       onClick={() => openVoidConfirm(sale)}
                       disabled={isVoidedSale(sale) || voidingSaleId === sale.id}
@@ -733,24 +972,35 @@ export default function PartPOSSalesHistoryPage() {
                         </tr>
                       </thead>
                       <tbody>
-                        {sale.items.map((item) => (
-                          <tr key={item.id}>
-                            <td>
-                              <strong>{item.product_name_ar}</strong>
-                              {Number(item.discount_percent) > 0 && (
-                                <small>خصم {percent(Number(item.discount_percent))}</small>
-                              )}
-                            </td>
-                            <td>{item.department_ar}</td>
-                            <td>{Number(item.quantity)}</td>
-                            <td>{money(Number(item.sale_price))} د.أ</td>
-                            <td>
-                              <strong className="lineTotal">
-                                {money(Number(item.line_total))} د.أ
-                              </strong>
-                            </td>
-                          </tr>
-                        ))}
+                        {sale.items.map((item) => {
+                          const alreadyReturned = returnedQuantityForItem(item);
+                          const availableToReturn = availableReturnQuantity(item);
+
+                          return (
+                            <tr key={item.id}>
+                              <td>
+                                <strong>{item.product_name_ar}</strong>
+                                {Number(item.discount_percent) > 0 && (
+                                  <small>خصم {percent(Number(item.discount_percent))}</small>
+                                )}
+                                {alreadyReturned > 0 && (
+                                  <small className="returnInfo">
+                                    مرتجع سابقاً: {money(alreadyReturned)} • المتاح:{" "}
+                                    {money(availableToReturn)}
+                                  </small>
+                                )}
+                              </td>
+                              <td>{item.department_ar}</td>
+                              <td>{Number(item.quantity)}</td>
+                              <td>{money(Number(item.sale_price))} د.أ</td>
+                              <td>
+                                <strong className="lineTotal">
+                                  {money(Number(item.line_total))} د.أ
+                                </strong>
+                              </td>
+                            </tr>
+                          );
+                        })}
                       </tbody>
                     </table>
                   </div>
@@ -812,6 +1062,127 @@ export default function PartPOSSalesHistoryPage() {
                 disabled={Boolean(voidingSaleId)}
               >
                 {voidingSaleId ? "جاري الإلغاء..." : "تأكيد الإلغاء"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {returnSale && (
+        <div className="popupBackdrop" role="dialog" aria-modal="true">
+          <div className="returnConfirmCard">
+            <p className="eyebrow">مرتجع أصناف</p>
+            <h2>مرتجع من فاتورة رقم {returnSale.sale_number ?? "—"}</h2>
+            <p className="voidConfirmText">
+              اختر الأصناف والكمية المراد إرجاعها. سيتم إنشاء فاتورة مرتجع بتاريخ اليوم
+              بقيم سالبة حتى تظهر في تقارير اليوم حسب القسم.
+            </p>
+
+            <div className="returnOriginalMeta">
+              <div>
+                <span>الفاتورة الأصلية</span>
+                <strong>{returnSale.sale_number ?? "—"}</strong>
+              </div>
+              <div>
+                <span>تاريخ البيع الأصلي</span>
+                <strong>{formatArabicDateTime(returnSale.created_at)}</strong>
+              </div>
+              <div>
+                <span>طريقة الدفع الأصلية</span>
+                <strong>{tenderLabel(returnSale.payment_method)}</strong>
+              </div>
+              <div>
+                <span>قيمة المرتجع المختار</span>
+                <strong className="redText">-{money(returnPreviewTotal)} د.أ</strong>
+              </div>
+            </div>
+
+            <div className="returnItemsBox">
+              {returnableItemsForSale(returnSale).length === 0 ? (
+                <div className="emptyReturnState">كل أصناف هذه الفاتورة تم إرجاعها سابقاً.</div>
+              ) : (
+                returnSale.items.map((item) => {
+                  const available = availableReturnQuantity(item);
+                  if (available <= 0.0001) return null;
+
+                  const enteredQuantity = returnQuantities[item.id] ?? "";
+                  const lineReturnTotal =
+                    parsePositiveQuantity(enteredQuantity) * Number(item.sale_price || 0);
+
+                  return (
+                    <div className="returnItemRow" key={item.id}>
+                      <div className="returnItemInfo">
+                        <strong>{item.product_name_ar}</strong>
+                        <span>{item.department_ar}</span>
+                        <small>
+                          مباع: {money(Number(item.quantity || 0))} • مرتجع سابقاً:{" "}
+                          {money(returnedQuantityForItem(item))} • المتاح: {money(available)}
+                        </small>
+                        <small>
+                          سعر الوحدة: {money(Number(item.sale_price || 0))} د.أ • قيمة هذا المرتجع:{" "}
+                          -{money(lineReturnTotal)} د.أ
+                        </small>
+                      </div>
+
+                      <div className="returnQuantityBox">
+                        <label htmlFor={`return-${item.id}`}>كمية المرتجع</label>
+                        <input
+                          id={`return-${item.id}`}
+                          value={enteredQuantity}
+                          onChange={(event) => updateReturnQuantity(item.id, event.target.value)}
+                          placeholder="0"
+                          inputMode="decimal"
+                        />
+                        <button
+                          type="button"
+                          className="returnAllButton"
+                          onClick={() => updateReturnQuantity(item.id, String(available))}
+                        >
+                          إرجاع المتاح
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })
+              )}
+            </div>
+
+            <label htmlFor="return-pin">رمز الدخول للتأكيد</label>
+            <input
+              id="return-pin"
+              value={returnPin}
+              onChange={(event) =>
+                setReturnPin(normalizeDigits(event.target.value).replace(/\D/g, "").slice(0, 6))
+              }
+              placeholder="أدخل رمز الدخول"
+              inputMode="numeric"
+              type="password"
+              autoFocus
+              onKeyDown={(event) => {
+                if (event.key === "Enter") {
+                  void confirmReturnItems();
+                }
+              }}
+            />
+
+            {returnError && <div className="voidError">{returnError}</div>}
+
+            <div className="voidPopupActions">
+              <button
+                type="button"
+                className="cancelVoidButton"
+                onClick={closeReturnPopup}
+                disabled={Boolean(returningSaleId)}
+              >
+                رجوع
+              </button>
+              <button
+                type="button"
+                className="confirmReturnButton"
+                onClick={() => void confirmReturnItems()}
+                disabled={Boolean(returningSaleId) || returnPreviewTotal <= 0}
+              >
+                {returningSaleId ? "جاري تسجيل المرتجع..." : "تأكيد المرتجع"}
               </button>
             </div>
           </div>
@@ -1088,7 +1459,14 @@ export default function PartPOSSalesHistoryPage() {
           border: 1px solid #fecaca;
         }
 
-        .voidSaleButton:disabled {
+        .returnSaleButton {
+          background: #fff7ed;
+          color: #9a3412;
+          border: 1px solid #fed7aa;
+        }
+
+        .voidSaleButton:disabled,
+        .returnSaleButton:disabled {
           background: #f3f4f6;
           color: #9ca3af;
           border-color: #e5e7eb;
@@ -1184,7 +1562,8 @@ export default function PartPOSSalesHistoryPage() {
           background: rgba(15, 23, 42, 0.58);
         }
 
-        .voidConfirmCard {
+        .voidConfirmCard,
+        .returnConfirmCard {
           width: min(520px, 100%);
           background: white;
           border-radius: 22px;
@@ -1193,7 +1572,14 @@ export default function PartPOSSalesHistoryPage() {
           box-shadow: 0 24px 80px rgba(15, 23, 42, 0.28);
         }
 
-        .voidConfirmCard h2 {
+        .returnConfirmCard {
+          width: min(900px, 100%);
+          max-height: 92vh;
+          overflow: auto;
+        }
+
+        .voidConfirmCard h2,
+        .returnConfirmCard h2 {
           margin: 0 0 10px;
           font-size: 26px;
         }
@@ -1231,7 +1617,95 @@ export default function PartPOSSalesHistoryPage() {
           color: white;
         }
 
+        .confirmReturnButton {
+          background: #c2410c;
+          color: white;
+        }
+
+        .returnInfo {
+          color: #9a3412 !important;
+        }
+
+        .returnOriginalMeta {
+          display: grid;
+          grid-template-columns: repeat(4, minmax(0, 1fr));
+          gap: 10px;
+          margin-bottom: 14px;
+        }
+
+        .returnOriginalMeta div {
+          background: #f9fafb;
+          border: 1px solid #e5e7eb;
+          border-radius: 14px;
+          padding: 12px;
+        }
+
+        .returnOriginalMeta span {
+          display: block;
+          color: #6b7280;
+          font-size: 12px;
+          margin-bottom: 4px;
+        }
+
+        .returnItemsBox {
+          display: grid;
+          gap: 10px;
+          margin: 14px 0;
+        }
+
+        .returnItemRow {
+          display: grid;
+          grid-template-columns: 1fr 190px;
+          gap: 12px;
+          align-items: stretch;
+          border: 1px solid #e5e7eb;
+          border-radius: 16px;
+          padding: 12px;
+          background: #fff;
+        }
+
+        .returnItemInfo {
+          display: flex;
+          flex-direction: column;
+          gap: 4px;
+        }
+
+        .returnItemInfo span,
+        .returnItemInfo small {
+          color: #6b7280;
+          font-size: 12px;
+          font-weight: 800;
+        }
+
+        .returnQuantityBox {
+          display: grid;
+          gap: 8px;
+        }
+
+        .returnQuantityBox label {
+          margin: 0;
+          font-size: 12px;
+        }
+
+        .returnAllButton {
+          background: #fff7ed;
+          color: #9a3412;
+          border: 1px solid #fed7aa;
+          padding: 10px;
+        }
+
+        .emptyReturnState {
+          border: 1px dashed #fed7aa;
+          border-radius: 14px;
+          padding: 18px;
+          color: #9a3412;
+          background: #fff7ed;
+          font-weight: 800;
+          text-align: center;
+        }
+
         .confirmVoidButton:disabled,
+        .confirmReturnButton:disabled,
         .cancelVoidButton:disabled {
           opacity: 0.55;
           cursor: not-allowed;
@@ -1245,6 +1719,8 @@ export default function PartPOSSalesHistoryPage() {
           .topCard,
           .saleTop,
           .receiptMeta,
+          .returnOriginalMeta,
+          .returnItemRow,
           .voidPopupActions {
             grid-template-columns: 1fr;
           }
