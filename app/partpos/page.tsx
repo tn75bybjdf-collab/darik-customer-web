@@ -659,13 +659,46 @@ export default function PartPOSPage() {
     });
   }
 
+  async function loadRecentProducts() {
+    setSearchError("");
+
+    if (!supabase) {
+      setSuggestions([]);
+      return;
+    }
+
+    setIsSearching(true);
+
+    const { data, error } = await supabase
+      .from("partpos_products")
+      .select("id, product_key, product_name_ar, department_ar, cost, price")
+      .order("updated_at", { ascending: false })
+      .limit(10);
+
+    setIsSearching(false);
+
+    if (error) {
+      setSearchError(error.message);
+      setSuggestions([]);
+      return;
+    }
+
+    setSuggestions(data ?? []);
+  }
+
   async function searchProducts(value: string) {
     setSearch(value);
     setSearchError("");
 
     const term = value.trim();
-    if (!supabase || term.length < 2) {
+
+    if (!supabase) {
       setSuggestions([]);
+      return;
+    }
+
+    if (term.length === 0) {
+      await loadRecentProducts();
       return;
     }
 
@@ -687,6 +720,15 @@ export default function PartPOSPage() {
     }
 
     setSuggestions(data ?? []);
+  }
+
+  function handleProductSearchFocus() {
+    if (search.trim()) {
+      void searchProducts(search);
+      return;
+    }
+
+    void loadRecentProducts();
   }
 
   function addSavedProduct(product: PartPOSProduct) {
@@ -726,6 +768,20 @@ export default function PartPOSPage() {
     setSuggestions([]);
   }
 
+  function mapCustomerRows(rows: any[]): PartPOSCustomer[] {
+    return rows.map((customer) => ({
+      id: String(customer.id),
+      customer_name: String(customer.customer_name ?? ""),
+      phone_number: String(customer.phone_number ?? ""),
+      credit_allowance: Number(customer.credit_allowance ?? 0),
+      credit_pin_code:
+        customer.credit_pin_code === null || customer.credit_pin_code === undefined
+          ? null
+          : String(customer.credit_pin_code),
+      credit_pin_required: Boolean(customer.credit_pin_required ?? false),
+    }));
+  }
+
   async function loadCustomerCreditBalance(customerId: string) {
     if (!supabase || !customerId) {
       setCustomerCreditInvoices([]);
@@ -744,6 +800,33 @@ export default function PartPOSPage() {
     }
   }
 
+  async function loadRecentCustomers() {
+    setCustomerSearchError("");
+
+    if (!supabase) {
+      setCustomerSuggestions([]);
+      return;
+    }
+
+    setIsCustomerSearching(true);
+
+    const { data, error } = await supabase
+      .from("partpos_customers")
+      .select("id, customer_name, phone_number, credit_allowance, credit_pin_code, credit_pin_required")
+      .order("updated_at", { ascending: false })
+      .limit(10);
+
+    setIsCustomerSearching(false);
+
+    if (error) {
+      setCustomerSearchError(error.message);
+      setCustomerSuggestions([]);
+      return;
+    }
+
+    setCustomerSuggestions(mapCustomerRows(data ?? []));
+  }
+
   async function searchCustomers(value: string) {
     setCustomerSearch(value);
     setCustomerSearchError("");
@@ -756,8 +839,13 @@ export default function PartPOSPage() {
 
     const term = value.trim();
 
-    if (!supabase || term.length < 2) {
+    if (!supabase) {
       setCustomerSuggestions([]);
+      return;
+    }
+
+    if (term.length === 0) {
+      await loadRecentCustomers();
       return;
     }
 
@@ -768,7 +856,7 @@ export default function PartPOSPage() {
       .select("id, customer_name, phone_number, credit_allowance, credit_pin_code, credit_pin_required")
       .or(`customer_name.ilike.%${term}%,phone_number.ilike.%${term}%`)
       .order("updated_at", { ascending: false })
-      .limit(8);
+      .limit(10);
 
     setIsCustomerSearching(false);
 
@@ -778,19 +866,16 @@ export default function PartPOSPage() {
       return;
     }
 
-    setCustomerSuggestions(
-      (data ?? []).map((customer) => ({
-        id: String(customer.id),
-        customer_name: String(customer.customer_name ?? ""),
-        phone_number: String(customer.phone_number ?? ""),
-        credit_allowance: Number(customer.credit_allowance ?? 0),
-        credit_pin_code:
-          customer.credit_pin_code === null || customer.credit_pin_code === undefined
-            ? null
-            : String(customer.credit_pin_code),
-        credit_pin_required: Boolean(customer.credit_pin_required ?? false),
-      })),
-    );
+    setCustomerSuggestions(mapCustomerRows(data ?? []));
+  }
+
+  function handleCustomerSearchFocus() {
+    if (customerSearch.trim()) {
+      void searchCustomers(customerSearch);
+      return;
+    }
+
+    void loadRecentCustomers();
   }
 
   function selectCustomer(customer: PartPOSCustomer) {
@@ -2143,8 +2228,9 @@ export default function PartPOSPage() {
         <input
           id="partpos-search"
           value={search}
+          onFocus={handleProductSearchFocus}
           onChange={(event) => void searchProducts(event.target.value)}
-          placeholder="مثال: فلتر زيت تويوتا"
+          placeholder="اضغط هنا لآخر 10 منتجات أو اكتب للبحث"
           autoComplete="off"
         />
 
@@ -2172,7 +2258,7 @@ export default function PartPOSPage() {
         <div className="customerBarHeader">
           <div>
             <label htmlFor="customer-search">إضافة زبون للفاتورة</label>
-            <p>ابحث بالاسم، اسم الشركة، أو رقم الهاتف.</p>
+            <p>اضغط لعرض آخر 10 زبائن، أو اكتب للبحث بالاسم / الشركة / الهاتف.</p>
           </div>
           {selectedCustomer && (
             <button type="button" className="removeCustomerButton" onClick={clearCustomerSelection}>
@@ -2186,8 +2272,9 @@ export default function PartPOSPage() {
             <input
               id="customer-search"
               value={customerSearch}
+              onFocus={handleCustomerSearchFocus}
               onChange={(event) => void searchCustomers(event.target.value)}
-              placeholder="اسم الزبون / اسم الشركة / رقم الهاتف"
+              placeholder="اضغط هنا لآخر 10 زبائن أو اكتب للبحث"
               autoComplete="off"
             />
 
