@@ -534,6 +534,17 @@ export default function PartPOSPage() {
     setLockNotice("تم إتمام البيع. أدخل الرمز لفتح فاتورة جديدة.");
   }
 
+  function lockPOSAfterCustomerCreditPayment(amountPaid: number, balanceAfter: number) {
+    setIsUnlocked(false);
+    setPinEntry("");
+    setPinError("");
+    setLockNotice(
+      `تم تسجيل دفعة ائتمان ${money(amountPaid)} د.أ. الرصيد المتبقي: ${money(
+        balanceAfter,
+      )} د.أ`,
+    );
+  }
+
   const saleRows = rows.filter(rowIsCashoutReady);
   const saleTotal = saleRows.reduce((sum, row) => sum + rowLineTotal(row), 0);
   const paidAmount = parseMoney(cashReceived);
@@ -731,11 +742,72 @@ export default function PartPOSPage() {
     void loadRecentProducts();
   }
 
-  function addSavedProduct(product: PartPOSProduct) {
+  async function loadLastActualSoldPrice(product: PartPOSProduct) {
+    if (!supabase) return null;
+
+    const { data: itemRows, error: itemError } = await supabase
+      .from("partpos_sale_items")
+      .select("sale_id, sale_price, line_total, quantity, created_at")
+      .eq("product_name_ar", product.product_name_ar)
+      .eq("department_ar", product.department_ar)
+      .order("created_at", { ascending: false })
+      .limit(20);
+
+    if (itemError || !itemRows || itemRows.length === 0) return null;
+
+    const saleIds = Array.from(
+      new Set(
+        itemRows
+          .map((item) => String((item as any).sale_id ?? ""))
+          .filter(Boolean),
+      ),
+    );
+
+    if (saleIds.length === 0) return null;
+
+    const { data: saleRows, error: saleError } = await supabase
+      .from("partpos_sales")
+      .select("id, status")
+      .in("id", saleIds);
+
+    if (saleError) return null;
+
+    const activeSaleIds = new Set(
+      ((saleRows ?? []) as any[])
+        .filter((sale) => String(sale.status ?? "active") !== "voided")
+        .map((sale) => String(sale.id ?? "")),
+    );
+
+    for (const item of itemRows as any[]) {
+      if (!activeSaleIds.has(String(item.sale_id ?? ""))) continue;
+
+      const salePrice = Number(item.sale_price ?? 0);
+      if (Number.isFinite(salePrice) && salePrice > 0) return salePrice;
+
+      const quantity = Number(item.quantity ?? 0);
+      const lineTotal = Number(item.line_total ?? 0);
+
+      if (Number.isFinite(quantity) && quantity > 0 && Number.isFinite(lineTotal) && lineTotal > 0) {
+        return lineTotal / quantity;
+      }
+    }
+
+    return null;
+  }
+
+  async function addSavedProduct(product: PartPOSProduct) {
     setCashoutStatus("idle");
     setCashoutMessage("");
 
-    const savedPrice = money(Number(product.price));
+    // Priority:
+    // 1. last ACTUAL sale price from partpos_sale_items
+    // 2. saved product price from partpos_products
+    // 3. blank
+    //
+    // This fixes the case where the product table still has an old/default
+    // 30% margin price like 161.65, but the item was actually last sold for 165.
+    const lastActualSoldPrice = await loadLastActualSoldPrice(product);
+    const savedPrice = money(lastActualSoldPrice ?? Number(product.price));
 
     setRows((current) => {
       const firstBlankIndex = current.findIndex((row) => !rowHasInput(row));
@@ -1262,7 +1334,19 @@ export default function PartPOSPage() {
         )} د.أ`,
       );
 
-      closeCreditPaymentPopup();
+      // Make customer account payments feel like a completed cashier action:
+      // close the payment popup, clear the selected customer, and return to the PIN lock screen
+      // with a visible success message.
+      setIsCreditPaymentPopupOpen(false);
+      setCreditPaymentAmount("");
+      setCreditPaymentError("");
+      setCreditPaymentStatus("idle");
+      setSelectedCustomer(null);
+      setCustomerSearch("");
+      setCustomerSuggestions([]);
+      setCustomerCreditInvoices([]);
+
+      lockPOSAfterCustomerCreditPayment(requestedAmount, balanceAfter);
     } catch (error) {
       setCreditPaymentStatus("error");
       setCreditPaymentError(`خطأ Supabase: ${readSupabaseError(error)}`);
@@ -2243,7 +2327,7 @@ export default function PartPOSPage() {
               <button
                 key={product.id}
                 type="button"
-                onClick={() => addSavedProduct(product)}
+                onClick={() => void addSavedProduct(product)}
               >
                 <strong>{product.product_name_ar}</strong>
                 <span>{product.department_ar}</span>
