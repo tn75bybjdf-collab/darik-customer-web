@@ -284,6 +284,7 @@ async function loadCustomerCreditBalanceForClient(
     .select("id, sale_number, sale_total, amount_paid, created_at")
     .eq("payment_method", "credit")
     .eq("customer_id", customerId)
+    .or("status.is.null,status.neq.voided")
     .order("created_at", { ascending: true })
     .limit(5000);
 
@@ -2231,6 +2232,7 @@ export default function PartPOSPage() {
                   ? "جاري الحساب..."
                   : `${money(selectedCustomerCreditBalance)} د.أ`}
               </strong>
+              <small className="creditBalanceNote">لا يشمل الفواتير الملغاة VOID</small>
             </div>
           </div>
         )}
