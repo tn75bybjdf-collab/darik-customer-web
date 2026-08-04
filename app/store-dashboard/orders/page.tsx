@@ -27,9 +27,14 @@ type DirectOrder = {
   customer_name: string;
   customer_phone: string;
   delivery_address_details: string | null;
+  delivery_note: string | null;
+  delivery_latitude: number | string | null;
+  delivery_longitude: number | string | null;
+  direct_building_number: string | null;
+  direct_apartment_number: string | null;
   payment_method: string;
   payment_status: string;
-  direct_payment_reference: string | null;
+  direct_cliq_receipt_path: string | null;
   subtotal: number | string;
   delivery_fee: number | string;
   total: number | string;
@@ -48,6 +53,7 @@ export default function DarikDirectOrdersPage() {
   const [context, setContext] = useState<ContextResult | null>(null);
   const [selectedRetailerId, setSelectedRetailerId] = useState("");
   const [orders, setOrders] = useState<DirectOrder[]>([]);
+  const [receiptUrls, setReceiptUrls] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(true);
   const [updatingOrderId, setUpdatingOrderId] = useState<string | null>(null);
   const [confirmingPaymentOrderId, setConfirmingPaymentOrderId] = useState<string | null>(null);
@@ -71,9 +77,40 @@ export default function DarikDirectOrdersPage() {
   const loadOrders = useCallback(async () => {
     if (!selectedRetailerId) { setOrders([]); setLoading(false); return; }
     setLoading(true); setError("");
-    const result = await supabase.from("orders").select("id,order_number,customer_name,customer_phone,delivery_address_details,payment_method,payment_status,direct_payment_reference,subtotal,delivery_fee,total,order_status,created_at").eq("sales_channel", "direct_storefront").eq("storefront_retailer_id", selectedRetailerId).order("created_at", { ascending: false }).limit(200);
-    if (result.error) setError(result.error.message);
-    else setOrders((result.data ?? []) as unknown as DirectOrder[]);
+    const result = await supabase
+      .from("orders")
+      .select(
+        "id,order_number,customer_name,customer_phone,delivery_address_details,delivery_note,delivery_latitude,delivery_longitude,direct_building_number,direct_apartment_number,payment_method,payment_status,direct_cliq_receipt_path,subtotal,delivery_fee,total,order_status,created_at"
+      )
+      .eq("sales_channel", "direct_storefront")
+      .eq("storefront_retailer_id", selectedRetailerId)
+      .order("created_at", { ascending: false })
+      .limit(200);
+
+    if (result.error) {
+      setError(result.error.message);
+      setReceiptUrls({});
+    } else {
+      const nextOrders = (result.data ?? []) as unknown as DirectOrder[];
+      setOrders(nextOrders);
+
+      const signedReceipts = await Promise.all(
+        nextOrders
+          .filter((order) => Boolean(order.direct_cliq_receipt_path))
+          .map(async (order) => {
+            const signed = await supabase.storage
+              .from("darik-direct-cliq-receipts")
+              .createSignedUrl(order.direct_cliq_receipt_path as string, 3600);
+
+            return [order.id, signed.data?.signedUrl ?? ""] as const;
+          })
+      );
+
+      setReceiptUrls(
+        Object.fromEntries(signedReceipts.filter(([, url]) => Boolean(url)))
+      );
+    }
+
     setLoading(false);
   }, [selectedRetailerId]);
 
@@ -94,7 +131,7 @@ export default function DarikDirectOrdersPage() {
     return orders.filter((order) => {
       if (statusFilter !== "all" && order.order_status !== statusFilter) return false;
       if (!term) return true;
-      return [order.order_number, order.customer_name, order.customer_phone, order.delivery_address_details].filter(Boolean).some((value) => String(value).toLowerCase().includes(term));
+      return [order.order_number, order.customer_name, order.customer_phone, order.delivery_address_details, order.direct_building_number, order.direct_apartment_number].filter(Boolean).some((value) => String(value).toLowerCase().includes(term));
     });
   }, [orders, search, statusFilter]);
 
@@ -179,36 +216,164 @@ export default function DarikDirectOrdersPage() {
           </div>
           {loading ? <div className={styles.tableEmpty}>Loading direct orders…</div> : filteredOrders.length === 0 ? <div className={styles.tableEmpty}>No direct orders match this view.</div> : (
             <div className={styles.ordersPageGrid}>
-              {filteredOrders.map((order) => <article className={styles.orderCard} key={order.id}>
-                <div className={styles.orderCardHeader}><div><span>{order.order_number || order.id.slice(0, 8)}</span><h3>{order.customer_name}</h3></div><strong>{money(order.total)}</strong></div>
-                <div className={styles.orderMetaGrid}><div><span>Phone</span><strong>{order.customer_phone}</strong></div><div><span>Payment</span><strong>{labelStatus(order.payment_method)}</strong></div><div><span>Status</span><strong className={styles.statusPill}>{labelStatus(order.order_status)}</strong></div><div><span>Placed</span><strong>{new Date(order.created_at).toLocaleString()}</strong></div></div>
-                {order.delivery_address_details ? <p className={styles.orderAddress}>{order.delivery_address_details}</p> : null}
-                {order.payment_method === "cliq" ? (
-                  <div className={styles.cliqOrderPanel}>
-                    <span>CliQ payment</span>
-                    <strong>{labelStatus(order.payment_status)}</strong>
-                    {order.direct_payment_reference ? (
-                      <code>{order.direct_payment_reference}</code>
-                    ) : null}
-                    {!["paid", "paid_by_cliq", "paid_cliq"].includes(
-                      order.payment_status
-                    ) ? (
-                      <div className={styles.cliqOrderActions}>
-                        <button
-                          type="button"
-                          disabled={confirmingPaymentOrderId === order.id}
-                          onClick={() => confirmCliqPayment(order)}
-                        >
-                          {confirmingPaymentOrderId === order.id
-                            ? "Confirming…"
-                            : "Mark CliQ received"}
-                        </button>
+              {filteredOrders.map((order) => {
+                const latitude = Number(order.delivery_latitude);
+                const longitude = Number(order.delivery_longitude);
+                const hasExactLocation =
+                  Number.isFinite(latitude) && Number.isFinite(longitude);
+                const mapUrl = hasExactLocation
+                  ? `https://www.google.com/maps?q=${latitude},${longitude}`
+                  : "";
+
+                return (
+                  <article className={styles.orderCard} key={order.id}>
+                    <div className={styles.orderCardHeader}>
+                      <div>
+                        <span>{order.order_number || order.id.slice(0, 8)}</span>
+                        <h3>{order.customer_name}</h3>
+                      </div>
+                      <strong>{money(order.total)}</strong>
+                    </div>
+
+                    <div className={styles.orderMetaGrid}>
+                      <div>
+                        <span>Phone</span>
+                        <a href={`tel:${order.customer_phone}`}>
+                          {order.customer_phone}
+                        </a>
+                      </div>
+                      <div>
+                        <span>Payment</span>
+                        <strong>{labelStatus(order.payment_method)}</strong>
+                      </div>
+                      <div>
+                        <span>Status</span>
+                        <strong className={styles.statusPill}>
+                          {labelStatus(order.order_status)}
+                        </strong>
+                      </div>
+                      <div>
+                        <span>Placed</span>
+                        <strong>{new Date(order.created_at).toLocaleString()}</strong>
+                      </div>
+                    </div>
+
+                    <div className={styles.deliveryLocationPanel}>
+                      <div>
+                        <span>Exact delivery location</span>
+                        <strong>
+                          {hasExactLocation
+                            ? `${latitude.toFixed(6)}, ${longitude.toFixed(6)}`
+                            : "Location unavailable"}
+                        </strong>
+                      </div>
+                      {mapUrl ? (
+                        <a href={mapUrl} target="_blank" rel="noreferrer">
+                          Open in Google Maps
+                        </a>
+                      ) : null}
+                    </div>
+
+                    {order.direct_building_number ||
+                    order.direct_apartment_number ||
+                    order.delivery_note ? (
+                      <div className={styles.deliveryDetailsPanel}>
+                        {order.direct_building_number ? (
+                          <div>
+                            <span>Building</span>
+                            <strong>{order.direct_building_number}</strong>
+                          </div>
+                        ) : null}
+                        {order.direct_apartment_number ? (
+                          <div>
+                            <span>Apartment</span>
+                            <strong>{order.direct_apartment_number}</strong>
+                          </div>
+                        ) : null}
+                        {order.delivery_note ? (
+                          <p>{order.delivery_note}</p>
+                        ) : null}
                       </div>
                     ) : null}
-                  </div>
-                ) : null}
-                <div className={styles.orderStatusActions}><span>Update status</span><select disabled={updatingOrderId === order.id} value={order.order_status} onChange={(event) => updateStatus(order, event.target.value)}><option value={order.order_status}>{labelStatus(order.order_status)}</option>{statusOptions.filter((status) => status !== order.order_status).map((status) => <option key={status} value={status}>{labelStatus(status)}</option>)}</select></div>
-              </article>)}
+
+                    {order.payment_method === "cliq" ? (
+                      <div className={styles.cliqOrderPanel}>
+                        <div className={styles.cliqReceiptHeading}>
+                          <div>
+                            <span>CliQ receipt</span>
+                            <strong>{labelStatus(order.payment_status)}</strong>
+                          </div>
+                          {receiptUrls[order.id] ? (
+                            <a
+                              href={receiptUrls[order.id]}
+                              target="_blank"
+                              rel="noreferrer"
+                            >
+                              Open full receipt
+                            </a>
+                          ) : null}
+                        </div>
+
+                        {receiptUrls[order.id] ? (
+                          <a
+                            className={styles.cliqReceiptImage}
+                            href={receiptUrls[order.id]}
+                            target="_blank"
+                            rel="noreferrer"
+                          >
+                            <img
+                              src={receiptUrls[order.id]}
+                              alt={`CliQ receipt for ${order.order_number || order.id}`}
+                            />
+                          </a>
+                        ) : (
+                          <p className={styles.receiptUnavailable}>
+                            Receipt preview is unavailable. Refresh the orders page.
+                          </p>
+                        )}
+
+                        {!['paid', 'paid_by_cliq', 'paid_cliq'].includes(
+                          order.payment_status
+                        ) ? (
+                          <div className={styles.cliqOrderActions}>
+                            <button
+                              type="button"
+                              disabled={confirmingPaymentOrderId === order.id}
+                              onClick={() => confirmCliqPayment(order)}
+                            >
+                              {confirmingPaymentOrderId === order.id
+                                ? "Confirming…"
+                                : "Mark CliQ received"}
+                            </button>
+                          </div>
+                        ) : null}
+                      </div>
+                    ) : null}
+
+                    <div className={styles.orderStatusActions}>
+                      <span>Update status</span>
+                      <select
+                        disabled={updatingOrderId === order.id}
+                        value={order.order_status}
+                        onChange={(event) =>
+                          updateStatus(order, event.target.value)
+                        }
+                      >
+                        <option value={order.order_status}>
+                          {labelStatus(order.order_status)}
+                        </option>
+                        {statusOptions
+                          .filter((status) => status !== order.order_status)
+                          .map((status) => (
+                            <option key={status} value={status}>
+                              {labelStatus(status)}
+                            </option>
+                          ))}
+                      </select>
+                    </div>
+                  </article>
+                );
+              })}
             </div>
           )}
         </section>

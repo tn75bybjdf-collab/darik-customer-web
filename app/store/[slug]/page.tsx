@@ -96,10 +96,10 @@ type CartLine = {
 type OnlineCheckoutForm = {
   customerName: string;
   customerPhone: string;
-  deliveryAddress: string;
+  buildingNumber: string;
+  apartmentNumber: string;
   deliveryNote: string;
   paymentMethod: "cash" | "cliq";
-  cliqReference: string;
   latitude: number | null;
   longitude: number | null;
 };
@@ -351,13 +351,16 @@ export default function DarikDirectStorefrontPage() {
   const [checkoutForm, setCheckoutForm] = useState<OnlineCheckoutForm>({
     customerName: "",
     customerPhone: "",
-    deliveryAddress: "",
+    buildingNumber: "",
+    apartmentNumber: "",
     deliveryNote: "",
     paymentMethod: "cash",
-    cliqReference: "",
     latitude: null,
     longitude: null,
   });
+  const [cliqReceiptFile, setCliqReceiptFile] = useState<File | null>(null);
+  const [cliqReceiptPreview, setCliqReceiptPreview] = useState("");
+  const [cliqReceiptPath, setCliqReceiptPath] = useState("");
   const [locatingCustomer, setLocatingCustomer] = useState(false);
   const [placingOrder, setPlacingOrder] = useState(false);
   const [checkoutError, setCheckoutError] = useState("");
@@ -414,6 +417,24 @@ export default function DarikDirectStorefrontPage() {
       };
     });
   }, [storefront]);
+
+  useEffect(() => {
+    if (!cliqReceiptFile) {
+      setCliqReceiptPreview("");
+      return;
+    }
+
+    const previewUrl = URL.createObjectURL(cliqReceiptFile);
+    setCliqReceiptPreview(previewUrl);
+
+    return () => URL.revokeObjectURL(previewUrl);
+  }, [cliqReceiptFile]);
+
+  useEffect(() => {
+    if (checkoutForm.paymentMethod === "cliq") return;
+    setCliqReceiptFile(null);
+    setCliqReceiptPath("");
+  }, [checkoutForm.paymentMethod]);
 
   useEffect(() => {
     if (!slug) return;
@@ -635,12 +656,66 @@ export default function DarikDirectStorefrontPage() {
     );
   }
 
+  function selectCliqReceipt(file: File | null) {
+    setCheckoutError("");
+    setCliqReceiptPath("");
+
+    if (!file) {
+      setCliqReceiptFile(null);
+      return;
+    }
+
+    if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) {
+      setCliqReceiptFile(null);
+      setCheckoutError("Upload the CliQ receipt as a JPG, PNG or WebP image.");
+      return;
+    }
+
+    if (file.size > 8 * 1024 * 1024) {
+      setCliqReceiptFile(null);
+      setCheckoutError("The CliQ receipt image must be smaller than 8 MB.");
+      return;
+    }
+
+    setCliqReceiptFile(file);
+  }
+
+  async function uploadCliqReceipt() {
+    if (!storefront || !cliqReceiptFile) {
+      throw new Error("Upload the CliQ receipt before submitting the order.");
+    }
+
+    if (cliqReceiptPath) return cliqReceiptPath;
+
+    const extension =
+      cliqReceiptFile.type === "image/png"
+        ? "png"
+        : cliqReceiptFile.type === "image/webp"
+          ? "webp"
+          : "jpg";
+    const receiptPath = `${storefront.retailer_id}/${crypto.randomUUID()}/receipt.${extension}`;
+    const uploadResult = await supabase.storage
+      .from("darik-direct-cliq-receipts")
+      .upload(receiptPath, cliqReceiptFile, {
+        cacheControl: "3600",
+        contentType: cliqReceiptFile.type,
+        upsert: false,
+      });
+
+    if (uploadResult.error) throw uploadResult.error;
+
+    setCliqReceiptPath(receiptPath);
+    return receiptPath;
+  }
+
   async function placeOnlineOrder() {
     if (!storefront || placingOrder) return;
 
     const customerName = checkoutForm.customerName.trim();
     const customerPhone = checkoutForm.customerPhone.trim();
-    const deliveryAddress = checkoutForm.deliveryAddress.trim();
+    const buildingNumber = checkoutForm.buildingNumber.trim();
+    const apartmentNumber = checkoutForm.apartmentNumber.trim();
+    const deliveryNote = checkoutForm.deliveryNote.trim();
 
     if (customerName.length < 2) {
       setCheckoutError("Enter your name.");
@@ -649,11 +724,6 @@ export default function DarikDirectStorefrontPage() {
 
     if (customerPhone.length < 7) {
       setCheckoutError("Enter a valid phone number.");
-      return;
-    }
-
-    if (deliveryAddress.length < 5) {
-      setCheckoutError("Enter your delivery address.");
       return;
     }
 
@@ -679,56 +749,89 @@ export default function DarikDirectStorefrontPage() {
         return;
       }
 
-      if (checkoutForm.cliqReference.trim().length < 2) {
-        setCheckoutError("Enter the CliQ transfer reference or sender name.");
+      if (!cliqReceiptFile && !cliqReceiptPath) {
+        setCheckoutError("Upload the CliQ receipt before submitting the order.");
         return;
       }
+    }
+
+    if (buildingNumber.length > 60) {
+      setCheckoutError("Building number is too long.");
+      return;
+    }
+
+    if (apartmentNumber.length > 60) {
+      setCheckoutError("Apartment number is too long.");
+      return;
+    }
+
+    if (deliveryNote.length > 500) {
+      setCheckoutError("Extra delivery details must be 500 characters or less.");
+      return;
     }
 
     setPlacingOrder(true);
     setCheckoutError("");
 
-    const result = await supabase.rpc("darik_direct_place_online_order", {
-      p_storefront_slug: storefront.slug,
-      p_customer_name: customerName,
-      p_customer_phone: customerPhone,
-      p_delivery_address: deliveryAddress,
-      p_delivery_latitude: checkoutForm.latitude,
-      p_delivery_longitude: checkoutForm.longitude,
-      p_items: cart.map((line) => ({
-        product_id: line.productId,
-        quantity: line.quantity,
-      })),
-      p_payment_method: checkoutForm.paymentMethod,
-      p_cliq_reference:
+    try {
+      const receiptPath =
         checkoutForm.paymentMethod === "cliq"
-          ? checkoutForm.cliqReference.trim()
-          : null,
-      p_delivery_note: checkoutForm.deliveryNote.trim() || null,
-    });
+          ? await uploadCliqReceipt()
+          : null;
 
-    if (result.error) {
-      setCheckoutError(result.error.message);
+      const result = await supabase.rpc("darik_direct_place_online_order_v2", {
+        p_storefront_slug: storefront.slug,
+        p_customer_name: customerName,
+        p_customer_phone: customerPhone,
+        p_delivery_latitude: checkoutForm.latitude,
+        p_delivery_longitude: checkoutForm.longitude,
+        p_items: cart.map((line) => ({
+          product_id: line.productId,
+          quantity: line.quantity,
+        })),
+        p_payment_method: checkoutForm.paymentMethod,
+        p_cliq_receipt_path: receiptPath,
+        p_building_number: buildingNumber || null,
+        p_apartment_number: apartmentNumber || null,
+        p_delivery_note: deliveryNote || null,
+      });
+
+      if (result.error) throw result.error;
+
+      const response = result.data as {
+        ok?: boolean;
+        order_number?: string;
+        total?: number | string;
+        payment_method?: "cash" | "cliq";
+      } | null;
+
+      setOrderConfirmation({
+        orderNumber: response?.order_number || "Order received",
+        total: Number(response?.total ?? orderTotal),
+        paymentMethod:
+          response?.payment_method ?? checkoutForm.paymentMethod,
+      });
+      setCart([]);
+      setOnlineCheckoutOpen(false);
+      setCliqReceiptFile(null);
+      setCliqReceiptPath("");
+      setCheckoutForm((current) => ({
+        ...current,
+        customerName: "",
+        customerPhone: "",
+        buildingNumber: "",
+        apartmentNumber: "",
+        deliveryNote: "",
+        latitude: null,
+        longitude: null,
+      }));
+    } catch (error) {
+      setCheckoutError(
+        error instanceof Error ? error.message : "The order could not be submitted."
+      );
+    } finally {
       setPlacingOrder(false);
-      return;
     }
-
-    const response = result.data as {
-      ok?: boolean;
-      order_number?: string;
-      total?: number | string;
-      payment_method?: "cash" | "cliq";
-    } | null;
-
-    setOrderConfirmation({
-      orderNumber: response?.order_number || "Order received",
-      total: Number(response?.total ?? orderTotal),
-      paymentMethod:
-        response?.payment_method ?? checkoutForm.paymentMethod,
-    });
-    setCart([]);
-    setOnlineCheckoutOpen(false);
-    setPlacingOrder(false);
   }
 
   if (loading) {
@@ -1525,7 +1628,7 @@ export default function DarikDirectStorefrontPage() {
                 <strong>{money(orderConfirmation.total)}</strong>
                 <small>
                   {orderConfirmation.paymentMethod === "cliq"
-                    ? "Your CliQ payment is awaiting store verification. The store will contact you to confirm delivery."
+                    ? "Your CliQ receipt was submitted for store verification. The store will contact you to confirm delivery."
                     : "The store received your cash-on-delivery order and will contact you to confirm delivery."}
                 </small>
                 <button
@@ -1708,21 +1811,38 @@ export default function DarikDirectStorefrontPage() {
                               {storefront.cliq_payment_identifier}
                             </strong>
                           </div>
-                          <label>
-                            Transfer reference or sender name
+                          <label className={styles.receiptUploadField}>
+                            CliQ receipt image <strong>Required</strong>
                             <input
-                              value={checkoutForm.cliqReference}
+                              type="file"
+                              accept="image/jpeg,image/png,image/webp"
                               onChange={(event) =>
-                                updateCheckoutField(
-                                  "cliqReference",
-                                  event.target.value
-                                )
+                                selectCliqReceipt(event.target.files?.[0] ?? null)
                               }
-                              placeholder="Reference number or sender name"
                             />
                           </label>
+                          {cliqReceiptPreview ? (
+                            <div className={styles.receiptPreview}>
+                              <img src={cliqReceiptPreview} alt="CliQ receipt preview" />
+                              <div>
+                                <strong>Receipt ready</strong>
+                                <small>{cliqReceiptFile?.name}</small>
+                                <button
+                                  type="button"
+                                  onClick={() => selectCliqReceipt(null)}
+                                >
+                                  Remove receipt
+                                </button>
+                              </div>
+                            </div>
+                          ) : (
+                            <p className={styles.receiptRequirement}>
+                              Upload the transfer receipt before submitting. A
+                              reference number is not required.
+                            </p>
+                          )}
                           <p>
-                            The store will verify the transfer before preparing
+                            The store will review the receipt before preparing
                             the order.
                           </p>
                         </div>
@@ -1757,23 +1877,64 @@ export default function DarikDirectStorefrontPage() {
                         />
                       </label>
 
-                      <label>
-                        Delivery address
-                        <textarea
-                          value={checkoutForm.deliveryAddress}
-                          onChange={(event) =>
-                            updateCheckoutField(
-                              "deliveryAddress",
-                              event.target.value
-                            )
-                          }
-                          placeholder="Area, street, building and floor"
-                          rows={3}
-                        />
-                      </label>
+                      <div className={styles.exactLocationBlock}>
+                        <div>
+                          <strong>Exact delivery location</strong>
+                          <small>Required for every online order</small>
+                        </div>
+                        <button
+                          type="button"
+                          className={`${styles.locationButton} ${
+                            checkoutForm.latitude != null &&
+                            checkoutForm.longitude != null
+                              ? styles.locationCaptured
+                              : ""
+                          }`}
+                          onClick={captureExactLocation}
+                          disabled={locatingCustomer}
+                        >
+                          <Icon name="location" size={18} />
+                          {locatingCustomer
+                            ? "Capturing location…"
+                            : checkoutForm.latitude != null &&
+                                checkoutForm.longitude != null
+                              ? "Exact location captured"
+                              : "Use my exact location"}
+                        </button>
+                      </div>
+
+                      <div className={styles.addressDetailsGrid}>
+                        <label>
+                          Building number <small>Optional</small>
+                          <input
+                            value={checkoutForm.buildingNumber}
+                            onChange={(event) =>
+                              updateCheckoutField(
+                                "buildingNumber",
+                                event.target.value
+                              )
+                            }
+                            placeholder="Example: 18"
+                          />
+                        </label>
+
+                        <label>
+                          Apartment number <small>Optional</small>
+                          <input
+                            value={checkoutForm.apartmentNumber}
+                            onChange={(event) =>
+                              updateCheckoutField(
+                                "apartmentNumber",
+                                event.target.value
+                              )
+                            }
+                            placeholder="Example: 4B"
+                          />
+                        </label>
+                      </div>
 
                       <label>
-                        Delivery note <small>Optional</small>
+                        Extra delivery details <small>Optional</small>
                         <textarea
                           value={checkoutForm.deliveryNote}
                           onChange={(event) =>
@@ -1782,30 +1943,10 @@ export default function DarikDirectStorefrontPage() {
                               event.target.value
                             )
                           }
-                          placeholder="Landmark or delivery instructions"
-                          rows={2}
+                          placeholder="Floor, entrance, landmark or delivery instructions"
+                          rows={3}
                         />
                       </label>
-
-                      <button
-                        type="button"
-                        className={`${styles.locationButton} ${
-                          checkoutForm.latitude != null &&
-                          checkoutForm.longitude != null
-                            ? styles.locationCaptured
-                            : ""
-                        }`}
-                        onClick={captureExactLocation}
-                        disabled={locatingCustomer}
-                      >
-                        <Icon name="location" size={18} />
-                        {locatingCustomer
-                          ? "Capturing location…"
-                          : checkoutForm.latitude != null &&
-                              checkoutForm.longitude != null
-                            ? "Exact location captured"
-                            : "Use my exact location"}
-                      </button>
 
                       {checkoutError ? (
                         <p className={styles.checkoutError}>{checkoutError}</p>
