@@ -55,6 +55,7 @@ type DirectProduct = {
   official_marketplace_name_ar: string | null;
   brand_name: string | null;
   quantity_in_stock: number | string;
+  direct_inventory_tracking_enabled: boolean;
   product_status: string;
   marketplace_visible: boolean;
   storefront_visible: boolean;
@@ -79,6 +80,7 @@ type ProductForm = {
   directCategoryId: string;
   price: string;
   compareAtPrice: string;
+  trackInventory: boolean;
   quantity: string;
   photoUrl: string;
   status: "draft" | "published" | "paused";
@@ -94,7 +96,8 @@ const emptyForm: ProductForm = {
   directCategoryId: "",
   price: "",
   compareAtPrice: "",
-  quantity: "1",
+  trackInventory: false,
+  quantity: "0",
   photoUrl: "",
   status: "published",
   featured: false,
@@ -112,6 +115,21 @@ function safeFileName(name: string) {
     .replace(/[^a-z0-9.]+/g, "-")
     .replace(/-+/g, "-")
     .replace(/^-|-$/g, "");
+}
+
+function abbreviateCategoryName(value: string | null, maxLength = 26) {
+  const clean = String(value ?? "").trim();
+  if (clean.length <= maxLength) return clean;
+  return `${clean.slice(0, maxLength - 1).trim()}…`;
+}
+
+function categoryOptionLabel(category: Category) {
+  const english = abbreviateCategoryName(category.name);
+  const arabic = abbreviateCategoryName(category.name_ar);
+  const bilingual = arabic ? `${english} / ${arabic}` : english;
+  return category.category_status === "hidden"
+    ? `${bilingual} (hidden)`
+    : bilingual;
 }
 
 function productDisplayName(product: DirectProduct) {
@@ -201,6 +219,7 @@ export default function DarikDirectProductsPage() {
             "official_marketplace_name_ar",
             "brand_name",
             "quantity_in_stock",
+            "direct_inventory_tracking_enabled",
             "product_status",
             "marketplace_visible",
             "storefront_visible",
@@ -319,6 +338,7 @@ export default function DarikDirectProductsPage() {
       lowStock: products.filter(
         (product) =>
           product.direct_product_status !== "archived" &&
+          product.direct_inventory_tracking_enabled &&
           Number(product.quantity_in_stock ?? 0) <= 3
       ).length,
       featured: products.filter(
@@ -357,6 +377,7 @@ export default function DarikDirectProductsPage() {
       directCategoryId: product.direct_store_category_id || "",
       price: String(product.direct_price ?? ""),
       compareAtPrice: String(product.direct_compare_at_price ?? ""),
+      trackInventory: Boolean(product.direct_inventory_tracking_enabled),
       quantity: String(product.quantity_in_stock ?? 0),
       photoUrl: product.direct_photo_url || "",
       status:
@@ -448,7 +469,7 @@ export default function DarikDirectProductsPage() {
     const compareAtPrice = form.compareAtPrice
       ? Number(form.compareAtPrice)
       : null;
-    const quantity = Number(form.quantity);
+    const quantity = form.trackInventory ? Number(form.quantity) : 0;
     const sortOrder = Number(form.sortOrder || 1000);
 
     if (name.length < 2) {
@@ -461,8 +482,11 @@ export default function DarikDirectProductsPage() {
       return;
     }
 
-    if (!Number.isInteger(quantity) || quantity < 0) {
-      setError("Quantity must be a whole number of zero or more.");
+    if (
+      form.trackInventory &&
+      (!Number.isInteger(quantity) || quantity < 0)
+    ) {
+      setError("Inventory amount must be a whole number of zero or more.");
       return;
     }
 
@@ -479,7 +503,7 @@ export default function DarikDirectProductsPage() {
     setMessage("");
 
     const result = editingProductId
-      ? await supabase.rpc("darik_direct_update_product_v2", {
+      ? await supabase.rpc("darik_direct_update_product_v3", {
           p_product_id: editingProductId,
           p_name: name,
           p_name_ar: form.nameAr.trim() || null,
@@ -488,13 +512,14 @@ export default function DarikDirectProductsPage() {
           p_direct_store_category_id: form.directCategoryId || null,
           p_price: price,
           p_compare_at_price: compareAtPrice,
+          p_track_inventory: form.trackInventory,
           p_quantity: quantity,
           p_photo_url: form.photoUrl.trim() || null,
           p_status: form.status,
           p_featured: form.featured,
           p_sort_order: Number.isFinite(sortOrder) ? sortOrder : 1000,
         })
-      : await supabase.rpc("darik_direct_create_product_v2", {
+      : await supabase.rpc("darik_direct_create_product_v3", {
           p_retailer_id: selectedRetailerId,
           p_name: name,
           p_name_ar: form.nameAr.trim() || null,
@@ -503,6 +528,7 @@ export default function DarikDirectProductsPage() {
           p_direct_store_category_id: form.directCategoryId || null,
           p_price: price,
           p_compare_at_price: compareAtPrice,
+          p_track_inventory: form.trackInventory,
           p_quantity: quantity,
           p_photo_url: form.photoUrl.trim() || null,
           p_publish: form.status === "published",
@@ -677,7 +703,7 @@ export default function DarikDirectProductsPage() {
               <article>
                 <span>Low stock</span>
                 <strong>{counts.lowStock}</strong>
-                <p>Three units or fewer</p>
+                <p>Tracked items with three or fewer</p>
               </article>
               <article>
                 <span>Featured</span>
@@ -787,13 +813,18 @@ export default function DarikDirectProductsPage() {
 
                           <div className={styles.productFacts}>
                             <div>
-                              <span>Stock</span>
+                              <span>Inventory</span>
                               <strong
                                 className={
-                                  stock <= 3 ? styles.lowStock : undefined
+                                  product.direct_inventory_tracking_enabled &&
+                                  stock <= 3
+                                    ? styles.lowStock
+                                    : undefined
                                 }
                               >
-                                {stock}
+                                {product.direct_inventory_tracking_enabled
+                                  ? stock
+                                  : "Not tracked"}
                               </strong>
                             </div>
                             <div>
@@ -955,10 +986,7 @@ export default function DarikDirectProductsPage() {
                       <option value="">Uncategorized</option>
                       {categories.map((category) => (
                         <option key={category.id} value={category.id}>
-                          {category.name}
-                          {category.category_status === "hidden"
-                            ? " (hidden)"
-                            : ""}
+                          {categoryOptionLabel(category)}
                         </option>
                       ))}
                     </select>
@@ -1018,19 +1046,44 @@ export default function DarikDirectProductsPage() {
                     </div>
                   </label>
 
-                  <label>
-                    Quantity in stock
-                    <input
-                      type="number"
-                      min="0"
-                      step="1"
-                      value={form.quantity}
-                      onChange={(event) =>
-                        updateForm("quantity", event.target.value)
-                      }
-                      required
-                    />
-                  </label>
+                  <div className={styles.inventoryControl}>
+                    <label className={styles.inventoryToggle}>
+                      <input
+                        type="checkbox"
+                        checked={form.trackInventory}
+                        onChange={(event) =>
+                          updateForm("trackInventory", event.target.checked)
+                        }
+                      />
+                      <span>
+                        <strong>Track inventory</strong>
+                        {form.trackInventory
+                          ? "Enter the amount currently available."
+                          : "Leave unchecked for items that are always available."}
+                      </span>
+                    </label>
+
+                    {form.trackInventory ? (
+                      <label className={styles.inventoryAmount}>
+                        Inventory amount
+                        <input
+                          type="number"
+                          min="0"
+                          step="1"
+                          value={form.quantity}
+                          onChange={(event) =>
+                            updateForm("quantity", event.target.value)
+                          }
+                          required
+                        />
+                      </label>
+                    ) : (
+                      <div className={styles.inventoryNotTracked}>
+                        <strong>Inventory not tracked</strong>
+                        <span>This item stays available until you pause it.</span>
+                      </div>
+                    )}
+                  </div>
                 </div>
 
                 <div className={styles.twoColumns}>

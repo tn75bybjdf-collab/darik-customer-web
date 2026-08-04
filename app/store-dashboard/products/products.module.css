@@ -814,6 +814,69 @@
   cursor: not-allowed;
 }
 
+
+.inventoryControl {
+  min-height: 100%;
+  display: grid;
+  gap: 10px;
+}
+
+.inventoryToggle {
+  min-height: 82px;
+  grid-template-columns: auto 1fr !important;
+  align-items: flex-start;
+  border: 1px solid #d6deea;
+  border-radius: 12px;
+  padding: 12px;
+  background: #f8fafc;
+  cursor: pointer;
+}
+
+.inventoryToggle input {
+  width: 19px !important;
+  height: 19px;
+  margin-top: 2px;
+  accent-color: #155eef;
+}
+
+.inventoryToggle span {
+  display: grid;
+  gap: 4px;
+  color: #667085;
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.inventoryToggle strong {
+  color: #344054;
+  font-size: 13px;
+}
+
+.inventoryAmount {
+  margin-top: 1px;
+}
+
+.inventoryNotTracked {
+  min-height: 52px;
+  display: grid;
+  align-content: center;
+  gap: 3px;
+  border-radius: 11px;
+  padding: 9px 11px;
+  background: #ecfdf5;
+  color: #047857;
+}
+
+.inventoryNotTracked strong {
+  font-size: 12px;
+}
+
+.inventoryNotTracked span {
+  font-size: 11px;
+  line-height: 1.35;
+}
+
 @keyframes spin {
   to {
     transform: rotate(360deg);

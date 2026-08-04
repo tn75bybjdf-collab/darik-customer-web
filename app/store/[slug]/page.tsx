@@ -60,6 +60,7 @@ type Product = {
   description: string | null;
   app_price: number | string | null;
   quantity_in_stock: number | string | null;
+  direct_inventory_tracking_enabled: boolean;
   official_product_photo_url: string | null;
   official_product_thumbnail_url: string | null;
   official_product_photo_url_2: string | null;
@@ -702,7 +703,7 @@ export default function DarikDirectStorefrontPage() {
             {product.storefront_featured ? (
               <strong className={styles.featuredTag}>Featured</strong>
             ) : null}
-            {stock <= 3 ? (
+            {product.direct_inventory_tracking_enabled && stock <= 3 ? (
               <strong className={styles.stockTag}>Only {stock} left</strong>
             ) : null}
           </div>
