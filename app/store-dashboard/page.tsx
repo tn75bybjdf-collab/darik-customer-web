@@ -6,6 +6,7 @@ import {
   useCallback,
   useEffect,
   useMemo,
+  useRef,
   useState,
 } from "react";
 import type { Session } from "@supabase/supabase-js";
@@ -175,6 +176,7 @@ type StorefrontSettings = {
   delivery_fee: number | string;
   delivery_radius_km: number | string | null;
   estimated_delivery_minutes: number | null;
+  updated_at?: string | null;
 };
 
 type RecentOrder = {
@@ -199,6 +201,10 @@ function cleanSlug(value: string) {
     .replace(/\s+/g, "-")
     .replace(/-+/g, "-")
     .replace(/^-|-$/g, "");
+}
+
+function storefrontDraftKey(retailerId: string) {
+  return `darik-direct-storefront-draft:${retailerId}`;
 }
 
 export default function DarikDirectDashboardPage() {
@@ -249,6 +255,12 @@ export default function DarikDirectDashboardPage() {
     operatingHours: { ...defaultOperatingHours },
   });
 
+  const [formDirty, setFormDirty] = useState(false);
+  const [draftSavedAt, setDraftSavedAt] = useState<string | null>(null);
+  const setupFormDirtyRef = useRef(false);
+  const hydratedRetailerIdRef = useRef<string | null>(null);
+  const authUserIdRef = useRef<string | null>(null);
+
   const selectedStore = useMemo(
     () =>
       context?.stores.find(
@@ -257,8 +269,15 @@ export default function DarikDirectDashboardPage() {
     [context, selectedRetailerId]
   );
 
+  const authUserId = session?.user.id ?? null;
+
+  const markSetupDirty = useCallback(() => {
+    setupFormDirtyRef.current = true;
+    setFormDirty(true);
+  }, []);
+
   const loadContext = useCallback(async () => {
-    if (!session) return;
+    if (!authUserId) return;
 
     setLoadingContext(true);
     setError("");
@@ -287,30 +306,49 @@ export default function DarikDirectDashboardPage() {
     });
 
     setLoadingContext(false);
-  }, [session]);
+  }, [authUserId]);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
+      authUserIdRef.current = data.session?.user.id ?? null;
       setSession(data.session);
       setAuthReady(true);
     });
 
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, nextSession) => {
+    } = supabase.auth.onAuthStateChange((event, nextSession) => {
+      const previousUserId = authUserIdRef.current;
+      const nextUserId = nextSession?.user.id ?? null;
+      const accountChanged =
+        Boolean(previousUserId) &&
+        Boolean(nextUserId) &&
+        previousUserId !== nextUserId;
+
+      authUserIdRef.current = nextUserId;
       setSession(nextSession);
-      setContext(null);
-      setStorefront(null);
-      setRecentOrders([]);
       setAuthReady(true);
+
+      // Supabase emits TOKEN_REFRESHED and INITIAL_SESSION in the background.
+      // Those events must never clear or reload an in-progress storefront form.
+      if (event === "SIGNED_OUT" || !nextSession || accountChanged) {
+        setContext(null);
+        setStorefront(null);
+        setRecentOrders([]);
+        setSelectedRetailerId("");
+        hydratedRetailerIdRef.current = null;
+        setupFormDirtyRef.current = false;
+        setFormDirty(false);
+        setDraftSavedAt(null);
+      }
     });
 
     return () => subscription.unsubscribe();
   }, []);
 
   useEffect(() => {
-    if (session) loadContext();
-  }, [session, loadContext]);
+    if (authUserId) loadContext();
+  }, [authUserId, loadContext]);
 
   useEffect(() => {
     if (!selectedStore) {
@@ -319,6 +357,15 @@ export default function DarikDirectDashboardPage() {
     }
 
     let cancelled = false;
+    const retailerChanged =
+      hydratedRetailerIdRef.current !== selectedStore.retailer_id;
+
+    if (retailerChanged) {
+      hydratedRetailerIdRef.current = selectedStore.retailer_id;
+      setupFormDirtyRef.current = false;
+      setFormDirty(false);
+      setDraftSavedAt(null);
+    }
 
     async function loadStoreData() {
       setError("");
@@ -360,74 +407,129 @@ export default function DarikDirectDashboardPage() {
           (storefrontResult.data as StorefrontSettings | null) ?? null;
         setStorefront(loadedStorefront);
 
-        if (loadedStorefront) {
-          setSetupForm({
-            slug: loadedStorefront.slug,
-            displayName: loadedStorefront.display_name,
-            displayNameAr: loadedStorefront.display_name_ar ?? "",
-            tagline: loadedStorefront.tagline ?? "",
-            taglineAr: loadedStorefront.tagline_ar ?? "",
-            logoUrl: loadedStorefront.logo_url ?? "",
-            heroImageUrl: loadedStorefront.hero_image_url ?? "",
-            phone: loadedStorefront.business_phone ?? "",
-            whatsapp: loadedStorefront.whatsapp_number ?? "",
-            publicEmail: loadedStorefront.public_email ?? "",
-            websiteUrl: loadedStorefront.website_url ?? "",
-            facebookUrl: loadedStorefront.facebook_url ?? "",
-            instagramUrl: loadedStorefront.instagram_url ?? "",
-            addressText: loadedStorefront.address_text ?? "",
-            aboutText: loadedStorefront.about_text ?? "",
-            aboutTextAr: loadedStorefront.about_text_ar ?? "",
-            primaryColor: loadedStorefront.primary_color,
-            accentColor: loadedStorefront.accent_color,
-            backgroundColor: loadedStorefront.background_color,
-            deliveryFee: String(loadedStorefront.delivery_fee ?? "0"),
-            minimumOrder: String(loadedStorefront.minimum_order ?? "0"),
-            deliveryRadiusKm:
-              loadedStorefront.delivery_radius_km == null
-                ? ""
-                : String(loadedStorefront.delivery_radius_km),
-            estimatedDeliveryMinutes:
-              loadedStorefront.estimated_delivery_minutes == null
-                ? ""
-                : String(loadedStorefront.estimated_delivery_minutes),
-            customLinks: normalizeCustomLinks(loadedStorefront.custom_links),
-            customInformation: normalizeCustomInformation(
-              loadedStorefront.custom_information
-            ),
-            operatingHours: normalizeOperatingHours(
-              loadedStorefront.operating_hours
-            ),
-          });
-        } else {
-          setSetupForm({
-            slug: cleanSlug(selectedStore.business_name),
-            displayName: selectedStore.business_name,
-            displayNameAr: "",
-            tagline: "",
-            taglineAr: "",
-            logoUrl: "",
-            heroImageUrl: "",
-            phone: "",
-            whatsapp: "",
-            publicEmail: "",
-            websiteUrl: "",
-            facebookUrl: "",
-            instagramUrl: "",
-            addressText: "",
-            aboutText: "",
-            aboutTextAr: "",
-            primaryColor: "#111827",
-            accentColor: "#2563EB",
-            backgroundColor: "#F8FAFC",
-            deliveryFee: "2.00",
-            minimumOrder: "0.00",
-            deliveryRadiusKm: "",
-            estimatedDeliveryMinutes: "45",
-            customLinks: [],
-            customInformation: [],
-            operatingHours: { ...defaultOperatingHours },
-          });
+        const databaseForm: StorefrontForm = loadedStorefront
+          ? {
+              slug: loadedStorefront.slug,
+              displayName: loadedStorefront.display_name,
+              displayNameAr: loadedStorefront.display_name_ar ?? "",
+              tagline: loadedStorefront.tagline ?? "",
+              taglineAr: loadedStorefront.tagline_ar ?? "",
+              logoUrl: loadedStorefront.logo_url ?? "",
+              heroImageUrl: loadedStorefront.hero_image_url ?? "",
+              phone: loadedStorefront.business_phone ?? "",
+              whatsapp: loadedStorefront.whatsapp_number ?? "",
+              publicEmail: loadedStorefront.public_email ?? "",
+              websiteUrl: loadedStorefront.website_url ?? "",
+              facebookUrl: loadedStorefront.facebook_url ?? "",
+              instagramUrl: loadedStorefront.instagram_url ?? "",
+              addressText: loadedStorefront.address_text ?? "",
+              aboutText: loadedStorefront.about_text ?? "",
+              aboutTextAr: loadedStorefront.about_text_ar ?? "",
+              primaryColor: loadedStorefront.primary_color,
+              accentColor: loadedStorefront.accent_color,
+              backgroundColor: loadedStorefront.background_color,
+              deliveryFee: String(loadedStorefront.delivery_fee ?? "0"),
+              minimumOrder: String(loadedStorefront.minimum_order ?? "0"),
+              deliveryRadiusKm:
+                loadedStorefront.delivery_radius_km == null
+                  ? ""
+                  : String(loadedStorefront.delivery_radius_km),
+              estimatedDeliveryMinutes:
+                loadedStorefront.estimated_delivery_minutes == null
+                  ? ""
+                  : String(loadedStorefront.estimated_delivery_minutes),
+              customLinks: normalizeCustomLinks(loadedStorefront.custom_links),
+              customInformation: normalizeCustomInformation(
+                loadedStorefront.custom_information
+              ),
+              operatingHours: normalizeOperatingHours(
+                loadedStorefront.operating_hours
+              ),
+            }
+          : {
+              slug: cleanSlug(selectedStore.business_name),
+              displayName: selectedStore.business_name,
+              displayNameAr: "",
+              tagline: "",
+              taglineAr: "",
+              logoUrl: "",
+              heroImageUrl: "",
+              phone: "",
+              whatsapp: "",
+              publicEmail: "",
+              websiteUrl: "",
+              facebookUrl: "",
+              instagramUrl: "",
+              addressText: "",
+              aboutText: "",
+              aboutTextAr: "",
+              primaryColor: "#111827",
+              accentColor: "#2563EB",
+              backgroundColor: "#F8FAFC",
+              deliveryFee: "2.00",
+              minimumOrder: "0.00",
+              deliveryRadiusKm: "",
+              estimatedDeliveryMinutes: "45",
+              customLinks: [],
+              customInformation: [],
+              operatingHours: { ...defaultOperatingHours },
+            };
+
+        let nextForm = databaseForm;
+        let restoredDraftAt: string | null = null;
+
+        if (typeof window !== "undefined") {
+          const draftKey = storefrontDraftKey(selectedStore.retailer_id);
+
+          try {
+            const rawDraft = window.localStorage.getItem(draftKey);
+
+            if (rawDraft) {
+              const parsedDraft = JSON.parse(rawDraft) as {
+                retailerId?: string;
+                savedAt?: string;
+                form?: Partial<StorefrontForm>;
+              };
+
+              if (
+                parsedDraft.retailerId === selectedStore.retailer_id &&
+                parsedDraft.form
+              ) {
+                nextForm = {
+                  ...databaseForm,
+                  ...parsedDraft.form,
+                  customLinks: normalizeCustomLinks(
+                    parsedDraft.form.customLinks
+                  ),
+                  customInformation: normalizeCustomInformation(
+                    parsedDraft.form.customInformation
+                  ),
+                  operatingHours: normalizeOperatingHours(
+                    parsedDraft.form.operatingHours
+                  ),
+                };
+                restoredDraftAt = parsedDraft.savedAt ?? new Date().toISOString();
+              }
+            }
+          } catch {
+            window.localStorage.removeItem(draftKey);
+          }
+        }
+
+        // Never replace fields while the retailer has unsaved changes.
+        if (retailerChanged || !setupFormDirtyRef.current) {
+          setSetupForm(nextForm);
+
+          const draftWasRestored = Boolean(restoredDraftAt);
+          setupFormDirtyRef.current = draftWasRestored;
+          setFormDirty(draftWasRestored);
+          setDraftSavedAt(restoredDraftAt);
+
+          if (draftWasRestored) {
+            setMessage(
+              "Your unsaved storefront changes were restored automatically."
+            );
+          }
         }
       }
 
@@ -449,6 +551,43 @@ export default function DarikDirectDashboardPage() {
       cancelled = true;
     };
   }, [selectedStore]);
+
+  useEffect(() => {
+    if (!selectedStore || !formDirty) return;
+
+    const timer = window.setTimeout(() => {
+      const savedAt = new Date().toISOString();
+
+      window.localStorage.setItem(
+        storefrontDraftKey(selectedStore.retailer_id),
+        JSON.stringify({
+          version: 1,
+          retailerId: selectedStore.retailer_id,
+          savedAt,
+          form: setupForm,
+        })
+      );
+
+      setDraftSavedAt(savedAt);
+    }, 300);
+
+    return () => window.clearTimeout(timer);
+  }, [selectedStore, setupForm, formDirty]);
+
+  useEffect(() => {
+    if (!formDirty) return;
+
+    const protectUnsavedForm = (event: BeforeUnloadEvent) => {
+      event.preventDefault();
+      event.returnValue = "";
+    };
+
+    window.addEventListener("beforeunload", protectUnsavedForm);
+
+    return () => {
+      window.removeEventListener("beforeunload", protectUnsavedForm);
+    };
+  }, [formDirty]);
 
   async function signIn(event: FormEvent) {
     event.preventDefault();
@@ -476,10 +615,12 @@ export default function DarikDirectDashboardPage() {
     field: K,
     value: StorefrontForm[K]
   ) {
+    markSetupDirty();
     setSetupForm((current) => ({ ...current, [field]: value }));
   }
 
   function updateOperatingHour(day: string, value: string) {
+    markSetupDirty();
     setSetupForm((current) => ({
       ...current,
       operatingHours: {
@@ -490,6 +631,7 @@ export default function DarikDirectDashboardPage() {
   }
 
   function addCustomLink() {
+    markSetupDirty();
     setSetupForm((current) => ({
       ...current,
       customLinks: [...current.customLinks, { label: "", url: "" }],
@@ -501,6 +643,7 @@ export default function DarikDirectDashboardPage() {
     field: keyof CustomLink,
     value: string
   ) {
+    markSetupDirty();
     setSetupForm((current) => ({
       ...current,
       customLinks: current.customLinks.map((link, linkIndex) =>
@@ -510,6 +653,7 @@ export default function DarikDirectDashboardPage() {
   }
 
   function removeCustomLink(index: number) {
+    markSetupDirty();
     setSetupForm((current) => ({
       ...current,
       customLinks: current.customLinks.filter(
@@ -519,6 +663,7 @@ export default function DarikDirectDashboardPage() {
   }
 
   function addCustomInformation() {
+    markSetupDirty();
     setSetupForm((current) => ({
       ...current,
       customInformation: [
@@ -533,6 +678,7 @@ export default function DarikDirectDashboardPage() {
     field: keyof CustomInformation,
     value: string
   ) {
+    markSetupDirty();
     setSetupForm((current) => ({
       ...current,
       customInformation: current.customInformation.map((item, itemIndex) =>
@@ -542,6 +688,7 @@ export default function DarikDirectDashboardPage() {
   }
 
   function removeCustomInformation(index: number) {
+    markSetupDirty();
     setSetupForm((current) => ({
       ...current,
       customInformation: current.customInformation.filter(
@@ -601,6 +748,7 @@ export default function DarikDirectDashboardPage() {
 
     const publicUrl = publicResult.data.publicUrl;
 
+    markSetupDirty();
     setSetupForm((current) => ({
       ...current,
       [assetType === "logo" ? "logoUrl" : "heroImageUrl"]: publicUrl,
@@ -710,7 +858,25 @@ export default function DarikDirectDashboardPage() {
       return;
     }
 
-    setStorefront(result.data as StorefrontSettings);
+    const savedStorefront = result.data as StorefrontSettings;
+
+    setStorefront(savedStorefront);
+    setSetupForm((current) => ({
+      ...current,
+      slug: savedStorefront.slug,
+      displayName: savedStorefront.display_name,
+    }));
+
+    setupFormDirtyRef.current = false;
+    setFormDirty(false);
+    setDraftSavedAt(null);
+
+    if (typeof window !== "undefined") {
+      window.localStorage.removeItem(
+        storefrontDraftKey(selectedStore.retailer_id)
+      );
+    }
+
     setMessage(
       storefront
         ? "Storefront settings updated."
@@ -1523,17 +1689,41 @@ export default function DarikDirectDashboardPage() {
                   </div>
                 </div>
 
-                <button
-                  className={styles.saveButton}
-                  type="submit"
-                  disabled={saving || uploadingAsset !== null}
-                >
-                  {saving
-                    ? "Saving…"
-                    : storefront
-                      ? "Save storefront profile"
-                      : "Create draft storefront"}
-                </button>
+                <div className={styles.formSaveBar}>
+                  <div
+                    className={`${styles.draftStatus} ${
+                      formDirty ? styles.draftStatusUnsaved : ""
+                    }`}
+                  >
+                    <strong>
+                      {formDirty ? "Unsaved changes protected" : "All changes saved"}
+                    </strong>
+                    <span>
+                      {formDirty
+                        ? draftSavedAt
+                          ? `Local draft updated at ${new Date(
+                              draftSavedAt
+                            ).toLocaleTimeString([], {
+                              hour: "2-digit",
+                              minute: "2-digit",
+                            })}`
+                          : "Protecting your entries automatically…"
+                        : "Background login refreshes will not reset this form."}
+                    </span>
+                  </div>
+
+                  <button
+                    className={styles.saveButton}
+                    type="submit"
+                    disabled={saving || uploadingAsset !== null}
+                  >
+                    {saving
+                      ? "Saving…"
+                      : storefront
+                        ? "Save storefront profile"
+                        : "Create draft storefront"}
+                  </button>
+                </div>
               </form>
             </section>
 
