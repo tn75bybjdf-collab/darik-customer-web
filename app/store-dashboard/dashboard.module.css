@@ -873,3 +873,36 @@
     width: 100%;
   }
 }
+
+
+.catalogActions {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  flex-wrap: wrap;
+}
+
+.catalogSecondaryButton {
+  min-height: 42px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #ccd6e4;
+  border-radius: 11px;
+  padding: 0 15px;
+  background: white;
+  color: #21314a;
+  font-size: 13px;
+  font-weight: 900;
+  text-decoration: none;
+}
+
+@media (max-width: 650px) {
+  .catalogActions {
+    width: 100%;
+  }
+
+  .catalogActions > a {
+    flex: 1;
+  }
+}

@@ -48,6 +48,10 @@ type Product = {
   id: string;
   retailer_id: string;
   category_id: string | null;
+  direct_store_category_id: string | null;
+  direct_store_category_name: string | null;
+  direct_store_category_name_ar: string | null;
+  direct_store_category_slug: string | null;
   subcategory_name: string | null;
   name: string;
   official_marketplace_name: string | null;
@@ -65,7 +69,16 @@ type Product = {
 
 type Category = {
   id: string;
+  retailer_id: string;
+  storefront_id: string;
+  storefront_slug: string;
   name: string;
+  name_ar: string | null;
+  slug: string;
+  description: string | null;
+  image_url: string | null;
+  sort_order: number | string;
+  product_count: number | string;
 };
 
 type CartLine = {
@@ -195,7 +208,12 @@ export default function DarikDirectStorefrontPage() {
           .order("storefront_featured", { ascending: false })
           .order("storefront_sort_order", { ascending: true })
           .order("created_at", { ascending: false }),
-        supabase.from("categories").select("id,name").order("name"),
+        supabase
+          .from("public_storefront_categories")
+          .select("*")
+          .eq("storefront_slug", slug)
+          .order("sort_order", { ascending: true })
+          .order("name", { ascending: true }),
       ]);
 
       if (cancelled) return;
@@ -220,14 +238,12 @@ export default function DarikDirectStorefrontPage() {
     };
   }, [slug]);
 
-  const usedCategoryIds = useMemo(
-    () => new Set(products.map((product) => product.category_id).filter(Boolean)),
-    [products]
-  );
-
   const visibleCategories = useMemo(
-    () => categories.filter((category) => usedCategoryIds.has(category.id)),
-    [categories, usedCategoryIds]
+    () =>
+      categories.filter(
+        (category) => Number(category.product_count ?? 0) > 0
+      ),
+    [categories]
   );
 
   const filteredProducts = useMemo(() => {
@@ -236,7 +252,7 @@ export default function DarikDirectStorefrontPage() {
     return products.filter((product) => {
       if (
         selectedCategoryId !== "all" &&
-        product.category_id !== selectedCategoryId
+        product.direct_store_category_id !== selectedCategoryId
       ) {
         return false;
       }
@@ -625,7 +641,11 @@ export default function DarikDirectStorefrontPage() {
               }
               onClick={() => setSelectedCategoryId(category.id)}
             >
-              {category.name}
+              {category.image_url ? (
+                <img src={category.image_url} alt="" />
+              ) : null}
+              <span>{category.name}</span>
+              <small>{Number(category.product_count ?? 0)}</small>
             </button>
           ))}
         </div>
@@ -678,8 +698,8 @@ export default function DarikDirectStorefrontPage() {
 
                   <div className={styles.productBody}>
                     <p className={styles.productMeta}>
-                      {product.brand_name ||
-                        product.subcategory_name ||
+                      {product.direct_store_category_name ||
+                        product.brand_name ||
                         "Available now"}
                     </p>
                     <h3>

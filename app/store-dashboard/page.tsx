@@ -859,6 +859,7 @@ export default function DarikDirectDashboardPage() {
           <a href="#storefront">Storefront</a>
           <a href="#orders">Orders</a>
           <a href="/store-dashboard/products">Products</a>
+          <a href="/store-dashboard/categories">Categories</a>
         </nav>
 
         <div className={styles.sidebarFooter}>
@@ -1579,12 +1580,20 @@ export default function DarikDirectDashboardPage() {
                   <h2>One product record, two channels</h2>
                 </div>
 
-                <a
-                  className={styles.catalogButton}
-                  href="/store-dashboard/products"
-                >
-                  Manage products
-                </a>
+                <div className={styles.catalogActions}>
+                  <a
+                    className={styles.catalogSecondaryButton}
+                    href="/store-dashboard/categories"
+                  >
+                    Manage categories
+                  </a>
+                  <a
+                    className={styles.catalogButton}
+                    href="/store-dashboard/products"
+                  >
+                    Manage products
+                  </a>
+                </div>
               </div>
 
               <div className={styles.channelExplanation}>

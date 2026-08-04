@@ -37,13 +37,18 @@ type ContextResult = {
 
 type Category = {
   id: string;
+  retailer_id: string;
   name: string;
+  name_ar: string | null;
+  category_status: "active" | "hidden" | "archived";
+  sort_order: number | string;
 };
 
 type DirectProduct = {
   id: string;
   retailer_id: string;
   category_id: string | null;
+  direct_store_category_id: string | null;
   name: string;
   retailer_submitted_name: string | null;
   official_marketplace_name: string | null;
@@ -71,7 +76,7 @@ type ProductForm = {
   nameAr: string;
   description: string;
   brandName: string;
-  categoryId: string;
+  directCategoryId: string;
   price: string;
   compareAtPrice: string;
   quantity: string;
@@ -86,7 +91,7 @@ const emptyForm: ProductForm = {
   nameAr: "",
   description: "",
   brandName: "",
-  categoryId: "",
+  directCategoryId: "",
   price: "",
   compareAtPrice: "",
   quantity: "1",
@@ -189,6 +194,7 @@ export default function DarikDirectProductsPage() {
             "id",
             "retailer_id",
             "category_id",
+            "direct_store_category_id",
             "name",
             "retailer_submitted_name",
             "official_marketplace_name",
@@ -215,7 +221,13 @@ export default function DarikDirectProductsPage() {
         .order("storefront_featured", { ascending: false })
         .order("storefront_sort_order", { ascending: true })
         .order("created_at", { ascending: false }),
-      supabase.from("categories").select("id,name").order("name"),
+      supabase
+        .from("retailer_store_categories")
+        .select("id,retailer_id,name,name_ar,category_status,sort_order")
+        .eq("retailer_id", selectedRetailerId)
+        .neq("category_status", "archived")
+        .order("sort_order", { ascending: true })
+        .order("name", { ascending: true }),
     ]);
 
     if (productResult.error) {
@@ -291,6 +303,11 @@ export default function DarikDirectProductsPage() {
     });
   }, [products, search, statusFilter]);
 
+  const categoryById = useMemo(
+    () => new Map(categories.map((category) => [category.id, category])),
+    [categories]
+  );
+
   const counts = useMemo(() => {
     return {
       total: products.filter(
@@ -337,7 +354,7 @@ export default function DarikDirectProductsPage() {
         "",
       description: product.direct_description || "",
       brandName: product.brand_name || "",
-      categoryId: product.category_id || "",
+      directCategoryId: product.direct_store_category_id || "",
       price: String(product.direct_price ?? ""),
       compareAtPrice: String(product.direct_compare_at_price ?? ""),
       quantity: String(product.quantity_in_stock ?? 0),
@@ -462,13 +479,13 @@ export default function DarikDirectProductsPage() {
     setMessage("");
 
     const result = editingProductId
-      ? await supabase.rpc("darik_direct_update_product", {
+      ? await supabase.rpc("darik_direct_update_product_v2", {
           p_product_id: editingProductId,
           p_name: name,
           p_name_ar: form.nameAr.trim() || null,
           p_description: form.description.trim() || null,
           p_brand_name: form.brandName.trim() || null,
-          p_category_id: form.categoryId || null,
+          p_direct_store_category_id: form.directCategoryId || null,
           p_price: price,
           p_compare_at_price: compareAtPrice,
           p_quantity: quantity,
@@ -477,13 +494,13 @@ export default function DarikDirectProductsPage() {
           p_featured: form.featured,
           p_sort_order: Number.isFinite(sortOrder) ? sortOrder : 1000,
         })
-      : await supabase.rpc("darik_direct_create_product", {
+      : await supabase.rpc("darik_direct_create_product_v2", {
           p_retailer_id: selectedRetailerId,
           p_name: name,
           p_name_ar: form.nameAr.trim() || null,
           p_description: form.description.trim() || null,
           p_brand_name: form.brandName.trim() || null,
-          p_category_id: form.categoryId || null,
+          p_direct_store_category_id: form.directCategoryId || null,
           p_price: price,
           p_compare_at_price: compareAtPrice,
           p_quantity: quantity,
@@ -574,6 +591,7 @@ export default function DarikDirectProductsPage() {
           <a className={styles.activeNav} href="/store-dashboard/products">
             Products
           </a>
+          <a href="/store-dashboard/categories">Categories</a>
         </nav>
 
         <div className={styles.sidebarFooter}>
@@ -752,7 +770,13 @@ export default function DarikDirectProductsPage() {
                         <div className={styles.productBody}>
                           <div className={styles.productHeading}>
                             <div>
-                              <p>{product.brand_name || "Darik Direct"}</p>
+                              <p>
+                                {categoryById.get(
+                                  product.direct_store_category_id || ""
+                                )?.name ||
+                                  product.brand_name ||
+                                  "Uncategorized"}
+                              </p>
                               <h3>{name}</h3>
                               {product.direct_name_ar ? (
                                 <span dir="rtl">{product.direct_name_ar}</span>
@@ -921,20 +945,29 @@ export default function DarikDirectProductsPage() {
                   </label>
 
                   <label>
-                    Category
+                    Store category
                     <select
-                      value={form.categoryId}
+                      value={form.directCategoryId}
                       onChange={(event) =>
-                        updateForm("categoryId", event.target.value)
+                        updateForm("directCategoryId", event.target.value)
                       }
                     >
-                      <option value="">No category</option>
+                      <option value="">Uncategorized</option>
                       {categories.map((category) => (
                         <option key={category.id} value={category.id}>
                           {category.name}
+                          {category.category_status === "hidden"
+                            ? " (hidden)"
+                            : ""}
                         </option>
                       ))}
                     </select>
+                    <a
+                      className={styles.manageCategoriesLink}
+                      href="/store-dashboard/categories"
+                    >
+                      Create or manage store categories
+                    </a>
                   </label>
                 </div>
 
