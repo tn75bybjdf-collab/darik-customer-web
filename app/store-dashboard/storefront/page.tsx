@@ -215,6 +215,24 @@ function cleanSlug(value: string) {
     .replace(/^-|-$/g, "");
 }
 
+function normalizeOptionalWebUrl(value: string) {
+  const trimmed = value.trim();
+  if (!trimmed) return null;
+  if (/^https?:\/\//i.test(trimmed)) return trimmed;
+  return `https://${trimmed}`;
+}
+
+function formatSupabaseSaveError(error: {
+  message: string;
+  details?: string | null;
+  hint?: string | null;
+  code?: string | null;
+}) {
+  return [error.message, error.details, error.hint, error.code]
+    .filter(Boolean)
+    .join(" | ");
+}
+
 function storefrontDraftKey(retailerId: string) {
   return `darik-direct-storefront-draft:${retailerId}`;
 }
@@ -277,6 +295,7 @@ export default function DarikDirectStorefrontSettingsPage() {
   const setupFormDirtyRef = useRef(false);
   const hydratedRetailerIdRef = useRef<string | null>(null);
   const authUserIdRef = useRef<string | null>(null);
+  const saveBarRef = useRef<HTMLDivElement | null>(null);
 
   const selectedStore = useMemo(
     () =>
@@ -291,6 +310,21 @@ export default function DarikDirectStorefrontSettingsPage() {
   const markSetupDirty = useCallback(() => {
     setupFormDirtyRef.current = true;
     setFormDirty(true);
+    setError("");
+    setMessage("");
+  }, []);
+
+  const showSaveError = useCallback((nextError: string) => {
+    setSaving(false);
+    setMessage("");
+    setError(nextError);
+
+    window.setTimeout(() => {
+      saveBarRef.current?.scrollIntoView({
+        behavior: "smooth",
+        block: "center",
+      });
+    }, 0);
   }, []);
 
   const loadContext = useCallback(async () => {
@@ -799,12 +833,18 @@ export default function DarikDirectStorefrontSettingsPage() {
     const displayName = setupForm.displayName.trim();
 
     if (slug.length < 2) {
-      setError("The storefront link must contain at least two characters.");
+      showSaveError("The storefront link must contain at least two characters.");
       return;
     }
 
     if (!displayName) {
-      setError("Storefront display name is required.");
+      showSaveError("Storefront display name is required.");
+      return;
+    }
+
+    const publicEmail = setupForm.publicEmail.trim();
+    if (publicEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(publicEmail)) {
+      showSaveError("Enter a valid public email address or leave it blank.");
       return;
     }
 
@@ -814,7 +854,7 @@ export default function DarikDirectStorefrontSettingsPage() {
       !setupForm.phone.trim() &&
       !setupForm.whatsapp.trim()
     ) {
-      setError(
+      showSaveError(
         "Add a phone or WhatsApp number before enabling phone ordering."
       );
       return;
@@ -825,17 +865,17 @@ export default function DarikDirectStorefrontSettingsPage() {
       setupForm.orderSubmissionMode === "both";
 
     if (onlineOrderingSelected && !setupForm.acceptCash && !setupForm.acceptCliq) {
-      setError("Select at least one online payment method: Cash or CliQ.");
+      showSaveError("Select at least one online payment method: Cash or CliQ.");
       return;
     }
 
     if (setupForm.acceptCliq && !setupForm.cliqAccountName.trim()) {
-      setError("Enter the CliQ account holder or business name.");
+      showSaveError("Enter the CliQ account holder or business name.");
       return;
     }
 
     if (setupForm.acceptCliq && !setupForm.cliqIdentifier.trim()) {
-      setError("Enter the store's CliQ alias or registered mobile number.");
+      showSaveError("Enter the store's CliQ alias or registered mobile number.");
       return;
     }
 
@@ -854,10 +894,10 @@ export default function DarikDirectStorefrontSettingsPage() {
       hero_image_url: setupForm.heroImageUrl.trim() || null,
       business_phone: setupForm.phone.trim() || null,
       whatsapp_number: setupForm.whatsapp.trim() || null,
-      public_email: setupForm.publicEmail.trim() || null,
-      website_url: setupForm.websiteUrl.trim() || null,
-      facebook_url: setupForm.facebookUrl.trim() || null,
-      instagram_url: setupForm.instagramUrl.trim() || null,
+      public_email: publicEmail || null,
+      website_url: normalizeOptionalWebUrl(setupForm.websiteUrl),
+      facebook_url: normalizeOptionalWebUrl(setupForm.facebookUrl),
+      instagram_url: normalizeOptionalWebUrl(setupForm.instagramUrl),
       address_text: setupForm.addressText.trim() || null,
       about_text: setupForm.aboutText.trim() || null,
       about_text_ar: setupForm.aboutTextAr.trim() || null,
@@ -890,15 +930,6 @@ export default function DarikDirectStorefrontSettingsPage() {
       estimated_delivery_minutes: setupForm.estimatedDeliveryMinutes
         ? Number(setupForm.estimatedDeliveryMinutes)
         : null,
-      order_submission_mode: setupForm.orderSubmissionMode,
-      cash_on_delivery_enabled: setupForm.acceptCash,
-      cliq_enabled: setupForm.acceptCliq,
-      cliq_account_name: setupForm.acceptCliq
-        ? setupForm.cliqAccountName.trim()
-        : null,
-      cliq_payment_identifier: setupForm.acceptCliq
-        ? setupForm.cliqIdentifier.trim()
-        : null,
     };
 
     const result = storefront
@@ -921,12 +952,49 @@ export default function DarikDirectStorefrontSettingsPage() {
           .single();
 
     if (result.error) {
-      setError(result.error.message);
-      setSaving(false);
+      showSaveError(formatSupabaseSaveError(result.error));
       return;
     }
 
-    const savedStorefront = result.data as StorefrontSettings;
+    const profileStorefront = result.data as StorefrontSettings;
+
+    const paymentResult = await supabase.rpc(
+      "darik_direct_save_payment_preferences",
+      {
+        p_storefront_id: profileStorefront.id,
+        p_order_submission_mode: setupForm.orderSubmissionMode,
+        p_cash_on_delivery_enabled: setupForm.acceptCash,
+        p_cliq_enabled: setupForm.acceptCliq,
+        p_cliq_account_name: setupForm.acceptCliq
+          ? setupForm.cliqAccountName.trim()
+          : null,
+        p_cliq_payment_identifier: setupForm.acceptCliq
+          ? setupForm.cliqIdentifier.trim()
+          : null,
+      }
+    );
+
+    if (paymentResult.error) {
+      showSaveError(
+        `The storefront profile saved, but the payment options did not: ${formatSupabaseSaveError(
+          paymentResult.error
+        )}`
+      );
+      return;
+    }
+
+    const savedStorefront: StorefrontSettings = {
+      ...profileStorefront,
+      order_submission_mode: setupForm.orderSubmissionMode,
+      cash_on_delivery_enabled: setupForm.acceptCash,
+      cliq_enabled: setupForm.acceptCliq,
+      cliq_account_name: setupForm.acceptCliq
+        ? setupForm.cliqAccountName.trim()
+        : null,
+      cliq_payment_identifier: setupForm.acceptCliq
+        ? setupForm.cliqIdentifier.trim()
+        : null,
+    };
 
     setStorefront(savedStorefront);
     setSetupForm((current) => ({
@@ -1181,7 +1249,7 @@ export default function DarikDirectStorefrontSettingsPage() {
                 ) : null}
               </div>
 
-              <form className={styles.setupForm} onSubmit={saveStorefront}>
+              <form className={styles.setupForm} onSubmit={saveStorefront} noValidate>
                 <div className={styles.formSection}>
                   <div className={styles.formSectionHeading}>
                     <div>
@@ -1874,7 +1942,7 @@ export default function DarikDirectStorefrontSettingsPage() {
                   </div>
                 </div>
 
-                <div className={styles.formSaveBar}>
+                <div className={styles.formSaveBar} ref={saveBarRef}>
                   <div
                     className={`${styles.draftStatus} ${
                       formDirty ? styles.draftStatusUnsaved : ""
@@ -1896,6 +1964,13 @@ export default function DarikDirectStorefrontSettingsPage() {
                         : "Background login refreshes will not reset this form."}
                     </span>
                   </div>
+
+                  {error ? (
+                    <div className={styles.saveErrorInline} role="alert">
+                      <strong>Could not save</strong>
+                      <span>{error}</span>
+                    </div>
+                  ) : null}
 
                   <button
                     className={styles.saveButton}

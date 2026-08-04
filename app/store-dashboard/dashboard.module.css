@@ -952,6 +952,29 @@
   position: absolute;
 }
 
+.saveErrorInline {
+  min-width: 220px;
+  max-width: 460px;
+  display: grid;
+  gap: 3px;
+  border: 1px solid #fecaca;
+  border-radius: 12px;
+  padding: 9px 11px;
+  background: #fff1f2;
+}
+
+.saveErrorInline strong {
+  color: #991b1b;
+  font-size: 12px;
+}
+
+.saveErrorInline span {
+  color: #b91c1c;
+  font-size: 11px;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+}
+
 .formSaveBar .saveButton {
   grid-column: auto;
   flex: 0 0 auto;
@@ -965,6 +988,11 @@
     bottom: 8px;
     align-items: stretch;
     flex-direction: column;
+  }
+
+  .saveErrorInline {
+    width: 100%;
+    max-width: none;
   }
 
   .formSaveBar .saveButton {
