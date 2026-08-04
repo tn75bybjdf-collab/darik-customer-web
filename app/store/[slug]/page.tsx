@@ -16,6 +16,18 @@ type Storefront = {
   tagline_ar: string | null;
   logo_url: string | null;
   hero_image_url: string | null;
+  business_phone: string | null;
+  whatsapp_number: string | null;
+  public_email: string | null;
+  website_url: string | null;
+  facebook_url: string | null;
+  instagram_url: string | null;
+  address_text: string | null;
+  about_text: string | null;
+  about_text_ar: string | null;
+  custom_links: Array<{ label: string; url: string }> | null;
+  custom_information: Array<{ label: string; value: string }> | null;
+  operating_hours: Record<string, string> | null;
   primary_color: string;
   accent_color: string;
   background_color: string;
@@ -71,6 +83,38 @@ function money(value: number | string | null | undefined) {
 
 function normalizeParam(value: string | string[] | undefined) {
   return Array.isArray(value) ? value[0] : value ?? "";
+}
+
+function normalizeExternalUrl(value: string | null | undefined) {
+  const clean = String(value ?? "").trim();
+  if (!clean) return null;
+
+  try {
+    const candidate = /^https?:\/\//i.test(clean) ? clean : `https://${clean}`;
+    const url = new URL(candidate);
+    return url.protocol === "http:" || url.protocol === "https:"
+      ? url.toString()
+      : null;
+  } catch {
+    return null;
+  }
+}
+
+function phoneHref(value: string | null | undefined) {
+  const clean = String(value ?? "").trim();
+  if (!clean) return null;
+  const normalized = clean.replace(/[^\d+]/g, "");
+  return normalized ? `tel:${normalized}` : null;
+}
+
+function whatsappHref(value: string | null | undefined) {
+  const digits = String(value ?? "").replace(/\D/g, "");
+  return digits ? `https://wa.me/${digits}` : null;
+}
+
+function emailHref(value: string | null | undefined) {
+  const clean = String(value ?? "").trim();
+  return clean && clean.includes("@") ? `mailto:${clean}` : null;
 }
 
 export default function DarikDirectStorefrontPage() {
@@ -159,11 +203,11 @@ export default function DarikDirectStorefrontPage() {
       if (productResult.error) {
         setLoadError(productResult.error.message);
       } else {
-        setProducts((productResult.data ?? []) as Product[]);
+        setProducts((productResult.data ?? []) as unknown as Product[]);
       }
 
       if (!categoryResult.error) {
-        setCategories((categoryResult.data ?? []) as Category[]);
+        setCategories((categoryResult.data ?? []) as unknown as Category[]);
       }
 
       setLoading(false);
@@ -302,6 +346,82 @@ export default function DarikDirectStorefrontPage() {
     "--store-background": storefront.background_color || "#F8FAFC",
   } as CSSProperties;
 
+  const heroStyle = storefront.hero_image_url
+    ? ({
+        backgroundImage: `linear-gradient(120deg, color-mix(in srgb, var(--store-primary) 88%, rgba(0, 0, 0, 0.38)), color-mix(in srgb, var(--store-accent) 64%, rgba(0, 0, 0, 0.4))), url(${JSON.stringify(
+          storefront.hero_image_url
+        )})`,
+      } as CSSProperties)
+    : undefined;
+
+  const contactLinks = [
+    {
+      label: "Call",
+      detail: storefront.business_phone,
+      href: phoneHref(storefront.business_phone),
+    },
+    {
+      label: "WhatsApp",
+      detail: storefront.whatsapp_number,
+      href: whatsappHref(storefront.whatsapp_number),
+    },
+    {
+      label: "Email",
+      detail: storefront.public_email,
+      href: emailHref(storefront.public_email),
+    },
+    {
+      label: "Website",
+      detail: "Visit website",
+      href: normalizeExternalUrl(storefront.website_url),
+    },
+    {
+      label: "Facebook",
+      detail: "Facebook",
+      href: normalizeExternalUrl(storefront.facebook_url),
+    },
+    {
+      label: "Instagram",
+      detail: "Instagram",
+      href: normalizeExternalUrl(storefront.instagram_url),
+    },
+    ...(Array.isArray(storefront.custom_links)
+      ? storefront.custom_links.map((link) => ({
+          label: String(link.label ?? "").trim(),
+          detail: String(link.label ?? "").trim(),
+          href: normalizeExternalUrl(link.url),
+        }))
+      : []),
+  ].filter(
+    (link): link is { label: string; detail: string; href: string } =>
+      Boolean(link.label && link.detail && link.href)
+  );
+
+  const customInformation = Array.isArray(storefront.custom_information)
+    ? storefront.custom_information.filter(
+        (item) =>
+          String(item?.label ?? "").trim() &&
+          String(item?.value ?? "").trim()
+      )
+    : [];
+
+  const operatingHours = storefront.operating_hours ?? {};
+  const visibleHours = [
+    ["sunday", "Sunday"],
+    ["monday", "Monday"],
+    ["tuesday", "Tuesday"],
+    ["wednesday", "Wednesday"],
+    ["thursday", "Thursday"],
+    ["friday", "Friday"],
+    ["saturday", "Saturday"],
+  ].filter(([day]) => String(operatingHours[day] ?? "").trim());
+
+  const hasStoreProfile =
+    Boolean(storefront.about_text || storefront.about_text_ar) ||
+    Boolean(storefront.address_text) ||
+    customInformation.length > 0 ||
+    visibleHours.length > 0;
+
   return (
     <main className={styles.page} style={themeStyle}>
       <header className={styles.header}>
@@ -315,7 +435,12 @@ export default function DarikDirectStorefrontPage() {
         </button>
       </header>
 
-      <section className={styles.hero}>
+      <section
+        className={`${styles.hero} ${
+          storefront.hero_image_url ? styles.heroWithImage : ""
+        }`}
+        style={heroStyle}
+      >
         <div className={styles.brandBlock}>
           <div className={styles.logoWrap}>
             {storefront.logo_url ? (
@@ -331,9 +456,40 @@ export default function DarikDirectStorefrontPage() {
           <div>
             <p className={styles.eyebrow}>Powered by Darik</p>
             <h1>{storefront.display_name}</h1>
+            {storefront.display_name_ar ? (
+              <p className={styles.arabicName} dir="rtl">
+                {storefront.display_name_ar}
+              </p>
+            ) : null}
+
             <p className={styles.tagline}>
               {storefront.tagline || "Local products delivered to your door."}
             </p>
+
+            {storefront.tagline_ar ? (
+              <p className={styles.arabicTagline} dir="rtl">
+                {storefront.tagline_ar}
+              </p>
+            ) : null}
+
+            {contactLinks.length > 0 ? (
+              <div className={styles.heroContactLinks}>
+                {contactLinks.slice(0, 6).map((link) => (
+                  <a
+                    key={`${link.label}-${link.href}`}
+                    href={link.href}
+                    target={link.href.startsWith("http") ? "_blank" : undefined}
+                    rel={
+                      link.href.startsWith("http")
+                        ? "noreferrer"
+                        : undefined
+                    }
+                  >
+                    {link.label}
+                  </a>
+                ))}
+              </div>
+            ) : null}
           </div>
         </div>
 
@@ -358,6 +514,88 @@ export default function DarikDirectStorefrontPage() {
           </div>
         </div>
       </section>
+
+      {hasStoreProfile || contactLinks.length > 0 ? (
+        <section className={styles.storeProfile}>
+          {(storefront.about_text ||
+            storefront.about_text_ar ||
+            storefront.address_text) ? (
+            <article className={styles.aboutCard}>
+              <p className={styles.profileEyebrow}>About the store</p>
+              <h2>{storefront.display_name}</h2>
+
+              {storefront.about_text ? (
+                <p className={styles.aboutText}>{storefront.about_text}</p>
+              ) : null}
+
+              {storefront.about_text_ar ? (
+                <p className={styles.aboutTextArabic} dir="rtl">
+                  {storefront.about_text_ar}
+                </p>
+              ) : null}
+
+              {storefront.address_text ? (
+                <div className={styles.addressLine}>
+                  <strong>Address</strong>
+                  <span>{storefront.address_text}</span>
+                </div>
+              ) : null}
+            </article>
+          ) : null}
+
+          {(customInformation.length > 0 || visibleHours.length > 0) ? (
+            <div className={styles.profileSide}>
+              {customInformation.length > 0 ? (
+                <div className={styles.informationGrid}>
+                  {customInformation.map((item, index) => (
+                    <article key={`${item.label}-${index}`}>
+                      <span>{item.label}</span>
+                      <strong>{item.value}</strong>
+                    </article>
+                  ))}
+                </div>
+              ) : null}
+
+              {visibleHours.length > 0 ? (
+                <article className={styles.hoursCard}>
+                  <div>
+                    <p className={styles.profileEyebrow}>Business hours</p>
+                    <h3>Opening times</h3>
+                  </div>
+                  <dl>
+                    {visibleHours.map(([day, label]) => (
+                      <div key={day}>
+                        <dt>{label}</dt>
+                        <dd>{operatingHours[day]}</dd>
+                      </div>
+                    ))}
+                  </dl>
+                </article>
+              ) : null}
+            </div>
+          ) : null}
+
+          {contactLinks.length > 0 ? (
+            <div className={styles.contactDirectory}>
+              {contactLinks.map((link) => (
+                <a
+                  key={`${link.label}-${link.href}-directory`}
+                  href={link.href}
+                  target={link.href.startsWith("http") ? "_blank" : undefined}
+                  rel={
+                    link.href.startsWith("http")
+                      ? "noreferrer"
+                      : undefined
+                  }
+                >
+                  <span>{link.label}</span>
+                  <strong>{link.detail}</strong>
+                </a>
+              ))}
+            </div>
+          ) : null}
+        </section>
+      ) : null}
 
       <section className={styles.catalogToolbar}>
         <label className={styles.searchBox}>
@@ -463,6 +701,28 @@ export default function DarikDirectStorefrontPage() {
           </div>
         )}
       </section>
+
+      <footer className={styles.storeFooter}>
+        <div>
+          <strong>{storefront.display_name}</strong>
+          <span>Darik Direct storefront</span>
+        </div>
+
+        <div className={styles.footerLinks}>
+          {contactLinks.slice(0, 8).map((link) => (
+            <a
+              key={`${link.label}-${link.href}-footer`}
+              href={link.href}
+              target={link.href.startsWith("http") ? "_blank" : undefined}
+              rel={link.href.startsWith("http") ? "noreferrer" : undefined}
+            >
+              {link.label}
+            </a>
+          ))}
+        </div>
+
+        <a href="/">Powered by Darik</a>
+      </footer>
 
       {cartOpen ? (
         <div className={styles.cartOverlay} onClick={() => setCartOpen(false)}>

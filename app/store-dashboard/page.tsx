@@ -1,6 +1,13 @@
 "use client";
 
-import { FormEvent, useCallback, useEffect, useMemo, useState } from "react";
+import {
+  ChangeEvent,
+  FormEvent,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import type { Session } from "@supabase/supabase-js";
 import { supabase } from "@/lib/supabaseBrowser";
 import styles from "./dashboard.module.css";
@@ -27,6 +34,114 @@ type ContextResult = {
   stores: StoreContext[];
 };
 
+
+type CustomLink = {
+  label: string;
+  url: string;
+};
+
+type CustomInformation = {
+  label: string;
+  value: string;
+};
+
+type OperatingHours = Record<string, string>;
+
+type StorefrontForm = {
+  slug: string;
+  displayName: string;
+  displayNameAr: string;
+  tagline: string;
+  taglineAr: string;
+  logoUrl: string;
+  heroImageUrl: string;
+  phone: string;
+  whatsapp: string;
+  publicEmail: string;
+  websiteUrl: string;
+  facebookUrl: string;
+  instagramUrl: string;
+  addressText: string;
+  aboutText: string;
+  aboutTextAr: string;
+  primaryColor: string;
+  accentColor: string;
+  backgroundColor: string;
+  deliveryFee: string;
+  minimumOrder: string;
+  deliveryRadiusKm: string;
+  estimatedDeliveryMinutes: string;
+  customLinks: CustomLink[];
+  customInformation: CustomInformation[];
+  operatingHours: OperatingHours;
+};
+
+const operatingDays = [
+  ["sunday", "Sunday"],
+  ["monday", "Monday"],
+  ["tuesday", "Tuesday"],
+  ["wednesday", "Wednesday"],
+  ["thursday", "Thursday"],
+  ["friday", "Friday"],
+  ["saturday", "Saturday"],
+] as const;
+
+const defaultOperatingHours: OperatingHours = Object.fromEntries(
+  operatingDays.map(([key]) => [key, ""])
+);
+
+function normalizeCustomLinks(value: unknown): CustomLink[] {
+  if (!Array.isArray(value)) return [];
+
+  return value
+    .map((item) => {
+      if (!item || typeof item !== "object") return null;
+      const record = item as Record<string, unknown>;
+      return {
+        label: String(record.label ?? "").trim(),
+        url: String(record.url ?? "").trim(),
+      };
+    })
+    .filter((item): item is CustomLink => Boolean(item?.label || item?.url));
+}
+
+function normalizeCustomInformation(value: unknown): CustomInformation[] {
+  if (!Array.isArray(value)) return [];
+
+  return value
+    .map((item) => {
+      if (!item || typeof item !== "object") return null;
+      const record = item as Record<string, unknown>;
+      return {
+        label: String(record.label ?? "").trim(),
+        value: String(record.value ?? "").trim(),
+      };
+    })
+    .filter(
+      (item): item is CustomInformation => Boolean(item?.label || item?.value)
+    );
+}
+
+function normalizeOperatingHours(value: unknown): OperatingHours {
+  if (!value || typeof value !== "object" || Array.isArray(value)) {
+    return { ...defaultOperatingHours };
+  }
+
+  const source = value as Record<string, unknown>;
+
+  return Object.fromEntries(
+    operatingDays.map(([key]) => [key, String(source[key] ?? "")])
+  );
+}
+
+function safeAssetFileName(name: string) {
+  return name
+    .toLowerCase()
+    .replace(/[^a-z0-9.]+/g, "-")
+    .replace(/-+/g, "-")
+    .replace(/^-|-$/g, "");
+}
+
 type StorefrontSettings = {
   id: string;
   retailer_id: string;
@@ -36,6 +151,19 @@ type StorefrontSettings = {
   tagline: string | null;
   tagline_ar: string | null;
   logo_url: string | null;
+  hero_image_url: string | null;
+  business_phone: string | null;
+  whatsapp_number: string | null;
+  public_email: string | null;
+  website_url: string | null;
+  facebook_url: string | null;
+  instagram_url: string | null;
+  address_text: string | null;
+  about_text: string | null;
+  about_text_ar: string | null;
+  custom_links: CustomLink[] | null;
+  custom_information: CustomInformation[] | null;
+  operating_hours: OperatingHours | null;
   primary_color: string;
   accent_color: string;
   background_color: string;
@@ -85,18 +213,30 @@ export default function DarikDirectDashboardPage() {
   const [directRevenue, setDirectRevenue] = useState(0);
   const [loadingContext, setLoadingContext] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [uploadingAsset, setUploadingAsset] = useState<"logo" | "hero" | null>(null);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  const [setupForm, setSetupForm] = useState({
+  const [setupForm, setSetupForm] = useState<StorefrontForm>({
     slug: "",
     displayName: "",
     displayNameAr: "",
     tagline: "",
     taglineAr: "",
+    logoUrl: "",
+    heroImageUrl: "",
+    phone: "",
+    whatsapp: "",
+    publicEmail: "",
+    websiteUrl: "",
+    facebookUrl: "",
+    instagramUrl: "",
+    addressText: "",
+    aboutText: "",
+    aboutTextAr: "",
     primaryColor: "#111827",
     accentColor: "#2563EB",
     backgroundColor: "#F8FAFC",
@@ -104,6 +244,9 @@ export default function DarikDirectDashboardPage() {
     minimumOrder: "0.00",
     deliveryRadiusKm: "",
     estimatedDeliveryMinutes: "45",
+    customLinks: [],
+    customInformation: [],
+    operatingHours: { ...defaultOperatingHours },
   });
 
   const selectedStore = useMemo(
@@ -224,6 +367,17 @@ export default function DarikDirectDashboardPage() {
             displayNameAr: loadedStorefront.display_name_ar ?? "",
             tagline: loadedStorefront.tagline ?? "",
             taglineAr: loadedStorefront.tagline_ar ?? "",
+            logoUrl: loadedStorefront.logo_url ?? "",
+            heroImageUrl: loadedStorefront.hero_image_url ?? "",
+            phone: loadedStorefront.business_phone ?? "",
+            whatsapp: loadedStorefront.whatsapp_number ?? "",
+            publicEmail: loadedStorefront.public_email ?? "",
+            websiteUrl: loadedStorefront.website_url ?? "",
+            facebookUrl: loadedStorefront.facebook_url ?? "",
+            instagramUrl: loadedStorefront.instagram_url ?? "",
+            addressText: loadedStorefront.address_text ?? "",
+            aboutText: loadedStorefront.about_text ?? "",
+            aboutTextAr: loadedStorefront.about_text_ar ?? "",
             primaryColor: loadedStorefront.primary_color,
             accentColor: loadedStorefront.accent_color,
             backgroundColor: loadedStorefront.background_color,
@@ -237,6 +391,13 @@ export default function DarikDirectDashboardPage() {
               loadedStorefront.estimated_delivery_minutes == null
                 ? ""
                 : String(loadedStorefront.estimated_delivery_minutes),
+            customLinks: normalizeCustomLinks(loadedStorefront.custom_links),
+            customInformation: normalizeCustomInformation(
+              loadedStorefront.custom_information
+            ),
+            operatingHours: normalizeOperatingHours(
+              loadedStorefront.operating_hours
+            ),
           });
         } else {
           setSetupForm({
@@ -245,6 +406,17 @@ export default function DarikDirectDashboardPage() {
             displayNameAr: "",
             tagline: "",
             taglineAr: "",
+            logoUrl: "",
+            heroImageUrl: "",
+            phone: "",
+            whatsapp: "",
+            publicEmail: "",
+            websiteUrl: "",
+            facebookUrl: "",
+            instagramUrl: "",
+            addressText: "",
+            aboutText: "",
+            aboutTextAr: "",
             primaryColor: "#111827",
             accentColor: "#2563EB",
             backgroundColor: "#F8FAFC",
@@ -252,6 +424,9 @@ export default function DarikDirectDashboardPage() {
             minimumOrder: "0.00",
             deliveryRadiusKm: "",
             estimatedDeliveryMinutes: "45",
+            customLinks: [],
+            customInformation: [],
+            operatingHours: { ...defaultOperatingHours },
           });
         }
       }
@@ -297,11 +472,146 @@ export default function DarikDirectDashboardPage() {
     await supabase.auth.signOut();
   }
 
-  function updateSetupField(
-    field: keyof typeof setupForm,
-    value: string
+  function updateSetupField<K extends keyof StorefrontForm>(
+    field: K,
+    value: StorefrontForm[K]
   ) {
     setSetupForm((current) => ({ ...current, [field]: value }));
+  }
+
+  function updateOperatingHour(day: string, value: string) {
+    setSetupForm((current) => ({
+      ...current,
+      operatingHours: {
+        ...current.operatingHours,
+        [day]: value,
+      },
+    }));
+  }
+
+  function addCustomLink() {
+    setSetupForm((current) => ({
+      ...current,
+      customLinks: [...current.customLinks, { label: "", url: "" }],
+    }));
+  }
+
+  function updateCustomLink(
+    index: number,
+    field: keyof CustomLink,
+    value: string
+  ) {
+    setSetupForm((current) => ({
+      ...current,
+      customLinks: current.customLinks.map((link, linkIndex) =>
+        linkIndex === index ? { ...link, [field]: value } : link
+      ),
+    }));
+  }
+
+  function removeCustomLink(index: number) {
+    setSetupForm((current) => ({
+      ...current,
+      customLinks: current.customLinks.filter(
+        (_link, linkIndex) => linkIndex !== index
+      ),
+    }));
+  }
+
+  function addCustomInformation() {
+    setSetupForm((current) => ({
+      ...current,
+      customInformation: [
+        ...current.customInformation,
+        { label: "", value: "" },
+      ],
+    }));
+  }
+
+  function updateCustomInformation(
+    index: number,
+    field: keyof CustomInformation,
+    value: string
+  ) {
+    setSetupForm((current) => ({
+      ...current,
+      customInformation: current.customInformation.map((item, itemIndex) =>
+        itemIndex === index ? { ...item, [field]: value } : item
+      ),
+    }));
+  }
+
+  function removeCustomInformation(index: number) {
+    setSetupForm((current) => ({
+      ...current,
+      customInformation: current.customInformation.filter(
+        (_item, itemIndex) => itemIndex !== index
+      ),
+    }));
+  }
+
+  async function uploadStorefrontAsset(
+    event: ChangeEvent<HTMLInputElement>,
+    assetType: "logo" | "hero"
+  ) {
+    const file = event.target.files?.[0];
+    event.target.value = "";
+
+    if (!file || !selectedStore) return;
+
+    if (!file.type.startsWith("image/")) {
+      setError("Choose an image file.");
+      return;
+    }
+
+    if (file.size > 8 * 1024 * 1024) {
+      setError("The image must be 8 MB or smaller.");
+      return;
+    }
+
+    setUploadingAsset(assetType);
+    setError("");
+    setMessage("");
+
+    const safeName = safeAssetFileName(file.name);
+    const extension =
+      safeName.split(".").pop() ||
+      file.type.split("/").pop() ||
+      "jpg";
+
+    const objectPath = `${selectedStore.retailer_id}/${assetType}/${Date.now()}-${crypto.randomUUID()}.${extension}`;
+
+    const uploadResult = await supabase.storage
+      .from("darik-direct-storefront-assets")
+      .upload(objectPath, file, {
+        cacheControl: "3600",
+        upsert: false,
+        contentType: file.type,
+      });
+
+    if (uploadResult.error) {
+      setError(uploadResult.error.message);
+      setUploadingAsset(null);
+      return;
+    }
+
+    const publicResult = supabase.storage
+      .from("darik-direct-storefront-assets")
+      .getPublicUrl(uploadResult.data.path);
+
+    const publicUrl = publicResult.data.publicUrl;
+
+    setSetupForm((current) => ({
+      ...current,
+      [assetType === "logo" ? "logoUrl" : "heroImageUrl"]: publicUrl,
+    }));
+
+    setMessage(
+      assetType === "logo"
+        ? "Logo uploaded. Save the storefront to publish it."
+        : "Cover image uploaded. Save the storefront to publish it."
+    );
+    setUploadingAsset(null);
   }
 
   async function saveStorefront(event: FormEvent) {
@@ -333,6 +643,35 @@ export default function DarikDirectDashboardPage() {
       display_name_ar: setupForm.displayNameAr.trim() || null,
       tagline: setupForm.tagline.trim() || null,
       tagline_ar: setupForm.taglineAr.trim() || null,
+      logo_url: setupForm.logoUrl.trim() || null,
+      hero_image_url: setupForm.heroImageUrl.trim() || null,
+      business_phone: setupForm.phone.trim() || null,
+      whatsapp_number: setupForm.whatsapp.trim() || null,
+      public_email: setupForm.publicEmail.trim() || null,
+      website_url: setupForm.websiteUrl.trim() || null,
+      facebook_url: setupForm.facebookUrl.trim() || null,
+      instagram_url: setupForm.instagramUrl.trim() || null,
+      address_text: setupForm.addressText.trim() || null,
+      about_text: setupForm.aboutText.trim() || null,
+      about_text_ar: setupForm.aboutTextAr.trim() || null,
+      custom_links: setupForm.customLinks
+        .map((link) => ({
+          label: link.label.trim(),
+          url: link.url.trim(),
+        }))
+        .filter((link) => link.label && link.url),
+      custom_information: setupForm.customInformation
+        .map((item) => ({
+          label: item.label.trim(),
+          value: item.value.trim(),
+        }))
+        .filter((item) => item.label && item.value),
+      operating_hours: Object.fromEntries(
+        operatingDays.map(([day]) => [
+          day,
+          setupForm.operatingHours[day]?.trim() || "",
+        ])
+      ),
       primary_color: setupForm.primaryColor,
       accent_color: setupForm.accentColor,
       background_color: setupForm.backgroundColor,
@@ -637,160 +976,561 @@ export default function DarikDirectDashboardPage() {
               </div>
 
               <form className={styles.setupForm} onSubmit={saveStorefront}>
-                <label>
-                  Store link
-                  <div className={styles.slugInput}>
-                    <span>getdarik.com/store/</span>
-                    <input
-                      value={setupForm.slug}
-                      onChange={(event) =>
-                        updateSetupField("slug", cleanSlug(event.target.value))
-                      }
-                      required
-                    />
+                <div className={styles.formSection}>
+                  <div className={styles.formSectionHeading}>
+                    <div>
+                      <span>Identity</span>
+                      <h3>Store name and link</h3>
+                    </div>
+                    <p>This is what customers see at the top of your store.</p>
                   </div>
-                </label>
 
-                <label>
-                  Display name
-                  <input
-                    value={setupForm.displayName}
-                    onChange={(event) =>
-                      updateSetupField("displayName", event.target.value)
-                    }
-                    required
-                  />
-                </label>
+                  <div className={styles.formGrid}>
+                    <label>
+                      Store link
+                      <div className={styles.slugInput}>
+                        <span>getdarik.com/store/</span>
+                        <input
+                          value={setupForm.slug}
+                          onChange={(event) =>
+                            updateSetupField(
+                              "slug",
+                              cleanSlug(event.target.value)
+                            )
+                          }
+                          required
+                        />
+                      </div>
+                    </label>
 
-                <label>
-                  Arabic display name
-                  <input
-                    dir="rtl"
-                    value={setupForm.displayNameAr}
-                    onChange={(event) =>
-                      updateSetupField("displayNameAr", event.target.value)
-                    }
-                  />
-                </label>
+                    <label>
+                      Display name
+                      <input
+                        value={setupForm.displayName}
+                        onChange={(event) =>
+                          updateSetupField("displayName", event.target.value)
+                        }
+                        required
+                      />
+                    </label>
 
-                <label className={styles.wideField}>
-                  Store tagline
-                  <input
-                    value={setupForm.tagline}
-                    onChange={(event) =>
-                      updateSetupField("tagline", event.target.value)
-                    }
-                    placeholder="Local products delivered to your door"
-                  />
-                </label>
+                    <label>
+                      Arabic display name
+                      <input
+                        dir="rtl"
+                        value={setupForm.displayNameAr}
+                        onChange={(event) =>
+                          updateSetupField("displayNameAr", event.target.value)
+                        }
+                      />
+                    </label>
 
-                <label className={styles.wideField}>
-                  Arabic tagline
-                  <input
-                    dir="rtl"
-                    value={setupForm.taglineAr}
-                    onChange={(event) =>
-                      updateSetupField("taglineAr", event.target.value)
-                    }
-                  />
-                </label>
+                    <label className={styles.wideField}>
+                      Store tagline
+                      <input
+                        value={setupForm.tagline}
+                        onChange={(event) =>
+                          updateSetupField("tagline", event.target.value)
+                        }
+                        placeholder="Local products delivered to your door"
+                      />
+                    </label>
 
-                <label>
-                  Delivery fee
-                  <input
-                    type="number"
-                    min="0"
-                    step="0.01"
-                    value={setupForm.deliveryFee}
-                    onChange={(event) =>
-                      updateSetupField("deliveryFee", event.target.value)
-                    }
-                  />
-                </label>
+                    <label className={styles.wideField}>
+                      Arabic tagline
+                      <input
+                        dir="rtl"
+                        value={setupForm.taglineAr}
+                        onChange={(event) =>
+                          updateSetupField("taglineAr", event.target.value)
+                        }
+                      />
+                    </label>
+                  </div>
+                </div>
 
-                <label>
-                  Minimum order
-                  <input
-                    type="number"
-                    min="0"
-                    step="0.01"
-                    value={setupForm.minimumOrder}
-                    onChange={(event) =>
-                      updateSetupField("minimumOrder", event.target.value)
-                    }
-                  />
-                </label>
+                <div className={styles.formSection}>
+                  <div className={styles.formSectionHeading}>
+                    <div>
+                      <span>Branding</span>
+                      <h3>Logo and storefront cover</h3>
+                    </div>
+                    <p>Upload images or paste a hosted image URL.</p>
+                  </div>
 
-                <label>
-                  Delivery radius (km)
-                  <input
-                    type="number"
-                    min="0.1"
-                    step="0.1"
-                    value={setupForm.deliveryRadiusKm}
-                    onChange={(event) =>
-                      updateSetupField("deliveryRadiusKm", event.target.value)
-                    }
-                  />
-                </label>
+                  <div className={styles.assetGrid}>
+                    <article className={styles.assetCard}>
+                      <div className={styles.logoPreview}>
+                        {setupForm.logoUrl ? (
+                          <img src={setupForm.logoUrl} alt="Store logo preview" />
+                        ) : (
+                          <span>
+                            {(setupForm.displayName || "S")
+                              .slice(0, 1)
+                              .toUpperCase()}
+                          </span>
+                        )}
+                      </div>
 
-                <label>
-                  Estimated delivery (minutes)
-                  <input
-                    type="number"
-                    min="1"
-                    value={setupForm.estimatedDeliveryMinutes}
-                    onChange={(event) =>
-                      updateSetupField(
-                        "estimatedDeliveryMinutes",
-                        event.target.value
-                      )
-                    }
-                  />
-                </label>
+                      <div className={styles.assetControls}>
+                        <strong>Store logo</strong>
+                        <p>Square logo recommended. PNG or JPG, up to 8 MB.</p>
+                        <label className={styles.uploadAssetButton}>
+                          {uploadingAsset === "logo"
+                            ? "Uploading…"
+                            : "Upload logo"}
+                          <input
+                            type="file"
+                            accept="image/jpeg,image/png,image/webp,image/gif"
+                            onChange={(event) =>
+                              uploadStorefrontAsset(event, "logo")
+                            }
+                            disabled={uploadingAsset !== null}
+                          />
+                        </label>
+                        <input
+                          type="url"
+                          value={setupForm.logoUrl}
+                          onChange={(event) =>
+                            updateSetupField("logoUrl", event.target.value)
+                          }
+                          placeholder="Or paste logo URL"
+                        />
+                      </div>
+                    </article>
 
-                <div className={styles.colorRow}>
-                  <label>
-                    Primary
-                    <input
-                      type="color"
-                      value={setupForm.primaryColor}
-                      onChange={(event) =>
-                        updateSetupField("primaryColor", event.target.value)
-                      }
-                    />
-                  </label>
-                  <label>
-                    Accent
-                    <input
-                      type="color"
-                      value={setupForm.accentColor}
-                      onChange={(event) =>
-                        updateSetupField("accentColor", event.target.value)
-                      }
-                    />
-                  </label>
-                  <label>
-                    Background
-                    <input
-                      type="color"
-                      value={setupForm.backgroundColor}
-                      onChange={(event) =>
-                        updateSetupField("backgroundColor", event.target.value)
-                      }
-                    />
-                  </label>
+                    <article className={styles.assetCard}>
+                      <div className={styles.heroPreview}>
+                        {setupForm.heroImageUrl ? (
+                          <img
+                            src={setupForm.heroImageUrl}
+                            alt="Store cover preview"
+                          />
+                        ) : (
+                          <span>Cover image</span>
+                        )}
+                      </div>
+
+                      <div className={styles.assetControls}>
+                        <strong>Storefront cover</strong>
+                        <p>Wide image recommended. It appears behind your store name.</p>
+                        <label className={styles.uploadAssetButton}>
+                          {uploadingAsset === "hero"
+                            ? "Uploading…"
+                            : "Upload cover"}
+                          <input
+                            type="file"
+                            accept="image/jpeg,image/png,image/webp,image/gif"
+                            onChange={(event) =>
+                              uploadStorefrontAsset(event, "hero")
+                            }
+                            disabled={uploadingAsset !== null}
+                          />
+                        </label>
+                        <input
+                          type="url"
+                          value={setupForm.heroImageUrl}
+                          onChange={(event) =>
+                            updateSetupField("heroImageUrl", event.target.value)
+                          }
+                          placeholder="Or paste cover image URL"
+                        />
+                      </div>
+                    </article>
+                  </div>
+                </div>
+
+                <div className={styles.formSection}>
+                  <div className={styles.formSectionHeading}>
+                    <div>
+                      <span>Contact</span>
+                      <h3>How customers reach you</h3>
+                    </div>
+                    <p>Only completed fields appear publicly.</p>
+                  </div>
+
+                  <div className={styles.formGrid}>
+                    <label>
+                      Store phone
+                      <input
+                        type="tel"
+                        value={setupForm.phone}
+                        onChange={(event) =>
+                          updateSetupField("phone", event.target.value)
+                        }
+                        placeholder="07XXXXXXXX"
+                      />
+                    </label>
+
+                    <label>
+                      WhatsApp
+                      <input
+                        type="tel"
+                        value={setupForm.whatsapp}
+                        onChange={(event) =>
+                          updateSetupField("whatsapp", event.target.value)
+                        }
+                        placeholder="+9627XXXXXXXX"
+                      />
+                    </label>
+
+                    <label>
+                      Public email
+                      <input
+                        type="email"
+                        value={setupForm.publicEmail}
+                        onChange={(event) =>
+                          updateSetupField("publicEmail", event.target.value)
+                        }
+                        placeholder="store@example.com"
+                      />
+                    </label>
+
+                    <label>
+                      Website
+                      <input
+                        type="url"
+                        value={setupForm.websiteUrl}
+                        onChange={(event) =>
+                          updateSetupField("websiteUrl", event.target.value)
+                        }
+                        placeholder="https://yourstore.com"
+                      />
+                    </label>
+
+                    <label>
+                      Facebook page
+                      <input
+                        type="url"
+                        value={setupForm.facebookUrl}
+                        onChange={(event) =>
+                          updateSetupField("facebookUrl", event.target.value)
+                        }
+                        placeholder="https://facebook.com/..."
+                      />
+                    </label>
+
+                    <label>
+                      Instagram page
+                      <input
+                        type="url"
+                        value={setupForm.instagramUrl}
+                        onChange={(event) =>
+                          updateSetupField("instagramUrl", event.target.value)
+                        }
+                        placeholder="https://instagram.com/..."
+                      />
+                    </label>
+
+                    <label className={styles.wideField}>
+                      Public store address
+                      <input
+                        value={setupForm.addressText}
+                        onChange={(event) =>
+                          updateSetupField("addressText", event.target.value)
+                        }
+                        placeholder="Marka, Amman — next to..."
+                      />
+                    </label>
+                  </div>
+                </div>
+
+                <div className={styles.formSection}>
+                  <div className={styles.formSectionHeading}>
+                    <div>
+                      <span>About</span>
+                      <h3>Tell customers about the business</h3>
+                    </div>
+                    <p>Explain what you sell, your experience, or why customers should choose you.</p>
+                  </div>
+
+                  <div className={styles.formGrid}>
+                    <label className={styles.wideField}>
+                      About the store
+                      <textarea
+                        rows={5}
+                        value={setupForm.aboutText}
+                        onChange={(event) =>
+                          updateSetupField("aboutText", event.target.value)
+                        }
+                        placeholder="Tell customers about your store."
+                      />
+                    </label>
+
+                    <label className={styles.wideField}>
+                      Arabic About section
+                      <textarea
+                        dir="rtl"
+                        rows={5}
+                        value={setupForm.aboutTextAr}
+                        onChange={(event) =>
+                          updateSetupField("aboutTextAr", event.target.value)
+                        }
+                        placeholder="اكتب نبذة عن المتجر"
+                      />
+                    </label>
+                  </div>
+                </div>
+
+                <div className={styles.formSection}>
+                  <div className={styles.formSectionHeading}>
+                    <div>
+                      <span>Business hours</span>
+                      <h3>When the store is open</h3>
+                    </div>
+                    <p>Use any wording you prefer, such as 9:00 AM–10:00 PM or Closed.</p>
+                  </div>
+
+                  <div className={styles.hoursGrid}>
+                    {operatingDays.map(([day, label]) => (
+                      <label key={day}>
+                        {label}
+                        <input
+                          value={setupForm.operatingHours[day] ?? ""}
+                          onChange={(event) =>
+                            updateOperatingHour(day, event.target.value)
+                          }
+                          placeholder="9:00 AM – 10:00 PM"
+                        />
+                      </label>
+                    ))}
+                  </div>
+                </div>
+
+                <div className={styles.formSection}>
+                  <div className={styles.formSectionHeading}>
+                    <div>
+                      <span>Custom links</span>
+                      <h3>Add any links you want</h3>
+                    </div>
+                    <button
+                      type="button"
+                      className={styles.addRowButton}
+                      onClick={addCustomLink}
+                    >
+                      + Add link
+                    </button>
+                  </div>
+
+                  {setupForm.customLinks.length === 0 ? (
+                    <p className={styles.optionalEmpty}>
+                      Add TikTok, YouTube, a map pin, a catalog, a warranty page,
+                      or any other public link.
+                    </p>
+                  ) : (
+                    <div className={styles.repeatRows}>
+                      {setupForm.customLinks.map((link, index) => (
+                        <div className={styles.repeatRow} key={`link-${index}`}>
+                          <input
+                            value={link.label}
+                            onChange={(event) =>
+                              updateCustomLink(
+                                index,
+                                "label",
+                                event.target.value
+                              )
+                            }
+                            placeholder="Link label"
+                          />
+                          <input
+                            type="url"
+                            value={link.url}
+                            onChange={(event) =>
+                              updateCustomLink(index, "url", event.target.value)
+                            }
+                            placeholder="https://..."
+                          />
+                          <button
+                            type="button"
+                            onClick={() => removeCustomLink(index)}
+                            aria-label="Remove custom link"
+                          >
+                            Remove
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                <div className={styles.formSection}>
+                  <div className={styles.formSectionHeading}>
+                    <div>
+                      <span>Custom store information</span>
+                      <h3>Add anything else customers should know</h3>
+                    </div>
+                    <button
+                      type="button"
+                      className={styles.addRowButton}
+                      onClick={addCustomInformation}
+                    >
+                      + Add information
+                    </button>
+                  </div>
+
+                  {setupForm.customInformation.length === 0 ? (
+                    <p className={styles.optionalEmpty}>
+                      Examples: Delivery areas, payment options, warranty,
+                      installation service, parking, or return policy.
+                    </p>
+                  ) : (
+                    <div className={styles.repeatRows}>
+                      {setupForm.customInformation.map((item, index) => (
+                        <div className={styles.repeatRow} key={`info-${index}`}>
+                          <input
+                            value={item.label}
+                            onChange={(event) =>
+                              updateCustomInformation(
+                                index,
+                                "label",
+                                event.target.value
+                              )
+                            }
+                            placeholder="Heading"
+                          />
+                          <input
+                            value={item.value}
+                            onChange={(event) =>
+                              updateCustomInformation(
+                                index,
+                                "value",
+                                event.target.value
+                              )
+                            }
+                            placeholder="Information shown to customers"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => removeCustomInformation(index)}
+                            aria-label="Remove custom information"
+                          >
+                            Remove
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                <div className={styles.formSection}>
+                  <div className={styles.formSectionHeading}>
+                    <div>
+                      <span>Delivery</span>
+                      <h3>Ordering and delivery settings</h3>
+                    </div>
+                  </div>
+
+                  <div className={styles.formGrid}>
+                    <label>
+                      Delivery fee
+                      <input
+                        type="number"
+                        min="0"
+                        step="0.01"
+                        value={setupForm.deliveryFee}
+                        onChange={(event) =>
+                          updateSetupField("deliveryFee", event.target.value)
+                        }
+                      />
+                    </label>
+
+                    <label>
+                      Minimum order
+                      <input
+                        type="number"
+                        min="0"
+                        step="0.01"
+                        value={setupForm.minimumOrder}
+                        onChange={(event) =>
+                          updateSetupField("minimumOrder", event.target.value)
+                        }
+                      />
+                    </label>
+
+                    <label>
+                      Delivery radius (km)
+                      <input
+                        type="number"
+                        min="0.1"
+                        step="0.1"
+                        value={setupForm.deliveryRadiusKm}
+                        onChange={(event) =>
+                          updateSetupField(
+                            "deliveryRadiusKm",
+                            event.target.value
+                          )
+                        }
+                      />
+                    </label>
+
+                    <label>
+                      Estimated delivery (minutes)
+                      <input
+                        type="number"
+                        min="1"
+                        value={setupForm.estimatedDeliveryMinutes}
+                        onChange={(event) =>
+                          updateSetupField(
+                            "estimatedDeliveryMinutes",
+                            event.target.value
+                          )
+                        }
+                      />
+                    </label>
+                  </div>
+                </div>
+
+                <div className={styles.formSection}>
+                  <div className={styles.formSectionHeading}>
+                    <div>
+                      <span>Colors</span>
+                      <h3>Match the storefront to your brand</h3>
+                    </div>
+                  </div>
+
+                  <div className={styles.colorRow}>
+                    <label>
+                      Primary
+                      <input
+                        type="color"
+                        value={setupForm.primaryColor}
+                        onChange={(event) =>
+                          updateSetupField("primaryColor", event.target.value)
+                        }
+                      />
+                    </label>
+                    <label>
+                      Accent
+                      <input
+                        type="color"
+                        value={setupForm.accentColor}
+                        onChange={(event) =>
+                          updateSetupField("accentColor", event.target.value)
+                        }
+                      />
+                    </label>
+                    <label>
+                      Background
+                      <input
+                        type="color"
+                        value={setupForm.backgroundColor}
+                        onChange={(event) =>
+                          updateSetupField("backgroundColor", event.target.value)
+                        }
+                      />
+                    </label>
+                  </div>
                 </div>
 
                 <button
                   className={styles.saveButton}
                   type="submit"
-                  disabled={saving}
+                  disabled={saving || uploadingAsset !== null}
                 >
                   {saving
                     ? "Saving…"
                     : storefront
-                      ? "Save storefront"
+                      ? "Save storefront profile"
                       : "Create draft storefront"}
                 </button>
               </form>
