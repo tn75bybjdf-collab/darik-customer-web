@@ -48,6 +48,8 @@ type CustomInformation = {
 
 type OperatingHours = Record<string, string>;
 
+type OrderSubmissionMode = "phone" | "online" | "both";
+
 type StorefrontForm = {
   slug: string;
   displayName: string;
@@ -72,6 +74,11 @@ type StorefrontForm = {
   minimumOrder: string;
   deliveryRadiusKm: string;
   estimatedDeliveryMinutes: string;
+  orderSubmissionMode: OrderSubmissionMode;
+  acceptCash: boolean;
+  acceptCliq: boolean;
+  cliqAccountName: string;
+  cliqIdentifier: string;
   customLinks: CustomLink[];
   customInformation: CustomInformation[];
   operatingHours: OperatingHours;
@@ -176,6 +183,11 @@ type StorefrontSettings = {
   delivery_fee: number | string;
   delivery_radius_km: number | string | null;
   estimated_delivery_minutes: number | null;
+  order_submission_mode: OrderSubmissionMode;
+  cash_on_delivery_enabled: boolean;
+  cliq_enabled: boolean;
+  cliq_account_name: string | null;
+  cliq_payment_identifier: string | null;
   updated_at?: string | null;
 };
 
@@ -250,6 +262,11 @@ export default function DarikDirectStorefrontSettingsPage() {
     minimumOrder: "0.00",
     deliveryRadiusKm: "",
     estimatedDeliveryMinutes: "45",
+    orderSubmissionMode: "phone",
+    acceptCash: true,
+    acceptCliq: false,
+    cliqAccountName: "",
+    cliqIdentifier: "",
     customLinks: [],
     customInformation: [],
     operatingHours: { ...defaultOperatingHours },
@@ -438,6 +455,12 @@ export default function DarikDirectStorefrontSettingsPage() {
                 loadedStorefront.estimated_delivery_minutes == null
                   ? ""
                   : String(loadedStorefront.estimated_delivery_minutes),
+              orderSubmissionMode:
+                loadedStorefront.order_submission_mode ?? "phone",
+              acceptCash: loadedStorefront.cash_on_delivery_enabled ?? true,
+              acceptCliq: loadedStorefront.cliq_enabled ?? false,
+              cliqAccountName: loadedStorefront.cliq_account_name ?? "",
+              cliqIdentifier: loadedStorefront.cliq_payment_identifier ?? "",
               customLinks: normalizeCustomLinks(loadedStorefront.custom_links),
               customInformation: normalizeCustomInformation(
                 loadedStorefront.custom_information
@@ -470,6 +493,11 @@ export default function DarikDirectStorefrontSettingsPage() {
               minimumOrder: "0.00",
               deliveryRadiusKm: "",
               estimatedDeliveryMinutes: "45",
+              orderSubmissionMode: "phone",
+              acceptCash: true,
+              acceptCliq: false,
+              cliqAccountName: "",
+              cliqIdentifier: "",
               customLinks: [],
               customInformation: [],
               operatingHours: { ...defaultOperatingHours },
@@ -780,6 +808,37 @@ export default function DarikDirectStorefrontSettingsPage() {
       return;
     }
 
+    if (
+      (setupForm.orderSubmissionMode === "phone" ||
+        setupForm.orderSubmissionMode === "both") &&
+      !setupForm.phone.trim() &&
+      !setupForm.whatsapp.trim()
+    ) {
+      setError(
+        "Add a phone or WhatsApp number before enabling phone ordering."
+      );
+      return;
+    }
+
+    const onlineOrderingSelected =
+      setupForm.orderSubmissionMode === "online" ||
+      setupForm.orderSubmissionMode === "both";
+
+    if (onlineOrderingSelected && !setupForm.acceptCash && !setupForm.acceptCliq) {
+      setError("Select at least one online payment method: Cash or CliQ.");
+      return;
+    }
+
+    if (setupForm.acceptCliq && !setupForm.cliqAccountName.trim()) {
+      setError("Enter the CliQ account holder or business name.");
+      return;
+    }
+
+    if (setupForm.acceptCliq && !setupForm.cliqIdentifier.trim()) {
+      setError("Enter the store's CliQ alias or registered mobile number.");
+      return;
+    }
+
     setSaving(true);
     setError("");
     setMessage("");
@@ -830,6 +889,15 @@ export default function DarikDirectStorefrontSettingsPage() {
         : null,
       estimated_delivery_minutes: setupForm.estimatedDeliveryMinutes
         ? Number(setupForm.estimatedDeliveryMinutes)
+        : null,
+      order_submission_mode: setupForm.orderSubmissionMode,
+      cash_on_delivery_enabled: setupForm.acceptCash,
+      cliq_enabled: setupForm.acceptCliq,
+      cliq_account_name: setupForm.acceptCliq
+        ? setupForm.cliqAccountName.trim()
+        : null,
+      cliq_payment_identifier: setupForm.acceptCliq
+        ? setupForm.cliqIdentifier.trim()
         : null,
     };
 
@@ -1556,6 +1624,152 @@ export default function DarikDirectStorefrontSettingsPage() {
                       <span>Delivery</span>
                       <h3>Ordering and delivery settings</h3>
                     </div>
+                  </div>
+
+                  <div className={styles.orderMethodChoices}>
+                    <button
+                      type="button"
+                      className={
+                        setupForm.orderSubmissionMode === "phone"
+                          ? styles.activeOrderMethod
+                          : ""
+                      }
+                      onClick={() =>
+                        updateSetupField("orderSubmissionMode", "phone")
+                      }
+                    >
+                      <strong>Phone orders</strong>
+                      <span>
+                        Customers call the store or send the cart through
+                        WhatsApp. This remains the default.
+                      </span>
+                    </button>
+
+                    <button
+                      type="button"
+                      className={
+                        setupForm.orderSubmissionMode === "online"
+                          ? styles.activeOrderMethod
+                          : ""
+                      }
+                      onClick={() =>
+                        updateSetupField("orderSubmissionMode", "online")
+                      }
+                    >
+                      <strong>Online orders</strong>
+                      <span>
+                        Customers enter their delivery details and submit the
+                        order directly to this dashboard.
+                      </span>
+                    </button>
+
+                    <button
+                      type="button"
+                      className={
+                        setupForm.orderSubmissionMode === "both"
+                          ? styles.activeOrderMethod
+                          : ""
+                      }
+                      onClick={() =>
+                        updateSetupField("orderSubmissionMode", "both")
+                      }
+                    >
+                      <strong>Phone + online</strong>
+                      <span>
+                        Customers choose whether to call, use WhatsApp, or place
+                        the order online.
+                      </span>
+                    </button>
+                  </div>
+
+                  <div className={styles.onlinePaymentSettings}>
+                    <div className={styles.paymentSettingsHeading}>
+                      <div>
+                        <span>Online payment methods</span>
+                        <h4>What can customers use?</h4>
+                      </div>
+                      <p>Check one or both. Cash remains enabled by default.</p>
+                    </div>
+
+                    <div className={styles.paymentCheckboxGrid}>
+                      <label
+                        className={
+                          setupForm.acceptCash
+                            ? styles.activePaymentCheckbox
+                            : ""
+                        }
+                      >
+                        <input
+                          type="checkbox"
+                          checked={setupForm.acceptCash}
+                          onChange={(event) =>
+                            updateSetupField("acceptCash", event.target.checked)
+                          }
+                        />
+                        <span>
+                          <strong>Accept cash</strong>
+                          <small>Customer pays the store or driver on delivery.</small>
+                        </span>
+                      </label>
+
+                      <label
+                        className={
+                          setupForm.acceptCliq
+                            ? styles.activePaymentCheckbox
+                            : ""
+                        }
+                      >
+                        <input
+                          type="checkbox"
+                          checked={setupForm.acceptCliq}
+                          onChange={(event) =>
+                            updateSetupField("acceptCliq", event.target.checked)
+                          }
+                        />
+                        <span>
+                          <strong>Accept CliQ</strong>
+                          <small>Customer transfers the total before submitting.</small>
+                        </span>
+                      </label>
+                    </div>
+
+                    {setupForm.acceptCliq ? (
+                      <div className={styles.cliqSettingsPanel}>
+                        <div className={styles.formGrid}>
+                          <label>
+                            CliQ account holder / business name
+                            <input
+                              value={setupForm.cliqAccountName}
+                              onChange={(event) =>
+                                updateSetupField(
+                                  "cliqAccountName",
+                                  event.target.value
+                                )
+                              }
+                              placeholder="Al Salam Market"
+                            />
+                          </label>
+
+                          <label>
+                            CliQ alias or registered mobile number
+                            <input
+                              value={setupForm.cliqIdentifier}
+                              onChange={(event) =>
+                                updateSetupField(
+                                  "cliqIdentifier",
+                                  event.target.value
+                                )
+                              }
+                              placeholder="Store alias or 07XXXXXXXX"
+                            />
+                          </label>
+                        </div>
+                        <p>
+                          Customers will see these details only when they select
+                          CliQ during online checkout.
+                        </p>
+                      </div>
+                    ) : null}
                   </div>
 
                   <div className={styles.formGrid}>

@@ -28,6 +28,8 @@ type DirectOrder = {
   customer_phone: string;
   delivery_address_details: string | null;
   payment_method: string;
+  payment_status: string;
+  direct_payment_reference: string | null;
   subtotal: number | string;
   delivery_fee: number | string;
   total: number | string;
@@ -48,6 +50,7 @@ export default function DarikDirectOrdersPage() {
   const [orders, setOrders] = useState<DirectOrder[]>([]);
   const [loading, setLoading] = useState(true);
   const [updatingOrderId, setUpdatingOrderId] = useState<string | null>(null);
+  const [confirmingPaymentOrderId, setConfirmingPaymentOrderId] = useState<string | null>(null);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [error, setError] = useState("");
@@ -68,7 +71,7 @@ export default function DarikDirectOrdersPage() {
   const loadOrders = useCallback(async () => {
     if (!selectedRetailerId) { setOrders([]); setLoading(false); return; }
     setLoading(true); setError("");
-    const result = await supabase.from("orders").select("id,order_number,customer_name,customer_phone,delivery_address_details,payment_method,subtotal,delivery_fee,total,order_status,created_at").eq("sales_channel", "direct_storefront").eq("storefront_retailer_id", selectedRetailerId).order("created_at", { ascending: false }).limit(200);
+    const result = await supabase.from("orders").select("id,order_number,customer_name,customer_phone,delivery_address_details,payment_method,payment_status,direct_payment_reference,subtotal,delivery_fee,total,order_status,created_at").eq("sales_channel", "direct_storefront").eq("storefront_retailer_id", selectedRetailerId).order("created_at", { ascending: false }).limit(200);
     if (result.error) setError(result.error.message);
     else setOrders((result.data ?? []) as unknown as DirectOrder[]);
     setLoading(false);
@@ -108,6 +111,33 @@ export default function DarikDirectOrdersPage() {
     if (result.error) setError(result.error.message);
     else { setMessage(`Order ${order.order_number || order.id.slice(0, 8)} updated to ${labelStatus(nextStatus)}.`); await loadOrders(); }
     setUpdatingOrderId(null);
+  }
+
+  async function confirmCliqPayment(order: DirectOrder) {
+    setConfirmingPaymentOrderId(order.id);
+    setError("");
+    setMessage("");
+
+    const result = await supabase.rpc(
+      "darik_direct_retailer_confirm_cliq_payment",
+      {
+        p_order_id: order.id,
+        p_received: true,
+        p_note: null,
+      }
+    );
+
+    if (result.error) setError(result.error.message);
+    else {
+      setMessage(
+        `CliQ payment confirmed for order ${
+          order.order_number || order.id.slice(0, 8)
+        }.`
+      );
+      await loadOrders();
+    }
+
+    setConfirmingPaymentOrderId(null);
   }
 
   async function signOut() { await supabase.auth.signOut(); }
@@ -153,6 +183,30 @@ export default function DarikDirectOrdersPage() {
                 <div className={styles.orderCardHeader}><div><span>{order.order_number || order.id.slice(0, 8)}</span><h3>{order.customer_name}</h3></div><strong>{money(order.total)}</strong></div>
                 <div className={styles.orderMetaGrid}><div><span>Phone</span><strong>{order.customer_phone}</strong></div><div><span>Payment</span><strong>{labelStatus(order.payment_method)}</strong></div><div><span>Status</span><strong className={styles.statusPill}>{labelStatus(order.order_status)}</strong></div><div><span>Placed</span><strong>{new Date(order.created_at).toLocaleString()}</strong></div></div>
                 {order.delivery_address_details ? <p className={styles.orderAddress}>{order.delivery_address_details}</p> : null}
+                {order.payment_method === "cliq" ? (
+                  <div className={styles.cliqOrderPanel}>
+                    <span>CliQ payment</span>
+                    <strong>{labelStatus(order.payment_status)}</strong>
+                    {order.direct_payment_reference ? (
+                      <code>{order.direct_payment_reference}</code>
+                    ) : null}
+                    {!["paid", "paid_by_cliq", "paid_cliq"].includes(
+                      order.payment_status
+                    ) ? (
+                      <div className={styles.cliqOrderActions}>
+                        <button
+                          type="button"
+                          disabled={confirmingPaymentOrderId === order.id}
+                          onClick={() => confirmCliqPayment(order)}
+                        >
+                          {confirmingPaymentOrderId === order.id
+                            ? "Confirming…"
+                            : "Mark CliQ received"}
+                        </button>
+                      </div>
+                    ) : null}
+                  </div>
+                ) : null}
                 <div className={styles.orderStatusActions}><span>Update status</span><select disabled={updatingOrderId === order.id} value={order.order_status} onChange={(event) => updateStatus(order, event.target.value)}><option value={order.order_status}>{labelStatus(order.order_status)}</option>{statusOptions.filter((status) => status !== order.order_status).map((status) => <option key={status} value={status}>{labelStatus(status)}</option>)}</select></div>
               </article>)}
             </div>

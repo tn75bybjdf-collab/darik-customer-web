@@ -1144,3 +1144,236 @@
     grid-template-columns: 1fr;
   }
 }
+
+.orderMethodChoices {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.orderMethodChoices button {
+  min-height: 118px;
+  display: grid;
+  align-content: start;
+  gap: 8px;
+  border: 1px solid #dce4ef;
+  border-radius: 16px;
+  padding: 16px;
+  background: #ffffff;
+  color: #172033;
+  text-align: left;
+  cursor: pointer;
+  transition: 160ms ease;
+}
+
+.orderMethodChoices button:hover {
+  border-color: #9fb6d8;
+  transform: translateY(-1px);
+}
+
+.orderMethodChoices button strong {
+  font-size: 14px;
+}
+
+.orderMethodChoices button span {
+  color: #738198;
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+.orderMethodChoices .activeOrderMethod {
+  border-color: #2563eb;
+  background: #eff6ff;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.orderMethodChoices .activeOrderMethod strong {
+  color: #1d4ed8;
+}
+
+.orderMethodHint {
+  margin: 0 0 18px;
+  border-radius: 12px;
+  padding: 10px 12px;
+  background: #f1f5f9;
+  color: #64748b;
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+@media (max-width: 900px) {
+  .orderMethodChoices {
+    grid-template-columns: 1fr;
+  }
+
+  .orderMethodChoices button {
+    min-height: 0;
+  }
+}
+
+
+.onlinePaymentSettings {
+  margin: 0 0 20px;
+  border: 1px solid #dce4ef;
+  border-radius: 18px;
+  padding: 18px;
+  background: #f8fafc;
+}
+
+.paymentSettingsHeading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 18px;
+  margin-bottom: 14px;
+}
+
+.paymentSettingsHeading span {
+  color: #2563eb;
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+}
+
+.paymentSettingsHeading h4 {
+  margin: 4px 0 0;
+  color: #172033;
+  font-size: 16px;
+}
+
+.paymentSettingsHeading p {
+  max-width: 310px;
+  margin: 0;
+  color: #75839a;
+  font-size: 11px;
+  line-height: 1.5;
+  text-align: right;
+}
+
+.paymentCheckboxGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.paymentCheckboxGrid > label {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  border: 1px solid #dce4ef;
+  border-radius: 15px;
+  padding: 14px;
+  background: #fff;
+  cursor: pointer;
+  transition: 160ms ease;
+}
+
+.paymentCheckboxGrid > label:hover {
+  border-color: #9fb6d8;
+}
+
+.paymentCheckboxGrid input {
+  width: 18px;
+  height: 18px;
+  margin: 1px 0 0;
+  accent-color: #2563eb;
+}
+
+.paymentCheckboxGrid label > span {
+  display: grid;
+  gap: 4px;
+}
+
+.paymentCheckboxGrid strong {
+  color: #172033;
+  font-size: 13px;
+}
+
+.paymentCheckboxGrid small {
+  color: #75839a;
+  font-size: 10px;
+  line-height: 1.45;
+}
+
+.paymentCheckboxGrid .activePaymentCheckbox {
+  border-color: #2563eb;
+  background: #eff6ff;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.08);
+}
+
+.cliqSettingsPanel {
+  margin-top: 14px;
+  border: 1px solid #cfe0ff;
+  border-radius: 15px;
+  padding: 14px;
+  background: #fff;
+}
+
+.cliqSettingsPanel > p {
+  margin: 10px 0 0;
+  color: #64748b;
+  font-size: 10px;
+  line-height: 1.5;
+}
+
+.cliqOrderPanel {
+  margin-top: 14px;
+  border: 1px solid #cfe0ff;
+  border-radius: 14px;
+  padding: 12px;
+  background: #eff6ff;
+}
+
+.cliqOrderPanel span {
+  color: #64748b;
+  font-size: 10px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.cliqOrderPanel strong,
+.cliqOrderPanel code {
+  display: block;
+  margin-top: 4px;
+  color: #172033;
+  font-size: 12px;
+}
+
+.cliqOrderActions {
+  display: flex;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.cliqOrderActions button {
+  border: 0;
+  border-radius: 10px;
+  padding: 9px 12px;
+  background: #172033;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.cliqOrderActions button:disabled {
+  cursor: wait;
+  opacity: 0.6;
+}
+
+@media (max-width: 720px) {
+  .paymentSettingsHeading {
+    display: grid;
+  }
+
+  .paymentSettingsHeading p {
+    max-width: none;
+    text-align: left;
+  }
+
+  .paymentCheckboxGrid {
+    grid-template-columns: 1fr;
+  }
+}

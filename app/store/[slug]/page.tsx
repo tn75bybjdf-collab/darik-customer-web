@@ -37,8 +37,11 @@ type Storefront = {
   estimated_delivery_minutes: number | null;
   cash_on_delivery_enabled: boolean;
   cliq_enabled: boolean;
+  cliq_account_name: string | null;
+  cliq_payment_identifier: string | null;
   card_enabled: boolean;
   pickup_enabled: boolean;
+  order_submission_mode: "phone" | "online" | "both";
   business_name: string;
 };
 
@@ -88,6 +91,17 @@ type CartLine = {
   price: number;
   quantity: number;
   photoUrl: string | null;
+};
+
+type OnlineCheckoutForm = {
+  customerName: string;
+  customerPhone: string;
+  deliveryAddress: string;
+  deliveryNote: string;
+  paymentMethod: "cash" | "cliq";
+  cliqReference: string;
+  latitude: number | null;
+  longitude: number | null;
 };
 
 type IconName =
@@ -333,6 +347,25 @@ export default function DarikDirectStorefrontPage() {
   const [search, setSearch] = useState("");
   const [cart, setCart] = useState<CartLine[]>([]);
   const [cartOpen, setCartOpen] = useState(false);
+  const [onlineCheckoutOpen, setOnlineCheckoutOpen] = useState(false);
+  const [checkoutForm, setCheckoutForm] = useState<OnlineCheckoutForm>({
+    customerName: "",
+    customerPhone: "",
+    deliveryAddress: "",
+    deliveryNote: "",
+    paymentMethod: "cash",
+    cliqReference: "",
+    latitude: null,
+    longitude: null,
+  });
+  const [locatingCustomer, setLocatingCustomer] = useState(false);
+  const [placingOrder, setPlacingOrder] = useState(false);
+  const [checkoutError, setCheckoutError] = useState("");
+  const [orderConfirmation, setOrderConfirmation] = useState<{
+    orderNumber: string;
+    total: number;
+    paymentMethod: "cash" | "cliq";
+  } | null>(null);
   const [detailsOpen, setDetailsOpen] = useState(false);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState("");
@@ -361,6 +394,26 @@ export default function DarikDirectStorefrontPage() {
       // Cart persistence is optional.
     }
   }, [cart, slug]);
+
+  useEffect(() => {
+    if (!storefront) return;
+
+    setCheckoutForm((current) => {
+      const currentAllowed =
+        (current.paymentMethod === "cash" &&
+          storefront.cash_on_delivery_enabled) ||
+        (current.paymentMethod === "cliq" && storefront.cliq_enabled);
+
+      if (currentAllowed) return current;
+
+      return {
+        ...current,
+        paymentMethod: storefront.cash_on_delivery_enabled
+          ? "cash"
+          : "cliq",
+      };
+    });
+  }, [storefront]);
 
   useEffect(() => {
     if (!slug) return;
@@ -492,6 +545,7 @@ export default function DarikDirectStorefrontPage() {
   const minimumReached = cartSubtotal >= minimumOrder;
 
   function addToCart(product: Product) {
+    setOrderConfirmation(null);
     const price = Number(product.app_price ?? 0);
     if (!Number.isFinite(price) || price <= 0) return;
 
@@ -536,6 +590,145 @@ export default function DarikDirectStorefrontPage() {
       behavior: "smooth",
       block: "start",
     });
+  }
+
+  function updateCheckoutField<K extends keyof OnlineCheckoutForm>(
+    field: K,
+    value: OnlineCheckoutForm[K]
+  ) {
+    setCheckoutError("");
+    setCheckoutForm((current) => ({ ...current, [field]: value }));
+  }
+
+  function captureExactLocation() {
+    setCheckoutError("");
+
+    if (!navigator.geolocation) {
+      setCheckoutError(
+        "Location access is not available in this browser. Call the store to order instead."
+      );
+      return;
+    }
+
+    setLocatingCustomer(true);
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        setCheckoutForm((current) => ({
+          ...current,
+          latitude: position.coords.latitude,
+          longitude: position.coords.longitude,
+        }));
+        setLocatingCustomer(false);
+      },
+      () => {
+        setCheckoutError(
+          "We could not capture your exact location. Allow location access and try again."
+        );
+        setLocatingCustomer(false);
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 15000,
+        maximumAge: 60000,
+      }
+    );
+  }
+
+  async function placeOnlineOrder() {
+    if (!storefront || placingOrder) return;
+
+    const customerName = checkoutForm.customerName.trim();
+    const customerPhone = checkoutForm.customerPhone.trim();
+    const deliveryAddress = checkoutForm.deliveryAddress.trim();
+
+    if (customerName.length < 2) {
+      setCheckoutError("Enter your name.");
+      return;
+    }
+
+    if (customerPhone.length < 7) {
+      setCheckoutError("Enter a valid phone number.");
+      return;
+    }
+
+    if (deliveryAddress.length < 5) {
+      setCheckoutError("Enter your delivery address.");
+      return;
+    }
+
+    if (
+      checkoutForm.latitude == null ||
+      checkoutForm.longitude == null
+    ) {
+      setCheckoutError("Use exact location before placing the order.");
+      return;
+    }
+
+    if (
+      checkoutForm.paymentMethod === "cash" &&
+      !storefront.cash_on_delivery_enabled
+    ) {
+      setCheckoutError("Cash is not available for this store.");
+      return;
+    }
+
+    if (checkoutForm.paymentMethod === "cliq") {
+      if (!storefront.cliq_enabled) {
+        setCheckoutError("CliQ is not available for this store.");
+        return;
+      }
+
+      if (checkoutForm.cliqReference.trim().length < 2) {
+        setCheckoutError("Enter the CliQ transfer reference or sender name.");
+        return;
+      }
+    }
+
+    setPlacingOrder(true);
+    setCheckoutError("");
+
+    const result = await supabase.rpc("darik_direct_place_online_order", {
+      p_storefront_slug: storefront.slug,
+      p_customer_name: customerName,
+      p_customer_phone: customerPhone,
+      p_delivery_address: deliveryAddress,
+      p_delivery_latitude: checkoutForm.latitude,
+      p_delivery_longitude: checkoutForm.longitude,
+      p_items: cart.map((line) => ({
+        product_id: line.productId,
+        quantity: line.quantity,
+      })),
+      p_payment_method: checkoutForm.paymentMethod,
+      p_cliq_reference:
+        checkoutForm.paymentMethod === "cliq"
+          ? checkoutForm.cliqReference.trim()
+          : null,
+      p_delivery_note: checkoutForm.deliveryNote.trim() || null,
+    });
+
+    if (result.error) {
+      setCheckoutError(result.error.message);
+      setPlacingOrder(false);
+      return;
+    }
+
+    const response = result.data as {
+      ok?: boolean;
+      order_number?: string;
+      total?: number | string;
+      payment_method?: "cash" | "cliq";
+    } | null;
+
+    setOrderConfirmation({
+      orderNumber: response?.order_number || "Order received",
+      total: Number(response?.total ?? orderTotal),
+      paymentMethod:
+        response?.payment_method ?? checkoutForm.paymentMethod,
+    });
+    setCart([]);
+    setOnlineCheckoutOpen(false);
+    setPlacingOrder(false);
   }
 
   if (loading) {
@@ -667,15 +860,24 @@ export default function DarikDirectStorefrontPage() {
     `Total: ${money(orderTotal)}`,
   ].join("\n");
 
-  const fallbackOrderHref = whatsapp
+  const phoneOrderHref = whatsapp
     ? `https://wa.me/${whatsapp}?text=${encodeURIComponent(orderMessage)}`
     : phone;
 
-  const fallbackOrderLabel = whatsapp
+  const phoneOrderLabel = whatsapp
     ? "Order on WhatsApp"
     : phone
       ? "Call store to order"
-      : "Online checkout coming soon";
+      : "Phone ordering unavailable";
+
+  const orderSubmissionMode = storefront.order_submission_mode ?? "phone";
+  const phoneOrderingEnabled =
+    orderSubmissionMode === "phone" || orderSubmissionMode === "both";
+  const onlinePaymentAvailable =
+    storefront.cash_on_delivery_enabled || storefront.cliq_enabled;
+  const onlineOrderingEnabled =
+    (orderSubmissionMode === "online" || orderSubmissionMode === "both") &&
+    onlinePaymentAvailable;
 
   const selectedCategory = visibleCategories.find(
     (category) => category.id === selectedCategoryId
@@ -1301,120 +1503,410 @@ export default function DarikDirectStorefrontPage() {
                 <p>{storefront.display_name}</p>
                 <h2>Your cart</h2>
               </div>
-              <button onClick={() => setCartOpen(false)}>
+              <button
+                onClick={() => {
+                  setCartOpen(false);
+                  setOnlineCheckoutOpen(false);
+                  setOrderConfirmation(null);
+                  setCheckoutError("");
+                }}
+              >
                 <Icon name="close" size={20} />
               </button>
             </div>
 
-            <div className={styles.cartLines}>
-              {cart.length === 0 ? (
-                <div className={styles.emptyCart}>
-                  <span>
-                    <Icon name="bag" size={30} />
-                  </span>
-                  <h3>Your cart is empty</h3>
-                  <p>Add something from {storefront.display_name}.</p>
-                  <button
-                    onClick={() => {
-                      setCartOpen(false);
-                      jumpToCatalog();
-                    }}
-                  >
-                    Start shopping
-                  </button>
+            {orderConfirmation ? (
+              <div className={styles.orderConfirmation}>
+                <span>
+                  <Icon name="bag" size={30} />
+                </span>
+                <p>Order sent successfully</p>
+                <h2>{orderConfirmation.orderNumber}</h2>
+                <strong>{money(orderConfirmation.total)}</strong>
+                <small>
+                  {orderConfirmation.paymentMethod === "cliq"
+                    ? "Your CliQ payment is awaiting store verification. The store will contact you to confirm delivery."
+                    : "The store received your cash-on-delivery order and will contact you to confirm delivery."}
+                </small>
+                <button
+                  onClick={() => {
+                    setOrderConfirmation(null);
+                    setCartOpen(false);
+                  }}
+                >
+                  Done
+                </button>
+              </div>
+            ) : (
+              <>
+                <div
+                  className={`${styles.cartLines} ${
+                    onlineCheckoutOpen ? styles.cartLinesCheckoutHidden : ""
+                  }`}
+                >
+                  {cart.length === 0 ? (
+                    <div className={styles.emptyCart}>
+                      <span>
+                        <Icon name="bag" size={30} />
+                      </span>
+                      <h3>Your cart is empty</h3>
+                      <p>Add something from {storefront.display_name}.</p>
+                      <button
+                        onClick={() => {
+                          setCartOpen(false);
+                          jumpToCatalog();
+                        }}
+                      >
+                        Start shopping
+                      </button>
+                    </div>
+                  ) : (
+                    cart.map((line) => (
+                      <div className={styles.cartLine} key={line.productId}>
+                        <div className={styles.cartThumb}>
+                          {line.photoUrl ? (
+                            <img src={line.photoUrl} alt={line.name} />
+                          ) : (
+                            <span>{line.name.slice(0, 1)}</span>
+                          )}
+                        </div>
+                        <div className={styles.cartLineInfo}>
+                          <h3>{line.name}</h3>
+                          <p>{money(line.price)}</p>
+                        </div>
+                        <div className={styles.quantity}>
+                          <button
+                            onClick={() => changeQuantity(line.productId, -1)}
+                          >
+                            <Icon name="minus" size={15} />
+                          </button>
+                          <span>{line.quantity}</span>
+                          <button
+                            onClick={() => changeQuantity(line.productId, 1)}
+                          >
+                            <Icon name="plus" size={15} />
+                          </button>
+                        </div>
+                      </div>
+                    ))
+                  )}
                 </div>
-              ) : (
-                cart.map((line) => (
-                  <div className={styles.cartLine} key={line.productId}>
-                    <div className={styles.cartThumb}>
-                      {line.photoUrl ? (
-                        <img src={line.photoUrl} alt={line.name} />
-                      ) : (
-                        <span>{line.name.slice(0, 1)}</span>
-                      )}
-                    </div>
-                    <div className={styles.cartLineInfo}>
-                      <h3>{line.name}</h3>
-                      <p>{money(line.price)}</p>
-                    </div>
-                    <div className={styles.quantity}>
-                      <button onClick={() => changeQuantity(line.productId, -1)}>
-                        <Icon name="minus" size={15} />
-                      </button>
-                      <span>{line.quantity}</span>
-                      <button onClick={() => changeQuantity(line.productId, 1)}>
-                        <Icon name="plus" size={15} />
-                      </button>
-                    </div>
-                  </div>
-                ))
-              )}
-            </div>
 
-            <div className={styles.cartSummary}>
-              <div>
-                <span>Subtotal</span>
-                <strong>{money(cartSubtotal)}</strong>
-              </div>
-              <div>
-                <span>Delivery</span>
-                <strong>{money(deliveryFee)}</strong>
-              </div>
-              <div className={styles.cartTotal}>
-                <span>Total</span>
-                <strong>{money(orderTotal)}</strong>
-              </div>
-
-              {!minimumReached ? (
-                <div className={styles.minimumProgress}>
+                <div
+                  className={`${styles.cartSummary} ${
+                    onlineCheckoutOpen ? styles.checkoutSummaryOpen : ""
+                  }`}
+                >
                   <div>
-                    <span
-                      style={{
-                        width: `${Math.min(
-                          100,
-                          minimumOrder > 0
-                            ? (cartSubtotal / minimumOrder) * 100
-                            : 100
-                        )}%`,
-                      }}
-                    />
+                    <span>Subtotal</span>
+                    <strong>{money(cartSubtotal)}</strong>
                   </div>
-                  <p>
-                    Add {money(minimumOrder - cartSubtotal)} to reach the minimum
-                    order.
+                  <div>
+                    <span>Delivery</span>
+                    <strong>{money(deliveryFee)}</strong>
+                  </div>
+                  <div className={styles.cartTotal}>
+                    <span>Total</span>
+                    <strong>{money(orderTotal)}</strong>
+                  </div>
+
+                  {!minimumReached ? (
+                    <div className={styles.minimumProgress}>
+                      <div>
+                        <span
+                          style={{
+                            width: `${Math.min(
+                              100,
+                              minimumOrder > 0
+                                ? (cartSubtotal / minimumOrder) * 100
+                                : 100
+                            )}%`,
+                          }}
+                        />
+                      </div>
+                      <p>
+                        Add {money(minimumOrder - cartSubtotal)} to reach the
+                        minimum order.
+                      </p>
+                    </div>
+                  ) : null}
+
+                  {onlineCheckoutOpen &&
+                  onlineOrderingEnabled &&
+                  cart.length > 0 &&
+                  minimumReached &&
+                  storefront.is_accepting_orders ? (
+                    <div className={styles.onlineCheckoutForm}>
+                      <div className={styles.onlineCheckoutHeading}>
+                        <div>
+                          <span>Online order</span>
+                          <h3>Delivery details</h3>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setOnlineCheckoutOpen(false);
+                            setCheckoutError("");
+                          }}
+                        >
+                          Cancel
+                        </button>
+                      </div>
+
+                      <div className={styles.paymentMethodSection}>
+                        <span>Payment method</span>
+                        <div className={styles.paymentMethodChoices}>
+                          {storefront.cash_on_delivery_enabled ? (
+                            <button
+                              type="button"
+                              className={
+                                checkoutForm.paymentMethod === "cash"
+                                  ? styles.activePaymentMethod
+                                  : ""
+                              }
+                              onClick={() =>
+                                updateCheckoutField("paymentMethod", "cash")
+                              }
+                            >
+                              <strong>Cash</strong>
+                              <small>Pay on delivery</small>
+                            </button>
+                          ) : null}
+
+                          {storefront.cliq_enabled ? (
+                            <button
+                              type="button"
+                              className={
+                                checkoutForm.paymentMethod === "cliq"
+                                  ? styles.activePaymentMethod
+                                  : ""
+                              }
+                              onClick={() =>
+                                updateCheckoutField("paymentMethod", "cliq")
+                              }
+                            >
+                              <strong>CliQ</strong>
+                              <small>Transfer before submitting</small>
+                            </button>
+                          ) : null}
+                        </div>
+                      </div>
+
+                      {checkoutForm.paymentMethod === "cliq" ? (
+                        <div className={styles.cliqPaymentPanel}>
+                          <span>Send exactly {money(orderTotal)} by CliQ</span>
+                          <div>
+                            <small>Account name</small>
+                            <strong>
+                              {storefront.cliq_account_name ||
+                                storefront.display_name}
+                            </strong>
+                          </div>
+                          <div>
+                            <small>CliQ alias / mobile</small>
+                            <strong>
+                              {storefront.cliq_payment_identifier}
+                            </strong>
+                          </div>
+                          <label>
+                            Transfer reference or sender name
+                            <input
+                              value={checkoutForm.cliqReference}
+                              onChange={(event) =>
+                                updateCheckoutField(
+                                  "cliqReference",
+                                  event.target.value
+                                )
+                              }
+                              placeholder="Reference number or sender name"
+                            />
+                          </label>
+                          <p>
+                            The store will verify the transfer before preparing
+                            the order.
+                          </p>
+                        </div>
+                      ) : null}
+
+                      <label>
+                        Name
+                        <input
+                          value={checkoutForm.customerName}
+                          onChange={(event) =>
+                            updateCheckoutField(
+                              "customerName",
+                              event.target.value
+                            )
+                          }
+                          placeholder="Your full name"
+                        />
+                      </label>
+
+                      <label>
+                        Phone
+                        <input
+                          type="tel"
+                          value={checkoutForm.customerPhone}
+                          onChange={(event) =>
+                            updateCheckoutField(
+                              "customerPhone",
+                              event.target.value
+                            )
+                          }
+                          placeholder="07XXXXXXXX"
+                        />
+                      </label>
+
+                      <label>
+                        Delivery address
+                        <textarea
+                          value={checkoutForm.deliveryAddress}
+                          onChange={(event) =>
+                            updateCheckoutField(
+                              "deliveryAddress",
+                              event.target.value
+                            )
+                          }
+                          placeholder="Area, street, building and floor"
+                          rows={3}
+                        />
+                      </label>
+
+                      <label>
+                        Delivery note <small>Optional</small>
+                        <textarea
+                          value={checkoutForm.deliveryNote}
+                          onChange={(event) =>
+                            updateCheckoutField(
+                              "deliveryNote",
+                              event.target.value
+                            )
+                          }
+                          placeholder="Landmark or delivery instructions"
+                          rows={2}
+                        />
+                      </label>
+
+                      <button
+                        type="button"
+                        className={`${styles.locationButton} ${
+                          checkoutForm.latitude != null &&
+                          checkoutForm.longitude != null
+                            ? styles.locationCaptured
+                            : ""
+                        }`}
+                        onClick={captureExactLocation}
+                        disabled={locatingCustomer}
+                      >
+                        <Icon name="location" size={18} />
+                        {locatingCustomer
+                          ? "Capturing location…"
+                          : checkoutForm.latitude != null &&
+                              checkoutForm.longitude != null
+                            ? "Exact location captured"
+                            : "Use my exact location"}
+                      </button>
+
+                      {checkoutError ? (
+                        <p className={styles.checkoutError}>{checkoutError}</p>
+                      ) : null}
+
+                      <button
+                        type="button"
+                        className={styles.checkoutButton}
+                        onClick={placeOnlineOrder}
+                        disabled={placingOrder}
+                      >
+                        {placingOrder
+                          ? "Sending order…"
+                          : checkoutForm.paymentMethod === "cliq"
+                            ? `Submit CliQ order · ${money(orderTotal)}`
+                            : `Place cash order · ${money(orderTotal)}`}
+                        {!placingOrder ? <Icon name="arrow" size={18} /> : null}
+                      </button>
+                    </div>
+                  ) : null}
+
+                  {!storefront.is_accepting_orders ||
+                  cart.length === 0 ||
+                  !minimumReached ? (
+                    <button className={styles.checkoutButton} disabled>
+                      {!storefront.is_accepting_orders
+                        ? "Store is not accepting orders"
+                        : cart.length === 0
+                          ? "Add products to continue"
+                          : "Minimum order not reached"}
+                    </button>
+                  ) : (
+                    <div className={styles.orderMethodButtons}>
+                      {onlineOrderingEnabled && !onlineCheckoutOpen ? (
+                        <button
+                          type="button"
+                          className={styles.checkoutButton}
+                          onClick={() => {
+                            setOnlineCheckoutOpen(true);
+                            setCheckoutError("");
+                          }}
+                        >
+                          Place order online
+                          <Icon name="arrow" size={18} />
+                        </button>
+                      ) : null}
+
+                      {phoneOrderingEnabled && phoneOrderHref ? (
+                        <a
+                          className={`${styles.checkoutButton} ${
+                            onlineOrderingEnabled
+                              ? styles.secondaryCheckoutButton
+                              : ""
+                          }`}
+                          href={phoneOrderHref}
+                          target={
+                            phoneOrderHref.startsWith("http")
+                              ? "_blank"
+                              : undefined
+                          }
+                          rel={
+                            phoneOrderHref.startsWith("http")
+                              ? "noreferrer"
+                              : undefined
+                          }
+                        >
+                          {phoneOrderLabel}
+                          <Icon
+                            name={whatsapp ? "whatsapp" : "call"}
+                            size={18}
+                          />
+                        </a>
+                      ) : null}
+
+                      {phoneOrderingEnabled && !phoneOrderHref ? (
+                        <button
+                          className={`${styles.checkoutButton} ${
+                            onlineOrderingEnabled
+                              ? styles.secondaryCheckoutButton
+                              : ""
+                          }`}
+                          disabled
+                        >
+                          Phone ordering unavailable
+                        </button>
+                      ) : null}
+                    </div>
+                  )}
+
+                  <p className={styles.checkoutNote}>
+                    {onlineOrderingEnabled
+                      ? storefront.cash_on_delivery_enabled && storefront.cliq_enabled
+                        ? "This store accepts cash on delivery and CliQ for online orders."
+                        : storefront.cliq_enabled
+                          ? "This store accepts CliQ for online orders."
+                          : "This store accepts cash on delivery for online orders."
+                      : "The store will confirm product availability, address and final delivery details."}
                   </p>
                 </div>
-              ) : null}
-
-              {fallbackOrderHref && cart.length > 0 && minimumReached && storefront.is_accepting_orders ? (
-                <a
-                  className={styles.checkoutButton}
-                  href={fallbackOrderHref}
-                  target={fallbackOrderHref.startsWith("http") ? "_blank" : undefined}
-                  rel={fallbackOrderHref.startsWith("http") ? "noreferrer" : undefined}
-                >
-                  {fallbackOrderLabel}
-                  <Icon name="arrow" size={18} />
-                </a>
-              ) : (
-                <button
-                  className={styles.checkoutButton}
-                  disabled
-                >
-                  {!storefront.is_accepting_orders
-                    ? "Store is not accepting orders"
-                    : cart.length === 0
-                      ? "Add products to continue"
-                      : !minimumReached
-                        ? "Minimum order not reached"
-                        : fallbackOrderLabel}
-                </button>
-              )}
-
-              <p className={styles.checkoutNote}>
-                The store will confirm product availability, address and final delivery details.
-              </p>
-            </div>
+              </>
+            )}
           </aside>
         </div>
       ) : null}
