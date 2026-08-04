@@ -612,8 +612,8 @@ export default function DarikDirectProductsPage() {
 
         <nav>
           <a href="/store-dashboard">Overview</a>
-          <a href="/store-dashboard#storefront">Storefront</a>
-          <a href="/store-dashboard#orders">Orders</a>
+          <a href="/store-dashboard/storefront">Storefront</a>
+          <a href="/store-dashboard/orders">Orders</a>
           <a className={styles.activeNav} href="/store-dashboard/products">
             Products
           </a>
@@ -685,7 +685,7 @@ export default function DarikDirectProductsPage() {
                     storefront link before they can see them.
                   </p>
                 </div>
-                <a href="/store-dashboard#storefront">Set up storefront</a>
+                <a href="/store-dashboard/storefront">Set up storefront</a>
               </section>
             ) : null}
 

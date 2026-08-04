@@ -524,8 +524,8 @@ export default function DarikDirectCategoriesPage() {
 
         <nav>
           <a href="/store-dashboard">Overview</a>
-          <a href="/store-dashboard#storefront">Storefront</a>
-          <a href="/store-dashboard#orders">Orders</a>
+          <a href="/store-dashboard/storefront">Storefront</a>
+          <a href="/store-dashboard/orders">Orders</a>
           <a href="/store-dashboard/products">Products</a>
           <a
             className={styles.activeNav}

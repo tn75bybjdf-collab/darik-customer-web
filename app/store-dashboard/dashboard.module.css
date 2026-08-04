@@ -971,3 +971,176 @@
     width: 100%;
   }
 }
+
+
+/* Separate dashboard route additions */
+.quickActionGrid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.quickActionCard {
+  min-height: 170px;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid #e1e7f0;
+  border-radius: 18px;
+  padding: 20px;
+  background: #f8fafc;
+  color: #142033;
+  text-decoration: none;
+  transition: 160ms ease;
+}
+
+.quickActionCard:hover {
+  transform: translateY(-3px);
+  border-color: #b9c9e5;
+  background: white;
+  box-shadow: 0 15px 34px rgba(15, 23, 42, 0.08);
+}
+
+.quickActionCard > span {
+  margin-bottom: auto;
+  color: #155eef;
+  font-size: 12px;
+  font-weight: 950;
+}
+
+.quickActionCard > strong {
+  margin-top: 24px;
+  font-size: 20px;
+}
+
+.quickActionCard > p {
+  margin: 8px 0 0;
+  color: #66758b;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.ordersToolbar {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 230px;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.ordersToolbar input,
+.ordersToolbar select,
+.orderStatusActions select {
+  min-height: 44px;
+  border: 1px solid #d8e0ec;
+  border-radius: 11px;
+  padding: 0 13px;
+  background: white;
+  color: #142033;
+  font: inherit;
+  font-weight: 700;
+}
+
+.ordersPageGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.orderCard {
+  border: 1px solid #e1e7f0;
+  border-radius: 18px;
+  padding: 18px;
+  background: #fff;
+  box-shadow: 0 9px 24px rgba(15, 23, 42, 0.04);
+}
+
+.orderCardHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid #eef2f7;
+}
+
+.orderCardHeader span {
+  color: #155eef;
+  font-size: 11px;
+  font-weight: 950;
+  text-transform: uppercase;
+}
+
+.orderCardHeader h3 {
+  margin: 4px 0 0;
+  font-size: 19px;
+}
+
+.orderCardHeader > strong {
+  color: #0f172a;
+  font-size: 18px;
+}
+
+.orderMetaGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.orderMetaGrid > div {
+  border-radius: 11px;
+  padding: 10px;
+  background: #f7f9fc;
+}
+
+.orderMetaGrid span,
+.orderStatusActions > span {
+  display: block;
+  margin-bottom: 4px;
+  color: #7b899e;
+  font-size: 10px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.orderMetaGrid strong {
+  color: #344054;
+  font-size: 12px;
+}
+
+.orderAddress {
+  margin: 14px 0;
+  border-left: 3px solid #dbe7fb;
+  padding: 10px 12px;
+  background: #f8fafc;
+  color: #53647b;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.orderStatusActions {
+  margin-top: 14px;
+}
+
+.orderStatusActions select {
+  width: 100%;
+}
+
+@media (max-width: 1100px) {
+  .quickActionGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 850px) {
+  .ordersPageGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 650px) {
+  .quickActionGrid,
+  .ordersToolbar,
+  .orderMetaGrid {
+    grid-template-columns: 1fr;
+  }
+}
