@@ -590,3 +590,25 @@
     padding: 9px 13px 0;
   }
 }
+
+
+.catalogButton {
+  min-height: 42px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 11px;
+  padding: 0 15px;
+  background: #155eef;
+  color: white;
+  font-size: 13px;
+  font-weight: 900;
+  text-decoration: none;
+  box-shadow: 0 9px 20px rgba(21, 94, 239, 0.18);
+}
+
+@media (max-width: 650px) {
+  .catalogButton {
+    width: 100%;
+  }
+}
