@@ -57,6 +57,7 @@
 .slugWrap { display: flex; align-items: center; border: 1px solid #cad6df; border-radius: 13px; overflow: hidden; }
 .slugWrap span { padding: 0 0 0 12px; color: #6b7c89; font-weight: 600; white-space: nowrap; }
 .slugWrap input { border: 0; box-shadow: none !important; min-width: 0; }
+.slugWrap input:read-only { background: #f3f6f8; color: #314653; cursor: not-allowed; }
 .available { color: #147b4e; font-size: 12px; }
 .unavailable { color: #b33131; font-size: 12px; }
 .locationChoices { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }

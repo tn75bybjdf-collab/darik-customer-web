@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabaseBrowser";
 import styles from "./signup.module.css";
@@ -20,26 +20,50 @@ type LockedLocation = {
 };
 
 const businessTypes = [
-  ["supermarket", "Supermarket / Hypermarket"], ["grocery", "Grocery store"],
-  ["mini_market", "Mini-market / Convenience store"], ["restaurant", "Restaurant"],
-  ["fast_food", "Fast food"], ["bakery", "Bakery / Sweets"], ["cafe", "Café"],
-  ["butcher", "Butcher"], ["produce", "Fruit and vegetable store"],
-  ["frozen_food", "Frozen food store"], ["clothing", "Clothing"], ["shoes", "Shoes"],
-  ["jewelry", "Jewelry"], ["cosmetics", "Cosmetics / Beauty"], ["perfume", "Perfume"],
-  ["electronics", "Electronics"], ["computers", "Computers"],
-  ["mobile_phones", "Mobile phones and accessories"], ["furniture", "Furniture"],
-  ["home_appliances", "Home appliances"], ["home_decor", "Home décor"],
-  ["auto_parts", "Auto parts"], ["tires", "Tires and car accessories"],
-  ["hardware", "Hardware store"], ["building_materials", "Building materials"],
-  ["electrical_supplies", "Electrical supplies"], ["plumbing", "Plumbing supplies"],
-  ["tools", "Tools and equipment"], ["pharmacy", "Pharmacy"],
-  ["pet_supplies", "Pet supplies"], ["flowers", "Flowers"], ["gifts", "Gifts"],
-  ["toys", "Toys"], ["books_stationery", "Books and stationery"],
-  ["sports", "Sports equipment"], ["other", "Other"],
+  ["supermarket", "Supermarket / Hypermarket — سوبرماركت / هايبرماركت"],
+  ["grocery", "Grocery store — بقالة"],
+  ["mini_market", "Mini-market / Convenience store — ميني ماركت / تموينات"],
+  ["restaurant", "Restaurant — مطعم"],
+  ["fast_food", "Fast food — وجبات سريعة"],
+  ["bakery", "Bakery / Sweets — مخبز / حلويات"],
+  ["cafe", "Café — مقهى / كوفي شوب"],
+  ["butcher", "Butcher — ملحمة"],
+  ["produce", "Fruit and vegetable store — خضار وفواكه"],
+  ["frozen_food", "Frozen food store — مواد غذائية مجمدة"],
+  ["clothing", "Clothing — ملابس"],
+  ["shoes", "Shoes — أحذية"],
+  ["jewelry", "Jewelry — مجوهرات"],
+  ["cosmetics", "Cosmetics / Beauty — مستحضرات تجميل / عناية"],
+  ["perfume", "Perfume — عطور"],
+  ["electronics", "Electronics — إلكترونيات"],
+  ["computers", "Computers — كمبيوتر"],
+  ["mobile_phones", "Mobile phones and accessories — هواتف وإكسسوارات"],
+  ["furniture", "Furniture — أثاث"],
+  ["home_appliances", "Home appliances — أجهزة منزلية"],
+  ["home_decor", "Home décor — ديكور منزلي"],
+  ["auto_parts", "Auto parts — قطع سيارات"],
+  ["tires", "Tires and car accessories — إطارات وإكسسوارات سيارات"],
+  ["hardware", "Hardware store — عدد وأدوات"],
+  ["building_materials", "Building materials — مواد بناء"],
+  ["electrical_supplies", "Electrical supplies — مواد كهربائية"],
+  ["plumbing", "Plumbing supplies — مواد صحية وسباكة"],
+  ["tools", "Tools and equipment — أدوات ومعدات"],
+  ["pharmacy", "Pharmacy — صيدلية"],
+  ["pet_supplies", "Pet supplies — مستلزمات حيوانات أليفة"],
+  ["flowers", "Flowers — زهور"],
+  ["gifts", "Gifts — هدايا"],
+  ["toys", "Toys — ألعاب"],
+  ["books_stationery", "Books and stationery — كتب وقرطاسية"],
+  ["sports", "Sports equipment — معدات رياضية"],
+  ["other", "Other — أخرى"],
 ] as const;
 
 function cleanSlug(value: string) {
-  return value.toLowerCase().trim().replace(/[^a-z0-9\s-]/g, "").replace(/\s+/g, "-").replace(/-+/g, "-").replace(/^-|-$/g, "");
+  return value
+    .normalize("NFKD")
+    .toLowerCase()
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9]/g, "");
 }
 
 function strongPassword(value: string) {
@@ -55,8 +79,8 @@ export default function StoreSignupPage() {
   const [businessTypeOther, setBusinessTypeOther] = useState("");
   const [contactName, setContactName] = useState("");
   const [phone, setPhone] = useState("");
-  const [slug, setSlug] = useState("");
   const [slugState, setSlugState] = useState<"idle" | "checking" | "available" | "taken">("idle");
+  const slug = useMemo(() => cleanSlug(organizationName), [organizationName]);
   const [location, setLocation] = useState<LockedLocation | null>(null);
   const [locating, setLocating] = useState(false);
   const [placeQuery, setPlaceQuery] = useState("");
@@ -80,7 +104,6 @@ export default function StoreSignupPage() {
 
   async function checkSlug(nextSlug = slug) {
     const cleaned = cleanSlug(nextSlug);
-    setSlug(cleaned);
     if (cleaned.length < 2) { setSlugState("idle"); return false; }
     setSlugState("checking");
     const result = await supabase.rpc("darik_direct_slug_available", { p_slug: cleaned });
@@ -89,14 +112,37 @@ export default function StoreSignupPage() {
     return available;
   }
 
+  useEffect(() => {
+    let cancelled = false;
+
+    if (slug.length < 2) {
+      setSlugState("idle");
+      return;
+    }
+
+    setSlugState("checking");
+    const timer = window.setTimeout(async () => {
+      const result = await supabase.rpc("darik_direct_slug_available", { p_slug: slug });
+      if (cancelled) return;
+      const available = !result.error && result.data === true;
+      setSlugState(available ? "available" : "taken");
+    }, 450);
+
+    return () => {
+      cancelled = true;
+      window.clearTimeout(timer);
+    };
+  }, [slug]);
+
   function validateStepOne() {
     if (organizationName.trim().length < 2) return "Enter the organization or store name.";
     if (!businessType) return "Choose the retail field.";
     if (businessType === "other" && businessTypeOther.trim().length < 2) return "Enter the store type.";
     if (contactName.trim().length < 2) return "Enter the owner or contact name.";
     if (phone.trim().length < 7) return "Enter a valid business phone number.";
-    if (cleanSlug(slug).length < 2) return "Choose a valid GetDarik store link.";
-    if (slugState !== "available") return "Check that the GetDarik store link is available.";
+    if (slug.length < 2) return "Enter the store name using English letters or numbers so Darik can create its permanent link.";
+    if (slugState === "taken") return "A store already uses this permanent Darik link. Change the organization or store name.";
+    if (slugState === "checking") return "Wait a moment while Darik checks the permanent store link.";
     return "";
   }
 
@@ -166,8 +212,8 @@ export default function StoreSignupPage() {
     setError("");
     const issue = validateStepOne();
     if (issue) { setError(issue); return; }
-    const available = await checkSlug();
-    if (!available) { setError("That GetDarik store link is already taken."); return; }
+    const available = await checkSlug(slug);
+    if (!available) { setError("A store already uses this permanent Darik link. Change the organization or store name."); return; }
     setStep(2);
   }
 
@@ -200,7 +246,7 @@ export default function StoreSignupPage() {
           business_type_other: businessType === "other" ? businessTypeOther.trim() : "",
           contact_name: contactName.trim(),
           phone: phone.trim(),
-          store_slug: cleanSlug(slug),
+          store_slug: slug,
           business_address: location.address,
           business_latitude: location.latitude,
           business_longitude: location.longitude,
@@ -245,16 +291,17 @@ export default function StoreSignupPage() {
       {step === 1 ? <>
         <div className={styles.stepTitle}><span>Step 1 of 3</span><h2>Tell us about the store</h2><p>This creates the organization and reserves its permanent GetDarik address.</p></div>
         <div className={styles.grid}>
-          <label className={styles.label}>Organization / store name<input value={organizationName} onChange={(e) => { setOrganizationName(e.target.value); if (!slug) setSlug(cleanSlug(e.target.value)); }} placeholder="Hypermax" /></label>
-          <label className={styles.label}>Arabic store name <span className={styles.helper}>Optional</span><input dir="rtl" value={organizationNameAr} onChange={(e) => setOrganizationNameAr(e.target.value)} placeholder="هايبر ماكس" /></label>
-          <label className={styles.label}>Retail field<select value={businessType} onChange={(e) => setBusinessType(e.target.value)}>{businessTypes.map(([value,label]) => <option key={value} value={value}>{label}</option>)}</select></label>
+          <label className={styles.label}>Organization / store name<input value={organizationName} onChange={(e) => setOrganizationName(e.target.value)} /></label>
+          <label className={styles.label}>Arabic store name <span className={styles.helper}>Optional</span><input dir="rtl" value={organizationNameAr} onChange={(e) => setOrganizationNameAr(e.target.value)} /></label>
+          <label className={styles.label}>Retail field / مجال النشاط<select value={businessType} onChange={(e) => setBusinessType(e.target.value)}>{businessTypes.map(([value,label]) => <option key={value} value={value}>{label}</option>)}</select></label>
           {businessType === "other" ? <label className={styles.label}>Describe the business<input value={businessTypeOther} onChange={(e) => setBusinessTypeOther(e.target.value)} /></label> : null}
           <label className={styles.label}>Owner / main contact<input value={contactName} onChange={(e) => setContactName(e.target.value)} /></label>
           <label className={styles.label}>Business phone<input inputMode="tel" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="07XXXXXXXX" /></label>
-          <label className={`${styles.label} ${styles.full}`}>Permanent Darik store link<div className={styles.slugWrap}><span>getdarik.com/store/</span><input value={slug} onChange={(e) => { setSlug(cleanSlug(e.target.value)); setSlugState("idle"); }} onBlur={() => checkSlug()} /></div>
+          <label className={`${styles.label} ${styles.full}`}>Permanent Darik store link<div className={styles.slugWrap}><span>getdarik.com/store/</span><input value={slug} readOnly aria-readonly="true" /></div>
+            <span className={styles.helper}>Created automatically from the organization/store name and locked after signup.</span>
             {slugState === "checking" ? <span className={styles.helper}>Checking availability…</span> : null}
             {slugState === "available" ? <span className={styles.available}>Available — this address will be reserved.</span> : null}
-            {slugState === "taken" ? <span className={styles.unavailable}>Already taken. Choose another link.</span> : null}
+            {slugState === "taken" ? <span className={styles.unavailable}>Already in use. Change the organization/store name.</span> : null}
           </label>
         </div>
         <div className={styles.actions}><div/><div className={styles.actionsRight}><button type="button" className={styles.primaryButton} onClick={nextFromStepOne}>Continue to location</button></div></div>
