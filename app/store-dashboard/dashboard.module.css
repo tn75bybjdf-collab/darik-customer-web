@@ -685,6 +685,94 @@
   gap: 15px;
 }
 
+
+
+.bilingualPair {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 15px;
+}
+
+.hoursGrid {
+  grid-template-columns: 1fr;
+}
+
+.hoursRow {
+  display: grid;
+  grid-template-columns: minmax(120px, 0.28fr) minmax(0, 1fr);
+  gap: 15px;
+  align-items: end;
+  border: 1px solid #dce4ef;
+  border-radius: 15px;
+  padding: 14px;
+  background: white;
+}
+
+.hoursDay {
+  display: grid;
+  gap: 4px;
+  align-self: center;
+  color: #172033;
+}
+
+.hoursDay strong {
+  font-size: 13px;
+}
+
+.hoursDay span {
+  color: #64748b;
+  font-size: 13px;
+  text-align: left;
+}
+
+.bilingualLinkRow,
+.bilingualInformationRow {
+  display: grid;
+  gap: 10px;
+  align-items: end;
+  border: 1px solid #dce4ef;
+  border-radius: 15px;
+  padding: 14px;
+  background: white;
+}
+
+.bilingualLinkRow {
+  grid-template-columns: repeat(2, minmax(150px, 0.8fr)) minmax(220px, 1.2fr) auto;
+}
+
+.bilingualInformationRow {
+  grid-template-columns: repeat(2, minmax(0, 1fr)) auto;
+}
+
+.bilingualInformationRow > label:nth-of-type(3),
+.bilingualInformationRow > label:nth-of-type(4) {
+  grid-row: 2;
+}
+
+.bilingualInformationRow > button {
+  grid-column: 3;
+  grid-row: 1 / span 2;
+  align-self: stretch;
+}
+
+.bilingualLinkRow button,
+.bilingualInformationRow button {
+  min-height: 42px;
+  border: 1px solid #fecaca;
+  border-radius: 10px;
+  padding: 0 12px;
+  background: #fff5f5;
+  color: #b42318;
+  font-size: 11px;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.linkUrlField {
+  min-width: 0;
+}
+
 .assetGrid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -847,8 +935,23 @@
   }
 
   .formGrid,
-  .hoursGrid {
+  .hoursGrid,
+  .bilingualPair,
+  .hoursRow,
+  .bilingualLinkRow,
+  .bilingualInformationRow {
     grid-template-columns: 1fr;
+  }
+
+  .hoursRow {
+    align-items: stretch;
+  }
+
+  .bilingualInformationRow > label:nth-of-type(3),
+  .bilingualInformationRow > label:nth-of-type(4),
+  .bilingualInformationRow > button {
+    grid-column: 1;
+    grid-row: auto;
   }
 
   .assetCard {
@@ -869,6 +972,8 @@
   }
 
   .repeatRow button,
+  .bilingualLinkRow button,
+  .bilingualInformationRow button,
   .addRowButton {
     width: 100%;
   }

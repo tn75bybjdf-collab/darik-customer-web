@@ -23,11 +23,22 @@ type Storefront = {
   facebook_url: string | null;
   instagram_url: string | null;
   address_text: string | null;
+  address_text_ar: string | null;
   about_text: string | null;
   about_text_ar: string | null;
-  custom_links: Array<{ label: string; url: string }> | null;
-  custom_information: Array<{ label: string; value: string }> | null;
+  custom_links: Array<{
+    label: string;
+    label_ar?: string | null;
+    url: string;
+  }> | null;
+  custom_information: Array<{
+    label: string;
+    label_ar?: string | null;
+    value: string;
+    value_ar?: string | null;
+  }> | null;
   operating_hours: Record<string, string> | null;
+  operating_hours_ar: Record<string, string> | null;
   primary_color: string;
   accent_color: string;
   background_color: string;
@@ -938,50 +949,62 @@ export default function DarikDirectStorefrontPage() {
 
   const contactLinkCandidates: Array<{
     label: string;
+    labelAr?: string;
     detail: string;
     href: string;
     icon: IconName;
   }> = [
     {
       label: "Call",
+      labelAr: "اتصال",
       detail: storefront.business_phone || "",
       href: phoneHref(storefront.business_phone) || "",
       icon: "call",
     },
     {
       label: "WhatsApp",
+      labelAr: "واتساب",
       detail: storefront.whatsapp_number || "",
       href: whatsappHref(storefront.whatsapp_number) || "",
       icon: "whatsapp",
     },
     {
       label: "Email",
+      labelAr: "البريد الإلكتروني",
       detail: storefront.public_email || "",
       href: emailHref(storefront.public_email) || "",
       icon: "email",
     },
     {
       label: "Website",
+      labelAr: "الموقع الإلكتروني",
       detail: "Visit website",
       href: normalizeExternalUrl(storefront.website_url) || "",
       icon: "globe",
     },
     {
       label: "Facebook",
+      labelAr: "فيسبوك",
       detail: "Facebook",
       href: normalizeExternalUrl(storefront.facebook_url) || "",
       icon: "facebook",
     },
     {
       label: "Instagram",
+      labelAr: "إنستغرام",
       detail: "Instagram",
       href: normalizeExternalUrl(storefront.instagram_url) || "",
       icon: "instagram",
     },
     ...(Array.isArray(storefront.custom_links)
       ? storefront.custom_links.map((link) => ({
-          label: String(link.label ?? "").trim(),
-          detail: String(link.label ?? "").trim(),
+          label:
+            String(link.label ?? "").trim() ||
+            String(link.label_ar ?? "").trim(),
+          labelAr: String(link.label_ar ?? "").trim(),
+          detail:
+            String(link.label ?? "").trim() ||
+            String(link.label_ar ?? "").trim(),
           href: normalizeExternalUrl(link.url) || "",
           icon: "globe" as IconName,
         }))
@@ -1001,17 +1024,24 @@ export default function DarikDirectStorefrontPage() {
     : [];
 
   const operatingHours = storefront.operating_hours ?? {};
+  const operatingHoursAr = storefront.operating_hours_ar ?? {};
   const visibleHours = [
-    ["sunday", "Sunday"],
-    ["monday", "Monday"],
-    ["tuesday", "Tuesday"],
-    ["wednesday", "Wednesday"],
-    ["thursday", "Thursday"],
-    ["friday", "Friday"],
-    ["saturday", "Saturday"],
-  ].filter(([day]) => String(operatingHours[day] ?? "").trim());
+    ["sunday", "Sunday", "الأحد"],
+    ["monday", "Monday", "الاثنين"],
+    ["tuesday", "Tuesday", "الثلاثاء"],
+    ["wednesday", "Wednesday", "الأربعاء"],
+    ["thursday", "Thursday", "الخميس"],
+    ["friday", "Friday", "الجمعة"],
+    ["saturday", "Saturday", "السبت"],
+  ].filter(
+    ([day]) =>
+      String(operatingHours[day] ?? "").trim() ||
+      String(operatingHoursAr[day] ?? "").trim()
+  );
 
-  const currentDayHours = todayHours(storefront.operating_hours);
+  const currentDayHours =
+    todayHours(storefront.operating_hours) ||
+    todayHours(storefront.operating_hours_ar);
   const whatsapp = whatsappDigits(storefront.whatsapp_number);
   const phone = phoneHref(storefront.business_phone);
 
@@ -1261,14 +1291,19 @@ export default function DarikDirectStorefrontPage() {
       </section>
 
       <section className={styles.quickInfoStrip}>
-        {storefront.address_text ? (
+        {(storefront.address_text || storefront.address_text_ar) ? (
           <button onClick={() => setDetailsOpen(true)}>
             <span className={styles.quickIcon}>
               <Icon name="location" size={18} />
             </span>
             <span>
-              <small>Store location</small>
-              <strong>{storefront.address_text}</strong>
+              <small>Store location / موقع المتجر</small>
+              {storefront.address_text ? (
+                <strong>{storefront.address_text}</strong>
+              ) : null}
+              {storefront.address_text_ar ? (
+                <strong dir="rtl">{storefront.address_text_ar}</strong>
+              ) : null}
             </span>
           </button>
         ) : null}
@@ -1284,7 +1319,10 @@ export default function DarikDirectStorefrontPage() {
               <Icon name={link.icon} size={18} />
             </span>
             <span>
-              <small>{link.label}</small>
+              <small>
+                {link.label}
+                {link.labelAr ? ` / ${link.labelAr}` : ""}
+              </small>
               <strong>{link.detail}</strong>
             </span>
           </a>
@@ -1511,7 +1549,11 @@ export default function DarikDirectStorefrontPage() {
           </div>
           <div>
             <strong>{storefront.display_name}</strong>
-            <span>{storefront.address_text || "Darik Direct storefront"}</span>
+            <span>
+              {storefront.address_text ||
+                storefront.address_text_ar ||
+                "Darik Direct storefront"}
+            </span>
           </div>
         </div>
 
@@ -1591,14 +1633,21 @@ export default function DarikDirectStorefrontPage() {
                 </article>
               ) : null}
 
-              {storefront.address_text ? (
+              {(storefront.address_text || storefront.address_text_ar) ? (
                 <article className={styles.detailSection}>
                   <span className={styles.detailSectionIcon}>
                     <Icon name="location" size={19} />
                   </span>
                   <div>
-                    <h3>Address</h3>
-                    <p>{storefront.address_text}</p>
+                    <h3>Address / العنوان</h3>
+                    {storefront.address_text ? (
+                      <p>{storefront.address_text}</p>
+                    ) : null}
+                    {storefront.address_text_ar ? (
+                      <p className={styles.modalArabic} dir="rtl">
+                        {storefront.address_text_ar}
+                      </p>
+                    ) : null}
                   </div>
                 </article>
               ) : null}
@@ -1618,7 +1667,10 @@ export default function DarikDirectStorefrontPage() {
                           <Icon name={link.icon} size={18} />
                         </span>
                         <div>
-                          <small>{link.label}</small>
+                          <small>
+                            {link.label}
+                            {link.labelAr ? ` / ${link.labelAr}` : ""}
+                          </small>
                           <strong>{link.detail}</strong>
                         </div>
                         <Icon name="arrow" size={16} />
@@ -1632,10 +1684,17 @@ export default function DarikDirectStorefrontPage() {
                 <article className={styles.detailGroup}>
                   <h3>Business hours</h3>
                   <div className={styles.hoursGrid}>
-                    {visibleHours.map(([day, label]) => (
+                    {visibleHours.map(([day, label, labelAr]) => (
                       <div key={day}>
-                        <span>{label}</span>
-                        <strong>{operatingHours[day]}</strong>
+                        <span>
+                          {label} / <b dir="rtl">{labelAr}</b>
+                        </span>
+                        {operatingHours[day] ? (
+                          <strong>{operatingHours[day]}</strong>
+                        ) : null}
+                        {operatingHoursAr[day] ? (
+                          <strong dir="rtl">{operatingHoursAr[day]}</strong>
+                        ) : null}
                       </div>
                     ))}
                   </div>
@@ -1648,8 +1707,14 @@ export default function DarikDirectStorefrontPage() {
                   <div className={styles.customInfoGrid}>
                     {customInformation.map((item, index) => (
                       <div key={`${item.label}-${index}`}>
-                        <span>{item.label}</span>
-                        <strong>{item.value}</strong>
+                        {item.label ? <span>{item.label}</span> : null}
+                        {item.label_ar ? (
+                          <span dir="rtl">{item.label_ar}</span>
+                        ) : null}
+                        {item.value ? <strong>{item.value}</strong> : null}
+                        {item.value_ar ? (
+                          <strong dir="rtl">{item.value_ar}</strong>
+                        ) : null}
                       </div>
                     ))}
                   </div>

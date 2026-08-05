@@ -42,12 +42,15 @@ type ContextResult = {
 
 type CustomLink = {
   label: string;
+  labelAr: string;
   url: string;
 };
 
 type CustomInformation = {
   label: string;
+  labelAr: string;
   value: string;
+  valueAr: string;
 };
 
 type OperatingHours = Record<string, string>;
@@ -69,6 +72,7 @@ type StorefrontForm = {
   facebookUrl: string;
   instagramUrl: string;
   addressText: string;
+  addressTextAr: string;
   aboutText: string;
   aboutTextAr: string;
   primaryColor: string;
@@ -86,16 +90,17 @@ type StorefrontForm = {
   customLinks: CustomLink[];
   customInformation: CustomInformation[];
   operatingHours: OperatingHours;
+  operatingHoursAr: OperatingHours;
 };
 
 const operatingDays = [
-  ["sunday", "Sunday"],
-  ["monday", "Monday"],
-  ["tuesday", "Tuesday"],
-  ["wednesday", "Wednesday"],
-  ["thursday", "Thursday"],
-  ["friday", "Friday"],
-  ["saturday", "Saturday"],
+  ["sunday", "Sunday", "الأحد"],
+  ["monday", "Monday", "الاثنين"],
+  ["tuesday", "Tuesday", "الثلاثاء"],
+  ["wednesday", "Wednesday", "الأربعاء"],
+  ["thursday", "Thursday", "الخميس"],
+  ["friday", "Friday", "الجمعة"],
+  ["saturday", "Saturday", "السبت"],
 ] as const;
 
 const defaultOperatingHours: OperatingHours = Object.fromEntries(
@@ -111,10 +116,14 @@ function normalizeCustomLinks(value: unknown): CustomLink[] {
       const record = item as Record<string, unknown>;
       return {
         label: String(record.label ?? "").trim(),
+        labelAr: String(record.label_ar ?? record.labelAr ?? "").trim(),
         url: String(record.url ?? "").trim(),
       };
     })
-    .filter((item): item is CustomLink => Boolean(item?.label || item?.url));
+    .filter(
+      (item): item is CustomLink =>
+        Boolean(item?.label || item?.labelAr || item?.url)
+    );
 }
 
 function normalizeCustomInformation(value: unknown): CustomInformation[] {
@@ -126,11 +135,14 @@ function normalizeCustomInformation(value: unknown): CustomInformation[] {
       const record = item as Record<string, unknown>;
       return {
         label: String(record.label ?? "").trim(),
+        labelAr: String(record.label_ar ?? record.labelAr ?? "").trim(),
         value: String(record.value ?? "").trim(),
+        valueAr: String(record.value_ar ?? record.valueAr ?? "").trim(),
       };
     })
     .filter(
-      (item): item is CustomInformation => Boolean(item?.label || item?.value)
+      (item): item is CustomInformation =>
+        Boolean(item?.label || item?.labelAr || item?.value || item?.valueAr)
     );
 }
 
@@ -171,11 +183,13 @@ type StorefrontSettings = {
   facebook_url: string | null;
   instagram_url: string | null;
   address_text: string | null;
+  address_text_ar: string | null;
   about_text: string | null;
   about_text_ar: string | null;
   custom_links: CustomLink[] | null;
   custom_information: CustomInformation[] | null;
   operating_hours: OperatingHours | null;
+  operating_hours_ar: OperatingHours | null;
   primary_color: string;
   accent_color: string;
   background_color: string;
@@ -279,6 +293,7 @@ export default function DarikDirectStorefrontSettingsPage() {
     facebookUrl: "",
     instagramUrl: "",
     addressText: "",
+    addressTextAr: "",
     aboutText: "",
     aboutTextAr: "",
     primaryColor: "#111827",
@@ -296,6 +311,7 @@ export default function DarikDirectStorefrontSettingsPage() {
     customLinks: [],
     customInformation: [],
     operatingHours: { ...defaultOperatingHours },
+    operatingHoursAr: { ...defaultOperatingHours },
   });
 
   const [formDirty, setFormDirty] = useState(false);
@@ -482,6 +498,7 @@ export default function DarikDirectStorefrontSettingsPage() {
               facebookUrl: loadedStorefront.facebook_url ?? "",
               instagramUrl: loadedStorefront.instagram_url ?? "",
               addressText: loadedStorefront.address_text ?? "",
+              addressTextAr: loadedStorefront.address_text_ar ?? "",
               aboutText: loadedStorefront.about_text ?? "",
               aboutTextAr: loadedStorefront.about_text_ar ?? "",
               primaryColor: loadedStorefront.primary_color,
@@ -510,6 +527,9 @@ export default function DarikDirectStorefrontSettingsPage() {
               operatingHours: normalizeOperatingHours(
                 loadedStorefront.operating_hours
               ),
+              operatingHoursAr: normalizeOperatingHours(
+                loadedStorefront.operating_hours_ar
+              ),
             }
           : {
               slug: cleanSlug(selectedStore.business_name),
@@ -526,6 +546,7 @@ export default function DarikDirectStorefrontSettingsPage() {
               facebookUrl: "",
               instagramUrl: "",
               addressText: "",
+              addressTextAr: "",
               aboutText: "",
               aboutTextAr: "",
               primaryColor: "#111827",
@@ -543,6 +564,7 @@ export default function DarikDirectStorefrontSettingsPage() {
               customLinks: [],
               customInformation: [],
               operatingHours: { ...defaultOperatingHours },
+              operatingHoursAr: { ...defaultOperatingHours },
             };
 
         let nextForm = databaseForm;
@@ -689,8 +711,24 @@ export default function DarikDirectStorefrontSettingsPage() {
     setSetupForm((current) => ({ ...current, [field]: value }));
   }
 
-  function updateOperatingHour(day: string, value: string) {
+  function updateOperatingHour(
+    language: "en" | "ar",
+    day: string,
+    value: string
+  ) {
     markSetupDirty();
+
+    if (language === "ar") {
+      setSetupForm((current) => ({
+        ...current,
+        operatingHoursAr: {
+          ...current.operatingHoursAr,
+          [day]: value,
+        },
+      }));
+      return;
+    }
+
     setSetupForm((current) => ({
       ...current,
       operatingHours: {
@@ -704,7 +742,10 @@ export default function DarikDirectStorefrontSettingsPage() {
     markSetupDirty();
     setSetupForm((current) => ({
       ...current,
-      customLinks: [...current.customLinks, { label: "", url: "" }],
+      customLinks: [
+        ...current.customLinks,
+        { label: "", labelAr: "", url: "" },
+      ],
     }));
   }
 
@@ -738,7 +779,7 @@ export default function DarikDirectStorefrontSettingsPage() {
       ...current,
       customInformation: [
         ...current.customInformation,
-        { label: "", value: "" },
+        { label: "", labelAr: "", value: "", valueAr: "" },
       ],
     }));
   }
@@ -907,24 +948,38 @@ export default function DarikDirectStorefrontSettingsPage() {
       facebook_url: normalizeOptionalWebUrl(setupForm.facebookUrl),
       instagram_url: normalizeOptionalWebUrl(setupForm.instagramUrl),
       address_text: setupForm.addressText.trim() || null,
+      address_text_ar: setupForm.addressTextAr.trim() || null,
       about_text: setupForm.aboutText.trim() || null,
       about_text_ar: setupForm.aboutTextAr.trim() || null,
       custom_links: setupForm.customLinks
         .map((link) => ({
           label: link.label.trim(),
+          label_ar: link.labelAr.trim(),
           url: link.url.trim(),
         }))
-        .filter((link) => link.label && link.url),
+        .filter((link) => (link.label || link.label_ar) && link.url),
       custom_information: setupForm.customInformation
         .map((item) => ({
           label: item.label.trim(),
+          label_ar: item.labelAr.trim(),
           value: item.value.trim(),
+          value_ar: item.valueAr.trim(),
         }))
-        .filter((item) => item.label && item.value),
+        .filter(
+          (item) =>
+            (item.label || item.label_ar) &&
+            (item.value || item.value_ar)
+        ),
       operating_hours: Object.fromEntries(
         operatingDays.map(([day]) => [
           day,
           setupForm.operatingHours[day]?.trim() || "",
+        ])
+      ),
+      operating_hours_ar: Object.fromEntries(
+        operatingDays.map(([day]) => [
+          day,
+          setupForm.operatingHoursAr[day]?.trim() || "",
         ])
       ),
       primary_color: setupForm.primaryColor,
@@ -1241,8 +1296,8 @@ export default function DarikDirectStorefrontSettingsPage() {
                   </div>
 
                   <div className={styles.formGrid}>
-                    <label>
-                      Store link
+                    <label className={styles.wideField}>
+                      Permanent store link
                       <div className={styles.slugInput}>
                         <span>getdarik.com/store/</span>
                         <input
@@ -1259,49 +1314,52 @@ export default function DarikDirectStorefrontSettingsPage() {
                       </div>
                     </label>
 
-                    <label>
-                      Display name
-                      <input
-                        value={setupForm.displayName}
-                        onChange={(event) =>
-                          updateSetupField("displayName", event.target.value)
-                        }
-                        required
-                      />
-                    </label>
+                    <div className={styles.bilingualPair}>
+                      <label>
+                        Customer-facing name
+                        <input
+                          value={setupForm.displayName}
+                          onChange={(event) =>
+                            updateSetupField("displayName", event.target.value)
+                          }
+                          required
+                        />
+                      </label>
 
-                    <label>
-                      Arabic display name
-                      <input
-                        dir="rtl"
-                        value={setupForm.displayNameAr}
-                        onChange={(event) =>
-                          updateSetupField("displayNameAr", event.target.value)
-                        }
-                      />
-                    </label>
+                      <label>
+                        Customer-facing name in Arabic
+                        <input
+                          dir="rtl"
+                          value={setupForm.displayNameAr}
+                          onChange={(event) =>
+                            updateSetupField("displayNameAr", event.target.value)
+                          }
+                        />
+                      </label>
+                    </div>
 
-                    <label className={styles.wideField}>
-                      Store tagline
-                      <input
-                        value={setupForm.tagline}
-                        onChange={(event) =>
-                          updateSetupField("tagline", event.target.value)
-                        }
-                        placeholder="Local products delivered to your door"
-                      />
-                    </label>
+                    <div className={styles.bilingualPair}>
+                      <label>
+                        Store tagline
+                        <input
+                          value={setupForm.tagline}
+                          onChange={(event) =>
+                            updateSetupField("tagline", event.target.value)
+                          }
+                        />
+                      </label>
 
-                    <label className={styles.wideField}>
-                      Arabic tagline
-                      <input
-                        dir="rtl"
-                        value={setupForm.taglineAr}
-                        onChange={(event) =>
-                          updateSetupField("taglineAr", event.target.value)
-                        }
-                      />
-                    </label>
+                      <label>
+                        Store tagline in Arabic
+                        <input
+                          dir="rtl"
+                          value={setupForm.taglineAr}
+                          onChange={(event) =>
+                            updateSetupField("taglineAr", event.target.value)
+                          }
+                        />
+                      </label>
+                    </div>
                   </div>
                 </div>
 
@@ -1478,16 +1536,28 @@ export default function DarikDirectStorefrontSettingsPage() {
                       />
                     </label>
 
-                    <label className={styles.wideField}>
-                      Public store address
-                      <input
-                        value={setupForm.addressText}
-                        onChange={(event) =>
-                          updateSetupField("addressText", event.target.value)
-                        }
-                        placeholder="Marka, Amman — next to..."
-                      />
-                    </label>
+                    <div className={styles.bilingualPair}>
+                      <label>
+                        Public store address
+                        <input
+                          value={setupForm.addressText}
+                          onChange={(event) =>
+                            updateSetupField("addressText", event.target.value)
+                          }
+                        />
+                      </label>
+
+                      <label>
+                        Public store address in Arabic
+                        <input
+                          dir="rtl"
+                          value={setupForm.addressTextAr}
+                          onChange={(event) =>
+                            updateSetupField("addressTextAr", event.target.value)
+                          }
+                        />
+                      </label>
+                    </div>
                   </div>
                 </div>
 
@@ -1501,30 +1571,30 @@ export default function DarikDirectStorefrontSettingsPage() {
                   </div>
 
                   <div className={styles.formGrid}>
-                    <label className={styles.wideField}>
-                      About the store
-                      <textarea
-                        rows={5}
-                        value={setupForm.aboutText}
-                        onChange={(event) =>
-                          updateSetupField("aboutText", event.target.value)
-                        }
-                        placeholder="Tell customers about your store."
-                      />
-                    </label>
+                    <div className={styles.bilingualPair}>
+                      <label>
+                        About the store
+                        <textarea
+                          rows={5}
+                          value={setupForm.aboutText}
+                          onChange={(event) =>
+                            updateSetupField("aboutText", event.target.value)
+                          }
+                        />
+                      </label>
 
-                    <label className={styles.wideField}>
-                      Arabic About section
-                      <textarea
-                        dir="rtl"
-                        rows={5}
-                        value={setupForm.aboutTextAr}
-                        onChange={(event) =>
-                          updateSetupField("aboutTextAr", event.target.value)
-                        }
-                        placeholder="اكتب نبذة عن المتجر"
-                      />
-                    </label>
+                      <label>
+                        About the store in Arabic
+                        <textarea
+                          dir="rtl"
+                          rows={5}
+                          value={setupForm.aboutTextAr}
+                          onChange={(event) =>
+                            updateSetupField("aboutTextAr", event.target.value)
+                          }
+                        />
+                      </label>
+                    </div>
                   </div>
                 </div>
 
@@ -1538,17 +1608,42 @@ export default function DarikDirectStorefrontSettingsPage() {
                   </div>
 
                   <div className={styles.hoursGrid}>
-                    {operatingDays.map(([day, label]) => (
-                      <label key={day}>
-                        {label}
-                        <input
-                          value={setupForm.operatingHours[day] ?? ""}
-                          onChange={(event) =>
-                            updateOperatingHour(day, event.target.value)
-                          }
-                          placeholder="9:00 AM – 10:00 PM"
-                        />
-                      </label>
+                    {operatingDays.map(([day, label, labelAr]) => (
+                      <div className={styles.hoursRow} key={day}>
+                        <div className={styles.hoursDay}>
+                          <strong>{label}</strong>
+                          <span dir="rtl">{labelAr}</span>
+                        </div>
+                        <div className={styles.bilingualPair}>
+                          <label>
+                            Hours in English
+                            <input
+                              value={setupForm.operatingHours[day] ?? ""}
+                              onChange={(event) =>
+                                updateOperatingHour(
+                                  "en",
+                                  day,
+                                  event.target.value
+                                )
+                              }
+                            />
+                          </label>
+                          <label>
+                            Hours in Arabic
+                            <input
+                              dir="rtl"
+                              value={setupForm.operatingHoursAr[day] ?? ""}
+                              onChange={(event) =>
+                                updateOperatingHour(
+                                  "ar",
+                                  day,
+                                  event.target.value
+                                )
+                              }
+                            />
+                          </label>
+                        </div>
+                      </div>
                     ))}
                   </div>
                 </div>
@@ -1576,26 +1671,51 @@ export default function DarikDirectStorefrontSettingsPage() {
                   ) : (
                     <div className={styles.repeatRows}>
                       {setupForm.customLinks.map((link, index) => (
-                        <div className={styles.repeatRow} key={`link-${index}`}>
-                          <input
-                            value={link.label}
-                            onChange={(event) =>
-                              updateCustomLink(
-                                index,
-                                "label",
-                                event.target.value
-                              )
-                            }
-                            placeholder="Link label"
-                          />
-                          <input
-                            type="url"
-                            value={link.url}
-                            onChange={(event) =>
-                              updateCustomLink(index, "url", event.target.value)
-                            }
-                            placeholder="https://..."
-                          />
+                        <div
+                          className={styles.bilingualLinkRow}
+                          key={`link-${index}`}
+                        >
+                          <label>
+                            Link label
+                            <input
+                              value={link.label}
+                              onChange={(event) =>
+                                updateCustomLink(
+                                  index,
+                                  "label",
+                                  event.target.value
+                                )
+                              }
+                            />
+                          </label>
+                          <label>
+                            Link label in Arabic
+                            <input
+                              dir="rtl"
+                              value={link.labelAr}
+                              onChange={(event) =>
+                                updateCustomLink(
+                                  index,
+                                  "labelAr",
+                                  event.target.value
+                                )
+                              }
+                            />
+                          </label>
+                          <label className={styles.linkUrlField}>
+                            Link URL
+                            <input
+                              type="url"
+                              value={link.url}
+                              onChange={(event) =>
+                                updateCustomLink(
+                                  index,
+                                  "url",
+                                  event.target.value
+                                )
+                              }
+                            />
+                          </label>
                           <button
                             type="button"
                             onClick={() => removeCustomLink(index)}
@@ -1632,29 +1752,66 @@ export default function DarikDirectStorefrontSettingsPage() {
                   ) : (
                     <div className={styles.repeatRows}>
                       {setupForm.customInformation.map((item, index) => (
-                        <div className={styles.repeatRow} key={`info-${index}`}>
-                          <input
-                            value={item.label}
-                            onChange={(event) =>
-                              updateCustomInformation(
-                                index,
-                                "label",
-                                event.target.value
-                              )
-                            }
-                            placeholder="Heading"
-                          />
-                          <input
-                            value={item.value}
-                            onChange={(event) =>
-                              updateCustomInformation(
-                                index,
-                                "value",
-                                event.target.value
-                              )
-                            }
-                            placeholder="Information shown to customers"
-                          />
+                        <div
+                          className={styles.bilingualInformationRow}
+                          key={`info-${index}`}
+                        >
+                          <label>
+                            Heading
+                            <input
+                              value={item.label}
+                              onChange={(event) =>
+                                updateCustomInformation(
+                                  index,
+                                  "label",
+                                  event.target.value
+                                )
+                              }
+                            />
+                          </label>
+                          <label>
+                            Heading in Arabic
+                            <input
+                              dir="rtl"
+                              value={item.labelAr}
+                              onChange={(event) =>
+                                updateCustomInformation(
+                                  index,
+                                  "labelAr",
+                                  event.target.value
+                                )
+                              }
+                            />
+                          </label>
+                          <label>
+                            Information
+                            <textarea
+                              rows={3}
+                              value={item.value}
+                              onChange={(event) =>
+                                updateCustomInformation(
+                                  index,
+                                  "value",
+                                  event.target.value
+                                )
+                              }
+                            />
+                          </label>
+                          <label>
+                            Information in Arabic
+                            <textarea
+                              dir="rtl"
+                              rows={3}
+                              value={item.valueAr}
+                              onChange={(event) =>
+                                updateCustomInformation(
+                                  index,
+                                  "valueAr",
+                                  event.target.value
+                                )
+                              }
+                            />
+                          </label>
                           <button
                             type="button"
                             onClick={() => removeCustomInformation(index)}
