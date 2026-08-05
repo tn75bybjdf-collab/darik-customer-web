@@ -13,7 +13,6 @@ import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabaseBrowser";
 import styles from "./categories.module.css";
 import { getBusinessCategoryPreset } from "./categoryPresets";
-import type { CategoryPreset } from "./categoryPresets";
 
 type StoreContext = {
   retailer_id: string;
@@ -115,8 +114,6 @@ export default function DarikDirectCategoriesPage() {
   const [categories, setCategories] = useState<StoreCategory[]>([]);
   const [products, setProducts] = useState<CategoryProduct[]>([]);
   const [presetContext, setPresetContext] = useState<CategoryPresetContext | null>(null);
-  const [selectedPresetKeys, setSelectedPresetKeys] = useState<string[]>([]);
-  const [addingPresets, setAddingPresets] = useState(false);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
@@ -165,14 +162,23 @@ export default function DarikDirectCategoriesPage() {
       setCategories([]);
       setProducts([]);
       setPresetContext(null);
-      setSelectedPresetKeys([]);
       setLoading(false);
       return;
     }
 
     setLoading(true);
     setError("");
-    setSelectedPresetKeys([]);
+
+    const ensureResult = await supabase.rpc(
+      "darik_direct_ensure_default_categories",
+      { p_retailer_id: selectedRetailerId }
+    );
+
+    if (ensureResult.error) {
+      setError(
+        `Could not prepare the default departments. / طھط¹ط°ط± طھط¬ظ‡ظٹط² ط§ظ„ط£ظ‚ط³ط§ظ… ط§ظ„ط§ظپطھط±ط§ط¶ظٹط©. ${ensureResult.error.message}`
+      );
+    }
 
     const [categoryResult, productResult, presetContextResult] = await Promise.all([
       supabase
@@ -344,6 +350,10 @@ export default function DarikDirectCategoriesPage() {
     return images;
   }, [products]);
 
+  const editingAutomaticImageUrl = editingCategoryId
+    ? automaticImageByCategory.get(editingCategoryId) ?? null
+    : null;
+
   const filteredCategories = useMemo(() => {
     const cleanSearch = search.trim().toLowerCase();
 
@@ -401,137 +411,10 @@ export default function DarikDirectCategoriesPage() {
     [presetContext]
   );
 
-  const existingPresetKeys = useMemo(() => {
-    const normalize = (value: string | null | undefined) =>
-      String(value || "")
-        .trim()
-        .toLocaleLowerCase()
-        .replace(/\s+/g, " ");
-
-    const existingNames = new Set(
-      categories.flatMap((category) => [
-        normalize(category.name),
-        normalize(category.name_ar),
-      ])
-    );
-
-    return new Set(
-      businessPreset.categories
-        .filter(
-          (preset) =>
-            existingNames.has(normalize(preset.name)) ||
-            existingNames.has(normalize(preset.nameAr))
-        )
-        .map((preset) => preset.key)
-    );
-  }, [businessPreset, categories]);
-
-  const availablePresets = useMemo(
-    () =>
-      businessPreset.categories.filter(
-        (preset) => !existingPresetKeys.has(preset.key)
-      ),
-    [businessPreset, existingPresetKeys]
+  const preparedPresetCount = useMemo(
+    () => businessPreset.categories.length,
+    [businessPreset]
   );
-
-
-  const editingAutomaticImageUrl = useMemo(
-    () =>
-      editingCategoryId
-        ? automaticImageByCategory.get(editingCategoryId) ?? null
-        : null,
-    [automaticImageByCategory, editingCategoryId]
-  );
-
-  useEffect(() => {
-    setSelectedPresetKeys((current) =>
-      current.filter(
-        (key) =>
-          businessPreset.categories.some((preset) => preset.key === key) &&
-          !existingPresetKeys.has(key)
-      )
-    );
-  }, [businessPreset, existingPresetKeys]);
-
-
-  function togglePreset(presetKey: string) {
-    if (existingPresetKeys.has(presetKey) || addingPresets) return;
-
-    setSelectedPresetKeys((current) =>
-      current.includes(presetKey)
-        ? current.filter((key) => key !== presetKey)
-        : [...current, presetKey]
-    );
-  }
-
-  function selectAllAvailablePresets() {
-    if (addingPresets) return;
-    setSelectedPresetKeys(availablePresets.map((preset) => preset.key));
-  }
-
-  async function addPresetCategories(presets: CategoryPreset[]) {
-    if (!selectedRetailerId || presets.length === 0 || addingPresets) return;
-
-    setAddingPresets(true);
-    setError("");
-    setMessage("");
-
-    const currentCategoryCount = categories.filter(
-      (category) => category.category_status !== "archived"
-    ).length;
-
-    try {
-      let createdCount = 0;
-
-      for (const [index, preset] of presets.entries()) {
-        if (existingPresetKeys.has(preset.key)) continue;
-
-        const result = await supabase.rpc(
-          "darik_direct_create_store_category",
-          {
-            p_retailer_id: selectedRetailerId,
-            p_name: preset.name,
-            p_name_ar: preset.nameAr,
-            p_description: null,
-            p_image_url: null,
-            p_status: "active",
-            p_sort_order: (currentCategoryCount + index + 1) * 100,
-          }
-        );
-
-        if (result.error) {
-          throw new Error(
-            `${preset.name} / ${preset.nameAr}: ${result.error.message}`
-          );
-        }
-
-        createdCount += 1;
-      }
-
-      setSelectedPresetKeys([]);
-      setMessage(
-        createdCount === 1
-          ? "1 preset department was added. / تمت إضافة قسم جاهز واحد."
-          : `${createdCount} preset departments were added. / تمت إضافة ${createdCount} أقسام جاهزة.`
-      );
-      await loadCategories();
-    } catch (caught) {
-      setError(
-        caught instanceof Error
-          ? caught.message
-          : "Could not add the selected departments. / تعذر إضافة الأقسام المحددة."
-      );
-    } finally {
-      setAddingPresets(false);
-    }
-  }
-
-  async function addSelectedPresets() {
-    const selected = businessPreset.categories.filter((preset) =>
-      selectedPresetKeys.includes(preset.key)
-    );
-    await addPresetCategories(selected);
-  }
 
   function updateForm<K extends keyof CategoryForm>(
     key: K,
@@ -619,7 +502,7 @@ export default function DarikDirectCategoriesPage() {
     try {
       const url = await uploadCategoryImage(file);
       updateForm("imageUrl", url);
-      setMessage("Category image uploaded / تم رفع صورة القسم.");
+      setMessage("Category image uploaded / طھظ… ط±ظپط¹ طµظˆط±ط© ط§ظ„ظ‚ط³ظ….");
     } catch (uploadError) {
       setUploading(false);
       setError(
@@ -726,7 +609,7 @@ export default function DarikDirectCategoriesPage() {
     return (
       <main className={styles.statePage}>
         <div className={styles.spinner} />
-        <h1>Opening store categories… / جارٍ فتح الأقسام…</h1>
+        <h1>Opening store categoriesâ€¦ / ط¬ط§ط±ظچ ظپطھط­ ط§ظ„ط£ظ‚ط³ط§ظ…â€¦</h1>
       </main>
     );
   }
@@ -734,7 +617,7 @@ export default function DarikDirectCategoriesPage() {
   if (!session) {
     return (
       <main className={styles.statePage}>
-        <h1>Redirecting to store login… / جارٍ التحويل لتسجيل الدخول…</h1>
+        <h1>Redirecting to store loginâ€¦ / ط¬ط§ط±ظچ ط§ظ„طھط­ظˆظٹظ„ ظ„طھط³ط¬ظٹظ„ ط§ظ„ط¯ط®ظˆظ„â€¦</h1>
       </main>
     );
   }
@@ -748,30 +631,30 @@ export default function DarikDirectCategoriesPage() {
         </div>
 
         <nav>
-          <a href="/store-dashboard">Overview / نظرة عامة</a>
-          <a href="/store-dashboard/storefront">Storefront / واجهة المتجر</a>
-          <a href="/store-dashboard/orders">Orders / الطلبات</a>
-          <a href="/store-dashboard/products">Products / المنتجات</a>
+          <a href="/store-dashboard">Overview / ظ†ط¸ط±ط© ط¹ط§ظ…ط©</a>
+          <a href="/store-dashboard/storefront">Storefront / ظˆط§ط¬ظ‡ط© ط§ظ„ظ…طھط¬ط±</a>
+          <a href="/store-dashboard/orders">Orders / ط§ظ„ط·ظ„ط¨ط§طھ</a>
+          <a href="/store-dashboard/products">Products / ط§ظ„ظ…ظ†طھط¬ط§طھ</a>
           <a
             className={styles.activeNav}
             href="/store-dashboard/categories"
           >
-            Categories / الأقسام
+            Categories / ط§ظ„ط£ظ‚ط³ط§ظ…
           </a>
-          <a href="/store-dashboard/activation">Go live / تفعيل المتجر</a>
+          <a href="/store-dashboard/activation">Go live / طھظپط¹ظٹظ„ ط§ظ„ظ…طھط¬ط±</a>
         </nav>
 
         <div className={styles.sidebarFooter}>
           <span>{session.user.email}</span>
-          <a href="/store-dashboard">Back to dashboard / العودة للوحة</a>
+          <a href="/store-dashboard">Back to dashboard / ط§ظ„ط¹ظˆط¯ط© ظ„ظ„ظˆط­ط©</a>
         </div>
       </aside>
 
       <section className={styles.content}>
         <header className={styles.topbar}>
           <div>
-            <p>Store departments / أقسام المتجر</p>
-            <h2>{selectedStore?.business_name || "Your store"} — Categories / الأقسام</h2>
+            <p>Store departments / ط£ظ‚ط³ط§ظ… ط§ظ„ظ…طھط¬ط±</p>
+            <h2>{selectedStore?.business_name || "Your store"} â€” Categories / ط§ظ„ط£ظ‚ط³ط§ظ…</h2>
           </div>
 
           <div className={styles.topActions}>
@@ -794,7 +677,7 @@ export default function DarikDirectCategoriesPage() {
               className={styles.secondaryButton}
               href="/store-dashboard/products"
             >
-              Assign products / ربط المنتجات
+              Assign products / ط±ط¨ط· ط§ظ„ظ…ظ†طھط¬ط§طھ
             </a>
 
             {selectedStore?.storefront_slug ? (
@@ -804,12 +687,12 @@ export default function DarikDirectCategoriesPage() {
                 target="_blank"
                 rel="noreferrer"
               >
-                View storefront / عرض المتجر
+                View storefront / ط¹ط±ط¶ ط§ظ„ظ…طھط¬ط±
               </a>
             ) : null}
 
             <button className={styles.addButton} onClick={openCreateForm}>
-              + Add custom category / إضافة قسم مخصص
+              + Add custom category / ط¥ط¶ط§ظپط© ظ‚ط³ظ… ظ…ط®طµطµ
             </button>
           </div>
         </header>
@@ -819,24 +702,25 @@ export default function DarikDirectCategoriesPage() {
 
         {!selectedStore ? (
           <section className={styles.emptyState}>
-            <h2>No retailer membership was found. / لم يتم العثور على عضوية متجر.</h2>
-            <p>Return to the dashboard and verify the retailer login. / ارجع للوحة وتحقق من حساب المتجر.</p>
+            <h2>No retailer membership was found. / ظ„ظ… ظٹطھظ… ط§ظ„ط¹ط«ظˆط± ط¹ظ„ظ‰ ط¹ط¶ظˆظٹط© ظ…طھط¬ط±.</h2>
+            <p>Return to the dashboard and verify the retailer login. / ط§ط±ط¬ط¹ ظ„ظ„ظˆط­ط© ظˆطھط­ظ‚ظ‚ ظ…ظ† ط­ط³ط§ط¨ ط§ظ„ظ…طھط¬ط±.</p>
           </section>
         ) : (
           <>
             <section className={styles.explainer}>
               <div>
                 <strong>
-                  Store departments / أقسام المتجر
+                  Store departments / ط£ظ‚ط³ط§ظ… ط§ظ„ظ…طھط¬ط±
                 </strong>
                 <p>
-                  Choose ready bilingual departments based on the retail field,
-                  or create any custom department your store needs.
+                  Your retail-field departments are created automatically and
+                  are ready in Add Product. Create a custom department only when
+                  your store needs something extra.
                 </p>
               </div>
               <span dir="rtl">
-                اختر أقساماً جاهزة بالعربي والإنجليزي حسب نوع نشاطك، أو أنشئ
-                أي قسم مخصص يناسب متجرك.
+                ظٹطھظ… ط¥ظ†ط´ط§ط، ط£ظ‚ط³ط§ظ… ظ†ط´ط§ط·ظƒ طھظ„ظ‚ط§ط¦ظٹط§ظ‹ ظˆطھطµط¨ط­ ط¬ط§ظ‡ط²ط© ط¯ط§ط®ظ„ ط¥ط¶ط§ظپط© ظ…ظ†طھط¬.
+                ط£ظ†ط´ط¦ ظ‚ط³ظ…ط§ظ‹ ظ…ط®طµطµط§ظ‹ ظپظ‚ط· ط¹ظ†ط¯ظ…ط§ ظٹط­طھط§ط¬ ظ…طھط¬ط±ظƒ ط¥ظ„ظ‰ ظ‚ط³ظ… ط¥ط¶ط§ظپظٹ.
               </span>
             </section>
 
@@ -844,18 +728,22 @@ export default function DarikDirectCategoriesPage() {
               <div className={styles.presetHeader}>
                 <div>
                   <p className={styles.presetEyebrow}>
-                    Suggested for your retail field / مقترحة حسب مجال النشاط
+                    Automatically prepared / ط¬ط§ظ‡ط²ط© طھظ„ظ‚ط§ط¦ظٹط§ظ‹
                   </p>
                   <h2>
                     {businessPreset.label}
                     <span dir="rtl">{businessPreset.labelAr}</span>
                   </h2>
                   <p className={styles.presetIntro}>
-                    Select the departments you want. Darik adds the English and
-                    Arabic names automatically.
+                    Darik has already created all {preparedPresetCount} standard
+                    bilingual departments for this retail field. They are ready
+                    immediately inside Add Productâ€”there is nothing to select or
+                    approve first.
                     <span dir="rtl">
-                      اختر الأقسام المناسبة، وسيضيف داريك الاسم بالعربي
-                      والإنجليزي تلقائياً.
+                      ط£ظ†ط´ط£ ط¯ط§ط±ظٹظƒ طھظ„ظ‚ط§ط¦ظٹط§ظ‹ ط¬ظ…ظٹط¹ ط§ظ„ط£ظ‚ط³ط§ظ… ط§ظ„ظ‚ظٹط§ط³ظٹط© ظˆط¹ط¯ط¯ظ‡ط§{" "}
+                      {preparedPresetCount} ظ„ظ‡ط°ط§ ط§ظ„ظ†ط´ط§ط· ط¨ط§ظ„ط¹ط±ط¨ظٹ ظˆط§ظ„ط¥ظ†ط¬ظ„ظٹط²ظٹ.
+                      ط§ظ„ط£ظ‚ط³ط§ظ… ط¬ط§ظ‡ط²ط© ظ…ط¨ط§ط´ط±ط© ط¯ط§ط®ظ„ ط¥ط¶ط§ظپط© ظ…ظ†طھط¬طŒ ظˆظ„ط§ طھط­طھط§ط¬ ط¥ظ„ظ‰ طھط­ط¯ظٹط¯ظ‡ط§
+                      ط£ظˆ ط§ط¹طھظ…ط§ط¯ظ‡ط§ ط£ظˆظ„ط§ظ‹.
                     </span>
                   </p>
                 </div>
@@ -864,79 +752,33 @@ export default function DarikDirectCategoriesPage() {
                   <button
                     type="button"
                     className={styles.selectAllButton}
-                    onClick={selectAllAvailablePresets}
-                    disabled={addingPresets || availablePresets.length === 0}
+                    onClick={() => router.push("/store-dashboard/products")}
                   >
-                    Select all available / تحديد الكل
-                  </button>
-                  <button
-                    type="button"
-                    className={styles.addSelectedButton}
-                    onClick={addSelectedPresets}
-                    disabled={
-                      addingPresets || selectedPresetKeys.length === 0
-                    }
-                  >
-                    {addingPresets
-                      ? "Adding… / جارٍ الإضافة…"
-                      : `Add selected (${selectedPresetKeys.length}) / إضافة المحدد`}
+                    Add a product / ط¥ط¶ط§ظپط© ظ…ظ†طھط¬
                   </button>
                   <button
                     type="button"
                     className={styles.customCategoryButton}
                     onClick={openCreateForm}
-                    disabled={addingPresets}
                   >
-                    + Custom category / قسم مخصص
+                    + Custom category / ظ‚ط³ظ… ظ…ط®طµطµ
                   </button>
                 </div>
               </div>
 
-              <div className={styles.presetGrid}>
-                {businessPreset.categories.map((preset) => {
-                  const alreadyAdded = existingPresetKeys.has(preset.key);
-                  const selected = selectedPresetKeys.includes(preset.key);
-
-                  return (
-                    <button
-                      type="button"
-                      key={preset.key}
-                      className={`${styles.presetCard} ${
-                        selected ? styles.presetSelected : ""
-                      } ${alreadyAdded ? styles.presetAdded : ""}`}
-                      onClick={() => togglePreset(preset.key)}
-                      disabled={addingPresets || alreadyAdded}
-                      aria-pressed={selected}
-                    >
-                      <span className={styles.presetCheck}>
-                        {alreadyAdded ? "✓" : selected ? "✓" : ""}
-                      </span>
-                      <span className={styles.presetNames}>
-                        <strong>{preset.name}</strong>
-                        <span dir="rtl">{preset.nameAr}</span>
-                      </span>
-                      <small>
-                        {alreadyAdded
-                          ? "Added / تمت الإضافة"
-                          : selected
-                            ? "Selected / تم التحديد"
-                            : "Choose / اختيار"}
-                      </small>
-                    </button>
-                  );
-                })}
-              </div>
-
               <footer className={styles.presetFooter}>
                 <span>
-                  {availablePresets.length} available / {availablePresets.length} متاح
+                  {preparedPresetCount} ready / {preparedPresetCount} ط¬ط§ظ‡ط²
                 </span>
                 <p>
-                  Presets are optional. You can rename, hide, archive, reorder,
-                  or add custom categories at any time.
+                  Default categories stay hidden from the customer storefront
+                  until at least one visible product is assigned to them. You
+                  can still rename, hide, archive, reorder, or add custom
+                  categories at any time.
                   <span dir="rtl">
-                    الأقسام الجاهزة اختيارية، ويمكنك تعديلها أو إخفاءها أو
-                    ترتيبها أو إضافة أقسام مخصصة في أي وقت.
+                    طھط¨ظ‚ظ‰ ط§ظ„ط£ظ‚ط³ط§ظ… ط§ظ„ط§ظپطھط±ط§ط¶ظٹط© ظ…ط®ظپظٹط© ط¹ظ† ظˆط§ط¬ظ‡ط© ط§ظ„ط¹ظ…ظ„ط§ط، ط­طھظ‰ ظٹطھظ… ط±ط¨ط·
+                    ظ…ظ†طھط¬ ط¸ط§ظ‡ط± ظˆط§ط­ط¯ ط¹ظ„ظ‰ ط§ظ„ط£ظ‚ظ„ ط¨ظ‡ط§. ظˆظٹظ…ظƒظ†ظƒ طھط¹ط¯ظٹظ„ظ‡ط§ ط£ظˆ ط¥ط®ظپط§ط،ظ‡ط§ ط£ظˆ
+                    ط£ط±ط´ظپطھظ‡ط§ ط£ظˆ طھط±طھظٹط¨ظ‡ط§ ط£ظˆ ط¥ط¶ط§ظپط© ط£ظ‚ط³ط§ظ… ظ…ط®طµطµط© ظپظٹ ط£ظٹ ظˆظ‚طھ.
                   </span>
                 </p>
               </footer>
@@ -944,49 +786,49 @@ export default function DarikDirectCategoriesPage() {
 
             <section className={styles.metrics}>
               <article>
-                <span>Current categories / الأقسام الحالية</span>
+                <span>Current categories / ط§ظ„ط£ظ‚ط³ط§ظ… ط§ظ„ط­ط§ظ„ظٹط©</span>
                 <strong>{counts.current}</strong>
-                <p>Active and hidden / ظاهرة ومخفية</p>
+                <p>Active and hidden / ط¸ط§ظ‡ط±ط© ظˆظ…ط®ظپظٹط©</p>
               </article>
               <article>
-                <span>Visible / ظاهر</span>
+                <span>Visible / ط¸ط§ظ‡ط±</span>
                 <strong>{counts.active}</strong>
-                <p>Shown to customers / تظهر للعملاء</p>
+                <p>Shown to customers / طھط¸ظ‡ط± ظ„ظ„ط¹ظ…ظ„ط§ط،</p>
               </article>
               <article>
-                <span>Hidden / مخفي</span>
+                <span>Hidden / ظ…ط®ظپظٹ</span>
                 <strong>{counts.hidden}</strong>
-                <p>Products hidden with them / منتجاتها مخفية</p>
+                <p>Products hidden with them / ظ…ظ†طھط¬ط§طھظ‡ط§ ظ…ط®ظپظٹط©</p>
               </article>
               <article>
-                <span>Uncategorized products / منتجات بلا قسم</span>
+                <span>Uncategorized products / ظ…ظ†طھط¬ط§طھ ط¨ظ„ط§ ظ‚ط³ظ…</span>
                 <strong>{counts.uncategorized}</strong>
-                <p>Still shown under All products / تظهر تحت كل المنتجات</p>
+                <p>Still shown under All products / طھط¸ظ‡ط± طھط­طھ ظƒظ„ ط§ظ„ظ…ظ†طھط¬ط§طھ</p>
               </article>
             </section>
 
             <section className={styles.catalogPanel}>
               <div className={styles.catalogHeader}>
                 <div>
-                  <p>Category manager / إدارة الأقسام</p>
-                  <h2>Organize your storefront / رتّب واجهة متجرك</h2>
+                  <p>Category manager / ط¥ط¯ط§ط±ط© ط§ظ„ط£ظ‚ط³ط§ظ…</p>
+                  <h2>Organize your storefront / ط±طھظ‘ط¨ ظˆط§ط¬ظ‡ط© ظ…طھط¬ط±ظƒ</h2>
                 </div>
 
                 <div className={styles.filters}>
                   <input
                     value={search}
                     onChange={(event) => setSearch(event.target.value)}
-                    placeholder="Search categories / ابحث في الأقسام"
+                    placeholder="Search categories / ط§ط¨ط­ط« ظپظٹ ط§ظ„ط£ظ‚ط³ط§ظ…"
                   />
                   <select
                     value={statusFilter}
                     onChange={(event) => setStatusFilter(event.target.value)}
                   >
-                    <option value="current">Current categories / الأقسام الحالية</option>
-                    <option value="active">Visible / ظاهر</option>
-                    <option value="hidden">Hidden / مخفي</option>
-                    <option value="archived">Archived / مؤرشفة</option>
-                    <option value="all">All statuses / كل الحالات</option>
+                    <option value="current">Current categories / ط§ظ„ط£ظ‚ط³ط§ظ… ط§ظ„ط­ط§ظ„ظٹط©</option>
+                    <option value="active">Visible / ط¸ط§ظ‡ط±</option>
+                    <option value="hidden">Hidden / ظ…ط®ظپظٹ</option>
+                    <option value="archived">Archived / ظ…ط¤ط±ط´ظپط©</option>
+                    <option value="all">All statuses / ظƒظ„ ط§ظ„ط­ط§ظ„ط§طھ</option>
                   </select>
                 </div>
               </div>
@@ -994,22 +836,22 @@ export default function DarikDirectCategoriesPage() {
               {loading ? (
                 <div className={styles.loadingBlock}>
                   <div className={styles.spinner} />
-                  <span>Loading categories… / جارٍ تحميل الأقسام…</span>
+                  <span>Loading categoriesâ€¦ / ط¬ط§ط±ظچ طھط­ظ…ظٹظ„ ط§ظ„ط£ظ‚ط³ط§ظ…â€¦</span>
                 </div>
               ) : filteredCategories.length === 0 ? (
                 <div className={styles.emptyCatalog}>
                   <div className={styles.emptyIcon}>+</div>
                   <h3>
                     {categories.length === 0
-                      ? "Choose ready departments or create your first category"
-                      : "No categories match this filter / لا توجد أقسام مطابقة"}
+                      ? "Default departments are being prepared automatically"
+                      : "No categories match this filter / ظ„ط§ طھظˆط¬ط¯ ط£ظ‚ط³ط§ظ… ظ…ط·ط§ط¨ظ‚ط©"}
                   </h3>
                   <p>
-                    Start with the bilingual suggestions above, or create any
-                    custom department your store needs.
+                    Refresh once if setup just completed, or create a custom
+                    department when your store needs an additional option.
                   </p>
                   {categories.length === 0 ? (
-                    <button onClick={openCreateForm}>Add custom category / إضافة قسم مخصص</button>
+                    <button onClick={openCreateForm}>Add custom category / ط¥ط¶ط§ظپط© ظ‚ط³ظ… ظ…ط®طµطµ</button>
                   ) : null}
                 </div>
               ) : (
@@ -1045,8 +887,8 @@ export default function DarikDirectCategoriesPage() {
                               }`}
                             >
                               {imageSource === "manual"
-                                ? "Custom / مخصصة"
-                                : "First product / أول منتج"}
+                                ? "Custom / ظ…ط®طµطµط©"
+                                : "First product / ط£ظˆظ„ ظ…ظ†طھط¬"}
                             </span>
                           ) : null}
 
@@ -1071,18 +913,18 @@ export default function DarikDirectCategoriesPage() {
 
                           <div className={styles.categoryFacts}>
                             <div>
-                              <span>Products / المنتجات</span>
+                              <span>Products / ط§ظ„ظ…ظ†طھط¬ط§طھ</span>
                               <strong>{productCount}</strong>
                             </div>
                             <div>
-                              <span>Display order / ترتيب العرض</span>
+                              <span>Display order / طھط±طھظٹط¨ ط§ظ„ط¹ط±ط¶</span>
                               <strong>{Number(category.sort_order ?? 1000)}</strong>
                             </div>
                           </div>
 
                           <div className={styles.categoryActions}>
                             <button onClick={() => openEditForm(category)}>
-                              Edit / تعديل
+                              Edit / طھط¹ط¯ظٹظ„
                             </button>
 
                             {category.category_status === "active" ? (
@@ -1091,7 +933,7 @@ export default function DarikDirectCategoriesPage() {
                                   setCategoryStatus(category, "hidden")
                                 }
                               >
-                                Hide / إخفاء
+                                Hide / ط¥ط®ظپط§ط،
                               </button>
                             ) : category.category_status === "hidden" ? (
                               <button
@@ -1100,7 +942,7 @@ export default function DarikDirectCategoriesPage() {
                                   setCategoryStatus(category, "active")
                                 }
                               >
-                                Show / إظهار
+                                Show / ط¥ط¸ظ‡ط§ط±
                               </button>
                             ) : (
                               <button
@@ -1109,7 +951,7 @@ export default function DarikDirectCategoriesPage() {
                                   setCategoryStatus(category, "active")
                                 }
                               >
-                                Restore / استعادة
+                                Restore / ط§ط³طھط¹ط§ط¯ط©
                               </button>
                             )}
 
@@ -1129,7 +971,7 @@ export default function DarikDirectCategoriesPage() {
                                   }
                                 }}
                               >
-                                Archive / أرشفة
+                                Archive / ط£ط±ط´ظپط©
                               </button>
                             ) : null}
                           </div>
@@ -1149,11 +991,11 @@ export default function DarikDirectCategoriesPage() {
           <section className={styles.modal}>
             <header className={styles.modalHeader}>
               <div>
-                <p>{editingCategoryId ? "Edit category / تعديل القسم" : "New custom category / قسم مخصص جديد"}</p>
+                <p>{editingCategoryId ? "Edit category / طھط¹ط¯ظٹظ„ ط§ظ„ظ‚ط³ظ…" : "New custom category / ظ‚ط³ظ… ظ…ط®طµطµ ط¬ط¯ظٹط¯"}</p>
                 <h2>
                   {editingCategoryId
-                    ? "Update store category / تعديل قسم المتجر"
-                    : "Create a custom category / إنشاء قسم مخصص"}
+                    ? "Update store category / طھط¹ط¯ظٹظ„ ظ‚ط³ظ… ط§ظ„ظ…طھط¬ط±"
+                    : "Create a custom category / ط¥ظ†ط´ط§ط، ظ‚ط³ظ… ظ…ط®طµطµ"}
                 </h2>
               </div>
               <button
@@ -1165,14 +1007,14 @@ export default function DarikDirectCategoriesPage() {
                   }
                 }}
               >
-                ×
+                أ—
               </button>
             </header>
 
             <form className={styles.categoryForm} onSubmit={saveCategory}>
               <div className={styles.formMain}>
                 <label>
-                  Category name (English) / اسم القسم بالإنجليزية
+                  Category name (English) / ط§ط³ظ… ط§ظ„ظ‚ط³ظ… ط¨ط§ظ„ط¥ظ†ط¬ظ„ظٹط²ظٹط©
                   <input
                     value={form.name}
                     onChange={(event) =>
@@ -1184,32 +1026,32 @@ export default function DarikDirectCategoriesPage() {
                 </label>
 
                 <label>
-                  Category name (Arabic) / اسم القسم بالعربية
+                  Category name (Arabic) / ط§ط³ظ… ط§ظ„ظ‚ط³ظ… ط¨ط§ظ„ط¹ط±ط¨ظٹط©
                   <input
                     dir="rtl"
                     value={form.nameAr}
                     onChange={(event) =>
                       updateForm("nameAr", event.target.value)
                     }
-                    placeholder="اسم التصنيف بالعربي"
+                    placeholder="ط§ط³ظ… ط§ظ„طھطµظ†ظٹظپ ط¨ط§ظ„ط¹ط±ط¨ظٹ"
                   />
                 </label>
 
                 <label>
-                  Description / الوصف
+                  Description / ط§ظ„ظˆطµظپ
                   <textarea
                     value={form.description}
                     onChange={(event) =>
                       updateForm("description", event.target.value)
                     }
                     rows={4}
-                    placeholder="Optional / اختياري"
+                    placeholder="Optional / ط§ط®طھظٹط§ط±ظٹ"
                   />
                 </label>
 
                 <div className={styles.twoColumns}>
                   <label>
-                    Visibility / الظهور
+                    Visibility / ط§ظ„ط¸ظ‡ظˆط±
                     <select
                       value={form.status}
                       onChange={(event) =>
@@ -1219,13 +1061,13 @@ export default function DarikDirectCategoriesPage() {
                         )
                       }
                     >
-                      <option value="active">Visible / ظاهر</option>
-                      <option value="hidden">Hidden / مخفي</option>
+                      <option value="active">Visible / ط¸ط§ظ‡ط±</option>
+                      <option value="hidden">Hidden / ظ…ط®ظپظٹ</option>
                     </select>
                   </label>
 
                   <label>
-                    Display order / ترتيب العرض
+                    Display order / طھط±طھظٹط¨ ط§ظ„ط¹ط±ط¶
                     <input
                       type="number"
                       min="0"
@@ -1239,11 +1081,11 @@ export default function DarikDirectCategoriesPage() {
                 </div>
 
                 <div className={styles.visibilityNote}>
-                  <strong>Hiding a category hides its assigned products / إخفاء القسم يخفي منتجاته</strong>
+                  <strong>Hiding a category hides its assigned products / ط¥ط®ظپط§ط، ط§ظ„ظ‚ط³ظ… ظٹط®ظپظٹ ظ…ظ†طھط¬ط§طھظ‡</strong>
                   <p>
                     Products are not deleted. Show the category again or move
-                    them to another category. / لا يتم حذف المنتجات، ويمكنك إظهار
-                    القسم مجدداً أو نقلها إلى قسم آخر.
+                    them to another category. / ظ„ط§ ظٹطھظ… ط­ط°ظپ ط§ظ„ظ…ظ†طھط¬ط§طھطŒ ظˆظٹظ…ظƒظ†ظƒ ط¥ط¸ظ‡ط§ط±
+                    ط§ظ„ظ‚ط³ظ… ظ…ط¬ط¯ط¯ط§ظ‹ ط£ظˆ ظ†ظ‚ظ„ظ‡ط§ ط¥ظ„ظ‰ ظ‚ط³ظ… ط¢ط®ط±.
                   </p>
                 </div>
               </div>
@@ -1257,14 +1099,14 @@ export default function DarikDirectCategoriesPage() {
                     />
                   ) : (
                     <div>
-                      <strong>Category image / صورة القسم</strong>
-                      <span>Added automatically with the first product / تضاف تلقائياً مع أول منتج</span>
+                      <strong>Category image / طµظˆط±ط© ط§ظ„ظ‚ط³ظ…</strong>
+                      <span>Added automatically with the first product / طھط¶ط§ظپ طھظ„ظ‚ط§ط¦ظٹط§ظ‹ ظ…ط¹ ط£ظˆظ„ ظ…ظ†طھط¬</span>
                     </div>
                   )}
                 </div>
 
                 <label className={styles.uploadButton}>
-                  {uploading ? "Uploading… / جارٍ الرفع…" : "Upload category image / رفع صورة القسم"}
+                  {uploading ? "Uploadingâ€¦ / ط¬ط§ط±ظچ ط§ظ„ط±ظپط¹â€¦" : "Upload category image / ط±ظپط¹ طµظˆط±ط© ط§ظ„ظ‚ط³ظ…"}
                   <input
                     type="file"
                     accept="image/jpeg,image/png,image/webp,image/gif"
@@ -1274,7 +1116,7 @@ export default function DarikDirectCategoriesPage() {
                 </label>
 
                 <label>
-                  Or paste image URL / أو الصق رابط الصورة
+                  Or paste image URL / ط£ظˆ ط§ظ„طµظ‚ ط±ط§ط¨ط· ط§ظ„طµظˆط±ط©
                   <input
                     type="url"
                     value={form.imageUrl}
@@ -1292,25 +1134,25 @@ export default function DarikDirectCategoriesPage() {
                     onClick={() => updateForm("imageUrl", "")}
                     disabled={uploading || saving}
                   >
-                    Use automatic product image / استخدام صورة المنتج التلقائية
+                    Use automatic product image / ط§ط³طھط®ط¯ط§ظ… طµظˆط±ط© ط§ظ„ظ…ظ†طھط¬ ط§ظ„طھظ„ظ‚ط§ط¦ظٹط©
                   </button>
                 ) : null}
 
                 <div className={styles.autoImageNote}>
-                  <strong>Automatic category image / صورة تلقائية للقسم</strong>
+                  <strong>Automatic category image / طµظˆط±ط© طھظ„ظ‚ط§ط¦ظٹط© ظ„ظ„ظ‚ط³ظ…</strong>
                   <p>
                     If you do not upload a custom image, Darik uses the first
                     available product photo in this category. Uploading an image
-                    here overrides it. / إذا لم ترفع صورة مخصصة، يستخدم داريك
-                    صورة أول منتج متاح في هذا القسم، ورفع صورة هنا يستبدلها.
+                    here overrides it. / ط¥ط°ط§ ظ„ظ… طھط±ظپط¹ طµظˆط±ط© ظ…ط®طµطµط©طŒ ظٹط³طھط®ط¯ظ… ط¯ط§ط±ظٹظƒ
+                    طµظˆط±ط© ط£ظˆظ„ ظ…ظ†طھط¬ ظ…طھط§ط­ ظپظٹ ظ‡ط°ط§ ط§ظ„ظ‚ط³ظ…طŒ ظˆط±ظپط¹ طµظˆط±ط© ظ‡ظ†ط§ ظٹط³طھط¨ط¯ظ„ظ‡ط§.
                   </p>
                 </div>
 
                 <div className={styles.channelNote}>
-                  <strong>Independent from Darik Marketplace / مستقل عن سوق داريك</strong>
+                  <strong>Independent from Darik Marketplace / ظ…ط³طھظ‚ظ„ ط¹ظ† ط³ظˆظ‚ ط¯ط§ط±ظٹظƒ</strong>
                   <p>
-                    This category exists only inside this store’s Darik Direct
-                    storefront. / هذا القسم خاص بواجهة هذا المتجر فقط.
+                    This category exists only inside this storeâ€™s Darik Direct
+                    storefront. / ظ‡ط°ط§ ط§ظ„ظ‚ط³ظ… ط®ط§طµ ط¨ظˆط§ط¬ظ‡ط© ظ‡ط°ط§ ط§ظ„ظ…طھط¬ط± ظپظ‚ط·.
                   </p>
                 </div>
               </aside>
@@ -1326,7 +1168,7 @@ export default function DarikDirectCategoriesPage() {
                     }
                   }}
                 >
-                  Cancel / إلغاء
+                  Cancel / ط¥ظ„ط؛ط§ط،
                 </button>
                 <button
                   type="submit"
@@ -1334,10 +1176,10 @@ export default function DarikDirectCategoriesPage() {
                   disabled={saving || uploading}
                 >
                   {saving
-                    ? "Saving…"
+                    ? "Savingâ€¦"
                     : editingCategoryId
-                      ? "Save category / حفظ القسم"
-                      : "Create category / إنشاء القسم"}
+                      ? "Save category / ط­ظپط¸ ط§ظ„ظ‚ط³ظ…"
+                      : "Create category / ط¥ظ†ط´ط§ط، ط§ظ„ظ‚ط³ظ…"}
                 </button>
               </footer>
             </form>

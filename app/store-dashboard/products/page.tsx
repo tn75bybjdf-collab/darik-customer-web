@@ -1,6 +1,6 @@
 "use client";
 
-// Darik Frontend 022: mobile-safe bilingual product form.
+// Darik Frontend 024: mobile-safe bilingual product form with automatic retail categories.
 
 import {
   ChangeEvent,
@@ -216,6 +216,17 @@ export default function DarikDirectProductsPage() {
 
     setLoading(true);
     setError("");
+
+    const ensureResult = await supabase.rpc(
+      "darik_direct_ensure_default_categories",
+      { p_retailer_id: selectedRetailerId }
+    );
+
+    if (ensureResult.error) {
+      setError(
+        `Could not prepare default departments. / تعذر تجهيز الأقسام الافتراضية. ${ensureResult.error.message}`
+      );
+    }
 
     const [productResult, categoryResult] = await Promise.all([
       supabase
