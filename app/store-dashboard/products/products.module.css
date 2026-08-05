@@ -1,3 +1,4 @@
+/* Darik Frontend 022: mobile-safe bilingual product form. */
 .page {
   min-height: 100vh;
   display: grid;
@@ -568,7 +569,11 @@
 .modal {
   width: min(1050px, 100%);
   max-height: calc(100vh - 48px);
+  max-height: calc(100dvh - 48px);
   overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
+  -webkit-overflow-scrolling: touch;
   border-radius: 24px;
   background: white;
   box-shadow: 0 30px 90px rgba(4, 12, 28, 0.35);
@@ -632,6 +637,24 @@
   color: #344054;
   font-size: 13px;
   font-weight: 900;
+}
+
+.fieldLabel {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  width: 100%;
+}
+
+.fieldLabel > span:first-child {
+  color: #344054;
+}
+
+.fieldLabel > span:last-child {
+  color: #667085;
+  font-weight: 800;
+  text-align: right;
 }
 
 .productForm input,
@@ -982,18 +1005,67 @@
   }
 
   .modalOverlay {
+    display: block;
+    height: 100vh;
+    height: 100dvh;
+    min-height: 0;
     padding: 0;
+    overflow: hidden;
   }
 
   .modal {
-    min-height: 100vh;
-    max-height: none;
+    width: 100%;
+    height: 100vh;
+    height: 100dvh;
+    min-height: 0;
+    max-height: 100vh;
+    max-height: 100dvh;
     border-radius: 0;
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior-y: contain;
+    scroll-behavior: auto;
+  }
+
+  .modalHeader {
+    top: 0;
+    padding: calc(14px + env(safe-area-inset-top)) 16px 14px;
+  }
+
+  .modalHeader h2 {
+    font-size: 19px;
+    line-height: 1.3;
+  }
+
+  .modalHeader p {
+    font-size: 10px;
+  }
+
+  .closeButton {
+    flex: 0 0 40px;
   }
 
   .formMain,
   .imagePanel {
-    padding: 18px;
+    padding: 16px;
+  }
+
+  .fieldLabel {
+    align-items: flex-start;
+    gap: 8px;
+    font-size: 12px;
+  }
+
+  .formFooter {
+    padding: 12px 16px calc(12px + env(safe-area-inset-bottom));
+  }
+
+  .cancelButton,
+  .saveButton {
+    flex: 1;
+    min-width: 0;
+    padding: 0 10px;
+    font-size: 12px;
   }
 }
 

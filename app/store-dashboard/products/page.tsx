@@ -1,11 +1,14 @@
 "use client";
 
+// Darik Frontend 022: mobile-safe bilingual product form.
+
 import {
   ChangeEvent,
   FormEvent,
   useCallback,
   useEffect,
   useMemo,
+  useRef,
   useState,
 } from "react";
 import type { Session } from "@supabase/supabase-js";
@@ -128,7 +131,7 @@ function categoryOptionLabel(category: Category) {
   const arabic = abbreviateCategoryName(category.name_ar);
   const bilingual = arabic ? `${english} / ${arabic}` : english;
   return category.category_status === "hidden"
-    ? `${bilingual} (hidden)`
+    ? `${bilingual} (hidden / مخفية)`
     : bilingual;
 }
 
@@ -139,6 +142,15 @@ function productDisplayName(product: DirectProduct) {
     product.retailer_submitted_name ||
     product.name ||
     "Unnamed product"
+  );
+}
+
+function BilingualLabel({ en, ar }: { en: string; ar: string }) {
+  return (
+    <span className={styles.fieldLabel}>
+      <span>{en}</span>
+      <span dir="rtl">{ar}</span>
+    </span>
   );
 }
 
@@ -161,6 +173,7 @@ export default function DarikDirectProductsPage() {
   const [statusFilter, setStatusFilter] = useState("all");
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
+  const modalRef = useRef<HTMLElement | null>(null);
 
   const selectedStore = useMemo(
     () =>
@@ -299,6 +312,22 @@ export default function DarikDirectProductsPage() {
     }
   }, [selectedRetailerId, loadCatalog]);
 
+  useEffect(() => {
+    if (!formOpen) return;
+
+    const previousBodyOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
+    const frame = window.requestAnimationFrame(() => {
+      modalRef.current?.scrollTo({ top: 0, left: 0, behavior: "auto" });
+    });
+
+    return () => {
+      window.cancelAnimationFrame(frame);
+      document.body.style.overflow = previousBodyOverflow;
+    };
+  }, [formOpen]);
+
   const filteredProducts = useMemo(() => {
     const cleanSearch = search.trim().toLowerCase();
 
@@ -394,15 +423,15 @@ export default function DarikDirectProductsPage() {
 
   async function uploadImage(file: File) {
     if (!selectedRetailerId) {
-      throw new Error("No retailer is selected.");
+      throw new Error("No retailer is selected / لم يتم اختيار متجر.");
     }
 
     if (!file.type.startsWith("image/")) {
-      throw new Error("Choose an image file.");
+      throw new Error("Choose an image file / اختر ملف صورة.");
     }
 
     if (file.size > 8 * 1024 * 1024) {
-      throw new Error("The image must be 8 MB or smaller.");
+      throw new Error("The image must be 8 MB or smaller / يجب ألا يتجاوز حجم الصورة 8 ميجابايت.");
     }
 
     setUploading(true);
@@ -446,13 +475,13 @@ export default function DarikDirectProductsPage() {
     try {
       const publicUrl = await uploadImage(file);
       updateForm("photoUrl", publicUrl);
-      setMessage("Product image uploaded.");
+      setMessage("Product image uploaded / تم رفع صورة المنتج.");
     } catch (uploadError) {
       setUploading(false);
       setError(
         uploadError instanceof Error
           ? uploadError.message
-          : "The image could not be uploaded."
+          : "The image could not be uploaded / تعذر رفع الصورة."
       );
     } finally {
       event.target.value = "";
@@ -473,12 +502,12 @@ export default function DarikDirectProductsPage() {
     const sortOrder = Number(form.sortOrder || 1000);
 
     if (name.length < 2) {
-      setError("Enter a product name.");
+      setError("Enter a product name / أدخل اسم المنتج.");
       return;
     }
 
     if (!Number.isFinite(price) || price <= 0) {
-      setError("Enter a valid selling price.");
+      setError("Enter a valid selling price / أدخل سعر بيع صحيحًا.");
       return;
     }
 
@@ -486,7 +515,7 @@ export default function DarikDirectProductsPage() {
       form.trackInventory &&
       (!Number.isInteger(quantity) || quantity < 0)
     ) {
-      setError("Inventory amount must be a whole number of zero or more.");
+      setError("Inventory amount must be a whole number of zero or more / يجب أن تكون كمية المخزون رقمًا صحيحًا يساوي صفرًا أو أكثر.");
       return;
     }
 
@@ -494,7 +523,7 @@ export default function DarikDirectProductsPage() {
       compareAtPrice != null &&
       (!Number.isFinite(compareAtPrice) || compareAtPrice < price)
     ) {
-      setError("Compare-at price must be equal to or higher than the price.");
+      setError("Compare-at price must be equal to or higher than the selling price / يجب أن يكون السعر قبل الخصم مساويًا لسعر البيع أو أعلى منه.");
       return;
     }
 
@@ -548,8 +577,8 @@ export default function DarikDirectProductsPage() {
     setForm(emptyForm);
     setMessage(
       editingProductId
-        ? "Product updated successfully."
-        : "Product added to the Darik Direct catalog."
+        ? "Product updated successfully / تم تحديث المنتج بنجاح."
+        : "Product added to the Darik Direct catalog / تمت إضافة المنتج إلى كتالوج داريك دايركت."
     );
     await loadCatalog();
   }
@@ -612,13 +641,12 @@ export default function DarikDirectProductsPage() {
 
         <nav>
           <a href="/store-dashboard">Overview</a>
-          <a href="/store-dashboard/storefront">Storefront</a>
-          <a href="/store-dashboard/orders">Orders</a>
+          <a href="/store-dashboard#storefront">Storefront</a>
+          <a href="/store-dashboard#orders">Orders</a>
           <a className={styles.activeNav} href="/store-dashboard/products">
             Products
           </a>
           <a href="/store-dashboard/categories">Categories</a>
-          <a href="/store-dashboard/activation">Go live</a>
         </nav>
 
         <div className={styles.sidebarFooter}>
@@ -662,7 +690,7 @@ export default function DarikDirectProductsPage() {
             ) : null}
 
             <button className={styles.addButton} onClick={openCreateForm}>
-              + Add product
+              + Add product / إضافة منتج
             </button>
           </div>
         </header>
@@ -686,7 +714,7 @@ export default function DarikDirectProductsPage() {
                     storefront link before they can see them.
                   </p>
                 </div>
-                <a href="/store-dashboard/storefront">Set up storefront</a>
+                <a href="/store-dashboard#storefront">Set up storefront</a>
               </section>
             ) : null}
 
@@ -757,7 +785,7 @@ export default function DarikDirectProductsPage() {
                     Marketplace approval process.
                   </p>
                   {products.length === 0 ? (
-                    <button onClick={openCreateForm}>Add first product</button>
+                    <button onClick={openCreateForm}>Add first product / إضافة أول منتج</button>
                   ) : null}
                 </div>
               ) : (
@@ -915,18 +943,30 @@ export default function DarikDirectProductsPage() {
 
       {formOpen ? (
         <div className={styles.modalOverlay}>
-          <section className={styles.modal}>
+          <section
+            ref={modalRef}
+            className={styles.modal}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="product-form-title"
+          >
             <header className={styles.modalHeader}>
               <div>
-                <p>{editingProductId ? "Edit product" : "New product"}</p>
-                <h2>
+                <p>
                   {editingProductId
-                    ? "Update storefront product"
-                    : "Add to your direct catalog"}
+                    ? "Edit product / تعديل المنتج"
+                    : "New product / منتج جديد"}
+                </p>
+                <h2 id="product-form-title">
+                  {editingProductId
+                    ? "Update storefront product / تحديث منتج المتجر"
+                    : "Add to your direct catalog / إضافة إلى كتالوج متجرك"}
                 </h2>
               </div>
               <button
+                type="button"
                 className={styles.closeButton}
+                aria-label="Close product form / إغلاق نموذج المنتج"
                 onClick={() => {
                   if (!saving && !uploading) {
                     setFormOpen(false);
@@ -941,50 +981,64 @@ export default function DarikDirectProductsPage() {
             <form className={styles.productForm} onSubmit={saveProduct}>
               <div className={styles.formMain}>
                 <label>
-                  Product name
+                  <BilingualLabel
+                    en="Product name (English)"
+                    ar="اسم المنتج بالإنجليزية"
+                  />
                   <input
                     value={form.name}
                     onChange={(event) =>
                       updateForm("name", event.target.value)
                     }
-                    placeholder="Example: Front brake pads"
+                    placeholder="Enter the product name in English"
+                    autoComplete="off"
                     required
                   />
                 </label>
 
                 <label>
-                  Arabic product name
+                  <BilingualLabel
+                    en="Product name (Arabic)"
+                    ar="اسم المنتج بالعربية"
+                  />
                   <input
                     dir="rtl"
                     value={form.nameAr}
                     onChange={(event) =>
                       updateForm("nameAr", event.target.value)
                     }
-                    placeholder="اسم المنتج بالعربي"
+                    placeholder="أدخل اسم المنتج بالعربية"
+                    autoComplete="off"
                   />
                 </label>
 
                 <div className={styles.twoColumns}>
                   <label>
-                    Brand
+                    <BilingualLabel
+                      en="Brand"
+                      ar="العلامة التجارية"
+                    />
                     <input
                       value={form.brandName}
                       onChange={(event) =>
                         updateForm("brandName", event.target.value)
                       }
-                      placeholder="Brand name"
+                      placeholder="Brand name / اسم العلامة التجارية"
                     />
                   </label>
 
                   <label>
-                    Store category
+                    <BilingualLabel
+                      en="Store category"
+                      ar="فئة المتجر"
+                    />
                     <select
                       value={form.directCategoryId}
                       onChange={(event) =>
                         updateForm("directCategoryId", event.target.value)
                       }
                     >
-                      <option value="">Uncategorized</option>
+                      <option value="">Uncategorized / بدون فئة</option>
                       {categories.map((category) => (
                         <option key={category.id} value={category.id}>
                           {categoryOptionLabel(category)}
@@ -995,29 +1049,36 @@ export default function DarikDirectProductsPage() {
                       className={styles.manageCategoriesLink}
                       href="/store-dashboard/categories"
                     >
-                      Create or manage store categories
+                      Create or manage categories / إنشاء أو إدارة الفئات
                     </a>
                   </label>
                 </div>
 
                 <label>
-                  Description
+                  <BilingualLabel
+                    en="Description"
+                    ar="وصف المنتج"
+                  />
                   <textarea
                     value={form.description}
                     onChange={(event) =>
                       updateForm("description", event.target.value)
                     }
-                    placeholder="Describe the product, fitment, size, or important details."
+                    placeholder="Product details, size, fitment or important notes / تفاصيل المنتج أو القياس أو الملاحظات المهمة"
                     rows={4}
                   />
                 </label>
 
                 <div className={styles.threeColumns}>
                   <label>
-                    Selling price
+                    <BilingualLabel
+                      en="Selling price"
+                      ar="سعر البيع"
+                    />
                     <div className={styles.moneyInput}>
                       <input
                         type="number"
+                        inputMode="decimal"
                         min="0.01"
                         step="0.01"
                         value={form.price}
@@ -1031,17 +1092,21 @@ export default function DarikDirectProductsPage() {
                   </label>
 
                   <label>
-                    Compare-at price
+                    <BilingualLabel
+                      en="Compare-at price"
+                      ar="السعر قبل الخصم"
+                    />
                     <div className={styles.moneyInput}>
                       <input
                         type="number"
+                        inputMode="decimal"
                         min="0"
                         step="0.01"
                         value={form.compareAtPrice}
                         onChange={(event) =>
                           updateForm("compareAtPrice", event.target.value)
                         }
-                        placeholder="Optional"
+                        placeholder="Optional / اختياري"
                       />
                       <span>JOD</span>
                     </div>
@@ -1057,18 +1122,22 @@ export default function DarikDirectProductsPage() {
                         }
                       />
                       <span>
-                        <strong>Track inventory</strong>
+                        <strong>Track inventory / تتبّع المخزون</strong>
                         {form.trackInventory
-                          ? "Enter the amount currently available."
-                          : "Leave unchecked for items that are always available."}
+                          ? "Enter the available quantity / أدخل الكمية المتوفرة"
+                          : "Leave off for always-available items / اتركه مغلقًا للمنتجات المتوفرة دائمًا"}
                       </span>
                     </label>
 
                     {form.trackInventory ? (
                       <label className={styles.inventoryAmount}>
-                        Inventory amount
+                        <BilingualLabel
+                          en="Inventory amount"
+                          ar="كمية المخزون"
+                        />
                         <input
                           type="number"
+                          inputMode="numeric"
                           min="0"
                           step="1"
                           value={form.quantity}
@@ -1080,8 +1149,13 @@ export default function DarikDirectProductsPage() {
                       </label>
                     ) : (
                       <div className={styles.inventoryNotTracked}>
-                        <strong>Inventory not tracked</strong>
-                        <span>This item stays available until you pause it.</span>
+                        <strong>
+                          Inventory not tracked / المخزون غير متتبّع
+                        </strong>
+                        <span>
+                          This item stays available until paused / يبقى المنتج
+                          متاحًا حتى تقوم بإيقافه
+                        </span>
                       </div>
                     )}
                   </div>
@@ -1089,7 +1163,10 @@ export default function DarikDirectProductsPage() {
 
                 <div className={styles.twoColumns}>
                   <label>
-                    Storefront status
+                    <BilingualLabel
+                      en="Storefront status"
+                      ar="حالة الظهور في المتجر"
+                    />
                     <select
                       value={form.status}
                       onChange={(event) =>
@@ -1099,18 +1176,22 @@ export default function DarikDirectProductsPage() {
                         )
                       }
                     >
-                      <option value="published">Published</option>
-                      <option value="draft">Draft</option>
+                      <option value="published">Published / منشور</option>
+                      <option value="draft">Draft / مسودة</option>
                       {editingProductId ? (
-                        <option value="paused">Paused</option>
+                        <option value="paused">Paused / متوقف</option>
                       ) : null}
                     </select>
                   </label>
 
                   <label>
-                    Display order
+                    <BilingualLabel
+                      en="Display order"
+                      ar="ترتيب العرض"
+                    />
                     <input
                       type="number"
+                      inputMode="numeric"
                       min="0"
                       step="1"
                       value={form.sortOrder}
@@ -1130,8 +1211,10 @@ export default function DarikDirectProductsPage() {
                     }
                   />
                   <span>
-                    <strong>Feature this product</strong>
-                    Show it before normal products on the storefront.
+                    <strong>
+                      Feature this product / ميّز هذا المنتج
+                    </strong>
+                    Show it before normal products / اعرضه قبل المنتجات العادية
                   </span>
                 </label>
               </div>
@@ -1142,14 +1225,16 @@ export default function DarikDirectProductsPage() {
                     <img src={form.photoUrl} alt="Product preview" />
                   ) : (
                     <div>
-                      <strong>Product photo</strong>
+                      <strong>Product photo / صورة المنتج</strong>
                       <span>JPG, PNG, WEBP or GIF</span>
                     </div>
                   )}
                 </div>
 
                 <label className={styles.uploadButton}>
-                  {uploading ? "Uploading…" : "Upload product image"}
+                  {uploading
+                    ? "Uploading… / جارٍ الرفع…"
+                    : "Upload product image / رفع صورة المنتج"}
                   <input
                     type="file"
                     accept="image/jpeg,image/png,image/webp,image/gif"
@@ -1159,7 +1244,10 @@ export default function DarikDirectProductsPage() {
                 </label>
 
                 <label>
-                  Or paste image URL
+                  <BilingualLabel
+                    en="Or paste image URL"
+                    ar="أو الصق رابط الصورة"
+                  />
                   <input
                     type="url"
                     value={form.photoUrl}
@@ -1171,11 +1259,14 @@ export default function DarikDirectProductsPage() {
                 </label>
 
                 <div className={styles.channelNote}>
-                  <strong>Marketplace remains protected</strong>
+                  <strong>
+                    Marketplace remains protected / يبقى سوق داريك محميًا
+                  </strong>
                   <p>
-                    A product created here starts as direct-store only. Darik
-                    Marketplace approval and official product fields are not
-                    changed.
+                    This product starts as direct-store only. Marketplace
+                    approval and official product data are not changed. / يبدأ
+                    هذا المنتج كمنتج خاص بالمتجر المباشر ولا تتغير موافقة السوق
+                    أو بيانات المنتج الرسمية.
                   </p>
                 </div>
               </aside>
@@ -1191,7 +1282,7 @@ export default function DarikDirectProductsPage() {
                     }
                   }}
                 >
-                  Cancel
+                  Cancel / إلغاء
                 </button>
                 <button
                   type="submit"
@@ -1199,10 +1290,10 @@ export default function DarikDirectProductsPage() {
                   disabled={saving || uploading}
                 >
                   {saving
-                    ? "Saving…"
+                    ? "Saving… / جارٍ الحفظ…"
                     : editingProductId
-                      ? "Save changes"
-                      : "Add product"}
+                      ? "Save changes / حفظ التغييرات"
+                      : "Add product / إضافة المنتج"}
                 </button>
               </footer>
             </form>
