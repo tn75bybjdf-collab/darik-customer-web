@@ -738,21 +738,15 @@
 }
 
 .bilingualLinkRow {
-  grid-template-columns: repeat(2, minmax(150px, 0.8fr)) minmax(220px, 1.2fr) auto;
+  grid-template-columns: minmax(180px, 0.8fr) minmax(220px, 1.2fr) auto;
 }
 
 .bilingualInformationRow {
-  grid-template-columns: repeat(2, minmax(0, 1fr)) auto;
-}
-
-.bilingualInformationRow > label:nth-of-type(3),
-.bilingualInformationRow > label:nth-of-type(4) {
-  grid-row: 2;
+  grid-template-columns: minmax(180px, 0.8fr) minmax(260px, 1.2fr) auto;
 }
 
 .bilingualInformationRow > button {
   grid-column: 3;
-  grid-row: 1 / span 2;
   align-self: stretch;
 }
 
@@ -947,8 +941,6 @@
     align-items: stretch;
   }
 
-  .bilingualInformationRow > label:nth-of-type(3),
-  .bilingualInformationRow > label:nth-of-type(4),
   .bilingualInformationRow > button {
     grid-column: 1;
     grid-row: auto;

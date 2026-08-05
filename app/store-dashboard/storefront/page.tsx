@@ -114,15 +114,20 @@ function normalizeCustomLinks(value: unknown): CustomLink[] {
     .map((item) => {
       if (!item || typeof item !== "object") return null;
       const record = item as Record<string, unknown>;
+      const primaryLabel = String(record.label ?? "").trim();
+      const legacyArabicLabel = String(
+        record.label_ar ?? record.labelAr ?? ""
+      ).trim();
+
       return {
-        label: String(record.label ?? "").trim(),
-        labelAr: String(record.label_ar ?? record.labelAr ?? "").trim(),
+        label: primaryLabel || legacyArabicLabel,
+        labelAr: "",
         url: String(record.url ?? "").trim(),
       };
     })
     .filter(
       (item): item is CustomLink =>
-        Boolean(item?.label || item?.labelAr || item?.url)
+        Boolean(item?.label || item?.url)
     );
 }
 
@@ -133,16 +138,25 @@ function normalizeCustomInformation(value: unknown): CustomInformation[] {
     .map((item) => {
       if (!item || typeof item !== "object") return null;
       const record = item as Record<string, unknown>;
+      const primaryLabel = String(record.label ?? "").trim();
+      const legacyArabicLabel = String(
+        record.label_ar ?? record.labelAr ?? ""
+      ).trim();
+      const primaryValue = String(record.value ?? "").trim();
+      const legacyArabicValue = String(
+        record.value_ar ?? record.valueAr ?? ""
+      ).trim();
+
       return {
-        label: String(record.label ?? "").trim(),
-        labelAr: String(record.label_ar ?? record.labelAr ?? "").trim(),
-        value: String(record.value ?? "").trim(),
-        valueAr: String(record.value_ar ?? record.valueAr ?? "").trim(),
+        label: primaryLabel || legacyArabicLabel,
+        labelAr: "",
+        value: primaryValue || legacyArabicValue,
+        valueAr: "",
       };
     })
     .filter(
       (item): item is CustomInformation =>
-        Boolean(item?.label || item?.labelAr || item?.value || item?.valueAr)
+        Boolean(item?.label || item?.value)
     );
 }
 
@@ -155,6 +169,21 @@ function normalizeOperatingHours(value: unknown): OperatingHours {
 
   return Object.fromEntries(
     operatingDays.map(([key]) => [key, String(source[key] ?? "")])
+  );
+}
+
+function mergeLegacyOperatingHours(
+  primaryValue: unknown,
+  arabicValue: unknown
+): OperatingHours {
+  const primary = normalizeOperatingHours(primaryValue);
+  const arabic = normalizeOperatingHours(arabicValue);
+
+  return Object.fromEntries(
+    operatingDays.map(([key]) => [
+      key,
+      primary[key]?.trim() || arabic[key]?.trim() || "",
+    ])
   );
 }
 
@@ -485,10 +514,16 @@ export default function DarikDirectStorefrontSettingsPage() {
         const databaseForm: StorefrontForm = loadedStorefront
           ? {
               slug: loadedStorefront.slug,
-              displayName: loadedStorefront.display_name,
-              displayNameAr: loadedStorefront.display_name_ar ?? "",
-              tagline: loadedStorefront.tagline ?? "",
-              taglineAr: loadedStorefront.tagline_ar ?? "",
+              displayName:
+                loadedStorefront.display_name ||
+                loadedStorefront.display_name_ar ||
+                "",
+              displayNameAr: "",
+              tagline:
+                loadedStorefront.tagline ||
+                loadedStorefront.tagline_ar ||
+                "",
+              taglineAr: "",
               logoUrl: loadedStorefront.logo_url ?? "",
               heroImageUrl: loadedStorefront.hero_image_url ?? "",
               phone: loadedStorefront.business_phone ?? "",
@@ -497,10 +532,16 @@ export default function DarikDirectStorefrontSettingsPage() {
               websiteUrl: loadedStorefront.website_url ?? "",
               facebookUrl: loadedStorefront.facebook_url ?? "",
               instagramUrl: loadedStorefront.instagram_url ?? "",
-              addressText: loadedStorefront.address_text ?? "",
-              addressTextAr: loadedStorefront.address_text_ar ?? "",
-              aboutText: loadedStorefront.about_text ?? "",
-              aboutTextAr: loadedStorefront.about_text_ar ?? "",
+              addressText:
+                loadedStorefront.address_text ||
+                loadedStorefront.address_text_ar ||
+                "",
+              addressTextAr: "",
+              aboutText:
+                loadedStorefront.about_text ||
+                loadedStorefront.about_text_ar ||
+                "",
+              aboutTextAr: "",
               primaryColor: loadedStorefront.primary_color,
               accentColor: loadedStorefront.accent_color,
               backgroundColor: loadedStorefront.background_color,
@@ -524,12 +565,11 @@ export default function DarikDirectStorefrontSettingsPage() {
               customInformation: normalizeCustomInformation(
                 loadedStorefront.custom_information
               ),
-              operatingHours: normalizeOperatingHours(
-                loadedStorefront.operating_hours
-              ),
-              operatingHoursAr: normalizeOperatingHours(
+              operatingHours: mergeLegacyOperatingHours(
+                loadedStorefront.operating_hours,
                 loadedStorefront.operating_hours_ar
               ),
+              operatingHoursAr: { ...defaultOperatingHours },
             }
           : {
               slug: cleanSlug(selectedStore.business_name),
@@ -587,18 +627,44 @@ export default function DarikDirectStorefrontSettingsPage() {
                 parsedDraft.retailerId === selectedStore.retailer_id &&
                 parsedDraft.form
               ) {
-                nextForm = {
+                const draftForm = {
                   ...databaseForm,
                   ...parsedDraft.form,
+                } as StorefrontForm;
+
+                nextForm = {
+                  ...draftForm,
+                  displayName:
+                    draftForm.displayName?.trim() ||
+                    draftForm.displayNameAr?.trim() ||
+                    databaseForm.displayName,
+                  displayNameAr: "",
+                  tagline:
+                    draftForm.tagline?.trim() ||
+                    draftForm.taglineAr?.trim() ||
+                    "",
+                  taglineAr: "",
+                  addressText:
+                    draftForm.addressText?.trim() ||
+                    draftForm.addressTextAr?.trim() ||
+                    "",
+                  addressTextAr: "",
+                  aboutText:
+                    draftForm.aboutText?.trim() ||
+                    draftForm.aboutTextAr?.trim() ||
+                    "",
+                  aboutTextAr: "",
                   customLinks: normalizeCustomLinks(
                     parsedDraft.form.customLinks
                   ),
                   customInformation: normalizeCustomInformation(
                     parsedDraft.form.customInformation
                   ),
-                  operatingHours: normalizeOperatingHours(
-                    parsedDraft.form.operatingHours
+                  operatingHours: mergeLegacyOperatingHours(
+                    parsedDraft.form.operatingHours,
+                    parsedDraft.form.operatingHoursAr
                   ),
+                  operatingHoursAr: { ...defaultOperatingHours },
                 };
                 restoredDraftAt = parsedDraft.savedAt ?? new Date().toISOString();
               }
@@ -711,23 +777,8 @@ export default function DarikDirectStorefrontSettingsPage() {
     setSetupForm((current) => ({ ...current, [field]: value }));
   }
 
-  function updateOperatingHour(
-    language: "en" | "ar",
-    day: string,
-    value: string
-  ) {
+  function updateOperatingHour(day: string, value: string) {
     markSetupDirty();
-
-    if (language === "ar") {
-      setSetupForm((current) => ({
-        ...current,
-        operatingHoursAr: {
-          ...current.operatingHoursAr,
-          [day]: value,
-        },
-      }));
-      return;
-    }
 
     setSetupForm((current) => ({
       ...current,
@@ -936,9 +987,9 @@ export default function DarikDirectStorefrontSettingsPage() {
       retailer_id: selectedStore.retailer_id,
       slug,
       display_name: displayName,
-      display_name_ar: setupForm.displayNameAr.trim() || null,
+      display_name_ar: null,
       tagline: setupForm.tagline.trim() || null,
-      tagline_ar: setupForm.taglineAr.trim() || null,
+      tagline_ar: null,
       logo_url: setupForm.logoUrl.trim() || null,
       hero_image_url: setupForm.heroImageUrl.trim() || null,
       business_phone: setupForm.phone.trim() || null,
@@ -948,40 +999,28 @@ export default function DarikDirectStorefrontSettingsPage() {
       facebook_url: normalizeOptionalWebUrl(setupForm.facebookUrl),
       instagram_url: normalizeOptionalWebUrl(setupForm.instagramUrl),
       address_text: setupForm.addressText.trim() || null,
-      address_text_ar: setupForm.addressTextAr.trim() || null,
+      address_text_ar: null,
       about_text: setupForm.aboutText.trim() || null,
-      about_text_ar: setupForm.aboutTextAr.trim() || null,
+      about_text_ar: null,
       custom_links: setupForm.customLinks
         .map((link) => ({
           label: link.label.trim(),
-          label_ar: link.labelAr.trim(),
           url: link.url.trim(),
         }))
-        .filter((link) => (link.label || link.label_ar) && link.url),
+        .filter((link) => link.label && link.url),
       custom_information: setupForm.customInformation
         .map((item) => ({
           label: item.label.trim(),
-          label_ar: item.labelAr.trim(),
           value: item.value.trim(),
-          value_ar: item.valueAr.trim(),
         }))
-        .filter(
-          (item) =>
-            (item.label || item.label_ar) &&
-            (item.value || item.value_ar)
-        ),
+        .filter((item) => item.label && item.value),
       operating_hours: Object.fromEntries(
         operatingDays.map(([day]) => [
           day,
           setupForm.operatingHours[day]?.trim() || "",
         ])
       ),
-      operating_hours_ar: Object.fromEntries(
-        operatingDays.map(([day]) => [
-          day,
-          setupForm.operatingHoursAr[day]?.trim() || "",
-        ])
-      ),
+      operating_hours_ar: {},
       primary_color: setupForm.primaryColor,
       accent_color: setupForm.accentColor,
       background_color: setupForm.backgroundColor,
@@ -1130,14 +1169,14 @@ export default function DarikDirectStorefrontSettingsPage() {
             <span>Darik Direct</span>
             <h1>Store dashboard</h1>
             <p>
-              Sign in using the email connected to your existing Darik retailer
+              Sign in / تسجيل الدخول using the email connected to your existing Darik retailer
               account.
             </p>
           </div>
 
           <form onSubmit={signIn} className={styles.loginForm}>
             <label>
-              Email
+              Email / البريد الإلكتروني
               <input
                 type="email"
                 value={email}
@@ -1147,7 +1186,7 @@ export default function DarikDirectStorefrontSettingsPage() {
             </label>
 
             <label>
-              Password
+              Password / كلمة المرور
               <input
                 type="password"
                 value={password}
@@ -1159,7 +1198,7 @@ export default function DarikDirectStorefrontSettingsPage() {
             {error ? <p className={styles.error}>{error}</p> : null}
             {message ? <p className={styles.success}>{message}</p> : null}
 
-            <button type="submit">Sign in</button>
+            <button type="submit">Sign in / تسجيل الدخول</button>
           </form>
 
           <a className={styles.marketplaceLink} href="/">
@@ -1200,14 +1239,14 @@ export default function DarikDirectStorefrontSettingsPage() {
 
         <div className={styles.sidebarFooter}>
           <span>{session.user.email}</span>
-          <button onClick={signOut}>Sign out</button>
+          <button onClick={signOut}>Sign out / تسجيل الخروج</button>
         </div>
       </aside>
 
       <section className={styles.dashboardContent}>
         <header className={styles.topbar}>
           <div>
-            <p>Storefront management</p>
+            <p>Storefront management / إدارة واجهة المتجر</p>
             <h2>{selectedStore?.business_name || "Darik retailer"}</h2>
           </div>
 
@@ -1230,8 +1269,8 @@ export default function DarikDirectStorefrontSettingsPage() {
 
         {!selectedStore ? (
           <section className={styles.emptyState}>
-            <span>No retailer membership found</span>
-            <h2>This login is not connected to a Darik retailer.</h2>
+            <span>No retailer membership found / لم يتم العثور على عضوية متجر</span>
+            <h2>This login is not connected to a Darik retailer / هذا الحساب غير مرتبط بمتجر على داريك.</h2>
             <p>
               The Auth email must match an existing retailer email, or the user
               must be added to retailer_store_members.
@@ -1242,11 +1281,11 @@ export default function DarikDirectStorefrontSettingsPage() {
             <section className={styles.panel}>
               <div className={styles.panelHeader}>
                 <div>
-                  <p>Store setup</p>
+                  <p>Store setup / إعداد المتجر</p>
                   <h2>
                     {storefront
-                      ? "Manage your Darik Direct storefront"
-                      : "Create your first storefront"}
+                      ? "Manage your Darik Direct storefront / إدارة واجهة متجرك"
+                      : "Create your first storefront / أنشئ واجهة متجرك الأولى"}
                   </h2>
                 </div>
 
@@ -1256,7 +1295,7 @@ export default function DarikDirectStorefrontSettingsPage() {
                       type="button"
                       onClick={() => setPreviewOpen(true)}
                     >
-                      Preview store
+                      Preview store / معاينة المتجر
                     </button>
 
                     {storefront.activation_status === "active" ? (
@@ -1266,7 +1305,7 @@ export default function DarikDirectStorefrontSettingsPage() {
                           target="_blank"
                           rel="noreferrer"
                         >
-                          Open live store
+                          Open live store / فتح المتجر المباشر
                         </a>
                         <button
                           type="button"
@@ -1274,12 +1313,12 @@ export default function DarikDirectStorefrontSettingsPage() {
                           disabled={saving}
                         >
                           {storefront.is_accepting_orders
-                            ? "Pause orders"
-                            : "Accept orders"}
+                            ? "Pause orders / إيقاف الطلبات"
+                            : "Accept orders / استقبال الطلبات"}
                         </button>
                       </>
                     ) : (
-                      <a href="/store-dashboard/activation">Pay by CliQ to go live</a>
+                      <a href="/store-dashboard/activation">Pay by CliQ to go live / ادفع عبر كليك لتفعيل المتجر</a>
                     )}
                   </div>
                 ) : null}
@@ -1289,15 +1328,15 @@ export default function DarikDirectStorefrontSettingsPage() {
                 <div className={styles.formSection}>
                   <div className={styles.formSectionHeading}>
                     <div>
-                      <span>Identity</span>
-                      <h3>Store name and link</h3>
+                      <span>Identity / الهوية</span>
+                      <h3>Store name and link / اسم المتجر والرابط</h3>
                     </div>
-                    <p>This is what customers see at the top of your store.</p>
+                    <p>This is what customers see at the top of your store / هذا ما يراه العملاء في أعلى المتجر.</p>
                   </div>
 
                   <div className={styles.formGrid}>
                     <label className={styles.wideField}>
-                      Permanent store link
+                      Permanent store link / رابط المتجر الدائم
                       <div className={styles.slugInput}>
                         <span>getdarik.com/store/</span>
                         <input
@@ -1314,62 +1353,36 @@ export default function DarikDirectStorefrontSettingsPage() {
                       </div>
                     </label>
 
-                    <div className={styles.bilingualPair}>
-                      <label>
-                        Customer-facing name
-                        <input
-                          value={setupForm.displayName}
-                          onChange={(event) =>
-                            updateSetupField("displayName", event.target.value)
-                          }
-                          required
-                        />
-                      </label>
+                    <label>
+                      Customer-facing name / اسم المتجر الظاهر للعملاء
+                      <input
+                        value={setupForm.displayName}
+                        onChange={(event) =>
+                          updateSetupField("displayName", event.target.value)
+                        }
+                        required
+                      />
+                    </label>
 
-                      <label>
-                        Customer-facing name in Arabic
-                        <input
-                          dir="rtl"
-                          value={setupForm.displayNameAr}
-                          onChange={(event) =>
-                            updateSetupField("displayNameAr", event.target.value)
-                          }
-                        />
-                      </label>
-                    </div>
-
-                    <div className={styles.bilingualPair}>
-                      <label>
-                        Store tagline
-                        <input
-                          value={setupForm.tagline}
-                          onChange={(event) =>
-                            updateSetupField("tagline", event.target.value)
-                          }
-                        />
-                      </label>
-
-                      <label>
-                        Store tagline in Arabic
-                        <input
-                          dir="rtl"
-                          value={setupForm.taglineAr}
-                          onChange={(event) =>
-                            updateSetupField("taglineAr", event.target.value)
-                          }
-                        />
-                      </label>
-                    </div>
+                    <label>
+                      Store tagline / العبارة التعريفية للمتجر
+                      <input
+                        value={setupForm.tagline}
+                        onChange={(event) =>
+                          updateSetupField("tagline", event.target.value)
+                        }
+                      />
+                    </label>
                   </div>
                 </div>
 
                 <div className={styles.formSection}>
                   <div className={styles.formSectionHeading}>
                     <div>
-                      <span>Branding</span>
-                      <h3>Logo and storefront cover</h3>
+                      <span>Branding / الهوية البصرية</span>
+                      <h3>Logo and storefront cover / الشعار وصورة الغلاف</h3>
                     </div>
-                    <p>Upload images or paste a hosted image URL.</p>
+                    <p>Upload images or paste a hosted image URL / حمّل الصور أو الصق رابط صورة.</p>
                   </div>
 
                   <div className={styles.assetGrid}>
@@ -1387,12 +1400,12 @@ export default function DarikDirectStorefrontSettingsPage() {
                       </div>
 
                       <div className={styles.assetControls}>
-                        <strong>Store logo</strong>
-                        <p>Square logo recommended. PNG or JPG, up to 8 MB.</p>
+                        <strong>Store logo / شعار المتجر</strong>
+                        <p>Square logo recommended / يُفضّل شعار مربع. PNG or JPG, up to 8 MB / حتى 8 ميجابايت.</p>
                         <label className={styles.uploadAssetButton}>
                           {uploadingAsset === "logo"
-                            ? "Uploading…"
-                            : "Upload logo"}
+                            ? "Uploading… / جارٍ التحميل…"
+                            : "Upload logo / تحميل الشعار"}
                           <input
                             type="file"
                             accept="image/jpeg,image/png,image/webp,image/gif"
@@ -1408,7 +1421,7 @@ export default function DarikDirectStorefrontSettingsPage() {
                           onChange={(event) =>
                             updateSetupField("logoUrl", event.target.value)
                           }
-                          placeholder="Or paste logo URL"
+                          placeholder="Or paste logo URL / أو الصق رابط الشعار"
                         />
                       </div>
                     </article>
@@ -1421,17 +1434,17 @@ export default function DarikDirectStorefrontSettingsPage() {
                             alt="Store cover preview"
                           />
                         ) : (
-                          <span>Cover image</span>
+                          <span>Cover image / صورة الغلاف</span>
                         )}
                       </div>
 
                       <div className={styles.assetControls}>
-                        <strong>Storefront cover</strong>
-                        <p>Wide image recommended. It appears behind your store name.</p>
+                        <strong>Storefront cover / صورة غلاف المتجر</strong>
+                        <p>Wide image recommended / يُفضّل صورة عريضة. It appears behind your store name / تظهر خلف اسم المتجر.</p>
                         <label className={styles.uploadAssetButton}>
                           {uploadingAsset === "hero"
-                            ? "Uploading…"
-                            : "Upload cover"}
+                            ? "Uploading… / جارٍ التحميل…"
+                            : "Upload cover / تحميل الغلاف"}
                           <input
                             type="file"
                             accept="image/jpeg,image/png,image/webp,image/gif"
@@ -1447,7 +1460,7 @@ export default function DarikDirectStorefrontSettingsPage() {
                           onChange={(event) =>
                             updateSetupField("heroImageUrl", event.target.value)
                           }
-                          placeholder="Or paste cover image URL"
+                          placeholder="Or paste cover image URL / أو الصق رابط صورة الغلاف"
                         />
                       </div>
                     </article>
@@ -1457,15 +1470,15 @@ export default function DarikDirectStorefrontSettingsPage() {
                 <div className={styles.formSection}>
                   <div className={styles.formSectionHeading}>
                     <div>
-                      <span>Contact</span>
-                      <h3>How customers reach you</h3>
+                      <span>Contact / التواصل</span>
+                      <h3>How customers reach you / كيف يتواصل العملاء معك</h3>
                     </div>
-                    <p>Only completed fields appear publicly.</p>
+                    <p>Only completed fields appear publicly / تظهر الحقول المكتملة فقط للعملاء.</p>
                   </div>
 
                   <div className={styles.formGrid}>
                     <label>
-                      Store phone
+                      Store phone / هاتف المتجر
                       <input
                         type="tel"
                         value={setupForm.phone}
@@ -1477,7 +1490,7 @@ export default function DarikDirectStorefrontSettingsPage() {
                     </label>
 
                     <label>
-                      WhatsApp
+                      WhatsApp / واتساب
                       <input
                         type="tel"
                         value={setupForm.whatsapp}
@@ -1489,7 +1502,7 @@ export default function DarikDirectStorefrontSettingsPage() {
                     </label>
 
                     <label>
-                      Public email
+                      Public email / البريد الإلكتروني الظاهر للعملاء
                       <input
                         type="email"
                         value={setupForm.publicEmail}
@@ -1501,7 +1514,7 @@ export default function DarikDirectStorefrontSettingsPage() {
                     </label>
 
                     <label>
-                      Website
+                      Website / الموقع الإلكتروني
                       <input
                         type="url"
                         value={setupForm.websiteUrl}
@@ -1513,7 +1526,7 @@ export default function DarikDirectStorefrontSettingsPage() {
                     </label>
 
                     <label>
-                      Facebook page
+                      Facebook page / صفحة فيسبوك
                       <input
                         type="url"
                         value={setupForm.facebookUrl}
@@ -1525,7 +1538,7 @@ export default function DarikDirectStorefrontSettingsPage() {
                     </label>
 
                     <label>
-                      Instagram page
+                      Instagram page / صفحة إنستغرام
                       <input
                         type="url"
                         value={setupForm.instagramUrl}
@@ -1536,75 +1549,48 @@ export default function DarikDirectStorefrontSettingsPage() {
                       />
                     </label>
 
-                    <div className={styles.bilingualPair}>
-                      <label>
-                        Public store address
-                        <input
-                          value={setupForm.addressText}
-                          onChange={(event) =>
-                            updateSetupField("addressText", event.target.value)
-                          }
-                        />
-                      </label>
-
-                      <label>
-                        Public store address in Arabic
-                        <input
-                          dir="rtl"
-                          value={setupForm.addressTextAr}
-                          onChange={(event) =>
-                            updateSetupField("addressTextAr", event.target.value)
-                          }
-                        />
-                      </label>
-                    </div>
+                    <label className={styles.wideField}>
+                      Public store address / عنوان المتجر الظاهر للعملاء
+                      <input
+                        value={setupForm.addressText}
+                        onChange={(event) =>
+                          updateSetupField("addressText", event.target.value)
+                        }
+                      />
+                    </label>
                   </div>
                 </div>
 
                 <div className={styles.formSection}>
                   <div className={styles.formSectionHeading}>
                     <div>
-                      <span>About</span>
-                      <h3>Tell customers about the business</h3>
+                      <span>About / نبذة</span>
+                      <h3>Tell customers about the business / عرّف العملاء بمتجرك</h3>
                     </div>
-                    <p>Explain what you sell, your experience, or why customers should choose you.</p>
+                    <p>Explain what you sell, your experience, or why customers should choose you / اشرح ما تبيعه وخبرتك ولماذا يختار العملاء متجرك.</p>
                   </div>
 
                   <div className={styles.formGrid}>
-                    <div className={styles.bilingualPair}>
-                      <label>
-                        About the store
-                        <textarea
-                          rows={5}
-                          value={setupForm.aboutText}
-                          onChange={(event) =>
-                            updateSetupField("aboutText", event.target.value)
-                          }
-                        />
-                      </label>
-
-                      <label>
-                        About the store in Arabic
-                        <textarea
-                          dir="rtl"
-                          rows={5}
-                          value={setupForm.aboutTextAr}
-                          onChange={(event) =>
-                            updateSetupField("aboutTextAr", event.target.value)
-                          }
-                        />
-                      </label>
-                    </div>
+                    <label className={styles.wideField}>
+                      About the store / نبذة عن المتجر
+                      <textarea
+                        rows={5}
+                        value={setupForm.aboutText}
+                        onChange={(event) =>
+                          updateSetupField("aboutText", event.target.value)
+                        }
+                      />
+                    </label>
                   </div>
                 </div>
 
                 <div className={styles.formSection}>
                   <div className={styles.formSectionHeading}>
                     <div>
-                      <span>Business hours</span>
-                      <h3>When the store is open</h3>
+                      <span>Business hours / ساعات العمل</span>
+                      <h3>When the store is open / متى يكون المتجر مفتوحًا</h3>
                     </div>
-                    <p>Use any wording you prefer, such as 9:00 AM–10:00 PM or Closed.</p>
+                    <p>Use any wording you prefer, such as 9:00 AM–10:00 PM or Closed / اكتب الساعات بالطريقة التي تفضّلها أو اكتب مغلق.</p>
                   </div>
 
                   <div className={styles.hoursGrid}>
@@ -1614,35 +1600,15 @@ export default function DarikDirectStorefrontSettingsPage() {
                           <strong>{label}</strong>
                           <span dir="rtl">{labelAr}</span>
                         </div>
-                        <div className={styles.bilingualPair}>
-                          <label>
-                            Hours in English
-                            <input
-                              value={setupForm.operatingHours[day] ?? ""}
-                              onChange={(event) =>
-                                updateOperatingHour(
-                                  "en",
-                                  day,
-                                  event.target.value
-                                )
-                              }
-                            />
-                          </label>
-                          <label>
-                            Hours in Arabic
-                            <input
-                              dir="rtl"
-                              value={setupForm.operatingHoursAr[day] ?? ""}
-                              onChange={(event) =>
-                                updateOperatingHour(
-                                  "ar",
-                                  day,
-                                  event.target.value
-                                )
-                              }
-                            />
-                          </label>
-                        </div>
+                        <label>
+                          Hours / ساعات العمل
+                          <input
+                            value={setupForm.operatingHours[day] ?? ""}
+                            onChange={(event) =>
+                              updateOperatingHour(day, event.target.value)
+                            }
+                          />
+                        </label>
                       </div>
                     ))}
                   </div>
@@ -1651,22 +1617,23 @@ export default function DarikDirectStorefrontSettingsPage() {
                 <div className={styles.formSection}>
                   <div className={styles.formSectionHeading}>
                     <div>
-                      <span>Custom links</span>
-                      <h3>Add any links you want</h3>
+                      <span>Custom links / روابط إضافية</span>
+                      <h3>Add any links you want / أضف الروابط التي تريدها</h3>
                     </div>
                     <button
                       type="button"
                       className={styles.addRowButton}
                       onClick={addCustomLink}
                     >
-                      + Add link
+                      + Add link / إضافة رابط
                     </button>
                   </div>
 
                   {setupForm.customLinks.length === 0 ? (
                     <p className={styles.optionalEmpty}>
                       Add TikTok, YouTube, a map pin, a catalog, a warranty page,
-                      or any other public link.
+                      or any other public link / أضف تيك توك أو يوتيوب أو موقعًا
+                      على الخريطة أو كتالوجًا أو صفحة ضمان أو أي رابط عام آخر.
                     </p>
                   ) : (
                     <div className={styles.repeatRows}>
@@ -1676,7 +1643,7 @@ export default function DarikDirectStorefrontSettingsPage() {
                           key={`link-${index}`}
                         >
                           <label>
-                            Link label
+                            Link label / اسم الرابط
                             <input
                               value={link.label}
                               onChange={(event) =>
@@ -1688,22 +1655,8 @@ export default function DarikDirectStorefrontSettingsPage() {
                               }
                             />
                           </label>
-                          <label>
-                            Link label in Arabic
-                            <input
-                              dir="rtl"
-                              value={link.labelAr}
-                              onChange={(event) =>
-                                updateCustomLink(
-                                  index,
-                                  "labelAr",
-                                  event.target.value
-                                )
-                              }
-                            />
-                          </label>
                           <label className={styles.linkUrlField}>
-                            Link URL
+                            Link URL / رابط الصفحة
                             <input
                               type="url"
                               value={link.url}
@@ -1719,9 +1672,9 @@ export default function DarikDirectStorefrontSettingsPage() {
                           <button
                             type="button"
                             onClick={() => removeCustomLink(index)}
-                            aria-label="Remove custom link"
+                            aria-label="Remove custom link / حذف الرابط"
                           >
-                            Remove
+                            Remove / حذف
                           </button>
                         </div>
                       ))}
@@ -1732,22 +1685,23 @@ export default function DarikDirectStorefrontSettingsPage() {
                 <div className={styles.formSection}>
                   <div className={styles.formSectionHeading}>
                     <div>
-                      <span>Custom store information</span>
-                      <h3>Add anything else customers should know</h3>
+                      <span>Custom store information / معلومات إضافية عن المتجر</span>
+                      <h3>Add anything else customers should know / أضف أي معلومات أخرى يحتاجها العملاء</h3>
                     </div>
                     <button
                       type="button"
                       className={styles.addRowButton}
                       onClick={addCustomInformation}
                     >
-                      + Add information
+                      + Add information / إضافة معلومات
                     </button>
                   </div>
 
                   {setupForm.customInformation.length === 0 ? (
                     <p className={styles.optionalEmpty}>
-                      Examples: Delivery areas, payment options, warranty,
-                      installation service, parking, or return policy.
+                      Delivery areas, payment options, warranty, installation,
+                      parking, or return policy / مناطق التوصيل أو طرق الدفع أو
+                      الضمان أو التركيب أو المواقف أو سياسة الإرجاع.
                     </p>
                   ) : (
                     <div className={styles.repeatRows}>
@@ -1757,7 +1711,7 @@ export default function DarikDirectStorefrontSettingsPage() {
                           key={`info-${index}`}
                         >
                           <label>
-                            Heading
+                            Heading / العنوان
                             <input
                               value={item.label}
                               onChange={(event) =>
@@ -1770,21 +1724,7 @@ export default function DarikDirectStorefrontSettingsPage() {
                             />
                           </label>
                           <label>
-                            Heading in Arabic
-                            <input
-                              dir="rtl"
-                              value={item.labelAr}
-                              onChange={(event) =>
-                                updateCustomInformation(
-                                  index,
-                                  "labelAr",
-                                  event.target.value
-                                )
-                              }
-                            />
-                          </label>
-                          <label>
-                            Information
+                            Information / المعلومات
                             <textarea
                               rows={3}
                               value={item.value}
@@ -1797,27 +1737,12 @@ export default function DarikDirectStorefrontSettingsPage() {
                               }
                             />
                           </label>
-                          <label>
-                            Information in Arabic
-                            <textarea
-                              dir="rtl"
-                              rows={3}
-                              value={item.valueAr}
-                              onChange={(event) =>
-                                updateCustomInformation(
-                                  index,
-                                  "valueAr",
-                                  event.target.value
-                                )
-                              }
-                            />
-                          </label>
                           <button
                             type="button"
                             onClick={() => removeCustomInformation(index)}
-                            aria-label="Remove custom information"
+                            aria-label="Remove custom information / حذف المعلومات"
                           >
-                            Remove
+                            Remove / حذف
                           </button>
                         </div>
                       ))}
@@ -1828,8 +1753,8 @@ export default function DarikDirectStorefrontSettingsPage() {
                 <div className={styles.formSection}>
                   <div className={styles.formSectionHeading}>
                     <div>
-                      <span>Delivery</span>
-                      <h3>Ordering and delivery settings</h3>
+                      <span>Delivery / التوصيل</span>
+                      <h3>Ordering and delivery settings / إعدادات الطلب والتوصيل</h3>
                     </div>
                   </div>
 
@@ -1845,10 +1770,10 @@ export default function DarikDirectStorefrontSettingsPage() {
                         updateSetupField("orderSubmissionMode", "phone")
                       }
                     >
-                      <strong>Phone orders</strong>
+                      <strong>Phone orders / طلبات الهاتف</strong>
                       <span>
                         Customers call the store or send the cart through
-                        WhatsApp. This remains the default.
+                        WhatsApp / يتصل العملاء بالمتجر أو يرسلون السلة عبر واتساب.
                       </span>
                     </button>
 
@@ -1863,10 +1788,11 @@ export default function DarikDirectStorefrontSettingsPage() {
                         updateSetupField("orderSubmissionMode", "online")
                       }
                     >
-                      <strong>Online orders</strong>
+                      <strong>Online orders / الطلبات الإلكترونية</strong>
                       <span>
                         Customers enter their delivery details and submit the
-                        order directly to this dashboard.
+                        order directly / يُدخل العملاء بيانات التوصيل ويرسلون
+                        الطلب مباشرةً إلى لوحة التحكم.
                       </span>
                     </button>
 
@@ -1881,10 +1807,11 @@ export default function DarikDirectStorefrontSettingsPage() {
                         updateSetupField("orderSubmissionMode", "both")
                       }
                     >
-                      <strong>Phone + online</strong>
+                      <strong>Phone + online / الهاتف والإلكتروني</strong>
                       <span>
                         Customers choose whether to call, use WhatsApp, or place
-                        the order online.
+                        the order online / يختار العملاء الاتصال أو واتساب أو
+                        تقديم الطلب إلكترونيًا.
                       </span>
                     </button>
                   </div>
@@ -1892,10 +1819,10 @@ export default function DarikDirectStorefrontSettingsPage() {
                   <div className={styles.onlinePaymentSettings}>
                     <div className={styles.paymentSettingsHeading}>
                       <div>
-                        <span>Online payment methods</span>
-                        <h4>What can customers use?</h4>
+                        <span>Online payment methods / طرق الدفع الإلكترونية</span>
+                        <h4>What can customers use? / ما طرق الدفع المتاحة للعملاء؟</h4>
                       </div>
-                      <p>Check one or both. Cash remains enabled by default.</p>
+                      <p>Check one or both / اختر طريقة أو الطريقتين. Cash remains enabled by default / الدفع النقدي مفعّل افتراضيًا.</p>
                     </div>
 
                     <div className={styles.paymentCheckboxGrid}>
@@ -1914,8 +1841,8 @@ export default function DarikDirectStorefrontSettingsPage() {
                           }
                         />
                         <span>
-                          <strong>Accept cash</strong>
-                          <small>Customer pays the store or driver on delivery.</small>
+                          <strong>Accept cash / قبول الدفع نقدًا</strong>
+                          <small>Customer pays the store or driver on delivery / يدفع العميل للمتجر أو السائق عند التوصيل.</small>
                         </span>
                       </label>
 
@@ -1934,8 +1861,8 @@ export default function DarikDirectStorefrontSettingsPage() {
                           }
                         />
                         <span>
-                          <strong>Accept CliQ</strong>
-                          <small>Customer transfers the total before submitting.</small>
+                          <strong>Accept CliQ / قبول الدفع عبر كليك</strong>
+                          <small>Customer transfers the total before submitting / يحوّل العميل المبلغ قبل إرسال الطلب.</small>
                         </span>
                       </label>
                     </div>
@@ -1944,7 +1871,7 @@ export default function DarikDirectStorefrontSettingsPage() {
                       <div className={styles.cliqSettingsPanel}>
                         <div className={styles.formGrid}>
                           <label>
-                            CliQ account holder / business name
+                            CliQ account holder or business name / اسم صاحب حساب كليك أو اسم المنشأة
                             <input
                               value={setupForm.cliqAccountName}
                               onChange={(event) =>
@@ -1958,7 +1885,7 @@ export default function DarikDirectStorefrontSettingsPage() {
                           </label>
 
                           <label>
-                            CliQ alias or registered mobile number
+                            CliQ alias or registered mobile number / اسم كليك المستعار أو رقم الهاتف المسجل
                             <input
                               value={setupForm.cliqIdentifier}
                               onChange={(event) =>
@@ -1972,8 +1899,8 @@ export default function DarikDirectStorefrontSettingsPage() {
                           </label>
                         </div>
                         <p>
-                          Customers will see these details only when they select
-                          CliQ during online checkout.
+                          Customers see these details only when they select CliQ
+                          / تظهر هذه البيانات للعملاء فقط عند اختيار كليك.
                         </p>
                       </div>
                     ) : null}
@@ -1981,7 +1908,7 @@ export default function DarikDirectStorefrontSettingsPage() {
 
                   <div className={styles.formGrid}>
                     <label>
-                      Delivery fee
+                      Delivery fee / رسوم التوصيل
                       <input
                         type="number"
                         min="0"
@@ -1994,7 +1921,7 @@ export default function DarikDirectStorefrontSettingsPage() {
                     </label>
 
                     <label>
-                      Minimum order
+                      Minimum order / الحد الأدنى للطلب
                       <input
                         type="number"
                         min="0"
@@ -2007,7 +1934,7 @@ export default function DarikDirectStorefrontSettingsPage() {
                     </label>
 
                     <label>
-                      Delivery radius (km)
+                      Delivery radius (km) / نطاق التوصيل (كم)
                       <input
                         type="number"
                         min="0.1"
@@ -2023,7 +1950,7 @@ export default function DarikDirectStorefrontSettingsPage() {
                     </label>
 
                     <label>
-                      Estimated delivery (minutes)
+                      Estimated delivery (minutes) / مدة التوصيل المتوقعة (دقيقة)
                       <input
                         type="number"
                         min="1"
@@ -2042,14 +1969,14 @@ export default function DarikDirectStorefrontSettingsPage() {
                 <div className={styles.formSection}>
                   <div className={styles.formSectionHeading}>
                     <div>
-                      <span>Colors</span>
-                      <h3>Match the storefront to your brand</h3>
+                      <span>Colors / الألوان</span>
+                      <h3>Match the storefront to your brand / طابق ألوان المتجر مع علامتك</h3>
                     </div>
                   </div>
 
                   <div className={styles.colorRow}>
                     <label>
-                      Primary
+                      Primary / اللون الأساسي
                       <input
                         type="color"
                         value={setupForm.primaryColor}
@@ -2059,7 +1986,7 @@ export default function DarikDirectStorefrontSettingsPage() {
                       />
                     </label>
                     <label>
-                      Accent
+                      Accent / اللون الثانوي
                       <input
                         type="color"
                         value={setupForm.accentColor}
@@ -2069,7 +1996,7 @@ export default function DarikDirectStorefrontSettingsPage() {
                       />
                     </label>
                     <label>
-                      Background
+                      Background / لون الخلفية
                       <input
                         type="color"
                         value={setupForm.backgroundColor}
@@ -2088,7 +2015,9 @@ export default function DarikDirectStorefrontSettingsPage() {
                     }`}
                   >
                     <strong>
-                      {formDirty ? "Unsaved changes protected" : "All changes saved"}
+                      {formDirty
+                        ? "Unsaved changes protected / التغييرات غير المحفوظة محمية"
+                        : "All changes saved / تم حفظ جميع التغييرات"}
                     </strong>
                     <span>
                       {formDirty
@@ -2099,14 +2028,14 @@ export default function DarikDirectStorefrontSettingsPage() {
                               hour: "2-digit",
                               minute: "2-digit",
                             })}`
-                          : "Protecting your entries automatically…"
-                        : "Background login refreshes will not reset this form."}
+                          : "Protecting your entries automatically… / جارٍ حماية مدخلاتك تلقائيًا…"
+                        : "Background login refreshes will not reset this form / تحديث تسجيل الدخول لن يمسح النموذج."}
                     </span>
                   </div>
 
                   {error ? (
                     <div className={styles.saveErrorInline} role="alert">
-                      <strong>Could not save</strong>
+                      <strong>Could not save / تعذر الحفظ</strong>
                       <span>{error}</span>
                     </div>
                   ) : null}
@@ -2117,10 +2046,10 @@ export default function DarikDirectStorefrontSettingsPage() {
                     disabled={saving || uploadingAsset !== null}
                   >
                     {saving
-                      ? "Saving…"
+                      ? "Saving… / جارٍ الحفظ…"
                       : storefront
-                        ? "Save storefront profile"
-                        : "Create draft storefront"}
+                        ? "Save storefront profile / حفظ ملف المتجر"
+                        : "Create draft storefront / إنشاء مسودة المتجر"}
                   </button>
                 </div>
               </form>

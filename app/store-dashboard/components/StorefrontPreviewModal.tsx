@@ -65,21 +65,21 @@ export default function StorefrontPreviewModal({ open, retailerId, form, onClose
   } as CSSProperties;
   const heroStyle = form.heroImageUrl ? { backgroundImage: `linear-gradient(rgba(5,15,24,.38),rgba(5,15,24,.48)), url(${JSON.stringify(form.heroImageUrl)})` } : undefined;
 
-  return <div className={styles.backdrop} role="dialog" aria-modal="true" aria-label="Private storefront preview" onMouseDown={(event) => { if (event.target === event.currentTarget) onClose(); }}>
+  return <div className={styles.backdrop} role="dialog" aria-modal="true" aria-label="Private storefront preview / معاينة خاصة للمتجر" onMouseDown={(event) => { if (event.target === event.currentTarget) onClose(); }}>
     <section className={styles.modal}>
-      <div className={styles.toolbar}><div><strong>Private storefront preview</strong><span>This popup is visible only inside the store dashboard.</span></div><div className={styles.toolbarActions}>
-        <button type="button" className={`${styles.deviceButton} ${device === "desktop" ? styles.deviceActive : ""}`} onClick={() => setDevice("desktop")}>Desktop</button>
-        <button type="button" className={`${styles.deviceButton} ${device === "mobile" ? styles.deviceActive : ""}`} onClick={() => setDevice("mobile")}>Mobile</button>
-        <button type="button" className={styles.closeButton} onClick={onClose}>Close preview</button>
+      <div className={styles.toolbar}><div><strong>Private storefront preview / معاينة خاصة للمتجر</strong><span>This popup is visible only inside the store dashboard / تظهر هذه النافذة داخل لوحة المتجر فقط.</span></div><div className={styles.toolbarActions}>
+        <button type="button" className={`${styles.deviceButton} ${device === "desktop" ? styles.deviceActive : ""}`} onClick={() => setDevice("desktop")}>Desktop / كمبيوتر</button>
+        <button type="button" className={`${styles.deviceButton} ${device === "mobile" ? styles.deviceActive : ""}`} onClick={() => setDevice("mobile")}>Mobile / هاتف</button>
+        <button type="button" className={styles.closeButton} onClick={onClose}>Close preview / إغلاق المعاينة</button>
       </div></div>
       <div className={styles.stage}><div className={`${styles.viewport} ${device === "mobile" ? styles.mobile : ""}`} style={theme}>
-        <div className={styles.previewOnly}>PREVIEW ONLY — YOUR STORE IS NOT LIVE</div>
-        <header className={styles.header}><div className={styles.identity}><div className={styles.logo}>{form.logoUrl ? <img src={form.logoUrl} alt="Store logo preview"/> : (form.displayName || "D").slice(0,1).toUpperCase()}</div><div><strong>{form.displayName || "Your store"}</strong><span>{form.displayNameAr || "Darik Direct store"}</span></div></div><span className={styles.headerBadge}>Orders disabled in preview</span></header>
-        <section className={styles.hero} style={heroStyle}><div className={styles.heroContent}><h1>{form.displayName || "Your store"}</h1>{form.displayNameAr ? <h2 dir="rtl">{form.displayNameAr}</h2> : null}<p>{form.tagline || "Add the English tagline in the storefront settings."}</p>{form.taglineAr ? <p dir="rtl">{form.taglineAr}</p> : null}</div></section>
+        <div className={styles.previewOnly}>PREVIEW ONLY — YOUR STORE IS NOT LIVE / معاينة فقط — متجرك غير مفعّل</div>
+        <header className={styles.header}><div className={styles.identity}><div className={styles.logo}>{form.logoUrl ? <img src={form.logoUrl} alt="Store logo preview"/> : (form.displayName || "D").slice(0,1).toUpperCase()}</div><div><strong>{form.displayName || "Your store"}</strong><span>Darik Direct store / متجر داريك دايركت</span></div></div><span className={styles.headerBadge}>Orders disabled in preview / الطلبات معطّلة في المعاينة</span></header>
+        <section className={styles.hero} style={heroStyle}><div className={styles.heroContent}><h1>{form.displayName || "Your store / متجرك"}</h1><p>{form.tagline || "Add a store tagline / أضف العبارة التعريفية للمتجر"}</p></div></section>
         <section className={styles.stats}><div><span>Delivery</span><strong>{money(form.deliveryFee || "0")}</strong></div><div><span>Minimum order</span><strong>{money(form.minimumOrder || "0")}</strong></div><div><span>Estimated time</span><strong>{form.estimatedDeliveryMinutes ? `${form.estimatedDeliveryMinutes} min` : "Set timing"}</strong></div><div><span>Contact</span><strong>{form.whatsapp || form.phone || "Add phone"}</strong></div></section>
-        {(form.aboutText || form.aboutTextAr || form.addressText || form.addressTextAr) ? <section className={styles.bilingualCopy}>
-          {(form.aboutText || form.aboutTextAr) ? <article><strong>About the store / عن المتجر</strong>{form.aboutText ? <p>{form.aboutText}</p> : null}{form.aboutTextAr ? <p dir="rtl">{form.aboutTextAr}</p> : null}</article> : null}
-          {(form.addressText || form.addressTextAr) ? <article><strong>Address / العنوان</strong>{form.addressText ? <p>{form.addressText}</p> : null}{form.addressTextAr ? <p dir="rtl">{form.addressTextAr}</p> : null}</article> : null}
+        {(form.aboutText || form.addressText) ? <section className={styles.bilingualCopy}>
+          {form.aboutText ? <article><strong>About the store / عن المتجر</strong><p>{form.aboutText}</p></article> : null}
+          {form.addressText ? <article><strong>Address / العنوان</strong><p>{form.addressText}</p></article> : null}
         </section> : null}
         <section className={styles.catalog}><div className={styles.catalogTop}><div><h2>Shop the catalog</h2><p>Draft categories and products appear here before activation.</p></div><strong>{visibleProducts.length} products</strong></div>
           {categories.length ? <div className={styles.categories}>{categories.slice(0,8).map((category) => <div className={styles.category} key={category.id}><div className={styles.categoryBubble}>{category.image_url ? <img src={category.image_url} alt=""/> : category.name.slice(0,1).toUpperCase()}</div><span>{category.name_ar || category.name}</span></div>)}</div> : null}
