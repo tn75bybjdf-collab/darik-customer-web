@@ -533,6 +533,7 @@ export default function DarikDirectCategoriesPage() {
           >
             Categories
           </a>
+          <a href="/store-dashboard/activation">Go live</a>
         </nav>
 
         <div className={styles.sidebarFooter}>

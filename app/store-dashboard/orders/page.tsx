@@ -192,6 +192,7 @@ export default function DarikDirectOrdersPage() {
           <a className={styles.activeNav} href="/store-dashboard/orders">Orders</a>
           <a href="/store-dashboard/products">Products</a>
           <a href="/store-dashboard/categories">Categories</a>
+          <a href="/store-dashboard/activation">Go live</a>
         </nav>
         <div className={styles.sidebarFooter}><span>{session.user.email}</span><button onClick={signOut}>Sign out</button></div>
       </aside>

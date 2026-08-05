@@ -45,6 +45,17 @@ type Storefront = {
   business_name: string;
 };
 
+type PublicStoreStatus = {
+  slug: string;
+  display_name: string;
+  display_name_ar: string | null;
+  logo_url: string | null;
+  primary_color: string | null;
+  accent_color: string | null;
+  business_type: string | null;
+  public_status: "live" | "coming_soon" | "unavailable";
+};
+
 type Product = {
   storefront_id: string;
   storefront_slug: string;
@@ -341,6 +352,7 @@ export default function DarikDirectStorefrontPage() {
   const slug = normalizeParam(params?.slug);
 
   const [storefront, setStorefront] = useState<Storefront | null>(null);
+  const [publicStatus, setPublicStatus] = useState<PublicStoreStatus | null>(null);
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [selectedCategoryId, setSelectedCategoryId] = useState("all");
@@ -454,17 +466,36 @@ export default function DarikDirectStorefrontPage() {
       if (cancelled) return;
 
       if (storefrontResult.error || !storefrontResult.data) {
+        const statusResult = await supabase
+          .from("public_retailer_storefront_status")
+          .select("*")
+          .eq("slug", slug)
+          .maybeSingle();
+
+        if (cancelled) return;
+
         setStorefront(null);
         setProducts([]);
-        setLoadError(
-          storefrontResult.error?.message ||
-            "This Darik Direct storefront is not published."
-        );
+        setCategories([]);
+
+        if (!statusResult.error && statusResult.data) {
+          setPublicStatus(statusResult.data as PublicStoreStatus);
+          setLoadError("");
+        } else {
+          setPublicStatus(null);
+          setLoadError(
+            storefrontResult.error?.message ||
+              statusResult.error?.message ||
+              "This Darik Direct storefront could not be found."
+          );
+        }
+
         setLoading(false);
         return;
       }
 
       const currentStorefront = storefrontResult.data as Storefront;
+      setPublicStatus(null);
       setStorefront(currentStorefront);
 
       const [productResult, categoryResult] = await Promise.all([
@@ -847,6 +878,40 @@ export default function DarikDirectStorefrontPage() {
   }
 
   if (!storefront) {
+    if (publicStatus) {
+      const comingSoonTheme = {
+        "--coming-primary": publicStatus.primary_color || "#111827",
+        "--coming-accent": publicStatus.accent_color || "#178456",
+      } as CSSProperties;
+
+      return (
+        <main className={styles.comingSoonPage} style={comingSoonTheme}>
+          <section className={styles.comingSoonCard}>
+            <a className={styles.comingSoonBrand} href="/">Darik Direct</a>
+            <div className={styles.comingSoonLogo}>
+              {publicStatus.logo_url ? (
+                <img src={publicStatus.logo_url} alt={`${publicStatus.display_name} logo`} />
+              ) : (
+                <span>{publicStatus.display_name.slice(0, 1).toUpperCase()}</span>
+              )}
+            </div>
+            <span className={styles.comingSoonType}>
+              {(publicStatus.business_type || "local_store").replace(/_/g, " ")}
+            </span>
+            <h1>{publicStatus.display_name}</h1>
+            {publicStatus.display_name_ar ? <h2 dir="rtl">{publicStatus.display_name_ar}</h2> : null}
+            <p>
+              {publicStatus.public_status === "unavailable"
+                ? "This Darik store is temporarily unavailable."
+                : "Coming soon on Darik. The store is preparing its catalog and delivery experience."}
+            </p>
+            <div className={styles.comingSoonLine} />
+            <a className={styles.comingSoonHome} href="/">Explore Darik</a>
+          </section>
+        </main>
+      );
+    }
+
     return (
       <main className={styles.statePage}>
         <div className={styles.stateCard}>

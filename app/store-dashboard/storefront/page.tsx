@@ -11,6 +11,7 @@ import {
 } from "react";
 import type { Session } from "@supabase/supabase-js";
 import { supabase } from "@/lib/supabaseBrowser";
+import StorefrontPreviewModal from "../components/StorefrontPreviewModal";
 import styles from "../dashboard.module.css";
 
 type StoreContext = {
@@ -26,6 +27,9 @@ type StoreContext = {
   storefront_status: string | null;
   direct_storefront_enabled: boolean | null;
   is_accepting_orders: boolean | null;
+  activation_status?: string | null;
+  activation_plan?: string | null;
+  activation_expires_at?: string | null;
 };
 
 type ContextResult = {
@@ -188,6 +192,9 @@ type StorefrontSettings = {
   cliq_enabled: boolean;
   cliq_account_name: string | null;
   cliq_payment_identifier: string | null;
+  activation_status?: string | null;
+  activation_plan?: string | null;
+  activation_expires_at?: string | null;
   updated_at?: string | null;
 };
 
@@ -252,6 +259,7 @@ export default function DarikDirectStorefrontSettingsPage() {
   const [uploadingAsset, setUploadingAsset] = useState<"logo" | "hero" | null>(null);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
+  const [previewOpen, setPreviewOpen] = useState(false);
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -944,7 +952,7 @@ export default function DarikDirectStorefrontSettingsPage() {
           .insert({
             ...payload,
             storefront_status: "draft",
-            direct_storefront_enabled: true,
+            direct_storefront_enabled: false,
             marketplace_listing_enabled: true,
             is_accepting_orders: false,
           })
@@ -1016,40 +1024,10 @@ export default function DarikDirectStorefrontSettingsPage() {
     setMessage(
       storefront
         ? "Storefront settings updated."
-        : "Draft storefront created. Publish it when the catalog is ready."
+        : "Draft storefront created. Preview it privately, then submit CliQ activation when ready."
     );
     setSaving(false);
     await loadContext();
-  }
-
-  async function publishStorefront() {
-    if (!storefront) return;
-
-    setSaving(true);
-    setError("");
-    setMessage("");
-
-    const result = await supabase
-      .from("retailer_storefronts")
-      .update({
-        storefront_status: "published",
-        direct_storefront_enabled: true,
-        is_accepting_orders: true,
-        published_at: new Date().toISOString(),
-      })
-      .eq("id", storefront.id)
-      .select("*")
-      .single();
-
-    if (result.error) {
-      setError(result.error.message);
-    } else {
-      setStorefront(result.data as StorefrontSettings);
-      setMessage("Storefront published and accepting orders.");
-      await loadContext();
-    }
-
-    setSaving(false);
   }
 
   async function toggleOrders() {
@@ -1162,6 +1140,7 @@ export default function DarikDirectStorefrontSettingsPage() {
           <a href="/store-dashboard/orders">Orders</a>
           <a href="/store-dashboard/products">Products</a>
           <a href="/store-dashboard/categories">Categories</a>
+          <a href="/store-dashboard/activation">Go live</a>
         </nav>
 
         <div className={styles.sidebarFooter}>
@@ -1218,32 +1197,34 @@ export default function DarikDirectStorefrontSettingsPage() {
 
                 {storefront ? (
                   <div className={styles.panelActions}>
-                    <a
-                      href={`/store/${storefront.slug}`}
-                      target="_blank"
-                      rel="noreferrer"
+                    <button
+                      type="button"
+                      onClick={() => setPreviewOpen(true)}
                     >
-                      View storefront
-                    </a>
+                      Preview store
+                    </button>
 
-                    {storefront.storefront_status !== "published" ? (
-                      <button
-                        type="button"
-                        onClick={publishStorefront}
-                        disabled={saving}
-                      >
-                        Publish
-                      </button>
+                    {storefront.activation_status === "active" ? (
+                      <>
+                        <a
+                          href={`/store/${storefront.slug}`}
+                          target="_blank"
+                          rel="noreferrer"
+                        >
+                          Open live store
+                        </a>
+                        <button
+                          type="button"
+                          onClick={toggleOrders}
+                          disabled={saving}
+                        >
+                          {storefront.is_accepting_orders
+                            ? "Pause orders"
+                            : "Accept orders"}
+                        </button>
+                      </>
                     ) : (
-                      <button
-                        type="button"
-                        onClick={toggleOrders}
-                        disabled={saving}
-                      >
-                        {storefront.is_accepting_orders
-                          ? "Pause orders"
-                          : "Accept orders"}
-                      </button>
+                      <a href="/store-dashboard/activation">Pay by CliQ to go live</a>
                     )}
                   </div>
                 ) : null}
@@ -1272,6 +1253,7 @@ export default function DarikDirectStorefrontSettingsPage() {
                               cleanSlug(event.target.value)
                             )
                           }
+                          disabled={Boolean(storefront)}
                           required
                         />
                       </div>
@@ -1990,6 +1972,12 @@ export default function DarikDirectStorefrontSettingsPage() {
           </>
         )}
       </section>
+      <StorefrontPreviewModal
+        open={previewOpen}
+        retailerId={selectedStore?.retailer_id ?? ""}
+        form={setupForm}
+        onClose={() => setPreviewOpen(false)}
+      />
     </main>
   );
 }

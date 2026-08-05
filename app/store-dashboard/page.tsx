@@ -18,6 +18,9 @@ type StoreContext = {
   storefront_status: string | null;
   direct_storefront_enabled: boolean | null;
   is_accepting_orders: boolean | null;
+  activation_status?: string | null;
+  activation_plan?: string | null;
+  activation_expires_at?: string | null;
 };
 
 type ContextResult = {
@@ -32,6 +35,9 @@ type StorefrontSummary = {
   slug: string;
   storefront_status: string;
   is_accepting_orders: boolean;
+  activation_status?: string | null;
+  activation_plan?: string | null;
+  activation_expires_at?: string | null;
 };
 
 type RecentOrder = {
@@ -122,7 +128,7 @@ export default function DarikDirectOverviewPage() {
     async function loadSummary() {
       setError("");
       const [storefrontResult, productResult, orderResult, recentResult] = await Promise.all([
-        supabase.from("retailer_storefronts").select("id,slug,storefront_status,is_accepting_orders").eq("retailer_id", selectedStore.retailer_id).maybeSingle(),
+        supabase.from("retailer_storefronts").select("id,slug,storefront_status,is_accepting_orders,activation_status,activation_plan,activation_expires_at").eq("retailer_id", selectedStore.retailer_id).maybeSingle(),
         supabase.from("products").select("id", { count: "exact", head: true }).eq("retailer_id", selectedStore.retailer_id).neq("direct_product_status", "archived"),
         supabase.from("orders").select("id,total", { count: "exact" }).eq("sales_channel", "direct_storefront").eq("storefront_retailer_id", selectedStore.retailer_id),
         supabase.from("orders").select("id,order_number,customer_name,total,order_status,created_at").eq("sales_channel", "direct_storefront").eq("storefront_retailer_id", selectedStore.retailer_id).order("created_at", { ascending: false }).limit(5),
@@ -171,6 +177,7 @@ export default function DarikDirectOverviewPage() {
             {message ? <p className={styles.success}>{message}</p> : null}
             <button type="submit">Sign in</button>
           </form>
+          <a className={styles.marketplaceLink} href="/store-signup">Create a store for free</a>
           <a className={styles.marketplaceLink} href="/">Return to Darik Marketplace</a>
         </section>
       </main>
@@ -191,6 +198,7 @@ export default function DarikDirectOverviewPage() {
           <a href="/store-dashboard/orders">Orders</a>
           <a href="/store-dashboard/products">Products</a>
           <a href="/store-dashboard/categories">Categories</a>
+          <a href="/store-dashboard/activation">Go live</a>
         </nav>
         <div className={styles.sidebarFooter}><span>{session.user.email}</span><button onClick={signOut}>Sign out</button></div>
       </aside>
@@ -216,16 +224,17 @@ export default function DarikDirectOverviewPage() {
               <article><span>Products</span><strong>{productCount}</strong><p>Direct catalog items</p></article>
               <article><span>Direct orders</span><strong>{directOrderCount}</strong><p>Storefront channel only</p></article>
               <article><span>Total direct value</span><strong>{money(directRevenue)}</strong><p>All direct orders</p></article>
-              <article><span>Storefront</span><strong>{storefront?.storefront_status || "Not created"}</strong><p>{storefront?.is_accepting_orders ? "Accepting orders" : "Orders paused"}</p></article>
+              <article><span>Activation</span><strong>{(storefront?.activation_status || selectedStore.activation_status || "free_draft").replace(/_/g, " ")}</strong><p>{storefront?.activation_status === "active" ? "Public store is live" : "Public page shows Coming Soon"}</p></article>
             </section>
 
             <section className={styles.panel}>
               <div className={styles.panelHeader}><div><p>Manage your store</p><h2>Choose where to work</h2></div></div>
               <div className={styles.quickActionGrid}>
-                <a className={styles.quickActionCard} href="/store-dashboard/storefront"><span>01</span><strong>Storefront</strong><p>Branding, store details, delivery settings, hours and publishing.</p></a>
+                <a className={styles.quickActionCard} href="/store-dashboard/storefront"><span>01</span><strong>Storefront</strong><p>Branding, store details, delivery settings, hours and private preview.</p></a>
                 <a className={styles.quickActionCard} href="/store-dashboard/orders"><span>02</span><strong>Orders</strong><p>Review and manage Darik Direct customer orders.</p></a>
                 <a className={styles.quickActionCard} href="/store-dashboard/products"><span>03</span><strong>Products</strong><p>Add products, prices, photos and optional inventory.</p></a>
                 <a className={styles.quickActionCard} href="/store-dashboard/categories"><span>04</span><strong>Categories</strong><p>Create this store’s own English and Arabic category structure.</p></a>
+                <a className={styles.quickActionCard} href="/store-dashboard/activation"><span>05</span><strong>Go live</strong><p>Choose a plan, submit CliQ proof, and wait for Darik approval.</p></a>
               </div>
             </section>
 
