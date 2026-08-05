@@ -2852,3 +2852,1001 @@
     box-sizing: border-box;
   }
 }
+/* DARIK FRONTEND 021 - PREMIUM STORE COMMAND CENTER */
+.commandContent {
+  max-width: 1560px;
+  padding: 26px 32px 48px;
+}
+
+.commandHero {
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 28px;
+  border: 1px solid rgba(198, 210, 226, 0.9);
+  border-radius: 26px;
+  padding: 24px 26px;
+  background:
+    radial-gradient(circle at 76% 4%, rgba(72, 215, 181, 0.18), transparent 18rem),
+    radial-gradient(circle at 98% 100%, rgba(37, 99, 235, 0.1), transparent 24rem),
+    linear-gradient(132deg, rgba(255, 255, 255, 0.98), rgba(246, 250, 254, 0.96));
+  box-shadow: 0 24px 58px rgba(15, 23, 42, 0.075);
+}
+
+.commandHero::after {
+  content: "";
+  position: absolute;
+  right: -60px;
+  top: -82px;
+  width: 220px;
+  height: 220px;
+  border: 1px solid rgba(22, 124, 105, 0.12);
+  border-radius: 50%;
+  box-shadow:
+    0 0 0 26px rgba(22, 124, 105, 0.025),
+    0 0 0 54px rgba(37, 99, 235, 0.018);
+  pointer-events: none;
+}
+
+.commandIdentity {
+  position: relative;
+  z-index: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+
+.commandLogo {
+  width: 70px;
+  height: 70px;
+  flex: 0 0 70px;
+  overflow: hidden;
+  display: grid;
+  place-items: center;
+  border: 1px solid rgba(22, 124, 105, 0.16);
+  border-radius: 20px;
+  background:
+    linear-gradient(145deg, #0d1a2b, #15283e);
+  color: #78e5cd;
+  font-size: 27px;
+  font-weight: 950;
+  box-shadow: 0 15px 30px rgba(15, 23, 42, 0.16);
+}
+
+.commandLogo img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: contain;
+  background: white;
+}
+
+.commandIdentityCopy {
+  min-width: 0;
+}
+
+.commandEyebrowRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.commandEyebrowRow > span:first-child {
+  color: #167c69;
+  font-size: 10px;
+  font-weight: 950;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.commandStatusBadge {
+  width: max-content;
+  border-radius: 999px;
+  padding: 6px 10px;
+  font-size: 9px;
+  font-weight: 950;
+  letter-spacing: 0.01em;
+}
+
+.commandStatusLive {
+  border: 1px solid #9ce1cf;
+  background: #e9fbf5;
+  color: #08745f;
+}
+
+.commandStatusDraft {
+  border: 1px solid #d7e0eb;
+  background: #f4f7fa;
+  color: #53627a;
+}
+
+.commandIdentityCopy h2 {
+  margin: 7px 0 0;
+  color: #101828;
+  font-size: clamp(30px, 3vw, 43px);
+  line-height: 1;
+  letter-spacing: -0.055em;
+}
+
+.commandLinkRow {
+  min-width: 0;
+  margin-top: 11px;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  flex-wrap: wrap;
+  color: #718096;
+  font-size: 11px;
+}
+
+.commandLinkRow strong {
+  color: #24344c;
+  overflow-wrap: anywhere;
+}
+
+.commandLinkState {
+  margin-left: 8px;
+  border-left: 1px solid #dce4ee;
+  padding-left: 9px;
+  color: #167c69;
+  font-weight: 850;
+}
+
+.commandHeroControls {
+  position: relative;
+  z-index: 1;
+  flex: 0 0 auto;
+  display: flex;
+  align-items: flex-end;
+  justify-content: flex-end;
+  gap: 9px;
+  flex-wrap: wrap;
+}
+
+.commandStoreSwitcher {
+  min-width: 190px;
+  display: grid;
+  gap: 5px;
+  color: #657389;
+  font-size: 9px;
+  font-weight: 900;
+}
+
+.commandStoreSwitcher select {
+  min-height: 43px;
+  border: 1px solid #d6e0eb;
+  border-radius: 11px;
+  padding: 0 12px;
+  background: rgba(255, 255, 255, 0.92);
+  color: #172033;
+  font: inherit;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.commandSecondaryButton,
+.commandPrimaryButton {
+  min-height: 43px;
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 11px;
+  padding: 0 14px;
+  font-size: 11px;
+  font-weight: 900;
+  text-decoration: none;
+  cursor: pointer;
+  transition: 160ms ease;
+}
+
+.commandSecondaryButton {
+  border: 1px solid #cfdae6;
+  background: rgba(255, 255, 255, 0.9);
+  color: #24344c;
+}
+
+button.commandSecondaryButton:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.commandPrimaryButton {
+  border: 1px solid #0d1a2b;
+  background: #0d1a2b;
+  color: #fff;
+  box-shadow: 0 12px 25px rgba(15, 23, 42, 0.16);
+}
+
+.commandSecondaryButton:hover,
+.commandPrimaryButton:hover {
+  transform: translateY(-1px);
+}
+
+.commandMetricGrid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 14px;
+}
+
+.commandMetricCard {
+  min-width: 0;
+  position: relative;
+  display: grid;
+  grid-template-columns: 42px minmax(0, 1fr);
+  gap: 12px;
+  align-items: start;
+  border: 1px solid #dce4ef;
+  border-radius: 19px;
+  padding: 16px;
+  background: rgba(255, 255, 255, 0.92);
+  box-shadow: 0 14px 34px rgba(15, 23, 42, 0.05);
+}
+
+.commandMetricAccent {
+  border-color: #bfe5dc;
+  background: linear-gradient(135deg, #f6fffc, #f7fbff);
+}
+
+.commandMetricIcon {
+  width: 42px;
+  height: 42px;
+  display: grid;
+  place-items: center;
+  border-radius: 12px;
+  background: #edf8f5;
+  color: #167c69;
+  font-size: 16px;
+  font-weight: 950;
+}
+
+.commandMetricCard > div:nth-child(2) {
+  min-width: 0;
+}
+
+.commandMetricCard span {
+  display: block;
+  color: #68768b;
+  font-size: 9px;
+  font-weight: 850;
+  line-height: 1.45;
+}
+
+.commandMetricCard strong {
+  display: block;
+  margin-top: 6px;
+  color: #111827;
+  font-size: 24px;
+  line-height: 1;
+  letter-spacing: -0.045em;
+  overflow-wrap: anywhere;
+}
+
+.commandMetricCard p {
+  margin: 7px 0 0;
+  color: #98a2b3;
+  font-size: 9px;
+  line-height: 1.45;
+}
+
+.commandMetricCard > a {
+  grid-column: 1 / -1;
+  width: max-content;
+  margin-top: 2px;
+  color: #167c69;
+  font-size: 9px;
+  font-weight: 900;
+  text-decoration: none;
+}
+
+.commandMainGrid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.6fr) minmax(320px, 0.72fr);
+  gap: 14px;
+  margin-top: 14px;
+}
+
+.commandReadinessPanel,
+.commandPulsePanel,
+.commandActivityPanel {
+  border: 1px solid #dce4ef;
+  border-radius: 23px;
+  background: rgba(255, 255, 255, 0.94);
+  box-shadow: 0 18px 48px rgba(15, 23, 42, 0.06);
+}
+
+.commandReadinessPanel {
+  padding: 22px;
+}
+
+.commandPulsePanel {
+  padding: 20px;
+  background:
+    radial-gradient(circle at 100% 0, rgba(72, 215, 181, 0.13), transparent 16rem),
+    #0f1a2a;
+  color: white;
+  border-color: rgba(148, 163, 184, 0.18);
+  box-shadow: 0 22px 48px rgba(15, 23, 42, 0.18);
+}
+
+.commandPanelHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 22px;
+}
+
+.commandPanelHeader p,
+.commandPanelHeader h3,
+.commandPanelHeader span,
+.commandPanelHeaderCompact p,
+.commandPanelHeaderCompact h3 {
+  margin: 0;
+}
+
+.commandPanelHeader p,
+.commandPanelHeaderCompact p,
+.commandActivityHeader p {
+  color: #167c69;
+  font-size: 9px;
+  font-weight: 950;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.commandPanelHeader h3,
+.commandPanelHeaderCompact h3,
+.commandActivityHeader h3 {
+  margin-top: 5px;
+  color: #111827;
+  font-size: 22px;
+  line-height: 1.1;
+  letter-spacing: -0.04em;
+}
+
+.commandPanelHeader > div:first-child > span,
+.commandActivityHeader > div:first-child > span {
+  display: block;
+  margin-top: 6px;
+  color: #7c899b;
+  font-size: 10px;
+  direction: rtl;
+  text-align: left;
+}
+
+.commandProgressRing {
+  --command-progress: 0deg;
+  width: 92px;
+  height: 92px;
+  flex: 0 0 92px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: conic-gradient(#20a387 var(--command-progress), #e8eef4 0deg);
+  box-shadow: inset 0 0 0 1px rgba(22, 124, 105, 0.08);
+}
+
+.commandProgressRing > div {
+  width: 72px;
+  height: 72px;
+  display: grid;
+  place-content: center;
+  border-radius: 50%;
+  background: white;
+  text-align: center;
+  box-shadow: 0 6px 16px rgba(15, 23, 42, 0.08);
+}
+
+.commandProgressRing strong {
+  color: #101828;
+  font-size: 20px;
+  line-height: 1;
+  letter-spacing: -0.04em;
+}
+
+.commandProgressRing span {
+  margin-top: 4px;
+  color: #758398;
+  font-size: 7px;
+  font-weight: 850;
+}
+
+.commandProgressTrack {
+  height: 7px;
+  overflow: hidden;
+  margin-top: 17px;
+  border-radius: 999px;
+  background: #e9eef4;
+}
+
+.commandProgressTrack span {
+  height: 100%;
+  display: block;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #167c69, #48d7b5);
+  transition: width 260ms ease;
+}
+
+.commandTaskList {
+  display: grid;
+  gap: 7px;
+  margin-top: 16px;
+}
+
+.commandTaskRow {
+  min-width: 0;
+  display: grid;
+  grid-template-columns: 28px minmax(0, 1fr) auto;
+  gap: 11px;
+  align-items: center;
+  border: 1px solid #e3e9f0;
+  border-radius: 14px;
+  padding: 11px 12px;
+  background: #fbfcfe;
+  color: inherit;
+  text-decoration: none;
+  transition: 150ms ease;
+}
+
+.commandTaskRow:hover {
+  transform: translateX(2px);
+  border-color: #b9d9d1;
+  background: #f8fffc;
+}
+
+.commandTaskComplete {
+  background: #f8fbfa;
+  opacity: 0.78;
+}
+
+.commandTaskState {
+  width: 28px;
+  height: 28px;
+  display: grid;
+  place-items: center;
+  border: 1px solid #cfd9e5;
+  border-radius: 9px;
+  background: white;
+  color: #167c69;
+  font-size: 12px;
+  font-weight: 950;
+}
+
+.commandTaskComplete .commandTaskState {
+  border-color: #a9ddcf;
+  background: #eaf9f4;
+}
+
+.commandTaskCopy {
+  min-width: 0;
+  display: grid;
+  gap: 3px;
+}
+
+.commandTaskCopy strong {
+  color: #26364d;
+  font-size: 10px;
+  line-height: 1.4;
+}
+
+.commandTaskCopy small {
+  color: #8a96a7;
+  font-size: 8px;
+  line-height: 1.45;
+}
+
+.commandTaskAction {
+  max-width: 145px;
+  color: #167c69;
+  font-size: 8px;
+  font-weight: 900;
+  text-align: right;
+}
+
+.commandPanelHeaderCompact {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.commandPanelHeaderCompact p {
+  color: #6fe1c7;
+}
+
+.commandPanelHeaderCompact h3 {
+  color: white;
+  font-size: 19px;
+}
+
+.commandPulseLive,
+.commandPulseDraft {
+  border-radius: 999px;
+  padding: 6px 9px;
+  font-size: 8px;
+  font-weight: 950;
+  letter-spacing: 0.08em;
+}
+
+.commandPulseLive {
+  background: rgba(72, 215, 181, 0.16);
+  color: #76e8ce;
+}
+
+.commandPulseDraft {
+  background: rgba(148, 163, 184, 0.14);
+  color: #d5deea;
+}
+
+.commandPulseList {
+  display: grid;
+  margin-top: 18px;
+  border-top: 1px solid rgba(148, 163, 184, 0.14);
+}
+
+.commandPulseList > div {
+  display: grid;
+  gap: 5px;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.12);
+  padding: 12px 0;
+}
+
+.commandPulseList span {
+  color: rgba(226, 232, 240, 0.52);
+  font-size: 8px;
+  font-weight: 750;
+}
+
+.commandPulseList strong {
+  color: #f8fafc;
+  font-size: 10px;
+  line-height: 1.45;
+}
+
+.commandPulseAction {
+  margin-top: 16px;
+  display: grid;
+  gap: 4px;
+  border: 1px solid rgba(72, 215, 181, 0.18);
+  border-radius: 15px;
+  padding: 14px;
+  background: linear-gradient(135deg, rgba(72, 215, 181, 0.12), rgba(37, 99, 235, 0.08));
+  color: white;
+  text-decoration: none;
+}
+
+.commandPulseAction span {
+  color: #6fe1c7;
+  font-size: 8px;
+  font-weight: 900;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.commandPulseAction strong {
+  font-size: 11px;
+  line-height: 1.4;
+}
+
+.commandPulseAction small {
+  color: rgba(226, 232, 240, 0.68);
+  font-size: 8px;
+}
+
+.commandActivityPanel {
+  margin-top: 14px;
+  padding: 22px;
+}
+
+.commandActivityHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.commandActivityHeader p,
+.commandActivityHeader h3,
+.commandActivityHeader span {
+  margin: 0;
+}
+
+.commandActivityMeta {
+  display: grid;
+  gap: 7px;
+  text-align: right;
+}
+
+.commandActivityMeta strong {
+  color: #4b5d75;
+  font-size: 9px;
+}
+
+.commandActivityMeta a {
+  color: #167c69;
+  font-size: 9px;
+  font-weight: 900;
+  text-decoration: none;
+}
+
+.commandActivityLoading {
+  display: grid;
+  gap: 9px;
+  margin-top: 18px;
+}
+
+.commandActivityLoading span {
+  height: 55px;
+  border-radius: 13px;
+  background: linear-gradient(90deg, #eef2f6 25%, #f9fbfd 50%, #eef2f6 75%);
+  background-size: 200% 100%;
+  animation: commandLoad 1.25s linear infinite;
+}
+
+@keyframes commandLoad {
+  to { background-position: -200% 0; }
+}
+
+.commandActivityEmpty {
+  min-height: 150px;
+  margin-top: 17px;
+  display: grid;
+  grid-template-columns: 170px minmax(0, 1fr) auto;
+  gap: 22px;
+  align-items: center;
+  border: 1px dashed #cad7e4;
+  border-radius: 19px;
+  padding: 22px;
+  background:
+    radial-gradient(circle at 0 50%, rgba(72, 215, 181, 0.1), transparent 16rem),
+    #f9fbfd;
+}
+
+.commandEmptyVisual {
+  position: relative;
+  height: 112px;
+}
+
+.commandEmptyVisual span {
+  position: absolute;
+  width: 62px;
+  height: 62px;
+  display: grid;
+  place-items: center;
+  border: 1px solid #cbd9e5;
+  border-radius: 18px;
+  background: white;
+  color: #167c69;
+  font-size: 11px;
+  font-weight: 950;
+  box-shadow: 0 12px 25px rgba(15, 23, 42, 0.08);
+}
+
+.commandEmptyVisual span:nth-child(1) {
+  left: 2px;
+  top: 27px;
+}
+
+.commandEmptyVisual span:nth-child(2) {
+  left: 53px;
+  top: 4px;
+  z-index: 2;
+  border-color: #99d7c8;
+  background: #ebfaf5;
+}
+
+.commandEmptyVisual span:nth-child(3) {
+  left: 105px;
+  top: 35px;
+}
+
+.commandActivityEmpty > div:nth-child(2) p {
+  margin: 0;
+  color: #167c69;
+  font-size: 8px;
+  font-weight: 950;
+  letter-spacing: 0.1em;
+}
+
+.commandActivityEmpty h4 {
+  margin: 7px 0 0;
+  color: #172033;
+  font-size: 19px;
+  line-height: 1.2;
+  letter-spacing: -0.035em;
+}
+
+.commandActivityEmpty > div:nth-child(2) > span {
+  display: block;
+  margin-top: 8px;
+  color: #718096;
+  font-size: 9px;
+  line-height: 1.6;
+}
+
+.commandEmptyActions {
+  display: grid;
+  gap: 8px;
+}
+
+.commandEmptyActions a,
+.commandEmptyActions button {
+  min-height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  padding: 0 13px;
+  font: inherit;
+  font-size: 9px;
+  font-weight: 900;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.commandEmptyActions a {
+  border: 1px solid #0d1a2b;
+  background: #0d1a2b;
+  color: white;
+}
+
+.commandEmptyActions button {
+  border: 1px solid #ccd8e4;
+  background: white;
+  color: #26364d;
+}
+
+.commandOrderList {
+  display: grid;
+  margin-top: 16px;
+  border: 1px solid #e1e7ef;
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+.commandOrderRow {
+  min-width: 0;
+  display: grid;
+  grid-template-columns: 130px minmax(170px, 1fr) minmax(160px, 0.8fr) 120px 20px;
+  gap: 12px;
+  align-items: center;
+  padding: 13px 14px;
+  border-top: 1px solid #edf1f5;
+  color: inherit;
+  text-decoration: none;
+  transition: 140ms ease;
+}
+
+.commandOrderRow:first-child {
+  border-top: 0;
+}
+
+.commandOrderRow:hover {
+  background: #f8fbfa;
+}
+
+.commandOrderNumber {
+  color: #167c69;
+  font-size: 9px;
+  font-weight: 950;
+}
+
+.commandOrderCustomer {
+  min-width: 0;
+  display: grid;
+  gap: 3px;
+}
+
+.commandOrderCustomer strong,
+.commandOrderTotal {
+  color: #24344c;
+  font-size: 10px;
+}
+
+.commandOrderCustomer small {
+  color: #98a2b3;
+  font-size: 8px;
+}
+
+.commandOrderStatus {
+  width: max-content;
+  border-radius: 999px;
+  padding: 6px 9px;
+  background: #eef7f4;
+  color: #167c69;
+  font-size: 8px;
+  font-weight: 900;
+}
+
+.commandOrderTotal {
+  text-align: right;
+}
+
+.commandOrderArrow {
+  color: #9aa6b6;
+  text-align: right;
+}
+
+@media (max-width: 1220px) {
+  .commandHero {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .commandHeroControls {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .commandMetricGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .commandMainGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .commandPulseList {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0 18px;
+  }
+}
+
+@media (max-width: 880px) {
+  .commandContent {
+    padding: 18px;
+  }
+
+  .commandHeroControls {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .commandStoreSwitcher {
+    grid-column: 1 / -1;
+    width: 100%;
+  }
+
+  .commandSecondaryButton,
+  .commandPrimaryButton {
+    width: 100%;
+  }
+
+  .commandActivityEmpty {
+    grid-template-columns: 130px minmax(0, 1fr);
+  }
+
+  .commandEmptyActions {
+    grid-column: 1 / -1;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .commandOrderRow {
+    grid-template-columns: 100px minmax(150px, 1fr) 120px 90px 16px;
+  }
+}
+
+@media (max-width: 650px) {
+  .commandContent {
+    padding: 14px;
+  }
+
+  .commandHero {
+    padding: 19px;
+  }
+
+  .commandIdentity {
+    align-items: flex-start;
+  }
+
+  .commandLogo {
+    width: 56px;
+    height: 56px;
+    flex-basis: 56px;
+    border-radius: 16px;
+  }
+
+  .commandIdentityCopy h2 {
+    font-size: 29px;
+  }
+
+  .commandHeroControls,
+  .commandMetricGrid,
+  .commandPulseList,
+  .commandEmptyActions {
+    grid-template-columns: 1fr;
+  }
+
+  .commandMetricCard {
+    grid-template-columns: 40px minmax(0, 1fr) auto;
+    align-items: center;
+  }
+
+  .commandMetricCard > a {
+    grid-column: auto;
+    margin: 0;
+  }
+
+  .commandPanelHeader {
+    align-items: flex-start;
+  }
+
+  .commandProgressRing {
+    width: 78px;
+    height: 78px;
+    flex-basis: 78px;
+  }
+
+  .commandProgressRing > div {
+    width: 60px;
+    height: 60px;
+  }
+
+  .commandTaskRow {
+    grid-template-columns: 28px minmax(0, 1fr);
+  }
+
+  .commandTaskAction {
+    grid-column: 2;
+    max-width: none;
+    text-align: left;
+  }
+
+  .commandActivityHeader {
+    flex-direction: column;
+  }
+
+  .commandActivityMeta {
+    text-align: left;
+  }
+
+  .commandActivityEmpty {
+    grid-template-columns: 1fr;
+    text-align: center;
+  }
+
+  .commandEmptyVisual {
+    width: 170px;
+    margin: 0 auto;
+  }
+
+  .commandOrderList {
+    overflow-x: auto;
+  }
+
+  .commandOrderRow {
+    min-width: 680px;
+  }
+}
+
+@media (max-width: 420px) {
+  .commandIdentity {
+    display: grid;
+    grid-template-columns: 56px minmax(0, 1fr);
+  }
+
+  .commandEyebrowRow {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .commandLinkState {
+    width: 100%;
+    margin: 5px 0 0;
+    border-left: 0;
+    padding-left: 0;
+  }
+
+  .commandMetricCard {
+    grid-template-columns: 38px minmax(0, 1fr);
+  }
+
+  .commandMetricCard > a {
+    grid-column: 1 / -1;
+  }
+}

@@ -1,8 +1,17 @@
 "use client";
 
-import { FormEvent, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  CSSProperties,
+  FormEvent,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import type { Session } from "@supabase/supabase-js";
 import { supabase } from "@/lib/supabaseBrowser";
+import StorefrontPreviewModal from "./components/StorefrontPreviewModal";
 import styles from "./dashboard.module.css";
 
 type StoreContext = {
@@ -33,6 +42,29 @@ type ContextResult = {
 type StorefrontSummary = {
   id: string;
   slug: string;
+  display_name?: string | null;
+  display_name_ar?: string | null;
+  tagline?: string | null;
+  tagline_ar?: string | null;
+  logo_url?: string | null;
+  hero_image_url?: string | null;
+  business_phone?: string | null;
+  whatsapp_number?: string | null;
+  public_email?: string | null;
+  address_text?: string | null;
+  address_text_ar?: string | null;
+  about_text?: string | null;
+  about_text_ar?: string | null;
+  primary_color?: string | null;
+  accent_color?: string | null;
+  background_color?: string | null;
+  delivery_fee?: number | string | null;
+  minimum_order?: number | string | null;
+  delivery_radius_km?: number | string | null;
+  estimated_delivery_minutes?: number | string | null;
+  order_submission_mode?: string | null;
+  cash_on_delivery_enabled?: boolean | null;
+  cliq_enabled?: boolean | null;
   storefront_status: string;
   is_accepting_orders: boolean;
   activation_status?: string | null;
@@ -40,7 +72,7 @@ type StorefrontSummary = {
   activation_expires_at?: string | null;
 };
 
-type RecentOrder = {
+type DirectOrder = {
   id: string;
   order_number: string | null;
   customer_name: string;
@@ -49,9 +81,65 @@ type RecentOrder = {
   created_at: string;
 };
 
+type SetupTask = {
+  id: string;
+  title: string;
+  detail: string;
+  href: string;
+  action: string;
+  complete: boolean;
+};
+
+const orderStatusLabels: Record<string, string> = {
+  pending: "Pending / قيد الانتظار",
+  accepted: "Accepted / مقبول",
+  preparing: "Preparing / قيد التجهيز",
+  ready_for_driver: "Ready for driver / جاهز للسائق",
+  out_for_delivery: "Out for delivery / في الطريق",
+  delivered: "Delivered / تم التوصيل",
+  cancelled: "Cancelled / ملغي",
+};
+
 function money(value: number | string | null | undefined) {
   const amount = Number(value ?? 0);
   return `${Number.isFinite(amount) ? amount.toFixed(2) : "0.00"} JOD`;
+}
+
+function isToday(value: string) {
+  const date = new Date(value);
+  const now = new Date();
+  return (
+    date.getFullYear() === now.getFullYear() &&
+    date.getMonth() === now.getMonth() &&
+    date.getDate() === now.getDate()
+  );
+}
+
+function activationLabel(value: string | null | undefined) {
+  const labels: Record<string, string> = {
+    free_draft: "Free Draft / مسودة مجانية",
+    payment_review: "Payment Review / مراجعة الدفع",
+    pending_review: "Payment Review / مراجعة الدفع",
+    active: "Live / مباشر",
+    suspended: "Suspended / موقوف",
+    expired: "Expired / منتهي",
+    rejected: "Payment Rejected / الدفع مرفوض",
+  };
+  return labels[value || "free_draft"] || "Free Draft / مسودة مجانية";
+}
+
+function planLabel(value: string | null | undefined) {
+  const labels: Record<string, string> = {
+    monthly: "Monthly / شهري",
+    six_months: "6 Months / 6 أشهر",
+    annual: "12 Months / 12 شهر",
+    premium_annual: "Premium Annual / سنوي مميز",
+  };
+  return value ? labels[value] || value.replace(/_/g, " ") : "No plan selected / لم يتم اختيار خطة";
+}
+
+function orderStatusLabel(value: string) {
+  return orderStatusLabels[value] || value.replace(/_/g, " ");
 }
 
 export default function DarikDirectOverviewPage() {
@@ -60,11 +148,17 @@ export default function DarikDirectOverviewPage() {
   const [context, setContext] = useState<ContextResult | null>(null);
   const [selectedRetailerId, setSelectedRetailerId] = useState("");
   const [storefront, setStorefront] = useState<StorefrontSummary | null>(null);
-  const [recentOrders, setRecentOrders] = useState<RecentOrder[]>([]);
+  const [recentOrders, setRecentOrders] = useState<DirectOrder[]>([]);
   const [productCount, setProductCount] = useState(0);
+  const [categoryCount, setCategoryCount] = useState(0);
   const [directOrderCount, setDirectOrderCount] = useState(0);
   const [directRevenue, setDirectRevenue] = useState(0);
+  const [todayOrderCount, setTodayOrderCount] = useState(0);
+  const [todayRevenue, setTodayRevenue] = useState(0);
+  const [openOrderCount, setOpenOrderCount] = useState(0);
   const [loadingContext, setLoadingContext] = useState(false);
+  const [loadingSummary, setLoadingSummary] = useState(false);
+  const [previewOpen, setPreviewOpen] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [message, setMessage] = useState("");
@@ -72,25 +166,32 @@ export default function DarikDirectOverviewPage() {
   const authUserIdRef = useRef<string | null>(null);
 
   const selectedStore = useMemo(
-    () => context?.stores.find((store) => store.retailer_id === selectedRetailerId) ?? null,
-    [context, selectedRetailerId]
+    () =>
+      context?.stores.find((store) => store.retailer_id === selectedRetailerId) ??
+      null,
+    [context, selectedRetailerId],
   );
 
   const loadContext = useCallback(async () => {
     setLoadingContext(true);
+    setError("");
+
     const result = await supabase.rpc("darik_direct_get_my_context");
+
     if (result.error) {
       setError(result.error.message);
       setLoadingContext(false);
       return;
     }
+
     const nextContext = result.data as ContextResult;
     const stores = Array.isArray(nextContext?.stores) ? nextContext.stores : [];
+
     setContext({ ...nextContext, stores });
     setSelectedRetailerId((current) =>
       current && stores.some((store) => store.retailer_id === current)
         ? current
-        : stores[0]?.retailer_id ?? ""
+        : stores[0]?.retailer_id ?? "",
     );
     setLoadingContext(false);
   }, []);
@@ -101,20 +202,29 @@ export default function DarikDirectOverviewPage() {
       setSession(data.session);
       setAuthReady(true);
     });
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, nextSession) => {
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((event, nextSession) => {
       const previousUserId = authUserIdRef.current;
       const nextUserId = nextSession?.user.id ?? null;
-      const accountChanged = Boolean(previousUserId && nextUserId && previousUserId !== nextUserId);
+      const accountChanged = Boolean(
+        previousUserId && nextUserId && previousUserId !== nextUserId,
+      );
+
       authUserIdRef.current = nextUserId;
       setSession(nextSession);
       setAuthReady(true);
+
       if (event === "SIGNED_OUT" || !nextSession || accountChanged) {
         setContext(null);
         setSelectedRetailerId("");
         setStorefront(null);
         setRecentOrders([]);
+        setPreviewOpen(false);
       }
     });
+
     return () => subscription.unsubscribe();
   }, []);
 
@@ -123,38 +233,219 @@ export default function DarikDirectOverviewPage() {
   }, [session?.user.id, loadContext]);
 
   useEffect(() => {
-    if (!selectedStore) return;
-    let cancelled = false;
-    async function loadSummary() {
-      setError("");
-      const [storefrontResult, productResult, orderResult, recentResult] = await Promise.all([
-        supabase.from("retailer_storefronts").select("id,slug,storefront_status,is_accepting_orders,activation_status,activation_plan,activation_expires_at").eq("retailer_id", selectedStore.retailer_id).maybeSingle(),
-        supabase.from("products").select("id", { count: "exact", head: true }).eq("retailer_id", selectedStore.retailer_id).neq("direct_product_status", "archived"),
-        supabase.from("orders").select("id,total", { count: "exact" }).eq("sales_channel", "direct_storefront").eq("storefront_retailer_id", selectedStore.retailer_id),
-        supabase.from("orders").select("id,order_number,customer_name,total,order_status,created_at").eq("sales_channel", "direct_storefront").eq("storefront_retailer_id", selectedStore.retailer_id).order("created_at", { ascending: false }).limit(5),
-      ]);
-      if (cancelled) return;
-      if (storefrontResult.error) setError(storefrontResult.error.message);
-      else setStorefront((storefrontResult.data as StorefrontSummary | null) ?? null);
-      setProductCount(productResult.count ?? 0);
-      if (!orderResult.error) {
-        const rows = (orderResult.data ?? []) as unknown as Array<{ total: number | string }>;
-        setDirectOrderCount(orderResult.count ?? rows.length);
-        setDirectRevenue(rows.reduce((sum, row) => sum + Number(row.total ?? 0), 0));
-      }
-      if (!recentResult.error) setRecentOrders((recentResult.data ?? []) as unknown as RecentOrder[]);
+    if (!selectedStore) {
+      setStorefront(null);
+      return;
     }
+
+    let cancelled = false;
+
+    async function loadSummary() {
+      setLoadingSummary(true);
+      setError("");
+
+      const [
+        storefrontResult,
+        productResult,
+        categoryResult,
+        orderResult,
+        recentResult,
+      ] = await Promise.all([
+        supabase
+          .from("retailer_storefronts")
+          .select("*")
+          .eq("retailer_id", selectedStore.retailer_id)
+          .maybeSingle(),
+        supabase
+          .from("products")
+          .select("id", { count: "exact", head: true })
+          .eq("retailer_id", selectedStore.retailer_id)
+          .neq("direct_product_status", "archived"),
+        supabase
+          .from("retailer_store_categories")
+          .select("id", { count: "exact", head: true })
+          .eq("retailer_id", selectedStore.retailer_id)
+          .neq("category_status", "archived"),
+        supabase
+          .from("orders")
+          .select("id,order_number,customer_name,total,order_status,created_at", {
+            count: "exact",
+          })
+          .eq("sales_channel", "direct_storefront")
+          .eq("storefront_retailer_id", selectedStore.retailer_id),
+        supabase
+          .from("orders")
+          .select("id,order_number,customer_name,total,order_status,created_at")
+          .eq("sales_channel", "direct_storefront")
+          .eq("storefront_retailer_id", selectedStore.retailer_id)
+          .order("created_at", { ascending: false })
+          .limit(5),
+      ]);
+
+      if (cancelled) return;
+
+      if (storefrontResult.error) {
+        setError(storefrontResult.error.message);
+        setStorefront(null);
+      } else {
+        setStorefront(
+          (storefrontResult.data as StorefrontSummary | null) ?? null,
+        );
+      }
+
+      if (productResult.error) setError(productResult.error.message);
+      if (categoryResult.error) setError(categoryResult.error.message);
+      if (orderResult.error) setError(orderResult.error.message);
+      if (recentResult.error) setError(recentResult.error.message);
+
+      setProductCount(productResult.count ?? 0);
+      setCategoryCount(categoryResult.count ?? 0);
+
+      const rows = (orderResult.data ?? []) as DirectOrder[];
+      const nonCancelled = rows.filter(
+        (order) => order.order_status !== "cancelled",
+      );
+      const todayRows = nonCancelled.filter((order) => isToday(order.created_at));
+
+      setDirectOrderCount(orderResult.count ?? rows.length);
+      setDirectRevenue(
+        nonCancelled.reduce(
+          (sum, order) => sum + Number(order.total ?? 0),
+          0,
+        ),
+      );
+      setTodayOrderCount(todayRows.length);
+      setTodayRevenue(
+        todayRows.reduce((sum, order) => sum + Number(order.total ?? 0), 0),
+      );
+      setOpenOrderCount(
+        rows.filter(
+          (order) =>
+            !["delivered", "cancelled"].includes(order.order_status),
+        ).length,
+      );
+      setRecentOrders((recentResult.data ?? []) as DirectOrder[]);
+      setLoadingSummary(false);
+    }
+
     loadSummary();
-    return () => { cancelled = true; };
+
+    return () => {
+      cancelled = true;
+    };
   }, [selectedStore]);
+
+  const activationStatus =
+    storefront?.activation_status || selectedStore?.activation_status || "free_draft";
+  const isLive = activationStatus === "active";
+
+  const setupTasks = useMemo<SetupTask[]>(() => {
+    const paymentReady = Boolean(
+      storefront?.cash_on_delivery_enabled || storefront?.cliq_enabled,
+    );
+
+    return [
+      {
+        id: "identity",
+        title: "Store identity / هوية المتجر",
+        detail: "Name, permanent link and public information / الاسم والرابط والمعلومات العامة",
+        href: "/store-dashboard/storefront",
+        action: "Review profile / مراجعة الملف",
+        complete: Boolean(
+          storefront?.slug &&
+            (storefront?.display_name || selectedStore?.business_name),
+        ),
+      },
+      {
+        id: "branding",
+        title: "Logo and branding / الشعار والهوية البصرية",
+        detail: "Add a logo and a clear storefront presentation / أضف شعاراً ومظهراً واضحاً للمتجر",
+        href: "/store-dashboard/storefront",
+        action: "Add branding / إضافة الهوية",
+        complete: Boolean(storefront?.logo_url),
+      },
+      {
+        id: "categories",
+        title: "Catalog structure / هيكلة الكتالوج",
+        detail: "Create at least one customer-facing category / أنشئ فئة واحدة على الأقل",
+        href: "/store-dashboard/categories",
+        action: "Create category / إنشاء فئة",
+        complete: categoryCount > 0,
+      },
+      {
+        id: "products",
+        title: "Products / المنتجات",
+        detail: "Add at least one priced product customers can see / أضف منتجاً مسعّراً يمكن للعملاء رؤيته",
+        href: "/store-dashboard/products",
+        action: "Add product / إضافة منتج",
+        complete: productCount > 0,
+      },
+      {
+        id: "operations",
+        title: "Ordering and payments / الطلب والدفع",
+        detail: "Choose an ordering method and customer payment option / اختر طريقة الطلب والدفع للعملاء",
+        href: "/store-dashboard/storefront",
+        action: "Configure orders / إعداد الطلبات",
+        complete: Boolean(storefront?.order_submission_mode && paymentReady),
+      },
+      {
+        id: "activation",
+        title: "Store activation / تفعيل المتجر",
+        detail: "Submit your plan and payment proof for Darik approval / أرسل الخطة وإثبات الدفع للموافقة",
+        href: "/store-dashboard/activation",
+        action: isLive ? "View plan / عرض الخطة" : "Go live / تفعيل المتجر",
+        complete: isLive,
+      },
+    ];
+  }, [categoryCount, isLive, productCount, selectedStore, storefront]);
+
+  const completedSetupTasks = setupTasks.filter((task) => task.complete).length;
+  const setupProgress = Math.round(
+    (completedSetupTasks / setupTasks.length) * 100,
+  );
+  const incompleteTasks = setupTasks.filter((task) => !task.complete);
+  const nextTask = incompleteTasks[0] ?? setupTasks[setupTasks.length - 1];
+
+  const progressStyle = {
+    "--command-progress": `${setupProgress * 3.6}deg`,
+  } as CSSProperties;
+
+  const previewForm = {
+    displayName:
+      storefront?.display_name || selectedStore?.business_name || "Your store",
+    displayNameAr: storefront?.display_name_ar || "",
+    tagline: storefront?.tagline || storefront?.tagline_ar || "",
+    taglineAr: storefront?.tagline_ar || "",
+    logoUrl: storefront?.logo_url || "",
+    heroImageUrl: storefront?.hero_image_url || "",
+    primaryColor: storefront?.primary_color || "#111827",
+    accentColor: storefront?.accent_color || "#2563eb",
+    backgroundColor: storefront?.background_color || "#f8fafc",
+    deliveryFee: String(storefront?.delivery_fee ?? "0"),
+    minimumOrder: String(storefront?.minimum_order ?? "0"),
+    estimatedDeliveryMinutes: String(
+      storefront?.estimated_delivery_minutes ?? "",
+    ),
+    phone: storefront?.business_phone || "",
+    whatsapp: storefront?.whatsapp_number || "",
+    addressText: storefront?.address_text || storefront?.address_text_ar || "",
+    addressTextAr: storefront?.address_text_ar || "",
+    aboutText: storefront?.about_text || storefront?.about_text_ar || "",
+    aboutTextAr: storefront?.about_text_ar || "",
+  };
 
   async function signIn(event: FormEvent) {
     event.preventDefault();
     setError("");
     setMessage("");
-    const result = await supabase.auth.signInWithPassword({ email: email.trim(), password });
+
+    const result = await supabase.auth.signInWithPassword({
+      email: email.trim(),
+      password,
+    });
+
     if (result.error) setError(result.error.message);
-    else setMessage("Signed in successfully.");
+    else setMessage("Signed in successfully / تم تسجيل الدخول بنجاح");
   }
 
   async function signOut() {
@@ -162,94 +453,425 @@ export default function DarikDirectOverviewPage() {
   }
 
   if (!authReady) {
-    return <main className={styles.centerPage}><div className={styles.spinner} /><h1>Loading Darik Direct…</h1></main>;
+    return (
+      <main className={styles.centerPage}>
+        <div className={styles.spinner} />
+        <h1>Loading Darik Direct…</h1>
+      </main>
+    );
   }
 
   if (!session) {
     return (
       <main className={styles.loginPage}>
         <section className={styles.loginCard}>
-          <div className={styles.loginBrand}><span>Darik Direct</span><h1>Store dashboard</h1><p>Sign in using the email connected to your Darik retailer account.</p></div>
+          <div className={styles.loginBrand}>
+            <span>Darik Direct</span>
+            <h1>Store dashboard / لوحة المتجر</h1>
+            <p>
+              Sign in using the email connected to your Darik retailer account.
+              <br />
+              سجل الدخول بالبريد الإلكتروني المرتبط بحساب متجرك.
+            </p>
+          </div>
           <form onSubmit={signIn} className={styles.loginForm}>
-            <label>Email<input type="email" value={email} onChange={(event) => setEmail(event.target.value)} required /></label>
-            <label>Password<input type="password" value={password} onChange={(event) => setPassword(event.target.value)} required /></label>
+            <label>
+              Email / البريد الإلكتروني
+              <input
+                type="email"
+                value={email}
+                onChange={(event) => setEmail(event.target.value)}
+                required
+              />
+            </label>
+            <label>
+              Password / كلمة المرور
+              <input
+                type="password"
+                value={password}
+                onChange={(event) => setPassword(event.target.value)}
+                required
+              />
+            </label>
             {error ? <p className={styles.error}>{error}</p> : null}
             {message ? <p className={styles.success}>{message}</p> : null}
-            <button type="submit">Sign in</button>
+            <button type="submit">Sign in / تسجيل الدخول</button>
           </form>
-          <a className={styles.marketplaceLink} href="/store-signup">Create a store for free</a>
-          <a className={styles.marketplaceLink} href="/">Return to Darik Marketplace</a>
+          <a className={styles.marketplaceLink} href="/store-signup">
+            Create a store for free / أنشئ متجراً مجاناً
+          </a>
+          <a className={styles.marketplaceLink} href="/">
+            Return to Darik Marketplace / العودة إلى داريك
+          </a>
         </section>
       </main>
     );
   }
 
   if (loadingContext) {
-    return <main className={styles.centerPage}><div className={styles.spinner} /><h1>Opening your dashboard…</h1></main>;
+    return (
+      <main className={styles.centerPage}>
+        <div className={styles.spinner} />
+        <h1>Opening your command center…</h1>
+      </main>
+    );
   }
 
   return (
     <main className={styles.dashboardPage}>
       <aside className={styles.sidebar}>
-        <div><p className={styles.brandEyebrow}>Darik</p><h1>Direct</h1></div>
+        <div>
+          <p className={styles.brandEyebrow}>Darik</p>
+          <h1>Direct</h1>
+        </div>
         <nav>
-          <a className={styles.activeNav} href="/store-dashboard">Overview</a>
+          <a className={styles.activeNav} href="/store-dashboard">
+            Overview
+          </a>
           <a href="/store-dashboard/storefront">Storefront</a>
           <a href="/store-dashboard/orders">Orders</a>
           <a href="/store-dashboard/products">Products</a>
           <a href="/store-dashboard/categories">Categories</a>
           <a href="/store-dashboard/activation">Go live</a>
         </nav>
-        <div className={styles.sidebarFooter}><span>{session.user.email}</span><button onClick={signOut}>Sign out</button></div>
+        <div className={styles.sidebarFooter}>
+          <span>{session.user.email}</span>
+          <button onClick={signOut}>Sign out</button>
+        </div>
       </aside>
 
-      <section className={styles.dashboardContent}>
-        <header className={styles.topbar}>
-          <div><p>Store owner dashboard</p><h2>{selectedStore?.business_name || "Darik retailer"}</h2></div>
-          {context && context.stores.length > 1 ? (
-            <select value={selectedRetailerId} onChange={(event) => setSelectedRetailerId(event.target.value)}>
-              {context.stores.map((store) => <option key={store.retailer_id} value={store.retailer_id}>{store.business_name}</option>)}
-            </select>
-          ) : null}
-        </header>
-
+      <section className={`${styles.dashboardContent} ${styles.commandContent}`}>
         {error ? <p className={styles.errorBanner}>{error}</p> : null}
         {message ? <p className={styles.successBanner}>{message}</p> : null}
 
         {!selectedStore ? (
-          <section className={styles.emptyState}><span>No retailer membership found</span><h2>This login is not connected to a Darik retailer.</h2></section>
+          <section className={styles.emptyState}>
+            <span>No retailer membership found</span>
+            <h2>This login is not connected to a Darik retailer.</h2>
+            <p>
+              Contact Darik support or create a new store account.
+            </p>
+          </section>
         ) : (
           <>
-            <section className={styles.metrics}>
-              <article><span>Products</span><strong>{productCount}</strong><p>Direct catalog items</p></article>
-              <article><span>Direct orders</span><strong>{directOrderCount}</strong><p>Storefront channel only</p></article>
-              <article><span>Total direct value</span><strong>{money(directRevenue)}</strong><p>All direct orders</p></article>
-              <article><span>Activation</span><strong>{(storefront?.activation_status || selectedStore.activation_status || "free_draft").replace(/_/g, " ")}</strong><p>{storefront?.activation_status === "active" ? "Public store is live" : "Public page shows Coming Soon"}</p></article>
-            </section>
-
-            <section className={styles.panel}>
-              <div className={styles.panelHeader}><div><p>Manage your store</p><h2>Choose where to work</h2></div></div>
-              <div className={styles.quickActionGrid}>
-                <a className={styles.quickActionCard} href="/store-dashboard/storefront"><span>01</span><strong>Storefront</strong><p>Branding, store details, delivery settings, hours and private preview.</p></a>
-                <a className={styles.quickActionCard} href="/store-dashboard/orders"><span>02</span><strong>Orders</strong><p>Review and manage Darik Direct customer orders.</p></a>
-                <a className={styles.quickActionCard} href="/store-dashboard/products"><span>03</span><strong>Products</strong><p>Add products, prices, photos and optional inventory.</p></a>
-                <a className={styles.quickActionCard} href="/store-dashboard/categories"><span>04</span><strong>Categories</strong><p>Create this store’s own English and Arabic category structure.</p></a>
-                <a className={styles.quickActionCard} href="/store-dashboard/activation"><span>05</span><strong>Go live</strong><p>Choose a plan, submit CliQ proof, and wait for Darik approval.</p></a>
+            <header className={styles.commandHero}>
+              <div className={styles.commandIdentity}>
+                <div className={styles.commandLogo}>
+                  {storefront?.logo_url ? (
+                    <img src={storefront.logo_url} alt="Store logo" />
+                  ) : (
+                    (selectedStore.business_name || "D").slice(0, 1).toUpperCase()
+                  )}
+                </div>
+                <div className={styles.commandIdentityCopy}>
+                  <div className={styles.commandEyebrowRow}>
+                    <span>Store command center / مركز إدارة المتجر</span>
+                    <span
+                      className={`${styles.commandStatusBadge} ${
+                        isLive
+                          ? styles.commandStatusLive
+                          : styles.commandStatusDraft
+                      }`}
+                    >
+                      {activationLabel(activationStatus)}
+                    </span>
+                  </div>
+                  <h2>{selectedStore.business_name}</h2>
+                  <div className={styles.commandLinkRow}>
+                    <span>getdarik.com/store/</span>
+                    <strong>{storefront?.slug || selectedStore.storefront_slug || "store"}</strong>
+                    <span className={styles.commandLinkState}>
+                      {isLive
+                        ? "Public / منشور"
+                        : "Coming Soon / قريباً"}
+                    </span>
+                  </div>
+                </div>
               </div>
+
+              <div className={styles.commandHeroControls}>
+                {context && context.stores.length > 1 ? (
+                  <label className={styles.commandStoreSwitcher}>
+                    Store / المتجر
+                    <select
+                      value={selectedRetailerId}
+                      onChange={(event) =>
+                        setSelectedRetailerId(event.target.value)
+                      }
+                    >
+                      {context.stores.map((store) => (
+                        <option key={store.retailer_id} value={store.retailer_id}>
+                          {store.business_name}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                ) : null}
+                <button
+                  type="button"
+                  className={styles.commandSecondaryButton}
+                  onClick={() => setPreviewOpen(true)}
+                  disabled={!storefront}
+                >
+                  Preview store / معاينة المتجر
+                </button>
+                <a
+                  className={styles.commandSecondaryButton}
+                  href="/store-dashboard/products"
+                >
+                  Add product / إضافة منتج
+                </a>
+                <a
+                  className={styles.commandPrimaryButton}
+                  href={
+                    isLive && storefront?.slug
+                      ? `/store/${storefront.slug}`
+                      : "/store-dashboard/activation"
+                  }
+                  target={isLive && storefront?.slug ? "_blank" : undefined}
+                  rel={isLive && storefront?.slug ? "noreferrer" : undefined}
+                >
+                  {isLive
+                    ? "Open live store / فتح المتجر"
+                    : "Go live / تفعيل المتجر"}
+                </a>
+              </div>
+            </header>
+
+            <section className={styles.commandMetricGrid} aria-label="Store performance summary">
+              <article className={styles.commandMetricCard}>
+                <div className={styles.commandMetricIcon}>!</div>
+                <div>
+                  <span>Orders requiring action / طلبات تحتاج إجراء</span>
+                  <strong>{loadingSummary ? "—" : openOrderCount}</strong>
+                  <p>
+                    {openOrderCount > 0
+                      ? "Open the orders workspace now / افتح صفحة الطلبات الآن"
+                      : "Nothing waiting right now / لا توجد طلبات معلقة"}
+                  </p>
+                </div>
+                <a href="/store-dashboard/orders">Manage / إدارة</a>
+              </article>
+
+              <article className={styles.commandMetricCard}>
+                <div className={styles.commandMetricIcon}>↗</div>
+                <div>
+                  <span>Today&apos;s sales / مبيعات اليوم</span>
+                  <strong>{loadingSummary ? "—" : money(todayRevenue)}</strong>
+                  <p>{todayOrderCount} orders today / {todayOrderCount} طلب اليوم</p>
+                </div>
+                <a href="/store-dashboard/orders">Details / التفاصيل</a>
+              </article>
+
+              <article className={styles.commandMetricCard}>
+                <div className={styles.commandMetricIcon}>□</div>
+                <div>
+                  <span>Published catalog / الكتالوج</span>
+                  <strong>{loadingSummary ? "—" : productCount}</strong>
+                  <p>{categoryCount} categories / {categoryCount} فئات</p>
+                </div>
+                <a href="/store-dashboard/products">Catalog / الكتالوج</a>
+              </article>
+
+              <article className={`${styles.commandMetricCard} ${styles.commandMetricAccent}`}>
+                <div className={styles.commandMetricIcon}>✓</div>
+                <div>
+                  <span>Store readiness / جاهزية المتجر</span>
+                  <strong>{loadingSummary ? "—" : `${setupProgress}%`}</strong>
+                  <p>{completedSetupTasks} of {setupTasks.length} complete / اكتمل {completedSetupTasks} من {setupTasks.length}</p>
+                </div>
+                <a href={nextTask.href}>Continue / متابعة</a>
+              </article>
             </section>
 
-            <section className={styles.panel}>
-              <div className={styles.panelHeader}><div><p>Latest activity</p><h2>Recent direct orders</h2></div><a className={styles.catalogButton} href="/store-dashboard/orders">View all orders</a></div>
-              {recentOrders.length === 0 ? <div className={styles.tableEmpty}>No Darik Direct orders yet.</div> : (
-                <div className={styles.orderTable}>
-                  <div className={styles.tableHead}><span>Order</span><span>Customer</span><span>Status</span><span>Total</span></div>
-                  {recentOrders.map((order) => <div className={styles.tableRow} key={order.id}><strong>{order.order_number || order.id.slice(0, 8)}</strong><span>{order.customer_name}</span><span className={styles.statusPill}>{order.order_status}</span><strong>{money(order.total)}</strong></div>)}
+            <section className={styles.commandMainGrid}>
+              <article className={styles.commandReadinessPanel}>
+                <div className={styles.commandPanelHeader}>
+                  <div>
+                    <p>Store readiness / جاهزية المتجر</p>
+                    <h3>Build a store customers trust</h3>
+                    <span>أكمل الأساسيات قبل استقبال الطلبات</span>
+                  </div>
+                  <div className={styles.commandProgressRing} style={progressStyle}>
+                    <div>
+                      <strong>{setupProgress}%</strong>
+                      <span>Complete / مكتمل</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className={styles.commandProgressTrack} aria-label={`${setupProgress}% complete`}>
+                  <span style={{ width: `${setupProgress}%` }} />
+                </div>
+
+                <div className={styles.commandTaskList}>
+                  {setupTasks.map((task) => (
+                    <a
+                      className={`${styles.commandTaskRow} ${
+                        task.complete ? styles.commandTaskComplete : ""
+                      }`}
+                      href={task.href}
+                      key={task.id}
+                    >
+                      <span className={styles.commandTaskState}>
+                        {task.complete ? "✓" : ""}
+                      </span>
+                      <span className={styles.commandTaskCopy}>
+                        <strong>{task.title}</strong>
+                        <small>{task.detail}</small>
+                      </span>
+                      <span className={styles.commandTaskAction}>
+                        {task.complete ? "Complete / مكتمل" : task.action}
+                      </span>
+                    </a>
+                  ))}
+                </div>
+              </article>
+
+              <aside className={styles.commandPulsePanel}>
+                <div className={styles.commandPanelHeaderCompact}>
+                  <div>
+                    <p>Store pulse / حالة المتجر</p>
+                    <h3>Operational snapshot</h3>
+                  </div>
+                  <span className={isLive ? styles.commandPulseLive : styles.commandPulseDraft}>
+                    {isLive ? "LIVE" : "DRAFT"}
+                  </span>
+                </div>
+
+                <div className={styles.commandPulseList}>
+                  <div>
+                    <span>Public page / الصفحة العامة</span>
+                    <strong>{isLive ? "Visible / ظاهرة" : "Coming Soon / قريباً"}</strong>
+                  </div>
+                  <div>
+                    <span>Ordering / استقبال الطلبات</span>
+                    <strong>
+                      {storefront?.is_accepting_orders
+                        ? "Accepting / يستقبل"
+                        : "Paused / متوقف"}
+                    </strong>
+                  </div>
+                  <div>
+                    <span>Customer payments / دفع العملاء</span>
+                    <strong>
+                      {storefront?.cash_on_delivery_enabled && storefront?.cliq_enabled
+                        ? "Cash + CliQ / كاش + كليك"
+                        : storefront?.cliq_enabled
+                          ? "CliQ / كليك"
+                          : storefront?.cash_on_delivery_enabled
+                            ? "Cash / كاش"
+                            : "Not configured / غير معدّ"}
+                    </strong>
+                  </div>
+                  <div>
+                    <span>Delivery radius / نطاق التوصيل</span>
+                    <strong>
+                      {storefront?.delivery_radius_km
+                        ? `${storefront.delivery_radius_km} km`
+                        : "Not set / غير محدد"}
+                    </strong>
+                  </div>
+                  <div>
+                    <span>Activation plan / خطة التفعيل</span>
+                    <strong>{planLabel(storefront?.activation_plan || selectedStore.activation_plan)}</strong>
+                  </div>
+                  <div>
+                    <span>All-time direct sales / إجمالي المبيعات</span>
+                    <strong>{money(directRevenue)}</strong>
+                  </div>
+                </div>
+
+                <a className={styles.commandPulseAction} href={nextTask.href}>
+                  <span>Recommended next step / الخطوة التالية</span>
+                  <strong>{nextTask.title}</strong>
+                  <small>{nextTask.action} →</small>
+                </a>
+              </aside>
+            </section>
+
+            <section className={styles.commandActivityPanel}>
+              <div className={styles.commandActivityHeader}>
+                <div>
+                  <p>Recent activity / آخر النشاطات</p>
+                  <h3>Orders and store activity</h3>
+                  <span>الطلبات وآخر ما يحدث في متجرك</span>
+                </div>
+                <div className={styles.commandActivityMeta}>
+                  <strong>{directOrderCount} total orders / إجمالي الطلبات</strong>
+                  <a href="/store-dashboard/orders">View all orders / عرض الكل</a>
+                </div>
+              </div>
+
+              {loadingSummary ? (
+                <div className={styles.commandActivityLoading}>
+                  <span />
+                  <span />
+                  <span />
+                </div>
+              ) : recentOrders.length === 0 ? (
+                <div className={styles.commandActivityEmpty}>
+                  <div className={styles.commandEmptyVisual}>
+                    <span>01</span>
+                    <span>02</span>
+                    <span>03</span>
+                  </div>
+                  <div>
+                    <p>YOUR STORE IS IN SETUP MODE / متجرك في مرحلة الإعداد</p>
+                    <h4>Your first order starts with a complete storefront.</h4>
+                    <span>
+                      Finish the recommended steps, preview the customer experience,
+                      then activate your store.
+                      <br />
+                      أكمل الخطوات، عاين تجربة العميل، ثم فعّل متجرك.
+                    </span>
+                  </div>
+                  <div className={styles.commandEmptyActions}>
+                    <a href={nextTask.href}>{nextTask.action}</a>
+                    <button type="button" onClick={() => setPreviewOpen(true)}>
+                      Preview store / معاينة المتجر
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <div className={styles.commandOrderList}>
+                  {recentOrders.map((order) => (
+                    <a
+                      className={styles.commandOrderRow}
+                      href="/store-dashboard/orders"
+                      key={order.id}
+                    >
+                      <span className={styles.commandOrderNumber}>
+                        {order.order_number || `#${order.id.slice(0, 8)}`}
+                      </span>
+                      <span className={styles.commandOrderCustomer}>
+                        <strong>{order.customer_name}</strong>
+                        <small>{new Date(order.created_at).toLocaleString()}</small>
+                      </span>
+                      <span className={styles.commandOrderStatus}>
+                        {orderStatusLabel(order.order_status)}
+                      </span>
+                      <strong className={styles.commandOrderTotal}>
+                        {money(order.total)}
+                      </strong>
+                      <span className={styles.commandOrderArrow}>→</span>
+                    </a>
+                  ))}
                 </div>
               )}
             </section>
           </>
         )}
       </section>
+
+      {selectedStore && storefront ? (
+        <StorefrontPreviewModal
+          open={previewOpen}
+          retailerId={selectedStore.retailer_id}
+          form={previewForm}
+          onClose={() => setPreviewOpen(false)}
+        />
+      ) : null}
     </main>
   );
 }
