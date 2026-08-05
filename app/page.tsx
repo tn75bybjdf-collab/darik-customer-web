@@ -1,6 +1,6 @@
 "use client";
 
-// DARIK_DISCOVERY_HOME_025
+// DARIK_DISCOVERY_HOME_026
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import { supabase } from "@/lib/supabaseBrowser";
 import styles from "./home.module.css";
@@ -733,15 +733,14 @@ export default function DarikDiscoveryHome() {
     <main className={styles.page} dir={language === "ar" ? "rtl" : "ltr"}>
       <header className={styles.header}>
         <div className={styles.headerInner}>
-          <a className={styles.brand} href="/" aria-label="Darik home">
-            <span className={styles.brandMark}>D</span>
-            <span className={styles.brandName}>darik</span>
+          <a className={styles.brand} href="/" aria-label="Darik Marketplace home">
+            <img className={styles.brandLogo} src="/darik_logo_final_v3.png" alt="Darik Marketplace" />
           </a>
 
           <nav className={styles.desktopNav} aria-label="Primary navigation">
             <a href="#stores">{t.stores}</a>
-            <a href="#how-it-works">{t.how}</a>
-            <a href="#pricing">{t.pricing}</a>
+            <a href="/how-it-works">{t.how}</a>
+            <a href="/pricing">{t.pricing}</a>
           </nav>
 
           <div className={styles.headerActions}>
@@ -760,8 +759,8 @@ export default function DarikDiscoveryHome() {
         {mobileNavOpen ? (
           <nav className={styles.mobileNav} aria-label="Mobile navigation">
             <a href="#stores" onClick={() => setMobileNavOpen(false)}>{t.stores}</a>
-            <a href="#how-it-works" onClick={() => setMobileNavOpen(false)}>{t.how}</a>
-            <a href="#pricing" onClick={() => setMobileNavOpen(false)}>{t.pricing}</a>
+            <a href="/how-it-works" onClick={() => setMobileNavOpen(false)}>{t.how}</a>
+            <a href="/pricing" onClick={() => setMobileNavOpen(false)}>{t.pricing}</a>
             <a href="/store-dashboard">{t.dashboard}</a>
             <a href="/store-signup">{t.retailerSignup}</a>
           </nav>
@@ -928,31 +927,6 @@ export default function DarikDiscoveryHome() {
         </div>
       </section>
 
-      <section className={styles.howSection} id="how-it-works">
-        <div className={styles.sectionShell}>
-          <div className={styles.centeredHeading}>
-            <span className={styles.sectionKicker}>{t.how}</span>
-            <h2>{t.discovery}</h2>
-            <p>{t.discoveryBody}</p>
-          </div>
-
-          <div className={styles.stepsGrid}>
-            {[
-              { number: "01", icon: "location" as IconName, title: t.stepOne, body: t.stepOneBody },
-              { number: "02", icon: "grid" as IconName, title: t.stepTwo, body: t.stepTwoBody },
-              { number: "03", icon: "shop" as IconName, title: t.stepThree, body: t.stepThreeBody },
-            ].map((step) => (
-              <article className={styles.stepCard} key={step.number}>
-                <span className={styles.stepNumber}>{step.number}</span>
-                <span className={styles.stepIcon}><Icon name={step.icon} size={26} /></span>
-                <h3>{step.title}</h3>
-                <p>{step.body}</p>
-              </article>
-            ))}
-          </div>
-        </div>
-      </section>
-
       <section className={styles.retailerSection}>
         <div className={styles.sectionShell}>
           <div className={styles.retailerPanel}>
@@ -981,47 +955,14 @@ export default function DarikDiscoveryHome() {
         </div>
       </section>
 
-      <section className={styles.pricingSection} id="pricing">
-        <div className={styles.sectionShell}>
-          <div className={styles.centeredHeading}>
-            <span className={styles.sectionKicker}>{t.pricing}</span>
-            <h2>{t.plansTitle}</h2>
-            <p>{t.plansBody}</p>
-          </div>
-
-          <div className={styles.pricingGrid}>
-            {[
-              { name: t.monthly, price: "45", suffix: t.perMonth, badge: "", premium: false },
-              { name: t.sixMonths, price: "210", suffix: t.onePayment, badge: "", premium: false },
-              { name: t.annual, price: "300", suffix: t.onePayment, badge: t.bestValue, premium: false },
-              { name: t.premium, price: "600", suffix: t.onePayment, badge: t.premiumBadge, premium: true },
-            ].map((plan) => (
-              <article className={`${styles.priceCard} ${plan.premium ? styles.priceCardPremium : ""}`} key={plan.name}>
-                {plan.badge ? <span className={styles.planBadge}>{plan.badge}</span> : null}
-                <p>{plan.name}</p>
-                <div className={styles.priceLine}><span>JOD</span><strong>{plan.price}</strong></div>
-                <small>{plan.suffix}</small>
-                <div className={styles.priceDivider} />
-                <ul>
-                  <li><Icon name="check" size={17} />{plan.premium ? t.premiumFeatures : t.basicFeatures}</li>
-                  <li><Icon name="check" size={17} />{language === "ar" ? "ابدأ البناء والمعاينة قبل التفعيل" : "Build and preview before activation"}</li>
-                  <li><Icon name="check" size={17} />{language === "ar" ? "مراجعة وتفعيل آمن من داريك" : "Secure Darik review and activation"}</li>
-                </ul>
-                <a href="/store-signup">{t.choosePlan}<Icon name="arrow" size={18} /></a>
-              </article>
-            ))}
-          </div>
-        </div>
-      </section>
-
       <footer className={styles.footer}>
         <div className={styles.footerInner}>
           <div className={styles.footerBrand}>
-            <a className={styles.brand} href="/"><span className={styles.brandMark}>D</span><span className={styles.brandName}>darik</span></a>
+            <a className={styles.brand} href="/" aria-label="Darik Marketplace home"><img className={styles.brandLogo} src="/darik_logo_final_v3.png" alt="Darik Marketplace" /></a>
             <p>{t.footerBody}</p>
           </div>
           <div className={styles.footerLinks}>
-            <div><strong>{t.platformLinks}</strong><a href="#stores">{t.stores}</a><a href="#how-it-works">{t.how}</a><a href="#pricing">{t.pricing}</a></div>
+            <div><strong>{t.platformLinks}</strong><a href="#stores">{t.stores}</a><a href="/how-it-works">{t.how}</a><a href="/pricing">{t.pricing}</a></div>
             <div><strong>{t.retailerLinks}</strong><a href="/store-signup">{t.retailerSignup}</a><a href="/store-dashboard">{t.dashboard}</a></div>
           </div>
         </div>
