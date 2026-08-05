@@ -27,6 +27,8 @@ type ActivationRequest = {
   sender_name: string;
   request_status: string;
   admin_note: string | null;
+  domain_preferences: string[] | null;
+  assigned_domain: string | null;
   created_at: string;
   reviewed_at: string | null;
 };
@@ -86,6 +88,26 @@ function safeFileName(name: string) {
     .replace(/-+/g, "-");
 }
 
+function normalizeDomain(value: string) {
+  return value
+    .trim()
+    .toLowerCase()
+    .replace(/^https?:\/\//, "")
+    .replace(/^www\./, "")
+    .replace(/\.$/, "");
+}
+
+function isValidDomain(value: string) {
+  const normalized = normalizeDomain(value);
+  return (
+    normalized.length >= 4 &&
+    normalized.length <= 253 &&
+    !normalized.includes("/") &&
+    !normalized.includes(":") &&
+    /^([a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,63}$/.test(normalized)
+  );
+}
+
 function statusLabel(value: string | null | undefined) {
   switch (value || "free_draft") {
     case "active":
@@ -132,6 +154,7 @@ export default function StoreActivationPage() {
   const [receipt, setReceipt] = useState<File | null>(null);
   const [receiptPreview, setReceiptPreview] = useState("");
   const [premiumInfoOpen, setPremiumInfoOpen] = useState(false);
+  const [domainPreferences, setDomainPreferences] = useState(["", "", "", "", ""]);
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
@@ -162,7 +185,7 @@ export default function StoreActivationPage() {
       const requestsResult = await supabase
         .from("retailer_store_activation_requests")
         .select(
-          "id,plan_code,amount_expected_jod,sender_name,request_status,admin_note,created_at,reviewed_at",
+          "id,plan_code,amount_expected_jod,sender_name,request_status,admin_note,domain_preferences,assigned_domain,created_at,reviewed_at",
         )
         .eq("retailer_id", nextStore.retailer_id)
         .order("created_at", { ascending: false });
@@ -253,7 +276,41 @@ export default function StoreActivationPage() {
       return;
     }
 
+    let normalizedDomains: string[] | null = null;
+
+    if (selectedPlan.premium) {
+      normalizedDomains = domainPreferences.map(normalizeDomain);
+
+      if (normalizedDomains.some((value) => !isValidDomain(value))) {
+        setError(
+          "Enter five valid domain names without https://, www, spaces, or page paths. / أدخل خمسة أسماء نطاقات صحيحة من دون https:// أو www أو مسافات أو روابط صفحات.",
+        );
+        return;
+      }
+
+      if (new Set(normalizedDomains).size !== 5) {
+        setError(
+          "All five domain choices must be different. / يجب أن تكون خيارات النطاقات الخمسة مختلفة.",
+        );
+        return;
+      }
+    }
+
     setBusy(true);
+
+    if (selectedPlan.premium && normalizedDomains) {
+      const domainResult = await supabase.rpc("darik_direct_save_premium_domain_preferences", {
+        p_storefront_id: store.storefront_id,
+        p_domain_preferences: normalizedDomains,
+      });
+
+      if (domainResult.error) {
+        setBusy(false);
+        setError(domainResult.error.message);
+        return;
+      }
+    }
+
     const extension = receipt.name.split(".").pop()?.toLowerCase() || "jpg";
     const path = `${store.retailer_id}/${crypto.randomUUID()}-${safeFileName(
       receipt.name.replace(/\.[^.]+$/, ""),
@@ -297,6 +354,7 @@ export default function StoreActivationPage() {
     setSenderName("");
     setCliqReference("");
     setNote("");
+    setDomainPreferences(["", "", "", "", ""]);
     await loadData();
   }
 
@@ -415,11 +473,11 @@ export default function StoreActivationPage() {
                           <div className={styles.premiumInfo} role="note">
                             <strong>What Premium includes / ماذا تشمل الباقة المميزة؟</strong>
                             <p>
-                              Premium includes everything in the annual plan plus the right to connect a custom domain you
-                              own to your Darik store.
+                              Premium includes everything in the annual plan plus one eligible custom domain connected to
+                              your Darik store.
                             </p>
                             <p dir="rtl">
-                              تشمل الباقة المميزة جميع مزايا الخطة السنوية، بالإضافة إلى إمكانية ربط نطاق خاص تملكه بمتجرك
+                              تشمل الباقة المميزة جميع مزايا الخطة السنوية، بالإضافة إلى نطاق خاص مؤهل واحد يتم ربطه بمتجرك
                               على داريك.
                             </p>
                             <div className={styles.domainExample}>
@@ -429,8 +487,8 @@ export default function StoreActivationPage() {
                               <code>fantoushmall.com</code>
                             </div>
                             <small>
-                              Domain registration is not included. Darik connects the domain after approval. / تكلفة شراء
-                              النطاق غير مشمولة، وتقوم داريك بربطه بعد الموافقة.
+                              Darik checks your five choices in order and confirms the first eligible domain that is
+                              available. / تتحقق داريك من خياراتك الخمسة بالترتيب وتؤكد أول نطاق مؤهل ومتاح.
                             </small>
                           </div>
                         ) : null}
@@ -439,6 +497,64 @@ export default function StoreActivationPage() {
                   </div>
                 ))}
               </div>
+
+              {selectedPlan.premium ? (
+                <section className={styles.domainPanel}>
+                  <div className={styles.domainPanelHead}>
+                    <div>
+                      <h3>Choose five domain names / اختر خمسة أسماء نطاقات</h3>
+                      <p>
+                        Enter them from most desired to least desired. Darik will check availability in this order and
+                        assign the first eligible domain available. / أدخلها من الأكثر رغبة إلى الأقل رغبة. ستتحقق داريك
+                        من التوفر بهذا الترتيب وتخصص أول نطاق مؤهل ومتاح.
+                      </p>
+                    </div>
+                    <span>Required for Premium / مطلوب للباقة المميزة</span>
+                  </div>
+
+                  <div className={styles.domainGrid}>
+                    {domainPreferences.map((value, index) => (
+                      <label className={styles.domainLabel} key={index}>
+                        {index + 1}.{" "}
+                        {index === 0
+                          ? "Most desired / الأكثر رغبة"
+                          : index === 4
+                            ? "Least desired / الأقل رغبة"
+                            : `Choice ${index + 1} / الخيار ${index + 1}`}
+                        <input
+                          value={value}
+                          onChange={(event) =>
+                            setDomainPreferences((current) =>
+                              current.map((item, itemIndex) =>
+                                itemIndex === index ? event.target.value : item,
+                              ),
+                            )
+                          }
+                          placeholder="yourdomain.com"
+                          inputMode="url"
+                          autoCapitalize="none"
+                          autoCorrect="off"
+                          spellCheck={false}
+                        />
+                      </label>
+                    ))}
+                  </div>
+
+                  <p className={styles.domainHint}>
+                    Enter only the domain name, without https://, www, or a page path. / أدخل اسم النطاق فقط، من دون
+                    https:// أو www أو رابط صفحة.
+                  </p>
+
+                  <div className={styles.domainTiming} role="note">
+                    <strong>Domain readiness / جاهزية النطاق</strong>
+                    <span>
+                      Your custom domain may take up to 48 hours to become ready after approval. In most cases, it is ready
+                      within a few hours. / قد يستغرق تجهيز النطاق الخاص ما يصل إلى 48 ساعة بعد الموافقة، وفي معظم الحالات
+                      يصبح جاهزًا خلال بضع ساعات.
+                    </span>
+                  </div>
+                </section>
+              ) : null}
             </section>
 
             <section className={styles.panel}>
@@ -536,6 +652,21 @@ export default function StoreActivationPage() {
                       Sent by {request.sender_name} on {new Date(request.created_at).toLocaleString()} / أرسلها{" "}
                       {request.sender_name} بتاريخ {new Date(request.created_at).toLocaleString("ar-JO")}
                     </p>
+                    {request.domain_preferences?.length ? (
+                      <div className={styles.historyDomains}>
+                        <strong>Domain choices / خيارات النطاق</strong>
+                        <ol>
+                          {request.domain_preferences.map((domain) => (
+                            <li key={domain}>{domain}</li>
+                          ))}
+                        </ol>
+                      </div>
+                    ) : null}
+                    {request.assigned_domain ? (
+                      <p>
+                        Assigned domain / النطاق المخصص: <strong>{request.assigned_domain}</strong>
+                      </p>
+                    ) : null}
                     {request.admin_note ? <p>Darik note / ملاحظة داريك: {request.admin_note}</p> : null}
                   </div>
                   <strong>{requestStatusLabel(request.request_status)}</strong>

@@ -234,6 +234,118 @@
   font-weight: 900;
 }
 
+.domainPanel {
+  margin-top: 18px;
+  border: 1px solid #c9ddd2;
+  border-radius: 17px;
+  padding: 18px;
+  background: #f6fbf8;
+}
+
+.domainPanelHead {
+  display: flex;
+  justify-content: space-between;
+  align-items: start;
+  gap: 16px;
+}
+
+.domainPanelHead h3 {
+  margin: 0;
+  font-size: 18px;
+}
+
+.domainPanelHead p {
+  margin: 6px 0 0;
+  color: #5f727d;
+  line-height: 1.5;
+}
+
+.domainPanelHead > span {
+  flex: 0 0 auto;
+  border-radius: 999px;
+  padding: 7px 10px;
+  background: #def3e7;
+  color: #126b43;
+  font-size: 11px;
+  font-weight: 900;
+}
+
+.domainGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.domainLabel {
+  display: grid;
+  gap: 7px;
+  font-size: 13px;
+  font-weight: 850;
+}
+
+.domainLabel input {
+  min-width: 0;
+  border: 1px solid #bfd0c7;
+  border-radius: 12px;
+  padding: 11px 12px;
+  background: white;
+  color: #17232d;
+  font: inherit;
+}
+
+.domainLabel:last-child {
+  grid-column: 1 / -1;
+}
+
+.domainHint {
+  margin: 12px 0 0;
+  color: #637680;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.domainTiming {
+  display: grid;
+  gap: 5px;
+  margin-top: 14px;
+  border-left: 4px solid #178456;
+  border-radius: 12px;
+  padding: 13px 14px;
+  background: white;
+}
+
+.domainTiming strong {
+  color: #126b43;
+}
+
+.domainTiming span {
+  color: #536771;
+  line-height: 1.5;
+}
+
+.historyDomains {
+  margin-top: 9px;
+  border-radius: 10px;
+  padding: 10px 12px;
+  background: #f3f7f5;
+}
+
+.historyDomains > strong {
+  display: block;
+  font-size: 12px;
+}
+
+.historyDomains ol {
+  margin: 6px 0 0;
+  padding-left: 20px;
+}
+
+.historyDomains li {
+  margin-top: 3px;
+  overflow-wrap: anywhere;
+}
+
 .configWarning {
   display: grid;
   gap: 5px;
@@ -453,6 +565,14 @@
   .paymentBox {
     grid-template-columns: 1fr;
   }
+
+  .domainGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .domainLabel:last-child {
+    grid-column: auto;
+  }
 }
 
 @media (max-width: 540px) {
@@ -480,5 +600,13 @@
     position: static;
     width: 100%;
     margin-top: 8px;
+  }
+
+  .domainPanelHead {
+    display: grid;
+  }
+
+  .domainPanelHead > span {
+    justify-self: start;
   }
 }

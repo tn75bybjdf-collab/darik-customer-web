@@ -41,6 +41,8 @@ type RequestRow = {
   request_status: string;
   retailer_note: string | null;
   admin_note: string | null;
+  domain_preferences: string[] | null;
+  assigned_domain: string | null;
   created_at: string;
   product_count: number;
   active_category_count: number;
@@ -99,6 +101,7 @@ export default function StoreActivationsAdminPage() {
   const [status, setStatus] = useState("pending");
   const [rows, setRows] = useState<RequestRow[]>([]);
   const [notes, setNotes] = useState<Record<string, string>>({});
+  const [assignedDomains, setAssignedDomains] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(true);
   const [busyId, setBusyId] = useState("");
   const [preview, setPreview] = useState<PreviewData | null>(null);
@@ -116,7 +119,17 @@ export default function StoreActivationsAdminPage() {
       setError(result.error.message);
       setRows([]);
     } else {
-      setRows(Array.isArray(result.data) ? (result.data as RequestRow[]) : []);
+      const nextRows = Array.isArray(result.data) ? (result.data as RequestRow[]) : [];
+      setRows(nextRows);
+      setAssignedDomains((current) => {
+        const next = { ...current };
+        nextRows.forEach((row) => {
+          if (row.plan_code === "premium_annual" && !next[row.id]) {
+            next[row.id] = row.assigned_domain || row.domain_preferences?.[0] || "";
+          }
+        });
+        return next;
+      });
     }
     setLoading(false);
   }, []);
@@ -233,6 +246,29 @@ export default function StoreActivationsAdminPage() {
     setBusyId(row.id);
     setError("");
     setMessage("");
+
+    if (decision === "approve" && row.plan_code === "premium_annual") {
+      const assignedDomain = assignedDomains[row.id]?.trim() || "";
+
+      if (!assignedDomain) {
+        setBusyId("");
+        setError("Choose the available domain before approving the Premium activation.");
+        return;
+      }
+
+      const domainResult = await supabase.rpc("darik_direct_admin_assign_activation_domain", {
+        p_session_token: admin.session_token,
+        p_request_id: row.id,
+        p_assigned_domain: assignedDomain,
+      });
+
+      if (domainResult.error) {
+        setBusyId("");
+        setError(domainResult.error.message);
+        return;
+      }
+    }
+
     const result = await supabase.rpc("darik_direct_admin_review_activation", {
       p_session_token: admin.session_token,
       p_request_id: row.id,
@@ -396,6 +432,25 @@ export default function StoreActivationsAdminPage() {
                         {row.product_count} products · {row.active_category_count} categories
                       </strong>
                     </div>
+                    {row.plan_code === "premium_annual" ? (
+                      <div className={`${styles.detail} ${styles.domainDetail}`}>
+                        <span>Domain preferences · most to least desired</span>
+                        {row.domain_preferences?.length ? (
+                          <ol className={styles.domainList}>
+                            {row.domain_preferences.map((domain) => (
+                              <li key={domain}>{domain}</li>
+                            ))}
+                          </ol>
+                        ) : (
+                          <strong>Missing — retailer must submit five choices</strong>
+                        )}
+                        {row.assigned_domain ? (
+                          <strong className={styles.assignedDomain}>
+                            Assigned domain: {row.assigned_domain}
+                          </strong>
+                        ) : null}
+                      </div>
+                    ) : null}
                     <div className={styles.detail}>
                       <span>Locked location</span>
                       <strong>{row.business_address || "—"}</strong>
@@ -449,6 +504,35 @@ export default function StoreActivationsAdminPage() {
                     </a>
                     {row.request_status === "pending" ? (
                       <>
+                        {row.plan_code === "premium_annual" ? (
+                          <div className={styles.domainAssignment}>
+                            <label>
+                              Available domain to assign
+                              <select
+                                value={assignedDomains[row.id] || ""}
+                                onChange={(event) =>
+                                  setAssignedDomains((current) => ({
+                                    ...current,
+                                    [row.id]: event.target.value,
+                                  }))
+                                }
+                                disabled={!row.domain_preferences?.length}
+                              >
+                                <option value="">Choose after checking availability</option>
+                                {(row.domain_preferences || []).map((domain, index) => (
+                                  <option value={domain} key={domain}>
+                                    {index + 1}. {domain}
+                                  </option>
+                                ))}
+                              </select>
+                            </label>
+                            <p>
+                              Check availability outside Darik, then select the first eligible choice available. The
+                              retailer has been told setup may take up to 48 hours and is usually ready within a few
+                              hours.
+                            </p>
+                          </div>
+                        ) : null}
                         <textarea
                           className={styles.note}
                           rows={3}

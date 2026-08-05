@@ -31,7 +31,15 @@
 .detail span, .detail strong { display: block; }
 .detail span { color: #74828d; font-size: 11px; }
 .detail strong { margin-top: 3px; overflow-wrap: anywhere; }
+.domainDetail { grid-column: 1 / -1; }
+.domainList { margin: 7px 0 0; padding-left: 22px; }
+.domainList li { margin-top: 4px; overflow-wrap: anywhere; font-weight: 800; }
+.assignedDomain { margin-top: 10px !important; color: #126b43; }
 .actions { border-left: 1px solid #e5ecef; padding-left: 20px; display: grid; align-content: start; gap: 10px; }
+.domainAssignment { border: 1px solid #cfe0d7; border-radius: 13px; padding: 12px; background: #f4faf7; }
+.domainAssignment label { display: grid; gap: 7px; font-size: 13px; font-weight: 900; }
+.domainAssignment select { width: 100%; min-width: 0; border: 1px solid #bfcfc7; border-radius: 10px; padding: 10px 11px; background: white; font: inherit; }
+.domainAssignment p { margin: 8px 0 0; color: #62747f; font-size: 12px; line-height: 1.45; }
 .actions a, .actions button { text-align: center; border: 0; border-radius: 11px; padding: 11px 12px; font-weight: 900; cursor: pointer; text-decoration: none; }
 .receipt { background: #e8f0f5; color: #263c4b; }
 .approve { background: #167d50; color: white; }
