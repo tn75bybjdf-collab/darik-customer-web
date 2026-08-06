@@ -1,5 +1,7 @@
 "use client";
 
+// DARIK_DETAILS_MODAL_SCROLL_FIX_034
+
 // DARIK_AUTOPARTS_FITMENT_FILTERS_033
 
 import { useEffect, useMemo, useState } from "react";
@@ -473,6 +475,32 @@ export default function DarikDirectStorefrontPage() {
   const [detailsOpen, setDetailsOpen] = useState(false);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState("");
+
+
+  useEffect(() => {
+    if (!detailsOpen && !cartOpen && !onlineCheckoutOpen) return;
+
+    const previousOverflow = document.body.style.overflow;
+    const previousPaddingRight = document.body.style.paddingRight;
+    const scrollbarWidth = Math.max(0, window.innerWidth - document.documentElement.clientWidth);
+
+    document.body.style.overflow = "hidden";
+    if (scrollbarWidth > 0) document.body.style.paddingRight = `${scrollbarWidth}px`;
+
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key !== "Escape") return;
+      if (onlineCheckoutOpen) setOnlineCheckoutOpen(false);
+      else if (cartOpen) setCartOpen(false);
+      else if (detailsOpen) setDetailsOpen(false);
+    };
+
+    document.addEventListener("keydown", closeOnEscape);
+    return () => {
+      document.removeEventListener("keydown", closeOnEscape);
+      document.body.style.overflow = previousOverflow;
+      document.body.style.paddingRight = previousPaddingRight;
+    };
+  }, [cartOpen, detailsOpen, onlineCheckoutOpen]);
 
   useEffect(() => {
     if (!slug) return;
@@ -2045,10 +2073,19 @@ export default function DarikDirectStorefrontPage() {
       ) : null}
 
       {detailsOpen ? (
-        <div className={styles.modalOverlay} onClick={() => setDetailsOpen(false)}>
+        <div
+          className={styles.modalOverlay}
+          role="presentation"
+          onMouseDown={(event) => {
+            if (event.target === event.currentTarget) setDetailsOpen(false);
+          }}
+        >
           <section
             className={styles.detailsModal}
-            onClick={(event) => event.stopPropagation()}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="store-details-title"
+            onMouseDown={(event) => event.stopPropagation()}
           >
             <header className={styles.modalHeader}>
               <div className={styles.modalStoreTitle}>
@@ -2061,10 +2098,10 @@ export default function DarikDirectStorefrontPage() {
                 </div>
                 <span>
                   <small>Store information</small>
-                  <strong>{storefront.display_name}</strong>
+                  <strong id="store-details-title">{storefront.display_name}</strong>
                 </span>
               </div>
-              <button onClick={() => setDetailsOpen(false)}>
+              <button type="button" aria-label="Close store details" onClick={() => setDetailsOpen(false)}>
                 <Icon name="close" size={20} />
               </button>
             </header>

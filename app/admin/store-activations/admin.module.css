@@ -31,15 +31,7 @@
 .detail span, .detail strong { display: block; }
 .detail span { color: #74828d; font-size: 11px; }
 .detail strong { margin-top: 3px; overflow-wrap: anywhere; }
-.domainDetail { grid-column: 1 / -1; }
-.domainList { margin: 7px 0 0; padding-left: 22px; }
-.domainList li { margin-top: 4px; overflow-wrap: anywhere; font-weight: 800; }
-.assignedDomain { margin-top: 10px !important; color: #126b43; }
 .actions { border-left: 1px solid #e5ecef; padding-left: 20px; display: grid; align-content: start; gap: 10px; }
-.domainAssignment { border: 1px solid #cfe0d7; border-radius: 13px; padding: 12px; background: #f4faf7; }
-.domainAssignment label { display: grid; gap: 7px; font-size: 13px; font-weight: 900; }
-.domainAssignment select { width: 100%; min-width: 0; border: 1px solid #bfcfc7; border-radius: 10px; padding: 10px 11px; background: white; font: inherit; }
-.domainAssignment p { margin: 8px 0 0; color: #62747f; font-size: 12px; line-height: 1.45; }
 .actions a, .actions button { text-align: center; border: 0; border-radius: 11px; padding: 11px 12px; font-weight: 900; cursor: pointer; text-decoration: none; }
 .receipt { background: #e8f0f5; color: #263c4b; }
 .approve { background: #167d50; color: white; }
@@ -83,3 +75,112 @@
 .previewProducts strong { display: block; margin-top: 8px; margin-bottom: 13px; color: var(--admin-preview-accent); }
 .previewEmpty { margin: 20px; padding: 25px; text-align: center; border-radius: 14px; border: 1px dashed #bac8d1; color: #687985; background: white; }
 @media(max-width:850px){.previewBackdrop{padding:8px}.previewStats{grid-template-columns:repeat(2,minmax(0,1fr))}.previewProducts{grid-template-columns:repeat(2,minmax(0,1fr));padding:12px}.previewHero{min-height:190px;padding:20px}.previewHero h1{font-size:30px}}
+
+
+/* DARIK_ACTIVATION_RECEIPT_PREVIEW_FIX_034 */
+.receiptBackdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 130;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  padding: 18px;
+  background: rgba(5, 12, 20, .82);
+  backdrop-filter: blur(8px);
+}
+
+.receiptModal {
+  width: min(980px, 100%);
+  height: min(92dvh, 920px);
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border: 1px solid #d4dfe5;
+  border-radius: 20px;
+  background: #f5f8fa;
+  box-shadow: 0 35px 110px rgba(0, 0, 0, .5);
+}
+
+.receiptToolbar {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 14px 16px;
+  background: #152631;
+  color: white;
+}
+
+.receiptToolbar strong,
+.receiptToolbar span {
+  display: block;
+}
+
+.receiptToolbar span {
+  margin-top: 2px;
+  color: #bdcbd3;
+  font-size: 12px;
+}
+
+.receiptToolbarActions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.receiptToolbarActions a,
+.receiptToolbarActions button {
+  border: 0;
+  border-radius: 10px;
+  padding: 9px 12px;
+  background: white;
+  color: #172936;
+  font: inherit;
+  font-weight: 900;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.receiptViewer {
+  min-height: 0;
+  flex: 1 1 auto;
+  overflow: auto;
+  display: grid;
+  place-items: center;
+  padding: 16px;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+}
+
+.receiptViewer img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  max-height: none;
+  object-fit: contain;
+  border-radius: 10px;
+  background: white;
+  box-shadow: 0 10px 35px rgba(15, 23, 42, .18);
+}
+
+.receiptViewer iframe {
+  width: 100%;
+  height: 100%;
+  min-height: 600px;
+  border: 0;
+  border-radius: 10px;
+  background: white;
+}
+
+@media (max-width: 700px) {
+  .receiptBackdrop { padding: 0; }
+  .receiptModal { width: 100%; height: 100dvh; border-radius: 0; border: 0; }
+  .receiptToolbar { align-items: flex-start; }
+  .receiptToolbarActions { flex-direction: column; align-items: stretch; }
+  .receiptToolbarActions a, .receiptToolbarActions button { text-align: center; padding: 8px 10px; font-size: 12px; }
+  .receiptViewer { padding: 8px; }
+}
