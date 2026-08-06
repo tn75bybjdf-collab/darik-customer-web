@@ -2973,3 +2973,126 @@
     min-height: 620px;
   }
 }
+
+/* Darik Frontend 033: customer vehicle fitment filters */
+.vehicleFilterPanel {
+  display: grid;
+  gap: 1rem;
+  margin: 1rem 0 1.25rem;
+  padding: 1rem;
+  border: 1px solid color-mix(in srgb, var(--store-primary) 22%, transparent);
+  border-radius: var(--store-corner-large, 24px);
+  background: color-mix(in srgb, var(--store-primary) 6%, var(--theme-surface));
+}
+
+.vehicleFilterHeading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.vehicleFilterHeading > div {
+  display: grid;
+  gap: 0.18rem;
+}
+
+.vehicleFilterHeading span {
+  color: var(--theme-muted);
+  font-size: 0.76rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.vehicleFilterHeading strong {
+  color: var(--theme-ink, #111827);
+  font-size: 0.95rem;
+}
+
+.vehicleFilterHeading button {
+  border: 0;
+  border-radius: var(--store-corner-small, 10px);
+  padding: 0.65rem 0.85rem;
+  background: var(--theme-surface);
+  color: var(--store-primary);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--store-primary) 20%, transparent);
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.76rem;
+  font-weight: 800;
+}
+
+.vehicleFilterGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.8rem;
+}
+
+.vehicleFilterGrid label {
+  display: grid;
+  gap: 0.4rem;
+  min-width: 0;
+}
+
+.vehicleFilterGrid label > span {
+  color: var(--theme-muted);
+  font-size: 0.76rem;
+  font-weight: 800;
+}
+
+.vehicleFilterGrid select {
+  width: 100%;
+  min-height: 46px;
+  border: 1px solid color-mix(in srgb, var(--store-primary) 18%, #d9e2ee);
+  border-radius: var(--store-corner-small, 10px);
+  padding: 0 0.8rem;
+  background: var(--theme-surface);
+  color: var(--theme-ink, #111827);
+  font: inherit;
+  font-weight: 750;
+  outline: none;
+}
+
+.vehicleFilterGrid select:focus {
+  border-color: var(--store-primary);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--store-primary) 14%, transparent);
+}
+
+.productFitment {
+  display: grid;
+  gap: 0.2rem;
+  margin-top: 0.55rem;
+  padding: 0.58rem 0.68rem;
+  border-radius: var(--store-corner-small, 10px);
+  background: color-mix(in srgb, var(--store-primary) 7%, var(--theme-surface));
+}
+
+.productFitment span {
+  color: var(--theme-muted);
+  font-size: 0.68rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.productFitment strong {
+  color: var(--store-primary);
+  font-size: 0.82rem;
+  line-height: 1.35;
+}
+
+@media (max-width: 760px) {
+  .vehicleFilterHeading {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .vehicleFilterGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .vehicleFilterHeading button {
+    width: 100%;
+  }
+}

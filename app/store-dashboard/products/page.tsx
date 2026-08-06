@@ -1,6 +1,6 @@
 "use client";
 
-// DARIK_PRODUCT_AVAILABILITY_032
+// DARIK_AUTOPARTS_FITMENT_FILTERS_033
 // Mobile-safe bilingual product form with automatic retail categories.
 
 import {
@@ -74,6 +74,10 @@ type DirectProduct = {
   direct_compare_at_price: number | string | null;
   direct_pricing_mode: "price" | "call" | "whatsapp" | "call_whatsapp" | null;
   direct_availability_status: "available" | "out_of_stock" | null;
+  direct_vehicle_year_from: number | string | null;
+  direct_vehicle_year_to: number | string | null;
+  direct_vehicle_make: string | null;
+  direct_vehicle_model: string | null;
   direct_photo_url: string | null;
   direct_product_status: "draft" | "published" | "paused" | "archived";
   direct_updated_at: string | null;
@@ -90,6 +94,10 @@ type ProductForm = {
   compareAtPrice: string;
   pricingMode: "price" | "call" | "whatsapp" | "call_whatsapp";
   availabilityStatus: "available" | "out_of_stock";
+  vehicleYearFrom: string;
+  vehicleYearTo: string;
+  vehicleMake: string;
+  vehicleModel: string;
   trackInventory: boolean;
   quantity: string;
   photoUrl: string;
@@ -108,6 +116,10 @@ const emptyForm: ProductForm = {
   compareAtPrice: "",
   pricingMode: "price",
   availabilityStatus: "available",
+  vehicleYearFrom: "",
+  vehicleYearTo: "",
+  vehicleMake: "",
+  vehicleModel: "",
   trackInventory: false,
   quantity: "0",
   photoUrl: "",
@@ -135,9 +147,47 @@ function abbreviateCategoryName(value: string | null, maxLength = 26) {
   return `${clean.slice(0, maxLength - 1).trim()}…`;
 }
 
-function categoryOptionLabel(category: Category) {
+const AUTO_PARTS_CATEGORY_AR_BY_ENGLISH: Record<string, string> = {
+  "body parts": "قطع بودي",
+  lighting: "إضاءة",
+  suspension: "تعليق",
+  steering: "توجيه",
+  brakes: "فرامل",
+  "engine parts": "قطع محرك",
+  "cooling system": "نظام تبريد",
+  "air conditioning": "تكييف",
+  "electrical parts": "قطع كهرباء",
+  "filters & maintenance": "فلاتر وصيانة",
+  "interior & exterior": "داخلي وخارجي",
+  "used parts": "قطع مستعملة",
+};
+
+function cleanAutoPartsCategoryArabic(category: Category) {
+  return (
+    AUTO_PARTS_CATEGORY_AR_BY_ENGLISH[category.name.trim().toLowerCase()] ||
+    category.name_ar ||
+    ""
+  );
+}
+
+function vehicleFitmentLabel(product: DirectProduct) {
+  const yearFrom = Number(product.direct_vehicle_year_from ?? 0);
+  const yearTo = Number(product.direct_vehicle_year_to ?? 0);
+  const yearLabel = yearFrom
+    ? yearTo && yearTo !== yearFrom
+      ? `${yearFrom}–${yearTo}`
+      : String(yearFrom)
+    : "";
+  return [yearLabel, product.direct_vehicle_make, product.direct_vehicle_model]
+    .filter(Boolean)
+    .join(" ");
+}
+
+function categoryOptionLabel(category: Category, isAutoPartsStore = false) {
   const english = abbreviateCategoryName(category.name);
-  const arabic = abbreviateCategoryName(category.name_ar);
+  const arabic = abbreviateCategoryName(
+    isAutoPartsStore ? cleanAutoPartsCategoryArabic(category) : category.name_ar
+  );
   const bilingual = arabic ? `${english} / ${arabic}` : english;
   return category.category_status === "hidden"
     ? `${bilingual} (hidden / مخفية)`
@@ -265,6 +315,10 @@ export default function DarikDirectProductsPage() {
             "direct_compare_at_price",
             "direct_pricing_mode",
             "direct_availability_status",
+            "direct_vehicle_year_from",
+            "direct_vehicle_year_to",
+            "direct_vehicle_make",
+            "direct_vehicle_model",
             "direct_photo_url",
             "direct_product_status",
             "direct_updated_at",
@@ -367,6 +421,10 @@ export default function DarikDirectProductsPage() {
         productDisplayName(product),
         product.direct_name_ar,
         product.brand_name,
+        product.direct_vehicle_make,
+        product.direct_vehicle_model,
+        product.direct_vehicle_year_from,
+        product.direct_vehicle_year_to,
       ]
         .filter(Boolean)
         .some((value) => String(value).toLowerCase().includes(cleanSearch));
@@ -444,6 +502,10 @@ export default function DarikDirectProductsPage() {
         (product.direct_inventory_tracking_enabled && Number(product.quantity_in_stock ?? 0) <= 0)
           ? "out_of_stock"
           : "available",
+      vehicleYearFrom: String(product.direct_vehicle_year_from ?? ""),
+      vehicleYearTo: String(product.direct_vehicle_year_to ?? ""),
+      vehicleMake: product.direct_vehicle_make || "",
+      vehicleModel: product.direct_vehicle_model || "",
       trackInventory: Boolean(product.direct_inventory_tracking_enabled),
       quantity: String(product.quantity_in_stock ?? 0),
       photoUrl: product.direct_photo_url || "",
@@ -539,6 +601,10 @@ export default function DarikDirectProductsPage() {
     const quantity = form.trackInventory ? Number(form.quantity) : 0;
     const sortOrder = Number(form.sortOrder || 1000);
     const pricingMode = isAutoParts ? form.pricingMode : "price";
+    const vehicleYearFrom = form.vehicleYearFrom ? Number(form.vehicleYearFrom) : null;
+    const vehicleYearTo = form.vehicleYearTo ? Number(form.vehicleYearTo) : vehicleYearFrom;
+    const vehicleMake = form.vehicleMake.trim();
+    const vehicleModel = form.vehicleModel.trim();
 
     if (name.length < 2) {
       setError("Enter a product name / أدخل اسم المنتج.");
@@ -553,6 +619,25 @@ export default function DarikDirectProductsPage() {
     if (!Number.isFinite(price) || price <= 0) {
       setError("Enter a valid selling price / أدخل سعر بيع صحيحًا.");
       return;
+    }
+
+    if (isAutoParts) {
+      if (vehicleYearFrom != null && (!Number.isInteger(vehicleYearFrom) || vehicleYearFrom < 1950 || vehicleYearFrom > 2100)) {
+        setError("Enter a valid starting vehicle year between 1950 and 2100 / أدخل سنة بداية صحيحة بين 1950 و2100.");
+        return;
+      }
+      if (vehicleYearTo != null && (!Number.isInteger(vehicleYearTo) || vehicleYearTo < 1950 || vehicleYearTo > 2100)) {
+        setError("Enter a valid ending vehicle year between 1950 and 2100 / أدخل سنة نهاية صحيحة بين 1950 و2100.");
+        return;
+      }
+      if (vehicleYearFrom != null && vehicleYearTo != null && vehicleYearTo < vehicleYearFrom) {
+        setError("The ending year cannot be before the starting year / لا يمكن أن تكون سنة النهاية قبل سنة البداية.");
+        return;
+      }
+      if (vehicleModel && !vehicleMake) {
+        setError("Enter the vehicle make before the model / أدخل نوع السيارة قبل الموديل.");
+        return;
+      }
     }
 
     if (
@@ -697,6 +782,28 @@ export default function DarikDirectProductsPage() {
       );
       await loadCatalog();
       return;
+    }
+
+    if (isAutoParts) {
+      const fitmentResult = await supabase.rpc(
+        "darik_direct_set_product_vehicle_fitment",
+        {
+          p_product_id: savedProductId,
+          p_year_from: vehicleYearFrom,
+          p_year_to: vehicleYearTo,
+          p_vehicle_make: vehicleMake || null,
+          p_vehicle_model: vehicleModel || null,
+        }
+      );
+
+      if (fitmentResult.error) {
+        setSaving(false);
+        setError(
+          `The product was saved, but vehicle fitment failed. / تم حفظ المنتج، لكن تعذر حفظ توافق السيارة. ${fitmentResult.error.message}`
+        );
+        await loadCatalog();
+        return;
+      }
     }
 
     setSaving(false);
@@ -1036,6 +1143,13 @@ export default function DarikDirectProductsPage() {
                             <strong>{pricingLabel}</strong>
                           </div>
 
+                          {isAutoParts && vehicleFitmentLabel(product) ? (
+                            <div className={styles.fitmentSummary}>
+                              <span>Vehicle fitment / توافق السيارة</span>
+                              <strong>{vehicleFitmentLabel(product)}</strong>
+                            </div>
+                          ) : null}
+
                           <div className={styles.productFacts}>
                             <div>
                               <span>Inventory</span>
@@ -1252,7 +1366,7 @@ export default function DarikDirectProductsPage() {
                       <option value="">Uncategorized / بدون فئة</option>
                       {categories.map((category) => (
                         <option key={category.id} value={category.id}>
-                          {categoryOptionLabel(category)}
+                          {categoryOptionLabel(category, isAutoParts)}
                         </option>
                       ))}
                     </select>
@@ -1264,6 +1378,66 @@ export default function DarikDirectProductsPage() {
                     </a>
                   </label>
                 </div>
+
+                {isAutoParts ? (
+                  <section className={styles.fitmentPanel}>
+                    <div className={styles.fitmentHeading}>
+                      <div>
+                        <strong>Vehicle fitment / توافق السيارة</strong>
+                        <span>Customers can filter the catalog by year, make, and model. / يمكن للعملاء تصفية المنتجات حسب السنة والنوع والموديل.</span>
+                      </div>
+                    </div>
+                    <div className={styles.fitmentGrid}>
+                      <label>
+                        <BilingualLabel en="Year from" ar="من سنة" />
+                        <input
+                          type="number"
+                          inputMode="numeric"
+                          min="1950"
+                          max="2100"
+                          step="1"
+                          value={form.vehicleYearFrom}
+                          onChange={(event) => updateForm("vehicleYearFrom", event.target.value)}
+                          placeholder="Example: 2020"
+                        />
+                      </label>
+                      <label>
+                        <BilingualLabel en="Year to" ar="إلى سنة" />
+                        <input
+                          type="number"
+                          inputMode="numeric"
+                          min="1950"
+                          max="2100"
+                          step="1"
+                          value={form.vehicleYearTo}
+                          onChange={(event) => updateForm("vehicleYearTo", event.target.value)}
+                          placeholder="Optional / اختياري"
+                        />
+                      </label>
+                      <label>
+                        <BilingualLabel en="Vehicle make" ar="نوع السيارة" />
+                        <input
+                          value={form.vehicleMake}
+                          onChange={(event) => updateForm("vehicleMake", event.target.value)}
+                          placeholder="NETA, BYD, Toyota..."
+                          autoComplete="off"
+                        />
+                      </label>
+                      <label>
+                        <BilingualLabel en="Vehicle model" ar="موديل السيارة" />
+                        <input
+                          value={form.vehicleModel}
+                          onChange={(event) => updateForm("vehicleModel", event.target.value)}
+                          placeholder="U, Song L, Corolla..."
+                          autoComplete="off"
+                        />
+                      </label>
+                    </div>
+                    <p className={styles.fitmentHint}>
+                      Leave these fields blank for universal parts. Use the year range when the same part fits several model years. / اترك الحقول فارغة للقطع العامة، واستخدم نطاق السنوات عندما تناسب القطعة أكثر من سنة.
+                    </p>
+                  </section>
+                ) : null}
 
                 <label>
                   <BilingualLabel

@@ -1,6 +1,6 @@
 "use client";
 
-// DARIK_PICKUP_ONLY_PRODUCT_AVAILABILITY_032
+// DARIK_AUTOPARTS_FITMENT_FILTERS_033
 
 import { useEffect, useMemo, useState } from "react";
 import type { CSSProperties } from "react";
@@ -68,6 +68,7 @@ type Storefront = {
   show_whatsapp: boolean | null;
   show_store_story: boolean | null;
   business_name: string;
+  business_type: string | null;
 };
 
 type PublicStoreStatus = {
@@ -102,6 +103,10 @@ type Product = {
   direct_inventory_tracking_enabled: boolean;
   direct_availability_status: "available" | "out_of_stock" | null;
   direct_pricing_mode: "price" | "call" | "whatsapp" | "call_whatsapp" | null;
+  direct_vehicle_year_from: number | string | null;
+  direct_vehicle_year_to: number | string | null;
+  direct_vehicle_make: string | null;
+  direct_vehicle_model: string | null;
   official_product_photo_url: string | null;
   official_product_thumbnail_url: string | null;
   official_product_photo_url_2: string | null;
@@ -379,6 +384,42 @@ function todayHours(operatingHours: Record<string, string> | null) {
   return String(operatingHours?.[key] ?? "").trim();
 }
 
+const AUTO_PARTS_CATEGORY_AR_BY_ENGLISH: Record<string, string> = {
+  "body parts": "قطع بودي",
+  lighting: "إضاءة",
+  suspension: "تعليق",
+  steering: "توجيه",
+  brakes: "فرامل",
+  "engine parts": "قطع محرك",
+  "cooling system": "نظام تبريد",
+  "air conditioning": "تكييف",
+  "electrical parts": "قطع كهرباء",
+  "filters & maintenance": "فلاتر وصيانة",
+  "interior & exterior": "داخلي وخارجي",
+  "used parts": "قطع مستعملة",
+};
+
+function cleanAutoPartsCategoryArabic(category: Category) {
+  return (
+    AUTO_PARTS_CATEGORY_AR_BY_ENGLISH[category.name.trim().toLowerCase()] ||
+    category.name_ar ||
+    ""
+  );
+}
+
+function productVehicleFitment(product: Product) {
+  const yearFrom = Number(product.direct_vehicle_year_from ?? 0);
+  const yearTo = Number(product.direct_vehicle_year_to ?? 0);
+  const yearLabel = yearFrom
+    ? yearTo && yearTo !== yearFrom
+      ? `${yearFrom}–${yearTo}`
+      : String(yearFrom)
+    : "";
+  return [yearLabel, product.direct_vehicle_make, product.direct_vehicle_model]
+    .filter(Boolean)
+    .join(" ");
+}
+
 function normalizeSectionOrder(value: Storefront["section_order"]) {
   const allowed = ["categories", "catalog", "story"] as const;
   const input = Array.isArray(value) ? value : [];
@@ -400,6 +441,9 @@ export default function DarikDirectStorefrontPage() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [selectedCategoryId, setSelectedCategoryId] = useState("all");
   const [search, setSearch] = useState("");
+  const [selectedVehicleMake, setSelectedVehicleMake] = useState("all");
+  const [selectedVehicleModel, setSelectedVehicleModel] = useState("all");
+  const [selectedVehicleYear, setSelectedVehicleYear] = useState("all");
   const [cart, setCart] = useState<CartLine[]>([]);
   const [cartOpen, setCartOpen] = useState(false);
   const [onlineCheckoutOpen, setOnlineCheckoutOpen] = useState(false);
@@ -597,6 +641,59 @@ export default function DarikDirectStorefrontPage() {
     [categories]
   );
 
+  const isAutoParts = storefront?.business_type === "auto_parts";
+
+  const vehicleMakes = useMemo(() => {
+    if (!isAutoParts) return [];
+    return Array.from(
+      new Set(
+        products
+          .map((product) => String(product.direct_vehicle_make ?? "").trim())
+          .filter(Boolean)
+      )
+    ).sort((a, b) => a.localeCompare(b));
+  }, [isAutoParts, products]);
+
+  const vehicleModels = useMemo(() => {
+    if (!isAutoParts) return [];
+    const selectedMakeLower = selectedVehicleMake.toLowerCase();
+    return Array.from(
+      new Set(
+        products
+          .filter((product) =>
+            selectedVehicleMake === "all"
+              ? true
+              : String(product.direct_vehicle_make ?? "").trim().toLowerCase() === selectedMakeLower
+          )
+          .map((product) => String(product.direct_vehicle_model ?? "").trim())
+          .filter(Boolean)
+      )
+    ).sort((a, b) => a.localeCompare(b));
+  }, [isAutoParts, products, selectedVehicleMake]);
+
+  const vehicleYears = useMemo(() => {
+    if (!isAutoParts) return [];
+    const years = new Set<number>();
+    for (const product of products) {
+      const from = Number(product.direct_vehicle_year_from ?? 0);
+      const to = Number(product.direct_vehicle_year_to ?? from);
+      if (!Number.isInteger(from) || from < 1950 || from > 2100) continue;
+      const safeTo = Number.isInteger(to) && to >= from && to <= 2100 ? to : from;
+      for (let year = from; year <= safeTo; year += 1) years.add(year);
+    }
+    return Array.from(years).sort((a, b) => b - a);
+  }, [isAutoParts, products]);
+
+  const hasVehicleFitment =
+    isAutoParts && (vehicleMakes.length > 0 || vehicleModels.length > 0 || vehicleYears.length > 0);
+
+  useEffect(() => {
+    if (selectedVehicleModel === "all") return;
+    if (!vehicleModels.some((model) => model.toLowerCase() === selectedVehicleModel.toLowerCase())) {
+      setSelectedVehicleModel("all");
+    }
+  }, [selectedVehicleModel, vehicleModels]);
+
   const filteredProducts = useMemo(() => {
     const cleanSearch = search.trim().toLowerCase();
 
@@ -606,6 +703,23 @@ export default function DarikDirectStorefrontPage() {
         product.direct_store_category_id !== selectedCategoryId
       ) {
         return false;
+      }
+
+      if (selectedVehicleMake !== "all" &&
+          String(product.direct_vehicle_make ?? "").trim().toLowerCase() !== selectedVehicleMake.toLowerCase()) {
+        return false;
+      }
+
+      if (selectedVehicleModel !== "all" &&
+          String(product.direct_vehicle_model ?? "").trim().toLowerCase() !== selectedVehicleModel.toLowerCase()) {
+        return false;
+      }
+
+      if (selectedVehicleYear !== "all") {
+        const year = Number(selectedVehicleYear);
+        const from = Number(product.direct_vehicle_year_from ?? 0);
+        const to = Number(product.direct_vehicle_year_to ?? from);
+        if (!from || year < from || year > (to || from)) return false;
       }
 
       if (!cleanSearch) return true;
@@ -619,11 +733,22 @@ export default function DarikDirectStorefrontPage() {
         product.direct_store_category_name_ar,
         product.subcategory_name,
         product.description,
+        product.direct_vehicle_make,
+        product.direct_vehicle_model,
+        product.direct_vehicle_year_from,
+        product.direct_vehicle_year_to,
       ]
         .filter(Boolean)
         .some((value) => String(value).toLowerCase().includes(cleanSearch));
     });
-  }, [products, search, selectedCategoryId]);
+  }, [
+    products,
+    search,
+    selectedCategoryId,
+    selectedVehicleMake,
+    selectedVehicleModel,
+    selectedVehicleYear,
+  ]);
 
   const availableProductCount = useMemo(
     () =>
@@ -637,9 +762,22 @@ export default function DarikDirectStorefrontPage() {
   );
 
   const featuredProducts = useMemo(() => {
-    if (selectedCategoryId !== "all" || search.trim()) return [];
+    if (
+      selectedCategoryId !== "all" ||
+      search.trim() ||
+      selectedVehicleMake !== "all" ||
+      selectedVehicleModel !== "all" ||
+      selectedVehicleYear !== "all"
+    ) return [];
     return products.filter((product) => product.storefront_featured).slice(0, 8);
-  }, [products, search, selectedCategoryId]);
+  }, [
+    products,
+    search,
+    selectedCategoryId,
+    selectedVehicleMake,
+    selectedVehicleModel,
+    selectedVehicleYear,
+  ]);
 
   const catalogProducts = useMemo(() => {
     if (featuredProducts.length === 0) return filteredProducts;
@@ -1190,6 +1328,7 @@ export default function DarikDirectStorefrontPage() {
     const stock = Number(product.quantity_in_stock ?? 0);
     const pricingMode = product.direct_pricing_mode || "price";
     const contactPricing = pricingMode !== "price";
+    const fitment = productVehicleFitment(product);
     const availabilityStatus =
       product.direct_availability_status === "out_of_stock" ||
       (product.direct_inventory_tracking_enabled && stock <= 0)
@@ -1204,6 +1343,7 @@ export default function DarikDirectStorefrontPage() {
     const pricingMessage = [
       `مرحبا، بدي أعرف سعر ${name}`,
       `Hello, I would like the price for ${name}.`,
+      fitment ? `Vehicle fitment: ${fitment}` : "",
       productLink,
     ].join("\n");
     const pricingWhatsappHref = whatsapp
@@ -1275,6 +1415,13 @@ export default function DarikDirectStorefrontPage() {
             <p className={styles.productArabic} dir="rtl">
               {product.official_marketplace_name_ar}
             </p>
+          ) : null}
+
+          {fitment ? (
+            <div className={styles.productFitment}>
+              <span>Fits / يناسب</span>
+              <strong>{fitment}</strong>
+            </div>
           ) : null}
 
           {product.description ? (
@@ -1595,8 +1742,10 @@ export default function DarikDirectStorefrontPage() {
                   )}
                 </div>
                 <span>{category.name}</span>
-                {category.name_ar ? (
-                  <em dir="rtl">{category.name_ar}</em>
+                {(isAutoParts ? cleanAutoPartsCategoryArabic(category) : category.name_ar) ? (
+                  <em dir="rtl">
+                    {isAutoParts ? cleanAutoPartsCategoryArabic(category) : category.name_ar}
+                  </em>
                 ) : (
                   <small>{Number(category.product_count ?? 0)} items</small>
                 )}
@@ -1633,6 +1782,70 @@ export default function DarikDirectStorefrontPage() {
             ) : null}
           </label>
         </div>
+
+        {hasVehicleFitment ? (
+          <section className={styles.vehicleFilterPanel}>
+            <div className={styles.vehicleFilterHeading}>
+              <div>
+                <span>Find parts for your vehicle</span>
+                <strong>اختر السنة والنوع والموديل</strong>
+              </div>
+              {(selectedVehicleMake !== "all" || selectedVehicleModel !== "all" || selectedVehicleYear !== "all") ? (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSelectedVehicleMake("all");
+                    setSelectedVehicleModel("all");
+                    setSelectedVehicleYear("all");
+                  }}
+                >
+                  Clear vehicle filters / مسح
+                </button>
+              ) : null}
+            </div>
+            <div className={styles.vehicleFilterGrid}>
+              <label>
+                <span>Make / النوع</span>
+                <select
+                  value={selectedVehicleMake}
+                  onChange={(event) => {
+                    setSelectedVehicleMake(event.target.value);
+                    setSelectedVehicleModel("all");
+                  }}
+                >
+                  <option value="all">All makes / كل الأنواع</option>
+                  {vehicleMakes.map((make) => (
+                    <option key={make} value={make}>{make}</option>
+                  ))}
+                </select>
+              </label>
+              <label>
+                <span>Model / الموديل</span>
+                <select
+                  value={selectedVehicleModel}
+                  onChange={(event) => setSelectedVehicleModel(event.target.value)}
+                >
+                  <option value="all">All models / كل الموديلات</option>
+                  {vehicleModels.map((model) => (
+                    <option key={model} value={model}>{model}</option>
+                  ))}
+                </select>
+              </label>
+              <label>
+                <span>Year / السنة</span>
+                <select
+                  value={selectedVehicleYear}
+                  onChange={(event) => setSelectedVehicleYear(event.target.value)}
+                >
+                  <option value="all">All years / كل السنوات</option>
+                  {vehicleYears.map((year) => (
+                    <option key={year} value={String(year)}>{year}</option>
+                  ))}
+                </select>
+              </label>
+            </div>
+          </section>
+        ) : null}
 
         {visibleCategories.length > 0 ? (
           <div className={styles.categoryPills}>
@@ -1701,6 +1914,9 @@ export default function DarikDirectStorefrontPage() {
                   onClick={() => {
                     setSearch("");
                     setSelectedCategoryId("all");
+                    setSelectedVehicleMake("all");
+                    setSelectedVehicleModel("all");
+                    setSelectedVehicleYear("all");
                   }}
                 >
                   Clear filters
