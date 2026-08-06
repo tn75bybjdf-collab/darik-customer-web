@@ -1,6 +1,6 @@
 "use client";
 
-// DARIK_AUTOPARTS_CONTACT_PRICING_031
+// DARIK_PRODUCT_AVAILABILITY_032
 // Mobile-safe bilingual product form with automatic retail categories.
 
 import {
@@ -73,6 +73,7 @@ type DirectProduct = {
   direct_price: number | string | null;
   direct_compare_at_price: number | string | null;
   direct_pricing_mode: "price" | "call" | "whatsapp" | "call_whatsapp" | null;
+  direct_availability_status: "available" | "out_of_stock" | null;
   direct_photo_url: string | null;
   direct_product_status: "draft" | "published" | "paused" | "archived";
   direct_updated_at: string | null;
@@ -88,6 +89,7 @@ type ProductForm = {
   price: string;
   compareAtPrice: string;
   pricingMode: "price" | "call" | "whatsapp" | "call_whatsapp";
+  availabilityStatus: "available" | "out_of_stock";
   trackInventory: boolean;
   quantity: string;
   photoUrl: string;
@@ -105,6 +107,7 @@ const emptyForm: ProductForm = {
   price: "",
   compareAtPrice: "",
   pricingMode: "price",
+  availabilityStatus: "available",
   trackInventory: false,
   quantity: "0",
   photoUrl: "",
@@ -261,6 +264,7 @@ export default function DarikDirectProductsPage() {
             "direct_price",
             "direct_compare_at_price",
             "direct_pricing_mode",
+            "direct_availability_status",
             "direct_photo_url",
             "direct_product_status",
             "direct_updated_at",
@@ -388,7 +392,15 @@ export default function DarikDirectProductsPage() {
         (product) =>
           product.direct_product_status !== "archived" &&
           product.direct_inventory_tracking_enabled &&
+          Number(product.quantity_in_stock ?? 0) > 0 &&
           Number(product.quantity_in_stock ?? 0) <= 3
+      ).length,
+      outOfStock: products.filter(
+        (product) =>
+          product.direct_product_status !== "archived" &&
+          (product.direct_availability_status === "out_of_stock" ||
+            (product.direct_inventory_tracking_enabled &&
+              Number(product.quantity_in_stock ?? 0) <= 0))
       ).length,
       featured: products.filter(
         (product) =>
@@ -427,6 +439,11 @@ export default function DarikDirectProductsPage() {
       price: String(product.direct_price ?? ""),
       compareAtPrice: String(product.direct_compare_at_price ?? ""),
       pricingMode: product.direct_pricing_mode || "price",
+      availabilityStatus:
+        product.direct_availability_status === "out_of_stock" ||
+        (product.direct_inventory_tracking_enabled && Number(product.quantity_in_stock ?? 0) <= 0)
+          ? "out_of_stock"
+          : "available",
       trackInventory: Boolean(product.direct_inventory_tracking_enabled),
       quantity: String(product.quantity_in_stock ?? 0),
       photoUrl: product.direct_photo_url || "",
@@ -547,6 +564,15 @@ export default function DarikDirectProductsPage() {
     }
 
     if (
+      form.availabilityStatus === "available" &&
+      form.trackInventory &&
+      quantity <= 0
+    ) {
+      setError("Increase inventory above zero before marking this product available / ارفع كمية المخزون فوق الصفر قبل تحديد المنتج كمتوفر.");
+      return;
+    }
+
+    if (
       compareAtPrice != null &&
       (!Number.isFinite(compareAtPrice) || compareAtPrice < price)
     ) {
@@ -656,6 +682,23 @@ export default function DarikDirectProductsPage() {
       return;
     }
 
+    const availabilityResult = await supabase.rpc(
+      "darik_direct_set_product_availability",
+      {
+        p_product_id: savedProductId,
+        p_availability_status: form.availabilityStatus,
+      }
+    );
+
+    if (availabilityResult.error) {
+      setSaving(false);
+      setError(
+        `The product was saved, but its availability status failed. / تم حفظ المنتج، لكن تعذر حفظ حالة التوفر. ${availabilityResult.error.message}`
+      );
+      await loadCatalog();
+      return;
+    }
+
     setSaving(false);
     setFormOpen(false);
     setEditingProductId(null);
@@ -664,6 +707,43 @@ export default function DarikDirectProductsPage() {
       editingProductId
         ? "Product updated successfully / تم تحديث المنتج بنجاح."
         : "Product added to the Darik Direct catalog / تمت إضافة المنتج إلى كتالوج داريك دايركت."
+    );
+    await loadCatalog();
+  }
+
+  async function setProductAvailability(
+    product: DirectProduct,
+    nextStatus: "available" | "out_of_stock"
+  ) {
+    setError("");
+    setMessage("");
+
+    if (
+      nextStatus === "available" &&
+      product.direct_inventory_tracking_enabled &&
+      Number(product.quantity_in_stock ?? 0) <= 0
+    ) {
+      setError("Increase inventory above zero before marking this product available / ارفع كمية المخزون فوق الصفر قبل تحديد المنتج كمتوفر.");
+      return;
+    }
+
+    const result = await supabase.rpc(
+      "darik_direct_set_product_availability",
+      {
+        p_product_id: product.id,
+        p_availability_status: nextStatus,
+      }
+    );
+
+    if (result.error) {
+      setError(result.error.message);
+      return;
+    }
+
+    setMessage(
+      nextStatus === "available"
+        ? `${productDisplayName(product)} is available / المنتج متوفر.`
+        : `${productDisplayName(product)} is out of stock / المنتج غير متوفر.`
     );
     await loadCatalog();
   }
@@ -882,6 +962,11 @@ export default function DarikDirectProductsPage() {
                     const price = Number(product.direct_price ?? 0);
                     const status = product.direct_product_status;
                     const pricingMode = product.direct_pricing_mode || "price";
+                    const availabilityStatus =
+                      product.direct_availability_status === "out_of_stock" ||
+                      (product.direct_inventory_tracking_enabled && stock <= 0)
+                        ? "out_of_stock"
+                        : "available";
                     const pricingLabel =
                       pricingMode === "call"
                         ? "اتصل لمعرفة السعر / Call for pricing"
@@ -907,6 +992,22 @@ export default function DarikDirectProductsPage() {
                               }`}
                             >
                               {status}
+                            </strong>
+
+                            <strong
+                              style={{
+                                background: availabilityStatus === "available" ? "#dcfce7" : "#fee2e2",
+                                color: availabilityStatus === "available" ? "#166534" : "#b91c1c",
+                                border: `1px solid ${availabilityStatus === "available" ? "#86efac" : "#fecaca"}`,
+                                borderRadius: 999,
+                                padding: "0.35rem 0.6rem",
+                                fontSize: "0.72rem",
+                                fontWeight: 800,
+                              }}
+                            >
+                              {availabilityStatus === "available"
+                                ? "متوفر / Available"
+                                : "غير متوفر / Out of stock"}
                             </strong>
 
                             {product.storefront_featured ? (
@@ -969,6 +1070,21 @@ export default function DarikDirectProductsPage() {
                           </div>
 
                           <div className={styles.productActions}>
+                            <button
+                              onClick={() =>
+                                setProductAvailability(
+                                  product,
+                                  availabilityStatus === "available"
+                                    ? "out_of_stock"
+                                    : "available"
+                                )
+                              }
+                            >
+                              {availabilityStatus === "available"
+                                ? "Mark out of stock / تحديد غير متوفر"
+                                : "Mark available / تحديد متوفر"}
+                            </button>
+
                             <button onClick={() => openEditForm(product)}>
                               Edit
                             </button>
@@ -1234,6 +1350,35 @@ export default function DarikDirectProductsPage() {
                   </label>
 
                   <div className={styles.inventoryControl}>
+                    <label>
+                      <BilingualLabel
+                        en="Customer availability"
+                        ar="حالة التوفر للعملاء"
+                      />
+                      <select
+                        value={form.availabilityStatus}
+                        onChange={(event) =>
+                          updateForm(
+                            "availabilityStatus",
+                            event.target.value as ProductForm["availabilityStatus"]
+                          )
+                        }
+                      >
+                        <option value="available">Available / متوفر</option>
+                        <option value="out_of_stock">Out of stock / غير متوفر</option>
+                      </select>
+                      <span style={{
+                        display: "block",
+                        marginTop: "0.45rem",
+                        color: form.availabilityStatus === "available" ? "#166534" : "#b91c1c",
+                        fontWeight: 800,
+                      }}>
+                        {form.availabilityStatus === "available"
+                          ? "Customers will see Available in green / سيظهر متوفر باللون الأخضر"
+                          : "Customers will see Out of stock in red / سيظهر غير متوفر باللون الأحمر"}
+                      </span>
+                    </label>
+
                     <label className={styles.inventoryToggle}>
                       <input
                         type="checkbox"

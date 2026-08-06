@@ -1,6 +1,6 @@
 "use client";
 
-// DARIK_STOREFRONT_DESIGN_027
+// DARIK_PICKUP_ONLY_FULFILLMENT_032
 
 import {
   ChangeEvent,
@@ -59,6 +59,7 @@ type CustomInformation = {
 type OperatingHours = Record<string, string>;
 
 type OrderSubmissionMode = "phone" | "online" | "both";
+type FulfillmentMode = "delivery" | "pickup";
 type StorefrontTheme =
   | "modern_market"
   | "boutique"
@@ -200,6 +201,7 @@ type StorefrontForm = {
   minimumOrder: string;
   deliveryRadiusKm: string;
   estimatedDeliveryMinutes: string;
+  fulfillmentMode: FulfillmentMode;
   orderSubmissionMode: OrderSubmissionMode;
   acceptCash: boolean;
   acceptCliq: boolean;
@@ -359,6 +361,8 @@ type StorefrontSettings = {
   delivery_fee: number | string;
   delivery_radius_km: number | string | null;
   estimated_delivery_minutes: number | null;
+  delivery_enabled: boolean | null;
+  pickup_enabled: boolean | null;
   order_submission_mode: OrderSubmissionMode;
   cash_on_delivery_enabled: boolean;
   cliq_enabled: boolean;
@@ -474,6 +478,7 @@ export default function DarikDirectStorefrontSettingsPage() {
     minimumOrder: "0.00",
     deliveryRadiusKm: "",
     estimatedDeliveryMinutes: "45",
+    fulfillmentMode: "delivery",
     orderSubmissionMode: "phone",
     acceptCash: true,
     acceptCliq: false,
@@ -698,6 +703,11 @@ export default function DarikDirectStorefrontSettingsPage() {
                 loadedStorefront.estimated_delivery_minutes == null
                   ? ""
                   : String(loadedStorefront.estimated_delivery_minutes),
+              fulfillmentMode:
+                loadedStorefront.delivery_enabled === false &&
+                loadedStorefront.pickup_enabled === true
+                  ? "pickup"
+                  : "delivery",
               orderSubmissionMode:
                 loadedStorefront.order_submission_mode ?? "phone",
               acceptCash: loadedStorefront.cash_on_delivery_enabled ?? true,
@@ -752,6 +762,7 @@ export default function DarikDirectStorefrontSettingsPage() {
               minimumOrder: "0.00",
               deliveryRadiusKm: "",
               estimatedDeliveryMinutes: "45",
+              fulfillmentMode: "delivery",
               orderSubmissionMode: "phone",
               acceptCash: true,
               acceptCliq: false,
@@ -1118,6 +1129,15 @@ export default function DarikDirectStorefrontSettingsPage() {
       return;
     }
 
+    if (
+      setupForm.showOrdering &&
+      setupForm.fulfillmentMode === "delivery" &&
+      (!setupForm.deliveryRadiusKm || Number(setupForm.deliveryRadiusKm) <= 0)
+    ) {
+      showSaveError("Enter a delivery radius, or choose Local pickup only / أدخل نطاق التوصيل أو اختر الاستلام المحلي فقط.");
+      return;
+    }
+
     const onlineOrderingSelected =
       setupForm.showOrdering &&
       (setupForm.orderSubmissionMode === "online" ||
@@ -1186,14 +1206,22 @@ export default function DarikDirectStorefrontSettingsPage() {
         accentColor: setupForm.accentColor,
         backgroundColor: setupForm.backgroundColor,
       },
-      delivery_fee: Number(setupForm.deliveryFee || 0),
+      delivery_enabled: setupForm.fulfillmentMode === "delivery",
+      pickup_enabled: setupForm.fulfillmentMode === "pickup",
+      delivery_fee:
+        setupForm.fulfillmentMode === "delivery"
+          ? Number(setupForm.deliveryFee || 0)
+          : 0,
       minimum_order: Number(setupForm.minimumOrder || 0),
-      delivery_radius_km: setupForm.deliveryRadiusKm
-        ? Number(setupForm.deliveryRadiusKm)
-        : null,
-      estimated_delivery_minutes: setupForm.estimatedDeliveryMinutes
-        ? Number(setupForm.estimatedDeliveryMinutes)
-        : null,
+      delivery_radius_km:
+        setupForm.fulfillmentMode === "delivery" && setupForm.deliveryRadiusKm
+          ? Number(setupForm.deliveryRadiusKm)
+          : 0.1,
+      estimated_delivery_minutes:
+        setupForm.fulfillmentMode === "delivery" &&
+        setupForm.estimatedDeliveryMinutes
+          ? Number(setupForm.estimatedDeliveryMinutes)
+          : null,
     };
 
     const result = storefront
@@ -1272,6 +1300,8 @@ export default function DarikDirectStorefrontSettingsPage() {
       cliq_payment_identifier: setupForm.acceptCliq
         ? setupForm.cliqIdentifier.trim()
         : null,
+      delivery_enabled: setupForm.fulfillmentMode === "delivery",
+      pickup_enabled: setupForm.fulfillmentMode === "pickup",
     };
 
     setStorefront(savedStorefront);
@@ -1988,6 +2018,51 @@ export default function DarikDirectStorefrontSettingsPage() {
                     <button
                       type="button"
                       className={
+                        setupForm.fulfillmentMode === "delivery"
+                          ? styles.activeOrderMethod
+                          : ""
+                      }
+                      onClick={() =>
+                        updateSetupField("fulfillmentMode", "delivery")
+                      }
+                    >
+                      <strong>Delivery / توصيل</strong>
+                      <span>
+                        Customers order for delivery inside your configured radius
+                        / يطلب العملاء للتوصيل ضمن النطاق الذي تحدده.
+                      </span>
+                    </button>
+
+                    <button
+                      type="button"
+                      className={
+                        setupForm.fulfillmentMode === "pickup"
+                          ? styles.activeOrderMethod
+                          : ""
+                      }
+                      onClick={() =>
+                        updateSetupField("fulfillmentMode", "pickup")
+                      }
+                    >
+                      <strong>Local pickup only / استلام محلي فقط</strong>
+                      <span>
+                        No delivery is offered. Customers collect the order from the store
+                        / لا يوجد توصيل ويستلم العميل الطلب من المتجر.
+                      </span>
+                    </button>
+                  </div>
+
+                  <div className={styles.formSectionHeading}>
+                    <div>
+                      <span>Order channel / طريقة إرسال الطلب</span>
+                      <h3>How customers submit orders / كيف يرسل العملاء الطلبات</h3>
+                    </div>
+                  </div>
+
+                  <div className={styles.orderMethodChoices}>
+                    <button
+                      type="button"
+                      className={
                         setupForm.orderSubmissionMode === "phone"
                           ? styles.activeOrderMethod
                           : ""
@@ -2068,7 +2143,11 @@ export default function DarikDirectStorefrontSettingsPage() {
                         />
                         <span>
                           <strong>Accept cash / قبول الدفع نقدًا</strong>
-                          <small>Customer pays the store or driver on delivery / يدفع العميل للمتجر أو السائق عند التوصيل.</small>
+                          <small>
+                            {setupForm.fulfillmentMode === "pickup"
+                              ? "Customer pays when collecting the order / يدفع العميل عند استلام الطلب من المتجر."
+                              : "Customer pays the store or driver on delivery / يدفع العميل للمتجر أو السائق عند التوصيل."}
+                          </small>
                         </span>
                       </label>
 
@@ -2133,18 +2212,65 @@ export default function DarikDirectStorefrontSettingsPage() {
                   </div>
 
                   <div className={styles.formGrid}>
-                    <label>
-                      Delivery fee / رسوم التوصيل
-                      <input
-                        type="number"
-                        min="0"
-                        step="0.01"
-                        value={setupForm.deliveryFee}
-                        onChange={(event) =>
-                          updateSetupField("deliveryFee", event.target.value)
-                        }
-                      />
-                    </label>
+                    {setupForm.fulfillmentMode === "delivery" ? (
+                      <>
+                        <label>
+                          Delivery fee / رسوم التوصيل
+                          <input
+                            type="number"
+                            min="0"
+                            step="0.01"
+                            value={setupForm.deliveryFee}
+                            onChange={(event) =>
+                              updateSetupField("deliveryFee", event.target.value)
+                            }
+                          />
+                        </label>
+
+                        <label>
+                          Delivery radius (km) / نطاق التوصيل (كم)
+                          <input
+                            type="number"
+                            min="0.1"
+                            step="0.1"
+                            value={setupForm.deliveryRadiusKm}
+                            onChange={(event) =>
+                              updateSetupField(
+                                "deliveryRadiusKm",
+                                event.target.value
+                              )
+                            }
+                          />
+                        </label>
+
+                        <label>
+                          Estimated delivery (minutes) / مدة التوصيل المتوقعة (دقيقة)
+                          <input
+                            type="number"
+                            min="1"
+                            value={setupForm.estimatedDeliveryMinutes}
+                            onChange={(event) =>
+                              updateSetupField(
+                                "estimatedDeliveryMinutes",
+                                event.target.value
+                              )
+                            }
+                          />
+                        </label>
+                      </>
+                    ) : (
+                      <div style={{
+                        padding: "1rem",
+                        borderRadius: "1rem",
+                        border: "1px solid #bbf7d0",
+                        background: "#f0fdf4",
+                        color: "#166534",
+                        fontWeight: 800,
+                      }}>
+                        Local pickup only is enabled. Delivery fee, delivery radius, and delivery time are disabled
+                        / تم تفعيل الاستلام المحلي فقط، وتم إيقاف رسوم ونطاق ووقت التوصيل.
+                      </div>
+                    )}
 
                     <label>
                       Minimum order / الحد الأدنى للطلب
@@ -2155,37 +2281,6 @@ export default function DarikDirectStorefrontSettingsPage() {
                         value={setupForm.minimumOrder}
                         onChange={(event) =>
                           updateSetupField("minimumOrder", event.target.value)
-                        }
-                      />
-                    </label>
-
-                    <label>
-                      Delivery radius (km) / نطاق التوصيل (كم)
-                      <input
-                        type="number"
-                        min="0.1"
-                        step="0.1"
-                        value={setupForm.deliveryRadiusKm}
-                        onChange={(event) =>
-                          updateSetupField(
-                            "deliveryRadiusKm",
-                            event.target.value
-                          )
-                        }
-                      />
-                    </label>
-
-                    <label>
-                      Estimated delivery (minutes) / مدة التوصيل المتوقعة (دقيقة)
-                      <input
-                        type="number"
-                        min="1"
-                        value={setupForm.estimatedDeliveryMinutes}
-                        onChange={(event) =>
-                          updateSetupField(
-                            "estimatedDeliveryMinutes",
-                            event.target.value
-                          )
                         }
                       />
                     </label>

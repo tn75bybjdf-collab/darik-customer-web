@@ -844,7 +844,9 @@
 }
 
 .featuredTag,
-.stockTag {
+.stockTag,
+.availableTag,
+.outOfStockTag {
   border-radius: 999px;
   padding: 6px 9px;
   font-size: 9px;
@@ -863,6 +865,16 @@
   margin-left: auto;
   background: #fff7ed;
   color: #c2410c;
+}
+
+.availableTag {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.outOfStockTag {
+  background: #fee2e2;
+  color: #b91c1c;
 }
 
 .productBody {

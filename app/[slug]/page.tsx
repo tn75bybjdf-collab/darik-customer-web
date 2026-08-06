@@ -1,6 +1,6 @@
 "use client";
 
-// DARIK_ROOT_STOREFRONT_031_AUTOPARTS_CONTACT_PRICING
+// DARIK_PICKUP_ONLY_PRODUCT_AVAILABILITY_032
 
 import { useEffect, useMemo, useState } from "react";
 import type { CSSProperties } from "react";
@@ -53,6 +53,7 @@ type Storefront = {
   cliq_account_name: string | null;
   cliq_payment_identifier: string | null;
   card_enabled: boolean;
+  delivery_enabled: boolean | null;
   pickup_enabled: boolean;
   order_submission_mode: "phone" | "online" | "both";
   storefront_theme: "modern_market" | "boutique" | "auto_pro" | "minimal" | "premium" | "menu" | null;
@@ -99,6 +100,7 @@ type Product = {
   app_price: number | string | null;
   quantity_in_stock: number | string | null;
   direct_inventory_tracking_enabled: boolean;
+  direct_availability_status: "available" | "out_of_stock" | null;
   direct_pricing_mode: "price" | "call" | "whatsapp" | "call_whatsapp" | null;
   official_product_photo_url: string | null;
   official_product_thumbnail_url: string | null;
@@ -136,6 +138,7 @@ type OnlineCheckoutForm = {
   apartmentNumber: string;
   deliveryNote: string;
   paymentMethod: "cash" | "cliq";
+  fulfillmentMethod: "delivery" | "pickup";
   latitude: number | null;
   longitude: number | null;
 };
@@ -407,6 +410,7 @@ export default function DarikDirectStorefrontPage() {
     apartmentNumber: "",
     deliveryNote: "",
     paymentMethod: "cash",
+    fulfillmentMethod: "delivery",
     latitude: null,
     longitude: null,
   });
@@ -420,6 +424,7 @@ export default function DarikDirectStorefrontPage() {
     orderNumber: string;
     total: number;
     paymentMethod: "cash" | "cliq";
+    fulfillmentMethod: "delivery" | "pickup";
   } | null>(null);
   const [detailsOpen, setDetailsOpen] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -454,18 +459,28 @@ export default function DarikDirectStorefrontPage() {
     if (!storefront) return;
 
     setCheckoutForm((current) => {
-      const currentAllowed =
+      const currentPaymentAllowed =
         (current.paymentMethod === "cash" &&
           storefront.cash_on_delivery_enabled) ||
         (current.paymentMethod === "cliq" && storefront.cliq_enabled);
-
-      if (currentAllowed) return current;
+      const deliveryEnabled = storefront.delivery_enabled !== false;
+      const pickupEnabled = storefront.pickup_enabled === true;
+      const currentFulfillmentAllowed =
+        (current.fulfillmentMethod === "delivery" && deliveryEnabled) ||
+        (current.fulfillmentMethod === "pickup" && pickupEnabled);
 
       return {
         ...current,
-        paymentMethod: storefront.cash_on_delivery_enabled
-          ? "cash"
-          : "cliq",
+        paymentMethod: currentPaymentAllowed
+          ? current.paymentMethod
+          : storefront.cash_on_delivery_enabled
+            ? "cash"
+            : "cliq",
+        fulfillmentMethod: currentFulfillmentAllowed
+          ? current.fulfillmentMethod
+          : deliveryEnabled
+            ? "delivery"
+            : "pickup",
       };
     });
   }, [storefront]);
@@ -610,6 +625,17 @@ export default function DarikDirectStorefrontPage() {
     });
   }, [products, search, selectedCategoryId]);
 
+  const availableProductCount = useMemo(
+    () =>
+      products.filter(
+        (product) =>
+          product.direct_availability_status !== "out_of_stock" &&
+          (!product.direct_inventory_tracking_enabled ||
+            Number(product.quantity_in_stock ?? 0) > 0)
+      ).length,
+    [products]
+  );
+
   const featuredProducts = useMemo(() => {
     if (selectedCategoryId !== "all" || search.trim()) return [];
     return products.filter((product) => product.storefront_featured).slice(0, 8);
@@ -632,16 +658,29 @@ export default function DarikDirectStorefrontPage() {
   );
 
   useEffect(() => {
-    const contactOnlyIds = new Set(
+    const unavailableIds = new Set(
       products
-        .filter((product) => (product.direct_pricing_mode || "price") !== "price")
+        .filter(
+          (product) =>
+            (product.direct_pricing_mode || "price") !== "price" ||
+            product.direct_availability_status === "out_of_stock" ||
+            (product.direct_inventory_tracking_enabled &&
+              Number(product.quantity_in_stock ?? 0) <= 0)
+        )
         .map((product) => product.id)
     );
-    if (contactOnlyIds.size === 0) return;
-    setCart((current) => current.filter((line) => !contactOnlyIds.has(line.productId)));
+    if (unavailableIds.size === 0) return;
+    setCart((current) =>
+      current.filter((line) => !unavailableIds.has(line.productId))
+    );
   }, [products]);
 
-  const deliveryFee = Number(storefront?.delivery_fee ?? 0);
+  const deliveryEnabled = storefront?.delivery_enabled !== false;
+  const pickupEnabled = storefront?.pickup_enabled === true;
+  const pickupOnly = Boolean(storefront && !deliveryEnabled && pickupEnabled);
+  const selectedPickup = checkoutForm.fulfillmentMethod === "pickup";
+  const deliveryFee =
+    deliveryEnabled && !selectedPickup ? Number(storefront?.delivery_fee ?? 0) : 0;
   const orderTotal = cartSubtotal + deliveryFee;
   const minimumOrder = Number(storefront?.minimum_order ?? 0);
   const minimumReached = cartSubtotal >= minimumOrder;
@@ -649,6 +688,11 @@ export default function DarikDirectStorefrontPage() {
   function addToCart(product: Product) {
     setOrderConfirmation(null);
     if ((product.direct_pricing_mode || "price") !== "price") return;
+    if (
+      product.direct_availability_status === "out_of_stock" ||
+      (product.direct_inventory_tracking_enabled &&
+        Number(product.quantity_in_stock ?? 0) <= 0)
+    ) return;
     const price = Number(product.app_price ?? 0);
     if (!Number.isFinite(price) || price <= 0) return;
 
@@ -810,10 +854,10 @@ export default function DarikDirectStorefrontPage() {
     }
 
     if (
-      checkoutForm.latitude == null ||
-      checkoutForm.longitude == null
+      checkoutForm.fulfillmentMethod === "delivery" &&
+      (checkoutForm.latitude == null || checkoutForm.longitude == null)
     ) {
-      setCheckoutError("Use exact location before placing the order.");
+      setCheckoutError("Use exact location before placing the delivery order.");
       return;
     }
 
@@ -861,10 +905,11 @@ export default function DarikDirectStorefrontPage() {
           ? await uploadCliqReceipt()
           : null;
 
-      const result = await supabase.rpc("darik_direct_place_online_order_v2", {
+      const result = await supabase.rpc("darik_direct_place_online_order_v3", {
         p_storefront_slug: storefront.slug,
         p_customer_name: customerName,
         p_customer_phone: customerPhone,
+        p_fulfillment_method: checkoutForm.fulfillmentMethod,
         p_delivery_latitude: checkoutForm.latitude,
         p_delivery_longitude: checkoutForm.longitude,
         p_items: cart.map((line) => ({
@@ -885,6 +930,7 @@ export default function DarikDirectStorefrontPage() {
         order_number?: string;
         total?: number | string;
         payment_method?: "cash" | "cliq";
+        fulfillment_method?: "delivery" | "pickup";
       } | null;
 
       setOrderConfirmation({
@@ -892,6 +938,8 @@ export default function DarikDirectStorefrontPage() {
         total: Number(response?.total ?? orderTotal),
         paymentMethod:
           response?.payment_method ?? checkoutForm.paymentMethod,
+        fulfillmentMethod:
+          response?.fulfillment_method ?? checkoutForm.fulfillmentMethod,
       });
       setCart([]);
       setOnlineCheckoutOpen(false);
@@ -1105,8 +1153,9 @@ export default function DarikDirectStorefrontPage() {
         `${line.quantity} × ${line.name} — ${money(line.price * line.quantity)}`
     ),
     "",
+    `Fulfillment: ${pickupOnly ? "Local pickup" : "Delivery"}`,
     `Subtotal: ${money(cartSubtotal)}`,
-    `Delivery: ${money(deliveryFee)}`,
+    pickupOnly ? "Pickup fee: 0.00 JOD" : `Delivery: ${money(deliveryFee)}`,
     `Total: ${money(orderTotal)}`,
   ].join("\n");
 
@@ -1141,6 +1190,12 @@ export default function DarikDirectStorefrontPage() {
     const stock = Number(product.quantity_in_stock ?? 0);
     const pricingMode = product.direct_pricing_mode || "price";
     const contactPricing = pricingMode !== "price";
+    const availabilityStatus =
+      product.direct_availability_status === "out_of_stock" ||
+      (product.direct_inventory_tracking_enabled && stock <= 0)
+        ? "out_of_stock"
+        : "available";
+    const productAvailable = availabilityStatus === "available";
     const inCart = cart.find((line) => line.productId === product.id)?.quantity ?? 0;
     const productLink =
       typeof window !== "undefined"
@@ -1187,7 +1242,21 @@ export default function DarikDirectStorefrontPage() {
             {product.storefront_featured ? (
               <strong className={styles.featuredTag}>Featured</strong>
             ) : null}
-            {product.direct_inventory_tracking_enabled && stock <= 3 ? (
+            <strong
+              className={
+                productAvailable
+                  ? styles.availableTag
+                  : styles.outOfStockTag
+              }
+            >
+              {productAvailable
+                ? "متوفر / Available"
+                : "غير متوفر / Out of stock"}
+            </strong>
+            {productAvailable &&
+            product.direct_inventory_tracking_enabled &&
+            stock > 0 &&
+            stock <= 3 ? (
               <strong className={styles.stockTag}>Only {stock} left</strong>
             ) : null}
           </div>
@@ -1245,12 +1314,16 @@ export default function DarikDirectStorefrontPage() {
               </div>
             ) : showOrdering ? (
               <button
-                aria-label={`Add ${name} to cart`}
-                disabled={!effectiveAcceptingOrders}
+                aria-label={
+                  productAvailable
+                    ? `Add ${name} to cart`
+                    : `${name} is out of stock`
+                }
+                disabled={!effectiveAcceptingOrders || !productAvailable}
                 onClick={() => addToCart(product)}
               >
-                <Icon name="plus" size={19} />
-                <span>Add</span>
+                {productAvailable ? <Icon name="plus" size={19} /> : null}
+                <span>{productAvailable ? "Add" : "Out of stock"}</span>
               </button>
             ) : contactLinks[0] ? (
               <a className={styles.productContactButton} href={contactLinks[0].href}>
@@ -1279,7 +1352,9 @@ export default function DarikDirectStorefrontPage() {
           {!showOrdering
             ? "Browse this store’s product showcase"
             : effectiveAcceptingOrders
-              ? "This store is accepting orders"
+              ? pickupOnly
+                ? "This store is accepting local pickup orders"
+                : "This store is accepting delivery orders"
               : "Browse now — ordering is temporarily paused"}
         </span>
         <a href="/">Powered by Darik</a>
@@ -1352,7 +1427,7 @@ export default function DarikDirectStorefrontPage() {
               </p>
             ) : null}
             <p className={styles.tagline}>
-              {storefront.tagline || "Everything you need, delivered from a local store."}
+              {storefront.tagline || (pickupOnly ? "Browse online and collect from this local store." : "Everything you need, delivered from a local store.")}
             </p>
             {storefront.tagline_ar ? (
               <p className={styles.arabicTagline} dir="rtl">
@@ -1391,17 +1466,19 @@ export default function DarikDirectStorefrontPage() {
               <>
                 <div>
                   <Icon name="clock" size={20} />
-                  <span>Estimated delivery</span>
+                  <span>{pickupOnly ? "Pickup method" : "Estimated delivery"}</span>
                   <strong>
-                    {storefront.estimated_delivery_minutes
-                      ? `${storefront.estimated_delivery_minutes} min`
-                      : "Store estimate"}
+                    {pickupOnly
+                      ? "Collect from store"
+                      : storefront.estimated_delivery_minutes
+                        ? `${storefront.estimated_delivery_minutes} min`
+                        : "Store estimate"}
                   </strong>
                 </div>
                 <div>
-                  <Icon name="truck" size={20} />
-                  <span>Delivery fee</span>
-                  <strong>{money(storefront.delivery_fee)}</strong>
+                  <Icon name={pickupOnly ? "store" : "truck"} size={20} />
+                  <span>{pickupOnly ? "Pickup fee" : "Delivery fee"}</span>
+                  <strong>{pickupOnly ? "Free" : money(storefront.delivery_fee)}</strong>
                 </div>
                 <div>
                   <Icon name="bag" size={20} />
@@ -1665,7 +1742,7 @@ export default function DarikDirectStorefrontPage() {
 
         <div className={styles.storyStats}>
           <article>
-            <strong>{products.length}</strong>
+            <strong>{availableProductCount}</strong>
             <span>Available products</span>
           </article>
           <article>
@@ -1674,15 +1751,25 @@ export default function DarikDirectStorefrontPage() {
           </article>
           <article>
             <strong>
-              {storefront.estimated_delivery_minutes
-                ? `${storefront.estimated_delivery_minutes}m`
-                : "Local"}
+              {pickupOnly
+                ? "Pickup"
+                : storefront.estimated_delivery_minutes
+                  ? `${storefront.estimated_delivery_minutes}m`
+                  : "Local"}
             </strong>
-            <span>Delivery estimate</span>
+            <span>{pickupOnly ? "Local pickup" : "Delivery estimate"}</span>
           </article>
           <article>
-            <strong>{!showOrdering ? "Catalog" : storefront.pickup_enabled ? "Yes" : "Delivery"}</strong>
-            <span>{!showOrdering ? "Showcase website" : storefront.pickup_enabled ? "Pickup available" : "Order method"}</span>
+            <strong>
+              {!showOrdering ? "Catalog" : pickupOnly ? "Pickup only" : "Delivery"}
+            </strong>
+            <span>
+              {!showOrdering
+                ? "Showcase website"
+                : pickupOnly
+                  ? "Collect from store"
+                  : "Order method"}
+            </span>
           </article>
         </div>
       </section>
@@ -1908,9 +1995,13 @@ export default function DarikDirectStorefrontPage() {
                 <h2>{orderConfirmation.orderNumber}</h2>
                 <strong>{money(orderConfirmation.total)}</strong>
                 <small>
-                  {orderConfirmation.paymentMethod === "cliq"
-                    ? "Your CliQ receipt was submitted for store verification. The store will contact you to confirm delivery."
-                    : "The store received your cash-on-delivery order and will contact you to confirm delivery."}
+                  {orderConfirmation.fulfillmentMethod === "pickup"
+                    ? orderConfirmation.paymentMethod === "cliq"
+                      ? "Your CliQ receipt was submitted. The store will contact you when the pickup order is ready."
+                      : "The store received your pickup order and will contact you when it is ready to collect."
+                    : orderConfirmation.paymentMethod === "cliq"
+                      ? "Your CliQ receipt was submitted for store verification. The store will contact you to confirm delivery."
+                      : "The store received your cash-on-delivery order and will contact you to confirm delivery."}
                 </small>
                 <button
                   onClick={() => {
@@ -1986,8 +2077,8 @@ export default function DarikDirectStorefrontPage() {
                     <strong>{money(cartSubtotal)}</strong>
                   </div>
                   <div>
-                    <span>Delivery</span>
-                    <strong>{money(deliveryFee)}</strong>
+                    <span>{selectedPickup ? "Pickup" : "Delivery"}</span>
+                    <strong>{selectedPickup ? "Free" : money(deliveryFee)}</strong>
                   </div>
                   <div className={styles.cartTotal}>
                     <span>Total</span>
@@ -2024,7 +2115,7 @@ export default function DarikDirectStorefrontPage() {
                       <div className={styles.onlineCheckoutHeading}>
                         <div>
                           <span>Online order</span>
-                          <h3>Delivery details</h3>
+                          <h3>{selectedPickup ? "Pickup details" : "Delivery details"}</h3>
                         </div>
                         <button
                           type="button"
@@ -2035,6 +2126,44 @@ export default function DarikDirectStorefrontPage() {
                         >
                           Cancel
                         </button>
+                      </div>
+
+                      <div className={styles.paymentMethodSection}>
+                        <span>Fulfillment method</span>
+                        <div className={styles.paymentMethodChoices}>
+                          {deliveryEnabled ? (
+                            <button
+                              type="button"
+                              className={
+                                checkoutForm.fulfillmentMethod === "delivery"
+                                  ? styles.activePaymentMethod
+                                  : ""
+                              }
+                              onClick={() =>
+                                updateCheckoutField("fulfillmentMethod", "delivery")
+                              }
+                            >
+                              <strong>Delivery</strong>
+                              <small>Delivered to your exact location</small>
+                            </button>
+                          ) : null}
+                          {pickupEnabled ? (
+                            <button
+                              type="button"
+                              className={
+                                checkoutForm.fulfillmentMethod === "pickup"
+                                  ? styles.activePaymentMethod
+                                  : ""
+                              }
+                              onClick={() =>
+                                updateCheckoutField("fulfillmentMethod", "pickup")
+                              }
+                            >
+                              <strong>Local pickup</strong>
+                              <small>Collect from the store</small>
+                            </button>
+                          ) : null}
+                        </div>
                       </div>
 
                       <div className={styles.paymentMethodSection}>
@@ -2053,7 +2182,7 @@ export default function DarikDirectStorefrontPage() {
                               }
                             >
                               <strong>Cash</strong>
-                              <small>Pay on delivery</small>
+                              <small>{selectedPickup ? "Pay at pickup" : "Pay on delivery"}</small>
                             </button>
                           ) : null}
 
@@ -2158,64 +2287,76 @@ export default function DarikDirectStorefrontPage() {
                         />
                       </label>
 
-                      <div className={styles.exactLocationBlock}>
-                        <div>
-                          <strong>Exact delivery location</strong>
-                          <small>Required for every online order</small>
+                      {selectedPickup ? (
+                        <div className={styles.exactLocationBlock}>
+                          <div>
+                            <strong>Local pickup only</strong>
+                            <small>Collect your order from the store address after confirmation.</small>
+                          </div>
+                          <strong>{storefront.address_text || "Store address shown in store information"}</strong>
                         </div>
-                        <button
-                          type="button"
-                          className={`${styles.locationButton} ${
-                            checkoutForm.latitude != null &&
-                            checkoutForm.longitude != null
-                              ? styles.locationCaptured
-                              : ""
-                          }`}
-                          onClick={captureExactLocation}
-                          disabled={locatingCustomer}
-                        >
-                          <Icon name="location" size={18} />
-                          {locatingCustomer
-                            ? "Capturing location…"
-                            : checkoutForm.latitude != null &&
+                      ) : (
+                        <>
+                          <div className={styles.exactLocationBlock}>
+                            <div>
+                              <strong>Exact delivery location</strong>
+                              <small>Required for every delivery order</small>
+                            </div>
+                            <button
+                              type="button"
+                              className={`${styles.locationButton} ${
+                                checkoutForm.latitude != null &&
                                 checkoutForm.longitude != null
-                              ? "Exact location captured"
-                              : "Use my exact location"}
-                        </button>
-                      </div>
+                                  ? styles.locationCaptured
+                                  : ""
+                              }`}
+                              onClick={captureExactLocation}
+                              disabled={locatingCustomer}
+                            >
+                              <Icon name="location" size={18} />
+                              {locatingCustomer
+                                ? "Capturing location…"
+                                : checkoutForm.latitude != null &&
+                                    checkoutForm.longitude != null
+                                  ? "Exact location captured"
+                                  : "Use my exact location"}
+                            </button>
+                          </div>
 
-                      <div className={styles.addressDetailsGrid}>
-                        <label>
-                          Building number <small>Optional</small>
-                          <input
-                            value={checkoutForm.buildingNumber}
-                            onChange={(event) =>
-                              updateCheckoutField(
-                                "buildingNumber",
-                                event.target.value
-                              )
-                            }
-                            placeholder="Example: 18"
-                          />
-                        </label>
+                          <div className={styles.addressDetailsGrid}>
+                            <label>
+                              Building number <small>Optional</small>
+                              <input
+                                value={checkoutForm.buildingNumber}
+                                onChange={(event) =>
+                                  updateCheckoutField(
+                                    "buildingNumber",
+                                    event.target.value
+                                  )
+                                }
+                                placeholder="Example: 18"
+                              />
+                            </label>
 
-                        <label>
-                          Apartment number <small>Optional</small>
-                          <input
-                            value={checkoutForm.apartmentNumber}
-                            onChange={(event) =>
-                              updateCheckoutField(
-                                "apartmentNumber",
-                                event.target.value
-                              )
-                            }
-                            placeholder="Example: 4B"
-                          />
-                        </label>
-                      </div>
+                            <label>
+                              Apartment number <small>Optional</small>
+                              <input
+                                value={checkoutForm.apartmentNumber}
+                                onChange={(event) =>
+                                  updateCheckoutField(
+                                    "apartmentNumber",
+                                    event.target.value
+                                  )
+                                }
+                                placeholder="Example: 4B"
+                              />
+                            </label>
+                          </div>
+                        </>
+                      )}
 
                       <label>
-                        Extra delivery details <small>Optional</small>
+                        {selectedPickup ? "Pickup note" : "Extra delivery details"} <small>Optional</small>
                         <textarea
                           value={checkoutForm.deliveryNote}
                           onChange={(event) =>
@@ -2224,7 +2365,11 @@ export default function DarikDirectStorefrontPage() {
                               event.target.value
                             )
                           }
-                          placeholder="Floor, entrance, landmark or delivery instructions"
+                          placeholder={
+                            selectedPickup
+                              ? "Anything the store should know before pickup"
+                              : "Floor, entrance, landmark or delivery instructions"
+                          }
                           rows={3}
                         />
                       </label>
@@ -2242,8 +2387,8 @@ export default function DarikDirectStorefrontPage() {
                         {placingOrder
                           ? "Sending order…"
                           : checkoutForm.paymentMethod === "cliq"
-                            ? `Submit CliQ order · ${money(orderTotal)}`
-                            : `Place cash order · ${money(orderTotal)}`}
+                            ? `Submit CliQ ${selectedPickup ? "pickup" : "delivery"} order · ${money(orderTotal)}`
+                            : `Place cash ${selectedPickup ? "pickup" : "delivery"} order · ${money(orderTotal)}`}
                         {!placingOrder ? <Icon name="arrow" size={18} /> : null}
                       </button>
                     </div>
@@ -2319,12 +2464,16 @@ export default function DarikDirectStorefrontPage() {
 
                   <p className={styles.checkoutNote}>
                     {onlineOrderingEnabled
-                      ? storefront.cash_on_delivery_enabled && storefront.cliq_enabled
-                        ? "This store accepts cash on delivery and CliQ for online orders."
-                        : storefront.cliq_enabled
-                          ? "This store accepts CliQ for online orders."
-                          : "This store accepts cash on delivery for online orders."
-                      : "The store will confirm product availability, address and final delivery details."}
+                      ? selectedPickup
+                        ? "This is a local pickup order. The store will confirm when it is ready to collect."
+                        : storefront.cash_on_delivery_enabled && storefront.cliq_enabled
+                          ? "This store accepts cash on delivery and CliQ for online orders."
+                          : storefront.cliq_enabled
+                            ? "This store accepts CliQ for online orders."
+                            : "This store accepts cash on delivery for online orders."
+                      : pickupOnly
+                        ? "The store will confirm product availability and pickup timing."
+                        : "The store will confirm product availability, address and final delivery details."}
                   </p>
                 </div>
               </>
