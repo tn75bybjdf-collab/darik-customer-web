@@ -2591,6 +2591,56 @@
   text-decoration: none;
 }
 
+.pricingActions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 7px;
+}
+
+.pricingCallButton,
+.pricingWhatsappButton {
+  min-height: 42px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  border-radius: var(--store-corner-medium, 12px);
+  padding: 0 13px;
+  color: #ffffff;
+  font-size: 11px;
+  font-weight: 900;
+  text-decoration: none;
+  transition: transform 150ms ease, filter 150ms ease;
+}
+
+.pricingCallButton {
+  background: var(--store-primary);
+}
+
+.pricingWhatsappButton {
+  background: #168a4a;
+}
+
+.pricingCallButton:hover,
+.pricingWhatsappButton:hover {
+  filter: brightness(0.96);
+  transform: translateY(-1px);
+}
+
+@media (max-width: 720px) {
+  .pricingActions {
+    width: 100%;
+    justify-content: stretch;
+  }
+
+  .pricingCallButton,
+  .pricingWhatsappButton,
+  .pricingActions .productContactButton {
+    flex: 1 1 0;
+  }
+}
+
 .page[data-corners="rounded"] {
   --store-corner-large: 30px;
   --store-corner-medium: 18px;

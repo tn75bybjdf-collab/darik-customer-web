@@ -1,6 +1,6 @@
 "use client";
 
-// DARIK_ROOT_STOREFRONT_027
+// DARIK_ROOT_STOREFRONT_031_AUTOPARTS_CONTACT_PRICING
 
 import { useEffect, useMemo, useState } from "react";
 import type { CSSProperties } from "react";
@@ -99,6 +99,7 @@ type Product = {
   app_price: number | string | null;
   quantity_in_stock: number | string | null;
   direct_inventory_tracking_enabled: boolean;
+  direct_pricing_mode: "price" | "call" | "whatsapp" | "call_whatsapp" | null;
   official_product_photo_url: string | null;
   official_product_thumbnail_url: string | null;
   official_product_photo_url_2: string | null;
@@ -332,7 +333,11 @@ function phoneHref(value: string | null | undefined) {
 }
 
 function whatsappDigits(value: string | null | undefined) {
-  return String(value ?? "").replace(/\D/g, "");
+  let digits = String(value ?? "").replace(/\D/g, "");
+  if (digits.startsWith("00")) digits = digits.slice(2);
+  if (digits.startsWith("0") && digits.length === 10) digits = `962${digits.slice(1)}`;
+  if (digits.startsWith("7") && digits.length === 9) digits = `962${digits}`;
+  return digits;
 }
 
 function whatsappHref(value: string | null | undefined) {
@@ -626,6 +631,16 @@ export default function DarikDirectStorefrontPage() {
     [cart]
   );
 
+  useEffect(() => {
+    const contactOnlyIds = new Set(
+      products
+        .filter((product) => (product.direct_pricing_mode || "price") !== "price")
+        .map((product) => product.id)
+    );
+    if (contactOnlyIds.size === 0) return;
+    setCart((current) => current.filter((line) => !contactOnlyIds.has(line.productId)));
+  }, [products]);
+
   const deliveryFee = Number(storefront?.delivery_fee ?? 0);
   const orderTotal = cartSubtotal + deliveryFee;
   const minimumOrder = Number(storefront?.minimum_order ?? 0);
@@ -633,6 +648,7 @@ export default function DarikDirectStorefrontPage() {
 
   function addToCart(product: Product) {
     setOrderConfirmation(null);
+    if ((product.direct_pricing_mode || "price") !== "price") return;
     const price = Number(product.app_price ?? 0);
     if (!Number.isFinite(price) || price <= 0) return;
 
@@ -1123,7 +1139,37 @@ export default function DarikDirectStorefrontPage() {
     const name = productName(product);
     const photo = productPhoto(product);
     const stock = Number(product.quantity_in_stock ?? 0);
+    const pricingMode = product.direct_pricing_mode || "price";
+    const contactPricing = pricingMode !== "price";
     const inCart = cart.find((line) => line.productId === product.id)?.quantity ?? 0;
+    const productLink =
+      typeof window !== "undefined"
+        ? `${window.location.origin}/${storefront.slug}?product=${encodeURIComponent(product.id)}#catalog`
+        : `https://getdarik.com/${storefront.slug}`;
+    const pricingMessage = [
+      `مرحبا، بدي أعرف سعر ${name}`,
+      `Hello, I would like the price for ${name}.`,
+      productLink,
+    ].join("\n");
+    const pricingWhatsappHref = whatsapp
+      ? `https://wa.me/${whatsapp}?text=${encodeURIComponent(pricingMessage)}`
+      : null;
+    const pricingCallHref = phone;
+    const canCallForPrice =
+      (pricingMode === "call" || pricingMode === "call_whatsapp") && Boolean(pricingCallHref);
+    const canWhatsappForPrice =
+      (pricingMode === "whatsapp" || pricingMode === "call_whatsapp") && Boolean(pricingWhatsappHref);
+    const hasSelectedPricingContact = canCallForPrice || canWhatsappForPrice;
+    const pricingLabel =
+      pricingMode === "call"
+        ? "اتصل لمعرفة السعر / Call for pricing"
+        : pricingMode === "whatsapp"
+          ? "واتساب لمعرفة السعر / WhatsApp for pricing"
+          : pricingMode === "call_whatsapp"
+            ? "اتصال أو واتساب لمعرفة السعر / Call or WhatsApp"
+            : showPrices
+              ? money(product.app_price)
+              : "Contact for price";
 
     return (
       <article className={styles.productCard} key={product.id}>
@@ -1168,11 +1214,36 @@ export default function DarikDirectStorefrontPage() {
 
           <div className={styles.productFooter}>
             <div>
-              <strong>{showPrices ? money(product.app_price) : "Contact for price"}</strong>
-              {showOrdering && inCart > 0 ? <span>{inCart} in cart</span> : null}
+              <strong>{pricingLabel}</strong>
+              {!contactPricing && showOrdering && inCart > 0 ? <span>{inCart} in cart</span> : null}
             </div>
 
-            {showOrdering ? (
+            {contactPricing ? (
+              <div className={styles.pricingActions}>
+                {canCallForPrice && pricingCallHref ? (
+                  <a className={styles.pricingCallButton} href={pricingCallHref}>
+                    <Icon name="call" size={17} />
+                    <span>اتصال / Call</span>
+                  </a>
+                ) : null}
+                {canWhatsappForPrice && pricingWhatsappHref ? (
+                  <a
+                    className={styles.pricingWhatsappButton}
+                    href={pricingWhatsappHref}
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    <Icon name="whatsapp" size={17} />
+                    <span>واتساب / WhatsApp</span>
+                  </a>
+                ) : null}
+                {!hasSelectedPricingContact && contactLinks[0] ? (
+                  <a className={styles.productContactButton} href={contactLinks[0].href}>
+                    Contact
+                  </a>
+                ) : null}
+              </div>
+            ) : showOrdering ? (
               <button
                 aria-label={`Add ${name} to cart`}
                 disabled={!effectiveAcceptingOrders}

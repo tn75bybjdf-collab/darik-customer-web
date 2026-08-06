@@ -6,6 +6,7 @@ import { ChangeEvent, useCallback, useEffect, useState } from "react";
 import type { Session } from "@supabase/supabase-js";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabaseBrowser";
+import DashboardLogoutButton from "../components/DashboardLogoutButton";
 import styles from "./activation.module.css";
 
 type StoreContext = {
@@ -389,6 +390,9 @@ export default function StoreActivationPage() {
             Go live / تفعيل المتجر
           </a>
         </nav>
+        <div style={{ marginTop: "auto", paddingTop: 20 }}>
+          <DashboardLogoutButton />
+        </div>
       </aside>
 
       <section className={styles.content}>

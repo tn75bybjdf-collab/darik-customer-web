@@ -12,6 +12,7 @@ import {
 import type { Session } from "@supabase/supabase-js";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabaseBrowser";
+import DashboardLogoutButton from "../components/DashboardLogoutButton";
 import styles from "./categories.module.css";
 import { getBusinessCategoryPreset } from "./categoryPresets";
 
@@ -648,6 +649,7 @@ export default function DarikDirectCategoriesPage() {
         <div className={styles.sidebarFooter}>
           <span>{session.user.email}</span>
           <a href="/store-dashboard">Back to dashboard / العودة للوحة</a>
+          <DashboardLogoutButton />
         </div>
       </aside>
 

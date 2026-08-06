@@ -1,7 +1,7 @@
 "use client";
-// DARIK_UTF8_CLEAN_REBUILD_029_V4
 
-// Darik Frontend 024: mobile-safe bilingual product form with automatic retail categories.
+// DARIK_AUTOPARTS_CONTACT_PRICING_031
+// Mobile-safe bilingual product form with automatic retail categories.
 
 import {
   ChangeEvent,
@@ -15,11 +15,13 @@ import {
 import type { Session } from "@supabase/supabase-js";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabaseBrowser";
+import DashboardLogoutButton from "../components/DashboardLogoutButton";
 import styles from "./products.module.css";
 
 type StoreContext = {
   retailer_id: string;
   business_name: string;
+  business_type: string | null;
   retailer_number: string | null;
   retailer_status: string | null;
   account_restricted: boolean;
@@ -70,6 +72,7 @@ type DirectProduct = {
   direct_description: string | null;
   direct_price: number | string | null;
   direct_compare_at_price: number | string | null;
+  direct_pricing_mode: "price" | "call" | "whatsapp" | "call_whatsapp" | null;
   direct_photo_url: string | null;
   direct_product_status: "draft" | "published" | "paused" | "archived";
   direct_updated_at: string | null;
@@ -84,6 +87,7 @@ type ProductForm = {
   directCategoryId: string;
   price: string;
   compareAtPrice: string;
+  pricingMode: "price" | "call" | "whatsapp" | "call_whatsapp";
   trackInventory: boolean;
   quantity: string;
   photoUrl: string;
@@ -100,6 +104,7 @@ const emptyForm: ProductForm = {
   directCategoryId: "",
   price: "",
   compareAtPrice: "",
+  pricingMode: "price",
   trackInventory: false,
   quantity: "0",
   photoUrl: "",
@@ -255,6 +260,7 @@ export default function DarikDirectProductsPage() {
             "direct_description",
             "direct_price",
             "direct_compare_at_price",
+            "direct_pricing_mode",
             "direct_photo_url",
             "direct_product_status",
             "direct_updated_at",
@@ -363,6 +369,8 @@ export default function DarikDirectProductsPage() {
     });
   }, [products, search, statusFilter]);
 
+  const isAutoParts = selectedStore?.business_type === "auto_parts";
+
   const categoryById = useMemo(
     () => new Map(categories.map((category) => [category.id, category])),
     [categories]
@@ -418,6 +426,7 @@ export default function DarikDirectProductsPage() {
       directCategoryId: product.direct_store_category_id || "",
       price: String(product.direct_price ?? ""),
       compareAtPrice: String(product.direct_compare_at_price ?? ""),
+      pricingMode: product.direct_pricing_mode || "price",
       trackInventory: Boolean(product.direct_inventory_tracking_enabled),
       quantity: String(product.quantity_in_stock ?? 0),
       photoUrl: product.direct_photo_url || "",
@@ -512,9 +521,15 @@ export default function DarikDirectProductsPage() {
       : null;
     const quantity = form.trackInventory ? Number(form.quantity) : 0;
     const sortOrder = Number(form.sortOrder || 1000);
+    const pricingMode = isAutoParts ? form.pricingMode : "price";
 
     if (name.length < 2) {
       setError("Enter a product name / أدخل اسم المنتج.");
+      return;
+    }
+
+    if (!["price", "call", "whatsapp", "call_whatsapp"].includes(pricingMode)) {
+      setError("Choose a valid pricing display option / اختر طريقة عرض سعر صحيحة.");
       return;
     }
 
@@ -580,6 +595,64 @@ export default function DarikDirectProductsPage() {
     if (result.error) {
       setError(result.error.message);
       setSaving(false);
+      return;
+    }
+
+    let savedProductId = editingProductId;
+    const resultData = result.data as
+      | string
+      | { id?: string; product_id?: string }
+      | null;
+
+    if (!savedProductId) {
+      if (typeof resultData === "string" && /^[0-9a-f-]{36}$/i.test(resultData)) {
+        savedProductId = resultData;
+      } else if (resultData && typeof resultData === "object") {
+        savedProductId = resultData.product_id || resultData.id || null;
+      }
+    }
+
+    if (!savedProductId) {
+      const lookupResult = await supabase
+        .from("products")
+        .select("id,direct_name,name,retailer_submitted_name")
+        .eq("retailer_id", selectedRetailerId)
+        .order("created_at", { ascending: false })
+        .limit(5);
+
+      if (!lookupResult.error && Array.isArray(lookupResult.data)) {
+        const matchingProduct = lookupResult.data.find((candidate) =>
+          [candidate.direct_name, candidate.retailer_submitted_name, candidate.name]
+            .filter(Boolean)
+            .some((candidateName) => String(candidateName).trim() === name)
+        );
+        if (matchingProduct?.id) savedProductId = String(matchingProduct.id);
+      }
+    }
+
+    if (!savedProductId) {
+      setSaving(false);
+      setError(
+        "The product was saved, but Darik could not attach the pricing display option. Refresh and edit the product again. / تم حفظ المنتج، لكن تعذر حفظ طريقة عرض السعر. حدّث الصفحة وعدّل المنتج مرة أخرى."
+      );
+      await loadCatalog();
+      return;
+    }
+
+    const pricingResult = await supabase.rpc(
+      "darik_direct_set_product_pricing_mode",
+      {
+        p_product_id: savedProductId,
+        p_pricing_mode: pricingMode,
+      }
+    );
+
+    if (pricingResult.error) {
+      setSaving(false);
+      setError(
+        `The product was saved, but the pricing display option failed. / تم حفظ المنتج، لكن تعذر حفظ طريقة عرض السعر. ${pricingResult.error.message}`
+      );
+      await loadCatalog();
       return;
     }
 
@@ -664,6 +737,7 @@ export default function DarikDirectProductsPage() {
         <div className={styles.sidebarFooter}>
           <span>{session.user.email}</span>
           <a href="/store-dashboard">Back to dashboard</a>
+          <DashboardLogoutButton />
         </div>
       </aside>
 
@@ -807,6 +881,15 @@ export default function DarikDirectProductsPage() {
                     const stock = Number(product.quantity_in_stock ?? 0);
                     const price = Number(product.direct_price ?? 0);
                     const status = product.direct_product_status;
+                    const pricingMode = product.direct_pricing_mode || "price";
+                    const pricingLabel =
+                      pricingMode === "call"
+                        ? "اتصل لمعرفة السعر / Call for pricing"
+                        : pricingMode === "whatsapp"
+                          ? "واتساب لمعرفة السعر / WhatsApp for pricing"
+                          : pricingMode === "call_whatsapp"
+                            ? "اتصال أو واتساب / Call or WhatsApp"
+                            : money(price);
 
                     return (
                       <article className={styles.productCard} key={product.id}>
@@ -849,7 +932,7 @@ export default function DarikDirectProductsPage() {
                                 <span dir="rtl">{product.direct_name_ar}</span>
                               ) : null}
                             </div>
-                            <strong>{money(price)}</strong>
+                            <strong>{pricingLabel}</strong>
                           </div>
 
                           <div className={styles.productFacts}>
@@ -1081,11 +1164,37 @@ export default function DarikDirectProductsPage() {
                   />
                 </label>
 
+                {isAutoParts ? (
+                  <label>
+                    <BilingualLabel
+                      en="Price display on storefront"
+                      ar="طريقة عرض السعر في المتجر"
+                    />
+                    <select
+                      value={form.pricingMode}
+                      onChange={(event) =>
+                        updateForm(
+                          "pricingMode",
+                          event.target.value as ProductForm["pricingMode"]
+                        )
+                      }
+                    >
+                      <option value="price">Show price / عرض السعر</option>
+                      <option value="call">Call for pricing / اتصل لمعرفة السعر</option>
+                      <option value="whatsapp">WhatsApp for pricing / واتساب لمعرفة السعر</option>
+                      <option value="call_whatsapp">Call or WhatsApp / اتصال أو واتساب</option>
+                    </select>
+                    <span style={{ color: "#667085", fontSize: 12, fontWeight: 600, lineHeight: 1.55 }}>
+                      Contact-pricing options hide the public price and cart button. The selling price remains private in your dashboard. / خيارات التواصل تخفي السعر وزر السلة عن العملاء، ويبقى سعر البيع ظاهرًا لك داخل لوحة التحكم فقط.
+                    </span>
+                  </label>
+                ) : null}
+
                 <div className={styles.threeColumns}>
                   <label>
                     <BilingualLabel
-                      en="Selling price"
-                      ar="سعر البيع"
+                      en={isAutoParts && form.pricingMode !== "price" ? "Internal selling price" : "Selling price"}
+                      ar={isAutoParts && form.pricingMode !== "price" ? "سعر البيع الداخلي" : "سعر البيع"}
                     />
                     <div className={styles.moneyInput}>
                       <input
