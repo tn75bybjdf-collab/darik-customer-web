@@ -892,3 +892,12 @@
   .addressForm { grid-template-columns: 1fr; }
   .addressForm button { min-height: 46px; }
 }
+
+.orderStatusShowcase {
+  background: rgba(17, 24, 39, 0.88);
+  color: #ffffff;
+}
+
+.orderStatusShowcase span {
+  background: #facc15;
+}

@@ -297,7 +297,7 @@ export default function StoreSignupPage() {
           {businessType === "other" ? <label className={styles.label}>Describe the business<input value={businessTypeOther} onChange={(e) => setBusinessTypeOther(e.target.value)} /></label> : null}
           <label className={styles.label}>Owner / main contact<input value={contactName} onChange={(e) => setContactName(e.target.value)} /></label>
           <label className={styles.label}>Business phone<input inputMode="tel" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="07XXXXXXXX" /></label>
-          <label className={`${styles.label} ${styles.full}`}>Permanent Darik store link<div className={styles.slugWrap}><span>getdarik.com/store/</span><input value={slug} readOnly aria-readonly="true" /></div>
+          <label className={`${styles.label} ${styles.full}`}>Permanent Darik store link<div className={styles.slugWrap}><span>getdarik.com/</span><input value={slug} readOnly aria-readonly="true" /></div>
             <span className={styles.helper}>Created automatically from the organization/store name and locked after signup.</span>
             {slugState === "checking" ? <span className={styles.helper}>Checking availability…</span> : null}
             {slugState === "available" ? <span className={styles.available}>Available — this address will be reserved.</span> : null}
@@ -325,7 +325,7 @@ export default function StoreSignupPage() {
           <label className={styles.label}>Enter email again<input type="email" value={emailConfirm} onChange={(e) => setEmailConfirm(e.target.value)} /></label>
           <label className={styles.label}>Password<input type="password" autoComplete="new-password" value={password} onChange={(e) => setPassword(e.target.value)} /><span className={styles.passwordRules}><span className={passwordChecks.length ? styles.passed : ""}>8+ characters</span><span className={passwordChecks.uppercase ? styles.passed : ""}>Uppercase</span><span className={passwordChecks.lowercase ? styles.passed : ""}>Lowercase</span><span className={passwordChecks.special ? styles.passed : ""}>Special character</span></span></label>
           <label className={styles.label}>Enter password again<input type="password" autoComplete="new-password" value={passwordConfirm} onChange={(e) => setPasswordConfirm(e.target.value)} /></label>
-          <div className={`${styles.summary} ${styles.full}`}><div><span>Store</span><strong>{organizationName}</strong></div><div><span>Store link</span><strong>getdarik.com/store/{slug}</strong></div><div><span>Locked location</span><strong>{location?.address}</strong></div><div><span>Starting status</span><strong>Free draft · Coming Soon publicly</strong></div></div>
+          <div className={`${styles.summary} ${styles.full}`}><div><span>Store</span><strong>{organizationName}</strong></div><div><span>Store link</span><strong>getdarik.com/{slug}</strong></div><div><span>Locked location</span><strong>{location?.address}</strong></div><div><span>Starting status</span><strong>Free draft · Coming Soon publicly</strong></div></div>
         </div>
         <div className={styles.actions}><button type="button" className={styles.backButton} onClick={() => setStep(2)}>Back</button><div className={styles.actionsRight}><button type="button" className={styles.primaryButton} onClick={createAccount} disabled={busy}>{busy ? "Creating store…" : "Create free store"}</button></div></div>
       </> : null}

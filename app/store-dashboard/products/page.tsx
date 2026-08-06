@@ -692,7 +692,7 @@ export default function DarikDirectProductsPage() {
             {selectedStore?.storefront_slug ? (
               <a
                 className={styles.previewButton}
-                href={`/store/${selectedStore.storefront_slug}`}
+                href={`/${selectedStore.storefront_slug}`}
                 target="_blank"
                 rel="noreferrer"
               >

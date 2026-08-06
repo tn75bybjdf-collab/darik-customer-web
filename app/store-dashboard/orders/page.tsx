@@ -625,7 +625,7 @@ export default function DarikDirectOrdersPage() {
                       className={styles.emptyOrderPrimaryAction}
                       href={
                         storeIsLive
-                          ? `/store/${selectedStore?.storefront_slug || ""}`
+                          ? `/${selectedStore?.storefront_slug || ""}`
                           : "/store-dashboard/activation"
                       }
                     >

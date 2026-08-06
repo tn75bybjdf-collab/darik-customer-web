@@ -385,7 +385,7 @@ export default function StoreActivationsAdminPage() {
                   <div>
                     <h2>{row.store_name}</h2>
                     <p>
-                      getdarik.com/store/{row.slug} · submitted{" "}
+                      getdarik.com/{row.slug} · submitted{" "}
                       {new Date(row.created_at).toLocaleString()}
                     </p>
                   </div>
@@ -496,7 +496,7 @@ export default function StoreActivationsAdminPage() {
                     ) : null}
                     <a
                       className={styles.receipt}
-                      href={`/store/${row.slug}`}
+                      href={`/${row.slug}`}
                       target="_blank"
                       rel="noreferrer"
                     >

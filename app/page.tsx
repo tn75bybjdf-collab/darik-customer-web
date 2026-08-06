@@ -1,5 +1,7 @@
 "use client";
 
+// DARIK_ROOT_LINKS_027
+
 // DARIK_DISCOVERY_HOME_026
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import { supabase } from "@/lib/supabaseBrowser";
@@ -52,6 +54,7 @@ type NearbyStore = {
   public_address: string | null;
   public_address_ar: string | null;
   is_accepting_orders: boolean | null;
+  show_ordering: boolean | null;
   minimum_order: number | string | null;
   delivery_fee: number | string | null;
   delivery_radius_km: number | string | null;
@@ -227,6 +230,9 @@ const copy = {
     seeAll: "See all",
     open: "Accepting orders",
     closed: "Orders paused",
+    showcase: "Website & catalog",
+    browseCatalog: "Browse catalog",
+    contactStore: "Contact store",
     delivery: "delivery",
     free: "Free",
     min: "min",
@@ -306,6 +312,9 @@ const copy = {
     seeAll: "عرض الكل",
     open: "يستقبل طلبات",
     closed: "الطلبات متوقفة",
+    showcase: "موقع وكتالوج",
+    browseCatalog: "تصفح الكتالوج",
+    contactStore: "تواصل مع المتجر",
     delivery: "توصيل",
     free: "مجاني",
     min: "دقيقة",
@@ -466,11 +475,11 @@ function StoreCard({ store, language }: { store: NearbyStore; language: Language
       };
 
   return (
-    <a className={styles.storeCard} href={`/store/${store.slug}`} aria-label={`${t.shopStore}: ${displayStoreName(store, language)}`}>
+    <a className={styles.storeCard} href={`/${store.slug}`} aria-label={`${t.shopStore}: ${displayStoreName(store, language)}`}>
       <div className={styles.storeCover} style={coverStyle}>
-        <div className={`${styles.orderStatus} ${store.is_accepting_orders ? styles.orderStatusOpen : styles.orderStatusPaused}`}>
+        <div className={`${styles.orderStatus} ${store.show_ordering === false ? styles.orderStatusShowcase : store.is_accepting_orders ? styles.orderStatusOpen : styles.orderStatusPaused}`}>
           <span />
-          {store.is_accepting_orders ? t.open : t.closed}
+          {store.show_ordering === false ? t.showcase : store.is_accepting_orders ? t.open : t.closed}
         </div>
         <div className={styles.distanceBadge}>
           <Icon name="location" size={15} />
@@ -494,9 +503,19 @@ function StoreCard({ store, language }: { store: NearbyStore; language: Language
         {(language === "ar" ? store.public_address_ar || store.public_address : store.public_address || store.public_address_ar) ? <p className={styles.storeAddress}><Icon name="location" size={16} />{language === "ar" ? store.public_address_ar || store.public_address : store.public_address || store.public_address_ar}</p> : null}
 
         <div className={styles.storeFacts}>
-          <span><Icon name="clock" size={17} />{store.estimated_delivery_minutes ? `${store.estimated_delivery_minutes} ${t.min}` : "—"}</span>
-          <span><Icon name="shop" size={17} />{deliveryFee <= 0 ? t.free : `${money(deliveryFee)} JOD`} {t.delivery}</span>
-          <span>{money(store.minimum_order)} JOD {t.minimum}</span>
+          {store.show_ordering === false ? (
+            <>
+              <span><Icon name="shop" size={17} />{t.browseCatalog}</span>
+              <span><Icon name="heart" size={17} />{t.contactStore}</span>
+              <span>{t.showcase}</span>
+            </>
+          ) : (
+            <>
+              <span><Icon name="clock" size={17} />{store.estimated_delivery_minutes ? `${store.estimated_delivery_minutes} ${t.min}` : "—"}</span>
+              <span><Icon name="shop" size={17} />{deliveryFee <= 0 ? t.free : `${money(deliveryFee)} JOD`} {t.delivery}</span>
+              <span>{money(store.minimum_order)} JOD {t.minimum}</span>
+            </>
+          )}
         </div>
       </div>
     </a>

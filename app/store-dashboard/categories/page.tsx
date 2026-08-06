@@ -683,7 +683,7 @@ export default function DarikDirectCategoriesPage() {
             {selectedStore?.storefront_slug ? (
               <a
                 className={styles.secondaryButton}
-                href={`/store/${selectedStore.storefront_slug}`}
+                href={`/${selectedStore.storefront_slug}`}
                 target="_blank"
                 rel="noreferrer"
               >

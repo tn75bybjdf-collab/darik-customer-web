@@ -578,7 +578,7 @@ export default function DarikDirectOverviewPage() {
                   </div>
                   <h2>{selectedStore.business_name}</h2>
                   <div className={styles.commandLinkRow}>
-                    <span>getdarik.com/store/</span>
+                    <span>getdarik.com/</span>
                     <strong>{storefront?.slug || selectedStore.storefront_slug || "store"}</strong>
                     <span className={styles.commandLinkState}>
                       {isLive
@@ -625,7 +625,7 @@ export default function DarikDirectOverviewPage() {
                   className={styles.commandPrimaryButton}
                   href={
                     isLive && storefront?.slug
-                      ? `/store/${storefront.slug}`
+                      ? `/${storefront.slug}`
                       : "/store-dashboard/activation"
                   }
                   target={isLive && storefront?.slug ? "_blank" : undefined}

@@ -1,5 +1,7 @@
 "use client";
 
+// DARIK_ACTIVATION_EXISTING_PRICING_028
+
 import { ChangeEvent, useCallback, useEffect, useState } from "react";
 import type { Session } from "@supabase/supabase-js";
 import { useRouter } from "next/navigation";
@@ -407,7 +409,7 @@ export default function StoreActivationPage() {
             <p>The public storefront is active and can receive orders. / واجهة المتجر العامة مفعّلة ويمكنها استقبال الطلبات.</p>
             <div className={styles.locked}>
               <strong>Public address / رابط المتجر العام</strong>
-              <span>getdarik.com/store/{store?.storefront_slug}</span>
+              <span>getdarik.com/{store?.storefront_slug}</span>
               {store?.activation_expires_at ? (
                 <span>
                   Active through {new Date(store.activation_expires_at).toLocaleDateString()} / مفعّل حتى{" "}
@@ -482,7 +484,7 @@ export default function StoreActivationPage() {
                             </p>
                             <div className={styles.domainExample}>
                               <span>Example / مثال</span>
-                              <code>getdarik.com/store/fantoushmall</code>
+                              <code>getdarik.com/fantoushmall</code>
                               <span>becomes / يصبح</span>
                               <code>fantoushmall.com</code>
                             </div>

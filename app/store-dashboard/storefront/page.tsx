@@ -1,5 +1,7 @@
 "use client";
 
+// DARIK_STOREFRONT_DESIGN_027
+
 import {
   ChangeEvent,
   FormEvent,
@@ -13,6 +15,7 @@ import type { Session } from "@supabase/supabase-js";
 import { supabase } from "@/lib/supabaseBrowser";
 import StorefrontPreviewModal from "../components/StorefrontPreviewModal";
 import styles from "../dashboard.module.css";
+import designStyles from "./storefront-design.module.css";
 
 type StoreContext = {
   retailer_id: string;
@@ -56,6 +59,121 @@ type CustomInformation = {
 type OperatingHours = Record<string, string>;
 
 type OrderSubmissionMode = "phone" | "online" | "both";
+type StorefrontTheme =
+  | "modern_market"
+  | "boutique"
+  | "auto_pro"
+  | "minimal"
+  | "premium"
+  | "menu";
+type AppearanceMode = "light" | "dark";
+type ProductCardStyle = "standard" | "image_first" | "compact";
+type CornerStyle = "rounded" | "soft" | "square";
+type HeroLayout = "centered" | "split" | "immersive";
+type StorefrontSection = "categories" | "catalog" | "story";
+
+type StorefrontDesign = {
+  storefrontTheme: StorefrontTheme;
+  appearanceMode: AppearanceMode;
+  productCardStyle: ProductCardStyle;
+  cornerStyle: CornerStyle;
+  heroLayout: HeroLayout;
+  sectionOrder: StorefrontSection[];
+  showPrices: boolean;
+  showOrdering: boolean;
+  showPhone: boolean;
+  showWhatsapp: boolean;
+  showStoreStory: boolean;
+};
+
+const defaultStorefrontDesign: StorefrontDesign = {
+  storefrontTheme: "modern_market",
+  appearanceMode: "light",
+  productCardStyle: "standard",
+  cornerStyle: "rounded",
+  heroLayout: "centered",
+  sectionOrder: ["categories", "catalog", "story"],
+  showPrices: true,
+  showOrdering: true,
+  showPhone: true,
+  showWhatsapp: true,
+  showStoreStory: true,
+};
+
+const themeOptions: Array<{
+  value: StorefrontTheme;
+  name: string;
+  nameAr: string;
+  description: string;
+}> = [
+  { value: "modern_market", name: "Modern Market", nameAr: "السوق العصري", description: "Clean, bright, and product focused" },
+  { value: "boutique", name: "Boutique", nameAr: "بوتيك", description: "Editorial presentation for fashion and beauty" },
+  { value: "auto_pro", name: "Auto Pro", nameAr: "أوتو برو", description: "Bold industrial styling for parts and tools" },
+  { value: "minimal", name: "Minimal", nameAr: "بسيط", description: "Quiet, fast, and distraction free" },
+  { value: "premium", name: "Premium", nameAr: "فاخر", description: "Dark luxury styling with strong imagery" },
+  { value: "menu", name: "Menu", nameAr: "قائمة", description: "Warm, friendly layout for food and bakeries" },
+];
+
+function normalizeSectionOrder(value: unknown): StorefrontSection[] {
+  const allowed: StorefrontSection[] = ["categories", "catalog", "story"];
+  const input = Array.isArray(value) ? value : [];
+  const next = input.filter(
+    (item, index): item is StorefrontSection =>
+      allowed.includes(item as StorefrontSection) && input.indexOf(item) === index
+  );
+  for (const item of allowed) if (!next.includes(item)) next.push(item);
+  return next;
+}
+
+function normalizeDesignDraft(value: unknown): Partial<StorefrontDesign> {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return {};
+  const record = value as Record<string, unknown>;
+  return {
+    storefrontTheme: themeOptions.some((item) => item.value === record.storefrontTheme)
+      ? (record.storefrontTheme as StorefrontTheme)
+      : undefined,
+    appearanceMode: record.appearanceMode === "dark" || record.appearanceMode === "light"
+      ? record.appearanceMode
+      : undefined,
+    productCardStyle: ["standard", "image_first", "compact"].includes(String(record.productCardStyle))
+      ? (record.productCardStyle as ProductCardStyle)
+      : undefined,
+    cornerStyle: ["rounded", "soft", "square"].includes(String(record.cornerStyle))
+      ? (record.cornerStyle as CornerStyle)
+      : undefined,
+    heroLayout: ["centered", "split", "immersive"].includes(String(record.heroLayout))
+      ? (record.heroLayout as HeroLayout)
+      : undefined,
+    sectionOrder: normalizeSectionOrder(record.sectionOrder),
+    showPrices: typeof record.showPrices === "boolean" ? record.showPrices : undefined,
+    showOrdering: typeof record.showOrdering === "boolean" ? record.showOrdering : undefined,
+    showPhone: typeof record.showPhone === "boolean" ? record.showPhone : undefined,
+    showWhatsapp: typeof record.showWhatsapp === "boolean" ? record.showWhatsapp : undefined,
+    showStoreStory: typeof record.showStoreStory === "boolean" ? record.showStoreStory : undefined,
+  };
+}
+
+function draftDesignString(value: unknown, key: string, fallback: string) {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return fallback;
+  const candidate = String((value as Record<string, unknown>)[key] ?? "").trim();
+  return candidate || fallback;
+}
+
+function designFromForm(form: StorefrontForm): StorefrontDesign {
+  return {
+    storefrontTheme: form.storefrontTheme,
+    appearanceMode: form.appearanceMode,
+    productCardStyle: form.productCardStyle,
+    cornerStyle: form.cornerStyle,
+    heroLayout: form.heroLayout,
+    sectionOrder: normalizeSectionOrder(form.sectionOrder),
+    showPrices: form.showPrices,
+    showOrdering: form.showOrdering,
+    showPhone: form.showPhone,
+    showWhatsapp: form.showWhatsapp,
+    showStoreStory: form.showStoreStory,
+  };
+}
 
 type StorefrontForm = {
   slug: string;
@@ -91,6 +209,17 @@ type StorefrontForm = {
   customInformation: CustomInformation[];
   operatingHours: OperatingHours;
   operatingHoursAr: OperatingHours;
+  storefrontTheme: StorefrontTheme;
+  appearanceMode: AppearanceMode;
+  productCardStyle: ProductCardStyle;
+  cornerStyle: CornerStyle;
+  heroLayout: HeroLayout;
+  sectionOrder: StorefrontSection[];
+  showPrices: boolean;
+  showOrdering: boolean;
+  showPhone: boolean;
+  showWhatsapp: boolean;
+  showStoreStory: boolean;
 };
 
 const operatingDays = [
@@ -238,6 +367,19 @@ type StorefrontSettings = {
   activation_status?: string | null;
   activation_plan?: string | null;
   activation_expires_at?: string | null;
+  storefront_theme?: StorefrontTheme | null;
+  appearance_mode?: AppearanceMode | null;
+  product_card_style?: ProductCardStyle | null;
+  corner_style?: CornerStyle | null;
+  hero_layout?: HeroLayout | null;
+  section_order?: StorefrontSection[] | null;
+  show_prices?: boolean | null;
+  show_ordering?: boolean | null;
+  show_phone?: boolean | null;
+  show_whatsapp?: boolean | null;
+  show_store_story?: boolean | null;
+  design_draft?: Partial<StorefrontDesign> | null;
+  design_published_at?: string | null;
   updated_at?: string | null;
 };
 
@@ -341,6 +483,7 @@ export default function DarikDirectStorefrontSettingsPage() {
     customInformation: [],
     operatingHours: { ...defaultOperatingHours },
     operatingHoursAr: { ...defaultOperatingHours },
+    ...defaultStorefrontDesign,
   });
 
   const [formDirty, setFormDirty] = useState(false);
@@ -542,9 +685,9 @@ export default function DarikDirectStorefrontSettingsPage() {
                 loadedStorefront.about_text_ar ||
                 "",
               aboutTextAr: "",
-              primaryColor: loadedStorefront.primary_color,
-              accentColor: loadedStorefront.accent_color,
-              backgroundColor: loadedStorefront.background_color,
+              primaryColor: draftDesignString(loadedStorefront.design_draft, "primaryColor", loadedStorefront.primary_color),
+              accentColor: draftDesignString(loadedStorefront.design_draft, "accentColor", loadedStorefront.accent_color),
+              backgroundColor: draftDesignString(loadedStorefront.design_draft, "backgroundColor", loadedStorefront.background_color),
               deliveryFee: String(loadedStorefront.delivery_fee ?? "0"),
               minimumOrder: String(loadedStorefront.minimum_order ?? "0"),
               deliveryRadiusKm:
@@ -570,6 +713,19 @@ export default function DarikDirectStorefrontSettingsPage() {
                 loadedStorefront.operating_hours_ar
               ),
               operatingHoursAr: { ...defaultOperatingHours },
+              ...defaultStorefrontDesign,
+              storefrontTheme: loadedStorefront.storefront_theme ?? defaultStorefrontDesign.storefrontTheme,
+              appearanceMode: loadedStorefront.appearance_mode ?? defaultStorefrontDesign.appearanceMode,
+              productCardStyle: loadedStorefront.product_card_style ?? defaultStorefrontDesign.productCardStyle,
+              cornerStyle: loadedStorefront.corner_style ?? defaultStorefrontDesign.cornerStyle,
+              heroLayout: loadedStorefront.hero_layout ?? defaultStorefrontDesign.heroLayout,
+              sectionOrder: normalizeSectionOrder(loadedStorefront.section_order),
+              showPrices: loadedStorefront.show_prices ?? true,
+              showOrdering: loadedStorefront.show_ordering ?? true,
+              showPhone: loadedStorefront.show_phone ?? true,
+              showWhatsapp: loadedStorefront.show_whatsapp ?? true,
+              showStoreStory: loadedStorefront.show_store_story ?? true,
+              ...normalizeDesignDraft(loadedStorefront.design_draft),
             }
           : {
               slug: cleanSlug(selectedStore.business_name),
@@ -605,6 +761,7 @@ export default function DarikDirectStorefrontSettingsPage() {
               customInformation: [],
               operatingHours: { ...defaultOperatingHours },
               operatingHoursAr: { ...defaultOperatingHours },
+              ...defaultStorefrontDesign,
             };
 
         let nextForm = databaseForm;
@@ -949,6 +1106,7 @@ export default function DarikDirectStorefrontSettingsPage() {
     }
 
     if (
+      setupForm.showOrdering &&
       (setupForm.orderSubmissionMode === "phone" ||
         setupForm.orderSubmissionMode === "both") &&
       !setupForm.phone.trim() &&
@@ -961,20 +1119,21 @@ export default function DarikDirectStorefrontSettingsPage() {
     }
 
     const onlineOrderingSelected =
-      setupForm.orderSubmissionMode === "online" ||
-      setupForm.orderSubmissionMode === "both";
+      setupForm.showOrdering &&
+      (setupForm.orderSubmissionMode === "online" ||
+        setupForm.orderSubmissionMode === "both");
 
     if (onlineOrderingSelected && !setupForm.acceptCash && !setupForm.acceptCliq) {
       showSaveError("Select at least one online payment method: Cash or CliQ.");
       return;
     }
 
-    if (setupForm.acceptCliq && !setupForm.cliqAccountName.trim()) {
+    if (setupForm.showOrdering && setupForm.acceptCliq && !setupForm.cliqAccountName.trim()) {
       showSaveError("Enter the CliQ account holder or business name.");
       return;
     }
 
-    if (setupForm.acceptCliq && !setupForm.cliqIdentifier.trim()) {
+    if (setupForm.showOrdering && setupForm.acceptCliq && !setupForm.cliqIdentifier.trim()) {
       showSaveError("Enter the store's CliQ alias or registered mobile number.");
       return;
     }
@@ -1021,9 +1180,12 @@ export default function DarikDirectStorefrontSettingsPage() {
         ])
       ),
       operating_hours_ar: {},
-      primary_color: setupForm.primaryColor,
-      accent_color: setupForm.accentColor,
-      background_color: setupForm.backgroundColor,
+      design_draft: {
+        ...designFromForm(setupForm),
+        primaryColor: setupForm.primaryColor,
+        accentColor: setupForm.accentColor,
+        backgroundColor: setupForm.backgroundColor,
+      },
       delivery_fee: Number(setupForm.deliveryFee || 0),
       minimum_order: Number(setupForm.minimumOrder || 0),
       delivery_radius_km: setupForm.deliveryRadiusKm
@@ -1049,6 +1211,20 @@ export default function DarikDirectStorefrontSettingsPage() {
             direct_storefront_enabled: false,
             marketplace_listing_enabled: true,
             is_accepting_orders: false,
+            primary_color: setupForm.primaryColor,
+            accent_color: setupForm.accentColor,
+            background_color: setupForm.backgroundColor,
+            storefront_theme: setupForm.storefrontTheme,
+            appearance_mode: setupForm.appearanceMode,
+            product_card_style: setupForm.productCardStyle,
+            corner_style: setupForm.cornerStyle,
+            hero_layout: setupForm.heroLayout,
+            section_order: setupForm.sectionOrder,
+            show_prices: setupForm.showPrices,
+            show_ordering: setupForm.showOrdering,
+            show_phone: setupForm.showPhone,
+            show_whatsapp: setupForm.showWhatsapp,
+            show_store_story: setupForm.showStoreStory,
           })
           .select("*")
           .single();
@@ -1122,6 +1298,56 @@ export default function DarikDirectStorefrontSettingsPage() {
     );
     setSaving(false);
     await loadContext();
+  }
+
+  async function publishStorefrontDesign() {
+    if (!storefront || !selectedStore) {
+      setError("Create and save the storefront before publishing its design.");
+      return;
+    }
+
+    setSaving(true);
+    setError("");
+    setMessage("");
+
+    const design = designFromForm(setupForm);
+    const result = await supabase
+      .from("retailer_storefronts")
+      .update({
+        storefront_theme: design.storefrontTheme,
+        appearance_mode: design.appearanceMode,
+        product_card_style: design.productCardStyle,
+        corner_style: design.cornerStyle,
+        hero_layout: design.heroLayout,
+        section_order: design.sectionOrder,
+        show_prices: design.showPrices,
+        show_ordering: design.showOrdering,
+        show_phone: design.showPhone,
+        show_whatsapp: design.showWhatsapp,
+        show_store_story: design.showStoreStory,
+        primary_color: setupForm.primaryColor,
+        accent_color: setupForm.accentColor,
+        background_color: setupForm.backgroundColor,
+        design_draft: null,
+        design_published_at: new Date().toISOString(),
+      })
+      .eq("id", storefront.id)
+      .select("*")
+      .single();
+
+    setSaving(false);
+
+    if (result.error) {
+      showSaveError(formatSupabaseSaveError(result.error));
+      return;
+    }
+
+    setStorefront(result.data as StorefrontSettings);
+    setMessage(
+      formDirty
+        ? "Design published. Other storefront changes are still unsaved—press Save storefront profile when ready. / تم نشر التصميم، وما زالت هناك تغييرات أخرى غير محفوظة."
+        : "Design published / تم نشر تصميم المتجر"
+    );
   }
 
   async function toggleOrders() {
@@ -1301,7 +1527,7 @@ export default function DarikDirectStorefrontSettingsPage() {
                     {storefront.activation_status === "active" ? (
                       <>
                         <a
-                          href={`/store/${storefront.slug}`}
+                          href={`/${storefront.slug}`}
                           target="_blank"
                           rel="noreferrer"
                         >
@@ -1338,7 +1564,7 @@ export default function DarikDirectStorefrontSettingsPage() {
                     <label className={styles.wideField}>
                       Permanent store link / رابط المتجر الدائم
                       <div className={styles.slugInput}>
-                        <span>getdarik.com/store/</span>
+                        <span>getdarik.com/</span>
                         <input
                           value={setupForm.slug}
                           onChange={(event) =>
@@ -1963,6 +2189,148 @@ export default function DarikDirectStorefrontSettingsPage() {
                         }
                       />
                     </label>
+                  </div>
+                </div>
+
+                <div className={`${styles.formSection} ${designStyles.designStudio}`}>
+                  <div className={styles.formSectionHeading}>
+                    <div>
+                      <span>Store design / تصميم المتجر</span>
+                      <h3>Make the website feel like your business / خلّي الموقع يعكس هوية نشاطك</h3>
+                    </div>
+                    <p>Choose a professionally controlled theme, preview it, then publish it without changing products or orders.</p>
+                  </div>
+
+                  <div className={designStyles.themeGrid}>
+                    {themeOptions.map((theme) => (
+                      <button
+                        type="button"
+                        key={theme.value}
+                        className={`${designStyles.themeCard} ${
+                          setupForm.storefrontTheme === theme.value
+                            ? designStyles.themeSelected
+                            : ""
+                        }`}
+                        data-theme-preview={theme.value}
+                        onClick={() => updateSetupField("storefrontTheme", theme.value)}
+                      >
+                        <span className={designStyles.themeMockup}>
+                          <i />
+                          <b />
+                          <em />
+                          <small />
+                        </span>
+                        <strong>{theme.name} / {theme.nameAr}</strong>
+                        <small>{theme.description}</small>
+                      </button>
+                    ))}
+                  </div>
+
+                  <div className={designStyles.controlGrid}>
+                    <label>
+                      Appearance / المظهر
+                      <select
+                        value={setupForm.appearanceMode}
+                        onChange={(event) => updateSetupField("appearanceMode", event.target.value as AppearanceMode)}
+                      >
+                        <option value="light">Light / فاتح</option>
+                        <option value="dark">Dark / داكن</option>
+                      </select>
+                    </label>
+                    <label>
+                      Product cards / بطاقات المنتجات
+                      <select
+                        value={setupForm.productCardStyle}
+                        onChange={(event) => updateSetupField("productCardStyle", event.target.value as ProductCardStyle)}
+                      >
+                        <option value="standard">Standard / قياسي</option>
+                        <option value="image_first">Image first / الصورة أولاً</option>
+                        <option value="compact">Compact / مضغوط</option>
+                      </select>
+                    </label>
+                    <label>
+                      Corners / شكل الزوايا
+                      <select
+                        value={setupForm.cornerStyle}
+                        onChange={(event) => updateSetupField("cornerStyle", event.target.value as CornerStyle)}
+                      >
+                        <option value="rounded">Rounded / دائرية</option>
+                        <option value="soft">Soft / ناعمة</option>
+                        <option value="square">Square / مربعة</option>
+                      </select>
+                    </label>
+                    <label>
+                      Hero layout / تصميم الغلاف
+                      <select
+                        value={setupForm.heroLayout}
+                        onChange={(event) => updateSetupField("heroLayout", event.target.value as HeroLayout)}
+                      >
+                        <option value="centered">Centered / وسطي</option>
+                        <option value="split">Split / مقسوم</option>
+                        <option value="immersive">Immersive / غامر</option>
+                      </select>
+                    </label>
+                  </div>
+
+                  <div className={designStyles.toggleGrid}>
+                    {[
+                      ["showPrices", "Show prices / إظهار الأسعار", "Turn off for catalog or quote-based businesses"],
+                      ["showOrdering", "Enable cart and checkout / تفعيل السلة والطلب", "Turn off for a true showcase-only website"],
+                      ["showPhone", "Show phone / إظهار الهاتف", "Customers can tap to call"],
+                      ["showWhatsapp", "Show WhatsApp / إظهار واتساب", "Customers can open a WhatsApp conversation"],
+                      ["showStoreStory", "Show About section / إظهار قسم عن المتجر", "Display the store story near the bottom"],
+                    ].map(([field, label, helper]) => (
+                      <label className={designStyles.switchCard} key={field}>
+                        <span><strong>{label}</strong><small>{helper}</small></span>
+                        <input
+                          type="checkbox"
+                          checked={Boolean(setupForm[field as keyof StorefrontForm])}
+                          onChange={(event) => updateSetupField(field as keyof StorefrontForm, event.target.checked as never)}
+                        />
+                      </label>
+                    ))}
+                  </div>
+
+                  <div className={designStyles.sectionOrderBox}>
+                    <div>
+                      <strong>Homepage section order / ترتيب أقسام الصفحة</strong>
+                      <span>Move each section up or down / حرّك كل قسم للأعلى أو الأسفل</span>
+                    </div>
+                    {setupForm.sectionOrder.map((section, index) => (
+                      <div className={designStyles.orderRow} key={section}>
+                        <span>{index + 1}</span>
+                        <strong>{section === "categories" ? "Categories / الأقسام" : section === "catalog" ? "Products / المنتجات" : "About store / عن المتجر"}</strong>
+                        <div>
+                          <button
+                            type="button"
+                            disabled={index === 0}
+                            onClick={() => {
+                              const next = [...setupForm.sectionOrder];
+                              [next[index - 1], next[index]] = [next[index], next[index - 1]];
+                              updateSetupField("sectionOrder", next);
+                            }}
+                          >↑</button>
+                          <button
+                            type="button"
+                            disabled={index === setupForm.sectionOrder.length - 1}
+                            onClick={() => {
+                              const next = [...setupForm.sectionOrder];
+                              [next[index + 1], next[index]] = [next[index], next[index + 1]];
+                              updateSetupField("sectionOrder", next);
+                            }}
+                          >↓</button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className={designStyles.designActions}>
+                    <button type="button" onClick={() => setPreviewOpen(true)}>
+                      Preview current design / معاينة التصميم الحالي
+                    </button>
+                    <button type="button" onClick={publishStorefrontDesign} disabled={!storefront || saving}>
+                      {saving ? "Publishing… / جارٍ النشر…" : "Publish design / نشر التصميم"}
+                    </button>
                   </div>
                 </div>
 
