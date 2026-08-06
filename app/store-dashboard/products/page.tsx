@@ -1,4 +1,5 @@
 "use client";
+// DARIK_UTF8_CLEAN_REBUILD_029_V4
 
 // Darik Frontend 024: mobile-safe bilingual product form with automatic retail categories.
 
