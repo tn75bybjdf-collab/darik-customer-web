@@ -56,9 +56,9 @@ function percent(value: number) {
 }
 
 function tenderLabel(value: string) {
-  if (value === "credit") return "ائتمان";
-  if (value === "cash") return "نقداً";
-  return value || "نقداً";
+  if (value === "credit") return "ائتمان / Credit";
+  if (value === "cash") return "نقداً / Cash";
+  return value || "نقداً / Cash";
 }
 
 function statusLabel(value: string) {
@@ -66,9 +66,9 @@ function statusLabel(value: string) {
 
   if (normalized === "voided") return "ملغاة / VOID";
   if (normalized === "return" || normalized === "returned") return "مرتجع / Return";
-  if (value === "credit") return "ائتمان";
-  if (value === "cashed_out") return "مكتملة";
-  return value || "مكتملة";
+  if (value === "credit") return "ائتمان / Credit";
+  if (value === "cashed_out") return "مكتملة / Completed";
+  return value || "مكتملة / Completed";
 }
 
 function isVoidedSale(sale: Sale) {
@@ -433,7 +433,7 @@ export default function PartPOSSalesHistoryPage() {
         offsetRef.current = nextOffset + nextSales.length;
         setHasMore(nextSales.length === PAGE_SIZE);
       } catch (caught) {
-        const message = caught instanceof Error ? caught.message : "حدث خطأ أثناء تحميل سجل المبيعات.";
+        const message = caught instanceof Error ? caught.message : "حدث خطأ أثناء تحميل سجل المبيعات. / Error loading sales history.";
         setError(message);
       } finally {
         loadingRef.current = false;
@@ -493,9 +493,9 @@ export default function PartPOSSalesHistoryPage() {
         return `
           <tr>
             <td>
-              <strong>${escapeReceiptText(item.product_name_ar || "صنف")}</strong>
+              <strong>${escapeReceiptText(item.product_name_ar || "صنف / Item")}</strong>
               <small>${escapeReceiptText(item.department_ar || "")}${
-                discount > 0 ? ` • خصم ${escapeReceiptText(percent(discount))}` : ""
+                discount > 0 ? ` • خصم / Discount ${escapeReceiptText(percent(discount))}` : ""
               }</small>
             </td>
             <td>${money(Number(item.quantity || 0))}</td>
@@ -510,7 +510,7 @@ export default function PartPOSSalesHistoryPage() {
 <html lang="ar" dir="rtl">
 <head>
   <meta charset="utf-8" />
-  <title>فاتورة ${escapeReceiptText(saleNumber)}</title>
+  <title>فاتورة / Receipt ${escapeReceiptText(saleNumber)}</title>
   <style>
     @page { size: 80mm auto; margin: 4mm; }
     * { box-sizing: border-box; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
@@ -538,41 +538,41 @@ export default function PartPOSSalesHistoryPage() {
   <div class="receipt">
     <div class="header">
       <img src="/partpos/receipt-header.png" alt="PartPOS" onerror="this.style.display='none'" />
-      <h1>فاتورة مبيعات</h1>
-      <p>نسخة العميل من سجل المبيعات</p>
+      <h1>فاتورة مبيعات / Sales Receipt</h1>
+      <p>نسخة العميل من سجل المبيعات / Customer copy from sales history</p>
     </div>
 
     ${voided ? `<div class="voidStamp">VOID / ملغاة</div>` : ""}
 
     <div class="meta">
-      <div class="metaRow"><span>رقم الفاتورة</span><strong>${escapeReceiptText(saleNumber)}</strong></div>
-      <div class="metaRow"><span>التاريخ</span><strong>${escapeReceiptText(formatArabicDateTime(sale.created_at))}</strong></div>
-      <div class="metaRow"><span>طريقة الدفع</span><strong>${escapeReceiptText(tenderLabel(sale.payment_method))}</strong></div>
-      <div class="metaRow"><span>الحالة</span><strong>${escapeReceiptText(statusLabel(sale.status))}</strong></div>
+      <div class="metaRow"><span>رقم الفاتورة / Receipt No.</span><strong>${escapeReceiptText(saleNumber)}</strong></div>
+      <div class="metaRow"><span>التاريخ / Date</span><strong>${escapeReceiptText(formatArabicDateTime(sale.created_at))}</strong></div>
+      <div class="metaRow"><span>طريقة الدفع / Payment Method</span><strong>${escapeReceiptText(tenderLabel(sale.payment_method))}</strong></div>
+      <div class="metaRow"><span>الحالة / Status</span><strong>${escapeReceiptText(statusLabel(sale.status))}</strong></div>
     </div>
 
     <table>
       <thead>
         <tr>
-          <th>الصنف</th>
-          <th>كمية</th>
-          <th>سعر</th>
-          <th>مجموع</th>
+          <th>الصنف / Item</th>
+          <th>كمية / Qty</th>
+          <th>سعر / Price</th>
+          <th>مجموع / Total</th>
         </tr>
       </thead>
       <tbody>${itemsHtml}</tbody>
     </table>
 
     <div class="totals">
-      <div class="totalLine"><span>عدد الأصناف</span><strong>${money(Number(sale.item_count || 0))}</strong></div>
-      <div class="totalLine grandTotal"><span>الإجمالي</span><strong>${money(Number(sale.sale_total || 0))} د.أ</strong></div>
-      <div class="totalLine"><span>المدفوع</span><strong>${money(Number(sale.amount_paid || 0))} د.أ</strong></div>
-      <div class="totalLine"><span>الراجع</span><strong>${money(Number(sale.change_due || 0))} د.أ</strong></div>
+      <div class="totalLine"><span>عدد الأصناف / Item Count</span><strong>${money(Number(sale.item_count || 0))}</strong></div>
+      <div class="totalLine grandTotal"><span>الإجمالي / Total</span><strong>${money(Number(sale.sale_total || 0))} د.أ</strong></div>
+      <div class="totalLine"><span>المدفوع / Paid</span><strong>${money(Number(sale.amount_paid || 0))} د.أ</strong></div>
+      <div class="totalLine"><span>الراجع / Change</span><strong>${money(Number(sale.change_due || 0))} د.أ</strong></div>
     </div>
 
     <div class="footer">
-      <strong>شكراً لكم</strong>
-      <p>احتفظ بالفاتورة للمراجعة.</p>
+      <strong>شكراً لكم / Thank you</strong>
+      <p>احتفظ بالفاتورة للمراجعة. / Keep this receipt for reference.</p>
     </div>
   </div>
   <script>
@@ -590,7 +590,7 @@ export default function PartPOSSalesHistoryPage() {
 
     const receiptWindow = window.open("", "_blank", "width=420,height=720");
     if (!receiptWindow) {
-      setActionMessage("المتصفح منع فتح نافذة الطباعة. اسمح بالـ popups ثم حاول مرة ثانية.");
+      setActionMessage("المتصفح منع فتح نافذة الطباعة. اسمح بالـ popups ثم حاول مرة ثانية. / The browser blocked the print window. Allow popups and try again.");
       return;
     }
 
@@ -691,7 +691,7 @@ export default function PartPOSSalesHistoryPage() {
     if (!supabase || !returnSale) return;
 
     if (returnPin !== EMPLOYEE_LOGIN_PIN) {
-      setReturnError("الرمز غير صحيح. أدخل رمز الدخول لتأكيد المرتجع.");
+      setReturnError("الرمز غير صحيح. أدخل رمز الدخول لتأكيد المرتجع. / Incorrect PIN. Enter the login PIN to confirm the return.");
       setReturnPin("");
       return;
     }
@@ -699,7 +699,7 @@ export default function PartPOSSalesHistoryPage() {
     const selectedLines = selectedReturnLines();
 
     if (selectedLines.length === 0) {
-      setReturnError("اختر صنف واحد على الأقل وأدخل كمية المرتجع.");
+      setReturnError("اختر صنف واحد على الأقل وأدخل كمية المرتجع. / Select at least one item and enter a return quantity.");
       return;
     }
 
@@ -711,7 +711,7 @@ export default function PartPOSSalesHistoryPage() {
     );
 
     if (invalidLine) {
-      setReturnError(`كمية المرتجع أكبر من المتاح للصنف: ${invalidLine.item.product_name_ar}`);
+      setReturnError(`كمية المرتجع أكبر من المتاح للصنف: ${invalidLine.item.product_name_ar} / Return quantity exceeds the available quantity.`);
       return;
     }
 
@@ -776,7 +776,7 @@ export default function PartPOSSalesHistoryPage() {
     if (!supabase || !voidSale) return;
 
     if (voidPin !== EMPLOYEE_LOGIN_PIN) {
-      setVoidError("الرمز غير صحيح. أدخل رمز الدخول لإلغاء الفاتورة.");
+      setVoidError("الرمز غير صحيح. أدخل رمز الدخول لإلغاء الفاتورة. / Incorrect PIN. Enter the login PIN to void the receipt.");
       setVoidPin("");
       return;
     }
@@ -797,11 +797,11 @@ export default function PartPOSSalesHistoryPage() {
           sale.id === voidSale.id ? { ...sale, status: "voided" } : sale,
         ),
       );
-      setActionMessage(`تم إلغاء الفاتورة رقم ${voidSale.sale_number ?? "—"}.`);
+      setActionMessage(`تم إلغاء الفاتورة رقم ${voidSale.sale_number ?? "—"}. / Receipt voided.`);
       setVoidSale(null);
       setVoidPin("");
     } catch (caught) {
-      setVoidError(`خطأ Supabase: ${readSupabaseError(caught)}`);
+      setVoidError(`خطأ Supabase / Supabase error: ${readSupabaseError(caught)}`);
     } finally {
       setVoidingSaleId(null);
     }
@@ -812,12 +812,12 @@ export default function PartPOSSalesHistoryPage() {
       <section className="topCard">
         <div>
           <p className="eyebrow">PartPOS</p>
-          <h1>سجل المبيعات</h1>
-          <p className="subtext">أحدث الفواتير تظهر أولاً. يتم تحميل 20 فاتورة كل مرة.</p>
+          <h1>سجل المبيعات / Sales History</h1>
+          <p className="subtext">أحدث الفواتير تظهر أولاً. يتم تحميل 20 فاتورة كل مرة. / Newest receipts first. 20 receipts load at a time.</p>
         </div>
         <div className="topActions">
           <button type="button" className="secondaryButton" onClick={backToPOS}>
-            الرجوع للكاشير
+            الرجوع للكاشير / Back to Cashier
           </button>
           <button
             type="button"
@@ -829,35 +829,35 @@ export default function PartPOSSalesHistoryPage() {
             }}
             disabled={!supabase || loading}
           >
-            {loading ? "جاري التحديث..." : "تحديث السجل"}
+            {loading ? "جاري التحديث... / Updating..." : "تحديث السجل / Refresh History"}
           </button>
         </div>
       </section>
 
       {!supabase && (
         <div className="warning">
-          أضف NEXT_PUBLIC_SUPABASE_URL و NEXT_PUBLIC_SUPABASE_ANON_KEY حتى يظهر سجل المبيعات.
+          أضف NEXT_PUBLIC_SUPABASE_URL و NEXT_PUBLIC_SUPABASE_ANON_KEY حتى يظهر سجل المبيعات. / Add the Supabase URL and anon key to show sales history.
         </div>
       )}
 
       <section className="searchCard">
-        <label htmlFor="history-search">بحث في السجل</label>
+        <label htmlFor="history-search">بحث في السجل / Search History</label>
         <div className="searchRow">
           <input
             id="history-search"
             value={search}
             onChange={(event) => setSearch(event.target.value)}
-            placeholder="ابحث باسم القطعة، التاريخ 2026-06-30، أو رقم الفاتورة"
+            placeholder="ابحث بالقطعة، التاريخ أو رقم الفاتورة / Search item, date, or receipt number"
             autoComplete="off"
           />
           {search.trim() && (
             <button type="button" onClick={clearSearch}>
-              مسح
+              مسح / Clear
             </button>
           )}
         </div>
         <p className="searchHint">
-          أمثلة: فلتر زيت، 1، فاتورة 1، 30/06/2026، 2026-06-30
+          أمثلة: فلتر زيت، 1، فاتورة 1، 30/06/2026، 2026-06-30 / Examples: oil filter, 1, receipt 1, 30/06/2026
         </p>
       </section>
 
@@ -867,7 +867,7 @@ export default function PartPOSSalesHistoryPage() {
       <section className="listCard">
         {sales.length === 0 && !loading && !error && (
           <div className="emptyState">
-            {search.trim() ? "لا يوجد نتائج مطابقة للبحث." : "لا يوجد مبيعات محفوظة حتى الآن."}
+            {search.trim() ? "لا يوجد نتائج مطابقة للبحث. / No matching search results." : "لا يوجد مبيعات محفوظة حتى الآن. / No saved sales yet."}
           </div>
         )}
 
@@ -885,20 +885,20 @@ export default function PartPOSSalesHistoryPage() {
                 onClick={() => setOpenSaleId(isOpen ? null : sale.id)}
               >
                 <div className="saleTitleBlock">
-                  <strong>فاتورة رقم {sale.sale_number ?? "—"}</strong>
+                  <strong>فاتورة رقم / Receipt No. {sale.sale_number ?? "—"}</strong>
                   <span>{formatArabicDateTime(sale.created_at)}</span>
                   <span>
-                    {sale.item_count} أصناف • {tenderLabel(sale.payment_method)} •{" "}
+                    {sale.item_count} أصناف / items • {tenderLabel(sale.payment_method)} •{" "}
                     {statusLabel(sale.status)}
                   </span>
                   {isVoidedSale(sale) && <em className="voidBadge">VOID / ملغاة</em>}
                 </div>
 
                 <div className="saleMoneyBlock">
-                  <span>الإجمالي</span>
+                  <span>الإجمالي / Total</span>
                   <strong className="totalAmount">{money(sale.sale_total)} د.أ</strong>
-                  <small>مدفوع: {money(sale.amount_paid)} د.أ</small>
-                  <small className="changeAmount">راجع: {money(sale.change_due)} د.أ</small>
+                  <small>مدفوع / Paid: {money(sale.amount_paid)} د.أ</small>
+                  <small className="changeAmount">راجع / Change: {money(sale.change_due)} د.أ</small>
                 </div>
               </button>
 
@@ -906,19 +906,19 @@ export default function PartPOSSalesHistoryPage() {
                 <div className="itemsPanel">
                   <div className="receiptMeta">
                     <div>
-                      <span>رقم الفاتورة</span>
+                      <span>رقم الفاتورة / Receipt No.</span>
                       <strong>{sale.sale_number ?? "—"}</strong>
                     </div>
                     <div>
-                      <span>الوقت والتاريخ</span>
+                      <span>الوقت والتاريخ / Date & Time</span>
                       <strong>{formatArabicDateTime(sale.created_at)}</strong>
                     </div>
                     <div>
-                      <span>طريقة الدفع</span>
+                      <span>طريقة الدفع / Payment Method</span>
                       <strong>{tenderLabel(sale.payment_method)}</strong>
                     </div>
                     <div>
-                      <span>الحالة</span>
+                      <span>الحالة / Status</span>
                       <strong className={isVoidedSale(sale) ? "redText" : ""}>
                         {statusLabel(sale.status)}
                       </strong>
@@ -931,7 +931,7 @@ export default function PartPOSSalesHistoryPage() {
                       className="printReceiptButton"
                       onClick={() => printSaleReceipt(sale)}
                     >
-                      طباعة الفاتورة
+                      طباعة الفاتورة / Print Receipt
                     </button>
                     <button
                       type="button"
@@ -945,10 +945,10 @@ export default function PartPOSSalesHistoryPage() {
                       }
                     >
                       {isReturnSale(sale)
-                        ? "هذه فاتورة مرتجع"
+                        ? "هذه فاتورة مرتجع / Return Receipt"
                         : returnableItemsForSale(sale).length === 0
-                          ? "لا يوجد أصناف قابلة للمرتجع"
-                          : "مرتجع أصناف"}
+                          ? "لا يوجد أصناف قابلة للمرتجع / No Returnable Items"
+                          : "مرتجع أصناف / Return Items"}
                     </button>
                     <button
                       type="button"
@@ -956,7 +956,7 @@ export default function PartPOSSalesHistoryPage() {
                       onClick={() => openVoidConfirm(sale)}
                       disabled={isVoidedSale(sale) || voidingSaleId === sale.id}
                     >
-                      {isVoidedSale(sale) ? "الفاتورة ملغاة" : "إلغاء / Void"}
+                      {isVoidedSale(sale) ? "الفاتورة ملغاة / Receipt Voided" : "إلغاء / Void"}
                     </button>
                   </div>
 
@@ -964,11 +964,11 @@ export default function PartPOSSalesHistoryPage() {
                     <table>
                       <thead>
                         <tr>
-                          <th>الصنف</th>
-                          <th>القسم</th>
-                          <th>الكمية</th>
-                          <th>السعر</th>
-                          <th>المجموع</th>
+                          <th>الصنف / Item</th>
+                          <th>القسم / Department</th>
+                          <th>الكمية / Qty</th>
+                          <th>السعر / Price</th>
+                          <th>المجموع / Total</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -981,11 +981,11 @@ export default function PartPOSSalesHistoryPage() {
                               <td>
                                 <strong>{item.product_name_ar}</strong>
                                 {Number(item.discount_percent) > 0 && (
-                                  <small>خصم {percent(Number(item.discount_percent))}</small>
+                                  <small>خصم / Discount {percent(Number(item.discount_percent))}</small>
                                 )}
                                 {alreadyReturned > 0 && (
                                   <small className="returnInfo">
-                                    مرتجع سابقاً: {money(alreadyReturned)} • المتاح:{" "}
+                                    مرتجع سابقاً / Previously returned: {money(alreadyReturned)} • المتاح / Available:{" "}
                                     {money(availableToReturn)}
                                   </small>
                                 )}
@@ -1011,29 +1011,29 @@ export default function PartPOSSalesHistoryPage() {
         })}
 
         <div ref={sentinelRef} className="loadMoreArea">
-          {loading && <span>جاري تحميل المبيعات...</span>}
-          {!loading && hasMore && sales.length > 0 && <span>اسحب للأسفل لتحميل المزيد</span>}
-          {!loading && !hasMore && sales.length > 0 && <span>تم تحميل كل النتائج.</span>}
+          {loading && <span>جاري تحميل المبيعات... / Loading sales...</span>}
+          {!loading && hasMore && sales.length > 0 && <span>اسحب للأسفل لتحميل المزيد / Scroll down to load more</span>}
+          {!loading && !hasMore && sales.length > 0 && <span>تم تحميل كل النتائج. / All results loaded.</span>}
         </div>
       </section>
 
       {voidSale && (
         <div className="popupBackdrop" role="dialog" aria-modal="true">
           <div className="voidConfirmCard">
-            <p className="eyebrow">تأكيد إلغاء الفاتورة</p>
-            <h2>إلغاء فاتورة رقم {voidSale.sale_number ?? "—"}</h2>
+            <p className="eyebrow">تأكيد إلغاء الفاتورة / Confirm Void</p>
+            <h2>إلغاء فاتورة رقم / Void Receipt No. {voidSale.sale_number ?? "—"}</h2>
             <p className="voidConfirmText">
-              هذا سيضع علامة VOID على الفاتورة داخل سجل المبيعات. أدخل رمز الدخول للتأكيد.
+              هذا سيضع علامة VOID على الفاتورة داخل سجل المبيعات. أدخل رمز الدخول للتأكيد. / This marks the receipt VOID in sales history. Enter the login PIN to confirm.
             </p>
 
-            <label htmlFor="void-pin">رمز الدخول</label>
+            <label htmlFor="void-pin">رمز الدخول / Login PIN</label>
             <input
               id="void-pin"
               value={voidPin}
               onChange={(event) =>
                 setVoidPin(normalizeDigits(event.target.value).replace(/\D/g, "").slice(0, 6))
               }
-              placeholder="أدخل رمز الدخول"
+              placeholder="أدخل رمز الدخول / Enter login PIN"
               inputMode="numeric"
               type="password"
               autoFocus
@@ -1053,7 +1053,7 @@ export default function PartPOSSalesHistoryPage() {
                 onClick={closeVoidConfirm}
                 disabled={Boolean(voidingSaleId)}
               >
-                رجوع
+                رجوع / Back
               </button>
               <button
                 type="button"
@@ -1061,7 +1061,7 @@ export default function PartPOSSalesHistoryPage() {
                 onClick={() => void confirmVoidSale()}
                 disabled={Boolean(voidingSaleId)}
               >
-                {voidingSaleId ? "جاري الإلغاء..." : "تأكيد الإلغاء"}
+                {voidingSaleId ? "جاري الإلغاء... / Voiding..." : "تأكيد الإلغاء / Confirm Void"}
               </button>
             </div>
           </div>
@@ -1071,35 +1071,34 @@ export default function PartPOSSalesHistoryPage() {
       {returnSale && (
         <div className="popupBackdrop" role="dialog" aria-modal="true">
           <div className="returnConfirmCard">
-            <p className="eyebrow">مرتجع أصناف</p>
-            <h2>مرتجع من فاتورة رقم {returnSale.sale_number ?? "—"}</h2>
+            <p className="eyebrow">مرتجع أصناف / Return Items</p>
+            <h2>مرتجع من فاتورة رقم / Return from Receipt No. {returnSale.sale_number ?? "—"}</h2>
             <p className="voidConfirmText">
-              اختر الأصناف والكمية المراد إرجاعها. سيتم إنشاء فاتورة مرتجع بتاريخ اليوم
-              بقيم سالبة حتى تظهر في تقارير اليوم حسب القسم.
+              اختر الأصناف والكمية المراد إرجاعها. سيتم إنشاء فاتورة مرتجع بتاريخ اليوم، وتظهر قيمة المرتجع بالسالب في التقارير مع بقاء القيم موجبة في قاعدة البيانات. / Select items and quantities to return. A return receipt is created today; reports display it as negative while database values remain positive.
             </p>
 
             <div className="returnOriginalMeta">
               <div>
-                <span>الفاتورة الأصلية</span>
+                <span>الفاتورة الأصلية / Original Receipt</span>
                 <strong>{returnSale.sale_number ?? "—"}</strong>
               </div>
               <div>
-                <span>تاريخ البيع الأصلي</span>
+                <span>تاريخ البيع الأصلي / Original Sale Date</span>
                 <strong>{formatArabicDateTime(returnSale.created_at)}</strong>
               </div>
               <div>
-                <span>طريقة الدفع الأصلية</span>
+                <span>طريقة الدفع الأصلية / Original Payment Method</span>
                 <strong>{tenderLabel(returnSale.payment_method)}</strong>
               </div>
               <div>
-                <span>قيمة المرتجع المختار</span>
+                <span>قيمة المرتجع المختار / Selected Return Value</span>
                 <strong className="redText">-{money(returnPreviewTotal)} د.أ</strong>
               </div>
             </div>
 
             <div className="returnItemsBox">
               {returnableItemsForSale(returnSale).length === 0 ? (
-                <div className="emptyReturnState">كل أصناف هذه الفاتورة تم إرجاعها سابقاً.</div>
+                <div className="emptyReturnState">كل أصناف هذه الفاتورة تم إرجاعها سابقاً. / All items on this receipt were already returned.</div>
               ) : (
                 returnSale.items.map((item) => {
                   const available = availableReturnQuantity(item);
@@ -1115,17 +1114,17 @@ export default function PartPOSSalesHistoryPage() {
                         <strong>{item.product_name_ar}</strong>
                         <span>{item.department_ar}</span>
                         <small>
-                          مباع: {money(Number(item.quantity || 0))} • مرتجع سابقاً:{" "}
-                          {money(returnedQuantityForItem(item))} • المتاح: {money(available)}
+                          مباع / Sold: {money(Number(item.quantity || 0))} • مرتجع سابقاً / Returned:{" "}
+                          {money(returnedQuantityForItem(item))} • المتاح / Available: {money(available)}
                         </small>
                         <small>
-                          سعر الوحدة: {money(Number(item.sale_price || 0))} د.أ • قيمة هذا المرتجع:{" "}
+                          سعر الوحدة / Unit price: {money(Number(item.sale_price || 0))} د.أ • قيمة هذا المرتجع / Return value:{" "}
                           -{money(lineReturnTotal)} د.أ
                         </small>
                       </div>
 
                       <div className="returnQuantityBox">
-                        <label htmlFor={`return-${item.id}`}>كمية المرتجع</label>
+                        <label htmlFor={`return-${item.id}`}>كمية المرتجع / Return Qty</label>
                         <input
                           id={`return-${item.id}`}
                           value={enteredQuantity}
@@ -1138,7 +1137,7 @@ export default function PartPOSSalesHistoryPage() {
                           className="returnAllButton"
                           onClick={() => updateReturnQuantity(item.id, String(available))}
                         >
-                          إرجاع المتاح
+                          إرجاع المتاح / Return Available
                         </button>
                       </div>
                     </div>
@@ -1147,14 +1146,14 @@ export default function PartPOSSalesHistoryPage() {
               )}
             </div>
 
-            <label htmlFor="return-pin">رمز الدخول للتأكيد</label>
+            <label htmlFor="return-pin">رمز الدخول للتأكيد / Login PIN to Confirm</label>
             <input
               id="return-pin"
               value={returnPin}
               onChange={(event) =>
                 setReturnPin(normalizeDigits(event.target.value).replace(/\D/g, "").slice(0, 6))
               }
-              placeholder="أدخل رمز الدخول"
+              placeholder="أدخل رمز الدخول / Enter login PIN"
               inputMode="numeric"
               type="password"
               autoFocus
@@ -1174,7 +1173,7 @@ export default function PartPOSSalesHistoryPage() {
                 onClick={closeReturnPopup}
                 disabled={Boolean(returningSaleId)}
               >
-                رجوع
+                رجوع / Back
               </button>
               <button
                 type="button"
@@ -1182,7 +1181,7 @@ export default function PartPOSSalesHistoryPage() {
                 onClick={() => void confirmReturnItems()}
                 disabled={Boolean(returningSaleId) || returnPreviewTotal <= 0}
               >
-                {returningSaleId ? "جاري تسجيل المرتجع..." : "تأكيد المرتجع"}
+                {returningSaleId ? "جاري تسجيل المرتجع... / Saving return..." : "تأكيد المرتجع / Confirm Return"}
               </button>
             </div>
           </div>

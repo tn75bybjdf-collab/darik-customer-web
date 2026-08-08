@@ -149,11 +149,11 @@ function isCashPaymentMethod(value: string) {
 }
 
 function tenderLabel(value: string) {
-  if (isReturnCreditPaymentMethod(value)) return "مرتجع ائتمان";
-  if (isReturnCashPaymentMethod(value)) return "مرتجع نقدي";
-  if (isCreditPaymentMethod(value)) return "ائتمان";
-  if (isCashPaymentMethod(value)) return "نقداً";
-  return value || "نقداً";
+  if (isReturnCreditPaymentMethod(value)) return "مرتجع ائتمان / Credit Return";
+  if (isReturnCashPaymentMethod(value)) return "مرتجع نقدي / Cash Return";
+  if (isCreditPaymentMethod(value)) return "ائتمان / Credit";
+  if (isCashPaymentMethod(value)) return "نقداً / Cash";
+  return value || "نقداً / Cash";
 }
 
 function readSupabaseError(error: unknown) {
@@ -181,9 +181,9 @@ function readSupabaseError(error: unknown) {
 }
 
 function cashCountStatusLabel(status: CashCountStatus) {
-  if (status === "short") return "نقص";
-  if (status === "over") return "زيادة";
-  return "الصندوق مطابق";
+  if (status === "short") return "نقص / Short";
+  if (status === "over") return "زيادة / Over";
+  return "الصندوق مطابق / Matched";
 }
 
 function backToPOS() {
@@ -375,7 +375,7 @@ export default function PartPOSEndOfDayReportPage() {
               ? null
               : Number(payment.expense_number),
           expense_type: payment.expense_type === "utility" ? "utility" : "vendor",
-          details: String(payment.details ?? "دفعة على ائتمان مورد"),
+          details: String(payment.details ?? "دفعة على ائتمان مورد / Supplier Credit Payment"),
           company_name: String(payment.company_name ?? ""),
           amount: Number(payment.amount ?? 0),
           paid_by: "cash",
@@ -402,7 +402,7 @@ export default function PartPOSEndOfDayReportPage() {
       const message =
         caught instanceof Error
           ? caught.message
-          : "حدث خطأ أثناء تحميل تقرير نهاية اليوم.";
+          : "حدث خطأ أثناء تحميل تقرير نهاية اليوم. / Error loading end-of-day report.";
       setError(message);
     } finally {
       setLoading(false);
@@ -417,7 +417,7 @@ export default function PartPOSEndOfDayReportPage() {
     const groups: Record<string, Set<string>> = {};
 
     for (const item of items) {
-      const department = item.department_ar.trim() || "غير محدد";
+      const department = item.department_ar.trim() || "غير محدد / Unspecified";
       if (!groups[department]) groups[department] = new Set<string>();
       groups[department].add(item.sale_id);
     }
@@ -429,7 +429,7 @@ export default function PartPOSEndOfDayReportPage() {
     const groups: Record<string, DepartmentSummary> = {};
 
     for (const item of items) {
-      const department = item.department_ar.trim() || "غير محدد";
+      const department = item.department_ar.trim() || "غير محدد / Unspecified";
       const quantity = Number(item.quantity) || 0;
       const lineTotal = Number(item.line_total) || 0;
       const costTotal = (Number(item.cost) || 0) * quantity;
@@ -497,7 +497,7 @@ export default function PartPOSEndOfDayReportPage() {
   async function submitActualCashCount() {
     if (!supabase) {
       setCashCountSubmitStatus("error");
-      setCashCountSubmitError("Supabase غير مربوط. لا يمكن حفظ العد.");
+      setCashCountSubmitError("Supabase غير مربوط. لا يمكن حفظ العد. / Supabase is not connected. Cash count cannot be saved.");
       return;
     }
 
@@ -506,7 +506,7 @@ export default function PartPOSEndOfDayReportPage() {
 
     if (rawValue.trim() === "" || !Number.isFinite(parsedActualCash) || parsedActualCash < 0) {
       setCashCountSubmitStatus("error");
-      setCashCountSubmitError("أدخل المبلغ الموجود بالصندوق بشكل صحيح.");
+      setCashCountSubmitError("أدخل المبلغ الموجود بالصندوق بشكل صحيح. / Enter the actual cash in the drawer correctly.");
       return;
     }
 
@@ -553,7 +553,7 @@ export default function PartPOSEndOfDayReportPage() {
       setCashCountSubmitStatus("idle");
     } catch (error) {
       setCashCountSubmitStatus("error");
-      setCashCountSubmitError(`خطأ Supabase: ${readSupabaseError(error)}`);
+      setCashCountSubmitError(`خطأ Supabase / Supabase error: ${readSupabaseError(error)}`);
     }
   }
 
@@ -584,7 +584,7 @@ export default function PartPOSEndOfDayReportPage() {
       <section className="topCard noPrint">
         <div>
           <p className="eyebrow">PartPOS</p>
-          <h1>تقرير نهاية اليوم</h1>
+          <h1>تقرير نهاية اليوم / End of Day Report</h1>
           <p className="subtext">
             التقرير يحسب اليوم من 12:00 صباحاً إلى 11:59 مساءً. الفواتير الملغاة VOID لا تدخل في أي حساب. مبيعات الائتمان لا تدخل الصندوق، والمصروفات النقدية غير الملغاة تخصم من كاش اليوم.
           </p>
@@ -592,10 +592,10 @@ export default function PartPOSEndOfDayReportPage() {
 
         <div className="topActions">
           <button type="button" className="secondaryButton" onClick={backToPOS}>
-            الرجوع للكاشير
+            الرجوع للكاشير / Back to Cashier
           </button>
           <button type="button" className="secondaryButton" onClick={openSalesHistory}>
-            سجل المبيعات
+            سجل المبيعات / Sales History
           </button>
           <button type="button" className="printReportButton" onClick={() => window.print()}>
             طباعة تقرير صفحة واحدة
@@ -605,13 +605,13 @@ export default function PartPOSEndOfDayReportPage() {
 
       {!supabase && (
         <div className="warning noPrint">
-          أضف NEXT_PUBLIC_SUPABASE_URL و NEXT_PUBLIC_SUPABASE_ANON_KEY حتى يظهر التقرير.
+          أضف NEXT_PUBLIC_SUPABASE_URL و NEXT_PUBLIC_SUPABASE_ANON_KEY حتى يظهر التقرير. / Add the Supabase URL and anon key to display the report.
         </div>
       )}
 
       <section className="dateCard noPrint">
         <div>
-          <label htmlFor="report-date">تاريخ التقرير</label>
+          <label htmlFor="report-date">تاريخ التقرير / Report Date</label>
           <input
             id="report-date"
             type="date"
@@ -626,13 +626,13 @@ export default function PartPOSEndOfDayReportPage() {
           onClick={() => void loadReport()}
           disabled={!supabase || loading}
         >
-          {loading ? "جاري التحميل..." : "تحديث التقرير"}
+          {loading ? "جاري التحميل... / Loading..." : "تحديث التقرير / Refresh Report"}
         </button>
       </section>
 
       <section className="cashCountCard noPrint">
         <div className="cashInputBlock">
-          <label htmlFor="actual-cash">إجمالي النقد الموجود بالصندوق</label>
+          <label htmlFor="actual-cash">إجمالي النقد الموجود بالصندوق / Actual Cash in Drawer</label>
           <input
             id="actual-cash"
             ref={actualCashInputRef}
@@ -640,7 +640,7 @@ export default function PartPOSEndOfDayReportPage() {
             min="0"
             step="0.01"
             inputMode="decimal"
-            placeholder="مثال: 235.00"
+            placeholder="مثال / Example: 235.00"
             defaultValue=""
           />
           <div className="cashCountActions">
@@ -650,7 +650,7 @@ export default function PartPOSEndOfDayReportPage() {
               onClick={() => void submitActualCashCount()}
               disabled={cashCountSubmitStatus === "saving"}
             >
-              {cashCountSubmitStatus === "saving" ? "جاري الحفظ..." : "تثبيت العد"}
+              {cashCountSubmitStatus === "saving" ? "جاري الحفظ... / Saving..." : "تثبيت العد / Submit Count"}
             </button>
             <button
               type="button"
@@ -674,15 +674,15 @@ export default function PartPOSEndOfDayReportPage() {
                 : "cashResult balancedResult"
           }
         >
-          <span>نتيجة العد</span>
+          <span>نتيجة العد / Count Result</span>
           {!hasActualCash ? (
-            <strong>أدخل مبلغ النقد</strong>
+            <strong>أدخل مبلغ النقد / Enter cash amount</strong>
           ) : cashStatus === "over" ? (
-            <strong>زيادة {money(Math.abs(shortOverAmount))} د.أ</strong>
+            <strong>زيادة / Over {money(Math.abs(shortOverAmount))} د.أ</strong>
           ) : cashStatus === "short" ? (
-            <strong>نقص {money(Math.abs(shortOverAmount))} د.أ</strong>
+            <strong>نقص / Short {money(Math.abs(shortOverAmount))} د.أ</strong>
           ) : (
-            <strong>الصندوق مطابق</strong>
+            <strong>الصندوق مطابق / Matched</strong>
           )}
           {cashCountSubmitError && (
             <div className="cashCountSubmitError">{cashCountSubmitError}</div>
@@ -699,91 +699,91 @@ export default function PartPOSEndOfDayReportPage() {
         <div className="printHeader">
           <div>
             <p className="eyebrow">PartPOS</p>
-            <h2>تقرير نهاية اليوم</h2>
+            <h2>تقرير نهاية اليوم / End of Day Report</h2>
             <p>{formatArabicDate(dateValue)}</p>
           </div>
           <div className="periodBox">
-            <span>فترة التقرير</span>
-            <strong>12:00 صباحاً - 11:59 مساءً</strong>
-            {lastUpdated && <small>آخر تحديث: {lastUpdated}</small>}
+            <span>فترة التقرير / Report Period</span>
+            <strong>12:00 صباحاً - 11:59 مساءً / 12:00 AM - 11:59 PM</strong>
+            {lastUpdated && <small>آخر تحديث / Last updated: {lastUpdated}</small>}
           </div>
         </div>
 
         <div className="summaryGrid">
           <div className="summaryBox redBox">
-            <span>إجمالي المبيعات</span>
+            <span>إجمالي المبيعات / Total Sales</span>
             <strong>{money(totalSales)} د.أ</strong>
-            <small>نقد + ائتمان</small>
+            <small>نقد + ائتمان / Cash + Credit</small>
           </div>
           <div className="summaryBox greenBox">
-            <span>مبيعات نقدية دخلت الصندوق</span>
+            <span>مبيعات نقدية دخلت الصندوق / Cash Sales into Drawer</span>
             <strong>{money(totalCashSales)} د.أ</strong>
           </div>
           <div className="summaryBox orangeBox">
-            <span>مبيعات ائتمان لم تدخل الصندوق</span>
+            <span>مبيعات ائتمان لم تدخل الصندوق / Credit Sales not in Drawer</span>
             <strong>{money(totalCreditSales)} د.أ</strong>
           </div>
           <div className="summaryBox greenBox">
-            <span>تحصيل حسابات ائتمان</span>
+            <span>تحصيل حسابات ائتمان / Credit Account Collections</span>
             <strong>{money(totalCreditAccountPayments)} د.أ</strong>
           </div>
           <div className="summaryBox redBox">
-            <span>مصروفات نقدية خرجت من الصندوق</span>
+            <span>مصروفات نقدية خرجت من الصندوق / Cash Expenses out of Drawer</span>
             <strong>{money(totalCashExpenses)} د.أ</strong>
           </div>
           <div className="summaryBox">
-            <span>عدد الفواتير</span>
+            <span>عدد الفواتير / Receipt Count</span>
             <strong>{sales.length}</strong>
           </div>
           <div className="summaryBox">
-            <span>إجمالي الربح التقريبي</span>
+            <span>إجمالي الربح التقريبي / Estimated Gross Profit</span>
             <strong>{money(grossProfit)} د.أ</strong>
           </div>
         </div>
 
         <div className="depositGrid">
           <div className="depositBox">
-            <span>البنك الافتتاحي اليومي</span>
+            <span>البنك الافتتاحي اليومي / Daily Starting Bank</span>
             <strong>{money(STARTING_BANK)} د.أ</strong>
-            <small>معلومة فقط، لا يدخل في حساب كاش اليوم</small>
+            <small>معلومة فقط، لا يدخل في حساب كاش اليوم / Information only; not included in today's cash calculation</small>
           </div>
           <div className="depositBox greenBox">
-            <span>مبيعات نقدية</span>
+            <span>مبيعات نقدية / Cash Sales</span>
             <strong>{money(totalCashSales)} د.أ</strong>
-            <small>دخلت الصندوق اليوم</small>
+            <small>دخلت الصندوق اليوم / Entered the drawer today</small>
           </div>
           <div className="depositBox greenBox">
-            <span>تحصيل من حسابات ائتمان</span>
+            <span>تحصيل من حسابات ائتمان / Credit Account Collections</span>
             <strong>{money(totalCreditAccountPayments)} د.أ</strong>
-            <small>دفعات حقيقية دخلت الصندوق</small>
+            <small>دفعات حقيقية دخلت الصندوق / Actual payments received into the drawer</small>
           </div>
           <div className="depositBox redBox">
-            <span>مصروفات نقدية</span>
+            <span>مصروفات نقدية / Cash Expenses</span>
             <strong>- {money(totalCashExpenses)} د.أ</strong>
-            <small>دفعات خرجت من الصندوق اليوم</small>
+            <small>دفعات خرجت من الصندوق اليوم / Payments that left the drawer today</small>
           </div>
           <div className="depositBox orangeBox">
-            <span>مبيعات ائتمان</span>
+            <span>مبيعات ائتمان / Credit Sales</span>
             <strong>{money(totalCreditSales)} د.أ</strong>
-            <small>بيع تم اليوم لكن cash مش موجود</small>
+            <small>بيع تم اليوم لكن الكاش غير موجود بالصندوق / Sale occurred today but cash is not in the drawer</small>
           </div>
           <div className="depositBox greenBox">
-            <span>النقد المتوقع بعد المصروفات</span>
+            <span>النقد المتوقع بعد المصروفات / Expected Cash After Expenses</span>
             <strong>{money(expectedDrawerCash)} د.أ</strong>
-            <small>مبيعات نقدية + تحصيل ائتمان - مصروفات نقدية</small>
+            <small>مبيعات نقدية + تحصيل ائتمان - مصروفات نقدية / Cash sales + credit collections - cash expenses</small>
           </div>
           <div className="depositBox redBox">
-            <span>المبلغ المتوقع للإيداع</span>
+            <span>المبلغ المتوقع للإيداع / Expected Deposit</span>
             <strong>{money(depositAmount)} د.أ</strong>
-            <small>مثال: 300 مبيعات نقدية - 300 مصروف نقدي = 0 د.أ</small>
+            <small>مثال: 300 مبيعات نقدية - 300 مصروف نقدي = 0 د.أ / Example: 300 cash sales - 300 cash expenses = 0 JOD</small>
           </div>
         </div>
 
         <div className="cashPrintGrid">
           <div className="depositBox">
-            <span>النقد المعدود فعلياً</span>
+            <span>النقد المعدود فعلياً / Actual Cash Counted</span>
             <strong>{hasActualCash ? money(actualCash) : "—"} د.أ</strong>
-            <small>نقد اليوم بعد خصم المصروفات النقدية</small>
+            <small>نقد اليوم بعد خصم المصروفات النقدية / Today's cash after cash expenses</small>
           </div>
           <div
             className={
@@ -794,45 +794,45 @@ export default function PartPOSEndOfDayReportPage() {
                   : "depositBox"
             }
           >
-            <span>النقص / الزيادة</span>
+            <span>النقص / الزيادة / Short / Over</span>
             {!hasActualCash ? (
               <strong>—</strong>
             ) : cashStatus === "over" ? (
-              <strong>زيادة {money(Math.abs(shortOverAmount))} د.أ</strong>
+              <strong>زيادة / Over {money(Math.abs(shortOverAmount))} د.أ</strong>
             ) : cashStatus === "short" ? (
-              <strong>نقص {money(Math.abs(shortOverAmount))} د.أ</strong>
+              <strong>نقص / Short {money(Math.abs(shortOverAmount))} د.أ</strong>
             ) : (
-              <strong>مطابق</strong>
+              <strong>مطابق / Matched</strong>
             )}
-            <small>مقارنة بالنقد المتوقع بعد خصم المصروفات</small>
+            <small>مقارنة بالنقد المتوقع بعد خصم المصروفات / Compared with expected cash after expenses</small>
           </div>
           <div className="depositBox">
-            <span>يتم إخراج هذا المبلغ للإيداع</span>
+            <span>يتم إخراج هذا المبلغ للإيداع / Amount Removed for Deposit</span>
             <strong>{money(depositAmount)} د.أ</strong>
-            <small>ثم يبقى 50 د.أ كبنك لبداية اليوم التالي. مبيعات الائتمان غير المحصلة لا تودع.</small>
+            <small>ثم يبقى 50 د.أ كبنك لبداية اليوم التالي. مبيعات الائتمان غير المحصلة لا تودع. / Then 50 JOD remains as the next day's starting bank. Uncollected credit sales are not deposited.</small>
           </div>
         </div>
 
         <section className="sectionBlock">
           <div className="sectionTitle">
-            <h3>ملخص حسب القسم</h3>
-            <p>مرتب من الأعلى مبيعاً إلى الأقل. يشمل النقد والائتمان لأن البيع حصل.</p>
+            <h3>ملخص حسب القسم / Summary by Department</h3>
+            <p>مرتب من الأعلى مبيعاً إلى الأقل. يشمل النقد والائتمان لأن البيع حصل. / Sorted highest to lowest sales. Includes cash and credit because the sale occurred.</p>
           </div>
 
           {departmentSummary.length === 0 ? (
-            <div className="emptyState">لا يوجد مبيعات لهذا اليوم.</div>
+            <div className="emptyState">لا يوجد مبيعات لهذا اليوم. / No sales for this day.</div>
           ) : (
             <div className="tableWrap">
               <table>
                 <thead>
                   <tr>
-                    <th>القسم</th>
-                    <th>عدد الفواتير</th>
-                    <th>عدد الأصناف</th>
-                    <th>الكمية</th>
-                    <th>إجمالي المبيعات</th>
-                    <th>التكلفة</th>
-                    <th>الربح</th>
+                    <th>القسم / Department</th>
+                    <th>عدد الفواتير / Receipts</th>
+                    <th>عدد الأصناف / Item Lines</th>
+                    <th>الكمية / Qty</th>
+                    <th>إجمالي المبيعات / Total Sales</th>
+                    <th>التكلفة / Cost</th>
+                    <th>الربح / Profit</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -860,7 +860,7 @@ export default function PartPOSEndOfDayReportPage() {
                 </tbody>
                 <tfoot>
                   <tr>
-                    <td>الإجمالي</td>
+                    <td>الإجمالي / Total</td>
                     <td>{sales.length}</td>
                     <td>{items.length}</td>
                     <td>{money(totalQuantity)}</td>
@@ -876,30 +876,30 @@ export default function PartPOSEndOfDayReportPage() {
 
         <section className="sectionBlock cashExpensesSection">
           <div className="sectionTitle">
-            <h3>المصروفات النقدية من الصندوق</h3>
-            <p>هذه المبالغ خرجت نقداً اليوم وتخصم من الكاش المتوقع، وتشمل دفعات ائتمان الموردين النقدية.</p>
+            <h3>المصروفات النقدية من الصندوق / Cash Expenses from Drawer</h3>
+            <p>هذه المبالغ خرجت نقداً اليوم وتخصم من الكاش المتوقع، وتشمل دفعات ائتمان الموردين النقدية. / These amounts left the drawer today and reduce expected cash, including cash payments on supplier credit.</p>
           </div>
 
           {cashExpenses.length === 0 ? (
-            <div className="emptyState">لا يوجد مصروفات أو دفعات ائتمان نقدية لهذا اليوم.</div>
+            <div className="emptyState">لا يوجد مصروفات أو دفعات ائتمان نقدية لهذا اليوم. / No cash expenses or supplier-credit cash payments for this day.</div>
           ) : (
             <div className="receiptsList">
               {cashExpenses.map((expense) => (
                 <div className="receiptRow" key={expense.id}>
                   <div>
-                    <strong>{expense.expense_number ? `قيد ${expense.expense_number}` : "مصروف نقدي"}</strong>
+                    <strong>{expense.expense_number ? `قيد / Entry ${expense.expense_number}` : "مصروف نقدي / Cash Expense"}</strong>
                     <span>
                       {formatArabicTime(expense.created_at)} •{" "}
                       {expense.source_kind === "credit_expense_payment"
-                        ? `دفعة ائتمان مورد • ${expense.company_name || expense.details || "مورد غير محدد"}`
+                        ? `دفعة ائتمان مورد • ${expense.company_name || expense.details || "مورد غير محدد / Unspecified supplier / Unspecified"}`
                         : expense.expense_type === "vendor"
-                          ? expense.company_name || "مورد غير محدد"
-                          : expense.details || "مصروف بدون تفاصيل"}
+                          ? expense.company_name || "مورد غير محدد / Unspecified supplier / Unspecified"
+                          : expense.details || "مصروف بدون تفاصيل / Expense without details"}
                     </span>
                   </div>
                   <div>
                     <strong className="redText">- {money(expense.amount)} د.أ</strong>
-                    <span>خصم من الصندوق</span>
+                    <span>خصم من الصندوق / Deducted from Drawer</span>
                   </div>
                 </div>
               ))}
@@ -909,27 +909,27 @@ export default function PartPOSEndOfDayReportPage() {
 
         <section className="sectionBlock creditPaymentsSection">
           <div className="sectionTitle">
-            <h3>تحصيل حسابات ائتمان الزبائن</h3>
-            <p>هذه دفعات نقدية دخلت الصندوق اليوم، وليست مبيعات جديدة.</p>
+            <h3>تحصيل حسابات ائتمان الزبائن / Customer Credit Collections</h3>
+            <p>هذه دفعات نقدية دخلت الصندوق اليوم، وليست مبيعات جديدة. / These are cash payments received today, not new sales.</p>
           </div>
 
           {creditPayments.length === 0 ? (
-            <div className="emptyState">لا يوجد دفعات ائتمان محصلة لهذا اليوم.</div>
+            <div className="emptyState">لا يوجد دفعات ائتمان محصلة لهذا اليوم. / No customer credit payments collected today.</div>
           ) : (
             <div className="receiptsList">
               {creditPayments.map((payment) => (
                 <div className="receiptRow" key={payment.id}>
                   <div>
-                    <strong>سند قبض رقم {payment.payment_number ?? "—"}</strong>
+                    <strong>سند قبض رقم / Receipt No. {payment.payment_number ?? "—"}</strong>
                     <span>
-                      {formatArabicTime(payment.created_at)} • {payment.customer_name || "زبون غير محدد"}
+                      {formatArabicTime(payment.created_at)} • {payment.customer_name || "زبون غير محدد / Unspecified customer / Unspecified"}
                     </span>
                     {payment.customer_phone && <span>{payment.customer_phone}</span>}
                   </div>
                   <div>
                     <strong className="greenText">{money(payment.amount_paid)} د.أ</strong>
-                    <span>الرصيد قبل: {money(payment.balance_before)} د.أ</span>
-                    <span>الرصيد بعد: {money(payment.balance_after)} د.أ</span>
+                    <span>الرصيد قبل / Balance before: {money(payment.balance_before)} د.أ</span>
+                    <span>الرصيد بعد / Balance after: {money(payment.balance_after)} د.أ</span>
                   </div>
                 </div>
               ))}
@@ -939,34 +939,34 @@ export default function PartPOSEndOfDayReportPage() {
 
         <section className="sectionBlock receiptsSection">
           <div className="sectionTitle">
-            <h3>الفواتير داخل التقرير</h3>
-            <p>أحدث فاتورة تظهر أولاً.</p>
+            <h3>الفواتير داخل التقرير / Receipts in Report</h3>
+            <p>أحدث فاتورة تظهر أولاً. / Newest receipt appears first.</p>
           </div>
 
           {sales.length === 0 ? (
-            <div className="emptyState">لا يوجد فواتير لهذا اليوم.</div>
+            <div className="emptyState">لا يوجد فواتير لهذا اليوم. / No receipts for this day.</div>
           ) : (
             <div className="receiptsList">
               {sales.map((sale) => (
                 <div className="receiptRow" key={sale.id}>
                   <div>
-                    <strong>فاتورة رقم {sale.sale_number ?? "—"}</strong>
+                    <strong>فاتورة رقم / Receipt No. {sale.sale_number ?? "—"}</strong>
                     <span>
                       {formatArabicTime(sale.created_at)} • {sale.item_count} أصناف •{" "}
                       {tenderLabel(sale.payment_method)}
                     </span>
                     {isCreditPaymentMethod(sale.payment_method) && (
-                      <span className="orangeText">ائتمان — لم يدخل الصندوق</span>
+                      <span className="orangeText">ائتمان — لم يدخل الصندوق / Credit — not in drawer</span>
                     )}
                   </div>
                   <div>
                     <strong className="redText">{money(sale.sale_total)} د.أ</strong>
                     {isCreditPaymentMethod(sale.payment_method) ? (
-                      <span className="orangeText">دخل الصندوق: 0.00 د.أ</span>
+                      <span className="orangeText">دخل الصندوق / Drawer received: 0.00 د.أ</span>
                     ) : (
                       <>
-                        <span>مدفوع: {money(sale.amount_paid)} د.أ</span>
-                        <span className="greenText">راجع: {money(sale.change_due)} د.أ</span>
+                        <span>مدفوع / Paid: {money(sale.amount_paid)} د.أ</span>
+                        <span className="greenText">راجع / Change: {money(sale.change_due)} د.أ</span>
                       </>
                     )}
                   </div>
@@ -978,10 +978,10 @@ export default function PartPOSEndOfDayReportPage() {
 
         <div className="signOff">
           <div>
-            <span>توقيع الكاشير</span>
+            <span>توقيع الكاشير / Cashier Signature</span>
           </div>
           <div>
-            <span>توقيع المدير</span>
+            <span>توقيع المدير / Manager Signature</span>
           </div>
         </div>
       </section>
@@ -989,20 +989,20 @@ export default function PartPOSEndOfDayReportPage() {
       {isCashCountResultOpen && submittedCashCount && (
         <div className="popupBackdrop noPrint" role="dialog" aria-modal="true">
           <div className="cashCountResultCard">
-            <p className="eyebrow">نتيجة عد الصندوق</p>
+            <p className="eyebrow">نتيجة عد الصندوق / Cash Count Result</p>
             <h2>{cashCountStatusLabel(submittedCashCount.status)}</h2>
 
             <div className="cashCountResultGrid">
               <div>
-                <span>المتوقع بالصندوق</span>
+                <span>المتوقع بالصندوق / Expected in Drawer</span>
                 <strong>{money(submittedCashCount.expected_cash)} د.أ</strong>
               </div>
               <div>
-                <span>الموجود فعلياً</span>
+                <span>الموجود فعلياً / Actual in Drawer</span>
                 <strong>{money(submittedCashCount.actual_cash)} د.أ</strong>
               </div>
               <div>
-                <span>الفرق</span>
+                <span>الفرق / Difference</span>
                 <strong
                   className={
                     submittedCashCount.status === "matched"
@@ -1027,10 +1027,10 @@ export default function PartPOSEndOfDayReportPage() {
               }
             >
               {submittedCashCount.status === "matched"
-                ? "الصندوق مطابق. لا يوجد نقص أو زيادة."
+                ? "الصندوق مطابق. لا يوجد نقص أو زيادة. / Drawer matches. No shortage or overage."
                 : submittedCashCount.status === "short"
-                  ? `الصندوق ناقص ${money(Math.abs(submittedCashCount.difference))} د.أ.`
-                  : `الصندوق زائد ${money(Math.abs(submittedCashCount.difference))} د.أ.`}
+                  ? `الصندوق ناقص ${money(Math.abs(submittedCashCount.difference))} د.أ. / Drawer is short.`
+                  : `الصندوق زائد ${money(Math.abs(submittedCashCount.difference))} د.أ. / Drawer is over.`}
             </div>
 
             <button
