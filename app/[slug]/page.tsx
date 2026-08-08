@@ -854,7 +854,18 @@ export default function DarikDirectStorefrontPage() {
     storefront?.business_type ||
     publicStatus?.business_type ||
     "retail";
-  const isAutoParts = effectiveBusinessType === "auto_parts";
+  const normalizedBusinessType = String(effectiveBusinessType || "retail")
+    .trim()
+    .toLowerCase();
+  const isAutoParts = normalizedBusinessType === "auto_parts";
+  const isGroceryStore = [
+    "supermarket",
+    "grocery",
+    "mini_market",
+    "butcher",
+    "produce",
+    "frozen_food",
+  ].includes(normalizedBusinessType);
 
   const vehicleMakes = useMemo(() => {
     if (!isAutoParts) return [];
@@ -1726,7 +1737,7 @@ export default function DarikDirectStorefrontPage() {
       data-card-style={productCardStyle}
       data-corners={cornerStyle}
       data-hero={heroLayout}
-      data-business={effectiveBusinessType}
+      data-business={normalizedBusinessType}
       data-field-preview={previewRetailField ? "yes" : "no"}
       data-category-count={String(visibleCategories.length)}
       data-direct-purchase={hasDirectPurchaseProducts ? "yes" : "no"}
@@ -1756,7 +1767,7 @@ export default function DarikDirectStorefrontPage() {
           </div>
           <div>
             <strong>{storefront.display_name}</strong>
-            <span>{isAutoParts ? "Auto parts / \u0642\u0637\u0639 \u063a\u064a\u0627\u0631" : "Darik Direct store"}</span>
+            <span>{isAutoParts ? "Auto parts / \u0642\u0637\u0639 \u063a\u064a\u0627\u0631" : isGroceryStore ? "Grocery store / \u0645\u062a\u062c\u0631 \u0645\u0648\u0627\u062f \u063a\u0630\u0627\u0626\u064a\u0629" : "Darik Direct store"}</span>
           </div>
         </a>
 
@@ -1801,13 +1812,15 @@ export default function DarikDirectStorefrontPage() {
         <div className={styles.heroTexture} />
 
         <div className={styles.heroContent}>
-          {isAutoParts ? (
+          {isAutoParts || isGroceryStore ? (
             <div className={styles.heroExperienceRail}>
               <span className={styles.heroLiveStatus}>
                 <i className={effectiveAcceptingOrders ? styles.liveDot : styles.pausedDot} />
                 {effectiveAcceptingOrders
                   ? "Open now / \u0645\u0641\u062a\u0648\u062d \u0627\u0644\u0622\u0646"
-                  : "Browse catalog / \u062a\u0635\u0641\u062d \u0627\u0644\u0643\u062a\u0627\u0644\u0648\u062c"}
+                  : isAutoParts
+                    ? "Browse catalog / \u062a\u0635\u0641\u062d \u0627\u0644\u0643\u062a\u0627\u0644\u0648\u062c"
+                    : "Fresh groceries / \u0645\u0646\u062a\u062c\u0627\u062a \u0637\u0627\u0632\u062c\u0629"}
               </span>
               {currentDayHours ? (
                 <span className={styles.heroHoursChip}>
@@ -1831,7 +1844,7 @@ export default function DarikDirectStorefrontPage() {
           <div className={styles.heroCopy}>
             <div className={styles.heroLabel}>
               <Icon name="store" size={15} />
-              {isAutoParts ? "Auto parts / \u0642\u0637\u0639 \u063a\u064a\u0627\u0631" : "Official store / \u0627\u0644\u0645\u062a\u062c\u0631 \u0627\u0644\u0631\u0633\u0645\u064a"}
+              {isAutoParts ? "Auto parts / \u0642\u0637\u0639 \u063a\u064a\u0627\u0631" : isGroceryStore ? "Hypermarket / \u0647\u0627\u064a\u0628\u0631\u0645\u0627\u0631\u0643\u062a" : "Official store / \u0627\u0644\u0645\u062a\u062c\u0631 \u0627\u0644\u0631\u0633\u0645\u064a"}
             </div>
             <h1>{storefront.display_name}</h1>
             {storefront.display_name_ar ? (
@@ -1840,7 +1853,7 @@ export default function DarikDirectStorefrontPage() {
               </p>
             ) : null}
             <p className={styles.tagline}>
-              {storefront.tagline || (pickupOnly ? "Browse online and collect from this local store." : "Everything you need, delivered from a local store.")}
+              {storefront.tagline || (pickupOnly ? "Browse online and collect from this local store." : isGroceryStore ? "Fresh groceries and daily essentials from your neighborhood market." : "Everything you need, delivered from a local store.")}
             </p>
             {storefront.tagline_ar ? (
               <p className={styles.arabicTagline} dir="rtl">
@@ -1850,7 +1863,7 @@ export default function DarikDirectStorefrontPage() {
 
             <div className={styles.heroButtons}>
               <button className={styles.primaryHeroButton} onClick={jumpToCatalog}>
-                {isAutoParts ? "Find a part / \u0627\u0628\u062d\u062b \u0639\u0646 \u0642\u0637\u0639\u0629" : "Browse products"}
+                {isAutoParts ? "Find a part / \u0627\u0628\u062d\u062b \u0639\u0646 \u0642\u0637\u0639\u0629" : isGroceryStore ? "Shop groceries / \u062a\u0633\u0648\u0642 \u0627\u0644\u0645\u0646\u062a\u062c\u0627\u062a" : "Browse products"}
                 <Icon name="arrow" size={18} />
               </button>
               <button
@@ -1942,7 +1955,7 @@ export default function DarikDirectStorefrontPage() {
             </span>
           </a>
         ) : null}
-        {(isAutoParts
+        {(isAutoParts || isGroceryStore
           ? contactLinks
               .filter((link) => link.icon === "call" || link.icon === "whatsapp")
               .slice(0, 2)
@@ -1970,17 +1983,34 @@ export default function DarikDirectStorefrontPage() {
       </section>
 
       <div className={styles.reorderableSections}>
+      {isGroceryStore ? (
+        <section className={styles.grocerySearchPanel}>
+          <label className={styles.grocerySearchBox}>
+            <Icon name="search" size={21} />
+            <input
+              value={search}
+              onChange={(event) => setSearch(event.target.value)}
+              placeholder={"Search groceries / \u0627\u0628\u062d\u062b \u0639\u0646 \u0627\u0644\u0645\u0646\u062a\u062c\u0627\u062a"}
+            />
+            {search ? (
+              <button type="button" onClick={() => setSearch("")}>
+                <Icon name="close" size={16} />
+              </button>
+            ) : null}
+          </label>
+        </section>
+      ) : null}
       {visibleCategories.length > 0 ? (
         <section
-          className={styles.categorySection}
+          className={`${styles.categorySection} ${isGroceryStore ? styles.groceryCategorySection : ""}`}
           style={{ order: sectionOrder.indexOf("categories") }}
         >
           <div className={styles.sectionHeading}>
             <div>
-              <span>{"Shop by category / \u062a\u0633\u0648\u0642 \u062d\u0633\u0628 \u0627\u0644\u0642\u0633\u0645"}</span>
-              <h2>{"Browse categories / \u0627\u0644\u0623\u0642\u0633\u0627\u0645"}</h2>
+              <span>{isGroceryStore ? "Shop by department / \u062a\u0633\u0648\u0642 \u062d\u0633\u0628 \u0627\u0644\u0642\u0633\u0645" : "Shop by category / \u062a\u0633\u0648\u0642 \u062d\u0633\u0628 \u0627\u0644\u0642\u0633\u0645"}</span>
+              <h2>{isGroceryStore ? "Browse aisles / \u062a\u0635\u0641\u062d \u0627\u0644\u0623\u0642\u0633\u0627\u0645" : "Browse categories / \u0627\u0644\u0623\u0642\u0633\u0627\u0645"}</h2>
             </div>
-            <button onClick={jumpToCatalog}>{"All products / \u0643\u0644 \u0627\u0644\u0645\u0646\u062a\u062c\u0627\u062a"}</button>
+            <button onClick={jumpToCatalog}>{isGroceryStore ? "All groceries / \u0643\u0644 \u0627\u0644\u0645\u0646\u062a\u062c\u0627\u062a" : "All products / \u0643\u0644 \u0627\u0644\u0645\u0646\u062a\u062c\u0627\u062a"}</button>
           </div>
 
           <div className={styles.categoryScroller}>
@@ -1996,7 +2026,7 @@ export default function DarikDirectStorefrontPage() {
               <div className={styles.allCategoryVisual}>
                 <Icon name="store" size={34} />
               </div>
-              <span>All products</span>
+              <span>{isGroceryStore ? "All groceries" : "All products"}</span>
               <small>{products.length} items</small>
             </button>
 
@@ -2034,12 +2064,32 @@ export default function DarikDirectStorefrontPage() {
         </section>
       ) : null}
 
-      <section
+            {isGroceryStore ? (
+        <section className={styles.groceryPromoBanner}>
+          <div className={styles.groceryPromoCopy}>
+            <span>{"Weekly picks / \u0645\u062e\u062a\u0627\u0631\u0627\u062a \u0627\u0644\u0623\u0633\u0628\u0648\u0639"}</span>
+            <h2>{"Fresh picks, family essentials, and fast shopping."}</h2>
+            <p>
+              {"Explore what the store is featuring this week, then add what you need straight to your basket. / \u062a\u0635\u0641\u062d \u0645\u062e\u062a\u0627\u0631\u0627\u062a \u0627\u0644\u0645\u062a\u062c\u0631 \u0644\u0647\u0630\u0627 \u0627\u0644\u0623\u0633\u0628\u0648\u0639 \u0648\u0623\u0636\u0641 \u0627\u062d\u062a\u064a\u0627\u062c\u0627\u062a\u0643 \u0644\u0644\u0633\u0644\u0629 \u0645\u0628\u0627\u0634\u0631\u0629."}
+            </p>
+            <button type="button" onClick={jumpToCatalog}>
+              {"Shop groceries / \u062a\u0633\u0648\u0642 \u0627\u0644\u0645\u0646\u062a\u062c\u0627\u062a"}
+              <Icon name="arrow" size={18} />
+            </button>
+          </div>
+          <div className={styles.groceryPromoBadge}>
+            <Icon name="bag" size={28} />
+            <strong>{"Fresh / \u0637\u0627\u0632\u062c"}</strong>
+            <span>{"Local shopping made easy / \u062a\u0633\u0648\u0642 \u0645\u062d\u0644\u064a \u0623\u0633\u0647\u0644"}</span>
+          </div>
+        </section>
+      ) : null}
+<section
         className={styles.catalogShell}
         id="catalog"
         style={{ order: sectionOrder.indexOf("catalog") }}
       >
-        <div className={styles.catalogTopbar}>
+        <div className={`${styles.catalogTopbar} ${isGroceryStore ? styles.groceryCatalogTopbar : ""}`}>
           <div>
             <span>Shop {storefront.display_name}</span>
             <h2>
@@ -2140,6 +2190,36 @@ export default function DarikDirectStorefrontPage() {
                 </strong>
               </div>
               {hasActiveVehicleFilter ? <b>{filteredProducts.length}</b> : null}
+      {isGroceryStore && (storeWhatsappHref || phone) ? (
+        <section className={styles.groceryAssistance}>
+          <div className={styles.groceryAssistanceCopy}>
+            <span>{"Need something special? / \u0628\u062f\u0643 \u0637\u0644\u0628 \u062e\u0627\u0635\u061f"}</span>
+            <h2>{"Let the store help you complete the basket."}</h2>
+            <p>
+              {"Use WhatsApp or call for special requests, missing products, or larger household orders. / \u062a\u0648\u0627\u0635\u0644 \u0645\u0639 \u0627\u0644\u0645\u062a\u062c\u0631 \u0639\u0628\u0631 \u0648\u0627\u062a\u0633\u0627\u0628 \u0623\u0648 \u0627\u0644\u0627\u062a\u0635\u0627\u0644 \u0644\u0644\u0637\u0644\u0628\u0627\u062a \u0627\u0644\u062e\u0627\u0635\u0629 \u0623\u0648 \u0627\u0644\u0645\u0646\u062a\u062c\u0627\u062a \u063a\u064a\u0631 \u0627\u0644\u0638\u0627\u0647\u0631\u0629."}
+            </p>
+          </div>
+          <div className={styles.groceryAssistanceActions}>
+            {storeWhatsappHref ? (
+              <a
+                className={styles.groceryAssistanceWhatsapp}
+                href={storeWhatsappHref}
+                target="_blank"
+                rel="noreferrer"
+              >
+                <Icon name="whatsapp" size={18} />
+                <span>{"WhatsApp / \u0648\u0627\u062a\u0633\u0627\u0628"}</span>
+              </a>
+            ) : null}
+            {phone ? (
+              <a className={styles.groceryAssistanceCall} href={phone}>
+                <Icon name="call" size={18} />
+                <span>{"Call us / \u0627\u062a\u0635\u0644 \u0628\u0646\u0627"}</span>
+              </a>
+            ) : null}
+          </div>
+        </section>
+      ) : null}
             </div></section>
         ) : null}
 
@@ -2169,11 +2249,11 @@ export default function DarikDirectStorefrontPage() {
         {loadError ? <p className={styles.notice}>{loadError}</p> : null}
 
         {featuredProducts.length > 0 ? (
-          <section className={styles.productSection}>
+          <section className={`${styles.productSection} ${isGroceryStore ? styles.groceryFeaturedProducts : ""}`}>
             <div className={styles.productSectionHeading}>
               <div>
-                <span>Handpicked by the store</span>
-                <h3>Featured products</h3>
+                <span>{isGroceryStore ? "Featured products / \u0645\u0646\u062a\u062c\u0627\u062a \u0645\u0645\u064a\u0632\u0629" : "Handpicked by the store"}</span>
+                <h3>{isGroceryStore ? "Fresh favorites / \u0627\u0644\u0645\u0641\u0636\u0644\u0629" : "Featured products"}</h3>
               </div>
               <small>{featuredProducts.length} featured</small>
             </div>
@@ -2183,15 +2263,15 @@ export default function DarikDirectStorefrontPage() {
           </section>
         ) : null}
 
-        <section className={styles.productSection}>
+        <section className={`${styles.productSection} ${isGroceryStore ? styles.groceryCatalogProducts : ""}`}>
           <div className={styles.productSectionHeading}>
             <div>
-              <span>{isAutoParts ? "Parts catalog / \u0643\u062a\u0627\u0644\u0648\u062c \u0627\u0644\u0642\u0637\u0639" : search ? `Results for “${search}”` : "Store catalog"}</span>
+              <span>{isAutoParts ? "Parts catalog / \u0643\u062a\u0627\u0644\u0648\u062c \u0627\u0644\u0642\u0637\u0639" : isGroceryStore ? "Store catalog / \u0643\u062a\u0627\u0644\u0648\u062c \u0627\u0644\u0645\u062a\u062c\u0631" : search ? `Results for “${search}”` : "Store catalog"}</span>
               <h3>
-                {isAutoParts ? (hasActiveVehicleFilter ? "Matches / \u0627\u0644\u0645\u0637\u0627\u0628\u0642\u0629" : "Parts / \u0627\u0644\u0642\u0637\u0639") : featuredProducts.length > 0 ? "More to explore" : "Products"}
+                {isAutoParts ? (hasActiveVehicleFilter ? "Matches / \u0627\u0644\u0645\u0637\u0627\u0628\u0642\u0629" : "Parts / \u0627\u0644\u0642\u0637\u0639") : isGroceryStore ? (featuredProducts.length > 0 ? "More groceries / \u0645\u0646\u062a\u062c\u0627\u062a \u0625\u0636\u0627\u0641\u064a\u0629" : "Products / \u0627\u0644\u0645\u0646\u062a\u062c\u0627\u062a") : featuredProducts.length > 0 ? "More to explore" : "Products"}
               </h3>
             </div>
-            <small>{filteredProducts.length} {filteredProducts.length === 1 ? "part" : "parts"}</small>
+            <small>{filteredProducts.length} {isAutoParts ? (filteredProducts.length === 1 ? "part" : "parts") : (filteredProducts.length === 1 ? "item" : "items")}</small>
           </div>
 
           {filteredProducts.length === 0 ? (
