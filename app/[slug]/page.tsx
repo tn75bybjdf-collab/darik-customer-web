@@ -473,6 +473,17 @@ export default function DarikDirectStorefrontPage() {
     fulfillmentMethod: "delivery" | "pickup";
   } | null>(null);
   const [detailsOpen, setDetailsOpen] = useState(false);
+  const [mobileContactDockVisible, setMobileContactDockVisible] = useState(false);
+
+  useEffect(() => {
+    const updateMobileContactDock = () => {
+      setMobileContactDockVisible(window.scrollY > 620);
+    };
+
+    updateMobileContactDock();
+    window.addEventListener("scroll", updateMobileContactDock, { passive: true });
+    return () => window.removeEventListener("scroll", updateMobileContactDock);
+  }, []);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState("");
 
@@ -1521,6 +1532,17 @@ export default function DarikDirectStorefrontPage() {
     );
   }
 
+  const hasActiveVehicleFilter =
+    selectedVehicleMake !== "all" ||
+    selectedVehicleModel !== "all" ||
+    selectedVehicleYear !== "all";
+  const activeVehicleLabel = [
+    selectedVehicleYear !== "all" ? selectedVehicleYear : "",
+    selectedVehicleMake !== "all" ? selectedVehicleMake : "",
+    selectedVehicleModel !== "all" ? selectedVehicleModel : "",
+  ]
+    .filter(Boolean)
+    .join(" ");
   return (
     <main
       className={styles.page}
@@ -1634,7 +1656,7 @@ export default function DarikDirectStorefrontPage() {
           <div className={styles.heroCopy}>
             <div className={styles.heroLabel}>
               <Icon name="store" size={15} />
-              {"Official store / \u0627\u0644\u0645\u062a\u062c\u0631 \u0627\u0644\u0631\u0633\u0645\u064a"}
+              {isAutoParts ? "Auto parts / \u0642\u0637\u0639 \u063a\u064a\u0627\u0631" : "Official store / \u0627\u0644\u0645\u062a\u062c\u0631 \u0627\u0644\u0631\u0633\u0645\u064a"}
             </div>
             <h1>{storefront.display_name}</h1>
             {storefront.display_name_ar ? (
@@ -1651,19 +1673,6 @@ export default function DarikDirectStorefrontPage() {
               </p>
             ) : null}
 
-            {isAutoParts ? (
-              <div className={styles.heroTrustLine}>
-                {pickupOnly ? (
-                  <span>{"Pickup ready / \u0627\u0633\u062a\u0644\u0627\u0645 \u0645\u0646 \u0627\u0644\u0645\u062a\u062c\u0631"}</span>
-                ) : null}
-                {hasVehicleFitment ? (
-                  <span>{"Vehicle fitment / \u062a\u0648\u0627\u0641\u0642 \u0627\u0644\u0633\u064a\u0627\u0631\u0629"}</span>
-                ) : null}
-                {partsHelpWhatsappHref ? (
-                  <span>{"Direct parts support / \u062f\u0639\u0645 \u0645\u0628\u0627\u0634\u0631"}</span>
-                ) : null}
-              </div>
-            ) : null}
             <div className={styles.heroButtons}>
               <button className={styles.primaryHeroButton} onClick={jumpToCatalog}>
                 {isAutoParts ? "Find a part / \u0627\u0628\u062d\u062b \u0639\u0646 \u0642\u0637\u0639\u0629" : "Browse products"}
@@ -1934,7 +1943,24 @@ export default function DarikDirectStorefrontPage() {
                 </select>
               </label>
             </div>
-          </section>
+                      <div className={`${styles.vehicleMatchSummary} ${hasActiveVehicleFilter ? styles.vehicleMatchActive : ""}`}>
+              <span className={styles.vehicleMatchIcon}>
+                <Icon name="search" size={17} />
+              </span>
+              <div>
+                <small>
+                  {hasActiveVehicleFilter
+                    ? "Vehicle selected / \u062a\u0645 \u0627\u062e\u062a\u064a\u0627\u0631 \u0627\u0644\u0633\u064a\u0627\u0631\u0629"
+                    : "Fitment finder / \u0628\u062d\u062b \u0627\u0644\u062a\u0648\u0627\u0641\u0642"}
+                </small>
+                <strong>
+                  {hasActiveVehicleFilter
+                    ? activeVehicleLabel
+                    : "Make + model + year / \u0627\u0644\u0646\u0648\u0639 + \u0627\u0644\u0645\u0648\u062f\u064a\u0644 + \u0627\u0644\u0633\u0646\u0629"}
+                </strong>
+              </div>
+              <b>{hasActiveVehicleFilter ? filteredProducts.length : vehicleMakes.length}</b>
+            </div></section>
         ) : null}
 
         {visibleCategories.length > 0 ? (
@@ -1982,7 +2008,7 @@ export default function DarikDirectStorefrontPage() {
             <div>
               <span>{isAutoParts ? "Parts catalog / \u0643\u062a\u0627\u0644\u0648\u062c \u0627\u0644\u0642\u0637\u0639" : search ? `Results for “${search}”` : "Store catalog"}</span>
               <h3>
-                {isAutoParts ? "Available parts" : featuredProducts.length > 0 ? "More to explore" : "Products"}
+                {isAutoParts ? (hasActiveVehicleFilter ? "Matching parts / \u0627\u0644\u0642\u0637\u0639 \u0627\u0644\u0645\u0637\u0627\u0628\u0642\u0629" : "Browse parts / \u062a\u0635\u0641\u062d \u0627\u0644\u0642\u0637\u0639") : featuredProducts.length > 0 ? "More to explore" : "Products"}
               </h3>
             </div>
             <small>{filteredProducts.length} available</small>
@@ -2023,39 +2049,7 @@ export default function DarikDirectStorefrontPage() {
         </section>
       </section>
 
-      {isAutoParts && (partsHelpWhatsappHref || phone) ? (
-        <section className={styles.partsConcierge}>
-          <div className={styles.partsConciergeIcon}>
-            <Icon name="store" size={24} />
-          </div>
-          <div className={styles.partsConciergeCopy}>
-            <span>{"Parts support / \u0645\u0633\u0627\u0639\u062f\u0629 \u0628\u0627\u0644\u0642\u0637\u0639"}</span>
-            <h2>{"Can't find the part? / \u0645\u0634 \u0644\u0627\u0642\u064a \u0627\u0644\u0642\u0637\u0639\u0629\u061f"}</h2>
-            <p>
-              {"Send your vehicle model or VIN and contact the store directly for help matching the correct part. / \u0623\u0631\u0633\u0644 \u0645\u0648\u062f\u064a\u0644 \u0627\u0644\u0633\u064a\u0627\u0631\u0629 \u0623\u0648 \u0631\u0642\u0645 \u0627\u0644\u0634\u0627\u0635\u064a \u0644\u0644\u0645\u0633\u0627\u0639\u062f\u0629 \u0641\u064a \u062a\u062d\u062f\u064a\u062f \u0627\u0644\u0642\u0637\u0639\u0629 \u0627\u0644\u0645\u0646\u0627\u0633\u0628\u0629."}
-            </p>
-          </div>
-          <div className={styles.partsConciergeActions}>
-            {partsHelpWhatsappHref ? (
-              <a
-                className={styles.partsConciergeWhatsapp}
-                href={partsHelpWhatsappHref}
-                target="_blank"
-                rel="noreferrer"
-              >
-                <Icon name="whatsapp" size={18} />
-                <span>{"WhatsApp / \u0648\u0627\u062a\u0633\u0627\u0628"}</span>
-              </a>
-            ) : null}
-            {phone ? (
-              <a className={styles.partsConciergeCall} href={phone}>
-                <Icon name="call" size={18} />
-                <span>{"Call / \u0627\u062a\u0635\u0627\u0644"}</span>
-              </a>
-            ) : null}
-          </div>
-        </section>
-      ) : null}      {showStoreStory ? (
+      {showStoreStory ? (
       <section
         className={styles.storeStory}
         style={{ order: sectionOrder.indexOf("story") }}
@@ -2114,6 +2108,39 @@ export default function DarikDirectStorefrontPage() {
       ) : null}
       </div>
 
+      {isAutoParts && (partsHelpWhatsappHref || phone) ? (
+        <section className={styles.partsConcierge}>
+          <div className={styles.partsConciergeIcon}>
+            <Icon name="store" size={24} />
+          </div>
+          <div className={styles.partsConciergeCopy}>
+            <span>{"Parts support / \u0645\u0633\u0627\u0639\u062f\u0629 \u0628\u0627\u0644\u0642\u0637\u0639"}</span>
+            <h2>{"Can't find the part? / \u0645\u0634 \u0644\u0627\u0642\u064a \u0627\u0644\u0642\u0637\u0639\u0629\u061f"}</h2>
+            <p>
+              {"Send your vehicle model or VIN and contact the store directly for help matching the correct part. / \u0623\u0631\u0633\u0644 \u0645\u0648\u062f\u064a\u0644 \u0627\u0644\u0633\u064a\u0627\u0631\u0629 \u0623\u0648 \u0631\u0642\u0645 \u0627\u0644\u0634\u0627\u0635\u064a \u0644\u0644\u0645\u0633\u0627\u0639\u062f\u0629 \u0641\u064a \u062a\u062d\u062f\u064a\u062f \u0627\u0644\u0642\u0637\u0639\u0629 \u0627\u0644\u0645\u0646\u0627\u0633\u0628\u0629."}
+            </p>
+          </div>
+          <div className={styles.partsConciergeActions}>
+            {partsHelpWhatsappHref ? (
+              <a
+                className={styles.partsConciergeWhatsapp}
+                href={partsHelpWhatsappHref}
+                target="_blank"
+                rel="noreferrer"
+              >
+                <Icon name="whatsapp" size={18} />
+                <span>{"WhatsApp / \u0648\u0627\u062a\u0633\u0627\u0628"}</span>
+              </a>
+            ) : null}
+            {phone ? (
+              <a className={styles.partsConciergeCall} href={phone}>
+                <Icon name="call" size={18} />
+                <span>{"Call / \u0627\u062a\u0635\u0627\u0644"}</span>
+              </a>
+            ) : null}
+          </div>
+        </section>
+      ) : null}
       <footer className={styles.footer}>
         <div className={styles.footerBrand}>
           <div className={styles.footerLogo}>
@@ -2166,6 +2193,46 @@ export default function DarikDirectStorefrontPage() {
         </button>
       ) : null}
 
+      {isAutoParts &&
+      mobileContactDockVisible &&
+      !detailsOpen &&
+      !cartOpen &&
+      !onlineCheckoutOpen &&
+      (partsHelpWhatsappHref || phone) ? (
+        <div className={styles.mobileContactDock}>
+          <div className={styles.mobileDockIdentity}>
+            <div>
+              {storefront.logo_url ? (
+                <img src={storefront.logo_url} alt="" />
+              ) : (
+                <span>{storefront.display_name.slice(0, 1)}</span>
+              )}
+            </div>
+            <p>
+              <strong>{"Need a part? / \u0628\u062f\u0643 \u0642\u0637\u0639\u0629\u061f"}</strong>
+              <small>{"Ask the store directly / \u0627\u0633\u0623\u0644 \u0627\u0644\u0645\u062a\u062c\u0631 \u0645\u0628\u0627\u0634\u0631\u0629"}</small>
+            </p>
+          </div>
+          <div className={styles.mobileDockActions}>
+            {phone ? (
+              <a href={phone} aria-label="Call store">
+                <Icon name="call" size={18} />
+              </a>
+            ) : null}
+            {partsHelpWhatsappHref ? (
+              <a
+                className={styles.mobileDockWhatsapp}
+                href={partsHelpWhatsappHref}
+                target="_blank"
+                rel="noreferrer"
+                aria-label="WhatsApp store"
+              >
+                <Icon name="whatsapp" size={19} />
+              </a>
+            ) : null}
+          </div>
+        </div>
+      ) : null}
       {detailsOpen ? (
         <div
           className={styles.modalOverlay}

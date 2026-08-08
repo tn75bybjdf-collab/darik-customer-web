@@ -4218,44 +4218,89 @@
   }
 }
 
-/* DARIK_AUTOPARTS_PREMIUM_REBUILD_040
-   Purpose-built auto-parts mobile storefront.
-   This is a structural UX pass, not a generic CSS polish. */
+/* DARIK_AUTOPARTS_ARCHITECTURE_042
+   Auto-parts mobile storefront architecture rebuild.
+   One coherent layer replacing the appended 040 + 041C visual systems. */
+
+@keyframes darik042HeroIn {
+  from { opacity: 0; transform: translateY(12px) scale(.994); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes darik042Glow {
+  0%, 100% { opacity: .26; transform: translate3d(0,0,0) scale(.96); }
+  50% { opacity: .55; transform: translate3d(8px,6px,0) scale(1.04); }
+}
+
+@keyframes darik042Sweep {
+  0%, 68% { transform: translateX(-190%) skewX(-20deg); opacity: 0; }
+  74% { opacity: .7; }
+  100% { transform: translateX(360%) skewX(-20deg); opacity: 0; }
+}
+
+@keyframes darik042DockIn {
+  from { opacity: 0; transform: translateY(18px) scale(.97); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes darik042Pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(22,163,74,.20), 0 9px 24px rgba(22,163,74,.18); }
+  50% { box-shadow: 0 0 0 7px rgba(22,163,74,0), 0 11px 27px rgba(22,163,74,.22); }
+}
 
 @media (max-width: 780px) {
-  /* Calm the chrome so the retailer brand remains the hero. */
-  .page[data-business="auto_parts"] .announcementBar {
-    min-height: 28px;
-    padding: 5px 12px;
-    background: #0b1220;
-    font-size: 9px;
-    font-weight: 800;
-    letter-spacing: .01em;
+  .page[data-business="auto_parts"] {
+    --parts-ink: #08111f;
+    --parts-ink-2: #101c30;
+    --parts-muted: #718096;
+    --parts-line: rgba(120, 137, 160, .15);
+    position: relative;
+    padding-bottom: 92px;
+    background:
+      radial-gradient(circle at 7% 29%, color-mix(in srgb, var(--store-accent) 6%, transparent), transparent 25rem),
+      radial-gradient(circle at 96% 68%, color-mix(in srgb, var(--store-primary) 5%, transparent), transparent 28rem),
+      linear-gradient(180deg, #fbfcfe 0%, #f2f6fb 52%, #f8fafc 100%);
   }
 
-  .page[data-business="auto_parts"] .announcementBar a {
+  /* Retailer identity first. Darik infrastructure stays quiet. */
+  .page[data-business="auto_parts"] .announcementBar {
     display: none;
   }
 
   .page[data-business="auto_parts"] .header {
-    min-height: 60px;
-    padding: 8px 12px;
-    border-bottom: 1px solid rgba(148, 163, 184, .14);
-    background: rgba(255,255,255,.96);
-    backdrop-filter: blur(18px);
+    min-height: 62px;
+    position: sticky;
+    top: 0;
+    z-index: 90;
+    padding: 7px 12px;
+    border-bottom: 1px solid rgba(148,163,184,.10);
+    background: rgba(255,255,255,.91);
+    box-shadow: 0 8px 28px rgba(15,23,42,.05);
+    backdrop-filter: blur(22px) saturate(150%);
+    -webkit-backdrop-filter: blur(22px) saturate(150%);
+  }
+
+  .page[data-business="auto_parts"] .headerLogo {
+    border: 1px solid rgba(148,163,184,.14);
+    box-shadow: 0 7px 20px rgba(15,23,42,.10);
   }
 
   .page[data-business="auto_parts"] .storeIdentity strong {
-    font-size: 13px;
+    max-width: 220px;
+    overflow: hidden;
+    font-size: 13.5px;
     line-height: 1.08;
+    letter-spacing: -.018em;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   .page[data-business="auto_parts"] .storeIdentity span {
     margin-top: 2px;
     color: #94a3b8;
-    font-size: 8px;
-    font-weight: 800;
-    letter-spacing: .04em;
+    font-size: 7.5px;
+    font-weight: 850;
+    letter-spacing: .045em;
   }
 
   .headerWhatsappButton {
@@ -4264,116 +4309,234 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
+    overflow: visible;
     border: 0;
-    border-radius: 12px;
+    border-radius: 13px;
     background: #16a34a;
     color: #fff;
     text-decoration: none;
-    box-shadow: 0 7px 18px rgba(22, 163, 74, .2);
+    animation: darik042Pulse 3.6s ease-in-out infinite;
   }
 
-  .headerWhatsappButton span {
-    display: none;
-  }
+  .headerWhatsappButton span { display: none; }
 
-  /* Hero remains immersive, but gains more editorial polish. */
+  /* Hero: cinematic, but no longer an entire screen by itself. */
   .page[data-business="auto_parts"] .hero,
   .page[data-business="auto_parts"][data-hero="immersive"] .hero {
-    width: calc(100% - 18px);
+    width: calc(100% - 16px);
+    min-height: 0;
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
     margin-top: 8px;
     border: 0;
     border-radius: 26px;
-    padding: 20px 18px 22px;
-    box-shadow: 0 24px 60px rgba(2, 6, 23, .22);
+    padding: 16px 17px 18px;
+    box-shadow:
+      0 24px 58px rgba(2,6,23,.22),
+      0 8px 22px rgba(2,6,23,.10);
+    animation: darik042HeroIn 560ms cubic-bezier(.2,.78,.2,1) both;
+  }
+
+  .page[data-business="auto_parts"] .hero::before {
+    content: "";
+    position: absolute;
+    z-index: 3;
+    top: -135px;
+    left: -115px;
+    width: 300px;
+    height: 300px;
+    border-radius: 999px;
+    pointer-events: none;
+    background: radial-gradient(circle,
+      color-mix(in srgb, var(--store-accent) 35%, transparent) 0%,
+      color-mix(in srgb, var(--store-accent) 11%, transparent) 38%,
+      transparent 70%);
+    filter: blur(20px);
+    animation: darik042Glow 7.5s ease-in-out infinite;
+  }
+
+  .page[data-business="auto_parts"] .hero::after {
+    content: "";
+    position: absolute;
+    z-index: 5;
+    inset: 0;
+    pointer-events: none;
+    border: 1px solid rgba(255,255,255,.16);
+    border-radius: inherit;
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,.16),
+      inset 0 -78px 90px rgba(2,6,23,.10);
   }
 
   .page[data-business="auto_parts"] .heroOverlay {
     background:
-      linear-gradient(180deg, rgba(2,6,23,.05) 0%, rgba(2,6,23,.22) 32%, rgba(2,6,23,.88) 100%),
-      linear-gradient(90deg, rgba(2,6,23,.20), transparent 70%);
+      linear-gradient(180deg, rgba(2,6,23,.08) 0%, rgba(2,6,23,.18) 31%, rgba(2,6,23,.62) 69%, rgba(2,6,23,.94) 100%),
+      linear-gradient(100deg, rgba(2,6,23,.18), transparent 70%);
+  }
+
+  .page[data-business="auto_parts"] .heroTexture {
+    opacity: .09;
+    background-image:
+      linear-gradient(rgba(255,255,255,.045) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,.035) 1px, transparent 1px);
+    background-size: 42px 42px;
+    mask-image: linear-gradient(to bottom, rgba(0,0,0,.5), transparent 72%);
   }
 
   .page[data-business="auto_parts"] .heroContent,
   .page[data-business="auto_parts"][data-hero="immersive"] .heroContent {
-    min-height: 410px;
-    gap: 10px;
+    min-height: 350px;
+    position: relative;
+    z-index: 7;
+    gap: 8px;
+  }
+
+  .heroExperienceRail {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 7px;
+    margin-bottom: auto;
+  }
+
+  .heroLiveStatus,
+  .heroHoursChip {
+    min-height: 29px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    border: 1px solid rgba(255,255,255,.14);
+    border-radius: 999px;
+    padding: 0 9px;
+    background: rgba(7,13,24,.46);
+    color: rgba(255,255,255,.96);
+    font-size: 8px;
+    font-weight: 850;
+    box-shadow: 0 8px 24px rgba(0,0,0,.12);
+    backdrop-filter: blur(13px) saturate(135%);
+    -webkit-backdrop-filter: blur(13px) saturate(135%);
+  }
+
+  .heroLiveStatus .liveDot,
+  .heroLiveStatus .pausedDot {
+    width: 7px;
+    height: 7px;
+    margin: 0;
   }
 
   .page[data-business="auto_parts"] .heroLogo {
-    width: 62px;
-    height: 62px;
-    border-radius: 18px;
+    width: 52px;
+    height: 52px;
+    margin-top: auto;
+    border-width: 3px;
+    border-radius: 16px;
+    box-shadow: 0 12px 30px rgba(0,0,0,.20);
   }
 
   .page[data-business="auto_parts"] .heroLabel {
-    padding: 5px 9px;
-    border: 1px solid rgba(255,255,255,.16);
+    min-height: 28px;
+    border: 1px solid rgba(255,255,255,.15);
     border-radius: 999px;
-    background: rgba(15,23,42,.38);
-    backdrop-filter: blur(14px);
-    font-size: 8px;
+    padding: 0 9px;
+    background: rgba(7,13,24,.43);
+    font-size: 7.5px;
+    backdrop-filter: blur(12px);
   }
 
   .page[data-business="auto_parts"] .hero h1 {
-    max-width: 96%;
-    font-size: clamp(37px, 10.8vw, 48px);
-    line-height: .95;
-    letter-spacing: -.055em;
+    max-width: 94%;
+    margin-top: 2px;
+    font-size: clamp(31px, 9.2vw, 40px);
+    line-height: .98;
+    letter-spacing: -.05em;
+    text-wrap: balance;
+    text-shadow: 0 3px 22px rgba(0,0,0,.20);
   }
 
   .page[data-business="auto_parts"] .tagline {
     max-width: 92%;
-    font-size: 13px;
-    line-height: 1.4;
+    margin-top: 1px;
+    color: rgba(255,255,255,.85);
+    font-size: 12px;
+    line-height: 1.38;
+    text-shadow: 0 2px 14px rgba(0,0,0,.16);
+  }
+
+  .heroTrustLine { display: none !important; }
+
+  .page[data-business="auto_parts"] .heroButtons {
+    margin-top: 12px;
   }
 
   .page[data-business="auto_parts"] .primaryHeroButton {
-    min-height: 50px;
+    min-height: 49px;
+    position: relative;
+    overflow: hidden;
     border-radius: 15px;
-    font-size: 12.5px;
-    font-weight: 850;
-    box-shadow: 0 12px 28px rgba(0,0,0,.16);
+    font-size: 12px;
+    font-weight: 900;
+    box-shadow: 0 12px 28px rgba(0,0,0,.17), inset 0 1px 0 rgba(255,255,255,.60);
   }
 
-  /* Contact dock becomes compact and intentional. */
+  .page[data-business="auto_parts"] .primaryHeroButton::after {
+    content: "";
+    position: absolute;
+    top: -45%;
+    left: 0;
+    width: 23%;
+    height: 190%;
+    pointer-events: none;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,.60), transparent);
+    animation: darik042Sweep 6.5s ease-in-out infinite;
+  }
+
+  /* Compact store utility dock: location first, direct contact immediately below. */
   .page[data-business="auto_parts"] .quickInfoStrip {
-    width: calc(100% - 26px);
-    margin-top: -12px;
+    width: calc(100% - 24px);
+    position: relative;
+    z-index: 20;
+    margin-top: -10px;
+    overflow: hidden;
     border: 1px solid rgba(148,163,184,.12);
-    border-radius: 20px;
+    border-radius: 19px;
     background: rgba(255,255,255,.98);
-    box-shadow: 0 18px 44px rgba(15,23,42,.12);
+    box-shadow: 0 17px 42px rgba(15,23,42,.10), inset 0 1px 0 #fff;
   }
 
   .page[data-business="auto_parts"] .quickInfoStrip .locationQuickLink {
-    min-height: 58px;
-    padding: 10px 14px;
+    min-height: 52px;
+    padding: 8px 12px;
   }
 
   .page[data-business="auto_parts"] .quickInfoStrip .contactQuickLink {
-    min-height: 54px;
+    min-height: 46px;
   }
 
-  /* A store with only one category should NOT waste a whole screen selling
-     the customer an artificial choice. Go straight to the catalog. */
+  .page[data-business="auto_parts"] .quickIcon {
+    width: 36px;
+    height: 36px;
+    border-radius: 11px;
+  }
+
+  /* Single-category auto-parts stores go directly to the useful journey. */
   .page[data-business="auto_parts"][data-category-count="0"] .categorySection,
   .page[data-business="auto_parts"][data-category-count="1"] .categorySection {
     display: none;
   }
 
-  .page[data-business="auto_parts"] .reorderableSections {
-    gap: 0;
-  }
+  .page[data-business="auto_parts"] .reorderableSections { gap: 0; }
 
   .page[data-business="auto_parts"] .catalogShell {
     width: calc(100% - 24px);
     margin-top: 0;
-    padding: 30px 0 44px;
+    padding: 24px 0 36px;
+    scroll-margin-top: 72px;
   }
 
-  /* Search feels like a premium utility bar, not a giant form field. */
   .page[data-business="auto_parts"] .catalogTopbar {
-    margin-bottom: 12px;
+    margin-bottom: 10px;
   }
 
   .page[data-business="auto_parts"] .catalogTopbar > div:first-child {
@@ -4382,47 +4545,87 @@
 
   .page[data-business="auto_parts"] .searchBox {
     min-height: 48px;
-    border: 1px solid rgba(148,163,184,.24);
+    border: 1px solid rgba(148,163,184,.20);
     border-radius: 15px;
-    background: #fff;
-    box-shadow: 0 9px 28px rgba(15,23,42,.05);
+    background: rgba(255,255,255,.98);
+    box-shadow: 0 8px 24px rgba(15,23,42,.045), inset 0 1px 0 #fff;
+    transition: transform 170ms ease, box-shadow 170ms ease, border-color 170ms ease;
+  }
+
+  .page[data-business="auto_parts"] .searchBox:focus-within {
+    border-color: color-mix(in srgb, var(--store-accent) 42%, #cbd5e1);
+    box-shadow: 0 14px 34px rgba(15,23,42,.075), 0 0 0 4px color-mix(in srgb, var(--store-accent) 8%, transparent);
+    transform: translateY(-1px);
   }
 
   .page[data-business="auto_parts"] .searchBox input {
     font-size: 13px;
-    font-weight: 650;
+    font-weight: 680;
   }
 
-  /* The vehicle finder is the automotive signature element:
-     deep navy surface, crisp white controls, obvious hierarchy. */
+  /* Signature automotive tool. */
   .page[data-business="auto_parts"] .vehicleFilterPanel {
-    margin: 12px 0 22px;
-    gap: 13px;
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    margin: 10px 0 22px;
+    gap: 12px;
     border: 0;
     border-radius: 22px;
-    padding: 17px;
+    padding: 16px;
     background:
-      radial-gradient(circle at 100% 0%, rgba(37,99,235,.32), transparent 42%),
-      linear-gradient(145deg, #0b1220 0%, #111c31 100%);
-    box-shadow: 0 18px 44px rgba(2,6,23,.16);
+      linear-gradient(145deg, #07101e 0%, #0c1729 50%, #112039 100%);
+    box-shadow: 0 22px 54px rgba(2,6,23,.19), inset 0 1px 0 rgba(255,255,255,.06);
+  }
+
+  .page[data-business="auto_parts"] .vehicleFilterPanel::before {
+    content: "";
+    position: absolute;
+    z-index: -1;
+    top: -115px;
+    right: -88px;
+    width: 245px;
+    height: 245px;
+    border-radius: 999px;
+    background: radial-gradient(circle, color-mix(in srgb, var(--store-accent) 44%, transparent), transparent 68%);
+    opacity: .60;
+  }
+
+  .page[data-business="auto_parts"] .vehicleFilterPanel::after {
+    content: "";
+    position: absolute;
+    z-index: -1;
+    left: -75px;
+    bottom: -105px;
+    width: 205px;
+    height: 205px;
+    border-radius: 999px;
+    background: radial-gradient(circle, rgba(22,163,74,.11), transparent 68%);
+  }
+
+  .page[data-business="auto_parts"] .vehicleFilterHeading,
+  .page[data-business="auto_parts"] .vehicleFilterGrid,
+  .vehicleMatchSummary {
+    position: relative;
+    z-index: 2;
   }
 
   .page[data-business="auto_parts"] .vehicleFilterHeading span {
     color: #93c5fd;
-    font-size: 8px;
-    font-weight: 900;
-    letter-spacing: .11em;
+    font-size: 7.5px;
+    font-weight: 950;
+    letter-spacing: .12em;
   }
 
   .page[data-business="auto_parts"] .vehicleFilterHeading strong {
     color: #fff;
     font-size: 17px;
-    line-height: 1.2;
-    letter-spacing: -.02em;
+    line-height: 1.16;
+    letter-spacing: -.025em;
   }
 
   .page[data-business="auto_parts"] .vehicleFilterHeading button {
-    border: 1px solid rgba(255,255,255,.16);
+    border: 1px solid rgba(255,255,255,.15);
     background: rgba(255,255,255,.08);
     color: #fff;
   }
@@ -4438,40 +4641,109 @@
 
   .page[data-business="auto_parts"] .vehicleFilterGrid label > span {
     color: #cbd5e1;
-    font-size: 8.5px;
+    font-size: 8px;
     font-weight: 850;
   }
 
   .page[data-business="auto_parts"] .vehicleFilterGrid select {
-    min-height: 46px;
-    border: 1px solid rgba(255,255,255,.13);
+    min-height: 45px;
+    border: 1px solid rgba(255,255,255,.11);
     border-radius: 13px;
     padding: 0 10px;
-    background: #fff;
+    background-color: rgba(255,255,255,.99);
     color: #0f172a;
-    font-size: 11.5px;
-    font-weight: 800;
-    box-shadow: 0 5px 16px rgba(2,6,23,.15);
+    font-size: 11px;
+    font-weight: 850;
+    box-shadow: 0 6px 18px rgba(2,6,23,.16), inset 0 1px 0 #fff;
   }
 
-  .page[data-business="auto_parts"] .categoryPills {
-    display: none;
+  .vehicleMatchSummary {
+    min-height: 56px;
+    display: grid;
+    grid-template-columns: 36px 1fr auto;
+    align-items: center;
+    gap: 9px;
+    border: 1px solid rgba(255,255,255,.10);
+    border-radius: 14px;
+    padding: 8px 9px;
+    background: rgba(255,255,255,.065);
+    color: #fff;
+    backdrop-filter: blur(10px);
   }
 
-  /* One clean catalog heading, then the goods. */
+  .vehicleMatchSummary.vehicleMatchActive {
+    border-color: color-mix(in srgb, var(--store-accent) 50%, rgba(255,255,255,.14));
+    background: color-mix(in srgb, var(--store-accent) 14%, rgba(255,255,255,.07));
+  }
+
+  .vehicleMatchIcon {
+    width: 34px;
+    height: 34px;
+    display: grid;
+    place-items: center;
+    border-radius: 10px;
+    background: rgba(255,255,255,.09);
+    color: #93c5fd;
+  }
+
+  .vehicleMatchSummary small {
+    display: block;
+    color: #94a3b8;
+    font-size: 7px;
+    font-weight: 900;
+    letter-spacing: .02em;
+  }
+
+  .vehicleMatchSummary strong {
+    display: block;
+    margin-top: 2px;
+    overflow: hidden;
+    color: #fff;
+    font-size: 10px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .vehicleMatchSummary b {
+    min-width: 30px;
+    height: 30px;
+    display: grid;
+    place-items: center;
+    border-radius: 9px;
+    background: rgba(255,255,255,.10);
+    color: #fff;
+    font-size: 10.5px;
+  }
+
+  .page[data-business="auto_parts"] .categoryPills { display: none; }
+
+  /* Inventory should arrive quickly and feel merchandised, not templated. */
   .page[data-business="auto_parts"] .productSection {
-    margin-top: 26px;
+    margin-top: 22px;
   }
 
   .page[data-business="auto_parts"] .productSectionHeading {
+    position: relative;
     align-items: flex-end;
-    margin-bottom: 12px;
+    margin-top: 0;
+    margin-bottom: 15px;
+  }
+
+  .page[data-business="auto_parts"] .productSectionHeading::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    bottom: -8px;
+    width: 44px;
+    height: 3px;
+    border-radius: 999px;
+    background: linear-gradient(90deg, var(--store-accent), color-mix(in srgb, var(--store-accent) 22%, transparent));
   }
 
   .page[data-business="auto_parts"] .productSectionHeading > div > span {
     color: #2563eb;
-    font-size: 8px;
-    font-weight: 900;
+    font-size: 7.5px;
+    font-weight: 950;
     letter-spacing: .12em;
   }
 
@@ -4484,646 +4756,23 @@
 
   .page[data-business="auto_parts"] .productSectionHeading > small {
     color: #94a3b8;
-    font-size: 9.5px;
+    font-size: 9px;
     font-weight: 800;
   }
 
   .page[data-business="auto_parts"] .productGrid {
     grid-template-columns: 1fr;
-    gap: 16px;
-  }
-
-  .page[data-business="auto_parts"] .autoPartsProductCard {
-    border: 1px solid rgba(148,163,184,.13);
-    border-radius: 22px;
-    background: #fff;
-    box-shadow: 0 18px 48px rgba(15,23,42,.075);
-    overflow: hidden;
-  }
-
-  .page[data-business="auto_parts"] .autoPartsProductCard .productImage {
-    aspect-ratio: 1.62 / 1;
-    background: linear-gradient(180deg, #f8fafc, #f1f5f9);
-  }
-
-  .page[data-business="auto_parts"] .autoPartsProductCard .productImage img {
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
-  }
-
-  .page[data-business="auto_parts"] .autoPartsProductCard .productBody {
-    padding: 17px 18px 18px;
-  }
-
-  .page[data-business="auto_parts"] .autoPartsProductCard .productMeta {
-    margin-bottom: 7px;
-    color: #2563eb;
-    font-size: 8px;
-    font-weight: 900;
-    letter-spacing: .11em;
-  }
-
-  .page[data-business="auto_parts"] .autoPartsProductCard .productBody h3 {
-    font-size: 19px;
-    line-height: 1.28;
-    letter-spacing: -.025em;
-  }
-
-  .page[data-business="auto_parts"] .autoPartsProductCard .productArabic {
-    margin-top: 7px;
-    color: #64748b;
-    font-size: 13px;
-    line-height: 1.5;
-  }
-
-  .page[data-business="auto_parts"] .autoPartsProductCard .productFitment {
-    margin-top: 12px;
-    border: 0;
-    border-radius: 12px;
-    padding: 9px 11px;
-    background: #f1f5f9;
-  }
-
-  .page[data-business="auto_parts"] .autoPartsProductCard .productFitment span {
-    color: #64748b;
-    font-size: 8.5px;
-    font-weight: 900;
-  }
-
-  .page[data-business="auto_parts"] .autoPartsProductCard .productFitment strong {
-    color: #0f172a;
-    font-size: 13px;
-  }
-
-  .page[data-business="auto_parts"] .autoPartsProductCard .productDescription {
-    display: none;
-  }
-
-  .page[data-business="auto_parts"] .autoPartsProductCard .productFooter {
-    gap: 9px;
-    padding-top: 13px;
-  }
-
-  .page[data-business="auto_parts"] .autoPartsProductCard .productFooter > div:first-child > strong {
-    color: #64748b;
-    font-size: 10.5px;
-    font-weight: 850;
-  }
-
-  .page[data-business="auto_parts"] .autoPartsProductCard .pricingActions {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 8px;
-  }
-
-  .page[data-business="auto_parts"] .autoPartsProductCard .pricingCallButton,
-  .page[data-business="auto_parts"] .autoPartsProductCard .pricingWhatsappButton {
-    min-height: 48px;
-    border-radius: 14px;
-    font-size: 11.5px;
-    font-weight: 850;
-  }
-
-  /* Remove generic marketing filler from the auto-parts mobile path.
-     The concierge below is more valuable and more store-specific. */
-  .page[data-business="auto_parts"] .storeStory {
-    display: none;
-  }
-
-  .partsConcierge {
-    width: calc(100% - 24px);
-    margin: 12px auto 28px;
-    display: grid;
-    grid-template-columns: auto 1fr;
-    gap: 12px;
-    border-radius: 24px;
-    padding: 20px;
-    background:
-      radial-gradient(circle at 100% 0%, rgba(37,99,235,.28), transparent 38%),
-      linear-gradient(145deg, #0b1220, #111827);
-    color: #fff;
-    box-shadow: 0 22px 55px rgba(2,6,23,.17);
-  }
-
-  .partsConciergeIcon {
-    width: 44px;
-    height: 44px;
-    display: grid;
-    place-items: center;
-    border-radius: 14px;
-    background: rgba(255,255,255,.09);
-    color: #93c5fd;
-  }
-
-  .partsConciergeCopy {
-    min-width: 0;
-  }
-
-  .partsConciergeCopy > span {
-    display: block;
-    color: #93c5fd;
-    font-size: 8px;
-    font-weight: 900;
-    letter-spacing: .11em;
-    text-transform: uppercase;
-  }
-
-  .partsConciergeCopy h2 {
-    margin: 5px 0 0;
-    color: #fff;
-    font-size: 21px;
-    line-height: 1.08;
-    letter-spacing: -.035em;
-  }
-
-  .partsConciergeCopy p {
-    margin: 10px 0 0;
-    color: #cbd5e1;
-    font-size: 11px;
-    line-height: 1.55;
-  }
-
-  .partsConciergeActions {
-    grid-column: 1 / -1;
-    display: grid;
-    grid-template-columns: 1.25fr .75fr;
-    gap: 8px;
-    margin-top: 4px;
-  }
-
-  .partsConciergeActions a {
-    min-height: 46px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 7px;
-    border-radius: 14px;
-    font-size: 11px;
-    font-weight: 850;
-    text-decoration: none;
-  }
-
-  .partsConciergeWhatsapp {
-    background: #16a34a;
-    color: #fff;
-  }
-
-  .partsConciergeCall {
-    border: 1px solid rgba(255,255,255,.14);
-    background: rgba(255,255,255,.08);
-    color: #fff;
-  }
-
-  .page[data-business="auto_parts"] .footer {
-    width: calc(100% - 24px);
-    padding: 16px 0 30px;
-    border-top: 1px solid rgba(148,163,184,.16);
-  }
-
-  .page[data-business="auto_parts"] .poweredBy {
-    font-size: 8.5px;
-    opacity: .65;
-  }
-}
-
-@media (max-width: 430px) {
-  .page[data-business="auto_parts"] .heroContent,
-  .page[data-business="auto_parts"][data-hero="immersive"] .heroContent {
-    min-height: 392px;
-  }
-
-  .partsConcierge {
-    padding: 18px;
-  }
-
-  .partsConciergeCopy h2 {
-    font-size: 20px;
-  }
-}
-
-/* DARIK_AUTOPARTS_FLAGSHIP_041C
-   Flagship visual experience built only on stable 040 structures. */
-
-@keyframes darik041HeroIn {
-  from { opacity: 0; transform: translateY(16px) scale(.99); }
-  to { opacity: 1; transform: translateY(0) scale(1); }
-}
-
-@keyframes darik041Glow {
-  0%, 100% { opacity: .32; transform: scale(.94) translate3d(0,0,0); }
-  50% { opacity: .7; transform: scale(1.06) translate3d(6px,8px,0); }
-}
-
-@keyframes darik041Float {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-5px); }
-}
-
-@keyframes darik041Sweep {
-  0%, 62% { transform: translateX(-180%) skewX(-20deg); opacity: 0; }
-  68% { opacity: .8; }
-  100% { transform: translateX(360%) skewX(-20deg); opacity: 0; }
-}
-
-@keyframes darik041Pulse {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(34,197,94,.24); }
-  50% { box-shadow: 0 0 0 8px rgba(34,197,94,0); }
-}
-
-@media (max-width: 780px) {
-  .page[data-business="auto_parts"] {
-    --flagship-ink: #08111f;
-    --flagship-ink-2: #111d31;
-    --flagship-muted: #77849a;
-    --flagship-line: rgba(124, 142, 166, .15);
-    position: relative;
-    background:
-      radial-gradient(circle at 8% 20%, color-mix(in srgb, var(--store-accent) 8%, transparent), transparent 23rem),
-      radial-gradient(circle at 92% 64%, color-mix(in srgb, var(--store-primary) 7%, transparent), transparent 28rem),
-      linear-gradient(180deg, #f9fbfe 0%, #f3f7fc 46%, #f8fafc 100%);
-  }
-
-  /* Premium glass navigation. */
-  .page[data-business="auto_parts"] .announcementBar {
-    display: none;
-  }
-
-  .page[data-business="auto_parts"] .header {
-    min-height: 66px;
-    top: 0;
-    z-index: 80;
-    border-bottom: 1px solid rgba(148,163,184,.10);
-    padding: 8px 12px;
-    background: rgba(255,255,255,.88);
-    box-shadow:
-      0 10px 35px rgba(15,23,42,.055),
-      inset 0 -1px 0 rgba(255,255,255,.7);
-    backdrop-filter: blur(24px) saturate(155%);
-    -webkit-backdrop-filter: blur(24px) saturate(155%);
-  }
-
-  .page[data-business="auto_parts"] .headerLogo {
-    border: 1px solid rgba(148,163,184,.16);
-    box-shadow: 0 9px 24px rgba(15,23,42,.11);
-  }
-
-  .page[data-business="auto_parts"] .storeIdentity strong {
-    letter-spacing: -.018em;
-  }
-
-  .page[data-business="auto_parts"] .headerWhatsappButton {
-    position: relative;
-    overflow: visible;
-    box-shadow: 0 10px 26px rgba(22,163,74,.22);
-    animation: darik041Pulse 3.4s ease-in-out infinite;
-  }
-
-  /* Hero: cinematic depth, but retailer photo stays the star. */
-  .page[data-business="auto_parts"] .hero,
-  .page[data-business="auto_parts"][data-hero="immersive"] .hero {
-    width: calc(100% - 16px);
-    position: relative;
-    isolation: isolate;
-    overflow: hidden;
-    margin-top: 8px;
-    border: 0;
-    border-radius: 28px;
-    box-shadow:
-      0 30px 72px rgba(2,6,23,.25),
-      0 10px 25px rgba(2,6,23,.12);
-    animation: darik041HeroIn 650ms cubic-bezier(.2,.78,.2,1) both;
-  }
-
-  .page[data-business="auto_parts"] .hero::before {
-    content: "";
-    position: absolute;
-    z-index: 3;
-    top: -120px;
-    left: -110px;
-    width: 310px;
-    height: 310px;
-    border-radius: 999px;
-    pointer-events: none;
-    background:
-      radial-gradient(circle,
-        color-mix(in srgb, var(--store-accent) 44%, transparent) 0%,
-        color-mix(in srgb, var(--store-accent) 15%, transparent) 36%,
-        transparent 70%);
-    filter: blur(18px);
-    animation: darik041Glow 7s ease-in-out infinite;
-  }
-
-  .page[data-business="auto_parts"] .hero::after {
-    content: "";
-    position: absolute;
-    z-index: 5;
-    inset: 0;
-    pointer-events: none;
-    border: 1px solid rgba(255,255,255,.18);
-    border-radius: inherit;
-    box-shadow:
-      inset 0 1px 0 rgba(255,255,255,.17),
-      inset 0 -95px 100px rgba(2,6,23,.12);
-  }
-
-  .page[data-business="auto_parts"] .heroOverlay {
-    background:
-      linear-gradient(180deg, rgba(2,6,23,.04) 0%, rgba(2,6,23,.12) 26%, rgba(2,6,23,.48) 59%, rgba(2,6,23,.94) 100%),
-      linear-gradient(100deg, rgba(2,6,23,.20), transparent 70%);
-  }
-
-  .page[data-business="auto_parts"] .heroTexture {
-    opacity: .13;
-    background-image:
-      linear-gradient(rgba(255,255,255,.045) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(255,255,255,.035) 1px, transparent 1px);
-    background-size: 40px 40px;
-    mask-image: linear-gradient(to bottom, rgba(0,0,0,.6), transparent 74%);
-  }
-
-  .page[data-business="auto_parts"] .heroContent {
-    position: relative;
-    z-index: 7;
-    min-height: 430px;
-  }
-
-  .heroExperienceRail {
-    width: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 7px;
-    margin-bottom: auto;
-  }
-
-  .heroLiveStatus,
-  .heroHoursChip {
-    min-height: 31px;
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    border: 1px solid rgba(255,255,255,.15);
-    border-radius: 999px;
-    padding: 0 10px;
-    background: rgba(7,13,24,.42);
-    color: rgba(255,255,255,.95);
-    font-size: 8.5px;
-    font-weight: 850;
-    letter-spacing: .005em;
-    box-shadow: 0 9px 28px rgba(0,0,0,.13);
-    backdrop-filter: blur(14px) saturate(135%);
-    -webkit-backdrop-filter: blur(14px) saturate(135%);
-  }
-
-  .heroLiveStatus .liveDot,
-  .heroLiveStatus .pausedDot {
-    width: 7px;
-    height: 7px;
-    margin: 0;
-  }
-
-  .page[data-business="auto_parts"] .heroLogo {
-    position: relative;
-    width: 68px;
-    height: 68px;
-    border-radius: 20px;
-    border-width: 4px;
-    box-shadow:
-      0 15px 36px rgba(0,0,0,.22),
-      0 0 0 1px rgba(255,255,255,.15);
-    animation: darik041Float 5.2s ease-in-out infinite;
-  }
-
-  .page[data-business="auto_parts"] .heroLogo::after {
-    content: "";
-    position: absolute;
-    inset: -9px;
-    z-index: -1;
-    border-radius: 27px;
-    background: color-mix(in srgb, var(--store-accent) 28%, transparent);
-    filter: blur(20px);
-    opacity: .58;
-  }
-
-  .page[data-business="auto_parts"] .heroLabel {
-    border: 1px solid rgba(255,255,255,.17);
-    background: rgba(7,13,24,.40);
-    box-shadow: 0 9px 28px rgba(0,0,0,.12);
-    backdrop-filter: blur(13px);
-  }
-
-  .page[data-business="auto_parts"] .hero h1 {
-    max-width: 96%;
-    text-wrap: balance;
-    text-shadow: 0 3px 22px rgba(0,0,0,.20);
-  }
-
-  .page[data-business="auto_parts"] .tagline {
-    color: rgba(255,255,255,.86);
-    text-shadow: 0 2px 16px rgba(0,0,0,.17);
-  }
-
-  .heroTrustLine {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 6px;
-    margin-top: 12px;
-  }
-
-  .heroTrustLine span {
-    min-height: 27px;
-    display: inline-flex;
-    align-items: center;
-    border: 1px solid rgba(255,255,255,.13);
-    border-radius: 999px;
-    padding: 0 9px;
-    background: rgba(255,255,255,.08);
-    color: rgba(255,255,255,.90);
-    font-size: 7.8px;
-    font-weight: 800;
-    box-shadow: inset 0 1px 0 rgba(255,255,255,.06);
-    backdrop-filter: blur(10px);
-  }
-
-  .page[data-business="auto_parts"] .heroButtons {
-    margin-top: 15px;
-  }
-
-  .page[data-business="auto_parts"] .primaryHeroButton {
-    min-height: 54px;
-    position: relative;
-    overflow: hidden;
-    border-radius: 17px;
-    font-size: 13px;
-    font-weight: 850;
-    box-shadow:
-      0 15px 32px rgba(0,0,0,.18),
-      inset 0 1px 0 rgba(255,255,255,.65);
-  }
-
-  .page[data-business="auto_parts"] .primaryHeroButton::after {
-    content: "";
-    position: absolute;
-    top: -45%;
-    left: 0;
-    width: 24%;
-    height: 190%;
-    pointer-events: none;
-    background: linear-gradient(90deg, transparent, rgba(255,255,255,.65), transparent);
-    animation: darik041Sweep 6s ease-in-out infinite;
-  }
-
-  /* The contact dock should look attached to the hero, like a premium app surface. */
-  .page[data-business="auto_parts"] .quickInfoStrip {
-    width: calc(100% - 22px);
-    position: relative;
-    z-index: 20;
-    margin-top: -14px;
-    overflow: hidden;
-    border: 1px solid rgba(148,163,184,.13);
-    border-radius: 22px;
-    background:
-      linear-gradient(145deg, rgba(255,255,255,.99), rgba(248,250,252,.96));
-    box-shadow:
-      0 23px 56px rgba(15,23,42,.13),
-      inset 0 1px 0 #fff;
-  }
-
-  .page[data-business="auto_parts"] .quickInfoStrip::after {
-    content: "";
-    position: absolute;
-    top: -45px;
-    right: -45px;
-    width: 135px;
-    height: 135px;
-    border-radius: 999px;
-    pointer-events: none;
-    background: radial-gradient(circle, color-mix(in srgb, var(--store-accent) 15%, transparent), transparent 70%);
-  }
-
-  .page[data-business="auto_parts"] .quickInfoStrip .locationQuickLink {
-    min-height: 62px;
-  }
-
-  .page[data-business="auto_parts"] .quickIcon {
-    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--store-accent) 7%, transparent);
-  }
-
-  /* Search + fitment become the center of the store experience. */
-  .page[data-business="auto_parts"] .catalogShell {
-    width: calc(100% - 22px);
-    padding-top: 34px;
-  }
-
-  .page[data-business="auto_parts"] .searchBox {
-    min-height: 53px;
-    border-radius: 17px;
-    border: 1px solid rgba(148,163,184,.18);
-    background: rgba(255,255,255,.96);
-    box-shadow:
-      0 13px 34px rgba(15,23,42,.065),
-      inset 0 1px 0 #fff;
-    transition: transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease;
-  }
-
-  .page[data-business="auto_parts"] .searchBox:focus-within {
-    border-color: color-mix(in srgb, var(--store-accent) 45%, #cbd5e1);
-    box-shadow:
-      0 18px 42px rgba(15,23,42,.09),
-      0 0 0 4px color-mix(in srgb, var(--store-accent) 8%, transparent);
-    transform: translateY(-2px);
-  }
-
-  .page[data-business="auto_parts"] .vehicleFilterPanel {
-    position: relative;
-    isolation: isolate;
-    overflow: hidden;
-    margin-top: 13px;
-    border-radius: 24px;
-    padding: 18px;
-    background:
-      linear-gradient(145deg, #07101e 0%, #0d182a 48%, #12213a 100%);
-    box-shadow:
-      0 28px 66px rgba(2,6,23,.23),
-      inset 0 1px 0 rgba(255,255,255,.06);
-  }
-
-  .page[data-business="auto_parts"] .vehicleFilterPanel::before {
-    content: "";
-    position: absolute;
-    z-index: -1;
-    top: -120px;
-    right: -95px;
-    width: 260px;
-    height: 260px;
-    border-radius: 999px;
-    background:
-      radial-gradient(circle,
-        color-mix(in srgb, var(--store-accent) 46%, transparent),
-        transparent 68%);
-    opacity: .65;
-  }
-
-  .page[data-business="auto_parts"] .vehicleFilterPanel::after {
-    content: "";
-    position: absolute;
-    z-index: -1;
-    left: -75px;
-    bottom: -110px;
-    width: 210px;
-    height: 210px;
-    border-radius: 999px;
-    background: radial-gradient(circle, rgba(22,163,74,.14), transparent 68%);
-  }
-
-  .page[data-business="auto_parts"] .vehicleFilterHeading strong {
-    font-size: 18px;
-    letter-spacing: -.025em;
-  }
-
-  .page[data-business="auto_parts"] .vehicleFilterGrid select {
-    min-height: 49px;
-    border: 1px solid rgba(255,255,255,.10);
-    border-radius: 14px;
-    background-color: rgba(255,255,255,.98);
-    box-shadow:
-      0 8px 22px rgba(2,6,23,.18),
-      inset 0 1px 0 #fff;
-  }
-
-  /* Product area gets editorial hierarchy instead of generic cards. */
-  .page[data-business="auto_parts"] .productSectionHeading {
-    position: relative;
-    margin-top: 38px;
-    margin-bottom: 17px;
-  }
-
-  .page[data-business="auto_parts"] .productSectionHeading::after {
-    content: "";
-    position: absolute;
-    left: 0;
-    bottom: -9px;
-    width: 48px;
-    height: 3px;
-    border-radius: 999px;
-    background: linear-gradient(90deg, var(--store-accent), color-mix(in srgb, var(--store-accent) 22%, transparent));
-  }
-
-  .page[data-business="auto_parts"] .productSectionHeading h3 {
-    font-size: 29px;
-    letter-spacing: -.05em;
+    gap: 15px;
   }
 
   .page[data-business="auto_parts"] .autoPartsProductCard {
     position: relative;
     overflow: hidden;
     border: 1px solid rgba(148,163,184,.12);
-    border-radius: 25px;
-    box-shadow:
-      0 25px 65px rgba(15,23,42,.095),
-      inset 0 1px 0 #fff;
-    transition: transform 220ms cubic-bezier(.2,.8,.2,1), box-shadow 220ms ease;
+    border-radius: 21px;
+    background: #fff;
+    box-shadow: 0 17px 44px rgba(15,23,42,.075), inset 0 1px 0 #fff;
+    transition: transform 210ms cubic-bezier(.2,.8,.2,1), box-shadow 210ms ease;
   }
 
   .page[data-business="auto_parts"] .autoPartsProductCard::before {
@@ -5133,7 +4782,7 @@
     inset: 0;
     pointer-events: none;
     border-radius: inherit;
-    box-shadow: inset 0 1px 0 rgba(255,255,255,.85);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.80);
   }
 
   .page[data-business="auto_parts"] .autoPartsProductCard:active {
@@ -5143,71 +4792,160 @@
   .page[data-business="auto_parts"] .autoPartsProductCard .productImage {
     position: relative;
     overflow: hidden;
-    background:
-      radial-gradient(circle at 50% 20%, #fff, #f1f5f9 72%);
+    aspect-ratio: 1.68 / 1;
+    background: radial-gradient(circle at 50% 18%, #fff, #eef2f7 74%);
   }
 
   .page[data-business="auto_parts"] .autoPartsProductCard .productImage::after {
     content: "";
     position: absolute;
     inset: auto 0 0;
-    height: 30%;
+    height: 22%;
     pointer-events: none;
-    background: linear-gradient(to top, rgba(15,23,42,.055), transparent);
+    background: linear-gradient(to top, rgba(15,23,42,.045), transparent);
   }
 
   .page[data-business="auto_parts"] .autoPartsProductCard .productImage img {
-    transition: transform 420ms cubic-bezier(.2,.75,.25,1);
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    transition: transform 380ms cubic-bezier(.2,.75,.25,1);
   }
 
   .page[data-business="auto_parts"] .autoPartsProductCard:active .productImage img {
-    transform: scale(1.015);
+    transform: scale(1.012);
   }
 
   .page[data-business="auto_parts"] .autoPartsProductCard .productBody {
     position: relative;
-    padding: 19px 19px 20px;
+    padding: 15px 16px 16px;
+  }
+
+  .page[data-business="auto_parts"] .autoPartsProductCard .productMeta {
+    height: auto;
+    margin-bottom: 6px;
+    color: #2563eb;
+    font-size: 7.5px;
+    font-weight: 950;
+    letter-spacing: .11em;
   }
 
   .page[data-business="auto_parts"] .autoPartsProductCard .productBody h3 {
-    font-size: 20px;
-    line-height: 1.25;
-    letter-spacing: -.03em;
+    min-height: 0;
+    font-size: 18px;
+    line-height: 1.27;
+    letter-spacing: -.025em;
+  }
+
+  .page[data-business="auto_parts"] .autoPartsProductCard .productArabic {
+    display: -webkit-box;
+    margin-top: 6px;
+    overflow: hidden;
+    color: #64748b;
+    font-size: 12.5px;
+    line-height: 1.45;
+    white-space: normal;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
   }
 
   .page[data-business="auto_parts"] .autoPartsProductCard .productFitment {
-    border: 1px solid color-mix(in srgb, var(--store-accent) 8%, transparent);
-    background:
-      linear-gradient(90deg,
-        color-mix(in srgb, var(--store-accent) 5%, #f8fafc),
-        #f1f5f9);
+    display: flex;
+    align-items: baseline;
+    flex-wrap: wrap;
+    gap: 5px 8px;
+    margin-top: 10px;
+    border: 1px solid color-mix(in srgb, var(--store-accent) 7%, transparent);
+    border-radius: 11px;
+    padding: 8px 10px;
+    background: linear-gradient(90deg, color-mix(in srgb, var(--store-accent) 4%, #f8fafc), #f1f5f9);
     box-shadow: inset 0 1px 0 #fff;
   }
 
-  .page[data-business="auto_parts"] .pricingCallButton,
-  .page[data-business="auto_parts"] .pricingWhatsappButton {
-    min-height: 51px;
-    border-radius: 15px;
+  .page[data-business="auto_parts"] .autoPartsProductCard .productFitment span {
+    color: #64748b;
+    font-size: 8px;
+    font-weight: 950;
   }
 
-  .page[data-business="auto_parts"] .pricingWhatsappButton {
-    box-shadow: 0 12px 28px rgba(22,163,74,.18);
+  .page[data-business="auto_parts"] .autoPartsProductCard .productFitment strong {
+    color: #0f172a;
+    font-size: 12.5px;
   }
 
-  /* Concierge now feels like the premium final service promise. */
+  .page[data-business="auto_parts"] .autoPartsProductCard .productDescription {
+    display: none;
+  }
+
+  .page[data-business="auto_parts"] .autoPartsProductCard .productFooter {
+    align-items: stretch;
+    flex-direction: column;
+    gap: 9px;
+    padding-top: 11px;
+  }
+
+  .page[data-business="auto_parts"] .autoPartsProductCard .productFooter > div:first-child > strong {
+    color: #64748b;
+    font-size: 10px;
+    font-weight: 850;
+  }
+
+  .page[data-business="auto_parts"] .autoPartsProductCard .pricingActions {
+    width: 100%;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0,1fr));
+    gap: 7px;
+  }
+
+  .page[data-business="auto_parts"] .autoPartsProductCard .pricingCallButton,
+  .page[data-business="auto_parts"] .autoPartsProductCard .pricingWhatsappButton,
+  .page[data-business="auto_parts"] .autoPartsProductCard .pricingActions .productContactButton {
+    width: 100%;
+    min-width: 0;
+    min-height: 46px;
+    border-radius: 13px;
+    padding: 0 9px;
+    font-size: 11px;
+    font-weight: 900;
+    white-space: nowrap;
+  }
+
+  .page[data-business="auto_parts"] .autoPartsProductCard .pricingWhatsappButton {
+    box-shadow: 0 9px 22px rgba(22,163,74,.16);
+  }
+
+  .page[data-business="auto_parts"] .productBadges {
+    inset: 10px 10px auto;
+  }
+
+  .page[data-business="auto_parts"] .featuredTag,
+  .page[data-business="auto_parts"] .stockTag,
+  .page[data-business="auto_parts"] .availableTag,
+  .page[data-business="auto_parts"] .outOfStockTag {
+    padding: 5px 8px;
+    font-size: 8px;
+  }
+
+  /* Generic story stays off the mobile auto-parts route. */
+  .page[data-business="auto_parts"] .storeStory { display: none; }
+
+  /* Final service promise -- now AFTER inventory, not before the customer shops. */
   .page[data-business="auto_parts"] .partsConcierge {
+    width: calc(100% - 24px);
     position: relative;
     overflow: hidden;
-    margin-top: 42px;
-    border-radius: 26px;
-    padding: 22px;
+    margin: 4px auto 24px;
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 11px;
+    border-radius: 22px;
+    padding: 18px;
     background:
-      radial-gradient(circle at 108% -10%, color-mix(in srgb, var(--store-accent) 52%, transparent), transparent 39%),
-      radial-gradient(circle at -8% 115%, rgba(22,163,74,.18), transparent 35%),
+      radial-gradient(circle at 108% -10%, color-mix(in srgb, var(--store-accent) 45%, transparent), transparent 39%),
+      radial-gradient(circle at -8% 115%, rgba(22,163,74,.14), transparent 35%),
       linear-gradient(145deg, #07101e, #101c31);
-    box-shadow:
-      0 30px 74px rgba(2,6,23,.22),
-      inset 0 1px 0 rgba(255,255,255,.06);
+    color: #fff;
+    box-shadow: 0 21px 54px rgba(2,6,23,.18), inset 0 1px 0 rgba(255,255,255,.05);
   }
 
   .page[data-business="auto_parts"] .partsConcierge::after {
@@ -5215,58 +4953,215 @@
     position: absolute;
     inset: 0;
     pointer-events: none;
-    border: 1px solid rgba(255,255,255,.08);
+    border: 1px solid rgba(255,255,255,.07);
     border-radius: inherit;
   }
 
-  .page[data-business="auto_parts"] .partsConciergeIcon {
-    box-shadow:
-      inset 0 1px 0 rgba(255,255,255,.08),
-      0 12px 28px rgba(0,0,0,.12);
+  .partsConciergeIcon {
+    width: 40px;
+    height: 40px;
+    display: grid;
+    place-items: center;
+    border-radius: 12px;
+    background: rgba(255,255,255,.08);
+    color: #93c5fd;
   }
 
-  .page[data-business="auto_parts"] .partsConciergeActions a {
-    min-height: 49px;
-    border-radius: 15px;
+  .partsConciergeCopy { min-width: 0; }
+
+  .partsConciergeCopy > span {
+    display: block;
+    color: #93c5fd;
+    font-size: 7.5px;
+    font-weight: 950;
+    letter-spacing: .11em;
+    text-transform: uppercase;
   }
 
-  .page[data-business="auto_parts"] .partsConciergeWhatsapp {
-    box-shadow: 0 12px 28px rgba(22,163,74,.20);
+  .partsConciergeCopy h2 {
+    margin: 4px 0 0;
+    color: #fff;
+    font-size: 19px;
+    line-height: 1.08;
+    letter-spacing: -.03em;
+  }
+
+  .partsConciergeCopy p {
+    margin: 8px 0 0;
+    color: #cbd5e1;
+    font-size: 10.5px;
+    line-height: 1.5;
+  }
+
+  .partsConciergeActions {
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: 1.25fr .75fr;
+    gap: 7px;
+    margin-top: 3px;
+  }
+
+  .partsConciergeActions a {
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    border-radius: 13px;
+    font-size: 10.5px;
+    font-weight: 900;
+    text-decoration: none;
+  }
+
+  .partsConciergeWhatsapp {
+    background: #16a34a;
+    color: #fff;
+    box-shadow: 0 9px 22px rgba(22,163,74,.18);
+  }
+
+  .partsConciergeCall {
+    border: 1px solid rgba(255,255,255,.13);
+    background: rgba(255,255,255,.07);
+    color: #fff;
+  }
+
+  /* Deep-scroll contact dock: useful, compact, and absent from the first impression. */
+  .mobileContactDock {
+    position: fixed;
+    z-index: 120;
+    left: 11px;
+    right: 11px;
+    bottom: max(9px, env(safe-area-inset-bottom));
+    min-height: 64px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 9px;
+    border: 1px solid rgba(255,255,255,.14);
+    border-radius: 20px;
+    padding: 8px 9px 8px 10px;
+    background: rgba(8,16,29,.93);
+    color: #fff;
+    box-shadow: 0 22px 56px rgba(2,6,23,.30), inset 0 1px 0 rgba(255,255,255,.07);
+    backdrop-filter: blur(20px) saturate(145%);
+    -webkit-backdrop-filter: blur(20px) saturate(145%);
+    animation: darik042DockIn 250ms cubic-bezier(.2,.8,.2,1) both;
+  }
+
+  .mobileDockIdentity {
+    min-width: 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .mobileDockIdentity > div {
+    width: 39px;
+    height: 39px;
+    flex: 0 0 auto;
+    display: grid;
+    place-items: center;
+    overflow: hidden;
+    border: 1px solid rgba(255,255,255,.12);
+    border-radius: 11px;
+    background: #fff;
+    color: #0f172a;
+  }
+
+  .mobileDockIdentity img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+
+  .mobileDockIdentity p {
+    min-width: 0;
+    margin: 0;
+  }
+
+  .mobileDockIdentity strong,
+  .mobileDockIdentity small { display: block; }
+
+  .mobileDockIdentity strong {
+    overflow: hidden;
+    font-size: 10px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .mobileDockIdentity small {
+    margin-top: 2px;
+    color: #94a3b8;
+    font-size: 7px;
+  }
+
+  .mobileDockActions {
+    flex: 0 0 auto;
+    display: flex;
+    gap: 6px;
+  }
+
+  .mobileDockActions a {
+    width: 42px;
+    height: 42px;
+    display: grid;
+    place-items: center;
+    border: 1px solid rgba(255,255,255,.12);
+    border-radius: 12px;
+    background: rgba(255,255,255,.07);
+    color: #fff;
+    text-decoration: none;
+  }
+
+  .mobileDockActions .mobileDockWhatsapp {
+    border-color: transparent;
+    background: #16a34a;
+    box-shadow: 0 7px 20px rgba(22,163,74,.22);
   }
 
   .page[data-business="auto_parts"] .footer {
-    width: calc(100% - 22px);
-    padding-top: 20px;
+    width: calc(100% - 24px);
+    padding: 15px 0 28px;
     border-top: 1px solid rgba(148,163,184,.15);
   }
 
   .page[data-business="auto_parts"] .poweredBy {
-    opacity: .58;
+    font-size: 8px;
+    opacity: .54;
   }
 }
 
 @media (max-width: 430px) {
-  .page[data-business="auto_parts"] .heroContent {
-    min-height: 416px;
+  .page[data-business="auto_parts"] .heroContent,
+  .page[data-business="auto_parts"][data-hero="immersive"] .heroContent {
+    min-height: 336px;
   }
 
   .heroHoursChip {
-    max-width: 45%;
+    max-width: 47%;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
   }
 
-  .heroTrustLine span {
-    font-size: 7.5px;
+  .page[data-business="auto_parts"] .hero h1 {
+    font-size: clamp(30px, 9vw, 38px);
+  }
+
+  .partsConcierge {
+    padding: 17px;
+  }
+
+  .partsConciergeCopy h2 {
+    font-size: 18px;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .page[data-business="auto_parts"] .hero,
-  .page[data-business="auto_parts"] .heroLogo,
   .page[data-business="auto_parts"] .primaryHeroButton::after,
-  .page[data-business="auto_parts"] .headerWhatsappButton {
+  .page[data-business="auto_parts"] .headerWhatsappButton,
+  .mobileContactDock {
     animation: none !important;
   }
 
