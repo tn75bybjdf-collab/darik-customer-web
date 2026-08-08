@@ -5171,3 +5171,241 @@
     transition: none !important;
   }
 }
+
+/* DARIK_AUTOPARTS_VISUAL_REFINEMENT_043
+   Phone-reviewed refinement of FRONTEND 042.
+   Goal: premium utility, not oversized stacked cards. */
+
+@media (max-width: 760px) {
+  /* The header already carries store identity. Let the hero sell the store without
+     consuming nearly an entire phone screen. */
+  .page[data-business="auto_parts"] .hero,
+  .page[data-business="auto_parts"][data-hero="immersive"] .hero {
+    border-radius: 0 0 24px 24px;
+  }
+
+  .page[data-business="auto_parts"] .heroContent,
+  .page[data-business="auto_parts"][data-hero="immersive"] .heroContent {
+    min-height: 292px !important;
+    padding: 16px 16px 18px !important;
+  }
+
+  .page[data-business="auto_parts"] .heroLogo {
+    width: 46px;
+    height: 46px;
+    border-radius: 14px;
+  }
+
+  .page[data-business="auto_parts"] .hero h1 {
+    max-width: 92%;
+    font-size: clamp(28px, 8.2vw, 35px);
+    line-height: .97;
+  }
+
+  .page[data-business="auto_parts"] .tagline {
+    font-size: 11px;
+  }
+
+  .page[data-business="auto_parts"] .heroButtons {
+    margin-top: 9px;
+  }
+
+  .page[data-business="auto_parts"] .primaryHeroButton {
+    min-height: 45px;
+    border-radius: 14px;
+  }
+
+  /* Turn the oversized utility card into a compact bridge between brand and catalog. */
+  .page[data-business="auto_parts"] .quickInfoStrip {
+    width: calc(100% - 28px);
+    margin-top: -8px;
+    border-radius: 17px;
+    box-shadow: 0 12px 32px rgba(15,23,42,.085), inset 0 1px 0 #fff;
+  }
+
+  .page[data-business="auto_parts"] .quickInfoStrip .locationQuickLink {
+    min-height: 46px;
+    padding: 6px 10px;
+  }
+
+  .page[data-business="auto_parts"] .quickInfoStrip .contactQuickLink {
+    min-height: 39px;
+  }
+
+  .page[data-business="auto_parts"] .quickIcon {
+    width: 31px;
+    height: 31px;
+    border-radius: 10px;
+  }
+
+  /* Get the customer into the actual part-finding journey faster. */
+  .page[data-business="auto_parts"] .catalogShell {
+    width: calc(100% - 28px);
+    padding-top: 17px;
+    padding-bottom: 28px;
+  }
+
+  .page[data-business="auto_parts"] .catalogTopbar {
+    margin-bottom: 7px;
+  }
+
+  .page[data-business="auto_parts"] .searchBox {
+    min-height: 44px;
+    border-radius: 14px;
+  }
+
+  .page[data-business="auto_parts"] .vehicleFilterPanel {
+    margin: 8px 0 18px;
+    gap: 10px;
+    border-radius: 19px;
+    padding: 14px;
+    box-shadow: 0 16px 40px rgba(2,6,23,.16), inset 0 1px 0 rgba(255,255,255,.06);
+  }
+
+  .page[data-business="auto_parts"] .vehicleFilterHeading strong {
+    font-size: 16px;
+  }
+
+  .page[data-business="auto_parts"] .vehicleFilterGrid select {
+    min-height: 42px;
+    border-radius: 12px;
+    font-size: 10.5px;
+  }
+
+  .vehicleMatchSummary {
+    min-height: 49px;
+    grid-template-columns: 32px 1fr auto;
+    padding: 7px 8px;
+    border-radius: 12px;
+  }
+
+  .vehicleMatchIcon {
+    width: 30px;
+    height: 30px;
+    border-radius: 9px;
+  }
+
+  /* 042's bilingual catalog title was visually shouting. Make it editorial. */
+  .page[data-business="auto_parts"] .productSection {
+    margin-top: 17px;
+  }
+
+  .page[data-business="auto_parts"] .productSectionHeading {
+    margin-bottom: 14px;
+  }
+
+  .page[data-business="auto_parts"] .productSectionHeading h3 {
+    max-width: 82%;
+    font-size: clamp(22px, 6.5vw, 27px);
+    line-height: 1.04;
+    letter-spacing: -.035em;
+  }
+
+  .page[data-business="auto_parts"] .productSectionHeading > small {
+    align-self: flex-end;
+    padding-bottom: 2px;
+  }
+
+  /* Product should be the visual hero. Reduce the surrounding slab and tighten
+     the information architecture below the image. */
+  .page[data-business="auto_parts"] .autoPartsProductCard {
+    border-radius: 19px;
+    box-shadow: 0 13px 34px rgba(15,23,42,.07), inset 0 1px 0 #fff;
+  }
+
+  .page[data-business="auto_parts"] .autoPartsProductCard .productImage {
+    aspect-ratio: 1.78 / 1;
+  }
+
+  .page[data-business="auto_parts"] .autoPartsProductCard .productBody {
+    padding: 13px 14px 14px;
+  }
+
+  .page[data-business="auto_parts"] .autoPartsProductCard .productMeta {
+    margin-bottom: 5px;
+  }
+
+  .page[data-business="auto_parts"] .autoPartsProductCard .productBody h3 {
+    font-size: 17px;
+    line-height: 1.22;
+  }
+
+  .page[data-business="auto_parts"] .autoPartsProductCard .productArabic {
+    margin-top: 5px;
+    font-size: 11.5px;
+    line-height: 1.4;
+  }
+
+  .page[data-business="auto_parts"] .autoPartsProductCard .productFitment {
+    margin-top: 9px;
+    padding: 7px 9px;
+  }
+
+  .page[data-business="auto_parts"] .autoPartsProductCard .productFooter {
+    gap: 8px;
+    padding-top: 9px;
+  }
+
+  .page[data-business="auto_parts"] .autoPartsProductCard .pricingCallButton,
+  .page[data-business="auto_parts"] .autoPartsProductCard .pricingWhatsappButton,
+  .page[data-business="auto_parts"] .autoPartsProductCard .pricingActions .productContactButton {
+    min-height: 43px;
+    border-radius: 12px;
+    font-size: 10.5px;
+  }
+
+  /* The phone screenshots proved the fixed dock duplicates the product CTAs and
+     concierge, obscures content, and fights Safari's bottom chrome. Remove it. */
+  .mobileContactDock {
+    display: none !important;
+  }
+
+  /* Keep the concierge as the single graceful fallback after inventory. */
+  .page[data-business="auto_parts"] .partsConcierge {
+    width: calc(100% - 28px);
+    margin: 2px auto 20px;
+    gap: 10px;
+    border-radius: 19px;
+    padding: 15px;
+    box-shadow: 0 16px 42px rgba(2,6,23,.16), inset 0 1px 0 rgba(255,255,255,.05);
+  }
+
+  .partsConciergeIcon {
+    width: 36px;
+    height: 36px;
+    border-radius: 11px;
+  }
+
+  .partsConciergeCopy h2 {
+    font-size: 17px;
+    line-height: 1.08;
+  }
+
+  .partsConciergeCopy p {
+    margin-top: 6px;
+    font-size: 9.5px;
+    line-height: 1.45;
+  }
+
+  .partsConciergeActions a {
+    min-height: 41px;
+    border-radius: 12px;
+    font-size: 10px;
+  }
+
+  .page[data-business="auto_parts"] .footer {
+    width: calc(100% - 28px);
+    padding-bottom: 18px;
+  }
+}
+
+@media (max-width: 430px) {
+  .page[data-business="auto_parts"] .heroContent,
+  .page[data-business="auto_parts"][data-hero="immersive"] .heroContent {
+    min-height: 286px !important;
+  }
+
+  .page[data-business="auto_parts"] .productSectionHeading h3 {
+    font-size: clamp(21px, 6.3vw, 25px);
+  }
+}
