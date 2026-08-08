@@ -1593,7 +1593,7 @@ export default function DarikDirectStorefrontPage() {
           <div className={styles.heroCopy}>
             <div className={styles.heroLabel}>
               <Icon name="store" size={15} />
-              Official online store
+              {"Official store / \u0627\u0644\u0645\u062a\u062c\u0631 \u0627\u0644\u0631\u0633\u0645\u064a"}
             </div>
             <h1>{storefront.display_name}</h1>
             {storefront.display_name_ar ? (
@@ -1734,10 +1734,10 @@ export default function DarikDirectStorefrontPage() {
         >
           <div className={styles.sectionHeading}>
             <div>
-              <span>Shop your way</span>
-              <h2>Browse categories</h2>
+              <span>{"Shop by category / \u062a\u0633\u0648\u0642 \u062d\u0633\u0628 \u0627\u0644\u0642\u0633\u0645"}</span>
+              <h2>{"Browse categories / \u0627\u0644\u0623\u0642\u0633\u0627\u0645"}</h2>
             </div>
-            <button onClick={jumpToCatalog}>View all products</button>
+            <button onClick={jumpToCatalog}>{"All products / \u0643\u0644 \u0627\u0644\u0645\u0646\u062a\u062c\u0627\u062a"}</button>
           </div>
 
           <div className={styles.categoryScroller}>
@@ -1823,8 +1823,8 @@ export default function DarikDirectStorefrontPage() {
           <section className={styles.vehicleFilterPanel}>
             <div className={styles.vehicleFilterHeading}>
               <div>
-                <span>Find parts for your vehicle</span>
-                <strong>اختر السنة والنوع والموديل</strong>
+                <span>{"Find the right part / \u0627\u0628\u062d\u062b \u0639\u0646 \u0627\u0644\u0642\u0637\u0639\u0629 \u0627\u0644\u0645\u0646\u0627\u0633\u0628\u0629"}</span>
+                <strong>{"Select your vehicle / \u0627\u062e\u062a\u0631 \u0633\u064a\u0627\u0631\u062a\u0643"}</strong>
               </div>
               {(selectedVehicleMake !== "all" || selectedVehicleModel !== "all" || selectedVehicleYear !== "all") ? (
                 <button
@@ -1979,7 +1979,7 @@ export default function DarikDirectStorefrontPage() {
           <h2>About {storefront.display_name}</h2>
           <p>
             {storefront.about_text ||
-              `${storefront.display_name} is an independent local business serving customers through Darik Direct.`}
+              `${storefront.display_name} makes it easy to browse available products, check fitment, and contact the store directly for help.`}
           </p>
           {storefront.about_text_ar ? (
             <p className={styles.storyArabic} dir="rtl">
