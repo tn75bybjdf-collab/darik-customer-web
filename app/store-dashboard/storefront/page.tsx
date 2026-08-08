@@ -447,6 +447,8 @@ export default function DarikDirectStorefrontSettingsPage() {
   const [directRevenue, setDirectRevenue] = useState(0);
   const [loadingContext, setLoadingContext] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [locationLocked, setLocationLocked] = useState(false);
+  const [locatingStore, setLocatingStore] = useState(false);
   const [uploadingAsset, setUploadingAsset] = useState<"logo" | "hero" | null>(null);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
@@ -847,6 +849,8 @@ export default function DarikDirectStorefrontSettingsPage() {
 
         // Never replace fields while the retailer has unsaved changes.
         if (retailerChanged || !setupFormDirtyRef.current) {
+          setLocationLocked(Boolean(databaseForm.addressText.trim()));
+          setLocatingStore(false);
           setSetupForm(nextForm);
 
           const draftWasRestored = Boolean(restoredDraftAt);
@@ -981,6 +985,95 @@ export default function DarikDirectStorefrontSettingsPage() {
     setSetupForm((current) => ({ ...current, [field]: value }));
   }
 
+  function unlockStoreLocation() {
+    if (!locationLocked) return;
+
+    const confirmed = window.confirm(
+      "Unlock the store location? Customers may be sent to the wrong place if this is changed by mistake. / \u0647\u0644 \u062a\u0631\u064a\u062f \u0641\u062a\u062d \u0642\u0641\u0644 \u0645\u0648\u0642\u0639 \u0627\u0644\u0645\u062a\u062c\u0631\u061f \u0642\u062f \u064a\u062a\u0645 \u062a\u0648\u062c\u064a\u0647 \u0627\u0644\u0639\u0645\u0644\u0627\u0621 \u0625\u0644\u0649 \u0645\u0643\u0627\u0646 \u062e\u0627\u0637\u0626 \u0625\u0630\u0627 \u062a\u0645 \u062a\u063a\u064a\u064a\u0631\u0647 \u0628\u0627\u0644\u062e\u0637\u0623."
+    );
+
+    if (!confirmed) return;
+
+    setLocationLocked(false);
+    setError("");
+    setMessage(
+      "Store location unlocked. Update it, then save the storefront profile. / \u062a\u0645 \u0641\u062a\u062d \u0642\u0641\u0644 \u0645\u0648\u0642\u0639 \u0627\u0644\u0645\u062a\u062c\u0631. \u0639\u062f\u0644 \u0627\u0644\u0645\u0648\u0642\u0639 \u062b\u0645 \u0627\u062d\u0641\u0638 \u0645\u0644\u0641 \u0627\u0644\u0645\u062a\u062c\u0631."
+    );
+  }
+
+  function getCurrentStoreLocation() {
+    if (locationLocked || locatingStore) return;
+
+    if (!navigator.geolocation) {
+      setError(
+        "This browser does not support location access. Enter the store address manually. / \u0647\u0630\u0627 \u0627\u0644\u0645\u062a\u0635\u0641\u062d \u0644\u0627 \u064a\u062f\u0639\u0645 \u062a\u062d\u062f\u064a\u062f \u0627\u0644\u0645\u0648\u0642\u0639. \u0623\u062f\u062e\u0644 \u0639\u0646\u0648\u0627\u0646 \u0627\u0644\u0645\u062a\u062c\u0631 \u064a\u062f\u0648\u064a\u0627."
+      );
+      return;
+    }
+
+    setLocatingStore(true);
+    setError("");
+    setMessage("");
+
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        const latitude = position.coords.latitude;
+        const longitude = position.coords.longitude;
+        const coordinateFallback = `${latitude.toFixed(6)}, ${longitude.toFixed(6)}`;
+        let address = coordinateFallback;
+
+        try {
+          const params = new URLSearchParams({
+            lat: String(latitude),
+            lng: String(longitude),
+            language: "en",
+          });
+
+          const response = await fetch(
+            `/api/google-places/geocode?${params.toString()}`,
+            { cache: "no-store" }
+          );
+          const json = await response.json();
+          const formattedAddress = String(
+            json?.results?.[0]?.formatted_address ?? ""
+          ).trim();
+
+          if (formattedAddress) {
+            address = formattedAddress;
+          }
+        } catch {
+          // Coordinate fallback remains usable by Google Maps.
+        }
+
+        markSetupDirty();
+        setSetupForm((current) => ({
+          ...current,
+          addressText: address,
+          addressTextAr: "",
+        }));
+        setLocationLocked(true);
+        setLocatingStore(false);
+        setMessage(
+          "Current store location captured and locked. Save the storefront profile to publish it. / \u062a\u0645 \u062a\u062d\u062f\u064a\u062f \u0645\u0648\u0642\u0639 \u0627\u0644\u0645\u062a\u062c\u0631 \u0627\u0644\u062d\u0627\u0644\u064a \u0648\u0642\u0641\u0644\u0647. \u0627\u062d\u0641\u0638 \u0645\u0644\u0641 \u0627\u0644\u0645\u062a\u062c\u0631 \u0644\u0646\u0634\u0631\u0647."
+        );
+      },
+      (geolocationError) => {
+        setLocatingStore(false);
+
+        const permissionDenied = geolocationError.code === 1;
+        setError(
+          permissionDenied
+            ? "Location permission was denied. Allow location access in the browser, or enter the address manually. / \u062a\u0645 \u0631\u0641\u0636 \u0625\u0630\u0646 \u0627\u0644\u0645\u0648\u0642\u0639. \u0627\u0633\u0645\u062d \u0644\u0644\u0645\u062a\u0635\u0641\u062d \u0628\u0627\u0644\u0648\u0635\u0648\u0644 \u0625\u0644\u0649 \u0627\u0644\u0645\u0648\u0642\u0639 \u0623\u0648 \u0623\u062f\u062e\u0644 \u0627\u0644\u0639\u0646\u0648\u0627\u0646 \u064a\u062f\u0648\u064a\u0627."
+            : "Could not get the current location. Try again from the store, or enter the address manually. / \u062a\u0639\u0630\u0631 \u062a\u062d\u062f\u064a\u062f \u0627\u0644\u0645\u0648\u0642\u0639 \u0627\u0644\u062d\u0627\u0644\u064a. \u062d\u0627\u0648\u0644 \u0645\u0631\u0629 \u0623\u062e\u0631\u0649 \u0645\u0646 \u0627\u0644\u0645\u062a\u062c\u0631 \u0623\u0648 \u0623\u062f\u062e\u0644 \u0627\u0644\u0639\u0646\u0648\u0627\u0646 \u064a\u062f\u0648\u064a\u0627."
+        );
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 15000,
+        maximumAge: 0,
+      }
+    );
+  }
   function updateOperatingHour(day: string, value: string) {
     markSetupDirty();
 
@@ -1375,6 +1468,9 @@ export default function DarikDirectStorefrontSettingsPage() {
       slug: savedStorefront.slug,
       displayName: savedStorefront.display_name,
     }));
+
+    setLocationLocked(Boolean(setupForm.addressText.trim()));
+    setLocatingStore(false);
 
     setupFormDirtyRef.current = false;
     setFormDirty(false);
@@ -1885,14 +1981,66 @@ export default function DarikDirectStorefrontSettingsPage() {
                     </label>
 
                     <label className={styles.wideField}>
-                      Public store address / عنوان المتجر الظاهر للعملاء
+                      {"Store location / \u0645\u0648\u0642\u0639 \u0627\u0644\u0645\u062a\u062c\u0631"}
                       <input
                         value={setupForm.addressText}
                         onChange={(event) =>
                           updateSetupField("addressText", event.target.value)
                         }
+                        disabled={locationLocked || locatingStore}
+                        placeholder="Store address or use current location"
                       />
                     </label>
+                    <div
+                      className={styles.wideField}
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "0.75rem",
+                        flexWrap: "wrap",
+                      }}
+                    >
+                      {locationLocked ? (
+                        <>
+                          <span
+                            style={{
+                              display: "inline-flex",
+                              alignItems: "center",
+                              gap: "0.4rem",
+                              padding: "0.6rem 0.8rem",
+                              borderRadius: "0.8rem",
+                              background: "#ecfdf5",
+                              color: "#166534",
+                              fontWeight: 800,
+                            }}
+                          >
+                            {"Location locked / \u0627\u0644\u0645\u0648\u0642\u0639 \u0645\u0642\u0641\u0644"}
+                          </span>
+                          <button
+                            type="button"
+                            onClick={unlockStoreLocation}
+                            disabled={saving || locatingStore}
+                          >
+                            {"Unlock location / \u0641\u062a\u062d \u0642\u0641\u0644 \u0627\u0644\u0645\u0648\u0642\u0639"}
+                          </button>
+                        </>
+                      ) : (
+                        <>
+                          <button
+                            type="button"
+                            onClick={getCurrentStoreLocation}
+                            disabled={saving || locatingStore}
+                          >
+                            {locatingStore
+                              ? "Getting location... / \u062c\u0627\u0631\u064a \u062a\u062d\u062f\u064a\u062f \u0627\u0644\u0645\u0648\u0642\u0639..."
+                              : "Get current location / \u062a\u062d\u062f\u064a\u062f \u0627\u0644\u0645\u0648\u0642\u0639 \u0627\u0644\u062d\u0627\u0644\u064a"}
+                          </button>
+                          <span style={{ color: "#64748b", fontSize: "0.9rem" }}>
+                            {"Use this while you are physically at the store, or type the address manually. / \u0627\u0633\u062a\u062e\u062f\u0645\u0647 \u0648\u0623\u0646\u062a \u0641\u064a \u0627\u0644\u0645\u062a\u062c\u0631 \u0623\u0648 \u0623\u062f\u062e\u0644 \u0627\u0644\u0639\u0646\u0648\u0627\u0646 \u064a\u062f\u0648\u064a\u0627."}
+                          </span>
+                        </>
+                      )}
+                    </div>
                   </div>
                 </div>
 
