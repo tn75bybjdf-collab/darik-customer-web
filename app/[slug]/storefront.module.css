@@ -5782,3 +5782,41 @@
     width: calc(100% - 28px);
   }
 }
+
+/* DARIK_AUTOPARTS_OUTLINE_CLEANUP_046
+   Remove the two visual strokes that looked accidental on the phone:
+   1) header divider/outline
+   2) bright Call-cell outline inside the quick utility strip */
+
+.page[data-business="auto_parts"] .header {
+  border: 0 !important;
+  border-bottom: 0 !important;
+  box-shadow: 0 12px 32px rgba(2,6,23,.18) !important;
+}
+
+.page[data-business="auto_parts"] .quickInfoStrip {
+  border-color: rgba(148,163,184,.10) !important;
+}
+
+.page[data-business="auto_parts"] .quickInfoStrip .contactQuickLink,
+.page[data-business="auto_parts"] .quickInfoStrip .contactQuickLink:first-of-type,
+.page[data-business="auto_parts"] .quickInfoStrip .contactQuickLink:last-of-type {
+  border: 0 !important;
+  outline: 0 !important;
+  box-shadow: none !important;
+}
+
+@media (max-width: 760px) {
+  .page[data-business="auto_parts"] .quickInfoStrip .locationQuickLink {
+    border-right: 0 !important;
+    border-bottom: 1px solid rgba(148,163,184,.09) !important;
+  }
+
+  .page[data-business="auto_parts"] .quickInfoStrip .contactQuickLink {
+    border: 0 !important;
+  }
+
+  .page[data-business="auto_parts"] .quickInfoStrip .contactQuickLink + .contactQuickLink {
+    border-left: 1px solid rgba(148,163,184,.08) !important;
+  }
+}
