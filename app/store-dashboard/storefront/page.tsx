@@ -449,6 +449,10 @@ export default function DarikDirectStorefrontSettingsPage() {
   const [saving, setSaving] = useState(false);
   const [locationLocked, setLocationLocked] = useState(false);
   const [locatingStore, setLocatingStore] = useState(false);
+  const [autoSaveStatus, setAutoSaveStatus] = useState<
+    "idle" | "waiting" | "saving" | "saved" | "error"
+  >("idle");
+  const [showDesktopLocationHint, setShowDesktopLocationHint] = useState(false);
   const [uploadingAsset, setUploadingAsset] = useState<"logo" | "hero" | null>(null);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
@@ -522,6 +526,7 @@ export default function DarikDirectStorefrontSettingsPage() {
 
   const showSaveError = useCallback((nextError: string) => {
     setSaving(false);
+    setAutoSaveStatus("error");
     setMessage("");
     setError(nextError);
 
@@ -565,6 +570,18 @@ export default function DarikDirectStorefrontSettingsPage() {
     setLoadingContext(false);
   }, [authUserId]);
 
+  useEffect(() => {
+    const updateDesktopLocationHint = () => {
+      setShowDesktopLocationHint(
+        window.innerWidth >= 768 &&
+          window.matchMedia("(pointer: fine)").matches
+      );
+    };
+
+    updateDesktopLocationHint();
+    window.addEventListener("resize", updateDesktopLocationHint);
+    return () => window.removeEventListener("resize", updateDesktopLocationHint);
+  }, []);
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
       authUserIdRef.current = data.session?.user.id ?? null;
@@ -1054,7 +1071,7 @@ export default function DarikDirectStorefrontSettingsPage() {
         setLocationLocked(true);
         setLocatingStore(false);
         setMessage(
-          "Current store location captured and locked. Save the storefront profile to publish it. / \u062a\u0645 \u062a\u062d\u062f\u064a\u062f \u0645\u0648\u0642\u0639 \u0627\u0644\u0645\u062a\u062c\u0631 \u0627\u0644\u062d\u0627\u0644\u064a \u0648\u0642\u0641\u0644\u0647. \u0627\u062d\u0641\u0638 \u0645\u0644\u0641 \u0627\u0644\u0645\u062a\u062c\u0631 \u0644\u0646\u0634\u0631\u0647."
+          "Current store location captured and locked. Darik will save it automatically. / \u062a\u0645 \u062a\u062d\u062f\u064a\u062f \u0645\u0648\u0642\u0639 \u0627\u0644\u0645\u062a\u062c\u0631 \u0627\u0644\u062d\u0627\u0644\u064a \u0648\u0642\u0641\u0644\u0647. \u0627\u062d\u0641\u0638 \u0645\u0644\u0641 \u0627\u0644\u0645\u062a\u062c\u0631 \u0644\u0646\u0634\u0631\u0647."
         );
       },
       (geolocationError) => {
@@ -1215,14 +1232,17 @@ export default function DarikDirectStorefrontSettingsPage() {
 
     setMessage(
       assetType === "logo"
-        ? "Logo uploaded. Save the storefront to publish it."
-        : "Cover image uploaded. Save the storefront to publish it."
+        ? "Logo uploaded. Darik will save it automatically."
+        : "Cover image uploaded. Darik will save it automatically."
     );
     setUploadingAsset(null);
   }
 
-  async function saveStorefront(event: FormEvent) {
-    event.preventDefault();
+  async function saveStorefront(
+    event?: FormEvent,
+    mode: "manual" | "auto" = "manual"
+  ) {
+    event?.preventDefault();
 
     if (!selectedStore) return;
 
@@ -1298,6 +1318,9 @@ export default function DarikDirectStorefrontSettingsPage() {
     }
 
     setSaving(true);
+    if (mode === "auto") {
+      setAutoSaveStatus("saving");
+    }
     setError("");
     setMessage("");
 
@@ -1482,14 +1505,85 @@ export default function DarikDirectStorefrontSettingsPage() {
       );
     }
 
-    setMessage(
-      storefront
-        ? "Storefront settings updated."
-        : "Draft storefront created. Preview it privately, then submit CliQ activation when ready."
-    );
+    setAutoSaveStatus("saved");
+    if (mode === "manual") {
+      setMessage(
+        storefront
+          ? "Storefront settings updated."
+          : "Draft storefront created. Preview it privately, then submit CliQ activation when ready."
+      );
+    } else {
+      setMessage("");
+    }
     setSaving(false);
-    await loadContext();
+    if (mode === "manual") {
+      await loadContext();
+    }
   }
+
+  useEffect(() => {
+    if (
+      !formDirty ||
+      !selectedStore ||
+      saving ||
+      uploadingAsset !== null ||
+      slugState === "checking" ||
+      slugState === "taken"
+    ) {
+      return;
+    }
+
+    const slug = cleanSlug(setupForm.slug);
+    const displayName = setupForm.displayName.trim();
+    const publicEmail = setupForm.publicEmail.trim();
+    const onlineOrderingSelected =
+      setupForm.showOrdering &&
+      (setupForm.orderSubmissionMode === "online" ||
+        setupForm.orderSubmissionMode === "both");
+
+    const formIsReady =
+      slug.length >= 2 &&
+      Boolean(displayName) &&
+      (!publicEmail || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(publicEmail)) &&
+      (!setupForm.showOrdering ||
+        (setupForm.orderSubmissionMode !== "phone" &&
+          setupForm.orderSubmissionMode !== "both") ||
+        Boolean(setupForm.phone.trim() || setupForm.whatsapp.trim())) &&
+      (!setupForm.showOrdering ||
+        setupForm.fulfillmentMode !== "delivery" ||
+        Boolean(
+          setupForm.deliveryRadiusKm &&
+            Number(setupForm.deliveryRadiusKm) > 0
+        )) &&
+      (!onlineOrderingSelected ||
+        setupForm.acceptCash ||
+        setupForm.acceptCliq) &&
+      (!setupForm.showOrdering ||
+        !setupForm.acceptCliq ||
+        Boolean(setupForm.cliqAccountName.trim())) &&
+      (!setupForm.showOrdering ||
+        !setupForm.acceptCliq ||
+        Boolean(setupForm.cliqIdentifier.trim()));
+
+    if (!formIsReady) {
+      setAutoSaveStatus("waiting");
+      return;
+    }
+
+    setAutoSaveStatus("waiting");
+    const timer = window.setTimeout(() => {
+      void saveStorefront(undefined, "auto");
+    }, 1000);
+
+    return () => window.clearTimeout(timer);
+  }, [
+    formDirty,
+    saving,
+    selectedStore,
+    setupForm,
+    slugState,
+    uploadingAsset,
+  ]);
 
   async function publishStorefrontDesign() {
     if (!storefront || !selectedStore) {
@@ -2035,6 +2129,17 @@ export default function DarikDirectStorefrontSettingsPage() {
                               ? "Getting location... / \u062c\u0627\u0631\u064a \u062a\u062d\u062f\u064a\u062f \u0627\u0644\u0645\u0648\u0642\u0639..."
                               : "Get current location / \u062a\u062d\u062f\u064a\u062f \u0627\u0644\u0645\u0648\u0642\u0639 \u0627\u0644\u062d\u0627\u0644\u064a"}
                           </button>
+                          {showDesktopLocationHint ? (
+                            <span
+                              style={{
+                                color: "#92400e",
+                                fontSize: "0.9rem",
+                                fontWeight: 800,
+                              }}
+                            >
+                              {"For a more accurate location, use Get current location from your mobile device. / \u0644\u062f\u0642\u0629 \u0623\u0641\u0636\u0644\u060c \u0627\u0633\u062a\u062e\u062f\u0645 \u062a\u062d\u062f\u064a\u062f \u0627\u0644\u0645\u0648\u0642\u0639 \u0627\u0644\u062d\u0627\u0644\u064a \u0645\u0646 \u0647\u0627\u062a\u0641\u0643."}
+                            </span>
+                          ) : null}
                           <span style={{ color: "#64748b", fontSize: "0.9rem" }}>
                             {"Use this while you are physically at the store, or type the address manually. / \u0627\u0633\u062a\u062e\u062f\u0645\u0647 \u0648\u0623\u0646\u062a \u0641\u064a \u0627\u0644\u0645\u062a\u062c\u0631 \u0623\u0648 \u0623\u062f\u062e\u0644 \u0627\u0644\u0639\u0646\u0648\u0627\u0646 \u064a\u062f\u0648\u064a\u0627."}
                           </span>
@@ -2705,21 +2810,27 @@ export default function DarikDirectStorefrontSettingsPage() {
                     }`}
                   >
                     <strong>
-                      {formDirty
-                        ? "Unsaved changes protected / التغييرات غير المحفوظة محمية"
-                        : "All changes saved / تم حفظ جميع التغييرات"}
+                      {autoSaveStatus === "saving"
+                        ? "Saving automatically... / جار الحفظ تلقائيا..."
+                        : formDirty
+                          ? "Autosave pending / الحفظ التلقائي قيد الانتظار"
+                          : "All changes saved automatically / تم حفظ جميع التغييرات تلقائيا"}
                     </strong>
                     <span>
-                      {formDirty
-                        ? draftSavedAt
-                          ? `Local draft updated at ${new Date(
-                              draftSavedAt
-                            ).toLocaleTimeString([], {
-                              hour: "2-digit",
-                              minute: "2-digit",
-                            })}`
-                          : "Protecting your entries automatically… / جارٍ حماية مدخلاتك تلقائيًا…"
-                        : "Background login refreshes will not reset this form / تحديث تسجيل الدخول لن يمسح النموذج."}
+                      {autoSaveStatus === "saving"
+                        ? "Your changes are being saved to Darik now. / يتم الآن حفظ تغييراتك في داريك."
+                        : formDirty
+                          ? autoSaveStatus === "waiting"
+                            ? "Darik saves automatically about one second after you stop editing. / يحفظ داريك تلقائيا بعد حوالي ثانية من توقفك عن التعديل."
+                            : draftSavedAt
+                              ? `Local draft updated at ${new Date(
+                                  draftSavedAt
+                                ).toLocaleTimeString([], {
+                                  hour: "2-digit",
+                                  minute: "2-digit",
+                                })}`
+                              : "Protecting your entries automatically..."
+                          : "No Save button is required for normal edits. / لا تحتاج إلى الضغط على زر الحفظ للتعديلات العادية."}
                     </span>
                   </div>
 
@@ -2736,10 +2847,10 @@ export default function DarikDirectStorefrontSettingsPage() {
                     disabled={saving || uploadingAsset !== null}
                   >
                     {saving
-                      ? "Saving… / جارٍ الحفظ…"
+                      ? "Saving... / جار الحفظ..."
                       : storefront
-                        ? "Save storefront profile / حفظ ملف المتجر"
-                        : "Create draft storefront / إنشاء مسودة المتجر"}
+                        ? "Save now / حفظ الآن"
+                        : "Create now / إنشاء الآن"}
                   </button>
                 </div>
               </form>
