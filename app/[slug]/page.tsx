@@ -1310,6 +1310,19 @@ export default function DarikDirectStorefrontPage() {
     todayHours(storefront.operating_hours_ar);
   const whatsapp = whatsappDigits(storefront.whatsapp_number);
   const phone = phoneHref(storefront.business_phone);
+  const storeWhatsappHref = whatsappHref(storefront.whatsapp_number);
+  const hasDirectPurchaseProducts = products.some(
+    (product) => (product.direct_pricing_mode || "price") === "price"
+  );
+  const partsHelpMessage = [
+    `Hello ${storefront.display_name}, I need help finding the correct auto part.`,
+    "\u0645\u0631\u062d\u0628\u0627\u060c \u0628\u062f\u064a \u0645\u0633\u0627\u0639\u062f\u0629 \u0628\u0625\u064a\u062c\u0627\u062f \u0642\u0637\u0639\u0629 \u0627\u0644\u063a\u064a\u0627\u0631 \u0627\u0644\u0645\u0646\u0627\u0633\u0628\u0629.",
+    "",
+    "Vehicle model / VIN:",
+  ].join("\n");
+  const partsHelpWhatsappHref = whatsapp
+    ? `https://wa.me/${whatsapp}?text=${encodeURIComponent(partsHelpMessage)}`
+    : null;
 
   const orderMessage = [
     `Hello ${storefront.display_name}, I would like to place this order:`,
@@ -1384,17 +1397,15 @@ export default function DarikDirectStorefrontPage() {
       (pricingMode === "whatsapp" || pricingMode === "call_whatsapp") && Boolean(pricingWhatsappHref);
     const hasSelectedPricingContact = canCallForPrice || canWhatsappForPrice;
     const pricingLabel =
-      pricingMode === "call"
-        ? "Call for price / \u0627\u062a\u0635\u0644 \u0644\u0644\u0633\u0639\u0631"
-        : pricingMode === "whatsapp"
-          ? "WhatsApp for price / \u0648\u0627\u062a\u0633\u0627\u0628 \u0644\u0644\u0633\u0639\u0631"
-          : pricingMode === "call_whatsapp"
-            ? "Call or WhatsApp / \u0627\u062a\u0635\u0627\u0644 \u0623\u0648 \u0648\u0627\u062a\u0633\u0627\u0628"
-            : showPrices
-              ? money(product.app_price)
-              : "Contact for price";
+      pricingMode === "call" ||
+      pricingMode === "whatsapp" ||
+      pricingMode === "call_whatsapp"
+        ? "Price on request / \u0627\u0644\u0633\u0639\u0631 \u0639\u0646\u062f \u0627\u0644\u0637\u0644\u0628"
+        : showPrices
+          ? money(product.app_price)
+          : "Contact for price / \u062a\u0648\u0627\u0635\u0644 \u0644\u0644\u0633\u0639\u0631";
     return (
-      <article className={styles.productCard} key={product.id}>
+      <article className={`${styles.productCard} ${isAutoParts ? styles.autoPartsProductCard : ""}`} key={product.id}>
         <div className={styles.productImage}>
           {photo ? (
             <img src={photo} alt={name} />
@@ -1520,17 +1531,19 @@ export default function DarikDirectStorefrontPage() {
       data-corners={cornerStyle}
       data-hero={heroLayout}
       data-business={isAutoParts ? "auto_parts" : storefront.business_type || "retail"}
+      data-category-count={String(visibleCategories.length)}
+      data-direct-purchase={hasDirectPurchaseProducts ? "yes" : "no"}
     >
       <div className={styles.announcementBar}>
         <span>
           <i className={effectiveAcceptingOrders ? styles.liveDot : styles.pausedDot} />
           {!showOrdering
-            ? "Browse this store’s product showcase"
+            ? "Catalog open / \u0627\u0644\u0643\u062a\u0627\u0644\u0648\u062c \u0645\u062a\u0627\u062d"
             : effectiveAcceptingOrders
               ? pickupOnly
-                ? "This store is accepting local pickup orders"
-                : "This store is accepting delivery orders"
-              : "Browse now — ordering is temporarily paused"}
+                ? "Open for pickup / \u0645\u062a\u0627\u062d \u0644\u0644\u0627\u0633\u062a\u0644\u0627\u0645"
+                : "Open for orders / \u0645\u062a\u0627\u062d \u0644\u0644\u0637\u0644\u0628"
+              : "Ordering paused / \u0627\u0644\u0637\u0644\u0628 \u0645\u062a\u0648\u0642\u0641 \u0645\u0624\u0642\u062a\u0627"}
         </span>
         <a href="/">Powered by Darik</a>
       </div>
@@ -1546,7 +1559,7 @@ export default function DarikDirectStorefrontPage() {
           </div>
           <div>
             <strong>{storefront.display_name}</strong>
-            <span>Darik Direct store</span>
+            <span>{isAutoParts ? "Auto parts / \u0642\u0637\u0639 \u063a\u064a\u0627\u0631" : "Darik Direct store"}</span>
           </div>
         </a>
 
@@ -1559,7 +1572,19 @@ export default function DarikDirectStorefrontPage() {
             <Icon name="info" size={18} />
             <span>Store info</span>
           </button>
-          {showOrdering ? (
+          {isAutoParts && !hasDirectPurchaseProducts && partsHelpWhatsappHref ? (
+            <a
+              className={styles.headerWhatsappButton}
+              href={partsHelpWhatsappHref}
+              target="_blank"
+              rel="noreferrer"
+              aria-label="WhatsApp store"
+            >
+              <Icon name="whatsapp" size={19} />
+              <span>WhatsApp</span>
+            </a>
+          ) : null}
+          {showOrdering && hasDirectPurchaseProducts ? (
             <button className={styles.cartButton} onClick={() => setCartOpen(true)}>
               <Icon name="bag" size={19} />
               <span>Cart</span>
@@ -1612,7 +1637,7 @@ export default function DarikDirectStorefrontPage() {
 
             <div className={styles.heroButtons}>
               <button className={styles.primaryHeroButton} onClick={jumpToCatalog}>
-                Browse products
+                {isAutoParts ? "Find a part / \u0627\u0628\u062d\u062b \u0639\u0646 \u0642\u0637\u0639\u0629" : "Browse products"}
                 <Icon name="arrow" size={18} />
               </button>
               <button
@@ -1809,7 +1834,7 @@ export default function DarikDirectStorefrontPage() {
             <input
               value={search}
               onChange={(event) => setSearch(event.target.value)}
-              placeholder="Search this store"
+              placeholder={isAutoParts ? "Search parts / \u0627\u0628\u062d \u0639\u0646 \u0642\u0637\u0639\u0629" : "Search this store"}
             />
             {search ? (
               <button type="button" onClick={() => setSearch("")}>
@@ -1926,9 +1951,9 @@ export default function DarikDirectStorefrontPage() {
         <section className={styles.productSection}>
           <div className={styles.productSectionHeading}>
             <div>
-              <span>{search ? `Results for “${search}”` : "Store catalog"}</span>
+              <span>{isAutoParts ? "Parts catalog / \u0643\u062a\u0627\u0644\u0648\u062c \u0627\u0644\u0642\u0637\u0639" : search ? `Results for “${search}”` : "Store catalog"}</span>
               <h3>
-                {featuredProducts.length > 0 ? "More to explore" : "Products"}
+                {isAutoParts ? "Available parts" : featuredProducts.length > 0 ? "More to explore" : "Products"}
               </h3>
             </div>
             <small>{filteredProducts.length} available</small>
@@ -1969,7 +1994,39 @@ export default function DarikDirectStorefrontPage() {
         </section>
       </section>
 
-      {showStoreStory ? (
+      {isAutoParts && (partsHelpWhatsappHref || phone) ? (
+        <section className={styles.partsConcierge}>
+          <div className={styles.partsConciergeIcon}>
+            <Icon name="store" size={24} />
+          </div>
+          <div className={styles.partsConciergeCopy}>
+            <span>{"Parts support / \u0645\u0633\u0627\u0639\u062f\u0629 \u0628\u0627\u0644\u0642\u0637\u0639"}</span>
+            <h2>{"Can't find the part? / \u0645\u0634 \u0644\u0627\u0642\u064a \u0627\u0644\u0642\u0637\u0639\u0629\u061f"}</h2>
+            <p>
+              {"Send your vehicle model or VIN and contact the store directly for help matching the correct part. / \u0623\u0631\u0633\u0644 \u0645\u0648\u062f\u064a\u0644 \u0627\u0644\u0633\u064a\u0627\u0631\u0629 \u0623\u0648 \u0631\u0642\u0645 \u0627\u0644\u0634\u0627\u0635\u064a \u0644\u0644\u0645\u0633\u0627\u0639\u062f\u0629 \u0641\u064a \u062a\u062d\u062f\u064a\u062f \u0627\u0644\u0642\u0637\u0639\u0629 \u0627\u0644\u0645\u0646\u0627\u0633\u0628\u0629."}
+            </p>
+          </div>
+          <div className={styles.partsConciergeActions}>
+            {partsHelpWhatsappHref ? (
+              <a
+                className={styles.partsConciergeWhatsapp}
+                href={partsHelpWhatsappHref}
+                target="_blank"
+                rel="noreferrer"
+              >
+                <Icon name="whatsapp" size={18} />
+                <span>{"WhatsApp / \u0648\u0627\u062a\u0633\u0627\u0628"}</span>
+              </a>
+            ) : null}
+            {phone ? (
+              <a className={styles.partsConciergeCall} href={phone}>
+                <Icon name="call" size={18} />
+                <span>{"Call / \u0627\u062a\u0635\u0627\u0644"}</span>
+              </a>
+            ) : null}
+          </div>
+        </section>
+      ) : null}      {showStoreStory ? (
       <section
         className={styles.storeStory}
         style={{ order: sectionOrder.indexOf("story") }}
