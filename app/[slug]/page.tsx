@@ -1681,12 +1681,19 @@ export default function DarikDirectStorefrontPage() {
 
       <section className={styles.quickInfoStrip}>
         {(storefront.address_text || storefront.address_text_ar) ? (
-          <button onClick={() => setDetailsOpen(true)}>
+          <a
+            href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
+              storefront.address_text || storefront.address_text_ar || ""
+            )}`}
+            target="_blank"
+            rel="noreferrer"
+            aria-label="Open store location in Google Maps"
+          >
             <span className={styles.quickIcon}>
               <Icon name="location" size={18} />
             </span>
             <span>
-              <small>Store location / موقع المتجر</small>
+              <small>{"Store location / \u0645\u0648\u0642\u0639 \u0627\u0644\u0645\u062a\u062c\u0631"}</small>
               {storefront.address_text ? (
                 <strong>{storefront.address_text}</strong>
               ) : null}
@@ -1694,9 +1701,8 @@ export default function DarikDirectStorefrontPage() {
                 <strong dir="rtl">{storefront.address_text_ar}</strong>
               ) : null}
             </span>
-          </button>
+          </a>
         ) : null}
-
         {contactLinks.slice(0, 4).map((link) => (
           <a
             key={`quick-${link.label}-${link.href}`}
