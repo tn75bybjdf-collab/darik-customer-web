@@ -1385,15 +1385,14 @@ export default function DarikDirectStorefrontPage() {
     const hasSelectedPricingContact = canCallForPrice || canWhatsappForPrice;
     const pricingLabel =
       pricingMode === "call"
-        ? "اتصل لمعرفة السعر / Call for pricing"
+        ? "Call for price / \u0627\u062a\u0635\u0644 \u0644\u0644\u0633\u0639\u0631"
         : pricingMode === "whatsapp"
-          ? "واتساب لمعرفة السعر / WhatsApp for pricing"
+          ? "WhatsApp for price / \u0648\u0627\u062a\u0633\u0627\u0628 \u0644\u0644\u0633\u0639\u0631"
           : pricingMode === "call_whatsapp"
-            ? "اتصال أو واتساب لمعرفة السعر / Call or WhatsApp"
+            ? "Call or WhatsApp / \u0627\u062a\u0635\u0627\u0644 \u0623\u0648 \u0648\u0627\u062a\u0633\u0627\u0628"
             : showPrices
               ? money(product.app_price)
               : "Contact for price";
-
     return (
       <article className={styles.productCard} key={product.id}>
         <div className={styles.productImage}>
@@ -1467,7 +1466,7 @@ export default function DarikDirectStorefrontPage() {
                 {canCallForPrice && pricingCallHref ? (
                   <a className={styles.pricingCallButton} href={pricingCallHref}>
                     <Icon name="call" size={17} />
-                    <span>اتصال / Call</span>
+                    <span>{"Call / \u0627\u062a\u0635\u0627\u0644"}</span>
                   </a>
                 ) : null}
                 {canWhatsappForPrice && pricingWhatsappHref ? (
@@ -1478,7 +1477,7 @@ export default function DarikDirectStorefrontPage() {
                     rel="noreferrer"
                   >
                     <Icon name="whatsapp" size={17} />
-                    <span>واتساب / WhatsApp</span>
+                    <span>{"WhatsApp / \u0648\u0627\u062a\u0633\u0627\u0628"}</span>
                   </a>
                 ) : null}
                 {!hasSelectedPricingContact && contactLinks[0] ? (
@@ -1520,6 +1519,7 @@ export default function DarikDirectStorefrontPage() {
       data-card-style={productCardStyle}
       data-corners={cornerStyle}
       data-hero={heroLayout}
+      data-business={isAutoParts ? "auto_parts" : storefront.business_type || "retail"}
     >
       <div className={styles.announcementBar}>
         <span>
@@ -1593,7 +1593,7 @@ export default function DarikDirectStorefrontPage() {
           <div className={styles.heroCopy}>
             <div className={styles.heroLabel}>
               <Icon name="store" size={15} />
-              Independent store on Darik
+              Official online store
             </div>
             <h1>{storefront.display_name}</h1>
             {storefront.display_name_ar ? (
@@ -1682,6 +1682,7 @@ export default function DarikDirectStorefrontPage() {
       <section className={styles.quickInfoStrip}>
         {(storefront.address_text || storefront.address_text_ar) ? (
           <a
+            className={styles.locationQuickLink}
             href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
               storefront.address_text || storefront.address_text_ar || ""
             )}`}
@@ -1705,6 +1706,7 @@ export default function DarikDirectStorefrontPage() {
         ) : null}
         {contactLinks.slice(0, 4).map((link) => (
           <a
+            className={styles.contactQuickLink}
             key={`quick-${link.label}-${link.href}`}
             href={link.href}
             target={link.href.startsWith("http") ? "_blank" : undefined}
@@ -1974,7 +1976,7 @@ export default function DarikDirectStorefrontPage() {
       >
         <div className={styles.storyCopy}>
           <span>About this store</span>
-          <h2>Shop local with confidence</h2>
+          <h2>About {storefront.display_name}</h2>
           <p>
             {storefront.about_text ||
               `${storefront.display_name} is an independent local business serving customers through Darik Direct.`}
