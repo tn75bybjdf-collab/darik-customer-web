@@ -1604,6 +1604,22 @@ export default function DarikDirectStorefrontPage() {
         <div className={styles.heroTexture} />
 
         <div className={styles.heroContent}>
+          {isAutoParts ? (
+            <div className={styles.heroExperienceRail}>
+              <span className={styles.heroLiveStatus}>
+                <i className={effectiveAcceptingOrders ? styles.liveDot : styles.pausedDot} />
+                {effectiveAcceptingOrders
+                  ? "Open now / \u0645\u0641\u062a\u0648\u062d \u0627\u0644\u0622\u0646"
+                  : "Browse catalog / \u062a\u0635\u0641\u062d \u0627\u0644\u0643\u062a\u0627\u0644\u0648\u062c"}
+              </span>
+              {currentDayHours ? (
+                <span className={styles.heroHoursChip}>
+                  <Icon name="clock" size={14} />
+                  {currentDayHours}
+                </span>
+              ) : null}
+            </div>
+          ) : null}
           <div className={styles.heroLogo}>
             {storefront.logo_url ? (
               <img
@@ -1635,6 +1651,19 @@ export default function DarikDirectStorefrontPage() {
               </p>
             ) : null}
 
+            {isAutoParts ? (
+              <div className={styles.heroTrustLine}>
+                {pickupOnly ? (
+                  <span>{"Pickup ready / \u0627\u0633\u062a\u0644\u0627\u0645 \u0645\u0646 \u0627\u0644\u0645\u062a\u062c\u0631"}</span>
+                ) : null}
+                {hasVehicleFitment ? (
+                  <span>{"Vehicle fitment / \u062a\u0648\u0627\u0641\u0642 \u0627\u0644\u0633\u064a\u0627\u0631\u0629"}</span>
+                ) : null}
+                {partsHelpWhatsappHref ? (
+                  <span>{"Direct parts support / \u062f\u0639\u0645 \u0645\u0628\u0627\u0634\u0631"}</span>
+                ) : null}
+              </div>
+            ) : null}
             <div className={styles.heroButtons}>
               <button className={styles.primaryHeroButton} onClick={jumpToCatalog}>
                 {isAutoParts ? "Find a part / \u0627\u0628\u062d\u062b \u0639\u0646 \u0642\u0637\u0639\u0629" : "Browse products"}
