@@ -351,3 +351,177 @@
   .designActions { flex-direction: column; }
   .designActions button { width: 100%; }
 }
+
+/* DARIK_RETAIL_FIELD_LOCKED_SYSTEM_045 */
+
+.fieldLockedStudio {
+  overflow: hidden;
+  border: 1px solid #dbe4f0;
+  background:
+    radial-gradient(circle at 100% 0%, rgba(37,99,235,.08), transparent 24rem),
+    #fff;
+}
+
+.lockedDesignNotice {
+  display: grid;
+  gap: 8px;
+  border: 1px solid #bfdbfe;
+  border-radius: 18px;
+  padding: 18px;
+  background: linear-gradient(145deg, #eff6ff, #f8fbff);
+}
+
+.lockedDesignNotice > span,
+.fieldLabHeading span,
+.functionControls > div:first-child > span {
+  color: #2563eb;
+  font-size: 11px;
+  font-weight: 950;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+.lockedDesignNotice strong {
+  color: #0f172a;
+  font-size: 18px;
+}
+
+.lockedDesignNotice p {
+  margin: 0;
+  color: #52647b;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.fieldLab {
+  margin-top: 18px;
+  display: grid;
+  gap: 16px;
+  border: 1px solid #172554;
+  border-radius: 20px;
+  padding: 20px;
+  background:
+    radial-gradient(circle at 100% 0%, rgba(37,99,235,.28), transparent 21rem),
+    linear-gradient(145deg, #071426, #10233f);
+  color: #fff;
+  box-shadow: 0 18px 42px rgba(15,23,42,.15);
+}
+
+.fieldLabHeading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 18px;
+}
+
+.fieldLabHeading h4,
+.functionControls h4 {
+  margin: 4px 0 0;
+  color: inherit;
+  font-size: 18px;
+}
+
+.fieldLabHeading b {
+  flex: 0 0 auto;
+  border: 1px solid rgba(96,165,250,.30);
+  border-radius: 999px;
+  padding: 6px 10px;
+  background: rgba(37,99,235,.15);
+  color: #bfdbfe;
+  font-size: 9px;
+  letter-spacing: .08em;
+}
+
+.fieldLab > p {
+  margin: 0;
+  color: #b8c7da;
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.fieldLabControls {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: end;
+  gap: 14px;
+}
+
+.fieldLabControls label {
+  display: grid;
+  gap: 7px;
+  color: #cbd5e1;
+  font-size: 11px;
+  font-weight: 850;
+}
+
+.fieldLabControls select {
+  min-height: 48px;
+  width: 100%;
+  border: 1px solid rgba(148,163,184,.24);
+  border-radius: 13px;
+  padding: 0 13px;
+  background: rgba(255,255,255,.97);
+  color: #0f172a;
+  font-weight: 850;
+}
+
+.fieldLabActions {
+  display: flex;
+  gap: 8px;
+}
+
+.fieldLabActions button {
+  min-height: 48px;
+  border: 1px solid rgba(96,165,250,.25);
+  border-radius: 13px;
+  padding: 0 14px;
+  background: rgba(255,255,255,.08);
+  color: #fff;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.fieldLabActions button:first-child {
+  border-color: transparent;
+  background: #2563eb;
+  box-shadow: 0 10px 24px rgba(37,99,235,.25);
+}
+
+.fieldLabActions button:disabled {
+  opacity: .45;
+  cursor: not-allowed;
+}
+
+.fieldLab > small {
+  color: #8fa6c2;
+  line-height: 1.5;
+}
+
+.functionControls {
+  margin-top: 20px;
+  display: grid;
+  gap: 14px;
+}
+
+.functionControls > div:first-child {
+  color: #0f172a;
+}
+
+@media (max-width: 760px) {
+  .fieldLabControls {
+    grid-template-columns: 1fr;
+  }
+
+  .fieldLabActions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .fieldLabActions button {
+    padding: 0 10px;
+  }
+
+  .fieldLabHeading {
+    flex-direction: column;
+  }
+}

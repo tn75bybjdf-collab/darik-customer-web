@@ -117,7 +117,45 @@ const themeOptions: Array<{
   { value: "menu", name: "Menu", nameAr: "قائمة", description: "Warm, friendly layout for food and bakeries" },
 ];
 
-function normalizeSectionOrder(value: unknown): StorefrontSection[] {
+
+const retailFieldTestOptions = [
+  ["supermarket", "Supermarket / Hypermarket", "سوبرماركت / هايبرماركت"],
+  ["grocery", "Grocery store", "بقالة"],
+  ["mini_market", "Mini-market / Convenience", "ميني ماركت / تموينات"],
+  ["restaurant", "Restaurant", "مطعم"],
+  ["fast_food", "Fast food", "وجبات سريعة"],
+  ["bakery", "Bakery / Sweets", "مخبز / حلويات"],
+  ["cafe", "Café", "مقهى / كوفي شوب"],
+  ["butcher", "Butcher", "ملحمة"],
+  ["produce", "Fruit and vegetable store", "خضار وفواكه"],
+  ["frozen_food", "Frozen food store", "مواد غذائية مجمدة"],
+  ["clothing", "Clothing", "ملابس"],
+  ["shoes", "Shoes", "أحذية"],
+  ["jewelry", "Jewelry", "مجوهرات"],
+  ["cosmetics", "Cosmetics / Beauty", "مستحضرات تجميل / عناية"],
+  ["perfume", "Perfume", "عطور"],
+  ["electronics", "Electronics", "إلكترونيات"],
+  ["computers", "Computers", "كمبيوتر"],
+  ["mobile_phones", "Mobile phones & accessories", "هواتف وإكسسوارات"],
+  ["furniture", "Furniture", "أثاث"],
+  ["home_appliances", "Home appliances", "أجهزة منزلية"],
+  ["home_decor", "Home décor", "ديكور منزلي"],
+  ["auto_parts", "Auto parts", "قطع سيارات"],
+  ["tires", "Tires & car accessories", "إطارات وإكسسوارات سيارات"],
+  ["hardware", "Hardware store", "عدد وأدوات"],
+  ["building_materials", "Building materials", "مواد بناء"],
+  ["electrical_supplies", "Electrical supplies", "مواد كهربائية"],
+  ["plumbing", "Plumbing supplies", "مواد صحية وسباكة"],
+  ["tools", "Tools & equipment", "أدوات ومعدات"],
+  ["pharmacy", "Pharmacy", "صيدلية"],
+  ["pet_supplies", "Pet supplies", "مستلزمات حيوانات أليفة"],
+  ["flowers", "Flowers", "زهور"],
+  ["gifts", "Gifts", "هدايا"],
+  ["toys", "Toys", "ألعاب"],
+  ["books_stationery", "Books & stationery", "كتب وقرطاسية"],
+  ["sports", "Sports equipment", "معدات رياضية"],
+  ["other", "Other", "أخرى"],
+] as const;function normalizeSectionOrder(value: unknown): StorefrontSection[] {
   const allowed: StorefrontSection[] = ["categories", "catalog", "story"];
   const input = Array.isArray(value) ? value : [];
   const next = input.filter(
@@ -457,6 +495,8 @@ export default function DarikDirectStorefrontSettingsPage() {
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
   const [previewOpen, setPreviewOpen] = useState(false);
+  const [testRetailField, setTestRetailField] = useState("auto_parts");
+  const [fieldLabCopied, setFieldLabCopied] = useState(false);
   const [slugState, setSlugState] = useState<"idle" | "checking" | "available" | "taken">("idle");
 
   const [email, setEmail] = useState("");
@@ -1663,6 +1703,37 @@ export default function DarikDirectStorefrontSettingsPage() {
     setSaving(false);
   }
 
+  function getFieldLabPreviewPath() {
+    if (!storefront) return "";
+    return `/${storefront.slug}?previewField=${encodeURIComponent(
+      testRetailField
+    )}&fieldLab=1`;
+  }
+
+  function openFieldLabPreview() {
+    const path = getFieldLabPreviewPath();
+    if (!path) {
+      setError("Create the storefront before opening the field tester.");
+      return;
+    }
+    window.open(path, "_blank", "noopener,noreferrer");
+  }
+
+  async function copyFieldLabPreviewLink() {
+    const path = getFieldLabPreviewPath();
+    if (!path) {
+      setError("Create the storefront before copying a field preview link.");
+      return;
+    }
+    const absoluteUrl = `${window.location.origin}${path}`;
+    try {
+      await navigator.clipboard.writeText(absoluteUrl);
+      setFieldLabCopied(true);
+      window.setTimeout(() => setFieldLabCopied(false), 1800);
+    } catch {
+      setError(`Copy this preview link: ${absoluteUrl}`);
+    }
+  }
   if (!authReady) {
     return (
       <main className={styles.centerPage}>
@@ -2619,190 +2690,120 @@ export default function DarikDirectStorefrontSettingsPage() {
                   </div>
                 </div>
 
-                <div className={`${styles.formSection} ${designStyles.designStudio}`}>
+                <div className={`${styles.formSection} ${designStyles.fieldLockedStudio}`}>
                   <div className={styles.formSectionHeading}>
                     <div>
                       <span>Store design / تصميم المتجر</span>
-                      <h3>Make the website feel like your business / خلّي الموقع يعكس هوية نشاطك</h3>
+                      <h3>Designed by retail field / التصميم حسب النشاط</h3>
                     </div>
-                    <p>Choose a professionally controlled theme, preview it, then publish it without changing products or orders.</p>
+                    <p>
+                      Darik now assigns the storefront experience automatically from the retail field.
+                      Store owners no longer select themes, layouts, card styles, corners, or page colors.
+                      / يحدد داريك تصميم واجهة المتجر تلقائياً حسب نوع النشاط، ولم يعد صاحب المتجر يختار القالب أو شكل الصفحة.
+                    </p>
                   </div>
 
-                  <div className={designStyles.themeGrid}>
-                    {themeOptions.map((theme) => (
-                      <button
-                        type="button"
-                        key={theme.value}
-                        className={`${designStyles.themeCard} ${
-                          setupForm.storefrontTheme === theme.value
-                            ? designStyles.themeSelected
-                            : ""
-                        }`}
-                        data-theme-preview={theme.value}
-                        onClick={() => updateSetupField("storefrontTheme", theme.value)}
-                      >
-                        <span className={designStyles.themeMockup}>
-                          <i />
-                          <b />
-                          <em />
-                          <small />
-                        </span>
-                        <strong>{theme.name} / {theme.nameAr}</strong>
-                        <small>{theme.description}</small>
-                      </button>
-                    ))}
+                  <div className={designStyles.lockedDesignNotice}>
+                    <span>LOCKED BY DARIK / تصميم ثابت من داريك</span>
+                    <strong>
+                      One professional storefront system for each retail field
+                      / نظام واجهة احترافي مخصص لكل نشاط
+                    </strong>
+                    <p>
+                      The retailer still controls the logo, cover image, store information,
+                      products, availability, ordering, phone, and WhatsApp. Darik controls
+                      the visual system and shopping architecture.
+                    </p>
                   </div>
 
-                  <div className={designStyles.controlGrid}>
-                    <label>
-                      Appearance / المظهر
-                      <select
-                        value={setupForm.appearanceMode}
-                        onChange={(event) => updateSetupField("appearanceMode", event.target.value as AppearanceMode)}
-                      >
-                        <option value="light">Light / فاتح</option>
-                        <option value="dark">Dark / داكن</option>
-                      </select>
-                    </label>
-                    <label>
-                      Product cards / بطاقات المنتجات
-                      <select
-                        value={setupForm.productCardStyle}
-                        onChange={(event) => updateSetupField("productCardStyle", event.target.value as ProductCardStyle)}
-                      >
-                        <option value="standard">Standard / قياسي</option>
-                        <option value="image_first">Image first / الصورة أولاً</option>
-                        <option value="compact">Compact / مضغوط</option>
-                      </select>
-                    </label>
-                    <label>
-                      Corners / شكل الزوايا
-                      <select
-                        value={setupForm.cornerStyle}
-                        onChange={(event) => updateSetupField("cornerStyle", event.target.value as CornerStyle)}
-                      >
-                        <option value="rounded">Rounded / دائرية</option>
-                        <option value="soft">Soft / ناعمة</option>
-                        <option value="square">Square / مربعة</option>
-                      </select>
-                    </label>
-                    <label>
-                      Hero layout / تصميم الغلاف
-                      <select
-                        value={setupForm.heroLayout}
-                        onChange={(event) => updateSetupField("heroLayout", event.target.value as HeroLayout)}
-                      >
-                        <option value="centered">Centered / وسطي</option>
-                        <option value="split">Split / مقسوم</option>
-                        <option value="immersive">Immersive / غامر</option>
-                      </select>
-                    </label>
-                  </div>
-
-                  <div className={designStyles.toggleGrid}>
-                    {[
-                      ["showPrices", "Show prices / إظهار الأسعار", "Turn off for catalog or quote-based businesses"],
-                      ["showOrdering", "Enable cart and checkout / تفعيل السلة والطلب", "Turn off for a true showcase-only website"],
-                      ["showPhone", "Show phone / إظهار الهاتف", "Customers can tap to call"],
-                      ["showWhatsapp", "Show WhatsApp / إظهار واتساب", "Customers can open a WhatsApp conversation"],
-                      ["showStoreStory", "Show About section / إظهار قسم عن المتجر", "Display the store story near the bottom"],
-                    ].map(([field, label, helper]) => (
-                      <label className={designStyles.switchCard} key={field}>
-                        <span><strong>{label}</strong><small>{helper}</small></span>
-                        <input
-                          type="checkbox"
-                          checked={Boolean(setupForm[field as keyof StorefrontForm])}
-                          onChange={(event) => updateSetupField(field as keyof StorefrontForm, event.target.checked as never)}
-                        />
-                      </label>
-                    ))}
-                  </div>
-
-                  <div className={designStyles.sectionOrderBox}>
-                    <div>
-                      <strong>Homepage section order / ترتيب أقسام الصفحة</strong>
-                      <span>Move each section up or down / حرّك كل قسم للأعلى أو الأسفل</span>
-                    </div>
-                    {setupForm.sectionOrder.map((section, index) => (
-                      <div className={designStyles.orderRow} key={section}>
-                        <span>{index + 1}</span>
-                        <strong>{section === "categories" ? "Categories / الأقسام" : section === "catalog" ? "Products / المنتجات" : "About store / عن المتجر"}</strong>
-                        <div>
-                          <button
-                            type="button"
-                            disabled={index === 0}
-                            onClick={() => {
-                              const next = [...setupForm.sectionOrder];
-                              [next[index - 1], next[index]] = [next[index], next[index - 1]];
-                              updateSetupField("sectionOrder", next);
-                            }}
-                          >↑</button>
-                          <button
-                            type="button"
-                            disabled={index === setupForm.sectionOrder.length - 1}
-                            onClick={() => {
-                              const next = [...setupForm.sectionOrder];
-                              [next[index + 1], next[index]] = [next[index], next[index + 1]];
-                              updateSetupField("sectionOrder", next);
-                            }}
-                          >↓</button>
-                        </div>
+                  <div className={designStyles.fieldLab}>
+                    <div className={designStyles.fieldLabHeading}>
+                      <div>
+                        <span>DARIK FIELD LAB / مختبر أنشطة داريك</span>
+                        <h4>Test any retail field on this store / اختبر أي نشاط على هذا المتجر</h4>
                       </div>
-                    ))}
+                      <b>TESTING ONLY</b>
+                    </div>
+
+                    <p>
+                      This preview switch does not change the store's real retail field and does not write
+                      anything to Supabase. It only adds a temporary previewField parameter to the public URL.
+                    </p>
+
+                    <div className={designStyles.fieldLabControls}>
+                      <label>
+                        Test retail field / نشاط الاختبار
+                        <select
+                          value={testRetailField}
+                          onChange={(event) => {
+                            setTestRetailField(event.target.value);
+                            setFieldLabCopied(false);
+                          }}
+                        >
+                          {retailFieldTestOptions.map(([value, label, labelAr]) => (
+                            <option value={value} key={value}>
+                              {label} / {labelAr}
+                            </option>
+                          ))}
+                        </select>
+                      </label>
+
+                      <div className={designStyles.fieldLabActions}>
+                        <button
+                          type="button"
+                          onClick={openFieldLabPreview}
+                          disabled={!storefront}
+                        >
+                          Open field preview / فتح المعاينة
+                        </button>
+                        <button
+                          type="button"
+                          onClick={copyFieldLabPreviewLink}
+                          disabled={!storefront}
+                        >
+                          {fieldLabCopied
+                            ? "Copied / تم النسخ"
+                            : "Copy test link / نسخ رابط الاختبار"}
+                        </button>
+                      </div>
+                    </div>
+
+                    <small>
+                      Auto Parts is the first locked Darik retail-field design. We will now use this tester
+                      to build and approve every other signup field one by one.
+                    </small>
                   </div>
 
-                  <div className={designStyles.designActions}>
-                    <button type="button" onClick={() => setPreviewOpen(true)}>
-                      Preview current design / معاينة التصميم الحالي
-                    </button>
-                    <button type="button" onClick={publishStorefrontDesign} disabled={!storefront || saving}>
-                      {saving ? "Publishing… / جارٍ النشر…" : "Publish design / نشر التصميم"}
-                    </button>
-                  </div>
-                </div>
-
-                <div className={styles.formSection}>
-                  <div className={styles.formSectionHeading}>
+                  <div className={designStyles.functionControls}>
                     <div>
-                      <span>Colors / الألوان</span>
-                      <h3>Match the storefront to your brand / طابق ألوان المتجر مع علامتك</h3>
+                      <span>Store functions / وظائف المتجر</span>
+                      <h4>Retailers control function, not theme / صاحب المتجر يتحكم بالوظائف وليس التصميم</h4>
+                    </div>
+                    <div className={designStyles.toggleGrid}>
+                      {[
+                        ["showPrices", "Show prices / إظهار الأسعار", "Turn off for catalog or quote-based businesses"],
+                        ["showOrdering", "Enable cart and checkout / تفعيل السلة والطلب", "Turn off for a showcase-only website"],
+                        ["showPhone", "Show phone / إظهار الهاتف", "Customers can tap to call"],
+                        ["showWhatsapp", "Show WhatsApp / إظهار واتساب", "Customers can open a WhatsApp conversation"],
+                        ["showStoreStory", "Show About section / إظهار قسم عن المتجر", "Display the store story when the field design uses it"],
+                      ].map(([field, label, helper]) => (
+                        <label className={designStyles.switchCard} key={field}>
+                          <span><strong>{label}</strong><small>{helper}</small></span>
+                          <input
+                            type="checkbox"
+                            checked={Boolean(setupForm[field as keyof StorefrontForm])}
+                            onChange={(event) =>
+                              updateSetupField(
+                                field as keyof StorefrontForm,
+                                event.target.checked as never
+                              )
+                            }
+                          />
+                        </label>
+                      ))}
                     </div>
                   </div>
-
-                  <div className={styles.colorRow}>
-                    <label>
-                      Primary / اللون الأساسي
-                      <input
-                        type="color"
-                        value={setupForm.primaryColor}
-                        onChange={(event) =>
-                          updateSetupField("primaryColor", event.target.value)
-                        }
-                      />
-                    </label>
-                    <label>
-                      Accent / اللون الثانوي
-                      <input
-                        type="color"
-                        value={setupForm.accentColor}
-                        onChange={(event) =>
-                          updateSetupField("accentColor", event.target.value)
-                        }
-                      />
-                    </label>
-                    <label>
-                      Background / لون الخلفية
-                      <input
-                        type="color"
-                        value={setupForm.backgroundColor}
-                        onChange={(event) =>
-                          updateSetupField("backgroundColor", event.target.value)
-                        }
-                      />
-                    </label>
-                  </div>
                 </div>
-
                 <div className={styles.formSaveBar} ref={saveBarRef}>
                   <div
                     className={`${styles.draftStatus} ${

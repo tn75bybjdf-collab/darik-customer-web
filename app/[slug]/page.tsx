@@ -433,9 +433,178 @@ function normalizeSectionOrder(value: Storefront["section_order"]) {
   return next;
 }
 
+
+type LockedRetailFieldDesign = {
+  storefrontTheme: NonNullable<Storefront["storefront_theme"]>;
+  appearanceMode: NonNullable<Storefront["appearance_mode"]>;
+  productCardStyle: NonNullable<Storefront["product_card_style"]>;
+  cornerStyle: NonNullable<Storefront["corner_style"]>;
+  heroLayout: NonNullable<Storefront["hero_layout"]>;
+  sectionOrder: Array<"categories" | "catalog" | "story">;
+  primaryColor: string;
+  accentColor: string;
+  backgroundColor: string;
+};
+
+function lockedRetailFieldDesign(
+  rawField: string | null | undefined
+): LockedRetailFieldDesign {
+  const field = String(rawField || "retail").trim().toLowerCase();
+
+  if (field === "auto_parts") {
+    return {
+      storefrontTheme: "premium",
+      appearanceMode: "dark",
+      productCardStyle: "image_first",
+      cornerStyle: "rounded",
+      heroLayout: "immersive",
+      sectionOrder: ["catalog", "categories", "story"],
+      primaryColor: "#071426",
+      accentColor: "#2F66FF",
+      backgroundColor: "#061426",
+    };
+  }
+
+  if (
+    [
+      "supermarket",
+      "grocery",
+      "mini_market",
+      "butcher",
+      "produce",
+      "frozen_food",
+    ].includes(field)
+  ) {
+    return {
+      storefrontTheme: "modern_market",
+      appearanceMode: "light",
+      productCardStyle: "image_first",
+      cornerStyle: "rounded",
+      heroLayout: "immersive",
+      sectionOrder: ["categories", "catalog", "story"],
+      primaryColor: "#12372A",
+      accentColor: "#16A34A",
+      backgroundColor: "#F7FAF7",
+    };
+  }
+
+  if (["restaurant", "fast_food", "bakery", "cafe"].includes(field)) {
+    return {
+      storefrontTheme: "menu",
+      appearanceMode: "light",
+      productCardStyle: "image_first",
+      cornerStyle: "soft",
+      heroLayout: "immersive",
+      sectionOrder: ["categories", "catalog", "story"],
+      primaryColor: "#431407",
+      accentColor: "#EA580C",
+      backgroundColor: "#FFF9F3",
+    };
+  }
+
+  if (
+    ["clothing", "shoes", "jewelry", "cosmetics", "perfume"].includes(field)
+  ) {
+    return {
+      storefrontTheme: "boutique",
+      appearanceMode: "light",
+      productCardStyle: "image_first",
+      cornerStyle: "soft",
+      heroLayout: "immersive",
+      sectionOrder: ["categories", "catalog", "story"],
+      primaryColor: "#18111B",
+      accentColor: "#A855F7",
+      backgroundColor: "#FCFAFC",
+    };
+  }
+
+  if (["electronics", "computers", "mobile_phones"].includes(field)) {
+    return {
+      storefrontTheme: "minimal",
+      appearanceMode: "light",
+      productCardStyle: "standard",
+      cornerStyle: "soft",
+      heroLayout: "split",
+      sectionOrder: ["categories", "catalog", "story"],
+      primaryColor: "#0F172A",
+      accentColor: "#2563EB",
+      backgroundColor: "#F8FAFC",
+    };
+  }
+
+  if (["furniture", "home_appliances", "home_decor"].includes(field)) {
+    return {
+      storefrontTheme: "premium",
+      appearanceMode: "light",
+      productCardStyle: "image_first",
+      cornerStyle: "soft",
+      heroLayout: "immersive",
+      sectionOrder: ["categories", "catalog", "story"],
+      primaryColor: "#2B2118",
+      accentColor: "#A16207",
+      backgroundColor: "#FBFAF7",
+    };
+  }
+
+  if (
+    [
+      "tires",
+      "hardware",
+      "building_materials",
+      "electrical_supplies",
+      "plumbing",
+      "tools",
+    ].includes(field)
+  ) {
+    return {
+      storefrontTheme: "auto_pro",
+      appearanceMode: "dark",
+      productCardStyle: "compact",
+      cornerStyle: "soft",
+      heroLayout: "immersive",
+      sectionOrder: ["categories", "catalog", "story"],
+      primaryColor: "#111827",
+      accentColor: "#F59E0B",
+      backgroundColor: "#F8FAFC",
+    };
+  }
+
+  if (field === "pharmacy") {
+    return {
+      storefrontTheme: "minimal",
+      appearanceMode: "light",
+      productCardStyle: "standard",
+      cornerStyle: "soft",
+      heroLayout: "split",
+      sectionOrder: ["categories", "catalog", "story"],
+      primaryColor: "#0F766E",
+      accentColor: "#14B8A6",
+      backgroundColor: "#F7FFFD",
+    };
+  }
+
+  return {
+    storefrontTheme: "modern_market",
+    appearanceMode: "light",
+    productCardStyle: "standard",
+    cornerStyle: "rounded",
+    heroLayout: "centered",
+    sectionOrder: ["categories", "catalog", "story"],
+    primaryColor: "#111827",
+    accentColor: "#2563EB",
+    backgroundColor: "#F8FAFC",
+  };
+}
 export default function DarikDirectStorefrontPage() {
   const params = useParams<{ slug: string | string[] }>();
   const slug = normalizeParam(params?.slug);
+  const [previewRetailField, setPreviewRetailField] = useState("");
+  useEffect(() => {
+    const field = new URLSearchParams(window.location.search)
+      .get("previewField")
+      ?.trim();
+    setPreviewRetailField(field || "");
+  }, []);
 
   const [storefront, setStorefront] = useState<Storefront | null>(null);
   const [publicStatus, setPublicStatus] = useState<PublicStoreStatus | null>(null);
@@ -680,7 +849,12 @@ export default function DarikDirectStorefrontPage() {
     [categories]
   );
 
-  const isAutoParts = storefront?.business_type === "auto_parts";
+  const effectiveBusinessType =
+    previewRetailField ||
+    storefront?.business_type ||
+    publicStatus?.business_type ||
+    "retail";
+  const isAutoParts = effectiveBusinessType === "auto_parts";
 
   const vehicleMakes = useMemo(() => {
     if (!isAutoParts) return [];
@@ -1200,18 +1374,18 @@ export default function DarikDirectStorefrontPage() {
     );
   }
 
+  const fieldDesign = lockedRetailFieldDesign(effectiveBusinessType);
   const themeStyle = {
-    "--store-primary": storefront.primary_color || "#111827",
-    "--store-accent": storefront.accent_color || "#2563EB",
-    "--store-background": storefront.background_color || "#F8FAFC",
+    "--store-primary": fieldDesign.primaryColor,
+    "--store-accent": fieldDesign.accentColor,
+    "--store-background": fieldDesign.backgroundColor,
   } as CSSProperties;
-
-  const storefrontTheme = storefront.storefront_theme || "modern_market";
-  const appearanceMode = storefront.appearance_mode || "light";
-  const productCardStyle = storefront.product_card_style || "standard";
-  const cornerStyle = storefront.corner_style || "rounded";
-  const heroLayout = storefront.hero_layout || "centered";
-  const sectionOrder = normalizeSectionOrder(storefront.section_order);
+  const storefrontTheme = fieldDesign.storefrontTheme;
+  const appearanceMode = fieldDesign.appearanceMode;
+  const productCardStyle = fieldDesign.productCardStyle;
+  const cornerStyle = fieldDesign.cornerStyle;
+  const heroLayout = fieldDesign.heroLayout;
+  const sectionOrder = fieldDesign.sectionOrder;
   const showPrices = storefront.show_prices !== false;
   const showOrdering = storefront.show_ordering !== false;
   const showPhone = storefront.show_phone !== false;
@@ -1552,7 +1726,8 @@ export default function DarikDirectStorefrontPage() {
       data-card-style={productCardStyle}
       data-corners={cornerStyle}
       data-hero={heroLayout}
-      data-business={isAutoParts ? "auto_parts" : storefront.business_type || "retail"}
+      data-business={effectiveBusinessType}
+      data-field-preview={previewRetailField ? "yes" : "no"}
       data-category-count={String(visibleCategories.length)}
       data-direct-purchase={hasDirectPurchaseProducts ? "yes" : "no"}
     >
@@ -1767,7 +1942,12 @@ export default function DarikDirectStorefrontPage() {
             </span>
           </a>
         ) : null}
-        {contactLinks.slice(0, 4).map((link) => (
+        {(isAutoParts
+          ? contactLinks
+              .filter((link) => link.icon === "call" || link.icon === "whatsapp")
+              .slice(0, 2)
+          : contactLinks.slice(0, 4)
+        ).map((link) => (
           <a
             className={styles.contactQuickLink}
             key={`quick-${link.label}-${link.href}`}
@@ -1959,7 +2139,7 @@ export default function DarikDirectStorefrontPage() {
                     : "Make + model + year / \u0627\u0644\u0646\u0648\u0639 + \u0627\u0644\u0645\u0648\u062f\u064a\u0644 + \u0627\u0644\u0633\u0646\u0629"}
                 </strong>
               </div>
-              <b>{hasActiveVehicleFilter ? filteredProducts.length : vehicleMakes.length}</b>
+              {hasActiveVehicleFilter ? <b>{filteredProducts.length}</b> : null}
             </div></section>
         ) : null}
 
@@ -2008,10 +2188,10 @@ export default function DarikDirectStorefrontPage() {
             <div>
               <span>{isAutoParts ? "Parts catalog / \u0643\u062a\u0627\u0644\u0648\u062c \u0627\u0644\u0642\u0637\u0639" : search ? `Results for “${search}”` : "Store catalog"}</span>
               <h3>
-                {isAutoParts ? (hasActiveVehicleFilter ? "Matching parts / \u0627\u0644\u0642\u0637\u0639 \u0627\u0644\u0645\u0637\u0627\u0628\u0642\u0629" : "Browse parts / \u062a\u0635\u0641\u062d \u0627\u0644\u0642\u0637\u0639") : featuredProducts.length > 0 ? "More to explore" : "Products"}
+                {isAutoParts ? (hasActiveVehicleFilter ? "Matches / \u0627\u0644\u0645\u0637\u0627\u0628\u0642\u0629" : "Parts / \u0627\u0644\u0642\u0637\u0639") : featuredProducts.length > 0 ? "More to explore" : "Products"}
               </h3>
             </div>
-            <small>{filteredProducts.length} available</small>
+            <small>{filteredProducts.length} {filteredProducts.length === 1 ? "part" : "parts"}</small>
           </div>
 
           {filteredProducts.length === 0 ? (
