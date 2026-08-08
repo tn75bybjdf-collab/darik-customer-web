@@ -1,6 +1,7 @@
 "use client";
 
 // DARIK_PICKUP_ONLY_FULFILLMENT_032
+// DARIK_CUSTOM_STORE_LINKS_035
 
 import {
   ChangeEvent,
@@ -14,6 +15,7 @@ import {
 import type { Session } from "@supabase/supabase-js";
 import { supabase } from "@/lib/supabaseBrowser";
 import StorefrontPreviewModal from "../components/StorefrontPreviewModal";
+import DashboardLogoutButton from "../components/DashboardLogoutButton";
 import styles from "../dashboard.module.css";
 import designStyles from "./storefront-design.module.css";
 
@@ -449,6 +451,7 @@ export default function DarikDirectStorefrontSettingsPage() {
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
   const [previewOpen, setPreviewOpen] = useState(false);
+  const [slugState, setSlugState] = useState<"idle" | "checking" | "available" | "taken">("idle");
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -915,6 +918,43 @@ export default function DarikDirectStorefrontSettingsPage() {
     };
   }, [formDirty]);
 
+  useEffect(() => {
+    if (!selectedStore) {
+      setSlugState("idle");
+      return;
+    }
+
+    const slug = cleanSlug(setupForm.slug);
+    if (slug.length < 2) {
+      setSlugState("idle");
+      return;
+    }
+
+    if (storefront && slug === storefront.slug) {
+      setSlugState("available");
+      return;
+    }
+
+    let cancelled = false;
+    setSlugState("checking");
+    const timer = window.setTimeout(async () => {
+      const result = storefront
+        ? await supabase.rpc("darik_direct_slug_available_for_store", {
+            p_retailer_id: selectedStore.retailer_id,
+            p_slug: slug,
+          })
+        : await supabase.rpc("darik_direct_slug_available", { p_slug: slug });
+
+      if (cancelled) return;
+      setSlugState(!result.error && result.data === true ? "available" : "taken");
+    }, 400);
+
+    return () => {
+      cancelled = true;
+      window.clearTimeout(timer);
+    };
+  }, [selectedStore, storefront, setupForm.slug]);
+
   async function signIn(event: FormEvent) {
     event.preventDefault();
     setError("");
@@ -931,10 +971,6 @@ export default function DarikDirectStorefrontSettingsPage() {
     }
 
     setMessage("Signed in successfully.");
-  }
-
-  async function signOut() {
-    await supabase.auth.signOut();
   }
 
   function updateSetupField<K extends keyof StorefrontForm>(
@@ -1105,6 +1141,16 @@ export default function DarikDirectStorefrontSettingsPage() {
       return;
     }
 
+    if (slugState === "checking") {
+      showSaveError("Wait a moment while Darik checks the store link / انتظر قليلاً حتى يتم التحقق من الرابط.");
+      return;
+    }
+
+    if (slugState === "taken") {
+      showSaveError("That Darik store link is already in use or reserved / رابط المتجر مستخدم أو محجوز.");
+      return;
+    }
+
     if (!displayName) {
       showSaveError("Storefront display name is required.");
       return;
@@ -1224,10 +1270,13 @@ export default function DarikDirectStorefrontSettingsPage() {
           : null,
     };
 
+    const { slug: _payloadSlug, ...existingStorePayload } = payload;
+    const slugChanged = Boolean(storefront && slug !== storefront.slug);
+
     const result = storefront
       ? await supabase
           .from("retailer_storefronts")
-          .update(payload)
+          .update(existingStorePayload)
           .eq("id", storefront.id)
           .select("*")
           .single()
@@ -1262,7 +1311,23 @@ export default function DarikDirectStorefrontSettingsPage() {
       return;
     }
 
-    const profileStorefront = result.data as StorefrontSettings;
+    let profileStorefront = result.data as StorefrontSettings;
+
+    if (storefront && slugChanged) {
+      const slugResult = await supabase.rpc("darik_direct_update_store_slug", {
+        p_retailer_id: selectedStore.retailer_id,
+        p_slug: slug,
+      });
+
+      if (slugResult.error) {
+        showSaveError(
+          `The storefront settings saved, but the store link could not be changed: ${formatSupabaseSaveError(slugResult.error)}`
+        );
+        return;
+      }
+
+      profileStorefront = { ...profileStorefront, slug };
+    }
 
     const paymentResult = await supabase.rpc(
       "darik_direct_save_payment_preferences",
@@ -1495,7 +1560,7 @@ export default function DarikDirectStorefrontSettingsPage() {
 
         <div className={styles.sidebarFooter}>
           <span>{session.user.email}</span>
-          <button onClick={signOut}>Sign out / تسجيل الخروج</button>
+          <DashboardLogoutButton />
         </div>
       </aside>
 
@@ -1603,10 +1668,24 @@ export default function DarikDirectStorefrontSettingsPage() {
                               cleanSlug(event.target.value)
                             )
                           }
-                          disabled={Boolean(storefront)}
+                          inputMode="url"
+                          autoCapitalize="none"
+                          autoCorrect="off"
+                          spellCheck={false}
                           required
                         />
                       </div>
+                      <span style={{ marginTop: 6, display: "block", fontSize: 12, color: slugState === "taken" ? "#b42318" : slugState === "available" ? "#08745f" : "#667085", fontWeight: 800 }}>
+                        {slugState === "checking"
+                          ? "Checking availability… / جاري التحقق من توفر الرابط…"
+                          : slugState === "taken"
+                            ? "Already in use or reserved / الرابط مستخدم أو محجوز"
+                            : slugState === "available"
+                              ? storefront && setupForm.slug === storefront.slug
+                                ? "Current link / الرابط الحالي"
+                                : "Available / متاح"
+                              : "Use English letters, numbers, and hyphens / استخدم أحرفاً إنجليزية وأرقاماً وشرطات"}
+                      </span>
                     </label>
 
                     <label>

@@ -1,5 +1,6 @@
 "use client";
-// DARIK_UTF8_CLEAN_REBUILD_029_V4
+
+// DARIK_MOBILE_DASHBOARD_LOGOUT_035
 
 import {
   CSSProperties,
@@ -13,6 +14,7 @@ import {
 import type { Session } from "@supabase/supabase-js";
 import { supabase } from "@/lib/supabaseBrowser";
 import StorefrontPreviewModal from "./components/StorefrontPreviewModal";
+import DashboardLogoutButton from "./components/DashboardLogoutButton";
 import styles from "./dashboard.module.css";
 
 type StoreContext = {
@@ -449,10 +451,6 @@ export default function DarikDirectOverviewPage() {
     else setMessage("Signed in successfully / تم تسجيل الدخول بنجاح");
   }
 
-  async function signOut() {
-    await supabase.auth.signOut();
-  }
-
   if (!authReady) {
     return (
       <main className={styles.centerPage}>
@@ -537,7 +535,7 @@ export default function DarikDirectOverviewPage() {
         </nav>
         <div className={styles.sidebarFooter}>
           <span>{session.user.email}</span>
-          <button onClick={signOut}>Sign out</button>
+          <DashboardLogoutButton />
         </div>
       </aside>
 

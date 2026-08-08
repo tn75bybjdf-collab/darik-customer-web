@@ -1,10 +1,12 @@
 "use client";
-// DARIK_UTF8_CLEAN_REBUILD_029_V4
+
+// DARIK_MOBILE_DASHBOARD_LOGOUT_035
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import type { Session } from "@supabase/supabase-js";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabaseBrowser";
+import DashboardLogoutButton from "../components/DashboardLogoutButton";
 import styles from "../dashboard.module.css";
 
 type StoreContext = {
@@ -371,10 +373,6 @@ export default function DarikDirectOrdersPage() {
     setConfirmingPaymentOrderId(null);
   }
 
-  async function signOut() {
-    await supabase.auth.signOut();
-  }
-
   if (!authReady || (session && !context)) {
     return (
       <main className={styles.centerPage}>
@@ -411,9 +409,7 @@ export default function DarikDirectOrdersPage() {
         </nav>
         <div className={styles.sidebarFooter}>
           <span>{session.user.email}</span>
-          <button type="button" onClick={signOut}>
-            Sign out
-          </button>
+          <DashboardLogoutButton />
         </div>
       </aside>
 

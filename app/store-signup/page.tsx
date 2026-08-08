@@ -1,5 +1,6 @@
 "use client";
-// DARIK_UTF8_CLEAN_REBUILD_029_V4
+
+// DARIK_CUSTOM_STORE_LINKS_035
 
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -59,12 +60,24 @@ const businessTypes = [
   ["other", "Other — أخرى"],
 ] as const;
 
-function cleanSlug(value: string) {
+function autoSlugFromName(value: string) {
   return value
     .normalize("NFKD")
     .toLowerCase()
     .replace(/[\u0300-\u036f]/g, "")
     .replace(/[^a-z0-9]/g, "");
+}
+
+function cleanSlug(value: string) {
+  return value
+    .normalize("NFKD")
+    .toLowerCase()
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9\s-]/g, "")
+    .replace(/\s+/g, "-")
+    .replace(/-+/g, "-")
+    .replace(/^-|-$/g, "")
+    .slice(0, 80);
 }
 
 function strongPassword(value: string) {
@@ -80,8 +93,10 @@ export default function StoreSignupPage() {
   const [businessTypeOther, setBusinessTypeOther] = useState("");
   const [contactName, setContactName] = useState("");
   const [phone, setPhone] = useState("");
+  const [slug, setSlug] = useState("");
+  const [slugCustomized, setSlugCustomized] = useState(false);
   const [slugState, setSlugState] = useState<"idle" | "checking" | "available" | "taken">("idle");
-  const slug = useMemo(() => cleanSlug(organizationName), [organizationName]);
+  const suggestedSlug = useMemo(() => autoSlugFromName(organizationName), [organizationName]);
   const [location, setLocation] = useState<LockedLocation | null>(null);
   const [locating, setLocating] = useState(false);
   const [placeQuery, setPlaceQuery] = useState("");
@@ -95,6 +110,10 @@ export default function StoreSignupPage() {
   const [error, setError] = useState("");
   const [complete, setComplete] = useState(false);
   const [needsEmailConfirmation, setNeedsEmailConfirmation] = useState(false);
+
+  useEffect(() => {
+    if (!slugCustomized) setSlug(suggestedSlug);
+  }, [suggestedSlug, slugCustomized]);
 
   const passwordChecks = useMemo(() => ({
     length: password.length >= 8,
@@ -141,8 +160,8 @@ export default function StoreSignupPage() {
     if (businessType === "other" && businessTypeOther.trim().length < 2) return "Enter the store type.";
     if (contactName.trim().length < 2) return "Enter the owner or contact name.";
     if (phone.trim().length < 7) return "Enter a valid business phone number.";
-    if (slug.length < 2) return "Enter the store name using English letters or numbers so Darik can create its permanent link.";
-    if (slugState === "taken") return "A store already uses this permanent Darik link. Change the organization or store name.";
+    if (slug.length < 2) return "Choose a store link using English letters, numbers, or hyphens.";
+    if (slugState === "taken") return "That Darik store link is already in use. Choose another link.";
     if (slugState === "checking") return "Wait a moment while Darik checks the permanent store link.";
     return "";
   }
@@ -214,7 +233,7 @@ export default function StoreSignupPage() {
     const issue = validateStepOne();
     if (issue) { setError(issue); return; }
     const available = await checkSlug(slug);
-    if (!available) { setError("A store already uses this permanent Darik link. Change the organization or store name."); return; }
+    if (!available) { setError("That Darik store link is already in use. Choose another link."); return; }
     setStep(2);
   }
 
@@ -298,11 +317,12 @@ export default function StoreSignupPage() {
           {businessType === "other" ? <label className={styles.label}>Describe the business<input value={businessTypeOther} onChange={(e) => setBusinessTypeOther(e.target.value)} /></label> : null}
           <label className={styles.label}>Owner / main contact<input value={contactName} onChange={(e) => setContactName(e.target.value)} /></label>
           <label className={styles.label}>Business phone<input inputMode="tel" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="07XXXXXXXX" /></label>
-          <label className={`${styles.label} ${styles.full}`}>Permanent Darik store link<div className={styles.slugWrap}><span>getdarik.com/</span><input value={slug} readOnly aria-readonly="true" /></div>
-            <span className={styles.helper}>Created automatically from the organization/store name and locked after signup.</span>
-            {slugState === "checking" ? <span className={styles.helper}>Checking availability…</span> : null}
-            {slugState === "available" ? <span className={styles.available}>Available — this address will be reserved.</span> : null}
-            {slugState === "taken" ? <span className={styles.unavailable}>Already in use. Change the organization/store name.</span> : null}
+          <label className={`${styles.label} ${styles.full}`}>Store link / رابط المتجر<div className={styles.slugWrap}><span>getdarik.com/</span><input value={slug} onChange={(e) => { setSlugCustomized(true); setSlug(cleanSlug(e.target.value)); }} inputMode="url" autoCapitalize="none" autoCorrect="off" spellCheck={false} /></div>
+            <span className={styles.helper}>Filled automatically from the store name. You can shorten or customize it before signup / يتم تعبئته تلقائياً ويمكنك تعديله أو اختصاره.</span>
+            {slugCustomized && suggestedSlug && slug !== suggestedSlug ? <button type="button" className={styles.backButton} onClick={() => { setSlugCustomized(false); setSlug(suggestedSlug); }}>Use suggested link / استخدام الرابط المقترح</button> : null}
+            {slugState === "checking" ? <span className={styles.helper}>Checking availability… / جاري التحقق من توفر الرابط…</span> : null}
+            {slugState === "available" ? <span className={styles.available}>Available — this address will be reserved / متاح — سيتم حجز هذا الرابط.</span> : null}
+            {slugState === "taken" ? <span className={styles.unavailable}>Already in use or reserved. Choose another link / الرابط مستخدم أو محجوز. اختر رابطاً آخر.</span> : null}
           </label>
         </div>
         <div className={styles.actions}><div/><div className={styles.actionsRight}><button type="button" className={styles.primaryButton} onClick={nextFromStepOne}>Continue to location</button></div></div>
