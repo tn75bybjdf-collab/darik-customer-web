@@ -36,17 +36,24 @@ function mechanicsSummary(field: string) {
       "Call / WhatsApp quote flow",
     ];
   }
-  if (["supermarket", "bakery"].includes(field)) {
+  if (["supermarket", "bakery", "smoke_shop"].includes(field)) {
     return [
       "Sold per item or by weight",
       "Kilogram pricing",
       "Customer weight/cart rules — next mechanic",
     ];
   }
+  if (field === "shoes") {
+    return [
+      "European shoe sizes",
+      "Optional U.S. size labels",
+      "Per-size stock — next mechanic",
+    ];
+  }
   if (field === "smoke_shop") {
     return [
       "Smoke Shop category system",
-      "Base Darik product and inventory flow",
+      "Sold per item or by weight",
       "Age / ID verification — next mechanic",
     ];
   }

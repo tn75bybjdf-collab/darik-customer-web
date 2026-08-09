@@ -2,6 +2,7 @@
 // DARIK_MECHANICS_LAB_048
 // DARIK_GROCERY_WEIGHT_3_PHOTO_049
 // DARIK_RETAIL_FIELDS_SMOKE_SHOP_050
+// DARIK_SHOE_SIZES_051
 
 // DARIK_AUTOPARTS_FITMENT_FILTERS_033
 // Mobile-safe bilingual product form with automatic retail categories.
@@ -59,6 +60,11 @@ type Category = {
   sort_order: number | string;
 };
 
+type ShoeSizeOption = {
+  eu: string;
+  us: string;
+};
+
 type DirectProduct = {
   id: string;
   retailer_id: string;
@@ -93,6 +99,8 @@ type DirectProduct = {
   direct_sold_by_weight: boolean;
   direct_weight_unit: string | null;
   direct_weight_step: number | string | null;
+  direct_shoe_sizes: Array<{ eu?: string; us?: string | null }> | null;
+  direct_shoe_us_sizes_enabled: boolean;
   direct_product_status: "draft" | "published" | "paused" | "archived";
   direct_updated_at: string | null;
   created_at: string;
@@ -113,6 +121,8 @@ type ProductForm = {
   vehicleMake: string;
   vehicleModel: string;
   soldByWeight: boolean;
+  shoeSizes: ShoeSizeOption[];
+  shoeUsSizesEnabled: boolean;
   trackInventory: boolean;
   quantity: string;
   photoUrl: string;
@@ -138,6 +148,8 @@ const emptyForm: ProductForm = {
   vehicleMake: "",
   vehicleModel: "",
   soldByWeight: false,
+  shoeSizes: [],
+  shoeUsSizesEnabled: false,
   trackInventory: false,
   quantity: "0",
   photoUrl: "",
@@ -237,6 +249,7 @@ const PRODUCT_PHOTO_SLOTS: Array<{
 const WEIGHT_MECHANICS_FIELDS = new Set([
   "supermarket",
   "bakery",
+  "smoke_shop",
 ]);
 
 function normalizedCategoryKey(value: string | null | undefined) {
@@ -413,6 +426,8 @@ export default function DarikDirectProductsPage() {
             "direct_sold_by_weight",
             "direct_weight_unit",
             "direct_weight_step",
+            "direct_shoe_sizes",
+            "direct_shoe_us_sizes_enabled",
             "direct_product_status",
             "direct_updated_at",
             "created_at",
@@ -530,6 +545,7 @@ export default function DarikDirectProductsPage() {
   const effectiveBusinessType = mechanicsTestField || actualBusinessType;
   const isAutoParts = effectiveBusinessType === "auto_parts";
   const supportsWeightSelling = WEIGHT_MECHANICS_FIELDS.has(effectiveBusinessType);
+  const isShoesMechanics = effectiveBusinessType === "shoes";
   const mechanicsPresetCategories = useMemo(() => {
     if (!mechanicsTestField) return [] as MechanicsPresetCategory[];
     const preset = getBusinessCategoryPreset(effectiveBusinessType, null);
@@ -592,6 +608,33 @@ export default function DarikDirectProductsPage() {
     );
   }
 
+  function addShoeSize() {
+    setForm((current) => ({
+      ...current,
+      shoeSizes: [...current.shoeSizes, { eu: "", us: "" }],
+    }));
+  }
+
+  function updateShoeSize(
+    index: number,
+    field: keyof ShoeSizeOption,
+    value: string
+  ) {
+    setForm((current) => ({
+      ...current,
+      shoeSizes: current.shoeSizes.map((size, sizeIndex) =>
+        sizeIndex === index ? { ...size, [field]: value } : size
+      ),
+    }));
+  }
+
+  function removeShoeSize(index: number) {
+    setForm((current) => ({
+      ...current,
+      shoeSizes: current.shoeSizes.filter((_, sizeIndex) => sizeIndex !== index),
+    }));
+  }
+
   function openCreateForm() {
     setEditingProductId(null);
     setForm(emptyForm);
@@ -626,6 +669,15 @@ export default function DarikDirectProductsPage() {
       vehicleMake: product.direct_vehicle_make || "",
       vehicleModel: product.direct_vehicle_model || "",
       soldByWeight: Boolean(product.direct_sold_by_weight),
+      shoeSizes: Array.isArray(product.direct_shoe_sizes)
+        ? product.direct_shoe_sizes
+            .map((size) => ({
+              eu: String(size?.eu ?? "").trim(),
+              us: String(size?.us ?? "").trim(),
+            }))
+            .filter((size) => Boolean(size.eu))
+        : [],
+      shoeUsSizesEnabled: Boolean(product.direct_shoe_us_sizes_enabled),
       trackInventory: Boolean(product.direct_inventory_tracking_enabled),
       quantity: String(product.quantity_in_stock ?? 0),
       photoUrl: product.direct_photo_url || "",
@@ -849,6 +901,48 @@ export default function DarikDirectProductsPage() {
       return;
     }
 
+    const shoeSizesForSave = form.shoeSizes.map((size) => ({
+      eu: size.eu.trim(),
+      us: size.us.trim(),
+    }));
+
+    if (isShoesMechanics) {
+      if (shoeSizesForSave.length === 0) {
+        setError(
+          "Add at least one European shoe size / أضف مقاسًا أوروبيًا واحدًا على الأقل."
+        );
+        return;
+      }
+
+      if (shoeSizesForSave.some((size) => !size.eu)) {
+        setError(
+          "Every shoe-size row needs a European size / كل صف مقاس يحتاج إلى مقاس أوروبي."
+        );
+        return;
+      }
+
+      const normalizedEuSizes = shoeSizesForSave.map((size) =>
+        size.eu.toLowerCase()
+      );
+
+      if (new Set(normalizedEuSizes).size !== normalizedEuSizes.length) {
+        setError(
+          "European shoe sizes cannot be duplicated / لا يمكن تكرار المقاسات الأوروبية."
+        );
+        return;
+      }
+
+      if (
+        form.shoeUsSizesEnabled &&
+        shoeSizesForSave.some((size) => size.us.length > 24)
+      ) {
+        setError(
+          "A U.S. size label is too long / قيمة المقاس الأمريكي طويلة جدًا."
+        );
+        return;
+      }
+    }
+
     setSaving(true);
     setError("");
     setMessage("");
@@ -1015,6 +1109,26 @@ export default function DarikDirectProductsPage() {
       );
       await loadCatalog();
       return;
+    }
+
+    if (isShoesMechanics) {
+      const shoeSizesResult = await supabase.rpc(
+        "darik_direct_set_product_shoe_sizes_v1",
+        {
+          p_product_id: savedProductId,
+          p_sizes: shoeSizesForSave,
+          p_include_us: form.shoeUsSizesEnabled,
+        }
+      );
+
+      if (shoeSizesResult.error) {
+        setSaving(false);
+        setError(
+          `The product was saved, but the shoe sizes failed. / تم حفظ المنتج، لكن تعذر حفظ المقاسات. ${shoeSizesResult.error.message}`
+        );
+        await loadCatalog();
+        return;
+      }
     }
 
     if (isAutoParts) {
@@ -1752,6 +1866,105 @@ export default function DarikDirectProductsPage() {
                   </label>
                 ) : null}
 
+                {isShoesMechanics ? (
+                  <section className={styles.shoeMechanicPanel}>
+                    <div className={styles.shoeMechanicHeading}>
+                      <div>
+                        <strong>Shoe sizes / مقاسات الأحذية</strong>
+                        <span>
+                          European size is the main size. Add U.S. labels only if you want them shown too. /
+                          المقاس الأوروبي هو الأساسي، ويمكن إضافة المقاس الأمريكي اختياريًا.
+                        </span>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={addShoeSize}
+                        disabled={saving}
+                      >
+                        + Add EU size / إضافة مقاس أوروبي
+                      </button>
+                    </div>
+
+                    <label className={styles.shoeUsToggle}>
+                      <input
+                        type="checkbox"
+                        checked={form.shoeUsSizesEnabled}
+                        onChange={(event) =>
+                          updateForm("shoeUsSizesEnabled", event.target.checked)
+                        }
+                      />
+                      <span>
+                        <strong>
+                          Also add U.S. sizes / إضافة المقاسات الأمريكية أيضًا
+                        </strong>
+                        <small>
+                          Optional. European sizes remain the primary sizes. /
+                          اختياري، وتبقى المقاسات الأوروبية هي الأساسية.
+                        </small>
+                      </span>
+                    </label>
+
+                    {form.shoeSizes.length > 0 ? (
+                      <div className={styles.shoeSizeRows}>
+                        {form.shoeSizes.map((size, index) => (
+                          <div
+                            className={styles.shoeSizeRow}
+                            key={`shoe-size-${index}`}
+                          >
+                            <label>
+                              <BilingualLabel
+                                en="European size"
+                                ar="المقاس الأوروبي"
+                              />
+                              <input
+                                type="text"
+                                value={size.eu}
+                                onChange={(event) =>
+                                  updateShoeSize(index, "eu", event.target.value)
+                                }
+                                placeholder="42 / 42.5 / 42 2/3"
+                                maxLength={16}
+                                required
+                              />
+                            </label>
+
+                            {form.shoeUsSizesEnabled ? (
+                              <label>
+                                <BilingualLabel
+                                  en="U.S. size (optional)"
+                                  ar="المقاس الأمريكي (اختياري)"
+                                />
+                                <input
+                                  type="text"
+                                  value={size.us}
+                                  onChange={(event) =>
+                                    updateShoeSize(index, "us", event.target.value)
+                                  }
+                                  placeholder="9 / 9.5"
+                                  maxLength={24}
+                                />
+                              </label>
+                            ) : null}
+
+                            <button
+                              type="button"
+                              className={styles.removeShoeSizeButton}
+                              onClick={() => removeShoeSize(index)}
+                              disabled={saving}
+                            >
+                              Remove / حذف
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className={styles.shoeSizeEmpty}>
+                        Add the European sizes available for this shoe. /
+                        أضف المقاسات الأوروبية المتوفرة لهذا الحذاء.
+                      </div>
+                    )}
+                  </section>
+                ) : null}
                 {supportsWeightSelling ? (
                   <section className={styles.weightMechanicPanel}>
                     <label className={styles.weightMechanicToggle}>
@@ -1771,8 +1984,8 @@ export default function DarikDirectProductsPage() {
                       <span>
                         <strong>This item is sold by weight / هذا المنتج يباع بالوزن</strong>
                         <small>
-                          Turn this on for products priced per kilogram, including bakery items sold by weight. /
-                          فعّل هذا الخيار للمنتجات التي يكون سعرها لكل كيلو، بما فيها منتجات المخبز المباعة بالوزن.
+                          Turn this on for products priced per kilogram, including bakery and tobacco products sold by weight. /
+                          فعّل هذا الخيار للمنتجات التي يكون سعرها لكل كيلو، بما فيها منتجات المخبز والتبغ المباعة بالوزن.
                         </small>
                       </span>
                     </label>
