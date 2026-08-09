@@ -1,5 +1,7 @@
 "use client";
 
+// DARIK_SHOE_CATEGORY_SIZE_GROUPS_053
+
 // DARIK_RETAIL_FIELDS_SMOKE_SHOP_050
 
 import { useEffect, useMemo, useState } from "react";
@@ -45,9 +47,9 @@ function mechanicsSummary(field: string) {
   }
   if (field === "shoes") {
     return [
-      "Footwear category requires European sizes",
-      "Dropdown sizes with automatic next row",
-      "Optional U.S. size dropdowns",
+      "Men / Women / Kids / Baby-Toddler / Unisex categories",
+      "European size range changes with category",
+      "Optional U.S. range changes with category",
     ];
   }
   if (field === "smoke_shop") {

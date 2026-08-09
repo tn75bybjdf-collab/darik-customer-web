@@ -4,6 +4,7 @@
 // DARIK_RETAIL_FIELDS_SMOKE_SHOP_050
 // DARIK_SHOE_SIZES_051
 // DARIK_FOOTWEAR_SIZE_DROPDOWNS_052
+// DARIK_SHOE_CATEGORY_SIZE_GROUPS_053
 
 // DARIK_AUTOPARTS_FITMENT_FILTERS_033
 // Mobile-safe bilingual product form with automatic retail categories.
@@ -87,6 +88,185 @@ const US_ADULT_SHOE_SIZE_OPTIONS = Array.from({ length: 35 }, (_, index) => {
   const size = 1 + index * 0.5;
   return Number.isInteger(size) ? String(size) : size.toFixed(1);
 });
+
+type FootwearSizeGroup =
+  | "men"
+  | "women"
+  | "kids"
+  | "baby_toddler"
+  | "unisex";
+
+const EU_THIRD_SHOE_SIZE_OPTIONS = [
+  "35 1/3",
+  "35 2/3",
+  "36 1/3",
+  "36 2/3",
+  "37 1/3",
+  "37 2/3",
+  "38 1/3",
+  "38 2/3",
+  "39 1/3",
+  "39 2/3",
+  "40 1/3",
+  "40 2/3",
+  "41 1/3",
+  "41 2/3",
+  "42 1/3",
+  "42 2/3",
+  "43 1/3",
+  "43 2/3",
+  "44 1/3",
+  "44 2/3",
+  "45 1/3",
+  "45 2/3",
+  "46 1/3",
+  "46 2/3",
+  "47 1/3",
+  "47 2/3",
+  "48 1/3",
+  "48 2/3",
+  "49 1/3",
+  "49 2/3",
+  "50 1/3",
+  "50 2/3",
+  "51 1/3",
+  "51 2/3",
+  "52 1/3",
+  "52 2/3",
+  "53 1/3",
+  "53 2/3",
+  "54 1/3",
+  "54 2/3",
+  "55 1/3",
+  "55 2/3",
+] as const;
+
+const FOOTWEAR_GROUP_LABELS: Record<
+  FootwearSizeGroup,
+  { en: string; ar: string }
+> = {
+  men: { en: "Men's Footwear", ar: "أحذية رجالية" },
+  women: { en: "Women's Footwear", ar: "أحذية نسائية" },
+  kids: { en: "Kids' Footwear", ar: "أحذية أطفال" },
+  baby_toddler: {
+    en: "Baby & Toddler Footwear",
+    ar: "أحذية رضع وصغار",
+  },
+  unisex: { en: "Unisex Footwear", ar: "أحذية للجنسين" },
+};
+
+function footwearSizeGroupFromCategoryName(
+  categoryName: string | null | undefined
+): FootwearSizeGroup | null {
+  const key = normalizedCategoryKey(categoryName);
+
+  if (
+    key === "baby & toddler footwear" ||
+    key === "baby and toddler footwear" ||
+    key.startsWith("baby ") ||
+    key.startsWith("toddler ")
+  ) {
+    return "baby_toddler";
+  }
+
+  if (
+    key === "kids' footwear" ||
+    key === "kids footwear" ||
+    key === "children's footwear" ||
+    key === "children footwear" ||
+    key.startsWith("kids ") ||
+    key.startsWith("children ") ||
+    key.startsWith("boys ") ||
+    key.startsWith("girls ")
+  ) {
+    return "kids";
+  }
+
+  if (
+    key === "women's footwear" ||
+    key === "womens footwear" ||
+    key === "women footwear" ||
+    key.startsWith("women's ") ||
+    key.startsWith("womens ") ||
+    key.startsWith("women ")
+  ) {
+    return "women";
+  }
+
+  if (
+    key === "men's footwear" ||
+    key === "mens footwear" ||
+    key === "men footwear" ||
+    key.startsWith("men's ") ||
+    key.startsWith("mens ") ||
+    key.startsWith("men ")
+  ) {
+    return "men";
+  }
+
+  if (key === "unisex footwear" || key.startsWith("unisex ")) {
+    return "unisex";
+  }
+
+  return null;
+}
+
+function numericShoeSize(value: string) {
+  const [wholeText, fractionText] = String(value).trim().split(/s+/, 2);
+  const whole = Number.parseFloat(wholeText);
+  if (!Number.isFinite(whole)) return 0;
+
+  if (fractionText === "1/3") return whole + 1 / 3;
+  if (fractionText === "2/3") return whole + 2 / 3;
+
+  return whole;
+}
+
+function euSizesForGroup(group: FootwearSizeGroup) {
+  const ranges: Record<FootwearSizeGroup, [number, number]> = {
+    baby_toddler: [16, 27],
+    kids: [25, 40],
+    women: [33.5, 50],
+    men: [35.5, 55],
+    unisex: [33.5, 55],
+  };
+  const [min, max] = ranges[group];
+
+  const candidates =
+    group === "baby_toddler" || group === "kids"
+      ? [...EU_SHOE_SIZE_OPTIONS]
+      : [...EU_SHOE_SIZE_OPTIONS, ...EU_THIRD_SHOE_SIZE_OPTIONS];
+
+  return Array.from(new Set(candidates))
+    .filter((value) => {
+      const size = numericShoeSize(value);
+      return size >= min && size <= max;
+    })
+    .sort((left, right) => numericShoeSize(left) - numericShoeSize(right));
+}
+
+function usSizesForGroup(group: FootwearSizeGroup) {
+  if (group === "baby_toddler") {
+    return US_CHILD_SHOE_SIZE_OPTIONS.filter(
+      (value) => numericShoeSize(value) <= 10
+    );
+  }
+
+  if (group === "kids") {
+    return [
+      ...US_CHILD_SHOE_SIZE_OPTIONS.filter(
+        (value) => numericShoeSize(value) >= 8
+      ),
+      ...US_YOUTH_SHOE_SIZE_OPTIONS,
+    ];
+  }
+
+  const max = group === "women" ? 15.5 : 18;
+  return US_ADULT_SHOE_SIZE_OPTIONS.filter((value) => {
+    const size = numericShoeSize(value);
+    return size >= 3.5 && size <= max;
+  });
+}
 
 type DirectProduct = {
   id: string;
@@ -648,31 +828,52 @@ export default function DarikDirectProductsPage() {
     );
   })();
 
-  const selectedProductCategoryKey = normalizedCategoryKey(
+  const footwearSizeGroup = footwearSizeGroupFromCategoryName(
     selectedProductCategoryName
   );
 
-  const isFootwearCategory =
-    selectedProductCategoryKey === "footwear" ||
-    selectedProductCategoryKey === "shoe" ||
-    selectedProductCategoryKey === "shoes" ||
-    selectedProductCategoryKey.endsWith(" footwear") ||
-    selectedProductCategoryKey.endsWith(" shoes") ||
-    selectedProductCategoryKey.startsWith("footwear ") ||
-    selectedProductCategoryKey.startsWith("shoes ");
+  const isFootwearCategory = Boolean(footwearSizeGroup);
+
+  const footwearEuSizeOptions = footwearSizeGroup
+    ? euSizesForGroup(footwearSizeGroup)
+    : [];
+
+  const footwearUsSizeOptions = footwearSizeGroup
+    ? usSizesForGroup(footwearSizeGroup)
+    : [];
+
+  const footwearGroupLabel = footwearSizeGroup
+    ? FOOTWEAR_GROUP_LABELS[footwearSizeGroup]
+    : null;
 
   useEffect(() => {
-    if (!isFootwearCategory) return;
+    if (!footwearSizeGroup) return;
 
-    setForm((current) =>
-      current.shoeSizes.length > 0
-        ? current
-        : {
-            ...current,
-            shoeSizes: [{ eu: "", us: "" }],
-          }
-    );
-  }, [isFootwearCategory]);
+    const allowedEu = new Set(euSizesForGroup(footwearSizeGroup));
+    const allowedUs = new Set(usSizesForGroup(footwearSizeGroup));
+
+    setForm((current) => {
+      const kept = current.shoeSizes
+        .filter((size) => !size.eu || allowedEu.has(size.eu))
+        .map((size) => ({
+          eu: size.eu,
+          us: !size.us || allowedUs.has(size.us) ? size.us : "",
+        }))
+        .filter((size) => Boolean(size.eu) || Boolean(size.us));
+
+      const nextRows = [...kept, { eu: "", us: "" }];
+
+      const unchanged =
+        nextRows.length === current.shoeSizes.length &&
+        nextRows.every(
+          (size, index) =>
+            size.eu === current.shoeSizes[index]?.eu &&
+            size.us === current.shoeSizes[index]?.us
+        );
+
+      return unchanged ? current : { ...current, shoeSizes: nextRows };
+    });
+  }, [footwearSizeGroup]);
 
   function updateShoeSize(
     index: number,
@@ -1013,6 +1214,28 @@ export default function DarikDirectProductsPage() {
           "European shoe sizes cannot be duplicated / لا يمكن تكرار المقاسات الأوروبية."
         );
         return;
+      }
+
+      const allowedEuSizes = new Set(footwearEuSizeOptions);
+      if (shoeSizesForSave.some((size) => !allowedEuSizes.has(size.eu))) {
+        setError(
+          "One or more European sizes do not match the selected footwear category / بعض المقاسات الأوروبية لا تتوافق مع فئة الأحذية المختارة."
+        );
+        return;
+      }
+
+      if (form.shoeUsSizesEnabled) {
+        const allowedUsSizes = new Set(footwearUsSizeOptions);
+        if (
+          shoeSizesForSave.some(
+            (size) => Boolean(size.us) && !allowedUsSizes.has(size.us)
+          )
+        ) {
+          setError(
+            "One or more U.S. sizes do not match the selected footwear category / بعض المقاسات الأمريكية لا تتوافق مع فئة الأحذية المختارة."
+          );
+          return;
+        }
       }
     }
 
@@ -1943,11 +2166,12 @@ export default function DarikDirectProductsPage() {
                     <div className={styles.shoeMechanicHeading}>
                       <div>
                         <strong>
-                          Shoe sizes required / مقاسات الأحذية مطلوبة
+                          {footwearGroupLabel?.en || "Footwear"} sizes /{" "}
+                          {footwearGroupLabel?.ar || "مقاسات الأحذية"}
                         </strong>
                         <span>
-                          Choose one European size from each dropdown. After you choose a size, the next size dropdown appears automatically. /
-                          اختر مقاسًا أوروبيًا واحدًا من كل قائمة، وستظهر قائمة المقاس التالية تلقائيًا بعد الاختيار.
+                          Sizes are filtered for the selected footwear category. Choose one European size per row and the next row appears automatically. /
+                          يتم تصفية المقاسات حسب فئة الأحذية المختارة. اختر مقاسًا أوروبيًا واحدًا في كل صف وستظهر الخانة التالية تلقائيًا.
                         </span>
                       </div>
                     </div>
@@ -1998,7 +2222,7 @@ export default function DarikDirectProductsPage() {
                                 <option value="">
                                   Select EU size / اختر المقاس الأوروبي
                                 </option>
-                                {EU_SHOE_SIZE_OPTIONS.map((option) => (
+                                {footwearEuSizeOptions.map((option) => (
                                   <option
                                     key={option}
                                     value={option}
@@ -2030,36 +2254,11 @@ export default function DarikDirectProductsPage() {
                                   <option value="">
                                     Select U.S. size / اختر المقاس الأمريكي
                                   </option>
-                                  <optgroup label="Child / أطفال">
-                                    {US_CHILD_SHOE_SIZE_OPTIONS.map((option) => (
-                                      <option
-                                        key={`child-${option}`}
-                                        value={option}
-                                      >
-                                        US {option}
-                                      </option>
-                                    ))}
-                                  </optgroup>
-                                  <optgroup label="Youth / ناشئين">
-                                    {US_YOUTH_SHOE_SIZE_OPTIONS.map((option) => (
-                                      <option
-                                        key={`youth-${option}`}
-                                        value={option}
-                                      >
-                                        US {option}
-                                      </option>
-                                    ))}
-                                  </optgroup>
-                                  <optgroup label="Adult / بالغين">
-                                    {US_ADULT_SHOE_SIZE_OPTIONS.map((option) => (
-                                      <option
-                                        key={`adult-${option}`}
-                                        value={option}
-                                      >
-                                        US {option}
-                                      </option>
-                                    ))}
-                                  </optgroup>
+                                  {footwearUsSizeOptions.map((option) => (
+                                    <option key={option} value={option}>
+                                      US {option}
+                                    </option>
+                                  ))}
                                 </select>
                               </label>
                             ) : null}

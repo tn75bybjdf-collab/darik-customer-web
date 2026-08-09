@@ -1,4 +1,5 @@
 // DARIK_RETAIL_FIELDS_SMOKE_SHOP_050
+// DARIK_SHOE_CATEGORY_SIZE_GROUPS_053
 // Runtime category-preset overlay for the retail-field system.
 // The database preset table remains authoritative for real category provisioning.
 
@@ -26,6 +27,15 @@ const SMOKE_SHOP_CATEGORIES = [
   ["Charcoal", "فحم"],
   ["Ashtrays", "طفايات"],
   ["Smoking Accessories", "إكسسوارات التدخين"]
+] as const;
+
+const SHOES_CATEGORIES = [
+  ["Men's Footwear", "أحذية رجالية"],
+  ["Women's Footwear", "أحذية نسائية"],
+  ["Kids' Footwear", "أحذية أطفال"],
+  ["Baby & Toddler Footwear", "أحذية رضع وصغار"],
+  ["Unisex Footwear", "أحذية للجنسين"],
+  ["Shoe Care & Accessories", "العناية بالأحذية والإكسسوارات"],
 ] as const;
 
 function categoryEnglishName(value: unknown) {
@@ -56,6 +66,14 @@ export function getBusinessCategoryPreset(
   const normalized = String(businessType || "")
     .trim()
     .toLowerCase();
+
+  if (normalized === "shoes") {
+    return {
+      label: "Shoes",
+      labelAr: "أحذية",
+      categories: SHOES_CATEGORIES.map(([name, nameAr]) => [name, nameAr]),
+    } as unknown as BusinessPreset;
+  }
 
   if (normalized === "smoke_shop") {
     return {
