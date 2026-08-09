@@ -5,6 +5,7 @@
 // DARIK_SHOE_SIZES_051
 // DARIK_FOOTWEAR_SIZE_DROPDOWNS_052
 // DARIK_SHOE_CATEGORY_SIZE_GROUPS_053
+// DARIK_AUTO_MATCH_US_SHOE_SIZES_054
 
 // DARIK_AUTOPARTS_FITMENT_FILTERS_033
 // Mobile-safe bilingual product form with automatic retail categories.
@@ -84,7 +85,7 @@ const US_YOUTH_SHOE_SIZE_OPTIONS = Array.from({ length: 13 }, (_, index) => {
   return `${label}Y`;
 });
 
-const US_ADULT_SHOE_SIZE_OPTIONS = Array.from({ length: 35 }, (_, index) => {
+const US_ADULT_SHOE_SIZE_OPTIONS = Array.from({ length: 43 }, (_, index) => {
   const size = 1 + index * 0.5;
   return Number.isInteger(size) ? String(size) : size.toFixed(1);
 });
@@ -261,11 +262,87 @@ function usSizesForGroup(group: FootwearSizeGroup) {
     ];
   }
 
-  const max = group === "women" ? 15.5 : 18;
+  const max = group === "women" ? 16.5 : 20.5;
   return US_ADULT_SHOE_SIZE_OPTIONS.filter((value) => {
     const size = numericShoeSize(value);
     return size >= 3.5 && size <= max;
   });
+}
+
+type ShoeSizeConversionPoint = {
+  eu: string;
+  us: string;
+};
+
+const MEN_US_SIZE_REFERENCE: ShoeSizeConversionPoint[] = [
+  ["35.5", "3.5"], ["36", "4"], ["36.5", "4.5"], ["37.5", "5"],
+  ["38", "5.5"], ["38.5", "6"], ["39", "6.5"], ["40", "7"],
+  ["40.5", "7.5"], ["41", "8"], ["42", "8.5"], ["42.5", "9"],
+  ["43", "9.5"], ["44", "10"], ["44.5", "10.5"], ["45", "11"],
+  ["45.5", "11.5"], ["46", "12"], ["47", "12.5"], ["47.5", "13"],
+  ["48", "13.5"], ["48.5", "14"], ["49", "14.5"], ["49.5", "15"],
+  ["50", "15.5"], ["50.5", "16"], ["51", "16.5"], ["51.5", "17"],
+  ["52", "17.5"], ["52.5", "18"], ["53", "18.5"], ["53.5", "19"],
+  ["54", "19.5"], ["54.5", "20"], ["55", "20.5"],
+].map(([eu, us]) => ({ eu, us }));
+
+const WOMEN_US_SIZE_REFERENCE: ShoeSizeConversionPoint[] = [
+  ["33.5", "3.5"], ["34.5", "4"], ["35", "4.5"], ["35.5", "5"],
+  ["36", "5.5"], ["36.5", "6"], ["37.5", "6.5"], ["38", "7"],
+  ["38.5", "7.5"], ["39", "8"], ["40", "8.5"], ["40.5", "9"],
+  ["41", "9.5"], ["42", "10"], ["42.5", "10.5"], ["43", "11"],
+  ["44", "11.5"], ["44.5", "12"], ["45", "12.5"], ["45.5", "13"],
+  ["46", "13.5"], ["47", "14"], ["47.5", "14.5"], ["48", "15"],
+  ["48.5", "15.5"], ["49", "16"], ["50", "16.5"],
+].map(([eu, us]) => ({ eu, us }));
+
+const BABY_TODDLER_US_SIZE_REFERENCE: ShoeSizeConversionPoint[] = [
+  ["16", "1C"], ["17", "2C"], ["18", "3C"], ["19", "4C"],
+  ["20", "5C"], ["21", "5.5C"], ["22", "6C"], ["23", "6.5C"],
+  ["23.5", "7C"], ["24", "7.5C"], ["25", "8C"], ["25.5", "8.5C"],
+  ["26", "9C"], ["26.5", "9.5C"], ["27", "10C"],
+].map(([eu, us]) => ({ eu, us }));
+
+const KIDS_US_SIZE_REFERENCE: ShoeSizeConversionPoint[] = [
+  ["25", "8C"], ["25.5", "8.5C"], ["26", "9C"], ["26.5", "9.5C"],
+  ["27", "10C"], ["28", "10.5C"], ["28.5", "11C"], ["29", "11.5C"],
+  ["30", "12C"], ["30.5", "12.5C"], ["31", "13C"], ["31.5", "13.5C"],
+  ["32", "1Y"], ["33", "1.5Y"], ["33.5", "2Y"], ["34", "2.5Y"],
+  ["35", "3Y"], ["35.5", "3.5Y"], ["36", "4Y"], ["36.5", "4.5Y"],
+  ["37", "5Y"], ["37.5", "5.5Y"], ["38", "5.5Y"], ["38.5", "6Y"],
+  ["39", "6.5Y"], ["39.5", "7Y"], ["40", "7Y"],
+].map(([eu, us]) => ({ eu, us }));
+
+function defaultUsSizeForEu(group: FootwearSizeGroup, euValue: string) {
+  if (!euValue.trim()) return "";
+
+  const reference =
+    group === "baby_toddler"
+      ? BABY_TODDLER_US_SIZE_REFERENCE
+      : group === "kids"
+        ? KIDS_US_SIZE_REFERENCE
+        : group === "women"
+          ? WOMEN_US_SIZE_REFERENCE
+          : MEN_US_SIZE_REFERENCE;
+
+  const target = numericShoeSize(euValue);
+  let closest = reference[0];
+  let closestDistance = Math.abs(numericShoeSize(closest.eu) - target);
+
+  for (const point of reference.slice(1)) {
+    const distance = Math.abs(numericShoeSize(point.eu) - target);
+    if (
+      distance < closestDistance ||
+      (distance === closestDistance &&
+        numericShoeSize(point.eu) > numericShoeSize(closest.eu))
+    ) {
+      closest = point;
+      closestDistance = distance;
+    }
+  }
+
+  const allowed = new Set(usSizesForGroup(group));
+  return allowed.has(closest.us) ? closest.us : "";
 }
 
 type DirectProduct = {
@@ -881,9 +958,33 @@ export default function DarikDirectProductsPage() {
     value: string
   ) {
     setForm((current) => {
-      const shoeSizes = current.shoeSizes.map((size, sizeIndex) =>
-        sizeIndex === index ? { ...size, [field]: value } : size
+      const currentGroup = footwearSizeGroupFromCategoryName(
+        selectedProductCategoryName
       );
+
+      const firstEuropeanSize =
+        field === "eu" &&
+        Boolean(value.trim()) &&
+        current.shoeSizes.every(
+          (size) => !size.eu.trim() && !size.us.trim()
+        );
+
+      const shoeSizes = current.shoeSizes.map((size, sizeIndex) => {
+        if (sizeIndex !== index) return size;
+
+        if (field === "eu") {
+          return {
+            ...size,
+            eu: value,
+            us:
+              currentGroup && value.trim()
+                ? defaultUsSizeForEu(currentGroup, value)
+                : "",
+          };
+        }
+
+        return { ...size, us: value };
+      });
 
       const isLastRow = index === shoeSizes.length - 1;
       const selectedEuropeanSize = field === "eu" && Boolean(value.trim());
@@ -895,6 +996,9 @@ export default function DarikDirectProductsPage() {
       return {
         ...current,
         shoeSizes,
+        shoeUsSizesEnabled: firstEuropeanSize
+          ? true
+          : current.shoeUsSizesEnabled,
       };
     });
   }
@@ -2186,11 +2290,11 @@ export default function DarikDirectProductsPage() {
                       />
                       <span>
                         <strong>
-                          Also add U.S. sizes / إضافة المقاسات الأمريكية أيضًا
+                          Auto-match U.S. sizes / مطابقة المقاسات الأمريكية تلقائيًا
                         </strong>
                         <small>
-                          Optional. European sizes remain required. /
-                          اختياري، وتبقى المقاسات الأوروبية مطلوبة.
+                          Darik matches each EU size automatically. You can change the U.S. size for a brand-specific fit. /
+                          يقوم داريك بمطابقة كل مقاس أوروبي تلقائيًا، ويمكنك تعديل المقاس الأمريكي إذا اختلفت مقاسات العلامة التجارية.
                         </small>
                       </span>
                     </label>
@@ -2241,8 +2345,8 @@ export default function DarikDirectProductsPage() {
                             {form.shoeUsSizesEnabled ? (
                               <label>
                                 <BilingualLabel
-                                  en="U.S. size"
-                                  ar="المقاس الأمريكي"
+                                  en="U.S. size · auto-matched"
+                                  ar="المقاس الأمريكي · مطابق تلقائيًا"
                                 />
                                 <select
                                   value={size.us}
