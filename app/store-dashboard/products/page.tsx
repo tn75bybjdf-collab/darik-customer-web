@@ -7,6 +7,7 @@
 // DARIK_SHOE_CATEGORY_SIZE_GROUPS_053
 // DARIK_AUTO_MATCH_US_SHOE_SIZES_054
 // DARIK_SHOES_RETAIL_FINAL_056
+// DARIK_SHOES_CATEGORY_SIZE_EXCLUSIVITY_057
 
 // DARIK_AUTOPARTS_FITMENT_FILTERS_033
 // Mobile-safe bilingual product form with automatic retail categories.
@@ -162,6 +163,56 @@ function footwearSizeGroupFromCategoryName(
 ): FootwearSizeGroup | null {
   const key = normalizedCategoryKey(categoryName);
 
+  // FRONTEND 057: demographic words alone do NOT make a category footwear.
+  // This prevents Men's/Women's/Kids'/Baby/Unisex Clothing from also showing
+  // the EU/U.S. footwear-size panel. We first require an actual footwear word.
+  const footwearWords = new Set([
+    "footwear",
+    "shoe",
+    "shoes",
+    "sneaker",
+    "sneakers",
+    "boot",
+    "boots",
+    "sandal",
+    "sandals",
+    "slipper",
+    "slippers",
+    "cleat",
+    "cleats",
+    "loafer",
+    "loafers",
+    "heel",
+    "heels",
+  ]);
+  const categoryWords = key.split(/[^a-z0-9]+/).filter(Boolean);
+  const nonFootwearMerchandiseWords = new Set([
+    "care",
+    "accessory",
+    "accessories",
+    "lace",
+    "laces",
+    "shoelace",
+    "shoelaces",
+    "insole",
+    "insoles",
+    "insert",
+    "inserts",
+    "polish",
+    "cleaner",
+    "cleaning",
+    "brush",
+    "brushes",
+  ]);
+  const isNamedFootwearCategory = categoryWords.some((word) =>
+    footwearWords.has(word)
+  );
+  const isFootwearAccessoryCategory = categoryWords.some((word) =>
+    nonFootwearMerchandiseWords.has(word)
+  );
+
+  if (!isNamedFootwearCategory || isFootwearAccessoryCategory) return null;
+
   if (
     key === "baby & toddler footwear" ||
     key === "baby and toddler footwear" ||
@@ -210,7 +261,8 @@ function footwearSizeGroupFromCategoryName(
     return "unisex";
   }
 
-  return null;
+  // A generic footwear category such as Running Shoes still receives sizing.
+  return "unisex";
 }
 
 function numericShoeSize(value: string) {
