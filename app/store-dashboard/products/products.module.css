@@ -1562,3 +1562,87 @@
     grid-template-columns: 1fr;
   }
 }
+
+
+/* DARIK_SHOES_ADD_PRODUCT_WIZARD_064 */
+.shoeWizardForm { display:block; width:100%; }
+.shoeWizardShell { width:min(780px,100%); margin:0 auto; }
+.shoeWizardProgress,
+.shoeWizardCard {
+  border:1px solid #e4e7ec;
+  border-radius:20px;
+  background:#fff;
+  box-shadow:0 14px 34px rgba(16,24,40,.06);
+}
+.shoeWizardProgress { display:grid; gap:14px; padding:16px; margin-bottom:15px; }
+.shoeWizardProgress > div:first-child { display:grid; gap:4px; }
+.shoeWizardProgress span { color:#667085; font-size:11px; font-weight:800; }
+.shoeWizardProgress strong { color:#101828; font-size:18px; }
+.shoeWizardRail { display:grid; grid-template-columns:repeat(7,1fr); gap:6px; }
+.shoeWizardDot {
+  display:grid; place-items:center; min-height:30px;
+  border:1px solid #e4e7ec; border-radius:9px;
+  background:#f8fafc; color:#98a2b3 !important;
+  user-select:none;
+}
+.shoeWizardDotDone { border-color:#bbf7d0; background:#ecfdf3; color:#15803d !important; }
+.shoeWizardDotActive { border-color:#111827; background:#111827; color:#fff !important; }
+.shoeWizardCard { display:grid; gap:17px; padding:20px; }
+.shoeWizardTitle { display:flex; gap:12px; align-items:flex-start; }
+.shoeWizardTitle > b {
+  display:grid; place-items:center; width:34px; min-width:34px; height:34px;
+  border-radius:11px; background:#111827; color:#fff; font-size:13px;
+}
+.shoeWizardTitle > div { display:grid; gap:4px; }
+.shoeWizardTitle h3 { margin:0; color:#101828; font-size:20px; }
+.shoeWizardTitle p { margin:0; color:#667085; font-size:12px; line-height:1.6; }
+.shoeWizardField { display:grid; gap:7px; }
+.shoeWizardField input,
+.shoeWizardField select,
+.shoeWizardField textarea { width:100%; }
+.shoeWizardError { color:#b42318; font-size:11px; line-height:1.45; font-weight:850; }
+.shoeWizardActions {
+  display:flex; justify-content:flex-end; align-items:center; flex-wrap:wrap;
+  gap:9px; border-top:1px solid #f2f4f7; padding-top:15px;
+}
+.shoeWizardDone,
+.shoeWizardBack,
+.shoeWizardOptional,
+.shoeWizardSave {
+  border-radius:12px; padding:11px 16px; font-size:12px; font-weight:900; cursor:pointer;
+}
+.shoeWizardDone { border:1px solid #111827; background:#111827; color:#fff; }
+.shoeWizardBack { border:1px solid #d0d5dd; background:#fff; color:#344054; }
+.shoeWizardOptional { border:1px solid #bfdbfe; background:#eff6ff; color:#1d4ed8; }
+.shoeWizardSave { border:1px solid #15803d; background:#15803d; color:#fff; }
+.shoeWizardSave:disabled { opacity:.55; cursor:not-allowed; }
+.shoeWizardSizeBox { display:grid; gap:13px; padding:14px; border:1px solid #dbeafe; border-radius:15px; background:#f8fbff; }
+.shoeWizardNoSize { display:grid; gap:4px; padding:15px; border:1px solid #bbf7d0; border-radius:15px; background:#f0fdf4; color:#166534; }
+.shoeWizardNoSize strong { font-size:13px; }
+.shoeWizardNoSize span { font-size:11px; }
+.shoeWizardGrid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:12px; }
+.shoeWizardInventory { display:grid; gap:13px; padding:14px; border:1px solid #e4e7ec; border-radius:15px; background:#f9fafb; }
+.shoeWizardInventory > label:first-child { display:flex; align-items:flex-start; gap:10px; cursor:pointer; }
+.shoeWizardInventory > label:first-child input { width:18px; height:18px; min-width:18px; margin-top:2px; }
+.shoeWizardInventory > label:first-child span { display:grid; gap:3px; }
+.shoeWizardInventory small { color:#667085; font-size:11px; }
+.shoeWizardPhotos { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:12px; }
+.shoeWizardPhotos .imagePreview { min-height:145px; }
+.shoeWizardSummary { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; }
+.shoeWizardSummary > div,
+.shoeWizardReviewText { display:grid; gap:4px; padding:12px; border:1px solid #eaecf0; border-radius:13px; background:#f9fafb; }
+.shoeWizardSummary span,
+.shoeWizardReviewText > span { color:#667085; font-size:10px; font-weight:850; }
+.shoeWizardSummary strong { color:#101828; font-size:12px; line-height:1.5; overflow-wrap:anywhere; }
+.shoeWizardReviewText p { margin:0; color:#344054; font-size:12px; line-height:1.6; white-space:pre-wrap; }
+@media (max-width:800px) {
+  .shoeWizardGrid,.shoeWizardPhotos,.shoeWizardSummary { grid-template-columns:1fr; }
+}
+@media (max-width:560px) {
+  .shoeWizardProgress,.shoeWizardCard { border-radius:16px; padding:14px; }
+  .shoeWizardRail { gap:4px; }
+  .shoeWizardDot { min-height:27px; font-size:10px; }
+  .shoeWizardTitle h3 { font-size:17px; }
+  .shoeWizardActions { flex-direction:column-reverse; align-items:stretch; }
+  .shoeWizardDone,.shoeWizardBack,.shoeWizardOptional,.shoeWizardSave { width:100%; }
+}

@@ -14,6 +14,7 @@
 // DARIK_JEWELRY_CATEGORY_SIZING_061
 // DARIK_COSMETICS_OPTIONAL_CATEGORY_SIZES_062
 // DARIK_PERFUME_PHARMACY_OPTIONAL_CATEGORY_SIZES_063
+// DARIK_SHOES_ADD_PRODUCT_WIZARD_064
 
 // DARIK_AUTOPARTS_FITMENT_FILTERS_033
 // Mobile-safe bilingual product form with automatic retail categories.
@@ -3073,6 +3074,9 @@ export default function DarikDirectProductsPage() {
   const [uploading, setUploading] = useState(false);
   const [editingProductId, setEditingProductId] = useState<string | null>(null);
   const [formOpen, setFormOpen] = useState(false);
+  const [shoeWizardStep, setShoeWizardStep] = useState<1 | 2 | 3 | 4 | 5 | 6 | 7>(1);
+  const [shoeWizardErrors, setShoeWizardErrors] = useState<Record<string, string>>({});
+  const [shoeWizardPhotoSlots, setShoeWizardPhotoSlots] = useState(1);
   const [form, setForm] = useState<ProductForm>(emptyForm);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
@@ -3660,7 +3664,156 @@ export default function DarikDirectProductsPage() {
     });
   }
 
+  const isShoeCreateWizard =
+    effectiveBusinessType === "shoes" && editingProductId === null;
+
+  const shoeWizardMissingMessage =
+    "Please enter this field / يرجى تعبئة هذا الحقل";
+
+  const shoeWizardGenericSizes = form.sizeOptions
+    .map((value) => value.trim())
+    .filter((value) => Boolean(value) && value !== CUSTOM_RETAIL_SIZE_VALUE);
+
+  const shoeWizardFootwearSizes = form.shoeSizes
+    .map((size) => ({ eu: size.eu.trim(), us: size.us.trim() }))
+    .filter((size) => Boolean(size.eu) || Boolean(size.us));
+
+  const shoeWizardPhotoCount = [
+    form.photoUrl,
+    form.photoUrl2,
+    form.photoUrl3,
+  ].filter((value) => Boolean(String(value || "").trim())).length;
+
+  const shoeWizardLatestPhotoFilled =
+    shoeWizardPhotoSlots === 1
+      ? Boolean(form.photoUrl.trim())
+      : shoeWizardPhotoSlots === 2
+        ? Boolean(form.photoUrl2.trim())
+        : Boolean(form.photoUrl3.trim());
+
+  function clearShoeWizardError(key: string) {
+    setShoeWizardErrors((current) => {
+      if (!current[key]) return current;
+      const next = { ...current };
+      delete next[key];
+      return next;
+    });
+  }
+
+  function changeShoeWizardCategory(value: string) {
+    setShoeWizardErrors({});
+    setForm((current) => ({
+      ...current,
+      directCategoryId: value,
+      shoeSizes: [],
+      shoeUsSizesEnabled: false,
+      sizeOptions: [],
+    }));
+  }
+
+  function validateShoeWizardStep(step: number) {
+    const errors: Record<string, string> = {};
+
+    if (step === 1) {
+      if (!form.name.trim()) errors.name = shoeWizardMissingMessage;
+      if (!form.nameAr.trim()) errors.nameAr = shoeWizardMissingMessage;
+      if (!form.brandName.trim()) errors.brandName = shoeWizardMissingMessage;
+    }
+
+    if (step === 2 && !form.directCategoryId.trim()) {
+      errors.category = "Please select a category / يرجى اختيار الفئة";
+    }
+
+    if (step === 3) {
+      if (footwearSizeGroup) {
+        const rows = form.shoeSizes
+          .map((size) => ({ eu: size.eu.trim(), us: size.us.trim() }))
+          .filter((size) => Boolean(size.eu) || Boolean(size.us));
+
+        if (rows.length === 0 || rows.some((size) => !size.eu)) {
+          errors.sizes =
+            "Please select at least one European shoe size / يرجى اختيار مقاس حذاء أوروبي واحد على الأقل";
+        } else {
+          const euValues = rows.map((size) => size.eu.toLowerCase());
+          if (new Set(euValues).size !== euValues.length) {
+            errors.sizes =
+              "The same shoe size cannot be added twice / لا يمكن إضافة نفس مقاس الحذاء مرتين";
+          }
+        }
+      } else if (retailSizePreset?.required) {
+        if (shoeWizardGenericSizes.length === 0) {
+          errors.sizes =
+            "Please select at least one size / يرجى اختيار مقاس واحد على الأقل";
+        }
+      }
+    }
+
+    if (step === 4 && !form.description.trim()) {
+      errors.description = shoeWizardMissingMessage;
+    }
+
+    if (step === 5) {
+      const price = Number(form.price);
+      const compareAt = form.compareAtPrice.trim()
+        ? Number(form.compareAtPrice)
+        : null;
+      const quantity = Number(form.quantity);
+
+      if (!form.price.trim() || !Number.isFinite(price) || price <= 0) {
+        errors.price =
+          "Please enter a valid selling price / يرجى إدخال سعر بيع صحيح";
+      }
+
+      if (
+        compareAt !== null &&
+        (!Number.isFinite(compareAt) || compareAt < price)
+      ) {
+        errors.compareAtPrice =
+          "Compare-at price must be at least the selling price / يجب أن يكون السعر قبل الخصم مساويًا لسعر البيع أو أعلى";
+      }
+
+      if (form.trackInventory) {
+        if (!Number.isInteger(quantity) || quantity < 0) {
+          errors.quantity =
+            "Please enter a whole inventory quantity of 0 or more / يرجى إدخال كمية مخزون صحيحة من 0 أو أكثر";
+        } else if (
+          form.availabilityStatus === "available" &&
+          quantity <= 0
+        ) {
+          errors.quantity =
+            "Available tracked products need inventory above zero / المنتج المتاح مع تتبع المخزون يحتاج كمية أكبر من صفر";
+        }
+      }
+    }
+
+    if (step === 6 && !form.photoUrl.trim()) {
+      errors.photo =
+        "Please add the main product photo / يرجى إضافة الصورة الرئيسية للمنتج";
+    }
+
+    setShoeWizardErrors(errors);
+    return Object.keys(errors).length === 0;
+  }
+
+  function advanceShoeWizard() {
+    if (!validateShoeWizardStep(shoeWizardStep)) return;
+    setShoeWizardErrors({});
+    setShoeWizardStep((current) =>
+      Math.min(7, current + 1) as 1 | 2 | 3 | 4 | 5 | 6 | 7
+    );
+  }
+
+  function backShoeWizard() {
+    setShoeWizardErrors({});
+    setShoeWizardStep((current) =>
+      Math.max(1, current - 1) as 1 | 2 | 3 | 4 | 5 | 6 | 7
+    );
+  }
+
   function openCreateForm() {
+    setShoeWizardStep(1);
+    setShoeWizardErrors({});
+    setShoeWizardPhotoSlots(1);
     setEditingProductId(null);
     setForm(emptyForm);
     setError("");
@@ -4773,7 +4926,1021 @@ export default function DarikDirectProductsPage() {
               </button>
             </header>
 
-            <form className={styles.productForm} onSubmit={saveProduct}>
+            {isShoeCreateWizard ? (
+<form
+                  className={`${styles.productForm} ${styles.shoeWizardForm}`}
+                  onSubmit={(event) => {
+                    if (shoeWizardStep < 7) {
+                      event.preventDefault();
+                      advanceShoeWizard();
+                      return;
+                    }
+                    void saveProduct(event);
+                  }}
+                >
+                  <div className={styles.shoeWizardShell}>
+                    <header className={styles.shoeWizardProgress}>
+                      <div>
+                        <span>Add Shoes product / إضافة منتج للأحذية</span>
+                        <strong>
+                          Step {shoeWizardStep} of 7 / الخطوة {shoeWizardStep} من 7
+                        </strong>
+                      </div>
+                      <div
+                        className={styles.shoeWizardRail}
+                        aria-label="Product creation progress"
+                      >
+                        {[1, 2, 3, 4, 5, 6, 7].map((step) => (
+                          <span
+                            key={step}
+                            className={`${styles.shoeWizardDot} ${
+                              step === shoeWizardStep
+                                ? styles.shoeWizardDotActive
+                                : ""
+                            } ${
+                              step < shoeWizardStep
+                                ? styles.shoeWizardDotDone
+                                : ""
+                            }`}
+                          >
+                            {step}
+                          </span>
+                        ))}
+                      </div>
+                    </header>
+
+                    {shoeWizardStep === 1 ? (
+                      <section className={styles.shoeWizardCard}>
+                        <div className={styles.shoeWizardTitle}>
+                          <b>1</b>
+                          <div>
+                            <h3>Product identity / هوية المنتج</h3>
+                            <p>
+                              Enter all three fields, then press Done. /
+                              أدخل الحقول الثلاثة ثم اضغط تم.
+                            </p>
+                          </div>
+                        </div>
+
+                        <label className={styles.shoeWizardField}>
+                          <BilingualLabel
+                            en="Product name (English)"
+                            ar="اسم المنتج بالإنجليزي"
+                          />
+                          <input
+                            value={form.name}
+                            onChange={(event) => {
+                              updateForm("name", event.target.value);
+                              clearShoeWizardError("name");
+                            }}
+                            autoFocus
+                          />
+                          {shoeWizardErrors.name ? (
+                            <span className={styles.shoeWizardError}>
+                              {shoeWizardErrors.name}
+                            </span>
+                          ) : null}
+                        </label>
+
+                        <label className={styles.shoeWizardField}>
+                          <BilingualLabel
+                            en="Product name (Arabic)"
+                            ar="اسم المنتج بالعربي"
+                          />
+                          <input
+                            value={form.nameAr}
+                            dir="rtl"
+                            onChange={(event) => {
+                              updateForm("nameAr", event.target.value);
+                              clearShoeWizardError("nameAr");
+                            }}
+                          />
+                          {shoeWizardErrors.nameAr ? (
+                            <span className={styles.shoeWizardError}>
+                              {shoeWizardErrors.nameAr}
+                            </span>
+                          ) : null}
+                        </label>
+
+                        <label className={styles.shoeWizardField}>
+                          <BilingualLabel
+                            en="Brand"
+                            ar="العلامة التجارية"
+                          />
+                          <input
+                            value={form.brandName}
+                            onChange={(event) => {
+                              updateForm("brandName", event.target.value);
+                              clearShoeWizardError("brandName");
+                            }}
+                            placeholder="Nike, adidas, New Balance…"
+                          />
+                          {shoeWizardErrors.brandName ? (
+                            <span className={styles.shoeWizardError}>
+                              {shoeWizardErrors.brandName}
+                            </span>
+                          ) : null}
+                        </label>
+
+                        <div className={styles.shoeWizardActions}>
+                          <button
+                            type="button"
+                            className={styles.shoeWizardDone}
+                            onClick={advanceShoeWizard}
+                          >
+                            Done / تم
+                          </button>
+                        </div>
+                      </section>
+                    ) : null}
+
+                    {shoeWizardStep === 2 ? (
+                      <section className={styles.shoeWizardCard}>
+                        <div className={styles.shoeWizardTitle}>
+                          <b>2</b>
+                          <div>
+                            <h3>Select category / اختر الفئة</h3>
+                            <p>
+                              Only the category choice is shown on this step. /
+                              يظهر اختيار الفئة فقط في هذه الخطوة.
+                            </p>
+                          </div>
+                        </div>
+
+                        <label className={styles.shoeWizardField}>
+                          <BilingualLabel
+                            en="Store category"
+                            ar="فئة المتجر"
+                          />
+                          <select
+                            value={form.directCategoryId}
+                            onChange={(event) => {
+                              changeShoeWizardCategory(event.target.value);
+                              clearShoeWizardError("category");
+                            }}
+                            autoFocus
+                          >
+                            <option value="">
+                              Select category / اختر الفئة
+                            </option>
+                            {mechanicsTestField
+                              ? mechanicsPresetCategories.map((category) => (
+                                  <option
+                                    key={category.value}
+                                    value={category.value}
+                                  >
+                                    {category.name}
+                                    {category.nameAr
+                                      ? ` / ${category.nameAr}`
+                                      : ""}
+                                  </option>
+                                ))
+                              : categories.map((category) => (
+                                  <option
+                                    key={category.id}
+                                    value={category.id}
+                                  >
+                                    {categoryOptionLabel(
+                                      category,
+                                      isAutoParts
+                                    )}
+                                  </option>
+                                ))}
+                          </select>
+                          {shoeWizardErrors.category ? (
+                            <span className={styles.shoeWizardError}>
+                              {shoeWizardErrors.category}
+                            </span>
+                          ) : null}
+                        </label>
+
+                        <div className={styles.shoeWizardActions}>
+                          <button
+                            type="button"
+                            className={styles.shoeWizardBack}
+                            onClick={backShoeWizard}
+                          >
+                            Back / رجوع
+                          </button>
+                          <button
+                            type="button"
+                            className={styles.shoeWizardDone}
+                            onClick={advanceShoeWizard}
+                          >
+                            Done / تم
+                          </button>
+                        </div>
+                      </section>
+                    ) : null}
+
+                    {shoeWizardStep === 3 ? (
+                      <section className={styles.shoeWizardCard}>
+                        <div className={styles.shoeWizardTitle}>
+                          <b>3</b>
+                          <div>
+                            <h3>Select sizes / اختر المقاسات</h3>
+                            <p>
+                              Darik now shows only the size system for the category selected. /
+                              يعرض داريك فقط نظام المقاسات المناسب للفئة المختارة.
+                            </p>
+                          </div>
+                        </div>
+
+                        {footwearSizeGroup ? (
+                          <div className={styles.shoeWizardSizeBox}>
+                            <div className={styles.shoeMechanicHeading}>
+                              <div>
+                                <strong>
+                                  {footwearGroupLabel?.en || "Footwear"} /{" "}
+                                  {footwearGroupLabel?.ar || "أحذية"}
+                                </strong>
+                                <span>
+                                  Select EU sizes. Darik auto-matches U.S.
+                                  sizes and you may override them. /
+                                  اختر المقاسات الأوروبية، ويطابق داريك
+                                  المقاس الأمريكي تلقائيًا مع إمكانية تعديله.
+                                </span>
+                              </div>
+                            </div>
+
+                            <div className={styles.shoeSizeRows}>
+                              {form.shoeSizes.map((size, index) => {
+                                const nextRow =
+                                  index === form.shoeSizes.length - 1 &&
+                                  !size.eu.trim() &&
+                                  !size.us.trim();
+
+                                return (
+                                  <div
+                                    className={styles.shoeSizeRow}
+                                    key={`shoe-wizard-${index}`}
+                                  >
+                                    <label>
+                                      <BilingualLabel
+                                        en={`European size ${index + 1}`}
+                                        ar={`المقاس الأوروبي ${index + 1}`}
+                                      />
+                                      <select
+                                        value={size.eu}
+                                        onChange={(event) => {
+                                          updateShoeSize(
+                                            index,
+                                            "eu",
+                                            event.target.value
+                                          );
+                                          clearShoeWizardError("sizes");
+                                        }}
+                                      >
+                                        <option value="">
+                                          Select EU size / اختر المقاس الأوروبي
+                                        </option>
+                                        {footwearEuSizeOptions.map((option) => (
+                                          <option
+                                            key={option}
+                                            value={option}
+                                            disabled={form.shoeSizes.some(
+                                              (other, otherIndex) =>
+                                                otherIndex !== index &&
+                                                other.eu === option
+                                            )}
+                                          >
+                                            EU {option}
+                                          </option>
+                                        ))}
+                                      </select>
+                                    </label>
+
+                                    {form.shoeUsSizesEnabled ? (
+                                      <label>
+                                        <BilingualLabel
+                                          en="U.S. size · auto-matched"
+                                          ar="المقاس الأمريكي · مطابق تلقائيًا"
+                                        />
+                                        <select
+                                          value={size.us}
+                                          disabled={!size.eu.trim()}
+                                          onChange={(event) =>
+                                            updateShoeSize(
+                                              index,
+                                              "us",
+                                              event.target.value
+                                            )
+                                          }
+                                        >
+                                          <option value="">
+                                            Select U.S. size / اختر المقاس الأمريكي
+                                          </option>
+                                          {footwearUsSizeOptions.map(
+                                            (option) => (
+                                              <option
+                                                key={option}
+                                                value={option}
+                                              >
+                                                US {option}
+                                              </option>
+                                            )
+                                          )}
+                                        </select>
+                                      </label>
+                                    ) : null}
+
+                                    {nextRow ? (
+                                      <span
+                                        className={
+                                          styles.shoeSizeNextLabel
+                                        }
+                                      >
+                                        Next size / المقاس التالي
+                                      </span>
+                                    ) : (
+                                      <button
+                                        type="button"
+                                        className={
+                                          styles.removeShoeSizeButton
+                                        }
+                                        onClick={() =>
+                                          removeShoeSize(index)
+                                        }
+                                      >
+                                        Remove / حذف
+                                      </button>
+                                    )}
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        ) : retailSizePreset ? (
+                          <div className={styles.shoeWizardSizeBox}>
+                            <div className={styles.shoeMechanicHeading}>
+                              <div>
+                                <strong>
+                                  {retailSizePreset.label.en} /{" "}
+                                  {retailSizePreset.label.ar}
+                                </strong>
+                                <span>
+                                  {retailSizePreset.help.en} /{" "}
+                                  {retailSizePreset.help.ar}
+                                </span>
+                              </div>
+                            </div>
+
+                            <div className={styles.shoeSizeRows}>
+                              {form.sizeOptions.map((size, index) => {
+                                const clean = size.trim();
+                                const custom =
+                                  clean === CUSTOM_RETAIL_SIZE_VALUE ||
+                                  (Boolean(clean) &&
+                                    !retailSizePreset.options.includes(
+                                      clean
+                                    ));
+                                const value = custom
+                                  ? CUSTOM_RETAIL_SIZE_VALUE
+                                  : clean;
+                                const nextRow =
+                                  index === form.sizeOptions.length - 1 &&
+                                  !clean;
+
+                                return (
+                                  <div
+                                    className={styles.retailSizeRow}
+                                    key={`shoe-generic-${index}`}
+                                  >
+                                    <div
+                                      className={
+                                        styles.retailSizeInputs
+                                      }
+                                    >
+                                      <label>
+                                        <BilingualLabel
+                                          en={`Size ${index + 1}`}
+                                          ar={`المقاس ${index + 1}`}
+                                        />
+                                        <select
+                                          value={value}
+                                          onChange={(event) => {
+                                            updateRetailSize(
+                                              index,
+                                              event.target.value
+                                            );
+                                            clearShoeWizardError(
+                                              "sizes"
+                                            );
+                                          }}
+                                        >
+                                          <option value="">
+                                            Select size / اختر المقاس
+                                          </option>
+                                          {retailSizePreset.options.map(
+                                            (option) => (
+                                              <option
+                                                key={option}
+                                                value={option}
+                                                disabled={form.sizeOptions.some(
+                                                  (
+                                                    other,
+                                                    otherIndex
+                                                  ) =>
+                                                    otherIndex !==
+                                                      index &&
+                                                    other
+                                                      .trim()
+                                                      .toLowerCase() ===
+                                                      option.toLowerCase()
+                                                )}
+                                              >
+                                                {option}
+                                              </option>
+                                            )
+                                          )}
+                                          <option
+                                            value={
+                                              CUSTOM_RETAIL_SIZE_VALUE
+                                            }
+                                          >
+                                            Custom size / مقاس مخصص
+                                          </option>
+                                        </select>
+                                      </label>
+
+                                      {custom ? (
+                                        <label>
+                                          <BilingualLabel
+                                            en="Custom size"
+                                            ar="مقاس مخصص"
+                                          />
+                                          <input
+                                            maxLength={40}
+                                            value={
+                                              clean ===
+                                              CUSTOM_RETAIL_SIZE_VALUE
+                                                ? ""
+                                                : size
+                                            }
+                                            onChange={(event) => {
+                                              updateRetailSize(
+                                                index,
+                                                event.target.value
+                                              );
+                                              clearShoeWizardError(
+                                                "sizes"
+                                              );
+                                            }}
+                                          />
+                                        </label>
+                                      ) : null}
+                                    </div>
+
+                                    {nextRow ? (
+                                      <span
+                                        className={
+                                          styles.shoeSizeNextLabel
+                                        }
+                                      >
+                                        Next size / المقاس التالي
+                                      </span>
+                                    ) : (
+                                      <button
+                                        type="button"
+                                        className={
+                                          styles.removeShoeSizeButton
+                                        }
+                                        onClick={() =>
+                                          removeRetailSize(index)
+                                        }
+                                      >
+                                        Remove / حذف
+                                      </button>
+                                    )}
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        ) : (
+                          <div className={styles.shoeWizardNoSize}>
+                            <strong>
+                              No size required for this category /
+                              لا يتطلب هذا القسم مقاسًا
+                            </strong>
+                            <span>
+                              Press Done to continue. / اضغط تم للمتابعة.
+                            </span>
+                          </div>
+                        )}
+
+                        {shoeWizardErrors.sizes ? (
+                          <span className={styles.shoeWizardError}>
+                            {shoeWizardErrors.sizes}
+                          </span>
+                        ) : null}
+
+                        <div className={styles.shoeWizardActions}>
+                          <button
+                            type="button"
+                            className={styles.shoeWizardBack}
+                            onClick={backShoeWizard}
+                          >
+                            Back / رجوع
+                          </button>
+                          <button
+                            type="button"
+                            className={styles.shoeWizardDone}
+                            onClick={advanceShoeWizard}
+                          >
+                            Done / تم
+                          </button>
+                        </div>
+                      </section>
+                    ) : null}
+
+                    {shoeWizardStep === 4 ? (
+                      <section className={styles.shoeWizardCard}>
+                        <div className={styles.shoeWizardTitle}>
+                          <b>4</b>
+                          <div>
+                            <h3>Description / الوصف</h3>
+                            <p>
+                              This screen is only for the product description. /
+                              هذه الشاشة لوصف المنتج فقط.
+                            </p>
+                          </div>
+                        </div>
+
+                        <label className={styles.shoeWizardField}>
+                          <BilingualLabel
+                            en="Product description"
+                            ar="وصف المنتج"
+                          />
+                          <textarea
+                            rows={7}
+                            value={form.description}
+                            onChange={(event) => {
+                              updateForm(
+                                "description",
+                                event.target.value
+                              );
+                              clearShoeWizardError("description");
+                            }}
+                            autoFocus
+                          />
+                          {shoeWizardErrors.description ? (
+                            <span className={styles.shoeWizardError}>
+                              {shoeWizardErrors.description}
+                            </span>
+                          ) : null}
+                        </label>
+
+                        <div className={styles.shoeWizardActions}>
+                          <button
+                            type="button"
+                            className={styles.shoeWizardBack}
+                            onClick={backShoeWizard}
+                          >
+                            Back / رجوع
+                          </button>
+                          <button
+                            type="button"
+                            className={styles.shoeWizardDone}
+                            onClick={advanceShoeWizard}
+                          >
+                            Done / تم
+                          </button>
+                        </div>
+                      </section>
+                    ) : null}
+
+                    {shoeWizardStep === 5 ? (
+                      <section className={styles.shoeWizardCard}>
+                        <div className={styles.shoeWizardTitle}>
+                          <b>5</b>
+                          <div>
+                            <h3>
+                              Pricing & inventory / السعر والمخزون
+                            </h3>
+                            <p>
+                              All price, availability and inventory controls are together here. /
+                              كل إعدادات السعر والتوفر والمخزون موجودة هنا.
+                            </p>
+                          </div>
+                        </div>
+
+                        <div className={styles.shoeWizardGrid}>
+                          <label className={styles.shoeWizardField}>
+                            <BilingualLabel
+                              en="Selling price"
+                              ar="سعر البيع"
+                            />
+                            <input
+                              type="number"
+                              min="0"
+                              step="0.01"
+                              value={form.price}
+                              onChange={(event) => {
+                                updateForm(
+                                  "price",
+                                  event.target.value
+                                );
+                                clearShoeWizardError("price");
+                              }}
+                              autoFocus
+                            />
+                            {shoeWizardErrors.price ? (
+                              <span className={styles.shoeWizardError}>
+                                {shoeWizardErrors.price}
+                              </span>
+                            ) : null}
+                          </label>
+
+                          <label className={styles.shoeWizardField}>
+                            <BilingualLabel
+                              en="Compare-at price (optional)"
+                              ar="السعر قبل الخصم (اختياري)"
+                            />
+                            <input
+                              type="number"
+                              min="0"
+                              step="0.01"
+                              value={form.compareAtPrice}
+                              onChange={(event) => {
+                                updateForm(
+                                  "compareAtPrice",
+                                  event.target.value
+                                );
+                                clearShoeWizardError(
+                                  "compareAtPrice"
+                                );
+                              }}
+                            />
+                            {shoeWizardErrors.compareAtPrice ? (
+                              <span className={styles.shoeWizardError}>
+                                {shoeWizardErrors.compareAtPrice}
+                              </span>
+                            ) : null}
+                          </label>
+
+                          <label className={styles.shoeWizardField}>
+                            <BilingualLabel
+                              en="Customer availability"
+                              ar="توفر المنتج للعميل"
+                            />
+                            <select
+                              value={form.availabilityStatus}
+                              onChange={(event) =>
+                                updateForm(
+                                  "availabilityStatus",
+                                  event.target.value as ProductForm["availabilityStatus"]
+                                )
+                              }
+                            >
+                              <option value="available">
+                                Available / متوفر
+                              </option>
+                              <option value="out_of_stock">
+                                Out of stock / غير متوفر
+                              </option>
+                            </select>
+                          </label>
+                        </div>
+
+                        <div className={styles.shoeWizardInventory}>
+                          <label>
+                            <input
+                              type="checkbox"
+                              checked={form.trackInventory}
+                              onChange={(event) => {
+                                updateForm(
+                                  "trackInventory",
+                                  event.target.checked
+                                );
+                                clearShoeWizardError("quantity");
+                              }}
+                            />
+                            <span>
+                              <strong>
+                                Track inventory / تتبع المخزون
+                              </strong>
+                              <small>
+                                Track the exact number of units in stock. /
+                                تتبع العدد الفعلي للقطع في المخزون.
+                              </small>
+                            </span>
+                          </label>
+
+                          {form.trackInventory ? (
+                            <label className={styles.shoeWizardField}>
+                              <BilingualLabel
+                                en="Inventory quantity"
+                                ar="كمية المخزون"
+                              />
+                              <input
+                                type="number"
+                                min="0"
+                                step="1"
+                                value={form.quantity}
+                                onChange={(event) => {
+                                  updateForm(
+                                    "quantity",
+                                    event.target.value
+                                  );
+                                  clearShoeWizardError("quantity");
+                                }}
+                              />
+                              {shoeWizardErrors.quantity ? (
+                                <span
+                                  className={
+                                    styles.shoeWizardError
+                                  }
+                                >
+                                  {shoeWizardErrors.quantity}
+                                </span>
+                              ) : null}
+                            </label>
+                          ) : null}
+                        </div>
+
+                        <div className={styles.shoeWizardActions}>
+                          <button
+                            type="button"
+                            className={styles.shoeWizardBack}
+                            onClick={backShoeWizard}
+                          >
+                            Back / رجوع
+                          </button>
+                          <button
+                            type="button"
+                            className={styles.shoeWizardDone}
+                            onClick={advanceShoeWizard}
+                          >
+                            Done / تم
+                          </button>
+                        </div>
+                      </section>
+                    ) : null}
+
+                    {shoeWizardStep === 6 ? (
+                      <section className={styles.shoeWizardCard}>
+                        <div className={styles.shoeWizardTitle}>
+                          <b>6</b>
+                          <div>
+                            <h3>Product photos / صور المنتج</h3>
+                            <p>
+                              Photo 1 is required. Extra photos are optional. /
+                              الصورة الأولى مطلوبة والصور الإضافية اختيارية.
+                            </p>
+                          </div>
+                        </div>
+
+                        <div className={styles.shoeWizardPhotos}>
+                          {PRODUCT_PHOTO_SLOTS.slice(
+                            0,
+                            shoeWizardPhotoSlots
+                          ).map((slot) => {
+                            const photoValue = form[slot.field];
+
+                            return (
+                              <section
+                                className={styles.photoSlot}
+                                key={slot.field}
+                              >
+                                <div
+                                  className={styles.photoSlotTitle}
+                                >
+                                  <strong>
+                                    {slot.label} / {slot.labelAr}
+                                  </strong>
+                                  <span>
+                                    {slot.primary
+                                      ? "Required / مطلوبة"
+                                      : "Optional / اختيارية"}
+                                  </span>
+                                </div>
+
+                                <div className={styles.imagePreview}>
+                                  {photoValue ? (
+                                    <img
+                                      src={photoValue}
+                                      alt={`Product ${slot.label} preview`}
+                                    />
+                                  ) : (
+                                    <div>
+                                      <strong>
+                                        {slot.label} / {slot.labelAr}
+                                      </strong>
+                                      <span>
+                                        JPG, PNG, WEBP or GIF
+                                      </span>
+                                    </div>
+                                  )}
+                                </div>
+
+                                <label className={styles.uploadButton}>
+                                  {uploading
+                                    ? "Uploading… / جارٍ الرفع…"
+                                    : `Upload ${slot.label} / رفع ${slot.labelAr}`}
+                                  <input
+                                    type="file"
+                                    accept="image/jpeg,image/png,image/webp,image/gif"
+                                    onChange={(event) =>
+                                      handleImageChange(
+                                        event,
+                                        slot.field
+                                      )
+                                    }
+                                    disabled={uploading || saving}
+                                  />
+                                </label>
+
+                                <label
+                                  className={styles.shoeWizardField}
+                                >
+                                  <BilingualLabel
+                                    en="Or paste image URL"
+                                    ar="أو الصق رابط الصورة"
+                                  />
+                                  <input
+                                    type="url"
+                                    value={photoValue}
+                                    onChange={(event) => {
+                                      updateForm(
+                                        slot.field,
+                                        event.target.value
+                                      );
+                                      if (
+                                        slot.field === "photoUrl"
+                                      ) {
+                                        clearShoeWizardError(
+                                          "photo"
+                                        );
+                                      }
+                                    }}
+                                    placeholder="https://..."
+                                  />
+                                </label>
+
+                                {photoValue ? (
+                                  <button
+                                    type="button"
+                                    className={
+                                      styles.removePhotoButton
+                                    }
+                                    onClick={() =>
+                                      updateForm(slot.field, "")
+                                    }
+                                  >
+                                    Remove photo / حذف الصورة
+                                  </button>
+                                ) : null}
+                              </section>
+                            );
+                          })}
+                        </div>
+
+                        {shoeWizardErrors.photo ? (
+                          <span className={styles.shoeWizardError}>
+                            {shoeWizardErrors.photo}
+                          </span>
+                        ) : null}
+
+                        <div className={styles.shoeWizardActions}>
+                          <button
+                            type="button"
+                            className={styles.shoeWizardBack}
+                            onClick={backShoeWizard}
+                          >
+                            Back / رجوع
+                          </button>
+
+                          {shoeWizardPhotoSlots < 3 &&
+                          shoeWizardLatestPhotoFilled ? (
+                            <button
+                              type="button"
+                              className={styles.shoeWizardOptional}
+                              onClick={() =>
+                                setShoeWizardPhotoSlots((current) =>
+                                  Math.min(3, current + 1)
+                                )
+                              }
+                            >
+                              Add another photo (optional) /
+                              إضافة صورة أخرى (اختياري)
+                            </button>
+                          ) : null}
+
+                          <button
+                            type="button"
+                            className={styles.shoeWizardDone}
+                            onClick={advanceShoeWizard}
+                          >
+                            Done / تم
+                          </button>
+                        </div>
+                      </section>
+                    ) : null}
+
+                    {shoeWizardStep === 7 ? (
+                      <section className={styles.shoeWizardCard}>
+                        <div className={styles.shoeWizardTitle}>
+                          <b>7</b>
+                          <div>
+                            <h3>
+                              Review & save / مراجعة وحفظ
+                            </h3>
+                            <p>
+                              The Save Product button only appears after every required step is complete. /
+                              يظهر زر حفظ المنتج فقط بعد إكمال كل الخطوات المطلوبة.
+                            </p>
+                          </div>
+                        </div>
+
+                        <div className={styles.shoeWizardSummary}>
+                          <div>
+                            <span>Name / الاسم</span>
+                            <strong>
+                              {form.name} / {form.nameAr}
+                            </strong>
+                          </div>
+                          <div>
+                            <span>Brand / العلامة</span>
+                            <strong>{form.brandName}</strong>
+                          </div>
+                          <div>
+                            <span>Category / الفئة</span>
+                            <strong>
+                              {selectedProductCategoryName || "—"}
+                            </strong>
+                          </div>
+                          <div>
+                            <span>Sizes / المقاسات</span>
+                            <strong>
+                              {footwearSizeGroup
+                                ? shoeWizardFootwearSizes
+                                    .map(
+                                      (size) =>
+                                        `EU ${size.eu}${
+                                          size.us
+                                            ? ` / US ${size.us}`
+                                            : ""
+                                        }`
+                                    )
+                                    .join(", ") ||
+                                  "No size / بدون مقاس"
+                                : retailSizePreset
+                                  ? shoeWizardGenericSizes.join(
+                                      ", "
+                                    ) || "No size / بدون مقاس"
+                                  : "Not required / غير مطلوب"}
+                            </strong>
+                          </div>
+                          <div>
+                            <span>Price / السعر</span>
+                            <strong>
+                              {form.price || "0"} JOD
+                            </strong>
+                          </div>
+                          <div>
+                            <span>Inventory / المخزون</span>
+                            <strong>
+                              {form.trackInventory
+                                ? `${form.quantity || "0"} units / قطعة`
+                                : "Not tracked / غير متتبع"}
+                            </strong>
+                          </div>
+                          <div>
+                            <span>Photos / الصور</span>
+                            <strong>{shoeWizardPhotoCount}</strong>
+                          </div>
+                        </div>
+
+                        <div className={styles.shoeWizardReviewText}>
+                          <span>Description / الوصف</span>
+                          <p>{form.description}</p>
+                        </div>
+
+                        <div className={styles.shoeWizardActions}>
+                          <button
+                            type="button"
+                            className={styles.shoeWizardBack}
+                            onClick={backShoeWizard}
+                          >
+                            Back / رجوع
+                          </button>
+                          <button
+                            type="submit"
+                            className={styles.shoeWizardSave}
+                            disabled={saving || uploading}
+                          >
+                            {saving
+                              ? "Saving… / جارٍ الحفظ…"
+                              : "Save product / حفظ المنتج"}
+                          </button>
+                        </div>
+                      </section>
+                    ) : null}
+                  </div>
+                </form>
+              ) : (
+<form className={styles.productForm} onSubmit={saveProduct}>
               <div className={styles.formMain}>
                 <label>
                   <BilingualLabel
@@ -5701,6 +6868,7 @@ export default function DarikDirectProductsPage() {
                 </button>
               </footer>
             </form>
+              )}
           </section>
         </div>
       ) : null}
