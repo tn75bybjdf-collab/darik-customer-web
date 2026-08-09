@@ -1646,3 +1646,687 @@
   .shoeWizardActions { flex-direction:column-reverse; align-items:stretch; }
   .shoeWizardDone,.shoeWizardBack,.shoeWizardOptional,.shoeWizardSave { width:100%; }
 }
+
+/* DARIK_SHOES_WIZARD_PREMIUM_POLISH_065
+   Visual-only refinement for FRONTEND 064.
+   No product mechanics, validation, persistence, or step sequencing changes. */
+
+/* Keep every dashboard-level floating control (including mobile Sign out)
+   behind the guided product-creation experience while the Shoes wizard is open. */
+.modalOverlay:has(.shoeWizardForm) {
+  z-index: 2147483000;
+}
+
+/* Premium wizard modal shell. */
+.modal:has(.shoeWizardForm) {
+  width: min(1180px, calc(100vw - 56px));
+  max-height: calc(100dvh - 40px);
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  border-radius: 28px;
+  background:
+    radial-gradient(circle at 88% -10%, rgba(37, 99, 235, 0.08), transparent 30rem),
+    #f6f8fc;
+  box-shadow:
+    0 38px 110px rgba(2, 6, 23, 0.34),
+    0 2px 8px rgba(15, 23, 42, 0.08);
+}
+
+.modal:has(.shoeWizardForm) .modalHeader {
+  min-height: 76px;
+  padding: 17px 24px;
+  border-bottom: 1px solid rgba(15, 23, 42, 0.08);
+  background: rgba(255, 255, 255, 0.96);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+}
+
+.modal:has(.shoeWizardForm) .modalHeader h2 {
+  max-width: 880px;
+  font-size: clamp(20px, 2vw, 25px);
+  line-height: 1.18;
+  letter-spacing: -0.025em;
+}
+
+.modal:has(.shoeWizardForm) .closeButton {
+  width: 42px;
+  height: 42px;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  background: #ffffff;
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.05);
+  transition:
+    transform 160ms ease,
+    border-color 160ms ease,
+    box-shadow 160ms ease;
+}
+
+.modal:has(.shoeWizardForm) .closeButton:hover {
+  transform: translateY(-1px);
+  border-color: #cbd5e1;
+  box-shadow: 0 8px 20px rgba(15, 23, 42, 0.09);
+}
+
+.modal:has(.shoeWizardForm) .shoeWizardForm {
+  display: block;
+  width: 100%;
+  padding: 24px 28px 30px;
+  background: transparent;
+}
+
+.shoeWizardShell {
+  width: 100%;
+  max-width: none;
+}
+
+/* Buttons */
+.shoeWizardDone,
+.shoeWizardBack,
+.shoeWizardOptional,
+.shoeWizardSave {
+  min-height: 48px;
+  border-radius: 14px;
+  padding: 0 20px;
+  font-size: 13px;
+  font-weight: 900;
+  letter-spacing: -0.01em;
+  transition:
+    transform 150ms ease,
+    box-shadow 150ms ease,
+    background 150ms ease,
+    border-color 150ms ease;
+}
+
+.shoeWizardDone {
+  border-color: #155eef;
+  background: linear-gradient(135deg, #155eef 0%, #2563eb 100%);
+  color: #ffffff;
+  box-shadow: 0 10px 24px rgba(37, 99, 235, 0.22);
+}
+
+.shoeWizardDone:hover,
+.shoeWizardSave:hover {
+  transform: translateY(-1px);
+}
+
+.shoeWizardDone:hover {
+  box-shadow: 0 14px 30px rgba(37, 99, 235, 0.28);
+}
+
+.shoeWizardBack {
+  border-color: #dbe2ea;
+  background: #ffffff;
+  color: #334155;
+  box-shadow: 0 3px 9px rgba(15, 23, 42, 0.035);
+}
+
+.shoeWizardBack:hover {
+  border-color: #cbd5e1;
+  background: #f8fafc;
+}
+
+.shoeWizardOptional {
+  border-color: #bfdbfe;
+  background: #eff6ff;
+  color: #1d4ed8;
+}
+
+.shoeWizardSave {
+  border-color: #15803d;
+  background: linear-gradient(135deg, #15803d 0%, #16a34a 100%);
+  color: #ffffff;
+  box-shadow: 0 10px 24px rgba(22, 163, 74, 0.2);
+}
+
+/* Form controls */
+.shoeWizardField {
+  gap: 8px;
+}
+
+.shoeWizardField input,
+.shoeWizardField select,
+.shoeWizardField textarea {
+  border: 1px solid #d8e0ea;
+  border-radius: 14px;
+  background: #ffffff;
+  color: #0f172a;
+  box-shadow:
+    0 1px 2px rgba(15, 23, 42, 0.025),
+    inset 0 1px 0 rgba(255, 255, 255, 0.8);
+  transition:
+    border-color 150ms ease,
+    box-shadow 150ms ease,
+    background 150ms ease;
+}
+
+.shoeWizardField input,
+.shoeWizardField select {
+  min-height: 52px;
+  padding: 0 15px;
+}
+
+.shoeWizardField textarea {
+  min-height: 146px;
+  padding: 14px 15px;
+  line-height: 1.55;
+  resize: vertical;
+}
+
+.shoeWizardField input:focus,
+.shoeWizardField select:focus,
+.shoeWizardField textarea:focus {
+  border-color: #3b82f6;
+  background: #ffffff;
+  outline: none;
+  box-shadow:
+    0 0 0 4px rgba(59, 130, 246, 0.11),
+    0 8px 24px rgba(15, 23, 42, 0.05);
+}
+
+.shoeWizardError {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: #b42318;
+  font-size: 12px;
+  font-weight: 850;
+}
+
+.shoeWizardError::before {
+  content: "!";
+  display: grid;
+  width: 18px;
+  height: 18px;
+  place-items: center;
+  flex: 0 0 18px;
+  border-radius: 999px;
+  background: #fee4e2;
+  color: #b42318;
+  font-size: 11px;
+  font-weight: 950;
+}
+
+/* Supporting mechanics cards */
+.shoeWizardSizeBox,
+.shoeWizardInventory,
+.shoeWizardNoSize,
+.shoeWizardSummary > div,
+.shoeWizardReviewText {
+  border-radius: 16px;
+}
+
+.shoeWizardSizeBox {
+  border-color: #dbeafe;
+  background: linear-gradient(180deg, #f8fbff 0%, #f4f8ff 100%);
+}
+
+.shoeWizardInventory {
+  border-color: #e2e8f0;
+  background: #f8fafc;
+}
+
+.shoeWizardSummary > div,
+.shoeWizardReviewText {
+  border-color: #e2e8f0;
+  background: #f8fafc;
+}
+
+/* ----------------------- DESKTOP / TABLET LANDSCAPE ----------------------- */
+@media (min-width: 861px) {
+  .shoeWizardShell {
+    display: grid;
+    grid-template-columns: 250px minmax(0, 1fr);
+    gap: 24px;
+    align-items: start;
+  }
+
+  .shoeWizardProgress {
+    position: sticky;
+    top: 100px;
+    display: grid;
+    align-content: start;
+    gap: 22px;
+    min-height: 506px;
+    margin: 0;
+    padding: 24px 18px 20px;
+    overflow: hidden;
+    border: 0;
+    border-radius: 24px;
+    background:
+      radial-gradient(circle at 100% 0%, rgba(59, 130, 246, 0.34), transparent 16rem),
+      linear-gradient(160deg, #111c31 0%, #0b1324 62%, #09111f 100%);
+    box-shadow:
+      0 22px 44px rgba(2, 6, 23, 0.18),
+      inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  }
+
+  .shoeWizardProgress::after {
+    content: "Darik guided listing";
+    position: absolute;
+    right: -24px;
+    bottom: 24px;
+    transform: rotate(-90deg);
+    transform-origin: center;
+    color: rgba(255, 255, 255, 0.08);
+    font-size: 11px;
+    font-weight: 900;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    pointer-events: none;
+  }
+
+  .shoeWizardProgress > div:first-child {
+    gap: 7px;
+    padding: 2px 4px 4px;
+  }
+
+  .shoeWizardProgress > div:first-child span {
+    color: #93c5fd;
+    font-size: 10px;
+    font-weight: 900;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .shoeWizardProgress > div:first-child strong {
+    color: #ffffff;
+    font-size: 19px;
+    line-height: 1.25;
+    letter-spacing: -0.025em;
+  }
+
+  .shoeWizardRail {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 7px;
+  }
+
+  .shoeWizardDot {
+    position: relative;
+    display: flex;
+    min-height: 48px;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 11px;
+    padding: 0 12px;
+    border: 1px solid rgba(255, 255, 255, 0.075);
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.035);
+    color: #94a3b8 !important;
+    font-size: 12px;
+    font-weight: 950;
+  }
+
+  .shoeWizardDot::after {
+    color: #cbd5e1;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: -0.01em;
+  }
+
+  .shoeWizardDot:nth-child(1)::after { content: "Identity / الهوية"; }
+  .shoeWizardDot:nth-child(2)::after { content: "Category / القسم"; }
+  .shoeWizardDot:nth-child(3)::after { content: "Sizes / المقاسات"; }
+  .shoeWizardDot:nth-child(4)::after { content: "Description / الوصف"; }
+  .shoeWizardDot:nth-child(5)::after { content: "Price & stock / السعر والمخزون"; }
+  .shoeWizardDot:nth-child(6)::after { content: "Photos / الصور"; }
+  .shoeWizardDot:nth-child(7)::after { content: "Review / المراجعة"; }
+
+  .shoeWizardDotActive {
+    border-color: rgba(147, 197, 253, 0.42);
+    background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+    color: #ffffff !important;
+    box-shadow:
+      0 10px 24px rgba(37, 99, 235, 0.28),
+      inset 0 1px 0 rgba(255, 255, 255, 0.16);
+  }
+
+  .shoeWizardDotActive::after {
+    color: #ffffff;
+  }
+
+  .shoeWizardDotDone {
+    border-color: rgba(52, 211, 153, 0.2);
+    background: rgba(16, 185, 129, 0.1);
+    color: #6ee7b7 !important;
+  }
+
+  .shoeWizardDotDone::after {
+    color: #a7f3d0;
+  }
+
+  .shoeWizardCard {
+    min-height: 506px;
+    display: grid;
+    align-content: start;
+    gap: 22px;
+    padding: 30px 32px;
+    border: 1px solid rgba(15, 23, 42, 0.075);
+    border-radius: 24px;
+    background: rgba(255, 255, 255, 0.985);
+    box-shadow:
+      0 20px 44px rgba(15, 23, 42, 0.07),
+      0 2px 8px rgba(15, 23, 42, 0.03);
+  }
+
+  .shoeWizardTitle {
+    gap: 14px;
+    padding-bottom: 4px;
+  }
+
+  .shoeWizardTitle > b {
+    width: 42px;
+    height: 42px;
+    min-width: 42px;
+    border-radius: 13px;
+    background: linear-gradient(135deg, #111827 0%, #1e293b 100%);
+    box-shadow: 0 8px 18px rgba(15, 23, 42, 0.14);
+    font-size: 14px;
+  }
+
+  .shoeWizardTitle h3 {
+    font-size: 23px;
+    line-height: 1.18;
+    letter-spacing: -0.03em;
+  }
+
+  .shoeWizardTitle p {
+    max-width: 620px;
+    margin-top: 2px;
+    color: #64748b;
+    font-size: 12.5px;
+    line-height: 1.65;
+  }
+
+  .shoeWizardActions {
+    margin-top: auto;
+    padding-top: 22px;
+    border-top: 1px solid #edf0f4;
+  }
+
+  .shoeWizardGrid {
+    gap: 14px;
+  }
+}
+
+/* ------------------------------ MOBILE ------------------------------------ */
+@media (max-width: 860px) {
+  .modalOverlay:has(.shoeWizardForm) {
+    display: block;
+    padding: 0;
+    overflow: hidden;
+    background: #f5f7fb;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+
+  .modal:has(.shoeWizardForm) {
+    width: 100%;
+    min-height: 100dvh;
+    max-height: 100dvh;
+    overflow-y: auto;
+    border: 0;
+    border-radius: 0;
+    background: #f5f7fb;
+    box-shadow: none;
+    overscroll-behavior: contain;
+  }
+
+  .modal:has(.shoeWizardForm) .modalHeader {
+    min-height: 62px;
+    padding:
+      calc(10px + env(safe-area-inset-top))
+      16px
+      10px;
+    gap: 12px;
+    border-bottom: 1px solid #e8edf4;
+    background: rgba(255, 255, 255, 0.97);
+    box-shadow: 0 3px 14px rgba(15, 23, 42, 0.035);
+  }
+
+  .modal:has(.shoeWizardForm) .modalHeader > div > p {
+    display: none;
+  }
+
+  .modal:has(.shoeWizardForm) .modalHeader h2 {
+    margin: 0;
+    max-width: calc(100vw - 82px);
+    font-size: 18px;
+    line-height: 1.22;
+    letter-spacing: -0.025em;
+  }
+
+  .modal:has(.shoeWizardForm) .closeButton {
+    width: 38px;
+    height: 38px;
+    min-width: 38px;
+    border-radius: 12px;
+    box-shadow: none;
+  }
+
+  .modal:has(.shoeWizardForm) .shoeWizardForm {
+    padding: 0 0 calc(18px + env(safe-area-inset-bottom));
+  }
+
+  .shoeWizardShell {
+    display: block;
+    width: 100%;
+    margin: 0;
+  }
+
+  /* Mobile progress becomes a compact title + seven thin progress segments. */
+  .shoeWizardProgress {
+    display: grid;
+    gap: 10px;
+    margin: 0;
+    padding: 14px 18px 13px;
+    border: 0;
+    border-radius: 0;
+    background: #f5f7fb;
+    box-shadow: none;
+  }
+
+  .shoeWizardProgress > div:first-child {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+  }
+
+  .shoeWizardProgress > div:first-child span {
+    color: #64748b;
+    font-size: 10px;
+    font-weight: 900;
+    letter-spacing: 0.035em;
+  }
+
+  .shoeWizardProgress > div:first-child strong {
+    flex: 0 0 auto;
+    color: #0f172a;
+    font-size: 12px;
+    font-weight: 950;
+    letter-spacing: -0.015em;
+  }
+
+  .shoeWizardRail {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 5px;
+  }
+
+  .shoeWizardDot {
+    display: block;
+    min-height: 4px;
+    height: 4px;
+    padding: 0;
+    overflow: hidden;
+    border: 0;
+    border-radius: 999px;
+    background: #dce3ed;
+    color: transparent !important;
+    font-size: 0;
+    line-height: 0;
+    box-shadow: none;
+  }
+
+  .shoeWizardDotDone {
+    background: #7dd3a7;
+  }
+
+  .shoeWizardDotActive {
+    background: linear-gradient(90deg, #155eef 0%, #3b82f6 100%);
+    box-shadow: 0 0 0 1px rgba(37, 99, 235, 0.05);
+  }
+
+  /* One clean content surface instead of cards nested inside cards. */
+  .shoeWizardCard {
+    display: grid;
+    align-content: start;
+    gap: 20px;
+    min-height: calc(100dvh - 154px);
+    margin: 0 10px 10px;
+    padding: 22px 18px calc(22px + env(safe-area-inset-bottom));
+    border: 1px solid #e7ecf3;
+    border-radius: 22px;
+    background: #ffffff;
+    box-shadow: 0 8px 26px rgba(15, 23, 42, 0.045);
+  }
+
+  .shoeWizardTitle {
+    gap: 12px;
+    align-items: flex-start;
+  }
+
+  .shoeWizardTitle > b {
+    width: 38px;
+    height: 38px;
+    min-width: 38px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #111827 0%, #1e293b 100%);
+    box-shadow: 0 7px 16px rgba(15, 23, 42, 0.12);
+    font-size: 13px;
+  }
+
+  .shoeWizardTitle h3 {
+    font-size: 20px;
+    line-height: 1.2;
+    letter-spacing: -0.025em;
+  }
+
+  .shoeWizardTitle p {
+    margin-top: 3px;
+    color: #64748b;
+    font-size: 12px;
+    line-height: 1.55;
+  }
+
+  .shoeWizardField {
+    gap: 7px;
+  }
+
+  .shoeWizardField input,
+  .shoeWizardField select {
+    min-height: 52px;
+    border-radius: 14px;
+    font-size: 16px; /* prevents iOS Safari auto-zoom */
+  }
+
+  .shoeWizardField textarea {
+    min-height: 132px;
+    border-radius: 14px;
+    font-size: 16px;
+  }
+
+  .shoeWizardGrid,
+  .shoeWizardPhotos,
+  .shoeWizardSummary {
+    grid-template-columns: 1fr;
+  }
+
+  .shoeWizardSizeBox,
+  .shoeWizardInventory,
+  .shoeWizardNoSize {
+    padding: 14px;
+    border-radius: 16px;
+  }
+
+  .shoeWizardActions {
+    position: sticky;
+    bottom: 0;
+    z-index: 3;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 9px;
+    align-items: stretch;
+    margin: auto -8px -10px;
+    padding:
+      14px
+      8px
+      calc(10px + env(safe-area-inset-bottom));
+    border-top: 1px solid rgba(226, 232, 240, 0.92);
+    background:
+      linear-gradient(
+        180deg,
+        rgba(255, 255, 255, 0.78) 0%,
+        rgba(255, 255, 255, 0.98) 24%,
+        #ffffff 100%
+      );
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+  }
+
+  .shoeWizardDone,
+  .shoeWizardBack,
+  .shoeWizardOptional,
+  .shoeWizardSave {
+    width: 100%;
+    min-height: 52px;
+    border-radius: 15px;
+    font-size: 14px;
+  }
+
+  .shoeWizardDone,
+  .shoeWizardSave {
+    order: -1;
+  }
+
+  .shoeWizardOptional {
+    order: 0;
+  }
+
+  .shoeWizardBack {
+    order: 1;
+    min-height: 46px;
+    background: #f8fafc;
+    box-shadow: none;
+  }
+
+  .shoeWizardPhotos .imagePreview {
+    min-height: 190px;
+  }
+}
+
+@media (max-width: 420px) {
+  .modal:has(.shoeWizardForm) .modalHeader h2 {
+    font-size: 17px;
+  }
+
+  .shoeWizardProgress {
+    padding-inline: 16px;
+  }
+
+  .shoeWizardProgress > div:first-child span {
+    max-width: 47%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .shoeWizardCard {
+    margin-inline: 8px;
+    padding-inline: 16px;
+  }
+
+  .shoeWizardTitle h3 {
+    font-size: 19px;
+  }
+}
