@@ -8,6 +8,7 @@
 // DARIK_AUTO_MATCH_US_SHOE_SIZES_054
 // DARIK_SHOES_RETAIL_FINAL_056
 // DARIK_SHOES_CATEGORY_SIZE_EXCLUSIVITY_057
+// DARIK_CAFE_OPTIONAL_CATEGORY_SIZES_058
 
 // DARIK_AUTOPARTS_FITMENT_FILTERS_033
 // Mobile-safe bilingual product form with automatic retail categories.
@@ -455,6 +456,257 @@ const INSOLE_SIZE_OPTIONS = [
 const SHOELACE_SIZE_OPTIONS = [
   "45 cm", "60 cm", "75 cm", "90 cm", "100 cm", "110 cm", "120 cm", "130 cm", "140 cm", "150 cm", "160 cm", "180 cm", "200 cm",
 ] as const;
+
+const CAFE_HOT_DRINK_SIZE_OPTIONS = [
+  "Espresso (2 oz / 60 ml)",
+  "Double Espresso (4 oz / 120 ml)",
+  "Small (8 oz / 240 ml)",
+  "Medium (12 oz / 355 ml)",
+  "Large (16 oz / 475 ml)",
+  "XL (20 oz / 590 ml)",
+] as const;
+
+const CAFE_COLD_DRINK_SIZE_OPTIONS = [
+  "Small (12 oz / 355 ml)",
+  "Medium (16 oz / 475 ml)",
+  "Large (20 oz / 590 ml)",
+  "XL (24 oz / 710 ml)",
+] as const;
+
+const CAFE_JUICE_SMOOTHIE_SIZE_OPTIONS = [
+  "250 ml",
+  "330 ml",
+  "350 ml",
+  "400 ml",
+  "500 ml",
+  "700 ml",
+  "1 L",
+] as const;
+
+const CAFE_PACKAGED_DRINK_SIZE_OPTIONS = [
+  "200 ml",
+  "250 ml",
+  "300 ml",
+  "330 ml",
+  "500 ml",
+  "750 ml",
+  "1 L",
+  "1.5 L",
+] as const;
+
+const CAFE_CAKE_SIZE_OPTIONS = [
+  "Slice",
+  "Mini",
+  "4 in",
+  "6 in",
+  "8 in",
+  "10 in",
+  "12 in",
+] as const;
+
+const CAFE_PASTRY_SIZE_OPTIONS = [
+  "Mini",
+  "Regular",
+  "Large",
+] as const;
+
+const CAFE_DESSERT_SIZE_OPTIONS = [
+  "Mini",
+  "Regular",
+  "Large",
+  "Single Serving",
+  "Sharing",
+] as const;
+
+const CAFE_ICE_CREAM_SIZE_OPTIONS = [
+  "1 Scoop",
+  "2 Scoops",
+  "3 Scoops",
+  "Small Cup",
+  "Medium Cup",
+  "Large Cup",
+  "Pint (473 ml)",
+] as const;
+
+const CAFE_SANDWICH_SIZE_OPTIONS = [
+  "Half",
+  "Regular",
+  "Large",
+  "6 in",
+  "12 in",
+] as const;
+
+const CAFE_GENERAL_SIZE_OPTIONS = [
+  "Small",
+  "Medium",
+  "Large",
+  "XL",
+] as const;
+
+function cafeSizePresetFromCategoryName(
+  categoryName: string | null | undefined
+): RetailSizePreset {
+  const key = normalizedCategoryKey(categoryName);
+
+  const hasAny = (...words: string[]) =>
+    words.some((word) => key.includes(word));
+
+  // Cold/iced checks intentionally come before coffee/tea because a category
+  // such as "Iced Coffee" must receive cold-cup sizes rather than hot-cup sizes.
+  if (
+    hasAny(
+      "iced", "ice drinks", "cold drink", "cold drinks", "frappe",
+      "frappuccino", "mocktail", "lemonade", "slush", "slushy"
+    )
+  ) {
+    return {
+      key: "cafe_cold_drinks",
+      label: { en: "Cold drink sizes", ar: "أحجام المشروبات الباردة" },
+      required: true,
+      options: CAFE_COLD_DRINK_SIZE_OPTIONS,
+      help: {
+        en: "Common cold-cup sizes. Use Custom size when the cafe uses a different cup.",
+        ar: "أحجام شائعة للأكواب الباردة. استخدم المقاس المخصص إذا كان المقهى يستخدم كوبًا مختلفًا.",
+      },
+    };
+  }
+
+  if (hasAny("smoothie", "smoothies", "juice", "juices", "shake", "milkshake")) {
+    return {
+      key: "cafe_juice_smoothie",
+      label: { en: "Juice / smoothie sizes", ar: "أحجام العصائر والسموثي" },
+      required: true,
+      options: CAFE_JUICE_SMOOTHIE_SIZE_OPTIONS,
+      help: {
+        en: "Choose the actual serving volume.",
+        ar: "اختر حجم التقديم الفعلي.",
+      },
+    };
+  }
+
+  if (
+    hasAny(
+      "soft drink", "soft drinks", "soda", "water", "bottled",
+      "bottle", "canned", "can", "energy drink", "energy drinks"
+    )
+  ) {
+    return {
+      key: "cafe_packaged_drinks",
+      label: { en: "Bottle / can sizes", ar: "أحجام العبوات والعلب" },
+      required: true,
+      options: CAFE_PACKAGED_DRINK_SIZE_OPTIONS,
+      help: {
+        en: "Use the volume printed on the bottle or can.",
+        ar: "استخدم الحجم المطبوع على العبوة أو العلبة.",
+      },
+    };
+  }
+
+  if (
+    hasAny(
+      "coffee", "hot drink", "hot drinks", "tea", "latte", "cappuccino",
+      "espresso", "americano", "mocha", "macchiato", "turkish", "karak",
+      "hot chocolate", "matcha"
+    )
+  ) {
+    return {
+      key: "cafe_hot_drinks",
+      label: { en: "Hot drink sizes", ar: "أحجام المشروبات الساخنة" },
+      required: true,
+      options: CAFE_HOT_DRINK_SIZE_OPTIONS,
+      help: {
+        en: "Common cafe cup sizes, including espresso servings.",
+        ar: "أحجام أكواب شائعة للمقاهي، بما فيها أحجام الإسبريسو.",
+      },
+    };
+  }
+
+  if (hasAny("ice cream", "gelato")) {
+    return {
+      key: "cafe_ice_cream",
+      label: { en: "Ice cream sizes", ar: "أحجام الآيس كريم" },
+      required: true,
+      options: CAFE_ICE_CREAM_SIZE_OPTIONS,
+      help: {
+        en: "Use scoop count, cup size, or pint when applicable.",
+        ar: "استخدم عدد الكرات أو حجم الكوب أو الباينت حسب المنتج.",
+      },
+    };
+  }
+
+  if (hasAny("cake", "cakes", "cheesecake")) {
+    return {
+      key: "cafe_cake",
+      label: { en: "Cake sizes", ar: "أحجام الكيك" },
+      required: true,
+      options: CAFE_CAKE_SIZE_OPTIONS,
+      help: {
+        en: "Use slice, mini, or whole-cake diameter.",
+        ar: "استخدم شريحة أو ميني أو قطر الكيكة الكاملة.",
+      },
+    };
+  }
+
+  if (
+    hasAny(
+      "pastry", "pastries", "croissant", "croissants", "muffin",
+      "muffins", "donut", "donuts", "doughnut", "bakery", "cookie", "cookies"
+    )
+  ) {
+    return {
+      key: "cafe_pastry",
+      label: { en: "Pastry sizes", ar: "أحجام المعجنات" },
+      required: true,
+      options: CAFE_PASTRY_SIZE_OPTIONS,
+      help: {
+        en: "Use only when the same pastry is sold in different physical sizes.",
+        ar: "استخدمها فقط عندما تُباع نفس المعجنات بأحجام فعلية مختلفة.",
+      },
+    };
+  }
+
+  if (hasAny("dessert", "desserts", "sweet", "sweets", "pudding")) {
+    return {
+      key: "cafe_dessert",
+      label: { en: "Dessert sizes", ar: "أحجام الحلويات" },
+      required: true,
+      options: CAFE_DESSERT_SIZE_OPTIONS,
+      help: {
+        en: "Use individual or sharing portion sizes.",
+        ar: "استخدم حجم الحصة الفردية أو المشاركة.",
+      },
+    };
+  }
+
+  if (
+    hasAny(
+      "sandwich", "sandwiches", "wrap", "wraps", "panini",
+      "burger", "burgers", "sub", "subs"
+    )
+  ) {
+    return {
+      key: "cafe_sandwich",
+      label: { en: "Food portion sizes", ar: "أحجام الوجبات" },
+      required: true,
+      options: CAFE_SANDWICH_SIZE_OPTIONS,
+      help: {
+        en: "Use only when the same item is sold in different portions or lengths.",
+        ar: "استخدمها فقط عندما يُباع نفس الصنف بحصص أو أطوال مختلفة.",
+      },
+    };
+  }
+
+  return {
+    key: "cafe_general",
+    label: { en: "Item sizes", ar: "أحجام المنتج" },
+    required: true,
+    options: CAFE_GENERAL_SIZE_OPTIONS,
+    help: {
+      en: "General cafe sizes. Use Custom size for a cafe-specific label.",
+      ar: "أحجام عامة للمقهى. استخدم المقاس المخصص لاسم خاص بالمقهى.",
+    },
+  };
+}
 
 function retailSizePresetFromCategoryName(
   categoryName: string | null | undefined
@@ -1147,20 +1399,35 @@ export default function DarikDirectProductsPage() {
     ? FOOTWEAR_GROUP_LABELS[footwearSizeGroup]
     : null;
 
-  const retailSizePreset =
+  const shoesRetailSizePreset =
     effectiveBusinessType === "shoes"
       ? retailSizePresetFromCategoryName(selectedProductCategoryName)
       : null;
 
+  const cafeSizePreset =
+    effectiveBusinessType === "cafe"
+      ? cafeSizePresetFromCategoryName(selectedProductCategoryName)
+      : null;
+
+  // For Cafe, the existence of a size row is the opt-in state.
+  // New cafe products start with [], so the checkbox is off.
+  // Existing cafe products with saved direct_size_options reopen checked.
+  const cafeHasDifferentSizes =
+    effectiveBusinessType === "cafe" && form.sizeOptions.length > 0;
+
+  const retailSizePreset =
+    shoesRetailSizePreset ||
+    (cafeHasDifferentSizes ? cafeSizePreset : null);
+
   useEffect(() => {
-    if (!retailSizePreset) return;
+    if (!shoesRetailSizePreset) return;
 
     setForm((current) =>
       current.sizeOptions.length > 0
         ? current
         : { ...current, sizeOptions: [""] }
     );
-  }, [retailSizePreset?.key]);
+  }, [shoesRetailSizePreset?.key]);
 
   useEffect(() => {
     if (!footwearSizeGroup) return;
@@ -1190,6 +1457,17 @@ export default function DarikDirectProductsPage() {
       return unchanged ? current : { ...current, shoeSizes: nextRows };
     });
   }, [footwearSizeGroup]);
+
+  function toggleCafeDifferentSizes(enabled: boolean) {
+    setForm((current) => ({
+      ...current,
+      sizeOptions: enabled
+        ? current.sizeOptions.length > 0
+          ? current.sizeOptions
+          : [""]
+        : [],
+    }));
+  }
 
   function updateRetailSize(index: number, value: string) {
     setForm((current) => {
@@ -2716,6 +2994,44 @@ export default function DarikDirectProductsPage() {
                     </div>
                   </section>
                 ) : null}
+                {effectiveBusinessType === "cafe" && cafeSizePreset ? (
+                  <section className={styles.retailSizeMechanicPanel}>
+                    <div className={styles.shoeMechanicHeading}>
+                      <div>
+                        <strong>
+                          This item has different sizes / هذا المنتج له أحجام مختلفة
+                        </strong>
+                        <span>
+                          Optional. Turn this on only when customers can choose the same item in more than one size. /
+                          اختياري. فعّل هذا الخيار فقط عندما يستطيع العميل اختيار نفس المنتج بأكثر من حجم.
+                        </span>
+                      </div>
+
+                      <label
+                        style={{
+                          display: "inline-flex",
+                          alignItems: "center",
+                          gap: 8,
+                          fontWeight: 800,
+                          cursor: "pointer",
+                          whiteSpace: "nowrap",
+                        }}
+                      >
+                        <input
+                          type="checkbox"
+                          checked={cafeHasDifferentSizes}
+                          onChange={(event) =>
+                            toggleCafeDifferentSizes(event.target.checked)
+                          }
+                        />
+                        <span>
+                          {cafeHasDifferentSizes ? "Yes / نعم" : "No / لا"}
+                        </span>
+                      </label>
+                    </div>
+                  </section>
+                ) : null}
+
                 {retailSizePreset ? (
                   <section className={styles.retailSizeMechanicPanel}>
                     <div className={styles.shoeMechanicHeading}>
