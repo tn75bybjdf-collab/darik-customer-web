@@ -1,5 +1,6 @@
 // DARIK_RETAIL_FIELDS_SMOKE_SHOP_050
 // DARIK_SHOE_CATEGORY_SIZE_GROUPS_053
+// DARIK_SHOE_STORE_CATEGORIES_055
 // Runtime category-preset overlay for the retail-field system.
 // The database preset table remains authoritative for real category provisioning.
 
@@ -36,6 +37,11 @@ const SHOES_CATEGORIES = [
   ["Baby & Toddler Footwear", "أحذية رضع وصغار"],
   ["Unisex Footwear", "أحذية للجنسين"],
   ["Shoe Care & Accessories", "العناية بالأحذية والإكسسوارات"],
+  ["Socks", "جوارب"],
+  ["Clothing", "ملابس"],
+  ["Hats & Caps", "قبعات وكابات"],
+  ["Bags & Backpacks", "حقائب وحقائب ظهر"],
+  ["Belts & Wallets", "أحزمة ومحافظ"],
 ] as const;
 
 function categoryEnglishName(value: unknown) {
