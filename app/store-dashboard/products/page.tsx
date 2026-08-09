@@ -1,5 +1,6 @@
 "use client";
 // DARIK_MECHANICS_LAB_048
+// DARIK_GROCERY_WEIGHT_3_PHOTO_049
 
 // DARIK_AUTOPARTS_FITMENT_FILTERS_033
 // Mobile-safe bilingual product form with automatic retail categories.
@@ -21,6 +22,7 @@ import {
   readMechanicsLabField,
   withMechanicsPreview,
 } from "@/lib/darikMechanicsLab";
+import { getBusinessCategoryPreset } from "../categories/categoryPresets";
 import DashboardLogoutButton from "../components/DashboardLogoutButton";
 import styles from "./products.module.css";
 
@@ -85,6 +87,11 @@ type DirectProduct = {
   direct_vehicle_make: string | null;
   direct_vehicle_model: string | null;
   direct_photo_url: string | null;
+  retailer_raw_photo_url_2: string | null;
+  retailer_raw_photo_url_3: string | null;
+  direct_sold_by_weight: boolean;
+  direct_weight_unit: string | null;
+  direct_weight_step: number | string | null;
   direct_product_status: "draft" | "published" | "paused" | "archived";
   direct_updated_at: string | null;
   created_at: string;
@@ -104,9 +111,12 @@ type ProductForm = {
   vehicleYearTo: string;
   vehicleMake: string;
   vehicleModel: string;
+  soldByWeight: boolean;
   trackInventory: boolean;
   quantity: string;
   photoUrl: string;
+  photoUrl2: string;
+  photoUrl3: string;
   status: "draft" | "published" | "paused";
   featured: boolean;
   sortOrder: string;
@@ -126,9 +136,12 @@ const emptyForm: ProductForm = {
   vehicleYearTo: "",
   vehicleMake: "",
   vehicleModel: "",
+  soldByWeight: false,
   trackInventory: false,
   quantity: "0",
   photoUrl: "",
+  photoUrl2: "",
+  photoUrl3: "",
   status: "published",
   featured: false,
   sortOrder: "1000",
@@ -198,6 +211,68 @@ function categoryOptionLabel(category: Category, isAutoPartsStore = false) {
   return category.category_status === "hidden"
     ? `${bilingual} (hidden / مخفية)`
     : bilingual;
+}
+
+type PhotoField = "photoUrl" | "photoUrl2" | "photoUrl3";
+
+type MechanicsPresetCategory = {
+  value: string;
+  name: string;
+  nameAr: string;
+  sortOrder: number;
+};
+
+const PRODUCT_PHOTO_SLOTS: Array<{
+  field: PhotoField;
+  label: string;
+  labelAr: string;
+  primary: boolean;
+}> = [
+  { field: "photoUrl", label: "Photo 1", labelAr: "الصورة 1", primary: true },
+  { field: "photoUrl2", label: "Photo 2", labelAr: "الصورة 2", primary: false },
+  { field: "photoUrl3", label: "Photo 3", labelAr: "الصورة 3", primary: false },
+];
+
+const GROCERY_MECHANICS_FIELDS = new Set([
+  "supermarket",
+  "grocery",
+  "mini_market",
+  "butcher",
+  "produce",
+  "frozen_food",
+]);
+
+function normalizedCategoryKey(value: string | null | undefined) {
+  return String(value || "").trim().toLowerCase().replace(/\s+/g, " ");
+}
+
+function normalizePresetCategory(value: unknown, index: number): MechanicsPresetCategory | null {
+  if (typeof value === "string") {
+    const name = value.trim();
+    return name
+      ? { value: `mechanics:${index}`, name, nameAr: "", sortOrder: (index + 1) * 100 }
+      : null;
+  }
+
+  if (Array.isArray(value)) {
+    const name = String(value[0] ?? "").trim();
+    const nameAr = String(value[1] ?? "").trim();
+    return name
+      ? { value: `mechanics:${index}`, name, nameAr, sortOrder: (index + 1) * 100 }
+      : null;
+  }
+
+  if (!value || typeof value !== "object") return null;
+  const record = value as Record<string, unknown>;
+  const name = String(
+    record.name ?? record.label ?? record.nameEn ?? record.name_en ?? record.labelEn ?? record.en ?? ""
+  ).trim();
+  const nameAr = String(
+    record.nameAr ?? record.name_ar ?? record.labelAr ?? record.label_ar ?? record.ar ?? ""
+  ).trim();
+  const explicitSort = Number(record.sortOrder ?? record.sort_order ?? NaN);
+  const sortOrder = Number.isFinite(explicitSort) ? explicitSort : (index + 1) * 100;
+  return name ? { value: `mechanics:${index}`, name, nameAr, sortOrder } : null;
 }
 
 function productDisplayName(product: DirectProduct) {
@@ -336,6 +411,11 @@ export default function DarikDirectProductsPage() {
             "direct_vehicle_make",
             "direct_vehicle_model",
             "direct_photo_url",
+            "retailer_raw_photo_url_2",
+            "retailer_raw_photo_url_3",
+            "direct_sold_by_weight",
+            "direct_weight_unit",
+            "direct_weight_step",
             "direct_product_status",
             "direct_updated_at",
             "created_at",
@@ -452,6 +532,14 @@ export default function DarikDirectProductsPage() {
     .toLowerCase();
   const effectiveBusinessType = mechanicsTestField || actualBusinessType;
   const isAutoParts = effectiveBusinessType === "auto_parts";
+  const isGroceryMechanics = GROCERY_MECHANICS_FIELDS.has(effectiveBusinessType);
+  const mechanicsPresetCategories = useMemo(() => {
+    if (!mechanicsTestField) return [] as MechanicsPresetCategory[];
+    const preset = getBusinessCategoryPreset(effectiveBusinessType, null);
+    return Array.from(preset.categories as readonly unknown[])
+      .map((category, index) => normalizePresetCategory(category, index))
+      .filter((category): category is MechanicsPresetCategory => Boolean(category));
+  }, [effectiveBusinessType, mechanicsTestField]);
 
   const categoryById = useMemo(
     () => new Map(categories.map((category) => [category.id, category])),
@@ -495,6 +583,18 @@ export default function DarikDirectProductsPage() {
     setForm((current) => ({ ...current, [key]: value }));
   }
 
+  function mechanicsCategoryValueForSavedId(categoryId: string | null) {
+    if (!mechanicsTestField || !categoryId) return categoryId || "";
+    const savedCategory = categoryById.get(categoryId);
+    if (!savedCategory) return "";
+    const savedKey = normalizedCategoryKey(savedCategory.name);
+    return (
+      mechanicsPresetCategories.find(
+        (preset) => normalizedCategoryKey(preset.name) === savedKey
+      )?.value || ""
+    );
+  }
+
   function openCreateForm() {
     setEditingProductId(null);
     setForm(emptyForm);
@@ -513,7 +613,9 @@ export default function DarikDirectProductsPage() {
         "",
       description: product.direct_description || "",
       brandName: product.brand_name || "",
-      directCategoryId: product.direct_store_category_id || "",
+      directCategoryId: mechanicsTestField
+        ? mechanicsCategoryValueForSavedId(product.direct_store_category_id)
+        : product.direct_store_category_id || "",
       price: String(product.direct_price ?? ""),
       compareAtPrice: String(product.direct_compare_at_price ?? ""),
       pricingMode: product.direct_pricing_mode || "price",
@@ -526,9 +628,12 @@ export default function DarikDirectProductsPage() {
       vehicleYearTo: String(product.direct_vehicle_year_to ?? ""),
       vehicleMake: product.direct_vehicle_make || "",
       vehicleModel: product.direct_vehicle_model || "",
+      soldByWeight: Boolean(product.direct_sold_by_weight),
       trackInventory: Boolean(product.direct_inventory_tracking_enabled),
       quantity: String(product.quantity_in_stock ?? 0),
       photoUrl: product.direct_photo_url || "",
+      photoUrl2: product.retailer_raw_photo_url_2 || "",
+      photoUrl3: product.retailer_raw_photo_url_3 || "",
       status:
         product.direct_product_status === "archived"
           ? "paused"
@@ -584,17 +689,19 @@ export default function DarikDirectProductsPage() {
     return publicResult.data.publicUrl;
   }
 
-  async function handleImageChange(event: ChangeEvent<HTMLInputElement>) {
+  async function handleImageChange(
+    event: ChangeEvent<HTMLInputElement>,
+    field: PhotoField
+  ) {
     const file = event.target.files?.[0];
 
     if (!file) return;
 
     setError("");
     setMessage("");
-
     try {
       const publicUrl = await uploadImage(file);
-      updateForm("photoUrl", publicUrl);
+      updateForm(field, publicUrl);
       setMessage("Product image uploaded / تم رفع صورة المنتج.");
     } catch (uploadError) {
       setUploading(false);
@@ -608,6 +715,65 @@ export default function DarikDirectProductsPage() {
     }
   }
 
+  async function resolveDirectCategoryId(rawValue: string) {
+    const clean = String(rawValue || "").trim();
+    if (!clean) return null;
+    if (!clean.startsWith("mechanics:")) return clean;
+
+    const preset = mechanicsPresetCategories.find((item) => item.value === clean);
+    if (!preset) {
+      throw new Error("The selected Mechanics Lab category is no longer available / فئة الاختبار المختارة لم تعد متوفرة.");
+    }
+
+    const wantedKey = normalizedCategoryKey(preset.name);
+    const existing = categories.find(
+      (category) => normalizedCategoryKey(category.name) === wantedKey
+    );
+    if (existing) return existing.id;
+
+    const createResult = await supabase.rpc("darik_direct_create_store_category", {
+      p_retailer_id: selectedRetailerId,
+      p_name: preset.name,
+      p_name_ar: preset.nameAr || null,
+      p_description: null,
+      p_image_url: null,
+      p_status: "active",
+      p_sort_order: preset.sortOrder,
+    });
+
+    if (createResult.error) {
+      throw new Error(
+        `Could not prepare the selected test category. / تعذر تجهيز فئة الاختبار المختارة. ${createResult.error.message}`
+      );
+    }
+
+    const created = createResult.data as unknown as Category | null;
+    if (created?.id) {
+      const savedCategory = created;
+      setCategories((current) =>
+        current.some((category) => category.id === savedCategory.id)
+          ? current
+          : [...current, savedCategory]
+      );
+      return savedCategory.id;
+    }
+
+    const lookup = await supabase
+      .from("retailer_store_categories")
+      .select("id,retailer_id,name,name_ar,category_status,sort_order")
+      .eq("retailer_id", selectedRetailerId)
+      .eq("name", preset.name)
+      .neq("category_status", "archived")
+      .limit(1)
+      .maybeSingle();
+
+    if (lookup.error || !lookup.data?.id) {
+      throw new Error("The selected test category could not be resolved / تعذر تحديد فئة الاختبار المختارة.");
+    }
+
+    return String(lookup.data.id);
+  }
+
   async function saveProduct(event: FormEvent) {
     event.preventDefault();
 
@@ -618,7 +784,8 @@ export default function DarikDirectProductsPage() {
     const compareAtPrice = form.compareAtPrice
       ? Number(form.compareAtPrice)
       : null;
-    const quantity = form.trackInventory ? Number(form.quantity) : 0;
+    const effectiveTrackInventory = form.soldByWeight ? false : form.trackInventory;
+    const quantity = effectiveTrackInventory ? Number(form.quantity) : 0;
     const sortOrder = Number(form.sortOrder || 1000);
     const pricingMode = isAutoParts ? form.pricingMode : "price";
     const vehicleYearFrom = form.vehicleYearFrom ? Number(form.vehicleYearFrom) : null;
@@ -661,7 +828,7 @@ export default function DarikDirectProductsPage() {
     }
 
     if (
-      form.trackInventory &&
+      effectiveTrackInventory &&
       (!Number.isInteger(quantity) || quantity < 0)
     ) {
       setError("Inventory amount must be a whole number of zero or more / يجب أن تكون كمية المخزون رقمًا صحيحًا يساوي صفرًا أو أكثر.");
@@ -670,7 +837,7 @@ export default function DarikDirectProductsPage() {
 
     if (
       form.availabilityStatus === "available" &&
-      form.trackInventory &&
+      effectiveTrackInventory &&
       quantity <= 0
     ) {
       setError("Increase inventory above zero before marking this product available / ارفع كمية المخزون فوق الصفر قبل تحديد المنتج كمتوفر.");
@@ -689,6 +856,19 @@ export default function DarikDirectProductsPage() {
     setError("");
     setMessage("");
 
+    let resolvedCategoryId: string | null = null;
+    try {
+      resolvedCategoryId = await resolveDirectCategoryId(form.directCategoryId);
+    } catch (categoryError) {
+      setSaving(false);
+      setError(
+        categoryError instanceof Error
+          ? categoryError.message
+          : "Could not prepare the selected category / تعذر تجهيز الفئة المختارة."
+      );
+      return;
+    }
+
     const result = editingProductId
       ? await supabase.rpc("darik_direct_update_product_v3", {
           p_product_id: editingProductId,
@@ -696,10 +876,10 @@ export default function DarikDirectProductsPage() {
           p_name_ar: form.nameAr.trim() || null,
           p_description: form.description.trim() || null,
           p_brand_name: form.brandName.trim() || null,
-          p_direct_store_category_id: form.directCategoryId || null,
+          p_direct_store_category_id: resolvedCategoryId,
           p_price: price,
           p_compare_at_price: compareAtPrice,
-          p_track_inventory: form.trackInventory,
+          p_track_inventory: effectiveTrackInventory,
           p_quantity: quantity,
           p_photo_url: form.photoUrl.trim() || null,
           p_status: form.status,
@@ -712,10 +892,10 @@ export default function DarikDirectProductsPage() {
           p_name_ar: form.nameAr.trim() || null,
           p_description: form.description.trim() || null,
           p_brand_name: form.brandName.trim() || null,
-          p_direct_store_category_id: form.directCategoryId || null,
+          p_direct_store_category_id: resolvedCategoryId,
           p_price: price,
           p_compare_at_price: compareAtPrice,
-          p_track_inventory: form.trackInventory,
+          p_track_inventory: effectiveTrackInventory,
           p_quantity: quantity,
           p_photo_url: form.photoUrl.trim() || null,
           p_publish: form.status === "published",
@@ -799,6 +979,42 @@ export default function DarikDirectProductsPage() {
       setSaving(false);
       setError(
         `The product was saved, but its availability status failed. / تم حفظ المنتج، لكن تعذر حفظ حالة التوفر. ${availabilityResult.error.message}`
+      );
+      await loadCatalog();
+      return;
+    }
+
+    const photoResult = await supabase.rpc(
+      "darik_direct_set_product_photos_v1",
+      {
+        p_product_id: savedProductId,
+        p_photo_url_1: form.photoUrl.trim() || null,
+        p_photo_url_2: form.photoUrl2.trim() || null,
+        p_photo_url_3: form.photoUrl3.trim() || null,
+      }
+    );
+
+    if (photoResult.error) {
+      setSaving(false);
+      setError(
+        `The product was saved, but its photo set failed. / تم حفظ المنتج، لكن تعذر حفظ مجموعة الصور. ${photoResult.error.message}`
+      );
+      await loadCatalog();
+      return;
+    }
+
+    const groceryMechanicsResult = await supabase.rpc(
+      "darik_direct_set_product_grocery_mechanics_v1",
+      {
+        p_product_id: savedProductId,
+        p_sold_by_weight: form.soldByWeight,
+      }
+    );
+
+    if (groceryMechanicsResult.error) {
+      setSaving(false);
+      setError(
+        `The product was saved, but the weight mechanic failed. / تم حفظ المنتج، لكن تعذر حفظ خاصية البيع بالوزن. ${groceryMechanicsResult.error.message}`
       );
       await loadCatalog();
       return;
@@ -1122,7 +1338,9 @@ export default function DarikDirectProductsPage() {
                           ? "واتساب لمعرفة السعر / WhatsApp for pricing"
                           : pricingMode === "call_whatsapp"
                             ? "اتصال أو واتساب / Call or WhatsApp"
-                            : money(price);
+                            : product.direct_sold_by_weight
+                              ? `${money(price)} / kg`
+                              : money(price);
 
                     return (
                       <article className={styles.productCard} key={product.id}>
@@ -1202,9 +1420,11 @@ export default function DarikDirectProductsPage() {
                                     : undefined
                                 }
                               >
-                                {product.direct_inventory_tracking_enabled
-                                  ? stock
-                                  : "Not tracked"}
+                                {product.direct_sold_by_weight
+                                  ? "By weight / kg"
+                                  : product.direct_inventory_tracking_enabled
+                                    ? stock
+                                    : "Not tracked"}
                               </strong>
                             </div>
                             <div>
@@ -1405,12 +1625,26 @@ export default function DarikDirectProductsPage() {
                       }
                     >
                       <option value="">Uncategorized / بدون فئة</option>
-                      {categories.map((category) => (
-                        <option key={category.id} value={category.id}>
-                          {categoryOptionLabel(category, isAutoParts)}
-                        </option>
-                      ))}
+                      {mechanicsTestField
+                        ? mechanicsPresetCategories.map((category) => (
+                            <option key={category.value} value={category.value}>
+                              {category.name}
+                              {category.nameAr ? ` / ${category.nameAr}` : ""}
+                            </option>
+                          ))
+                        : categories.map((category) => (
+                            <option key={category.id} value={category.id}>
+                              {categoryOptionLabel(category, isAutoParts)}
+                            </option>
+                          ))}
                     </select>
+                    {mechanicsTestField ? (
+                      <span className={styles.mechanicsCategoryHint}>
+                        Showing {mechanicsFieldLabel(mechanicsTestField)} categories for this mechanics test.
+                        The selected category is prepared on the test store only when you save the product. /
+                        تعرض القائمة أقسام نشاط الاختبار المختار.
+                      </span>
+                    ) : null}
                     <a
                       className={styles.manageCategoriesLink}
                       href="/store-dashboard/categories"
@@ -1521,11 +1755,43 @@ export default function DarikDirectProductsPage() {
                   </label>
                 ) : null}
 
+                {isGroceryMechanics ? (
+                  <section className={styles.weightMechanicPanel}>
+                    <label className={styles.weightMechanicToggle}>
+                      <input
+                        type="checkbox"
+                        checked={form.soldByWeight}
+                        onChange={(event) => {
+                          const checked = event.target.checked;
+                          setForm((current) => ({
+                            ...current,
+                            soldByWeight: checked,
+                            trackInventory: checked ? false : current.trackInventory,
+                            quantity: checked ? "0" : current.quantity,
+                          }));
+                        }}
+                      />
+                      <span>
+                        <strong>This item is sold by weight / هذا المنتج يباع بالوزن</strong>
+                        <small>
+                          Turn this on for produce, meat, cheese, nuts, and other products priced per kilogram. /
+                          فعّل هذا الخيار للمنتجات التي يكون سعرها لكل كيلو.
+                        </small>
+                      </span>
+                    </label>
+                    {form.soldByWeight ? (
+                      <div className={styles.weightMechanicActive}>
+                        <strong>Weight unit: kg / وحدة الوزن: كيلو</strong>
+                        <span>Enter the selling price for 1 kg. Whole-item inventory is disabled for this product.</span>
+                      </div>
+                    ) : null}
+                  </section>
+                ) : null}
                 <div className={styles.threeColumns}>
                   <label>
                     <BilingualLabel
-                      en={isAutoParts && form.pricingMode !== "price" ? "Internal selling price" : "Selling price"}
-                      ar={isAutoParts && form.pricingMode !== "price" ? "سعر البيع الداخلي" : "سعر البيع"}
+                      en={form.soldByWeight ? "Price per kilogram" : isAutoParts && form.pricingMode !== "price" ? "Internal selling price" : "Selling price"}
+                      ar={form.soldByWeight ? "السعر لكل كيلو" : isAutoParts && form.pricingMode !== "price" ? "سعر البيع الداخلي" : "سعر البيع"}
                     />
                     <div className={styles.moneyInput}>
                       <input
@@ -1539,14 +1805,14 @@ export default function DarikDirectProductsPage() {
                         }
                         required
                       />
-                      <span>JOD</span>
+                      <span>{form.soldByWeight ? "JOD / kg" : "JOD"}</span>
                     </div>
                   </label>
 
                   <label>
                     <BilingualLabel
-                      en="Compare-at price"
-                      ar="السعر قبل الخصم"
+                      en={form.soldByWeight ? "Compare-at price per kilogram" : "Compare-at price"}
+                      ar={form.soldByWeight ? "السعر السابق لكل كيلو" : "السعر قبل الخصم"}
                     />
                     <div className={styles.moneyInput}>
                       <input
@@ -1560,7 +1826,7 @@ export default function DarikDirectProductsPage() {
                         }
                         placeholder="Optional / اختياري"
                       />
-                      <span>JOD</span>
+                      <span>{form.soldByWeight ? "JOD / kg" : "JOD"}</span>
                     </div>
                   </label>
 
@@ -1594,10 +1860,17 @@ export default function DarikDirectProductsPage() {
                       </span>
                     </label>
 
+                    {form.soldByWeight ? (
+                      <div className={styles.weightInventoryNote}>
+                        <strong>Weight item / منتج بالوزن</strong>
+                        <span>Use Available / Out of stock for now; whole-item inventory is disabled.</span>
+                      </div>
+                    ) : null}
                     <label className={styles.inventoryToggle}>
                       <input
                         type="checkbox"
-                        checked={form.trackInventory}
+                        checked={form.soldByWeight ? false : form.trackInventory}
+                        disabled={form.soldByWeight}
                         onChange={(event) =>
                           updateForm("trackInventory", event.target.checked)
                         }
@@ -1701,57 +1974,73 @@ export default function DarikDirectProductsPage() {
               </div>
 
               <aside className={styles.imagePanel}>
-                <div className={styles.imagePreview}>
-                  {form.photoUrl ? (
-                    <img src={form.photoUrl} alt="Product preview" />
-                  ) : (
-                    <div>
-                      <strong>Product photo / صورة المنتج</strong>
-                      <span>JPG, PNG, WEBP or GIF</span>
-                    </div>
-                  )}
+                <div className={styles.photoPanelHeading}>
+                  <strong>Product photos / صور المنتج</strong>
+                  <span>Up to 3 photos. Photo 1 is the main image. / حتى 3 صور، والصورة 1 هي الرئيسية.</span>
                 </div>
-
-                <label className={styles.uploadButton}>
-                  {uploading
-                    ? "Uploading… / جارٍ الرفع…"
-                    : "Upload product image / رفع صورة المنتج"}
-                  <input
-                    type="file"
-                    accept="image/jpeg,image/png,image/webp,image/gif"
-                    onChange={handleImageChange}
-                    disabled={uploading || saving}
-                  />
-                </label>
-
-                <label>
-                  <BilingualLabel
-                    en="Or paste image URL"
-                    ar="أو الصق رابط الصورة"
-                  />
-                  <input
-                    type="url"
-                    value={form.photoUrl}
-                    onChange={(event) =>
-                      updateForm("photoUrl", event.target.value)
-                    }
-                    placeholder="https://..."
-                  />
-                </label>
-
+                <div className={styles.photoSlotGrid}>
+                  {PRODUCT_PHOTO_SLOTS.map((slot) => {
+                    const photoValue = form[slot.field];
+                    return (
+                      <section className={styles.photoSlot} key={slot.field}>
+                        <div className={styles.photoSlotTitle}>
+                          <strong>{slot.label} / {slot.labelAr}</strong>
+                          {slot.primary ? <span>Main / الرئيسية</span> : null}
+                        </div>
+                        <div className={styles.imagePreview}>
+                          {photoValue ? (
+                            <img src={photoValue} alt={`Product ${slot.label} preview`} />
+                          ) : (
+                            <div>
+                              <strong>{slot.label} / {slot.labelAr}</strong>
+                              <span>JPG, PNG, WEBP or GIF</span>
+                            </div>
+                          )}
+                        </div>
+                        <label className={styles.uploadButton}>
+                          {uploading
+                            ? "Uploading… / جارٍ الرفع…"
+                            : `Upload ${slot.label} / رفع ${slot.labelAr}`}
+                          <input
+                            type="file"
+                            accept="image/jpeg,image/png,image/webp,image/gif"
+                            onChange={(event) => handleImageChange(event, slot.field)}
+                            disabled={uploading || saving}
+                          />
+                        </label>
+                        <label>
+                          <BilingualLabel en="Or paste image URL" ar="أو الصق رابط الصورة" />
+                          <input
+                            type="url"
+                            value={photoValue}
+                            onChange={(event) => updateForm(slot.field, event.target.value)}
+                            placeholder="https://..."
+                          />
+                        </label>
+                        {photoValue ? (
+                          <button
+                            type="button"
+                            className={styles.removePhotoButton}
+                            onClick={() => updateForm(slot.field, "")}
+                            disabled={saving || uploading}
+                          >
+                            Remove photo / حذف الصورة
+                          </button>
+                        ) : null}
+                      </section>
+                    );
+                  })}
+                </div>
                 <div className={styles.channelNote}>
                   <strong>
                     Marketplace remains protected / يبقى سوق داريك محميًا
                   </strong>
                   <p>
-                    This product starts as direct-store only. Marketplace
-                    approval and official product data are not changed. / يبدأ
-                    هذا المنتج كمنتج خاص بالمتجر المباشر ولا تتغير موافقة السوق
-                    أو بيانات المنتج الرسمية.
+                    These photos belong to the Direct product setup. Marketplace approval and official product data remain separate. /
+                    صور المنتج المباشر لا تغيّر موافقة السوق أو بيانات المنتج الرسمية.
                   </p>
                 </div>
               </aside>
-
               <footer className={styles.formFooter}>
                 <button
                   type="button"
