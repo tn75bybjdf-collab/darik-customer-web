@@ -15,6 +15,7 @@
 // DARIK_COSMETICS_OPTIONAL_CATEGORY_SIZES_062
 // DARIK_PERFUME_PHARMACY_OPTIONAL_CATEGORY_SIZES_063
 // DARIK_SHOES_ADD_PRODUCT_WIZARD_064
+// DARIK_MOBILE_PHONE_CATEGORY_HIERARCHY_066
 
 // DARIK_AUTOPARTS_FITMENT_FILTERS_033
 // Mobile-safe bilingual product form with automatic retail categories.
@@ -2818,11 +2819,27 @@ function retailSizePresetFromCategoryName(
   return null;
 }
 
+type MobileCategoryNode = {
+  id: string;
+  retailer_id: string;
+  category_id: string;
+  parent_node_id: string | null;
+  depth: 1 | 2 | number;
+  name: string;
+  name_ar: string | null;
+  slug: string;
+  sort_order: number | string;
+  node_status: "active" | "hidden" | "archived";
+  is_system: boolean;
+};
+
 type DirectProduct = {
   id: string;
   retailer_id: string;
   category_id: string | null;
   direct_store_category_id: string | null;
+  direct_store_subcategory_id: string | null;
+  direct_store_subsubcategory_id: string | null;
   name: string;
   retailer_submitted_name: string | null;
   official_marketplace_name: string | null;
@@ -3078,6 +3095,17 @@ export default function DarikDirectProductsPage() {
   const [shoeWizardErrors, setShoeWizardErrors] = useState<Record<string, string>>({});
   const [shoeWizardPhotoSlots, setShoeWizardPhotoSlots] = useState(1);
   const [form, setForm] = useState<ProductForm>(emptyForm);
+  const [mobileCategoryNodes, setMobileCategoryNodes] = useState<MobileCategoryNode[]>([]);
+  const [mobileSubcategoryId, setMobileSubcategoryId] = useState("");
+  const [mobileSubsubcategoryId, setMobileSubsubcategoryId] = useState("");
+  const [mobileNodeSaving, setMobileNodeSaving] = useState(false);
+  const [mobileAddSubcategoryOpen, setMobileAddSubcategoryOpen] = useState(false);
+  const [mobileAddDetailOpen, setMobileAddDetailOpen] = useState(false);
+  const [mobileCustomSubcategoryName, setMobileCustomSubcategoryName] = useState("");
+  const [mobileCustomSubcategoryNameAr, setMobileCustomSubcategoryNameAr] = useState("");
+  const [mobileCustomDetailName, setMobileCustomDetailName] = useState("");
+  const [mobileCustomDetailNameAr, setMobileCustomDetailNameAr] = useState("");
+
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [message, setMessage] = useState("");
@@ -3156,6 +3184,8 @@ export default function DarikDirectProductsPage() {
             "retailer_id",
             "category_id",
             "direct_store_category_id",
+            "direct_store_subcategory_id",
+            "direct_store_subsubcategory_id",
             "name",
             "retailer_submitted_name",
             "official_marketplace_name",
@@ -3255,6 +3285,44 @@ export default function DarikDirectProductsPage() {
       loadCatalog();
     }
   }, [selectedRetailerId, loadCatalog]);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadMobileCategoryNodes() {
+      if (!selectedRetailerId) {
+        if (!cancelled) setMobileCategoryNodes([]);
+        return;
+      }
+
+      const result = await supabase
+        .from("retailer_store_category_nodes")
+        .select(
+          "id,retailer_id,category_id,parent_node_id,depth,name,name_ar,slug,sort_order,node_status,is_system"
+        )
+        .eq("retailer_id", selectedRetailerId)
+        .neq("node_status", "archived")
+        .order("sort_order", { ascending: true })
+        .order("name", { ascending: true });
+
+      if (cancelled) return;
+
+      if (result.error) {
+        setMobileCategoryNodes([]);
+        return;
+      }
+
+      setMobileCategoryNodes(
+        (result.data ?? []) as unknown as MobileCategoryNode[]
+      );
+    }
+
+    void loadMobileCategoryNodes();
+    return () => {
+      cancelled = true;
+    };
+  }, [selectedRetailerId]);
+
 
   useEffect(() => {
     if (!formOpen) return;
@@ -3810,7 +3878,195 @@ export default function DarikDirectProductsPage() {
     );
   }
 
+  const isMobilePhoneMechanics = effectiveBusinessType === "mobile_phones";
+
+  const mobileSubcategoryOptions = useMemo(
+    () =>
+      mobileCategoryNodes.filter(
+        (node) =>
+          node.category_id === form.directCategoryId &&
+          Number(node.depth) === 1 &&
+          !node.parent_node_id &&
+          node.node_status !== "archived"
+      ),
+    [mobileCategoryNodes, form.directCategoryId]
+  );
+
+  const selectedMobileSubcategory = useMemo(
+    () =>
+      mobileCategoryNodes.find(
+        (node) =>
+          node.id === mobileSubcategoryId &&
+          node.category_id === form.directCategoryId &&
+          Number(node.depth) === 1
+      ) ?? null,
+    [mobileCategoryNodes, mobileSubcategoryId, form.directCategoryId]
+  );
+
+  const mobileSubsubcategoryOptions = useMemo(
+    () =>
+      mobileCategoryNodes.filter(
+        (node) =>
+          node.category_id === form.directCategoryId &&
+          node.parent_node_id === mobileSubcategoryId &&
+          Number(node.depth) === 2 &&
+          node.node_status !== "archived"
+      ),
+    [mobileCategoryNodes, form.directCategoryId, mobileSubcategoryId]
+  );
+
+  const selectedMobileSubsubcategory = useMemo(
+    () =>
+      mobileCategoryNodes.find(
+        (node) =>
+          node.id === mobileSubsubcategoryId &&
+          node.parent_node_id === mobileSubcategoryId &&
+          Number(node.depth) === 2
+      ) ?? null,
+    [mobileCategoryNodes, mobileSubsubcategoryId, mobileSubcategoryId]
+  );
+
+  const selectedMobileTopCategory = useMemo(
+    () => categories.find((category) => category.id === form.directCategoryId) ?? null,
+    [categories, form.directCategoryId]
+  );
+
+  const mobileCategoryPath = [
+    selectedMobileTopCategory?.name,
+    selectedMobileSubcategory?.name,
+    selectedMobileSubsubcategory?.name,
+  ].filter(Boolean).join(" → ");
+
+  useEffect(() => {
+    if (!mobileSubcategoryId) {
+      if (mobileSubsubcategoryId) setMobileSubsubcategoryId("");
+      return;
+    }
+
+    const subcategoryStillMatches = mobileCategoryNodes.some(
+      (node) =>
+        node.id === mobileSubcategoryId &&
+        node.category_id === form.directCategoryId &&
+        Number(node.depth) === 1
+    );
+
+    if (!subcategoryStillMatches) {
+      setMobileSubcategoryId("");
+      setMobileSubsubcategoryId("");
+      return;
+    }
+
+    if (mobileSubsubcategoryId) {
+      const detailStillMatches = mobileCategoryNodes.some(
+        (node) =>
+          node.id === mobileSubsubcategoryId &&
+          node.category_id === form.directCategoryId &&
+          node.parent_node_id === mobileSubcategoryId &&
+          Number(node.depth) === 2
+      );
+
+      if (!detailStillMatches) setMobileSubsubcategoryId("");
+    }
+  }, [
+    form.directCategoryId,
+    mobileCategoryNodes,
+    mobileSubcategoryId,
+    mobileSubsubcategoryId,
+  ]);
+
+  function selectMobileSubcategory(value: string) {
+    setMobileSubcategoryId(value);
+    setMobileSubsubcategoryId("");
+    setMobileAddDetailOpen(false);
+    setMobileCustomDetailName("");
+    setMobileCustomDetailNameAr("");
+  }
+
+  async function createMobileCategoryNode(level: 1 | 2) {
+    if (!form.directCategoryId) {
+      setError("Select a store category first / اختر فئة المتجر أولاً.");
+      return;
+    }
+
+    const name = level === 1
+      ? mobileCustomSubcategoryName.trim()
+      : mobileCustomDetailName.trim();
+    const nameAr = level === 1
+      ? mobileCustomSubcategoryNameAr.trim()
+      : mobileCustomDetailNameAr.trim();
+
+    if (!name) {
+      setError(
+        level === 1
+          ? "Enter the new subcategory name / أدخل اسم التصنيف الفرعي الجديد."
+          : "Enter the new model/detail name / أدخل اسم الموديل أو التفصيل الجديد."
+      );
+      return;
+    }
+
+    if (level === 2 && !mobileSubcategoryId) {
+      setError("Select a subcategory before adding another level / اختر التصنيف الفرعي أولاً.");
+      return;
+    }
+
+    setMobileNodeSaving(true);
+    setError("");
+    setMessage("");
+
+    const result = await supabase.rpc("darik_direct_create_category_node_v1", {
+      p_category_id: form.directCategoryId,
+      p_parent_node_id: level === 2 ? mobileSubcategoryId : null,
+      p_name: name,
+      p_name_ar: nameAr || null,
+    });
+
+    setMobileNodeSaving(false);
+
+    if (result.error) {
+      setError(result.error.message);
+      return;
+    }
+
+    const payload = result.data as { node?: MobileCategoryNode } | null;
+    const node = payload?.node;
+    if (!node?.id) {
+      setError("The new subcategory was created but could not be read back.");
+      return;
+    }
+
+    setMobileCategoryNodes((current) => {
+      const withoutNode = current.filter((item) => item.id !== node.id);
+      return [...withoutNode, node].sort((left, right) => {
+        const sortDifference = Number(left.sort_order) - Number(right.sort_order);
+        return sortDifference || left.name.localeCompare(right.name);
+      });
+    });
+
+    if (level === 1) {
+      setMobileSubcategoryId(node.id);
+      setMobileSubsubcategoryId("");
+      setMobileCustomSubcategoryName("");
+      setMobileCustomSubcategoryNameAr("");
+      setMobileAddSubcategoryOpen(false);
+      setMessage("Subcategory added / تمت إضافة التصنيف الفرعي.");
+    } else {
+      setMobileSubsubcategoryId(node.id);
+      setMobileCustomDetailName("");
+      setMobileCustomDetailNameAr("");
+      setMobileAddDetailOpen(false);
+      setMessage("Model/detail added / تمت إضافة الموديل أو التفصيل.");
+    }
+  }
+
   function openCreateForm() {
+    setMobileSubcategoryId("");
+    setMobileSubsubcategoryId("");
+    setMobileAddSubcategoryOpen(false);
+    setMobileAddDetailOpen(false);
+    setMobileCustomSubcategoryName("");
+    setMobileCustomSubcategoryNameAr("");
+    setMobileCustomDetailName("");
+    setMobileCustomDetailNameAr("");
     setShoeWizardStep(1);
     setShoeWizardErrors({});
     setShoeWizardPhotoSlots(1);
@@ -3822,6 +4078,14 @@ export default function DarikDirectProductsPage() {
   }
 
   function openEditForm(product: DirectProduct) {
+    setMobileSubcategoryId(product.direct_store_subcategory_id || "");
+    setMobileSubsubcategoryId(product.direct_store_subsubcategory_id || "");
+    setMobileAddSubcategoryOpen(false);
+    setMobileAddDetailOpen(false);
+    setMobileCustomSubcategoryName("");
+    setMobileCustomSubcategoryNameAr("");
+    setMobileCustomDetailName("");
+    setMobileCustomDetailNameAr("");
     setEditingProductId(product.id);
     setForm({
       name: productDisplayName(product),
@@ -4176,6 +4440,23 @@ export default function DarikDirectProductsPage() {
       }
     }
 
+    if (isMobilePhoneMechanics) {
+      if (!form.directCategoryId) {
+        setError("Select a store category / اختر فئة المتجر.");
+        return;
+      }
+
+      if (mobileSubcategoryOptions.length > 0 && !mobileSubcategoryId) {
+        setError("Select a subcategory / اختر التصنيف الفرعي.");
+        return;
+      }
+
+      if (mobileSubsubcategoryOptions.length > 0 && !mobileSubsubcategoryId) {
+        setError("Select the model/detail / اختر الموديل أو التفصيل.");
+        return;
+      }
+    }
+
     setSaving(true);
     setError("");
     setMessage("");
@@ -4361,6 +4642,27 @@ export default function DarikDirectProductsPage() {
       );
       await loadCatalog();
       return;
+    }
+
+    if (isMobilePhoneMechanics) {
+      const categoryPathResult = await supabase.rpc(
+        "darik_direct_set_product_category_path_v1",
+        {
+          p_product_id: savedProductId,
+          p_category_id: form.directCategoryId || null,
+          p_subcategory_id: mobileSubcategoryId || null,
+          p_subsubcategory_id: mobileSubsubcategoryId || null,
+        }
+      );
+
+      if (categoryPathResult.error) {
+        setSaving(false);
+        setError(
+          `The product was saved, but its mobile category path failed. / تم حفظ المنتج، لكن تعذر حفظ التصنيف التفصيلي للهاتف. ${categoryPathResult.error.message}`
+        );
+        await loadCatalog();
+        return;
+      }
     }
 
     const genericSizesResult = await supabase.rpc(
@@ -6028,6 +6330,174 @@ export default function DarikDirectProductsPage() {
                       Create or manage categories / إنشاء أو إدارة الفئات
                     </a>
                   </label>
+
+                  {isMobilePhoneMechanics && form.directCategoryId ? (
+                    <section className={styles.mobileHierarchyPanel}>
+                      <div className={styles.mobileHierarchyHeading}>
+                        <div>
+                          <strong>Product fit / التصنيف التفصيلي</strong>
+                          <span>
+                            Pick only what matters. Darik keeps this to two child levels so the catalog stays easy to use. /
+                            اختر التفاصيل المهمة فقط. دارك يحصرها بمستويين حتى يبقى الكتالوج بسيطًا.
+                          </span>
+                        </div>
+                        {mobileCategoryPath ? (
+                          <span className={styles.mobileHierarchyPath}>
+                            {mobileCategoryPath}
+                          </span>
+                        ) : null}
+                      </div>
+
+                      <div className={styles.mobileHierarchyFields}>
+                        <label>
+                          <BilingualLabel
+                            en="Subcategory / brand / type"
+                            ar="التصنيف الفرعي / العلامة / النوع"
+                          />
+                          <select
+                            value={mobileSubcategoryId}
+                            onChange={(event) => selectMobileSubcategory(event.target.value)}
+                            disabled={mobileNodeSaving}
+                          >
+                            <option value="">
+                              {mobileSubcategoryOptions.length > 0
+                                ? "Select subcategory / اختر التصنيف الفرعي"
+                                : "No preset subcategories / لا توجد تصنيفات جاهزة"}
+                            </option>
+                            {mobileSubcategoryOptions.map((node) => (
+                              <option key={node.id} value={node.id}>
+                                {node.name}{node.name_ar ? " / " + node.name_ar : ""}
+                              </option>
+                            ))}
+                          </select>
+                        </label>
+
+                        <button
+                          type="button"
+                          className={styles.mobileHierarchyAddButton}
+                          onClick={() => setMobileAddSubcategoryOpen((current) => !current)}
+                          disabled={mobileNodeSaving}
+                        >
+                          + Add subcategory / إضافة تصنيف فرعي
+                        </button>
+
+                        {mobileAddSubcategoryOpen ? (
+                          <div className={styles.mobileHierarchyCustomBox}>
+                            <label>
+                              <BilingualLabel en="New subcategory (English)" ar="التصنيف الفرعي الجديد بالإنجليزي" />
+                              <input
+                                value={mobileCustomSubcategoryName}
+                                onChange={(event) => setMobileCustomSubcategoryName(event.target.value)}
+                                placeholder="Example: Google Pixel"
+                              />
+                            </label>
+                            <label>
+                              <BilingualLabel en="Arabic name (optional)" ar="الاسم بالعربي (اختياري)" />
+                              <input
+                                dir="rtl"
+                                value={mobileCustomSubcategoryNameAr}
+                                onChange={(event) => setMobileCustomSubcategoryNameAr(event.target.value)}
+                              />
+                            </label>
+                            <div className={styles.mobileHierarchyCustomActions}>
+                              <button
+                                type="button"
+                                onClick={() => void createMobileCategoryNode(1)}
+                                disabled={mobileNodeSaving}
+                              >
+                                {mobileNodeSaving ? "Adding… / جارٍ الإضافة…" : "Add / إضافة"}
+                              </button>
+                              <button
+                                type="button"
+                                className={styles.mobileHierarchyCancelButton}
+                                onClick={() => setMobileAddSubcategoryOpen(false)}
+                                disabled={mobileNodeSaving}
+                              >
+                                Cancel / إلغاء
+                              </button>
+                            </div>
+                          </div>
+                        ) : null}
+
+                        {mobileSubcategoryId ? (
+                          <>
+                            {mobileSubsubcategoryOptions.length > 0 ? (
+                              <label>
+                                <BilingualLabel
+                                  en="Model / detail"
+                                  ar="الموديل / التفصيل"
+                                />
+                                <select
+                                  value={mobileSubsubcategoryId}
+                                  onChange={(event) => setMobileSubsubcategoryId(event.target.value)}
+                                  disabled={mobileNodeSaving}
+                                >
+                                  <option value="">Select model/detail / اختر الموديل أو التفصيل</option>
+                                  {mobileSubsubcategoryOptions.map((node) => (
+                                    <option key={node.id} value={node.id}>
+                                      {node.name}{node.name_ar ? " / " + node.name_ar : ""}
+                                    </option>
+                                  ))}
+                                </select>
+                              </label>
+                            ) : (
+                              <div className={styles.mobileHierarchyQuietNote}>
+                                No extra level is required for this choice. Add one only if you need a specific model or detail. /
+                                لا يلزم مستوى إضافي لهذا الخيار. أضفه فقط إذا احتجت موديلًا أو تفصيلًا محددًا.
+                              </div>
+                            )}
+
+                            <button
+                              type="button"
+                              className={styles.mobileHierarchyAddButton}
+                              onClick={() => setMobileAddDetailOpen((current) => !current)}
+                              disabled={mobileNodeSaving}
+                            >
+                              + Add model / detail / إضافة موديل أو تفصيل
+                            </button>
+
+                            {mobileAddDetailOpen ? (
+                              <div className={styles.mobileHierarchyCustomBox}>
+                                <label>
+                                  <BilingualLabel en="New model/detail (English)" ar="الموديل أو التفصيل الجديد بالإنجليزي" />
+                                  <input
+                                    value={mobileCustomDetailName}
+                                    onChange={(event) => setMobileCustomDetailName(event.target.value)}
+                                    placeholder="Example: iPhone 15 Plus"
+                                  />
+                                </label>
+                                <label>
+                                  <BilingualLabel en="Arabic name (optional)" ar="الاسم بالعربي (اختياري)" />
+                                  <input
+                                    dir="rtl"
+                                    value={mobileCustomDetailNameAr}
+                                    onChange={(event) => setMobileCustomDetailNameAr(event.target.value)}
+                                  />
+                                </label>
+                                <div className={styles.mobileHierarchyCustomActions}>
+                                  <button
+                                    type="button"
+                                    onClick={() => void createMobileCategoryNode(2)}
+                                    disabled={mobileNodeSaving}
+                                  >
+                                    {mobileNodeSaving ? "Adding… / جارٍ الإضافة…" : "Add / إضافة"}
+                                  </button>
+                                  <button
+                                    type="button"
+                                    className={styles.mobileHierarchyCancelButton}
+                                    onClick={() => setMobileAddDetailOpen(false)}
+                                    disabled={mobileNodeSaving}
+                                  >
+                                    Cancel / إلغاء
+                                  </button>
+                                </div>
+                              </div>
+                            ) : null}
+                          </>
+                        ) : null}
+                      </div>
+                    </section>
+                  ) : null}
                 </div>
 
                 {isAutoParts ? (
