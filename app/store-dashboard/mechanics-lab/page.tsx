@@ -1,5 +1,7 @@
 "use client";
 
+// DARIK_RETAIL_FIELDS_SMOKE_SHOP_050
+
 import { useEffect, useMemo, useState } from "react";
 import type { Session } from "@supabase/supabase-js";
 import { useRouter } from "next/navigation";
@@ -34,15 +36,18 @@ function mechanicsSummary(field: string) {
       "Call / WhatsApp quote flow",
     ];
   }
-  if (
-    ["supermarket", "grocery", "mini_market", "butcher", "produce", "frozen_food"].includes(
-      field
-    )
-  ) {
+  if (["supermarket", "bakery"].includes(field)) {
     return [
-      "Grocery product behavior",
-      "Item vs. weight selling — next mechanic",
-      "Grocery cart and quantity rules — next mechanic",
+      "Sold per item or by weight",
+      "Kilogram pricing",
+      "Customer weight/cart rules — next mechanic",
+    ];
+  }
+  if (field === "smoke_shop") {
+    return [
+      "Smoke Shop category system",
+      "Base Darik product and inventory flow",
+      "Age / ID verification — next mechanic",
     ];
   }
   return [

@@ -1,4 +1,6 @@
 "use client";
+
+// DARIK_RETAIL_FIELDS_SMOKE_SHOP_050
 // DARIK_MECHANICS_LAB_048
 // DARIK_CATEGORIES_UTF8_REPAIR_030
 
@@ -20,7 +22,7 @@ import {
 } from "@/lib/darikMechanicsLab";
 import DashboardLogoutButton from "../components/DashboardLogoutButton";
 import styles from "./categories.module.css";
-import { getBusinessCategoryPreset } from "./categoryPresets";
+import { getBusinessCategoryPreset } from "./categoryPresetOverrides";
 
 type StoreContext = {
   retailer_id: string;

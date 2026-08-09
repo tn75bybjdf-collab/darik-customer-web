@@ -1,5 +1,7 @@
 "use client";
 
+// DARIK_RETAIL_FIELDS_SMOKE_SHOP_050
+
 // DARIK_CUSTOM_STORE_LINKS_035
 
 import { useEffect, useMemo, useState } from "react";
@@ -23,15 +25,12 @@ type LockedLocation = {
 
 const businessTypes = [
   ["supermarket", "Supermarket / Hypermarket — سوبرماركت / هايبرماركت"],
-  ["grocery", "Grocery store — بقالة"],
-  ["mini_market", "Mini-market / Convenience store — ميني ماركت / تموينات"],
   ["restaurant", "Restaurant — مطعم"],
-  ["fast_food", "Fast food — وجبات سريعة"],
   ["bakery", "Bakery / Sweets — مخبز / حلويات"],
   ["cafe", "Café — مقهى / كوفي شوب"],
+  ["smoke_shop", "Smoke shop — محل دخان وتبغ"],
   ["butcher", "Butcher — ملحمة"],
   ["produce", "Fruit and vegetable store — خضار وفواكه"],
-  ["frozen_food", "Frozen food store — مواد غذائية مجمدة"],
   ["clothing", "Clothing — ملابس"],
   ["shoes", "Shoes — أحذية"],
   ["jewelry", "Jewelry — مجوهرات"],
@@ -89,7 +88,7 @@ export default function StoreSignupPage() {
   const [step, setStep] = useState(1);
   const [organizationName, setOrganizationName] = useState("");
   const [organizationNameAr, setOrganizationNameAr] = useState("");
-  const [businessType, setBusinessType] = useState("grocery");
+  const [businessType, setBusinessType] = useState("supermarket");
   const [businessTypeOther, setBusinessTypeOther] = useState("");
   const [contactName, setContactName] = useState("");
   const [phone, setPhone] = useState("");

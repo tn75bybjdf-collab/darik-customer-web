@@ -1,6 +1,7 @@
 "use client";
 // DARIK_MECHANICS_LAB_048
 // DARIK_GROCERY_WEIGHT_3_PHOTO_049
+// DARIK_RETAIL_FIELDS_SMOKE_SHOP_050
 
 // DARIK_AUTOPARTS_FITMENT_FILTERS_033
 // Mobile-safe bilingual product form with automatic retail categories.
@@ -22,7 +23,7 @@ import {
   readMechanicsLabField,
   withMechanicsPreview,
 } from "@/lib/darikMechanicsLab";
-import { getBusinessCategoryPreset } from "../categories/categoryPresets";
+import { getBusinessCategoryPreset } from "../categories/categoryPresetOverrides";
 import DashboardLogoutButton from "../components/DashboardLogoutButton";
 import styles from "./products.module.css";
 
@@ -233,13 +234,9 @@ const PRODUCT_PHOTO_SLOTS: Array<{
   { field: "photoUrl3", label: "Photo 3", labelAr: "الصورة 3", primary: false },
 ];
 
-const GROCERY_MECHANICS_FIELDS = new Set([
+const WEIGHT_MECHANICS_FIELDS = new Set([
   "supermarket",
-  "grocery",
-  "mini_market",
-  "butcher",
-  "produce",
-  "frozen_food",
+  "bakery",
 ]);
 
 function normalizedCategoryKey(value: string | null | undefined) {
@@ -532,7 +529,7 @@ export default function DarikDirectProductsPage() {
     .toLowerCase();
   const effectiveBusinessType = mechanicsTestField || actualBusinessType;
   const isAutoParts = effectiveBusinessType === "auto_parts";
-  const isGroceryMechanics = GROCERY_MECHANICS_FIELDS.has(effectiveBusinessType);
+  const supportsWeightSelling = WEIGHT_MECHANICS_FIELDS.has(effectiveBusinessType);
   const mechanicsPresetCategories = useMemo(() => {
     if (!mechanicsTestField) return [] as MechanicsPresetCategory[];
     const preset = getBusinessCategoryPreset(effectiveBusinessType, null);
@@ -1755,7 +1752,7 @@ export default function DarikDirectProductsPage() {
                   </label>
                 ) : null}
 
-                {isGroceryMechanics ? (
+                {supportsWeightSelling ? (
                   <section className={styles.weightMechanicPanel}>
                     <label className={styles.weightMechanicToggle}>
                       <input
@@ -1774,8 +1771,8 @@ export default function DarikDirectProductsPage() {
                       <span>
                         <strong>This item is sold by weight / هذا المنتج يباع بالوزن</strong>
                         <small>
-                          Turn this on for produce, meat, cheese, nuts, and other products priced per kilogram. /
-                          فعّل هذا الخيار للمنتجات التي يكون سعرها لكل كيلو.
+                          Turn this on for products priced per kilogram, including bakery items sold by weight. /
+                          فعّل هذا الخيار للمنتجات التي يكون سعرها لكل كيلو، بما فيها منتجات المخبز المباعة بالوزن.
                         </small>
                       </span>
                     </label>

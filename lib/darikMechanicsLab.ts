@@ -1,18 +1,17 @@
 "use client";
 
+// DARIK_RETAIL_FIELDS_SMOKE_SHOP_050
+
 export const DARIK_MECHANICS_LAB_STORAGE_KEY = "darik:mechanics-lab:field";
 
 export const darikMechanicsFieldOptions = [
   { value: "supermarket", label: "Supermarket / Hypermarket", labelAr: "سوبرماركت / هايبرماركت" },
-  { value: "grocery", label: "Grocery store", labelAr: "بقالة" },
-  { value: "mini_market", label: "Mini-market / Convenience", labelAr: "ميني ماركت / تموينات" },
   { value: "restaurant", label: "Restaurant", labelAr: "مطعم" },
-  { value: "fast_food", label: "Fast food", labelAr: "وجبات سريعة" },
   { value: "bakery", label: "Bakery / Sweets", labelAr: "مخبز / حلويات" },
   { value: "cafe", label: "Café", labelAr: "مقهى / كوفي شوب" },
+  { value: "smoke_shop", label: "Smoke Shop", labelAr: "محل دخان وتبغ" },
   { value: "butcher", label: "Butcher", labelAr: "ملحمة" },
   { value: "produce", label: "Fruit and vegetable store", labelAr: "خضار وفواكه" },
-  { value: "frozen_food", label: "Frozen food store", labelAr: "مواد غذائية مجمدة" },
   { value: "clothing", label: "Clothing", labelAr: "ملابس" },
   { value: "shoes", label: "Shoes", labelAr: "أحذية" },
   { value: "jewelry", label: "Jewelry", labelAr: "مجوهرات" },
