@@ -11,6 +11,7 @@
 // DARIK_CAFE_OPTIONAL_CATEGORY_SIZES_058
 // DARIK_CAFE_SIZE_YES_NO_BUTTON_059
 // DARIK_CLOTHING_MANDATORY_CATEGORY_SIZES_060
+// DARIK_JEWELRY_CATEGORY_SIZING_061
 
 // DARIK_AUTOPARTS_FITMENT_FILTERS_033
 // Mobile-safe bilingual product form with automatic retail categories.
@@ -607,6 +608,376 @@ const CLOTHING_RING_SIZE_OPTIONS = [
 ];
 
 const CLOTHING_ONE_SIZE_OPTIONS = ["One Size"] as const;
+
+const JEWELRY_RING_SIZE_OPTIONS = [
+  "US 3 — 14.1 mm diameter / 44.2 mm circumference",
+  "US 3.5 — 14.5 mm diameter / 45.5 mm circumference",
+  "US 4 — 14.9 mm diameter / 46.8 mm circumference",
+  "US 4.5 — 15.3 mm diameter / 48.0 mm circumference",
+  "US 5 — 15.7 mm diameter / 49.3 mm circumference",
+  "US 5.5 — 16.1 mm diameter / 50.6 mm circumference",
+  "US 6 — 16.5 mm diameter / 51.9 mm circumference",
+  "US 6.5 — 16.9 mm diameter / 53.1 mm circumference",
+  "US 7 — 17.3 mm diameter / 54.4 mm circumference",
+  "US 7.5 — 17.7 mm diameter / 55.7 mm circumference",
+  "US 8 — 18.1 mm diameter / 57.0 mm circumference",
+  "US 8.5 — 18.5 mm diameter / 58.3 mm circumference",
+  "US 9 — 18.9 mm diameter / 59.5 mm circumference",
+  "US 9.5 — 19.4 mm diameter / 60.8 mm circumference",
+  "US 10 — 19.8 mm diameter / 62.1 mm circumference",
+  "US 10.5 — 20.2 mm diameter / 63.4 mm circumference",
+  "US 11 — 20.6 mm diameter / 64.6 mm circumference",
+  "US 11.5 — 21.0 mm diameter / 65.9 mm circumference",
+  "US 12 — 21.4 mm diameter / 67.2 mm circumference",
+  "US 12.5 — 21.8 mm diameter / 68.5 mm circumference",
+  "US 13 — 22.2 mm diameter / 69.7 mm circumference",
+] as const;
+
+const JEWELRY_NECKLACE_LENGTH_OPTIONS = [
+  "14 in / 35.6 cm",
+  "16 in / 40.6 cm",
+  "18 in / 45.7 cm",
+  "20 in / 50.8 cm",
+  "22 in / 55.9 cm",
+  "24 in / 61.0 cm",
+  "26 in / 66.0 cm",
+  "28 in / 71.1 cm",
+  "30 in / 76.2 cm",
+  "32 in / 81.3 cm",
+  "36 in / 91.4 cm",
+] as const;
+
+const JEWELRY_BRACELET_SIZE_OPTIONS = [
+  "XS — wrist 12.1-13.3 cm",
+  "S — wrist 13.4-14.6 cm",
+  "M — wrist 14.6-15.9 cm",
+  "L — wrist 15.9-17.1 cm",
+  "XL — wrist 17.2-18.4 cm",
+  "XXL — wrist 18.4-19.7 cm",
+  "XXXL — wrist 19.7-21.0 cm",
+  "14 cm", "15 cm", "16 cm", "17 cm", "18 cm", "19 cm",
+  "20 cm", "21 cm", "22 cm", "23 cm", "24 cm",
+] as const;
+
+const JEWELRY_ANKLET_LENGTH_OPTIONS = [
+  "20 cm / 7.9 in",
+  "21 cm / 8.3 in",
+  "22 cm / 8.7 in",
+  "23 cm / 9.1 in",
+  "24 cm / 9.4 in",
+  "25 cm / 9.8 in",
+  "26 cm / 10.2 in",
+  "27 cm / 10.6 in",
+  "28 cm / 11.0 in",
+  "29 cm / 11.4 in",
+  "30 cm / 11.8 in",
+] as const;
+
+const JEWELRY_BANGLE_DIAMETER_OPTIONS = [
+  "50 mm inner diameter",
+  "52 mm inner diameter",
+  "54 mm inner diameter",
+  "56 mm inner diameter",
+  "58 mm inner diameter",
+  "60 mm inner diameter",
+  "62 mm inner diameter",
+  "64 mm inner diameter",
+  "66 mm inner diameter",
+  "68 mm inner diameter",
+  "70 mm inner diameter",
+  "72 mm inner diameter",
+  "74 mm inner diameter",
+  "76 mm inner diameter",
+] as const;
+
+const JEWELRY_HOOP_EARRING_OPTIONS = [
+  "8 mm diameter",
+  "10 mm diameter",
+  "12 mm diameter",
+  "15 mm diameter",
+  "20 mm diameter",
+  "25 mm diameter",
+  "30 mm diameter",
+  "35 mm diameter",
+  "40 mm diameter",
+  "50 mm diameter",
+  "60 mm diameter",
+  "70 mm diameter",
+  "80 mm diameter",
+] as const;
+
+const JEWELRY_DROP_EARRING_OPTIONS = [
+  "20 mm drop",
+  "25 mm drop",
+  "30 mm drop",
+  "35 mm drop",
+  "40 mm drop",
+  "50 mm drop",
+  "60 mm drop",
+  "70 mm drop",
+  "80 mm drop",
+  "100 mm drop",
+] as const;
+
+const JEWELRY_GENERIC_EARRING_OPTIONS = [
+  "One Size",
+  ...JEWELRY_HOOP_EARRING_OPTIONS,
+  ...JEWELRY_DROP_EARRING_OPTIONS,
+] as const;
+
+const JEWELRY_WATCH_CASE_OPTIONS = [
+  "Case 24 mm",
+  "Case 26 mm",
+  "Case 28 mm",
+  "Case 30 mm",
+  "Case 32 mm",
+  "Case 34 mm",
+  "Case 36 mm",
+  "Case 38 mm",
+  "Case 39 mm",
+  "Case 40 mm",
+  "Case 41 mm",
+  "Case 42 mm",
+  "Case 43 mm",
+  "Case 44 mm",
+  "Case 45 mm",
+  "Case 46 mm",
+  "Case 48 mm",
+  "Case 50 mm",
+] as const;
+
+const JEWELRY_BODY_SIZE_OPTIONS = [
+  "20G / 0.8 mm x 6 mm",
+  "20G / 0.8 mm x 8 mm",
+  "20G / 0.8 mm x 10 mm",
+  "18G / 1.0 mm x 6 mm",
+  "18G / 1.0 mm x 8 mm",
+  "18G / 1.0 mm x 10 mm",
+  "16G / 1.2 mm x 6 mm",
+  "16G / 1.2 mm x 8 mm",
+  "16G / 1.2 mm x 10 mm",
+  "16G / 1.2 mm x 12 mm",
+  "14G / 1.6 mm x 8 mm",
+  "14G / 1.6 mm x 10 mm",
+  "14G / 1.6 mm x 12 mm",
+  "14G / 1.6 mm x 14 mm",
+  "14G / 1.6 mm x 16 mm",
+  "12G / 2.0 mm",
+  "10G / 2.5 mm",
+  "8G / 3.2 mm",
+  "6G / 4.0 mm",
+  "4G / 5.0 mm",
+  "2G / 6.0 mm",
+  "0G / 8.0 mm",
+  "00G / 10.0 mm",
+] as const;
+
+const JEWELRY_ONE_SIZE_OPTIONS = ["One Size"] as const;
+
+function jewelryRetailSizePresetFromCategoryName(
+  categoryName: string | null | undefined
+): RetailSizePreset | null {
+  const key = normalizedCategoryKey(categoryName);
+  if (!key) return null;
+
+  const hasAny = (...words: string[]) =>
+    words.some((word) => key.includes(word));
+
+  // Body jewelry must be resolved before "ring" / "earring" because names
+  // such as "nose ring" and "ear piercing" otherwise fall into normal jewelry.
+  if (
+    hasAny(
+      "body jewelry", "body jewellery", "piercing", "piercings",
+      "nose ring", "nose stud", "belly ring", "navel", "labret",
+      "eyebrow", "tongue bar", "ear gauge", "plug", "plugs", "tunnel",
+      "بيرسنغ", "ثقب", "حلق الأنف", "حلق السرة"
+    )
+  ) {
+    return {
+      key: "jewelry_body",
+      label: { en: "Gauge & jewelry length", ar: "قياس و طول البيرسنغ" },
+      required: true,
+      options: JEWELRY_BODY_SIZE_OPTIONS,
+      help: {
+        en: "Choose the gauge/thickness and wearable length. Use Custom size for uncommon combinations.",
+        ar: "اختر سماكة القياس والطول. استخدم المقاس المخصص للتركيبات غير الشائعة.",
+      },
+    };
+  }
+
+  if (hasAny("anklet", "anklets", "خلخال", "خلاخل")) {
+    return {
+      key: "jewelry_anklets",
+      label: { en: "Anklet length", ar: "طول الخلخال" },
+      required: true,
+      options: JEWELRY_ANKLET_LENGTH_OPTIONS,
+      help: {
+        en: "Choose the finished anklet length in centimeters/inches.",
+        ar: "اختر الطول النهائي للخلخال بالسنتيمتر / الإنش.",
+      },
+    };
+  }
+
+  if (
+    !hasAny("cufflink", "cufflinks", "ear cuff", "ear cuffs") &&
+    hasAny(
+      "bangle", "bangles", "cuff", "cuffs",
+      "rigid bracelet", "أساور صلبة", "سوار صلب"
+    )
+  ) {
+    return {
+      key: "jewelry_bangles",
+      label: { en: "Bangle / cuff size", ar: "مقاس السوار الصلب" },
+      required: true,
+      options: JEWELRY_BANGLE_DIAMETER_OPTIONS,
+      help: {
+        en: "Choose the inner diameter of the bangle/cuff.",
+        ar: "اختر القطر الداخلي للسوار الصلب.",
+      },
+    };
+  }
+
+  // Bracelet checks come before chain because "chain bracelet" contains both.
+  if (hasAny("bracelet", "bracelets", "سوار", "أساور", "اساور")) {
+    return {
+      key: "jewelry_bracelets",
+      label: { en: "Bracelet size / wrist", ar: "مقاس السوار / المعصم" },
+      required: true,
+      options: JEWELRY_BRACELET_SIZE_OPTIONS,
+      help: {
+        en: "Choose a wrist range or the bracelet's finished centimeter length.",
+        ar: "اختر نطاق قياس المعصم أو طول السوار النهائي بالسنتيمتر.",
+      },
+    };
+  }
+
+  if (
+    !hasAny("earring", "earrings") &&
+    hasAny(
+      "ring", "rings", "wedding band", "band ring", "toe ring",
+      "خاتم", "خواتم", "دبلة", "دبل"
+    )
+  ) {
+    return {
+      key: "jewelry_rings",
+      label: { en: "Ring sizes", ar: "مقاسات الخواتم" },
+      required: true,
+      options: JEWELRY_RING_SIZE_OPTIONS,
+      help: {
+        en: "US ring size is shown with measured inside diameter and circumference for clarity.",
+        ar: "يظهر المقاس الأمريكي مع القطر والمحيط الداخليين بالملليمتر لتجنب الالتباس.",
+      },
+    };
+  }
+
+  if (
+    hasAny(
+      "necklace", "necklaces", "chain", "chains", "choker", "chokers",
+      "قلادة", "قلائد", "سلسلة", "سلاسل", "تشوكر"
+    )
+  ) {
+    return {
+      key: "jewelry_necklaces",
+      label: { en: "Necklace / chain length", ar: "طول القلادة / السلسلة" },
+      required: true,
+      options: JEWELRY_NECKLACE_LENGTH_OPTIONS,
+      help: {
+        en: "Choose the finished chain length in both inches and centimeters.",
+        ar: "اختر الطول النهائي للسلسلة بالإنش والسنتيمتر.",
+      },
+    };
+  }
+
+  if (hasAny("hoop earring", "hoop earrings", "hoops", "حلق دائري", "أقراط دائرية")) {
+    return {
+      key: "jewelry_hoop_earrings",
+      label: { en: "Hoop diameter", ar: "قطر الحلق" },
+      required: true,
+      options: JEWELRY_HOOP_EARRING_OPTIONS,
+      help: {
+        en: "Choose the hoop's outside diameter.",
+        ar: "اختر القطر الخارجي للحلق.",
+      },
+    };
+  }
+
+  if (
+    hasAny(
+      "drop earring", "drop earrings", "dangle", "dangles",
+      "أقراط متدلية", "حلق متدلي"
+    )
+  ) {
+    return {
+      key: "jewelry_drop_earrings",
+      label: { en: "Earring drop length", ar: "طول تدلي الحلق" },
+      required: true,
+      options: JEWELRY_DROP_EARRING_OPTIONS,
+      help: {
+        en: "Choose the approximate drop length.",
+        ar: "اختر طول التدلي التقريبي.",
+      },
+    };
+  }
+
+  if (hasAny("earring", "earrings", "ear studs", "stud earrings", "ear cuff", "ear cuffs", "قرط", "أقراط", "حلق")) {
+    return {
+      key: "jewelry_earrings",
+      label: { en: "Earring size", ar: "مقاس الحلق" },
+      required: true,
+      options: JEWELRY_GENERIC_EARRING_OPTIONS,
+      help: {
+        en: "Use One Size for studs, or choose hoop diameter/drop length when the design is sold by size.",
+        ar: "استخدم مقاسًا موحدًا للحلق الصغير، أو اختر القطر / طول التدلي عندما يباع التصميم بأحجام.",
+      },
+    };
+  }
+
+  if (hasAny("watch", "watches", "ساعة", "ساعات")) {
+    return {
+      key: "jewelry_watches",
+      label: { en: "Watch case size", ar: "حجم هيكل الساعة" },
+      required: true,
+      options: JEWELRY_WATCH_CASE_OPTIONS,
+      help: {
+        en: "Choose case diameter. Use Custom size when the retailer needs to include a strap/wrist measurement too.",
+        ar: "اختر قطر هيكل الساعة. استخدم المقاس المخصص إذا لزم إضافة قياس السوار أو المعصم.",
+      },
+    };
+  }
+
+  if (
+    hasAny(
+      "pendant", "pendants", "charm", "charms", "brooch", "brooches",
+      "cufflink", "cufflinks", "jewelry set", "jewellery set", "sets",
+      "دلاية", "دلايات", "تعليقة", "تعليقات", "بروش", "أزرار أكمام",
+      "طقم مجوهرات", "أطقم مجوهرات"
+    )
+  ) {
+    return {
+      key: "jewelry_one_size",
+      label: { en: "Jewelry size", ar: "مقاس المجوهرات" },
+      required: true,
+      options: JEWELRY_ONE_SIZE_OPTIONS,
+      help: {
+        en: "Select One Size, or use Custom size if this design is offered in measured variants.",
+        ar: "اختر مقاسًا موحدًا، أو استخدم المقاس المخصص إذا كان التصميم يباع بقياسات مختلفة.",
+      },
+    };
+  }
+
+  // Custom / uncommon Jewelry categories do not bypass sizing. They receive a
+  // safe One Size + Custom path rather than an unrelated clothing size list.
+  return {
+    key: "jewelry_general",
+    label: { en: "Jewelry size / measurement", ar: "مقاس / قياس المجوهرات" },
+    required: true,
+    options: JEWELRY_ONE_SIZE_OPTIONS,
+    help: {
+      en: "Choose One Size, or use Custom size for the item's actual measurement.",
+      ar: "اختر مقاسًا موحدًا، أو استخدم المقاس المخصص لإدخال القياس الفعلي للقطعة.",
+    },
+  };
+}
 
 function clothingRetailSizePresetFromCategoryName(
   categoryName: string | null | undefined
@@ -1810,6 +2181,13 @@ export default function DarikDirectProductsPage() {
         )
       : null;
 
+  const jewelryRetailSizePreset =
+    effectiveBusinessType === "jewelry"
+      ? jewelryRetailSizePresetFromCategoryName(
+          selectedProductCategoryName
+        )
+      : null;
+
   const cafeSizePreset =
     effectiveBusinessType === "cafe"
       ? cafeSizePresetFromCategoryName(selectedProductCategoryName)
@@ -1824,11 +2202,14 @@ export default function DarikDirectProductsPage() {
   const retailSizePreset =
     shoesRetailSizePreset ||
     clothingRetailSizePreset ||
+    jewelryRetailSizePreset ||
     (cafeHasDifferentSizes ? cafeSizePreset : null);
 
   useEffect(() => {
     const mandatorySizePreset =
-      shoesRetailSizePreset || clothingRetailSizePreset;
+      shoesRetailSizePreset ||
+      clothingRetailSizePreset ||
+      jewelryRetailSizePreset;
 
     if (!mandatorySizePreset) return;
 
@@ -1837,7 +2218,11 @@ export default function DarikDirectProductsPage() {
         ? current
         : { ...current, sizeOptions: [""] }
     );
-  }, [shoesRetailSizePreset?.key, clothingRetailSizePreset?.key]);
+  }, [
+    shoesRetailSizePreset?.key,
+    clothingRetailSizePreset?.key,
+    jewelryRetailSizePreset?.key,
+  ]);
 
   useEffect(() => {
     if (!footwearSizeGroup) return;
