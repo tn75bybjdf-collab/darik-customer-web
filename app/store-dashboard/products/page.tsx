@@ -9,6 +9,7 @@
 // DARIK_SHOES_RETAIL_FINAL_056
 // DARIK_SHOES_CATEGORY_SIZE_EXCLUSIVITY_057
 // DARIK_CAFE_OPTIONAL_CATEGORY_SIZES_058
+// DARIK_CAFE_SIZE_YES_NO_BUTTON_059
 
 // DARIK_AUTOPARTS_FITMENT_FILTERS_033
 // Mobile-safe bilingual product form with automatic retail categories.
@@ -2999,35 +3000,43 @@ export default function DarikDirectProductsPage() {
                     <div className={styles.shoeMechanicHeading}>
                       <div>
                         <strong>
-                          This item has different sizes / هذا المنتج له أحجام مختلفة
+                          This item has different sizes? / هل لهذا المنتج أحجام مختلفة؟
                         </strong>
                         <span>
-                          Optional. Turn this on only when customers can choose the same item in more than one size. /
-                          اختياري. فعّل هذا الخيار فقط عندما يستطيع العميل اختيار نفس المنتج بأكثر من حجم.
+                          Choose Yes to add size choices. Once enabled, the button changes to No so you can remove them. /
+                          اختر نعم لإضافة خيارات الأحجام. بعد التفعيل يتحول الزر إلى لا حتى تتمكن من إلغاء الأحجام.
                         </span>
                       </div>
 
-                      <label
+                      <button
+                        type="button"
+                        aria-pressed={cafeHasDifferentSizes}
+                        onClick={() =>
+                          toggleCafeDifferentSizes(!cafeHasDifferentSizes)
+                        }
                         style={{
-                          display: "inline-flex",
-                          alignItems: "center",
-                          gap: 8,
-                          fontWeight: 800,
+                          minWidth: 96,
+                          padding: "10px 18px",
+                          borderRadius: 12,
+                          border: cafeHasDifferentSizes
+                            ? "1px solid #fecaca"
+                            : "1px solid #0f6fff",
+                          background: cafeHasDifferentSizes
+                            ? "#fff1f2"
+                            : "#0f6fff",
+                          color: cafeHasDifferentSizes
+                            ? "#b42318"
+                            : "#ffffff",
+                          fontWeight: 900,
                           cursor: "pointer",
                           whiteSpace: "nowrap",
+                          boxShadow: cafeHasDifferentSizes
+                            ? "none"
+                            : "0 6px 16px rgba(15, 111, 255, 0.18)",
                         }}
                       >
-                        <input
-                          type="checkbox"
-                          checked={cafeHasDifferentSizes}
-                          onChange={(event) =>
-                            toggleCafeDifferentSizes(event.target.checked)
-                          }
-                        />
-                        <span>
-                          {cafeHasDifferentSizes ? "Yes / نعم" : "No / لا"}
-                        </span>
-                      </label>
+                        {cafeHasDifferentSizes ? "No / لا" : "Yes / نعم"}
+                      </button>
                     </div>
                   </section>
                 ) : null}
