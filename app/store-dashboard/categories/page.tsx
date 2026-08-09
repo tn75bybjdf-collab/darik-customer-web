@@ -1,4 +1,5 @@
 "use client";
+// DARIK_MECHANICS_LAB_048
 // DARIK_CATEGORIES_UTF8_REPAIR_030
 
 import {
@@ -12,6 +13,11 @@ import {
 import type { Session } from "@supabase/supabase-js";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabaseBrowser";
+import {
+  mechanicsFieldLabel,
+  readMechanicsLabField,
+  withMechanicsPreview,
+} from "@/lib/darikMechanicsLab";
 import DashboardLogoutButton from "../components/DashboardLogoutButton";
 import styles from "./categories.module.css";
 import { getBusinessCategoryPreset } from "./categoryPresets";
@@ -126,6 +132,16 @@ export default function DarikDirectCategoriesPage() {
   const [statusFilter, setStatusFilter] = useState("current");
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
+  const [mechanicsTestField, setMechanicsTestField] = useState("");
+
+  useEffect(() => {
+    const syncMechanicsField = () => {
+      setMechanicsTestField(readMechanicsLabField());
+    };
+    syncMechanicsField();
+    window.addEventListener("storage", syncMechanicsField);
+    return () => window.removeEventListener("storage", syncMechanicsField);
+  }, []);
 
   const selectedStore = useMemo(
     () =>
@@ -404,13 +420,17 @@ export default function DarikDirectCategoriesPage() {
     [categories, uncategorizedCount]
   );
 
+  const actualBusinessType = String(presetContext?.business_type || "")
+    .trim()
+    .toLowerCase();
+  const effectiveBusinessType = mechanicsTestField || actualBusinessType;
   const businessPreset = useMemo(
     () =>
       getBusinessCategoryPreset(
-        presetContext?.business_type,
-        presetContext?.business_type_other
+        effectiveBusinessType,
+        mechanicsTestField ? null : presetContext?.business_type_other
       ),
-    [presetContext]
+    [effectiveBusinessType, mechanicsTestField, presetContext?.business_type_other]
   );
 
   const preparedPresetCount = useMemo(
@@ -637,6 +657,7 @@ export default function DarikDirectCategoriesPage() {
           <a href="/store-dashboard/storefront">Storefront / واجهة المتجر</a>
           <a href="/store-dashboard/orders">Orders / الطلبات</a>
           <a href="/store-dashboard/products">Products / المنتجات</a>
+          <a href="/store-dashboard/mechanics-lab">Mechanics Lab / مختبر الخصائص</a>
           <a
             className={styles.activeNav}
             href="/store-dashboard/categories"
@@ -678,7 +699,11 @@ export default function DarikDirectCategoriesPage() {
 
             <a
               className={styles.secondaryButton}
-              href="/store-dashboard/products"
+              href={
+                mechanicsTestField
+                  ? withMechanicsPreview("/store-dashboard/products", mechanicsTestField)
+                  : "/store-dashboard/products"
+              }
             >
               Assign products / ربط المنتجات
             </a>
@@ -686,7 +711,14 @@ export default function DarikDirectCategoriesPage() {
             {selectedStore?.storefront_slug ? (
               <a
                 className={styles.secondaryButton}
-                href={`/${selectedStore.storefront_slug}`}
+                href={
+                  mechanicsTestField
+                    ? withMechanicsPreview(
+                        `/${selectedStore.storefront_slug}`,
+                        mechanicsTestField
+                      )
+                    : `/${selectedStore.storefront_slug}`
+                }
                 target="_blank"
                 rel="noreferrer"
               >
@@ -700,6 +732,19 @@ export default function DarikDirectCategoriesPage() {
           </div>
         </header>
 
+        {mechanicsTestField ? (
+          <section className={styles.mechanicsLabBanner}>
+            <div>
+              <span>MECHANICS TEST / اختبار الخصائص</span>
+              <strong>{mechanicsFieldLabel(mechanicsTestField)}</strong>
+              <small>
+                Category presets below are being previewed as this field. The store's real retail
+                field and existing saved categories are not changed.
+              </small>
+            </div>
+            <a href="/store-dashboard/mechanics-lab">Change field / تغيير النشاط</a>
+          </section>
+        ) : null}
         {error ? <p className={styles.errorBanner}>{error}</p> : null}
         {message ? <p className={styles.successBanner}>{message}</p> : null}
 

@@ -1,4 +1,5 @@
 "use client";
+// DARIK_MECHANICS_LAB_048
 
 // DARIK_AUTOPARTS_FITMENT_FILTERS_033
 // Mobile-safe bilingual product form with automatic retail categories.
@@ -15,6 +16,11 @@ import {
 import type { Session } from "@supabase/supabase-js";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabaseBrowser";
+import {
+  mechanicsFieldLabel,
+  readMechanicsLabField,
+  withMechanicsPreview,
+} from "@/lib/darikMechanicsLab";
 import DashboardLogoutButton from "../components/DashboardLogoutButton";
 import styles from "./products.module.css";
 
@@ -232,6 +238,16 @@ export default function DarikDirectProductsPage() {
   const [statusFilter, setStatusFilter] = useState("all");
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
+  const [mechanicsTestField, setMechanicsTestField] = useState("");
+
+  useEffect(() => {
+    const syncMechanicsField = () => {
+      setMechanicsTestField(readMechanicsLabField());
+    };
+    syncMechanicsField();
+    window.addEventListener("storage", syncMechanicsField);
+    return () => window.removeEventListener("storage", syncMechanicsField);
+  }, []);
   const modalRef = useRef<HTMLElement | null>(null);
 
   const selectedStore = useMemo(
@@ -431,7 +447,11 @@ export default function DarikDirectProductsPage() {
     });
   }, [products, search, statusFilter]);
 
-  const isAutoParts = selectedStore?.business_type === "auto_parts";
+  const actualBusinessType = String(selectedStore?.business_type || "")
+    .trim()
+    .toLowerCase();
+  const effectiveBusinessType = mechanicsTestField || actualBusinessType;
+  const isAutoParts = effectiveBusinessType === "auto_parts";
 
   const categoryById = useMemo(
     () => new Map(categories.map((category) => [category.id, category])),
@@ -919,6 +939,7 @@ export default function DarikDirectProductsPage() {
             Products
           </a>
           <a href="/store-dashboard/categories">Categories</a>
+          <a href="/store-dashboard/mechanics-lab">Mechanics Lab / مختبر الخصائص</a>
         </nav>
 
         <div className={styles.sidebarFooter}>
@@ -954,7 +975,14 @@ export default function DarikDirectProductsPage() {
             {selectedStore?.storefront_slug ? (
               <a
                 className={styles.previewButton}
-                href={`/${selectedStore.storefront_slug}`}
+                href={
+                  mechanicsTestField
+                    ? withMechanicsPreview(
+                        `/${selectedStore.storefront_slug}`,
+                        mechanicsTestField
+                      )
+                    : `/${selectedStore.storefront_slug}`
+                }
                 target="_blank"
                 rel="noreferrer"
               >
@@ -968,6 +996,19 @@ export default function DarikDirectProductsPage() {
           </div>
         </header>
 
+        {mechanicsTestField ? (
+          <section className={styles.mechanicsLabBanner}>
+            <div>
+              <span>MECHANICS TEST / اختبار الخصائص</span>
+              <strong>{mechanicsFieldLabel(mechanicsTestField)}</strong>
+              <small>
+                Actual field: {mechanicsFieldLabel(actualBusinessType)}. Saving a product still saves
+                to this test store; only the business mechanics are overridden.
+              </small>
+            </div>
+            <a href="/store-dashboard/mechanics-lab">Change field / تغيير النشاط</a>
+          </section>
+        ) : null}
         {error ? <p className={styles.errorBanner}>{error}</p> : null}
         {message ? <p className={styles.successBanner}>{message}</p> : null}
 

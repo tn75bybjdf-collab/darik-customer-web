@@ -3518,7 +3518,7 @@
     font-size: 9px;
   }
 
-  .page[data-business="auto_parts"] .vehicleFilterGrid {
+  .page[data-theme-field="auto_parts"] .vehicleFilterGrid {
     grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 6px;
   }
@@ -3578,46 +3578,46 @@
 
   /* Auto-parts names and fitment do not belong in tiny two-column cards.
      Full-width cards read like a professional parts catalog and eliminate dead space. */
-  .page[data-business="auto_parts"] .productGrid,
-  .page[data-business="auto_parts"][data-card-style="compact"] .productGrid,
-  .page[data-business="auto_parts"][data-card-style="image_first"] .productGrid {
+  .page[data-theme-field="auto_parts"] .productGrid,
+  .page[data-theme-field="auto_parts"][data-card-style="compact"] .productGrid,
+  .page[data-theme-field="auto_parts"][data-card-style="image_first"] .productGrid {
     grid-template-columns: 1fr;
     gap: 14px;
   }
 
-  .page[data-business="auto_parts"] .productCard {
+  .page[data-theme-field="auto_parts"] .productCard {
     border-radius: 20px;
     box-shadow: 0 10px 28px rgba(15, 23, 42, 0.065);
   }
 
-  .page[data-business="auto_parts"] .productImage,
-  .page[data-business="auto_parts"][data-card-style="image_first"] .productImage,
-  .page[data-business="auto_parts"][data-card-style="compact"] .productImage {
+  .page[data-theme-field="auto_parts"] .productImage,
+  .page[data-theme-field="auto_parts"][data-card-style="image_first"] .productImage,
+  .page[data-theme-field="auto_parts"][data-card-style="compact"] .productImage {
     aspect-ratio: 1.55 / 1;
   }
 
-  .page[data-business="auto_parts"] .productImage img {
+  .page[data-theme-field="auto_parts"] .productImage img {
     object-fit: contain;
   }
 
-  .page[data-business="auto_parts"] .productBody,
-  .page[data-business="auto_parts"][data-card-style="compact"] .productBody {
+  .page[data-theme-field="auto_parts"] .productBody,
+  .page[data-theme-field="auto_parts"][data-card-style="compact"] .productBody {
     padding: 17px;
   }
 
-  .page[data-business="auto_parts"] .productMeta {
+  .page[data-theme-field="auto_parts"] .productMeta {
     height: auto;
     margin-bottom: 7px;
     font-size: 8.5px;
   }
 
-  .page[data-business="auto_parts"] .productBody h3 {
+  .page[data-theme-field="auto_parts"] .productBody h3 {
     min-height: 0;
     font-size: 18px;
     line-height: 1.32;
   }
 
-  .page[data-business="auto_parts"] .productArabic {
+  .page[data-theme-field="auto_parts"] .productArabic {
     display: -webkit-box;
     margin-top: 6px;
     overflow: hidden;
@@ -3628,7 +3628,7 @@
     -webkit-line-clamp: 2;
   }
 
-  .page[data-business="auto_parts"] .productFitment {
+  .page[data-theme-field="auto_parts"] .productFitment {
     display: flex;
     align-items: baseline;
     flex-wrap: wrap;
@@ -3638,44 +3638,44 @@
     padding: 8px 10px;
   }
 
-  .page[data-business="auto_parts"] .productFitment span {
+  .page[data-theme-field="auto_parts"] .productFitment span {
     font-size: 9px;
   }
 
-  .page[data-business="auto_parts"] .productFitment strong {
+  .page[data-theme-field="auto_parts"] .productFitment strong {
     font-size: 13px;
   }
 
-  .page[data-business="auto_parts"] .productDescription {
+  .page[data-theme-field="auto_parts"] .productDescription {
     display: none;
   }
 
-  .page[data-business="auto_parts"] .productFooter {
+  .page[data-theme-field="auto_parts"] .productFooter {
     align-items: stretch;
     flex-direction: column;
     gap: 11px;
     padding-top: 13px;
   }
 
-  .page[data-business="auto_parts"] .productFooter > div:first-child {
+  .page[data-theme-field="auto_parts"] .productFooter > div:first-child {
     gap: 2px;
   }
 
-  .page[data-business="auto_parts"] .productFooter > div:first-child > strong {
+  .page[data-theme-field="auto_parts"] .productFooter > div:first-child > strong {
     font-size: 13.5px;
     line-height: 1.35;
   }
 
-  .page[data-business="auto_parts"] .pricingActions {
+  .page[data-theme-field="auto_parts"] .pricingActions {
     width: 100%;
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 7px;
   }
 
-  .page[data-business="auto_parts"] .pricingCallButton,
-  .page[data-business="auto_parts"] .pricingWhatsappButton,
-  .page[data-business="auto_parts"] .pricingActions .productContactButton {
+  .page[data-theme-field="auto_parts"] .pricingCallButton,
+  .page[data-theme-field="auto_parts"] .pricingWhatsappButton,
+  .page[data-theme-field="auto_parts"] .pricingActions .productContactButton {
     width: 100%;
     min-width: 0;
     min-height: 46px;
@@ -3782,7 +3782,7 @@
     font-size: clamp(33px, 10vw, 42px);
   }
 
-  .page[data-business="auto_parts"] .vehicleFilterGrid {
+  .page[data-theme-field="auto_parts"] .vehicleFilterGrid {
     gap: 5px;
   }
 
@@ -3959,7 +3959,7 @@
   }
 
   /* Fitment: premium "vehicle card" rather than 3 cramped native fields. */
-  .page[data-business="auto_parts"] .vehicleFilterPanel {
+  .page[data-theme-field="auto_parts"] .vehicleFilterPanel {
     margin: 12px 0 22px;
     gap: 12px;
     border: 1px solid rgba(100, 116, 139, 0.18);
@@ -3970,12 +3970,12 @@
     box-shadow: 0 12px 30px rgba(15, 23, 42, 0.05);
   }
 
-  .page[data-business="auto_parts"] .vehicleFilterHeading {
+  .page[data-theme-field="auto_parts"] .vehicleFilterHeading {
     align-items: center;
     gap: 8px;
   }
 
-  .page[data-business="auto_parts"] .vehicleFilterHeading span {
+  .page[data-theme-field="auto_parts"] .vehicleFilterHeading span {
     color: var(--store-primary);
     font-size: 8px;
     font-weight: 900;
@@ -3983,40 +3983,40 @@
     text-transform: uppercase;
   }
 
-  .page[data-business="auto_parts"] .vehicleFilterHeading strong {
+  .page[data-theme-field="auto_parts"] .vehicleFilterHeading strong {
     margin-top: 3px;
     font-size: 15px;
     line-height: 1.2;
   }
 
-  .page[data-business="auto_parts"] .vehicleFilterHeading button {
+  .page[data-theme-field="auto_parts"] .vehicleFilterHeading button {
     min-height: 30px;
     border-radius: 999px;
     padding: 0 9px;
     font-size: 8px;
   }
 
-  .page[data-business="auto_parts"] .vehicleFilterGrid {
+  .page[data-theme-field="auto_parts"] .vehicleFilterGrid {
     grid-template-columns: 1fr 1fr;
     gap: 8px;
   }
 
-  .page[data-business="auto_parts"] .vehicleFilterGrid label:first-child {
+  .page[data-theme-field="auto_parts"] .vehicleFilterGrid label:first-child {
     grid-column: 1 / -1;
   }
 
-  .page[data-business="auto_parts"] .vehicleFilterGrid label {
+  .page[data-theme-field="auto_parts"] .vehicleFilterGrid label {
     gap: 5px;
   }
 
-  .page[data-business="auto_parts"] .vehicleFilterGrid label > span {
+  .page[data-theme-field="auto_parts"] .vehicleFilterGrid label > span {
     padding-left: 2px;
     color: #64748b;
     font-size: 9px;
     font-weight: 800;
   }
 
-  .page[data-business="auto_parts"] .vehicleFilterGrid select {
+  .page[data-theme-field="auto_parts"] .vehicleFilterGrid select {
     min-height: 46px;
     border: 1px solid rgba(148, 163, 184, 0.38);
     border-radius: 13px;
@@ -4051,11 +4051,11 @@
     font-weight: 700;
   }
 
-  .page[data-business="auto_parts"] .productGrid {
+  .page[data-theme-field="auto_parts"] .productGrid {
     gap: 18px;
   }
 
-  .page[data-business="auto_parts"] .productCard {
+  .page[data-theme-field="auto_parts"] .productCard {
     border: 1px solid rgba(148, 163, 184, 0.16);
     border-radius: 22px;
     background: #fff;
@@ -4063,45 +4063,45 @@
     overflow: hidden;
   }
 
-  .page[data-business="auto_parts"] .productImage,
-  .page[data-business="auto_parts"][data-card-style="image_first"] .productImage,
-  .page[data-business="auto_parts"][data-card-style="compact"] .productImage {
+  .page[data-theme-field="auto_parts"] .productImage,
+  .page[data-theme-field="auto_parts"][data-card-style="image_first"] .productImage,
+  .page[data-theme-field="auto_parts"][data-card-style="compact"] .productImage {
     aspect-ratio: 1.72 / 1;
     background: #f8fafc;
   }
 
-  .page[data-business="auto_parts"] .productImage img {
+  .page[data-theme-field="auto_parts"] .productImage img {
     width: 100%;
     height: 100%;
     padding: 0;
     object-fit: contain;
   }
 
-  .page[data-business="auto_parts"] .productBody,
-  .page[data-business="auto_parts"][data-card-style="compact"] .productBody {
+  .page[data-theme-field="auto_parts"] .productBody,
+  .page[data-theme-field="auto_parts"][data-card-style="compact"] .productBody {
     padding: 17px 18px 18px;
   }
 
-  .page[data-business="auto_parts"] .productMeta {
+  .page[data-theme-field="auto_parts"] .productMeta {
     margin-bottom: 8px;
     font-size: 8px;
     letter-spacing: 0.1em;
   }
 
-  .page[data-business="auto_parts"] .productBody h3 {
+  .page[data-theme-field="auto_parts"] .productBody h3 {
     font-size: 19px;
     line-height: 1.27;
     letter-spacing: -0.025em;
   }
 
-  .page[data-business="auto_parts"] .productArabic {
+  .page[data-theme-field="auto_parts"] .productArabic {
     margin-top: 7px;
     color: #64748b;
     font-size: 13px;
     line-height: 1.5;
   }
 
-  .page[data-business="auto_parts"] .productFitment {
+  .page[data-theme-field="auto_parts"] .productFitment {
     margin-top: 12px;
     border: 0;
     border-radius: 12px;
@@ -4109,33 +4109,33 @@
     background: #f1f5f9;
   }
 
-  .page[data-business="auto_parts"] .productFitment span {
+  .page[data-theme-field="auto_parts"] .productFitment span {
     color: #64748b;
     font-size: 9px;
     font-weight: 900;
   }
 
-  .page[data-business="auto_parts"] .productFitment strong {
+  .page[data-theme-field="auto_parts"] .productFitment strong {
     color: #0f172a;
     font-size: 13px;
   }
 
-  .page[data-business="auto_parts"] .productFooter {
+  .page[data-theme-field="auto_parts"] .productFooter {
     gap: 10px;
     padding-top: 13px;
   }
 
-  .page[data-business="auto_parts"] .productFooter > div:first-child > strong {
+  .page[data-theme-field="auto_parts"] .productFooter > div:first-child > strong {
     font-size: 13px;
     line-height: 1.3;
   }
 
-  .page[data-business="auto_parts"] .pricingActions {
+  .page[data-theme-field="auto_parts"] .pricingActions {
     gap: 8px;
   }
 
-  .page[data-business="auto_parts"] .pricingCallButton,
-  .page[data-business="auto_parts"] .pricingWhatsappButton {
+  .page[data-theme-field="auto_parts"] .pricingCallButton,
+  .page[data-theme-field="auto_parts"] .pricingWhatsappButton {
     min-height: 48px;
     border-radius: 14px;
     font-size: 11.5px;
@@ -4209,11 +4209,11 @@
     min-height: 398px;
   }
 
-  .page[data-business="auto_parts"] .vehicleFilterGrid {
+  .page[data-theme-field="auto_parts"] .vehicleFilterGrid {
     grid-template-columns: 1fr 1fr;
   }
 
-  .page[data-business="auto_parts"] .vehicleFilterGrid label:first-child {
+  .page[data-theme-field="auto_parts"] .vehicleFilterGrid label:first-child {
     grid-column: 1 / -1;
   }
 }
@@ -4249,7 +4249,7 @@
 }
 
 @media (max-width: 780px) {
-  .page[data-business="auto_parts"] {
+  .page[data-theme-field="auto_parts"] {
     --parts-ink: #08111f;
     --parts-ink-2: #101c30;
     --parts-muted: #718096;
@@ -4263,11 +4263,11 @@
   }
 
   /* Retailer identity first. Darik infrastructure stays quiet. */
-  .page[data-business="auto_parts"] .announcementBar {
+  .page[data-theme-field="auto_parts"] .announcementBar {
     display: none;
   }
 
-  .page[data-business="auto_parts"] .header {
+  .page[data-theme-field="auto_parts"] .header {
     min-height: 62px;
     position: sticky;
     top: 0;
@@ -4280,12 +4280,12 @@
     -webkit-backdrop-filter: blur(22px) saturate(150%);
   }
 
-  .page[data-business="auto_parts"] .headerLogo {
+  .page[data-theme-field="auto_parts"] .headerLogo {
     border: 1px solid rgba(148,163,184,.14);
     box-shadow: 0 7px 20px rgba(15,23,42,.10);
   }
 
-  .page[data-business="auto_parts"] .storeIdentity strong {
+  .page[data-theme-field="auto_parts"] .storeIdentity strong {
     max-width: 220px;
     overflow: hidden;
     font-size: 13.5px;
@@ -4295,7 +4295,7 @@
     white-space: nowrap;
   }
 
-  .page[data-business="auto_parts"] .storeIdentity span {
+  .page[data-theme-field="auto_parts"] .storeIdentity span {
     margin-top: 2px;
     color: #94a3b8;
     font-size: 7.5px;
@@ -4321,8 +4321,8 @@
   .headerWhatsappButton span { display: none; }
 
   /* Hero: cinematic, but no longer an entire screen by itself. */
-  .page[data-business="auto_parts"] .hero,
-  .page[data-business="auto_parts"][data-hero="immersive"] .hero {
+  .page[data-theme-field="auto_parts"] .hero,
+  .page[data-theme-field="auto_parts"][data-hero="immersive"] .hero {
     width: calc(100% - 16px);
     min-height: 0;
     position: relative;
@@ -4338,7 +4338,7 @@
     animation: darik042HeroIn 560ms cubic-bezier(.2,.78,.2,1) both;
   }
 
-  .page[data-business="auto_parts"] .hero::before {
+  .page[data-theme-field="auto_parts"] .hero::before {
     content: "";
     position: absolute;
     z-index: 3;
@@ -4356,7 +4356,7 @@
     animation: darik042Glow 7.5s ease-in-out infinite;
   }
 
-  .page[data-business="auto_parts"] .hero::after {
+  .page[data-theme-field="auto_parts"] .hero::after {
     content: "";
     position: absolute;
     z-index: 5;
@@ -4369,13 +4369,13 @@
       inset 0 -78px 90px rgba(2,6,23,.10);
   }
 
-  .page[data-business="auto_parts"] .heroOverlay {
+  .page[data-theme-field="auto_parts"] .heroOverlay {
     background:
       linear-gradient(180deg, rgba(2,6,23,.08) 0%, rgba(2,6,23,.18) 31%, rgba(2,6,23,.62) 69%, rgba(2,6,23,.94) 100%),
       linear-gradient(100deg, rgba(2,6,23,.18), transparent 70%);
   }
 
-  .page[data-business="auto_parts"] .heroTexture {
+  .page[data-theme-field="auto_parts"] .heroTexture {
     opacity: .09;
     background-image:
       linear-gradient(rgba(255,255,255,.045) 1px, transparent 1px),
@@ -4384,8 +4384,8 @@
     mask-image: linear-gradient(to bottom, rgba(0,0,0,.5), transparent 72%);
   }
 
-  .page[data-business="auto_parts"] .heroContent,
-  .page[data-business="auto_parts"][data-hero="immersive"] .heroContent {
+  .page[data-theme-field="auto_parts"] .heroContent,
+  .page[data-theme-field="auto_parts"][data-hero="immersive"] .heroContent {
     min-height: 350px;
     position: relative;
     z-index: 7;
@@ -4426,7 +4426,7 @@
     margin: 0;
   }
 
-  .page[data-business="auto_parts"] .heroLogo {
+  .page[data-theme-field="auto_parts"] .heroLogo {
     width: 52px;
     height: 52px;
     margin-top: auto;
@@ -4435,7 +4435,7 @@
     box-shadow: 0 12px 30px rgba(0,0,0,.20);
   }
 
-  .page[data-business="auto_parts"] .heroLabel {
+  .page[data-theme-field="auto_parts"] .heroLabel {
     min-height: 28px;
     border: 1px solid rgba(255,255,255,.15);
     border-radius: 999px;
@@ -4445,7 +4445,7 @@
     backdrop-filter: blur(12px);
   }
 
-  .page[data-business="auto_parts"] .hero h1 {
+  .page[data-theme-field="auto_parts"] .hero h1 {
     max-width: 94%;
     margin-top: 2px;
     font-size: clamp(31px, 9.2vw, 40px);
@@ -4455,7 +4455,7 @@
     text-shadow: 0 3px 22px rgba(0,0,0,.20);
   }
 
-  .page[data-business="auto_parts"] .tagline {
+  .page[data-theme-field="auto_parts"] .tagline {
     max-width: 92%;
     margin-top: 1px;
     color: rgba(255,255,255,.85);
@@ -4466,11 +4466,11 @@
 
   .heroTrustLine { display: none !important; }
 
-  .page[data-business="auto_parts"] .heroButtons {
+  .page[data-theme-field="auto_parts"] .heroButtons {
     margin-top: 12px;
   }
 
-  .page[data-business="auto_parts"] .primaryHeroButton {
+  .page[data-theme-field="auto_parts"] .primaryHeroButton {
     min-height: 49px;
     position: relative;
     overflow: hidden;
@@ -4480,7 +4480,7 @@
     box-shadow: 0 12px 28px rgba(0,0,0,.17), inset 0 1px 0 rgba(255,255,255,.60);
   }
 
-  .page[data-business="auto_parts"] .primaryHeroButton::after {
+  .page[data-theme-field="auto_parts"] .primaryHeroButton::after {
     content: "";
     position: absolute;
     top: -45%;
@@ -4493,7 +4493,7 @@
   }
 
   /* Compact store utility dock: location first, direct contact immediately below. */
-  .page[data-business="auto_parts"] .quickInfoStrip {
+  .page[data-theme-field="auto_parts"] .quickInfoStrip {
     width: calc(100% - 24px);
     position: relative;
     z-index: 20;
@@ -4505,45 +4505,45 @@
     box-shadow: 0 17px 42px rgba(15,23,42,.10), inset 0 1px 0 #fff;
   }
 
-  .page[data-business="auto_parts"] .quickInfoStrip .locationQuickLink {
+  .page[data-theme-field="auto_parts"] .quickInfoStrip .locationQuickLink {
     min-height: 52px;
     padding: 8px 12px;
   }
 
-  .page[data-business="auto_parts"] .quickInfoStrip .contactQuickLink {
+  .page[data-theme-field="auto_parts"] .quickInfoStrip .contactQuickLink {
     min-height: 46px;
   }
 
-  .page[data-business="auto_parts"] .quickIcon {
+  .page[data-theme-field="auto_parts"] .quickIcon {
     width: 36px;
     height: 36px;
     border-radius: 11px;
   }
 
   /* Single-category auto-parts stores go directly to the useful journey. */
-  .page[data-business="auto_parts"][data-category-count="0"] .categorySection,
-  .page[data-business="auto_parts"][data-category-count="1"] .categorySection {
+  .page[data-theme-field="auto_parts"][data-category-count="0"] .categorySection,
+  .page[data-theme-field="auto_parts"][data-category-count="1"] .categorySection {
     display: none;
   }
 
-  .page[data-business="auto_parts"] .reorderableSections { gap: 0; }
+  .page[data-theme-field="auto_parts"] .reorderableSections { gap: 0; }
 
-  .page[data-business="auto_parts"] .catalogShell {
+  .page[data-theme-field="auto_parts"] .catalogShell {
     width: calc(100% - 24px);
     margin-top: 0;
     padding: 24px 0 36px;
     scroll-margin-top: 72px;
   }
 
-  .page[data-business="auto_parts"] .catalogTopbar {
+  .page[data-theme-field="auto_parts"] .catalogTopbar {
     margin-bottom: 10px;
   }
 
-  .page[data-business="auto_parts"] .catalogTopbar > div:first-child {
+  .page[data-theme-field="auto_parts"] .catalogTopbar > div:first-child {
     display: none;
   }
 
-  .page[data-business="auto_parts"] .searchBox {
+  .page[data-theme-field="auto_parts"] .searchBox {
     min-height: 48px;
     border: 1px solid rgba(148,163,184,.20);
     border-radius: 15px;
@@ -4552,19 +4552,19 @@
     transition: transform 170ms ease, box-shadow 170ms ease, border-color 170ms ease;
   }
 
-  .page[data-business="auto_parts"] .searchBox:focus-within {
+  .page[data-theme-field="auto_parts"] .searchBox:focus-within {
     border-color: color-mix(in srgb, var(--store-accent) 42%, #cbd5e1);
     box-shadow: 0 14px 34px rgba(15,23,42,.075), 0 0 0 4px color-mix(in srgb, var(--store-accent) 8%, transparent);
     transform: translateY(-1px);
   }
 
-  .page[data-business="auto_parts"] .searchBox input {
+  .page[data-theme-field="auto_parts"] .searchBox input {
     font-size: 13px;
     font-weight: 680;
   }
 
   /* Signature automotive tool. */
-  .page[data-business="auto_parts"] .vehicleFilterPanel {
+  .page[data-theme-field="auto_parts"] .vehicleFilterPanel {
     position: relative;
     isolation: isolate;
     overflow: hidden;
@@ -4578,7 +4578,7 @@
     box-shadow: 0 22px 54px rgba(2,6,23,.19), inset 0 1px 0 rgba(255,255,255,.06);
   }
 
-  .page[data-business="auto_parts"] .vehicleFilterPanel::before {
+  .page[data-theme-field="auto_parts"] .vehicleFilterPanel::before {
     content: "";
     position: absolute;
     z-index: -1;
@@ -4591,7 +4591,7 @@
     opacity: .60;
   }
 
-  .page[data-business="auto_parts"] .vehicleFilterPanel::after {
+  .page[data-theme-field="auto_parts"] .vehicleFilterPanel::after {
     content: "";
     position: absolute;
     z-index: -1;
@@ -4603,49 +4603,49 @@
     background: radial-gradient(circle, rgba(22,163,74,.11), transparent 68%);
   }
 
-  .page[data-business="auto_parts"] .vehicleFilterHeading,
-  .page[data-business="auto_parts"] .vehicleFilterGrid,
+  .page[data-theme-field="auto_parts"] .vehicleFilterHeading,
+  .page[data-theme-field="auto_parts"] .vehicleFilterGrid,
   .vehicleMatchSummary {
     position: relative;
     z-index: 2;
   }
 
-  .page[data-business="auto_parts"] .vehicleFilterHeading span {
+  .page[data-theme-field="auto_parts"] .vehicleFilterHeading span {
     color: #93c5fd;
     font-size: 7.5px;
     font-weight: 950;
     letter-spacing: .12em;
   }
 
-  .page[data-business="auto_parts"] .vehicleFilterHeading strong {
+  .page[data-theme-field="auto_parts"] .vehicleFilterHeading strong {
     color: #fff;
     font-size: 17px;
     line-height: 1.16;
     letter-spacing: -.025em;
   }
 
-  .page[data-business="auto_parts"] .vehicleFilterHeading button {
+  .page[data-theme-field="auto_parts"] .vehicleFilterHeading button {
     border: 1px solid rgba(255,255,255,.15);
     background: rgba(255,255,255,.08);
     color: #fff;
   }
 
-  .page[data-business="auto_parts"] .vehicleFilterGrid {
+  .page[data-theme-field="auto_parts"] .vehicleFilterGrid {
     grid-template-columns: 1fr 1fr;
     gap: 8px;
   }
 
-  .page[data-business="auto_parts"] .vehicleFilterGrid label:first-child {
+  .page[data-theme-field="auto_parts"] .vehicleFilterGrid label:first-child {
     grid-column: 1 / -1;
   }
 
-  .page[data-business="auto_parts"] .vehicleFilterGrid label > span {
+  .page[data-theme-field="auto_parts"] .vehicleFilterGrid label > span {
     color: #cbd5e1;
     font-size: 8px;
     font-weight: 850;
   }
 
-  .page[data-business="auto_parts"] .vehicleFilterGrid select {
+  .page[data-theme-field="auto_parts"] .vehicleFilterGrid select {
     min-height: 45px;
     border: 1px solid rgba(255,255,255,.11);
     border-radius: 13px;
@@ -4715,21 +4715,21 @@
     font-size: 10.5px;
   }
 
-  .page[data-business="auto_parts"] .categoryPills { display: none; }
+  .page[data-theme-field="auto_parts"] .categoryPills { display: none; }
 
   /* Inventory should arrive quickly and feel merchandised, not templated. */
-  .page[data-business="auto_parts"] .productSection {
+  .page[data-theme-field="auto_parts"] .productSection {
     margin-top: 22px;
   }
 
-  .page[data-business="auto_parts"] .productSectionHeading {
+  .page[data-theme-field="auto_parts"] .productSectionHeading {
     position: relative;
     align-items: flex-end;
     margin-top: 0;
     margin-bottom: 15px;
   }
 
-  .page[data-business="auto_parts"] .productSectionHeading::after {
+  .page[data-theme-field="auto_parts"] .productSectionHeading::after {
     content: "";
     position: absolute;
     left: 0;
@@ -4740,32 +4740,32 @@
     background: linear-gradient(90deg, var(--store-accent), color-mix(in srgb, var(--store-accent) 22%, transparent));
   }
 
-  .page[data-business="auto_parts"] .productSectionHeading > div > span {
+  .page[data-theme-field="auto_parts"] .productSectionHeading > div > span {
     color: #2563eb;
     font-size: 7.5px;
     font-weight: 950;
     letter-spacing: .12em;
   }
 
-  .page[data-business="auto_parts"] .productSectionHeading h3 {
+  .page[data-theme-field="auto_parts"] .productSectionHeading h3 {
     margin-top: 3px;
     font-size: 27px;
     line-height: 1;
     letter-spacing: -.045em;
   }
 
-  .page[data-business="auto_parts"] .productSectionHeading > small {
+  .page[data-theme-field="auto_parts"] .productSectionHeading > small {
     color: #94a3b8;
     font-size: 9px;
     font-weight: 800;
   }
 
-  .page[data-business="auto_parts"] .productGrid {
+  .page[data-theme-field="auto_parts"] .productGrid {
     grid-template-columns: 1fr;
     gap: 15px;
   }
 
-  .page[data-business="auto_parts"] .autoPartsProductCard {
+  .page[data-theme-field="auto_parts"] .autoPartsProductCard {
     position: relative;
     overflow: hidden;
     border: 1px solid rgba(148,163,184,.12);
@@ -4775,7 +4775,7 @@
     transition: transform 210ms cubic-bezier(.2,.8,.2,1), box-shadow 210ms ease;
   }
 
-  .page[data-business="auto_parts"] .autoPartsProductCard::before {
+  .page[data-theme-field="auto_parts"] .autoPartsProductCard::before {
     content: "";
     position: absolute;
     z-index: 4;
@@ -4785,18 +4785,18 @@
     box-shadow: inset 0 1px 0 rgba(255,255,255,.80);
   }
 
-  .page[data-business="auto_parts"] .autoPartsProductCard:active {
+  .page[data-theme-field="auto_parts"] .autoPartsProductCard:active {
     transform: scale(.995);
   }
 
-  .page[data-business="auto_parts"] .autoPartsProductCard .productImage {
+  .page[data-theme-field="auto_parts"] .autoPartsProductCard .productImage {
     position: relative;
     overflow: hidden;
     aspect-ratio: 1.68 / 1;
     background: radial-gradient(circle at 50% 18%, #fff, #eef2f7 74%);
   }
 
-  .page[data-business="auto_parts"] .autoPartsProductCard .productImage::after {
+  .page[data-theme-field="auto_parts"] .autoPartsProductCard .productImage::after {
     content: "";
     position: absolute;
     inset: auto 0 0;
@@ -4805,23 +4805,23 @@
     background: linear-gradient(to top, rgba(15,23,42,.045), transparent);
   }
 
-  .page[data-business="auto_parts"] .autoPartsProductCard .productImage img {
+  .page[data-theme-field="auto_parts"] .autoPartsProductCard .productImage img {
     width: 100%;
     height: 100%;
     object-fit: contain;
     transition: transform 380ms cubic-bezier(.2,.75,.25,1);
   }
 
-  .page[data-business="auto_parts"] .autoPartsProductCard:active .productImage img {
+  .page[data-theme-field="auto_parts"] .autoPartsProductCard:active .productImage img {
     transform: scale(1.012);
   }
 
-  .page[data-business="auto_parts"] .autoPartsProductCard .productBody {
+  .page[data-theme-field="auto_parts"] .autoPartsProductCard .productBody {
     position: relative;
     padding: 15px 16px 16px;
   }
 
-  .page[data-business="auto_parts"] .autoPartsProductCard .productMeta {
+  .page[data-theme-field="auto_parts"] .autoPartsProductCard .productMeta {
     height: auto;
     margin-bottom: 6px;
     color: #2563eb;
@@ -4830,14 +4830,14 @@
     letter-spacing: .11em;
   }
 
-  .page[data-business="auto_parts"] .autoPartsProductCard .productBody h3 {
+  .page[data-theme-field="auto_parts"] .autoPartsProductCard .productBody h3 {
     min-height: 0;
     font-size: 18px;
     line-height: 1.27;
     letter-spacing: -.025em;
   }
 
-  .page[data-business="auto_parts"] .autoPartsProductCard .productArabic {
+  .page[data-theme-field="auto_parts"] .autoPartsProductCard .productArabic {
     display: -webkit-box;
     margin-top: 6px;
     overflow: hidden;
@@ -4849,7 +4849,7 @@
     -webkit-line-clamp: 2;
   }
 
-  .page[data-business="auto_parts"] .autoPartsProductCard .productFitment {
+  .page[data-theme-field="auto_parts"] .autoPartsProductCard .productFitment {
     display: flex;
     align-items: baseline;
     flex-wrap: wrap;
@@ -4862,44 +4862,44 @@
     box-shadow: inset 0 1px 0 #fff;
   }
 
-  .page[data-business="auto_parts"] .autoPartsProductCard .productFitment span {
+  .page[data-theme-field="auto_parts"] .autoPartsProductCard .productFitment span {
     color: #64748b;
     font-size: 8px;
     font-weight: 950;
   }
 
-  .page[data-business="auto_parts"] .autoPartsProductCard .productFitment strong {
+  .page[data-theme-field="auto_parts"] .autoPartsProductCard .productFitment strong {
     color: #0f172a;
     font-size: 12.5px;
   }
 
-  .page[data-business="auto_parts"] .autoPartsProductCard .productDescription {
+  .page[data-theme-field="auto_parts"] .autoPartsProductCard .productDescription {
     display: none;
   }
 
-  .page[data-business="auto_parts"] .autoPartsProductCard .productFooter {
+  .page[data-theme-field="auto_parts"] .autoPartsProductCard .productFooter {
     align-items: stretch;
     flex-direction: column;
     gap: 9px;
     padding-top: 11px;
   }
 
-  .page[data-business="auto_parts"] .autoPartsProductCard .productFooter > div:first-child > strong {
+  .page[data-theme-field="auto_parts"] .autoPartsProductCard .productFooter > div:first-child > strong {
     color: #64748b;
     font-size: 10px;
     font-weight: 850;
   }
 
-  .page[data-business="auto_parts"] .autoPartsProductCard .pricingActions {
+  .page[data-theme-field="auto_parts"] .autoPartsProductCard .pricingActions {
     width: 100%;
     display: grid;
     grid-template-columns: repeat(2, minmax(0,1fr));
     gap: 7px;
   }
 
-  .page[data-business="auto_parts"] .autoPartsProductCard .pricingCallButton,
-  .page[data-business="auto_parts"] .autoPartsProductCard .pricingWhatsappButton,
-  .page[data-business="auto_parts"] .autoPartsProductCard .pricingActions .productContactButton {
+  .page[data-theme-field="auto_parts"] .autoPartsProductCard .pricingCallButton,
+  .page[data-theme-field="auto_parts"] .autoPartsProductCard .pricingWhatsappButton,
+  .page[data-theme-field="auto_parts"] .autoPartsProductCard .pricingActions .productContactButton {
     width: 100%;
     min-width: 0;
     min-height: 46px;
@@ -4910,27 +4910,27 @@
     white-space: nowrap;
   }
 
-  .page[data-business="auto_parts"] .autoPartsProductCard .pricingWhatsappButton {
+  .page[data-theme-field="auto_parts"] .autoPartsProductCard .pricingWhatsappButton {
     box-shadow: 0 9px 22px rgba(22,163,74,.16);
   }
 
-  .page[data-business="auto_parts"] .productBadges {
+  .page[data-theme-field="auto_parts"] .productBadges {
     inset: 10px 10px auto;
   }
 
-  .page[data-business="auto_parts"] .featuredTag,
-  .page[data-business="auto_parts"] .stockTag,
-  .page[data-business="auto_parts"] .availableTag,
-  .page[data-business="auto_parts"] .outOfStockTag {
+  .page[data-theme-field="auto_parts"] .featuredTag,
+  .page[data-theme-field="auto_parts"] .stockTag,
+  .page[data-theme-field="auto_parts"] .availableTag,
+  .page[data-theme-field="auto_parts"] .outOfStockTag {
     padding: 5px 8px;
     font-size: 8px;
   }
 
   /* Generic story stays off the mobile auto-parts route. */
-  .page[data-business="auto_parts"] .storeStory { display: none; }
+  .page[data-theme-field="auto_parts"] .storeStory { display: none; }
 
   /* Final service promise -- now AFTER inventory, not before the customer shops. */
-  .page[data-business="auto_parts"] .partsConcierge {
+  .page[data-theme-field="auto_parts"] .partsConcierge {
     width: calc(100% - 24px);
     position: relative;
     overflow: hidden;
@@ -4948,7 +4948,7 @@
     box-shadow: 0 21px 54px rgba(2,6,23,.18), inset 0 1px 0 rgba(255,255,255,.05);
   }
 
-  .page[data-business="auto_parts"] .partsConcierge::after {
+  .page[data-theme-field="auto_parts"] .partsConcierge::after {
     content: "";
     position: absolute;
     inset: 0;
@@ -5119,21 +5119,21 @@
     box-shadow: 0 7px 20px rgba(22,163,74,.22);
   }
 
-  .page[data-business="auto_parts"] .footer {
+  .page[data-theme-field="auto_parts"] .footer {
     width: calc(100% - 24px);
     padding: 15px 0 28px;
     border-top: 1px solid rgba(148,163,184,.15);
   }
 
-  .page[data-business="auto_parts"] .poweredBy {
+  .page[data-theme-field="auto_parts"] .poweredBy {
     font-size: 8px;
     opacity: .54;
   }
 }
 
 @media (max-width: 430px) {
-  .page[data-business="auto_parts"] .heroContent,
-  .page[data-business="auto_parts"][data-hero="immersive"] .heroContent {
+  .page[data-theme-field="auto_parts"] .heroContent,
+  .page[data-theme-field="auto_parts"][data-hero="immersive"] .heroContent {
     min-height: 336px;
   }
 
@@ -5144,7 +5144,7 @@
     white-space: nowrap;
   }
 
-  .page[data-business="auto_parts"] .hero h1 {
+  .page[data-theme-field="auto_parts"] .hero h1 {
     font-size: clamp(30px, 9vw, 38px);
   }
 
@@ -5158,16 +5158,16 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .page[data-business="auto_parts"] .hero,
-  .page[data-business="auto_parts"] .primaryHeroButton::after,
-  .page[data-business="auto_parts"] .headerWhatsappButton,
+  .page[data-theme-field="auto_parts"] .hero,
+  .page[data-theme-field="auto_parts"] .primaryHeroButton::after,
+  .page[data-theme-field="auto_parts"] .headerWhatsappButton,
   .mobileContactDock {
     animation: none !important;
   }
 
-  .page[data-business="auto_parts"] .autoPartsProductCard,
-  .page[data-business="auto_parts"] .autoPartsProductCard .productImage img,
-  .page[data-business="auto_parts"] .searchBox {
+  .page[data-theme-field="auto_parts"] .autoPartsProductCard,
+  .page[data-theme-field="auto_parts"] .autoPartsProductCard .productImage img,
+  .page[data-theme-field="auto_parts"] .searchBox {
     transition: none !important;
   }
 }
@@ -5179,82 +5179,82 @@
 @media (max-width: 760px) {
   /* The header already carries store identity. Let the hero sell the store without
      consuming nearly an entire phone screen. */
-  .page[data-business="auto_parts"] .hero,
-  .page[data-business="auto_parts"][data-hero="immersive"] .hero {
+  .page[data-theme-field="auto_parts"] .hero,
+  .page[data-theme-field="auto_parts"][data-hero="immersive"] .hero {
     border-radius: 0 0 24px 24px;
   }
 
-  .page[data-business="auto_parts"] .heroContent,
-  .page[data-business="auto_parts"][data-hero="immersive"] .heroContent {
+  .page[data-theme-field="auto_parts"] .heroContent,
+  .page[data-theme-field="auto_parts"][data-hero="immersive"] .heroContent {
     min-height: 292px !important;
     padding: 16px 16px 18px !important;
   }
 
-  .page[data-business="auto_parts"] .heroLogo {
+  .page[data-theme-field="auto_parts"] .heroLogo {
     width: 46px;
     height: 46px;
     border-radius: 14px;
   }
 
-  .page[data-business="auto_parts"] .hero h1 {
+  .page[data-theme-field="auto_parts"] .hero h1 {
     max-width: 92%;
     font-size: clamp(28px, 8.2vw, 35px);
     line-height: .97;
   }
 
-  .page[data-business="auto_parts"] .tagline {
+  .page[data-theme-field="auto_parts"] .tagline {
     font-size: 11px;
   }
 
-  .page[data-business="auto_parts"] .heroButtons {
+  .page[data-theme-field="auto_parts"] .heroButtons {
     margin-top: 9px;
   }
 
-  .page[data-business="auto_parts"] .primaryHeroButton {
+  .page[data-theme-field="auto_parts"] .primaryHeroButton {
     min-height: 45px;
     border-radius: 14px;
   }
 
   /* Turn the oversized utility card into a compact bridge between brand and catalog. */
-  .page[data-business="auto_parts"] .quickInfoStrip {
+  .page[data-theme-field="auto_parts"] .quickInfoStrip {
     width: calc(100% - 28px);
     margin-top: -8px;
     border-radius: 17px;
     box-shadow: 0 12px 32px rgba(15,23,42,.085), inset 0 1px 0 #fff;
   }
 
-  .page[data-business="auto_parts"] .quickInfoStrip .locationQuickLink {
+  .page[data-theme-field="auto_parts"] .quickInfoStrip .locationQuickLink {
     min-height: 46px;
     padding: 6px 10px;
   }
 
-  .page[data-business="auto_parts"] .quickInfoStrip .contactQuickLink {
+  .page[data-theme-field="auto_parts"] .quickInfoStrip .contactQuickLink {
     min-height: 39px;
   }
 
-  .page[data-business="auto_parts"] .quickIcon {
+  .page[data-theme-field="auto_parts"] .quickIcon {
     width: 31px;
     height: 31px;
     border-radius: 10px;
   }
 
   /* Get the customer into the actual part-finding journey faster. */
-  .page[data-business="auto_parts"] .catalogShell {
+  .page[data-theme-field="auto_parts"] .catalogShell {
     width: calc(100% - 28px);
     padding-top: 17px;
     padding-bottom: 28px;
   }
 
-  .page[data-business="auto_parts"] .catalogTopbar {
+  .page[data-theme-field="auto_parts"] .catalogTopbar {
     margin-bottom: 7px;
   }
 
-  .page[data-business="auto_parts"] .searchBox {
+  .page[data-theme-field="auto_parts"] .searchBox {
     min-height: 44px;
     border-radius: 14px;
   }
 
-  .page[data-business="auto_parts"] .vehicleFilterPanel {
+  .page[data-theme-field="auto_parts"] .vehicleFilterPanel {
     margin: 8px 0 18px;
     gap: 10px;
     border-radius: 19px;
@@ -5262,11 +5262,11 @@
     box-shadow: 0 16px 40px rgba(2,6,23,.16), inset 0 1px 0 rgba(255,255,255,.06);
   }
 
-  .page[data-business="auto_parts"] .vehicleFilterHeading strong {
+  .page[data-theme-field="auto_parts"] .vehicleFilterHeading strong {
     font-size: 16px;
   }
 
-  .page[data-business="auto_parts"] .vehicleFilterGrid select {
+  .page[data-theme-field="auto_parts"] .vehicleFilterGrid select {
     min-height: 42px;
     border-radius: 12px;
     font-size: 10.5px;
@@ -5286,69 +5286,69 @@
   }
 
   /* 042's bilingual catalog title was visually shouting. Make it editorial. */
-  .page[data-business="auto_parts"] .productSection {
+  .page[data-theme-field="auto_parts"] .productSection {
     margin-top: 17px;
   }
 
-  .page[data-business="auto_parts"] .productSectionHeading {
+  .page[data-theme-field="auto_parts"] .productSectionHeading {
     margin-bottom: 14px;
   }
 
-  .page[data-business="auto_parts"] .productSectionHeading h3 {
+  .page[data-theme-field="auto_parts"] .productSectionHeading h3 {
     max-width: 82%;
     font-size: clamp(22px, 6.5vw, 27px);
     line-height: 1.04;
     letter-spacing: -.035em;
   }
 
-  .page[data-business="auto_parts"] .productSectionHeading > small {
+  .page[data-theme-field="auto_parts"] .productSectionHeading > small {
     align-self: flex-end;
     padding-bottom: 2px;
   }
 
   /* Product should be the visual hero. Reduce the surrounding slab and tighten
      the information architecture below the image. */
-  .page[data-business="auto_parts"] .autoPartsProductCard {
+  .page[data-theme-field="auto_parts"] .autoPartsProductCard {
     border-radius: 19px;
     box-shadow: 0 13px 34px rgba(15,23,42,.07), inset 0 1px 0 #fff;
   }
 
-  .page[data-business="auto_parts"] .autoPartsProductCard .productImage {
+  .page[data-theme-field="auto_parts"] .autoPartsProductCard .productImage {
     aspect-ratio: 1.78 / 1;
   }
 
-  .page[data-business="auto_parts"] .autoPartsProductCard .productBody {
+  .page[data-theme-field="auto_parts"] .autoPartsProductCard .productBody {
     padding: 13px 14px 14px;
   }
 
-  .page[data-business="auto_parts"] .autoPartsProductCard .productMeta {
+  .page[data-theme-field="auto_parts"] .autoPartsProductCard .productMeta {
     margin-bottom: 5px;
   }
 
-  .page[data-business="auto_parts"] .autoPartsProductCard .productBody h3 {
+  .page[data-theme-field="auto_parts"] .autoPartsProductCard .productBody h3 {
     font-size: 17px;
     line-height: 1.22;
   }
 
-  .page[data-business="auto_parts"] .autoPartsProductCard .productArabic {
+  .page[data-theme-field="auto_parts"] .autoPartsProductCard .productArabic {
     margin-top: 5px;
     font-size: 11.5px;
     line-height: 1.4;
   }
 
-  .page[data-business="auto_parts"] .autoPartsProductCard .productFitment {
+  .page[data-theme-field="auto_parts"] .autoPartsProductCard .productFitment {
     margin-top: 9px;
     padding: 7px 9px;
   }
 
-  .page[data-business="auto_parts"] .autoPartsProductCard .productFooter {
+  .page[data-theme-field="auto_parts"] .autoPartsProductCard .productFooter {
     gap: 8px;
     padding-top: 9px;
   }
 
-  .page[data-business="auto_parts"] .autoPartsProductCard .pricingCallButton,
-  .page[data-business="auto_parts"] .autoPartsProductCard .pricingWhatsappButton,
-  .page[data-business="auto_parts"] .autoPartsProductCard .pricingActions .productContactButton {
+  .page[data-theme-field="auto_parts"] .autoPartsProductCard .pricingCallButton,
+  .page[data-theme-field="auto_parts"] .autoPartsProductCard .pricingWhatsappButton,
+  .page[data-theme-field="auto_parts"] .autoPartsProductCard .pricingActions .productContactButton {
     min-height: 43px;
     border-radius: 12px;
     font-size: 10.5px;
@@ -5361,7 +5361,7 @@
   }
 
   /* Keep the concierge as the single graceful fallback after inventory. */
-  .page[data-business="auto_parts"] .partsConcierge {
+  .page[data-theme-field="auto_parts"] .partsConcierge {
     width: calc(100% - 28px);
     margin: 2px auto 20px;
     gap: 10px;
@@ -5393,19 +5393,19 @@
     font-size: 10px;
   }
 
-  .page[data-business="auto_parts"] .footer {
+  .page[data-theme-field="auto_parts"] .footer {
     width: calc(100% - 28px);
     padding-bottom: 18px;
   }
 }
 
 @media (max-width: 430px) {
-  .page[data-business="auto_parts"] .heroContent,
-  .page[data-business="auto_parts"][data-hero="immersive"] .heroContent {
+  .page[data-theme-field="auto_parts"] .heroContent,
+  .page[data-theme-field="auto_parts"][data-hero="immersive"] .heroContent {
     min-height: 286px !important;
   }
 
-  .page[data-business="auto_parts"] .productSectionHeading h3 {
+  .page[data-theme-field="auto_parts"] .productSectionHeading h3 {
     font-size: clamp(21px, 6.3vw, 25px);
   }
 }
@@ -5414,7 +5414,7 @@
    Retail field owns the storefront design.
    Auto Parts is the first approved field-specific Darik storefront. */
 
-.page[data-business="auto_parts"] {
+.page[data-theme-field="auto_parts"] {
   --store-primary: #071426;
   --store-accent: #2f66ff;
   --store-background: #061426;
@@ -5425,13 +5425,13 @@
   color: #f8fafc;
 }
 
-.page[data-business="auto_parts"] .announcementBar {
+.page[data-theme-field="auto_parts"] .announcementBar {
   border-bottom: 1px solid rgba(148,163,184,.10);
   background: #050f1e;
   color: #dbeafe;
 }
 
-.page[data-business="auto_parts"] .header {
+.page[data-theme-field="auto_parts"] .header {
   border-bottom: 1px solid rgba(148,163,184,.13);
   background: rgba(5,15,30,.92);
   color: #fff;
@@ -5440,34 +5440,34 @@
   -webkit-backdrop-filter: blur(22px) saturate(135%);
 }
 
-.page[data-business="auto_parts"] .storeIdentity strong {
+.page[data-theme-field="auto_parts"] .storeIdentity strong {
   color: #fff;
 }
 
-.page[data-business="auto_parts"] .storeIdentity span {
+.page[data-theme-field="auto_parts"] .storeIdentity span {
   color: #8fa6c5;
 }
 
-.page[data-business="auto_parts"] .headerActions button {
+.page[data-theme-field="auto_parts"] .headerActions button {
   border-color: rgba(148,163,184,.20);
   background: rgba(255,255,255,.055);
   color: #dbeafe;
 }
 
-.page[data-business="auto_parts"] .headerActions button:hover {
+.page[data-theme-field="auto_parts"] .headerActions button:hover {
   border-color: rgba(96,165,250,.46);
   color: #fff;
 }
 
-.page[data-business="auto_parts"] .headerWhatsappButton {
+.page[data-theme-field="auto_parts"] .headerWhatsappButton {
   border-color: rgba(34,197,94,.32);
   background: linear-gradient(145deg, #19b85a, #159447);
   color: #fff;
   box-shadow: 0 10px 26px rgba(22,163,74,.22);
 }
 
-.page[data-business="auto_parts"] .hero,
-.page[data-business="auto_parts"][data-hero="immersive"] .hero {
+.page[data-theme-field="auto_parts"] .hero,
+.page[data-theme-field="auto_parts"][data-hero="immersive"] .hero {
   border: 1px solid rgba(148,163,184,.14);
   background-color: #071426;
   box-shadow:
@@ -5475,13 +5475,13 @@
     inset 0 1px 0 rgba(255,255,255,.07);
 }
 
-.page[data-business="auto_parts"] .heroOverlay {
+.page[data-theme-field="auto_parts"] .heroOverlay {
   background:
     linear-gradient(90deg, rgba(2,8,20,.94) 0%, rgba(4,13,30,.76) 48%, rgba(4,13,30,.28) 100%),
     linear-gradient(0deg, rgba(2,8,20,.78), transparent 62%);
 }
 
-.page[data-business="auto_parts"] .primaryHeroButton {
+.page[data-theme-field="auto_parts"] .primaryHeroButton {
   border: 1px solid rgba(147,197,253,.26);
   background: linear-gradient(135deg, #2f66ff, #1d4ed8);
   color: #fff;
@@ -5490,7 +5490,7 @@
     inset 0 1px 0 rgba(255,255,255,.24);
 }
 
-.page[data-business="auto_parts"] .quickInfoStrip {
+.page[data-theme-field="auto_parts"] .quickInfoStrip {
   border-color: rgba(148,163,184,.16);
   background:
     linear-gradient(145deg, rgba(12,30,52,.98), rgba(7,22,41,.98));
@@ -5500,29 +5500,29 @@
     inset 0 1px 0 rgba(255,255,255,.045);
 }
 
-.page[data-business="auto_parts"] .quickInfoStrip > a,
-.page[data-business="auto_parts"] .quickInfoStrip > button {
+.page[data-theme-field="auto_parts"] .quickInfoStrip > a,
+.page[data-theme-field="auto_parts"] .quickInfoStrip > button {
   border-right-color: rgba(148,163,184,.14);
 }
 
-.page[data-business="auto_parts"] .quickInfoStrip small {
+.page[data-theme-field="auto_parts"] .quickInfoStrip small {
   color: #8ea5c5;
 }
 
-.page[data-business="auto_parts"] .quickInfoStrip strong {
+.page[data-theme-field="auto_parts"] .quickInfoStrip strong {
   color: #f8fafc;
 }
 
-.page[data-business="auto_parts"] .quickIcon {
+.page[data-theme-field="auto_parts"] .quickIcon {
   background: rgba(47,102,255,.12);
   color: #93c5fd;
 }
 
-.page[data-business="auto_parts"] .catalogShell {
+.page[data-theme-field="auto_parts"] .catalogShell {
   color: #f8fafc;
 }
 
-.page[data-business="auto_parts"] .searchBox {
+.page[data-theme-field="auto_parts"] .searchBox {
   border-color: rgba(148,163,184,.15);
   background: linear-gradient(145deg, rgba(15,36,61,.96), rgba(9,26,47,.96));
   color: #90a7c6;
@@ -5531,21 +5531,21 @@
     inset 0 1px 0 rgba(255,255,255,.035);
 }
 
-.page[data-business="auto_parts"] .searchBox input {
+.page[data-theme-field="auto_parts"] .searchBox input {
   color: #fff;
 }
 
-.page[data-business="auto_parts"] .searchBox input::placeholder {
+.page[data-theme-field="auto_parts"] .searchBox input::placeholder {
   color: #758ba8;
   opacity: 1;
 }
 
-.page[data-business="auto_parts"] .searchBox button {
+.page[data-theme-field="auto_parts"] .searchBox button {
   background: rgba(255,255,255,.06);
   color: #a8bad1;
 }
 
-.page[data-business="auto_parts"] .vehicleFilterPanel {
+.page[data-theme-field="auto_parts"] .vehicleFilterPanel {
   border: 1px solid rgba(96,165,250,.15);
   background:
     radial-gradient(circle at 100% 0%, rgba(47,102,255,.25), transparent 35%),
@@ -5555,28 +5555,28 @@
     inset 0 1px 0 rgba(255,255,255,.05);
 }
 
-.page[data-business="auto_parts"] .productSectionHeading > div > span {
+.page[data-theme-field="auto_parts"] .productSectionHeading > div > span {
   color: #60a5fa;
 }
 
-.page[data-business="auto_parts"] .productSectionHeading h3 {
+.page[data-theme-field="auto_parts"] .productSectionHeading h3 {
   color: #fff;
 }
 
-.page[data-business="auto_parts"] .productSectionHeading > small {
+.page[data-theme-field="auto_parts"] .productSectionHeading > small {
   color: #8da2bf;
 }
 
-.page[data-business="auto_parts"] .productSectionHeading::after {
+.page[data-theme-field="auto_parts"] .productSectionHeading::after {
   background: linear-gradient(90deg, #3b82f6, rgba(59,130,246,.12));
 }
 
-.page[data-business="auto_parts"] .productGrid {
+.page[data-theme-field="auto_parts"] .productGrid {
   grid-template-columns: 1fr;
   gap: 22px;
 }
 
-.page[data-business="auto_parts"] .autoPartsProductCard {
+.page[data-theme-field="auto_parts"] .autoPartsProductCard {
   display: grid;
   grid-template-columns: minmax(300px, .92fr) minmax(0, 1.08fr);
   overflow: hidden;
@@ -5591,7 +5591,7 @@
     inset 0 1px 0 rgba(255,255,255,.045);
 }
 
-.page[data-business="auto_parts"] .autoPartsProductCard .productImage {
+.page[data-theme-field="auto_parts"] .autoPartsProductCard .productImage {
   min-height: 330px;
   height: 100%;
   aspect-ratio: auto;
@@ -5600,60 +5600,60 @@
     radial-gradient(circle at 50% 12%, #fff, #edf2f7 74%);
 }
 
-.page[data-business="auto_parts"] .autoPartsProductCard .productBody {
+.page[data-theme-field="auto_parts"] .autoPartsProductCard .productBody {
   display: flex;
   flex-direction: column;
   justify-content: center;
   padding: 26px 28px;
 }
 
-.page[data-business="auto_parts"] .autoPartsProductCard .productMeta {
+.page[data-theme-field="auto_parts"] .autoPartsProductCard .productMeta {
   color: #60a5fa;
 }
 
-.page[data-business="auto_parts"] .autoPartsProductCard .productBody h3 {
+.page[data-theme-field="auto_parts"] .autoPartsProductCard .productBody h3 {
   color: #fff;
   font-size: clamp(23px, 2.5vw, 32px);
   line-height: 1.12;
 }
 
-.page[data-business="auto_parts"] .autoPartsProductCard .productArabic {
+.page[data-theme-field="auto_parts"] .autoPartsProductCard .productArabic {
   color: #a9bad0;
 }
 
-.page[data-business="auto_parts"] .autoPartsProductCard .productFitment {
+.page[data-theme-field="auto_parts"] .autoPartsProductCard .productFitment {
   border-color: rgba(96,165,250,.18);
   background: rgba(47,102,255,.075);
   box-shadow: inset 0 1px 0 rgba(255,255,255,.035);
 }
 
-.page[data-business="auto_parts"] .autoPartsProductCard .productFitment span {
+.page[data-theme-field="auto_parts"] .autoPartsProductCard .productFitment span {
   color: #8ea5c5;
 }
 
-.page[data-business="auto_parts"] .autoPartsProductCard .productFitment strong {
+.page[data-theme-field="auto_parts"] .autoPartsProductCard .productFitment strong {
   color: #eaf2ff;
 }
 
-.page[data-business="auto_parts"] .autoPartsProductCard .productFooter > div:first-child > strong {
+.page[data-theme-field="auto_parts"] .autoPartsProductCard .productFooter > div:first-child > strong {
   color: #c3d0e2;
 }
 
-.page[data-business="auto_parts"] .autoPartsProductCard .pricingCallButton,
-.page[data-business="auto_parts"] .autoPartsProductCard .pricingActions .productContactButton {
+.page[data-theme-field="auto_parts"] .autoPartsProductCard .pricingCallButton,
+.page[data-theme-field="auto_parts"] .autoPartsProductCard .pricingActions .productContactButton {
   border: 1px solid rgba(96,165,250,.24);
   background: rgba(47,102,255,.08);
   color: #f8fafc;
 }
 
-.page[data-business="auto_parts"] .autoPartsProductCard .pricingWhatsappButton {
+.page[data-theme-field="auto_parts"] .autoPartsProductCard .pricingWhatsappButton {
   border-color: transparent;
   background: linear-gradient(145deg, #18b957, #159447);
   color: #fff;
   box-shadow: 0 12px 28px rgba(22,163,74,.22);
 }
 
-.page[data-business="auto_parts"] .partsConcierge {
+.page[data-theme-field="auto_parts"] .partsConcierge {
   border: 1px solid rgba(96,165,250,.20);
   background:
     radial-gradient(circle at 100% 0%, rgba(47,102,255,.25), transparent 36%),
@@ -5663,101 +5663,101 @@
     inset 0 1px 0 rgba(255,255,255,.045);
 }
 
-.page[data-business="auto_parts"] .footer {
+.page[data-theme-field="auto_parts"] .footer {
   border-top-color: rgba(148,163,184,.13);
   color: #d6e1f0;
 }
 
-.page[data-business="auto_parts"] .footer strong {
+.page[data-theme-field="auto_parts"] .footer strong {
   color: #fff;
 }
 
-.page[data-business="auto_parts"] .footer span,
-.page[data-business="auto_parts"] .footer small,
-.page[data-business="auto_parts"] .poweredBy {
+.page[data-theme-field="auto_parts"] .footer span,
+.page[data-theme-field="auto_parts"] .footer small,
+.page[data-theme-field="auto_parts"] .poweredBy {
   color: #8197b4;
 }
 
-.page[data-business="auto_parts"] .categorySection {
+.page[data-theme-field="auto_parts"] .categorySection {
   color: #f8fafc;
 }
 
-.page[data-business="auto_parts"] .categorySection .sectionHeading h2 {
+.page[data-theme-field="auto_parts"] .categorySection .sectionHeading h2 {
   color: #fff;
 }
 
-.page[data-business="auto_parts"] .categoryCard {
+.page[data-theme-field="auto_parts"] .categoryCard {
   color: #dbeafe;
 }
 
-.page[data-business="auto_parts"] .categoryCard small,
-.page[data-business="auto_parts"] .categoryCard em {
+.page[data-theme-field="auto_parts"] .categoryCard small,
+.page[data-theme-field="auto_parts"] .categoryCard em {
   color: #7f95b1;
 }
 
-.page[data-business="auto_parts"] .categoryVisual,
-.page[data-business="auto_parts"] .allCategoryVisual {
+.page[data-theme-field="auto_parts"] .categoryVisual,
+.page[data-theme-field="auto_parts"] .allCategoryVisual {
   border-color: rgba(148,163,184,.15);
   background-color: #102641;
 }
 
 @media (max-width: 760px) {
-  .page[data-business="auto_parts"] .header {
+  .page[data-theme-field="auto_parts"] .header {
     min-height: 67px;
     padding-top: 9px;
     padding-bottom: 9px;
   }
 
-  .page[data-business="auto_parts"] .hero,
-  .page[data-business="auto_parts"][data-hero="immersive"] .hero {
+  .page[data-theme-field="auto_parts"] .hero,
+  .page[data-theme-field="auto_parts"][data-hero="immersive"] .hero {
     width: calc(100% - 18px);
     margin-top: 10px;
     border-radius: 23px;
   }
 
-  .page[data-business="auto_parts"] .heroContent,
-  .page[data-business="auto_parts"][data-hero="immersive"] .heroContent {
+  .page[data-theme-field="auto_parts"] .heroContent,
+  .page[data-theme-field="auto_parts"][data-hero="immersive"] .heroContent {
     min-height: 300px !important;
   }
 
-  .page[data-business="auto_parts"] .primaryHeroButton {
+  .page[data-theme-field="auto_parts"] .primaryHeroButton {
     min-height: 47px;
   }
 
-  .page[data-business="auto_parts"] .quickInfoStrip {
+  .page[data-theme-field="auto_parts"] .quickInfoStrip {
     width: calc(100% - 28px);
     margin-top: 10px;
     grid-template-columns: 1fr 1fr;
     border-radius: 17px;
   }
 
-  .page[data-business="auto_parts"] .quickInfoStrip .locationQuickLink {
+  .page[data-theme-field="auto_parts"] .quickInfoStrip .locationQuickLink {
     grid-column: 1 / -1;
     border-right: 0;
     border-bottom: 1px solid rgba(148,163,184,.12);
   }
 
-  .page[data-business="auto_parts"] .quickInfoStrip .contactQuickLink {
+  .page[data-theme-field="auto_parts"] .quickInfoStrip .contactQuickLink {
     border-right: 1px solid rgba(148,163,184,.12);
   }
 
-  .page[data-business="auto_parts"] .catalogShell {
+  .page[data-theme-field="auto_parts"] .catalogShell {
     width: calc(100% - 28px);
     padding-top: 18px;
   }
 
-  .page[data-business="auto_parts"] .productSectionHeading h3 {
+  .page[data-theme-field="auto_parts"] .productSectionHeading h3 {
     color: #fff;
     white-space: nowrap;
     font-size: clamp(22px, 6vw, 26px);
   }
 
-  .page[data-business="auto_parts"] .autoPartsProductCard {
+  .page[data-theme-field="auto_parts"] .autoPartsProductCard {
     display: block;
     border-radius: 20px;
   }
 
-  .page[data-business="auto_parts"] .autoPartsProductCard .productImage {
+  .page[data-theme-field="auto_parts"] .autoPartsProductCard .productImage {
     min-height: 0;
     height: auto;
     aspect-ratio: 1.72 / 1;
@@ -5765,20 +5765,20 @@
     border-bottom: 1px solid rgba(148,163,184,.12);
   }
 
-  .page[data-business="auto_parts"] .autoPartsProductCard .productBody {
+  .page[data-theme-field="auto_parts"] .autoPartsProductCard .productBody {
     padding: 16px;
   }
 
-  .page[data-business="auto_parts"] .autoPartsProductCard .productBody h3 {
+  .page[data-theme-field="auto_parts"] .autoPartsProductCard .productBody h3 {
     font-size: 19px;
     line-height: 1.2;
   }
 
-  .page[data-business="auto_parts"] .partsConcierge {
+  .page[data-theme-field="auto_parts"] .partsConcierge {
     width: calc(100% - 28px);
   }
 
-  .page[data-business="auto_parts"] .footer {
+  .page[data-theme-field="auto_parts"] .footer {
     width: calc(100% - 28px);
   }
 }
@@ -5788,35 +5788,35 @@
    1) header divider/outline
    2) bright Call-cell outline inside the quick utility strip */
 
-.page[data-business="auto_parts"] .header {
+.page[data-theme-field="auto_parts"] .header {
   border: 0 !important;
   border-bottom: 0 !important;
   box-shadow: 0 12px 32px rgba(2,6,23,.18) !important;
 }
 
-.page[data-business="auto_parts"] .quickInfoStrip {
+.page[data-theme-field="auto_parts"] .quickInfoStrip {
   border-color: rgba(148,163,184,.10) !important;
 }
 
-.page[data-business="auto_parts"] .quickInfoStrip .contactQuickLink,
-.page[data-business="auto_parts"] .quickInfoStrip .contactQuickLink:first-of-type,
-.page[data-business="auto_parts"] .quickInfoStrip .contactQuickLink:last-of-type {
+.page[data-theme-field="auto_parts"] .quickInfoStrip .contactQuickLink,
+.page[data-theme-field="auto_parts"] .quickInfoStrip .contactQuickLink:first-of-type,
+.page[data-theme-field="auto_parts"] .quickInfoStrip .contactQuickLink:last-of-type {
   border: 0 !important;
   outline: 0 !important;
   box-shadow: none !important;
 }
 
 @media (max-width: 760px) {
-  .page[data-business="auto_parts"] .quickInfoStrip .locationQuickLink {
+  .page[data-theme-field="auto_parts"] .quickInfoStrip .locationQuickLink {
     border-right: 0 !important;
     border-bottom: 1px solid rgba(148,163,184,.09) !important;
   }
 
-  .page[data-business="auto_parts"] .quickInfoStrip .contactQuickLink {
+  .page[data-theme-field="auto_parts"] .quickInfoStrip .contactQuickLink {
     border: 0 !important;
   }
 
-  .page[data-business="auto_parts"] .quickInfoStrip .contactQuickLink + .contactQuickLink {
+  .page[data-theme-field="auto_parts"] .quickInfoStrip .contactQuickLink + .contactQuickLink {
     border-left: 1px solid rgba(148,163,184,.08) !important;
   }
 }
@@ -5826,12 +5826,12 @@
    Mechanics remain grocery mechanics; this block is presentation only. */
 
 .page:is(
-  [data-business="supermarket"],
-  [data-business="grocery"],
-  [data-business="mini_market"],
-  [data-business="butcher"],
-  [data-business="produce"],
-  [data-business="frozen_food"]
+  [data-theme-field="supermarket"],
+  [data-theme-field="grocery"],
+  [data-theme-field="mini_market"],
+  [data-theme-field="butcher"],
+  [data-theme-field="produce"],
+  [data-theme-field="frozen_food"]
 ) {
   background:
     radial-gradient(circle at 10% 4%, rgba(34,197,94,.10), transparent 25rem),
@@ -5840,12 +5840,12 @@
 }
 
 .page:is(
-  [data-business="supermarket"],
-  [data-business="grocery"],
-  [data-business="mini_market"],
-  [data-business="butcher"],
-  [data-business="produce"],
-  [data-business="frozen_food"]
+  [data-theme-field="supermarket"],
+  [data-theme-field="grocery"],
+  [data-theme-field="mini_market"],
+  [data-theme-field="butcher"],
+  [data-theme-field="produce"],
+  [data-theme-field="frozen_food"]
 ) .announcementBar {
   border-bottom-color: rgba(22,163,74,.10);
   background: #fff;
@@ -5853,12 +5853,12 @@
 }
 
 .page:is(
-  [data-business="supermarket"],
-  [data-business="grocery"],
-  [data-business="mini_market"],
-  [data-business="butcher"],
-  [data-business="produce"],
-  [data-business="frozen_food"]
+  [data-theme-field="supermarket"],
+  [data-theme-field="grocery"],
+  [data-theme-field="mini_market"],
+  [data-theme-field="butcher"],
+  [data-theme-field="produce"],
+  [data-theme-field="frozen_food"]
 ) .header {
   border-bottom-color: rgba(15,23,42,.06);
   background: rgba(255,255,255,.94);
@@ -5869,34 +5869,34 @@
 }
 
 .page:is(
-  [data-business="supermarket"],
-  [data-business="grocery"],
-  [data-business="mini_market"],
-  [data-business="butcher"],
-  [data-business="produce"],
-  [data-business="frozen_food"]
+  [data-theme-field="supermarket"],
+  [data-theme-field="grocery"],
+  [data-theme-field="mini_market"],
+  [data-theme-field="butcher"],
+  [data-theme-field="produce"],
+  [data-theme-field="frozen_food"]
 ) .storeIdentity strong {
   color: #0f172a;
 }
 
 .page:is(
-  [data-business="supermarket"],
-  [data-business="grocery"],
-  [data-business="mini_market"],
-  [data-business="butcher"],
-  [data-business="produce"],
-  [data-business="frozen_food"]
+  [data-theme-field="supermarket"],
+  [data-theme-field="grocery"],
+  [data-theme-field="mini_market"],
+  [data-theme-field="butcher"],
+  [data-theme-field="produce"],
+  [data-theme-field="frozen_food"]
 ) .storeIdentity span {
   color: #64748b;
 }
 
 .page:is(
-  [data-business="supermarket"],
-  [data-business="grocery"],
-  [data-business="mini_market"],
-  [data-business="butcher"],
-  [data-business="produce"],
-  [data-business="frozen_food"]
+  [data-theme-field="supermarket"],
+  [data-theme-field="grocery"],
+  [data-theme-field="mini_market"],
+  [data-theme-field="butcher"],
+  [data-theme-field="produce"],
+  [data-theme-field="frozen_food"]
 ) .hero {
   overflow: hidden;
   border: 1px solid rgba(255,255,255,.55);
@@ -5905,12 +5905,12 @@
 }
 
 .page:is(
-  [data-business="supermarket"],
-  [data-business="grocery"],
-  [data-business="mini_market"],
-  [data-business="butcher"],
-  [data-business="produce"],
-  [data-business="frozen_food"]
+  [data-theme-field="supermarket"],
+  [data-theme-field="grocery"],
+  [data-theme-field="mini_market"],
+  [data-theme-field="butcher"],
+  [data-theme-field="produce"],
+  [data-theme-field="frozen_food"]
 ) .heroOverlay {
   background:
     linear-gradient(90deg, rgba(5,18,13,.86) 0%, rgba(8,28,18,.62) 43%, rgba(5,18,13,.18) 76%, rgba(5,18,13,.08) 100%),
@@ -5918,12 +5918,12 @@
 }
 
 .page:is(
-  [data-business="supermarket"],
-  [data-business="grocery"],
-  [data-business="mini_market"],
-  [data-business="butcher"],
-  [data-business="produce"],
-  [data-business="frozen_food"]
+  [data-theme-field="supermarket"],
+  [data-theme-field="grocery"],
+  [data-theme-field="mini_market"],
+  [data-theme-field="butcher"],
+  [data-theme-field="produce"],
+  [data-theme-field="frozen_food"]
 ) .heroTexture {
   background:
     radial-gradient(circle at 18% 16%, rgba(34,197,94,.20), transparent 30%),
@@ -5931,12 +5931,12 @@
 }
 
 .page:is(
-  [data-business="supermarket"],
-  [data-business="grocery"],
-  [data-business="mini_market"],
-  [data-business="butcher"],
-  [data-business="produce"],
-  [data-business="frozen_food"]
+  [data-theme-field="supermarket"],
+  [data-theme-field="grocery"],
+  [data-theme-field="mini_market"],
+  [data-theme-field="butcher"],
+  [data-theme-field="produce"],
+  [data-theme-field="frozen_food"]
 ) .heroContent {
   min-height: 440px;
   align-items: flex-end;
@@ -5944,23 +5944,23 @@
 }
 
 .page:is(
-  [data-business="supermarket"],
-  [data-business="grocery"],
-  [data-business="mini_market"],
-  [data-business="butcher"],
-  [data-business="produce"],
-  [data-business="frozen_food"]
+  [data-theme-field="supermarket"],
+  [data-theme-field="grocery"],
+  [data-theme-field="mini_market"],
+  [data-theme-field="butcher"],
+  [data-theme-field="produce"],
+  [data-theme-field="frozen_food"]
 ) .heroCopy {
   max-width: 650px;
 }
 
 .page:is(
-  [data-business="supermarket"],
-  [data-business="grocery"],
-  [data-business="mini_market"],
-  [data-business="butcher"],
-  [data-business="produce"],
-  [data-business="frozen_food"]
+  [data-theme-field="supermarket"],
+  [data-theme-field="grocery"],
+  [data-theme-field="mini_market"],
+  [data-theme-field="butcher"],
+  [data-theme-field="produce"],
+  [data-theme-field="frozen_food"]
 ) .heroCopy h1 {
   max-width: 620px;
   font-size: clamp(46px, 7vw, 86px);
@@ -5969,20 +5969,20 @@
 }
 
 .page:is(
-  [data-business="supermarket"],
-  [data-business="grocery"],
-  [data-business="mini_market"],
-  [data-business="butcher"],
-  [data-business="produce"],
-  [data-business="frozen_food"]
+  [data-theme-field="supermarket"],
+  [data-theme-field="grocery"],
+  [data-theme-field="mini_market"],
+  [data-theme-field="butcher"],
+  [data-theme-field="produce"],
+  [data-theme-field="frozen_food"]
 ) .heroLiveStatus,
 .page:is(
-  [data-business="supermarket"],
-  [data-business="grocery"],
-  [data-business="mini_market"],
-  [data-business="butcher"],
-  [data-business="produce"],
-  [data-business="frozen_food"]
+  [data-theme-field="supermarket"],
+  [data-theme-field="grocery"],
+  [data-theme-field="mini_market"],
+  [data-theme-field="butcher"],
+  [data-theme-field="produce"],
+  [data-theme-field="frozen_food"]
 ) .heroHoursChip {
   border-color: rgba(255,255,255,.17);
   background: rgba(15,23,42,.54);
@@ -5992,12 +5992,12 @@
 }
 
 .page:is(
-  [data-business="supermarket"],
-  [data-business="grocery"],
-  [data-business="mini_market"],
-  [data-business="butcher"],
-  [data-business="produce"],
-  [data-business="frozen_food"]
+  [data-theme-field="supermarket"],
+  [data-theme-field="grocery"],
+  [data-theme-field="mini_market"],
+  [data-theme-field="butcher"],
+  [data-theme-field="produce"],
+  [data-theme-field="frozen_food"]
 ) .primaryHeroButton {
   min-height: 64px;
   border: 0;
@@ -6008,31 +6008,31 @@
 }
 
 .page:is(
-  [data-business="supermarket"],
-  [data-business="grocery"],
-  [data-business="mini_market"],
-  [data-business="butcher"],
-  [data-business="produce"],
-  [data-business="frozen_food"]
+  [data-theme-field="supermarket"],
+  [data-theme-field="grocery"],
+  [data-theme-field="mini_market"],
+  [data-theme-field="butcher"],
+  [data-theme-field="produce"],
+  [data-theme-field="frozen_food"]
 ) .secondaryHeroButton,
 .page:is(
-  [data-business="supermarket"],
-  [data-business="grocery"],
-  [data-business="mini_market"],
-  [data-business="butcher"],
-  [data-business="produce"],
-  [data-business="frozen_food"]
+  [data-theme-field="supermarket"],
+  [data-theme-field="grocery"],
+  [data-theme-field="mini_market"],
+  [data-theme-field="butcher"],
+  [data-theme-field="produce"],
+  [data-theme-field="frozen_food"]
 ) .orderSnapshot {
   display: none;
 }
 
 .page:is(
-  [data-business="supermarket"],
-  [data-business="grocery"],
-  [data-business="mini_market"],
-  [data-business="butcher"],
-  [data-business="produce"],
-  [data-business="frozen_food"]
+  [data-theme-field="supermarket"],
+  [data-theme-field="grocery"],
+  [data-theme-field="mini_market"],
+  [data-theme-field="butcher"],
+  [data-theme-field="produce"],
+  [data-theme-field="frozen_food"]
 ) .quickInfoStrip {
   overflow: hidden;
   border: 1px solid rgba(15,23,42,.07);
@@ -6042,12 +6042,12 @@
 }
 
 .page:is(
-  [data-business="supermarket"],
-  [data-business="grocery"],
-  [data-business="mini_market"],
-  [data-business="butcher"],
-  [data-business="produce"],
-  [data-business="frozen_food"]
+  [data-theme-field="supermarket"],
+  [data-theme-field="grocery"],
+  [data-theme-field="mini_market"],
+  [data-theme-field="butcher"],
+  [data-theme-field="produce"],
+  [data-theme-field="frozen_food"]
 ) .quickIcon {
   background: #ecfdf3;
   color: #16a34a;
@@ -6100,12 +6100,12 @@
 }
 
 .page:is(
-  [data-business="supermarket"],
-  [data-business="grocery"],
-  [data-business="mini_market"],
-  [data-business="butcher"],
-  [data-business="produce"],
-  [data-business="frozen_food"]
+  [data-theme-field="supermarket"],
+  [data-theme-field="grocery"],
+  [data-theme-field="mini_market"],
+  [data-theme-field="butcher"],
+  [data-theme-field="produce"],
+  [data-theme-field="frozen_food"]
 ) .groceryCategorySection {
   width: min(1180px, calc(100% - 36px));
   margin: 22px auto 0;
@@ -6117,12 +6117,12 @@
 }
 
 .page:is(
-  [data-business="supermarket"],
-  [data-business="grocery"],
-  [data-business="mini_market"],
-  [data-business="butcher"],
-  [data-business="produce"],
-  [data-business="frozen_food"]
+  [data-theme-field="supermarket"],
+  [data-theme-field="grocery"],
+  [data-theme-field="mini_market"],
+  [data-theme-field="butcher"],
+  [data-theme-field="produce"],
+  [data-theme-field="frozen_food"]
 ) .categoryScroller {
   display: grid;
   grid-template-columns: repeat(6, minmax(0, 1fr));
@@ -6134,12 +6134,12 @@
 }
 
 .page:is(
-  [data-business="supermarket"],
-  [data-business="grocery"],
-  [data-business="mini_market"],
-  [data-business="butcher"],
-  [data-business="produce"],
-  [data-business="frozen_food"]
+  [data-theme-field="supermarket"],
+  [data-theme-field="grocery"],
+  [data-theme-field="mini_market"],
+  [data-theme-field="butcher"],
+  [data-theme-field="produce"],
+  [data-theme-field="frozen_food"]
 ) .categoryCard {
   min-width: 0;
   min-height: 154px;
@@ -6151,20 +6151,20 @@
 }
 
 .page:is(
-  [data-business="supermarket"],
-  [data-business="grocery"],
-  [data-business="mini_market"],
-  [data-business="butcher"],
-  [data-business="produce"],
-  [data-business="frozen_food"]
+  [data-theme-field="supermarket"],
+  [data-theme-field="grocery"],
+  [data-theme-field="mini_market"],
+  [data-theme-field="butcher"],
+  [data-theme-field="produce"],
+  [data-theme-field="frozen_food"]
 ) .categoryVisual,
 .page:is(
-  [data-business="supermarket"],
-  [data-business="grocery"],
-  [data-business="mini_market"],
-  [data-business="butcher"],
-  [data-business="produce"],
-  [data-business="frozen_food"]
+  [data-theme-field="supermarket"],
+  [data-theme-field="grocery"],
+  [data-theme-field="mini_market"],
+  [data-theme-field="butcher"],
+  [data-theme-field="produce"],
+  [data-theme-field="frozen_food"]
 ) .allCategoryVisual {
   width: 100%;
   height: 78px;
@@ -6173,12 +6173,12 @@
 }
 
 .page:is(
-  [data-business="supermarket"],
-  [data-business="grocery"],
-  [data-business="mini_market"],
-  [data-business="butcher"],
-  [data-business="produce"],
-  [data-business="frozen_food"]
+  [data-theme-field="supermarket"],
+  [data-theme-field="grocery"],
+  [data-theme-field="mini_market"],
+  [data-theme-field="butcher"],
+  [data-theme-field="produce"],
+  [data-theme-field="frozen_food"]
 ) .activeCategoryCard {
   border-color: rgba(22,163,74,.30);
   box-shadow: 0 0 0 3px rgba(34,197,94,.08), 0 10px 24px rgba(15,23,42,.05);
@@ -6272,12 +6272,12 @@
 }
 
 .page:is(
-  [data-business="supermarket"],
-  [data-business="grocery"],
-  [data-business="mini_market"],
-  [data-business="butcher"],
-  [data-business="produce"],
-  [data-business="frozen_food"]
+  [data-theme-field="supermarket"],
+  [data-theme-field="grocery"],
+  [data-theme-field="mini_market"],
+  [data-theme-field="butcher"],
+  [data-theme-field="produce"],
+  [data-theme-field="frozen_food"]
 ) .catalogShell {
   border: 0;
   background: transparent;
@@ -6285,87 +6285,87 @@
 }
 
 .page:is(
-  [data-business="supermarket"],
-  [data-business="grocery"],
-  [data-business="mini_market"],
-  [data-business="butcher"],
-  [data-business="produce"],
-  [data-business="frozen_food"]
+  [data-theme-field="supermarket"],
+  [data-theme-field="grocery"],
+  [data-theme-field="mini_market"],
+  [data-theme-field="butcher"],
+  [data-theme-field="produce"],
+  [data-theme-field="frozen_food"]
 ) .groceryCatalogTopbar {
   display: none;
 }
 
 .page:is(
-  [data-business="supermarket"],
-  [data-business="grocery"],
-  [data-business="mini_market"],
-  [data-business="butcher"],
-  [data-business="produce"],
-  [data-business="frozen_food"]
+  [data-theme-field="supermarket"],
+  [data-theme-field="grocery"],
+  [data-theme-field="mini_market"],
+  [data-theme-field="butcher"],
+  [data-theme-field="produce"],
+  [data-theme-field="frozen_food"]
 ) .categoryPills {
   margin-top: 0;
 }
 
 .page:is(
-  [data-business="supermarket"],
-  [data-business="grocery"],
-  [data-business="mini_market"],
-  [data-business="butcher"],
-  [data-business="produce"],
-  [data-business="frozen_food"]
+  [data-theme-field="supermarket"],
+  [data-theme-field="grocery"],
+  [data-theme-field="mini_market"],
+  [data-theme-field="butcher"],
+  [data-theme-field="produce"],
+  [data-theme-field="frozen_food"]
 ) .productSectionHeading > div > span {
   color: #15803d;
 }
 
 .page:is(
-  [data-business="supermarket"],
-  [data-business="grocery"],
-  [data-business="mini_market"],
-  [data-business="butcher"],
-  [data-business="produce"],
-  [data-business="frozen_food"]
+  [data-theme-field="supermarket"],
+  [data-theme-field="grocery"],
+  [data-theme-field="mini_market"],
+  [data-theme-field="butcher"],
+  [data-theme-field="produce"],
+  [data-theme-field="frozen_food"]
 ) .productSectionHeading h3 {
   color: #0f172a;
 }
 
 .page:is(
-  [data-business="supermarket"],
-  [data-business="grocery"],
-  [data-business="mini_market"],
-  [data-business="butcher"],
-  [data-business="produce"],
-  [data-business="frozen_food"]
+  [data-theme-field="supermarket"],
+  [data-theme-field="grocery"],
+  [data-theme-field="mini_market"],
+  [data-theme-field="butcher"],
+  [data-theme-field="produce"],
+  [data-theme-field="frozen_food"]
 ) .groceryFeaturedProducts .productGrid,
 .page:is(
-  [data-business="supermarket"],
-  [data-business="grocery"],
-  [data-business="mini_market"],
-  [data-business="butcher"],
-  [data-business="produce"],
-  [data-business="frozen_food"]
+  [data-theme-field="supermarket"],
+  [data-theme-field="grocery"],
+  [data-theme-field="mini_market"],
+  [data-theme-field="butcher"],
+  [data-theme-field="produce"],
+  [data-theme-field="frozen_food"]
 ) .groceryCatalogProducts .productGrid {
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 15px;
 }
 
 .page:is(
-  [data-business="supermarket"],
-  [data-business="grocery"],
-  [data-business="mini_market"],
-  [data-business="butcher"],
-  [data-business="produce"],
-  [data-business="frozen_food"]
+  [data-theme-field="supermarket"],
+  [data-theme-field="grocery"],
+  [data-theme-field="mini_market"],
+  [data-theme-field="butcher"],
+  [data-theme-field="produce"],
+  [data-theme-field="frozen_food"]
 ) .groceryFeaturedProducts .productCard:first-child {
   grid-column: 1 / -1;
 }
 
 .page:is(
-  [data-business="supermarket"],
-  [data-business="grocery"],
-  [data-business="mini_market"],
-  [data-business="butcher"],
-  [data-business="produce"],
-  [data-business="frozen_food"]
+  [data-theme-field="supermarket"],
+  [data-theme-field="grocery"],
+  [data-theme-field="mini_market"],
+  [data-theme-field="butcher"],
+  [data-theme-field="produce"],
+  [data-theme-field="frozen_food"]
 ) .productCard {
   overflow: hidden;
   border-color: rgba(15,23,42,.07);
@@ -6375,23 +6375,23 @@
 }
 
 .page:is(
-  [data-business="supermarket"],
-  [data-business="grocery"],
-  [data-business="mini_market"],
-  [data-business="butcher"],
-  [data-business="produce"],
-  [data-business="frozen_food"]
+  [data-theme-field="supermarket"],
+  [data-theme-field="grocery"],
+  [data-theme-field="mini_market"],
+  [data-theme-field="butcher"],
+  [data-theme-field="produce"],
+  [data-theme-field="frozen_food"]
 ) .productImage {
   background: linear-gradient(180deg, #fff, #f8fafc);
 }
 
 .page:is(
-  [data-business="supermarket"],
-  [data-business="grocery"],
-  [data-business="mini_market"],
-  [data-business="butcher"],
-  [data-business="produce"],
-  [data-business="frozen_food"]
+  [data-theme-field="supermarket"],
+  [data-theme-field="grocery"],
+  [data-theme-field="mini_market"],
+  [data-theme-field="butcher"],
+  [data-theme-field="produce"],
+  [data-theme-field="frozen_food"]
 ) .productFooter button {
   background: linear-gradient(135deg, #16a34a, #22c55e);
   color: #fff;
@@ -6470,12 +6470,12 @@
 
 @media (max-width: 820px) {
   .page:is(
-    [data-business="supermarket"],
-    [data-business="grocery"],
-    [data-business="mini_market"],
-    [data-business="butcher"],
-    [data-business="produce"],
-    [data-business="frozen_food"]
+    [data-theme-field="supermarket"],
+    [data-theme-field="grocery"],
+    [data-theme-field="mini_market"],
+    [data-theme-field="butcher"],
+    [data-theme-field="produce"],
+    [data-theme-field="frozen_food"]
   ) .categoryScroller {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
@@ -6495,12 +6495,12 @@
 
 @media (max-width: 720px) {
   .page:is(
-    [data-business="supermarket"],
-    [data-business="grocery"],
-    [data-business="mini_market"],
-    [data-business="butcher"],
-    [data-business="produce"],
-    [data-business="frozen_food"]
+    [data-theme-field="supermarket"],
+    [data-theme-field="grocery"],
+    [data-theme-field="mini_market"],
+    [data-theme-field="butcher"],
+    [data-theme-field="produce"],
+    [data-theme-field="frozen_food"]
   ) .hero {
     width: calc(100% - 20px);
     margin-top: 9px;
@@ -6508,36 +6508,36 @@
   }
 
   .page:is(
-    [data-business="supermarket"],
-    [data-business="grocery"],
-    [data-business="mini_market"],
-    [data-business="butcher"],
-    [data-business="produce"],
-    [data-business="frozen_food"]
+    [data-theme-field="supermarket"],
+    [data-theme-field="grocery"],
+    [data-theme-field="mini_market"],
+    [data-theme-field="butcher"],
+    [data-theme-field="produce"],
+    [data-theme-field="frozen_food"]
   ) .heroContent {
     min-height: 390px;
     padding-bottom: 22px;
   }
 
   .page:is(
-    [data-business="supermarket"],
-    [data-business="grocery"],
-    [data-business="mini_market"],
-    [data-business="butcher"],
-    [data-business="produce"],
-    [data-business="frozen_food"]
+    [data-theme-field="supermarket"],
+    [data-theme-field="grocery"],
+    [data-theme-field="mini_market"],
+    [data-theme-field="butcher"],
+    [data-theme-field="produce"],
+    [data-theme-field="frozen_food"]
   ) .heroCopy h1 {
     font-size: clamp(34px, 10vw, 48px);
   }
 
   .grocerySearchPanel,
   .page:is(
-    [data-business="supermarket"],
-    [data-business="grocery"],
-    [data-business="mini_market"],
-    [data-business="butcher"],
-    [data-business="produce"],
-    [data-business="frozen_food"]
+    [data-theme-field="supermarket"],
+    [data-theme-field="grocery"],
+    [data-theme-field="mini_market"],
+    [data-theme-field="butcher"],
+    [data-theme-field="produce"],
+    [data-theme-field="frozen_food"]
   ) .groceryCategorySection,
   .groceryPromoBanner,
   .groceryAssistance {
@@ -6545,24 +6545,24 @@
   }
 
   .page:is(
-    [data-business="supermarket"],
-    [data-business="grocery"],
-    [data-business="mini_market"],
-    [data-business="butcher"],
-    [data-business="produce"],
-    [data-business="frozen_food"]
+    [data-theme-field="supermarket"],
+    [data-theme-field="grocery"],
+    [data-theme-field="mini_market"],
+    [data-theme-field="butcher"],
+    [data-theme-field="produce"],
+    [data-theme-field="frozen_food"]
   ) .groceryCategorySection {
     padding: 16px;
     border-radius: 21px;
   }
 
   .page:is(
-    [data-business="supermarket"],
-    [data-business="grocery"],
-    [data-business="mini_market"],
-    [data-business="butcher"],
-    [data-business="produce"],
-    [data-business="frozen_food"]
+    [data-theme-field="supermarket"],
+    [data-theme-field="grocery"],
+    [data-theme-field="mini_market"],
+    [data-theme-field="butcher"],
+    [data-theme-field="produce"],
+    [data-theme-field="frozen_food"]
   ) .categoryCard {
     min-height: 140px;
   }
@@ -6577,20 +6577,20 @@
   }
 
   .page:is(
-    [data-business="supermarket"],
-    [data-business="grocery"],
-    [data-business="mini_market"],
-    [data-business="butcher"],
-    [data-business="produce"],
-    [data-business="frozen_food"]
+    [data-theme-field="supermarket"],
+    [data-theme-field="grocery"],
+    [data-theme-field="mini_market"],
+    [data-theme-field="butcher"],
+    [data-theme-field="produce"],
+    [data-theme-field="frozen_food"]
   ) .groceryFeaturedProducts .productGrid,
   .page:is(
-    [data-business="supermarket"],
-    [data-business="grocery"],
-    [data-business="mini_market"],
-    [data-business="butcher"],
-    [data-business="produce"],
-    [data-business="frozen_food"]
+    [data-theme-field="supermarket"],
+    [data-theme-field="grocery"],
+    [data-theme-field="mini_market"],
+    [data-theme-field="butcher"],
+    [data-theme-field="produce"],
+    [data-theme-field="frozen_food"]
   ) .groceryCatalogProducts .productGrid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 12px;
@@ -6604,13 +6604,61 @@
 
 @media (max-width: 430px) {
   .page:is(
-    [data-business="supermarket"],
-    [data-business="grocery"],
-    [data-business="mini_market"],
-    [data-business="butcher"],
-    [data-business="produce"],
-    [data-business="frozen_food"]
+    [data-theme-field="supermarket"],
+    [data-theme-field="grocery"],
+    [data-theme-field="mini_market"],
+    [data-theme-field="butcher"],
+    [data-theme-field="produce"],
+    [data-theme-field="frozen_food"]
   ) .categoryScroller {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+
+/* DARIK_MECHANICS_LAB_048 */
+.mechanicsPreviewBanner {
+  position: sticky;
+  top: 0;
+  z-index: 120;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 12px;
+  min-height: 42px;
+  padding: 7px max(14px, calc((100vw - 1180px) / 2));
+  background: linear-gradient(90deg, #7c2d12, #c2410c);
+  color: #fff7ed;
+  box-shadow: 0 8px 22px rgba(124,45,18,.20);
+}
+
+.mechanicsPreviewBanner strong {
+  border-radius: 999px;
+  padding: 5px 8px;
+  background: rgba(255,255,255,.12);
+  font-size: 9px;
+  letter-spacing: .10em;
+}
+
+.mechanicsPreviewBanner span {
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.mechanicsPreviewBanner small {
+  color: #fed7aa;
+  font-size: 10px;
+  font-weight: 750;
+}
+
+@media (max-width: 720px) {
+  .mechanicsPreviewBanner {
+    position: relative;
+    grid-template-columns: 1fr;
+    gap: 4px;
+    padding: 9px 14px;
+  }
+  .mechanicsPreviewBanner strong {
+    justify-self: start;
   }
 }

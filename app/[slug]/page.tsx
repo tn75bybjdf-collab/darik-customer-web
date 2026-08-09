@@ -1,4 +1,5 @@
 "use client";
+// DARIK_MECHANICS_LAB_048
 
 // DARIK_DETAILS_MODAL_SCROLL_FIX_034
 
@@ -8,6 +9,7 @@ import { useEffect, useMemo, useState } from "react";
 import type { CSSProperties } from "react";
 import { useParams } from "next/navigation";
 import { supabase } from "@/lib/supabaseBrowser";
+import { mechanicsFieldLabel, readMechanicsLabField } from "@/lib/darikMechanicsLab";
 import styles from "./storefront.module.css";
 
 type Storefront = {
@@ -606,6 +608,12 @@ export default function DarikDirectStorefrontPage() {
     setPreviewRetailField(field || "");
   }, []);
 
+  const [previewMechanicsField, setPreviewMechanicsField] = useState("");
+  useEffect(() => {
+    setPreviewMechanicsField(readMechanicsLabField());
+  }, []);
+
+
   const [storefront, setStorefront] = useState<Storefront | null>(null);
   const [publicStatus, setPublicStatus] = useState<PublicStoreStatus | null>(null);
   const [products, setProducts] = useState<Product[]>([]);
@@ -849,15 +857,28 @@ export default function DarikDirectStorefrontPage() {
     [categories]
   );
 
-  const effectiveBusinessType =
-    previewRetailField ||
+  const actualBusinessType = String(
     storefront?.business_type ||
     publicStatus?.business_type ||
-    "retail";
-  const normalizedBusinessType = String(effectiveBusinessType || "retail")
+    "retail"
+  )
     .trim()
     .toLowerCase();
-  const isAutoParts = normalizedBusinessType === "auto_parts";
+  const effectiveBusinessType = String(
+    previewMechanicsField ||
+    actualBusinessType ||
+    "retail"
+  )
+    .trim()
+    .toLowerCase();
+  const effectiveThemeField = String(
+    previewRetailField ||
+    actualBusinessType ||
+    "retail"
+  )
+    .trim()
+    .toLowerCase();
+  const isAutoParts = effectiveBusinessType === "auto_parts";
   const isGroceryStore = [
     "supermarket",
     "grocery",
@@ -865,7 +886,8 @@ export default function DarikDirectStorefrontPage() {
     "butcher",
     "produce",
     "frozen_food",
-  ].includes(normalizedBusinessType);
+  ].includes(effectiveBusinessType);
+  const isAutoPartsTheme = effectiveThemeField === "auto_parts";
 
   const vehicleMakes = useMemo(() => {
     if (!isAutoParts) return [];
@@ -1385,7 +1407,7 @@ export default function DarikDirectStorefrontPage() {
     );
   }
 
-  const fieldDesign = lockedRetailFieldDesign(effectiveBusinessType);
+  const fieldDesign = lockedRetailFieldDesign(effectiveThemeField);
   const themeStyle = {
     "--store-primary": fieldDesign.primaryColor,
     "--store-accent": fieldDesign.accentColor,
@@ -1601,7 +1623,7 @@ export default function DarikDirectStorefrontPage() {
           ? money(product.app_price)
           : "Contact for price / \u062a\u0648\u0627\u0635\u0644 \u0644\u0644\u0633\u0639\u0631";
     return (
-      <article className={`${styles.productCard} ${isAutoParts ? styles.autoPartsProductCard : ""}`} key={product.id}>
+      <article className={`${styles.productCard} ${isAutoPartsTheme ? styles.autoPartsProductCard : ""}`} key={product.id}>
         <div className={styles.productImage}>
           {photo ? (
             <img src={photo} alt={name} />
@@ -1737,11 +1759,22 @@ export default function DarikDirectStorefrontPage() {
       data-card-style={productCardStyle}
       data-corners={cornerStyle}
       data-hero={heroLayout}
-      data-business={normalizedBusinessType}
+      data-business={effectiveBusinessType}
+      data-theme-field={effectiveThemeField}
       data-field-preview={previewRetailField ? "yes" : "no"}
+      data-mechanics-preview={previewMechanicsField ? "yes" : "no"}
       data-category-count={String(visibleCategories.length)}
       data-direct-purchase={hasDirectPurchaseProducts ? "yes" : "no"}
     >
+      {previewMechanicsField ? (
+        <div className={styles.mechanicsPreviewBanner}>
+          <strong>MECHANICS TEST / اختبار الخصائص</strong>
+          <span>{mechanicsFieldLabel(previewMechanicsField)}</span>
+          <small>
+            Visual theme stays separate: {mechanicsFieldLabel(effectiveThemeField)}
+          </small>
+        </div>
+      ) : null}
       <div className={styles.announcementBar}>
         <span>
           <i className={effectiveAcceptingOrders ? styles.liveDot : styles.pausedDot} />
