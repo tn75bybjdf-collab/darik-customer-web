@@ -3,6 +3,7 @@
 // DARIK_GROCERY_WEIGHT_3_PHOTO_049
 // DARIK_RETAIL_FIELDS_SMOKE_SHOP_050
 // DARIK_SHOE_SIZES_051
+// DARIK_FOOTWEAR_SIZE_DROPDOWNS_052
 
 // DARIK_AUTOPARTS_FITMENT_FILTERS_033
 // Mobile-safe bilingual product form with automatic retail categories.
@@ -64,6 +65,28 @@ type ShoeSizeOption = {
   eu: string;
   us: string;
 };
+
+const EU_SHOE_SIZE_OPTIONS = Array.from({ length: 79 }, (_, index) => {
+  const size = 16 + index * 0.5;
+  return Number.isInteger(size) ? String(size) : size.toFixed(1);
+});
+
+const US_CHILD_SHOE_SIZE_OPTIONS = Array.from({ length: 26 }, (_, index) => {
+  const size = 1 + index * 0.5;
+  const label = Number.isInteger(size) ? String(size) : size.toFixed(1);
+  return `${label}C`;
+});
+
+const US_YOUTH_SHOE_SIZE_OPTIONS = Array.from({ length: 13 }, (_, index) => {
+  const size = 1 + index * 0.5;
+  const label = Number.isInteger(size) ? String(size) : size.toFixed(1);
+  return `${label}Y`;
+});
+
+const US_ADULT_SHOE_SIZE_OPTIONS = Array.from({ length: 35 }, (_, index) => {
+  const size = 1 + index * 0.5;
+  return Number.isInteger(size) ? String(size) : size.toFixed(1);
+});
 
 type DirectProduct = {
   id: string;
@@ -545,7 +568,7 @@ export default function DarikDirectProductsPage() {
   const effectiveBusinessType = mechanicsTestField || actualBusinessType;
   const isAutoParts = effectiveBusinessType === "auto_parts";
   const supportsWeightSelling = WEIGHT_MECHANICS_FIELDS.has(effectiveBusinessType);
-  const isShoesMechanics = effectiveBusinessType === "shoes";
+
   const mechanicsPresetCategories = useMemo(() => {
     if (!mechanicsTestField) return [] as MechanicsPresetCategory[];
     const preset = getBusinessCategoryPreset(effectiveBusinessType, null);
@@ -608,31 +631,87 @@ export default function DarikDirectProductsPage() {
     );
   }
 
-  function addShoeSize() {
-    setForm((current) => ({
-      ...current,
-      shoeSizes: [...current.shoeSizes, { eu: "", us: "" }],
-    }));
-  }
+  const selectedProductCategoryName = (() => {
+    const selectedValue = String(form.directCategoryId || "").trim();
+    if (!selectedValue) return "";
+
+    if (selectedValue.startsWith("mechanics:")) {
+      return (
+        mechanicsPresetCategories.find(
+          (category) => category.value === selectedValue
+        )?.name || ""
+      );
+    }
+
+    return (
+      categories.find((category) => category.id === selectedValue)?.name || ""
+    );
+  })();
+
+  const selectedProductCategoryKey = normalizedCategoryKey(
+    selectedProductCategoryName
+  );
+
+  const isFootwearCategory =
+    selectedProductCategoryKey === "footwear" ||
+    selectedProductCategoryKey === "shoe" ||
+    selectedProductCategoryKey === "shoes" ||
+    selectedProductCategoryKey.endsWith(" footwear") ||
+    selectedProductCategoryKey.endsWith(" shoes") ||
+    selectedProductCategoryKey.startsWith("footwear ") ||
+    selectedProductCategoryKey.startsWith("shoes ");
+
+  useEffect(() => {
+    if (!isFootwearCategory) return;
+
+    setForm((current) =>
+      current.shoeSizes.length > 0
+        ? current
+        : {
+            ...current,
+            shoeSizes: [{ eu: "", us: "" }],
+          }
+    );
+  }, [isFootwearCategory]);
 
   function updateShoeSize(
     index: number,
     field: keyof ShoeSizeOption,
     value: string
   ) {
-    setForm((current) => ({
-      ...current,
-      shoeSizes: current.shoeSizes.map((size, sizeIndex) =>
+    setForm((current) => {
+      const shoeSizes = current.shoeSizes.map((size, sizeIndex) =>
         sizeIndex === index ? { ...size, [field]: value } : size
-      ),
-    }));
+      );
+
+      const isLastRow = index === shoeSizes.length - 1;
+      const selectedEuropeanSize = field === "eu" && Boolean(value.trim());
+
+      if (isLastRow && selectedEuropeanSize) {
+        shoeSizes.push({ eu: "", us: "" });
+      }
+
+      return {
+        ...current,
+        shoeSizes,
+      };
+    });
   }
 
   function removeShoeSize(index: number) {
-    setForm((current) => ({
-      ...current,
-      shoeSizes: current.shoeSizes.filter((_, sizeIndex) => sizeIndex !== index),
-    }));
+    setForm((current) => {
+      const shoeSizes = current.shoeSizes.filter(
+        (_, sizeIndex) => sizeIndex !== index
+      );
+
+      return {
+        ...current,
+        shoeSizes:
+          isFootwearCategory && shoeSizes.length === 0
+            ? [{ eu: "", us: "" }]
+            : shoeSizes,
+      };
+    });
   }
 
   function openCreateForm() {
@@ -901,22 +980,26 @@ export default function DarikDirectProductsPage() {
       return;
     }
 
-    const shoeSizesForSave = form.shoeSizes.map((size) => ({
+    const shoeSizeRows = form.shoeSizes.map((size) => ({
       eu: size.eu.trim(),
       us: size.us.trim(),
     }));
 
-    if (isShoesMechanics) {
+    const shoeSizesForSave = shoeSizeRows.filter(
+      (size) => Boolean(size.eu) || Boolean(size.us)
+    );
+
+    if (isFootwearCategory) {
       if (shoeSizesForSave.length === 0) {
         setError(
-          "Add at least one European shoe size / أضف مقاسًا أوروبيًا واحدًا على الأقل."
+          "Footwear requires at least one European size / منتجات الأحذية تتطلب مقاسًا أوروبيًا واحدًا على الأقل."
         );
         return;
       }
 
       if (shoeSizesForSave.some((size) => !size.eu)) {
         setError(
-          "Every shoe-size row needs a European size / كل صف مقاس يحتاج إلى مقاس أوروبي."
+          "Every entered shoe-size row needs its own European size / كل صف مقاس مُدخل يحتاج إلى مقاس أوروبي مستقل."
         );
         return;
       }
@@ -928,16 +1011,6 @@ export default function DarikDirectProductsPage() {
       if (new Set(normalizedEuSizes).size !== normalizedEuSizes.length) {
         setError(
           "European shoe sizes cannot be duplicated / لا يمكن تكرار المقاسات الأوروبية."
-        );
-        return;
-      }
-
-      if (
-        form.shoeUsSizesEnabled &&
-        shoeSizesForSave.some((size) => size.us.length > 24)
-      ) {
-        setError(
-          "A U.S. size label is too long / قيمة المقاس الأمريكي طويلة جدًا."
         );
         return;
       }
@@ -1111,24 +1184,23 @@ export default function DarikDirectProductsPage() {
       return;
     }
 
-    if (isShoesMechanics) {
-      const shoeSizesResult = await supabase.rpc(
-        "darik_direct_set_product_shoe_sizes_v1",
-        {
-          p_product_id: savedProductId,
-          p_sizes: shoeSizesForSave,
-          p_include_us: form.shoeUsSizesEnabled,
-        }
-      );
-
-      if (shoeSizesResult.error) {
-        setSaving(false);
-        setError(
-          `The product was saved, but the shoe sizes failed. / تم حفظ المنتج، لكن تعذر حفظ المقاسات. ${shoeSizesResult.error.message}`
-        );
-        await loadCatalog();
-        return;
+    const shoeSizesResult = await supabase.rpc(
+      "darik_direct_set_product_shoe_sizes_v1",
+      {
+        p_product_id: savedProductId,
+        p_sizes: isFootwearCategory ? shoeSizesForSave : [],
+        p_include_us:
+          isFootwearCategory && form.shoeUsSizesEnabled,
       }
+    );
+
+    if (shoeSizesResult.error) {
+      setSaving(false);
+      setError(
+        `The product was saved, but the shoe sizes failed. / تم حفظ المنتج، لكن تعذر حفظ المقاسات. ${shoeSizesResult.error.message}`
+      );
+      await loadCatalog();
+      return;
     }
 
     if (isAutoParts) {
@@ -1866,23 +1938,18 @@ export default function DarikDirectProductsPage() {
                   </label>
                 ) : null}
 
-                {isShoesMechanics ? (
+                {isFootwearCategory ? (
                   <section className={styles.shoeMechanicPanel}>
                     <div className={styles.shoeMechanicHeading}>
                       <div>
-                        <strong>Shoe sizes / مقاسات الأحذية</strong>
+                        <strong>
+                          Shoe sizes required / مقاسات الأحذية مطلوبة
+                        </strong>
                         <span>
-                          European size is the main size. Add U.S. labels only if you want them shown too. /
-                          المقاس الأوروبي هو الأساسي، ويمكن إضافة المقاس الأمريكي اختياريًا.
+                          Choose one European size from each dropdown. After you choose a size, the next size dropdown appears automatically. /
+                          اختر مقاسًا أوروبيًا واحدًا من كل قائمة، وستظهر قائمة المقاس التالية تلقائيًا بعد الاختيار.
                         </span>
                       </div>
-                      <button
-                        type="button"
-                        onClick={addShoeSize}
-                        disabled={saving}
-                      >
-                        + Add EU size / إضافة مقاس أوروبي
-                      </button>
                     </div>
 
                     <label className={styles.shoeUsToggle}>
@@ -1898,71 +1965,123 @@ export default function DarikDirectProductsPage() {
                           Also add U.S. sizes / إضافة المقاسات الأمريكية أيضًا
                         </strong>
                         <small>
-                          Optional. European sizes remain the primary sizes. /
-                          اختياري، وتبقى المقاسات الأوروبية هي الأساسية.
+                          Optional. European sizes remain required. /
+                          اختياري، وتبقى المقاسات الأوروبية مطلوبة.
                         </small>
                       </span>
                     </label>
 
-                    {form.shoeSizes.length > 0 ? (
-                      <div className={styles.shoeSizeRows}>
-                        {form.shoeSizes.map((size, index) => (
+                    <div className={styles.shoeSizeRows}>
+                      {form.shoeSizes.map((size, index) => {
+                        const isAutomaticNextRow =
+                          index === form.shoeSizes.length - 1 &&
+                          !size.eu.trim() &&
+                          !size.us.trim();
+
+                        return (
                           <div
                             className={styles.shoeSizeRow}
                             key={`shoe-size-${index}`}
                           >
                             <label>
                               <BilingualLabel
-                                en="European size"
-                                ar="المقاس الأوروبي"
+                                en={`European size ${index + 1}`}
+                                ar={`المقاس الأوروبي ${index + 1}`}
                               />
-                              <input
-                                type="text"
+                              <select
                                 value={size.eu}
                                 onChange={(event) =>
                                   updateShoeSize(index, "eu", event.target.value)
                                 }
-                                placeholder="42 / 42.5 / 42 2/3"
-                                maxLength={16}
-                                required
-                              />
+                                aria-label={`European shoe size ${index + 1}`}
+                              >
+                                <option value="">
+                                  Select EU size / اختر المقاس الأوروبي
+                                </option>
+                                {EU_SHOE_SIZE_OPTIONS.map((option) => (
+                                  <option
+                                    key={option}
+                                    value={option}
+                                    disabled={form.shoeSizes.some(
+                                      (otherSize, otherIndex) =>
+                                        otherIndex !== index &&
+                                        otherSize.eu === option
+                                    )}
+                                  >
+                                    EU {option}
+                                  </option>
+                                ))}
+                              </select>
                             </label>
 
                             {form.shoeUsSizesEnabled ? (
                               <label>
                                 <BilingualLabel
-                                  en="U.S. size (optional)"
-                                  ar="المقاس الأمريكي (اختياري)"
+                                  en="U.S. size"
+                                  ar="المقاس الأمريكي"
                                 />
-                                <input
-                                  type="text"
+                                <select
                                   value={size.us}
                                   onChange={(event) =>
                                     updateShoeSize(index, "us", event.target.value)
                                   }
-                                  placeholder="9 / 9.5"
-                                  maxLength={24}
-                                />
+                                  disabled={!size.eu.trim()}
+                                >
+                                  <option value="">
+                                    Select U.S. size / اختر المقاس الأمريكي
+                                  </option>
+                                  <optgroup label="Child / أطفال">
+                                    {US_CHILD_SHOE_SIZE_OPTIONS.map((option) => (
+                                      <option
+                                        key={`child-${option}`}
+                                        value={option}
+                                      >
+                                        US {option}
+                                      </option>
+                                    ))}
+                                  </optgroup>
+                                  <optgroup label="Youth / ناشئين">
+                                    {US_YOUTH_SHOE_SIZE_OPTIONS.map((option) => (
+                                      <option
+                                        key={`youth-${option}`}
+                                        value={option}
+                                      >
+                                        US {option}
+                                      </option>
+                                    ))}
+                                  </optgroup>
+                                  <optgroup label="Adult / بالغين">
+                                    {US_ADULT_SHOE_SIZE_OPTIONS.map((option) => (
+                                      <option
+                                        key={`adult-${option}`}
+                                        value={option}
+                                      >
+                                        US {option}
+                                      </option>
+                                    ))}
+                                  </optgroup>
+                                </select>
                               </label>
                             ) : null}
 
-                            <button
-                              type="button"
-                              className={styles.removeShoeSizeButton}
-                              onClick={() => removeShoeSize(index)}
-                              disabled={saving}
-                            >
-                              Remove / حذف
-                            </button>
+                            {isAutomaticNextRow ? (
+                              <span className={styles.shoeSizeNextLabel}>
+                                Next size / المقاس التالي
+                              </span>
+                            ) : (
+                              <button
+                                type="button"
+                                className={styles.removeShoeSizeButton}
+                                onClick={() => removeShoeSize(index)}
+                                disabled={saving}
+                              >
+                                Remove / حذف
+                              </button>
+                            )}
                           </div>
-                        ))}
-                      </div>
-                    ) : (
-                      <div className={styles.shoeSizeEmpty}>
-                        Add the European sizes available for this shoe. /
-                        أضف المقاسات الأوروبية المتوفرة لهذا الحذاء.
-                      </div>
-                    )}
+                        );
+                      })}
+                    </div>
                   </section>
                 ) : null}
                 {supportsWeightSelling ? (

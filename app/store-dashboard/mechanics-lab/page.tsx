@@ -45,9 +45,9 @@ function mechanicsSummary(field: string) {
   }
   if (field === "shoes") {
     return [
-      "European shoe sizes",
-      "Optional U.S. size labels",
-      "Per-size stock — next mechanic",
+      "Footwear category requires European sizes",
+      "Dropdown sizes with automatic next row",
+      "Optional U.S. size dropdowns",
     ];
   }
   if (field === "smoke_shop") {
