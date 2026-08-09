@@ -10,6 +10,7 @@
 // DARIK_SHOES_CATEGORY_SIZE_EXCLUSIVITY_057
 // DARIK_CAFE_OPTIONAL_CATEGORY_SIZES_058
 // DARIK_CAFE_SIZE_YES_NO_BUTTON_059
+// DARIK_CLOTHING_MANDATORY_CATEGORY_SIZES_060
 
 // DARIK_AUTOPARTS_FITMENT_FILTERS_033
 // Mobile-safe bilingual product form with automatic retail categories.
@@ -543,6 +544,403 @@ const CAFE_GENERAL_SIZE_OPTIONS = [
   "Large",
   "XL",
 ] as const;
+
+const CLOTHING_ADULT_GENERAL_SIZE_OPTIONS = [
+  "One Size",
+  "XXS", "XS", "S", "M", "L", "XL", "XXL", "XXXL", "4XL", "5XL", "6XL",
+  ...Array.from({ length: 16 }, (_, index) => "EU " + String(30 + index * 2)),
+];
+
+const CLOTHING_MEN_BOTTOM_SIZE_OPTIONS = [
+  "XS", "S", "M", "L", "XL", "XXL", "XXXL", "4XL", "5XL", "6XL",
+  ...Array.from({ length: 13 }, (_, index) => "W" + String(26 + index * 2)),
+  ...Array.from({ length: 12 }, (_, index) => "EU " + String(42 + index * 2)),
+];
+
+const CLOTHING_WOMEN_BOTTOM_SIZE_OPTIONS = [
+  "XXS", "XS", "S", "M", "L", "XL", "XXL", "XXXL", "4XL", "5XL", "6XL",
+  ...Array.from({ length: 14 }, (_, index) => "EU " + String(30 + index * 2)),
+  ...Array.from({ length: 13 }, (_, index) => "US " + String(index * 2)),
+];
+
+const CLOTHING_MEN_SHIRT_SIZE_OPTIONS = [
+  "XS", "S", "M", "L", "XL", "XXL", "XXXL", "4XL", "5XL", "6XL",
+  ...Array.from({ length: 15 }, (_, index) => "Neck " + String(36 + index) + " cm"),
+];
+
+const CLOTHING_MEN_SUIT_SIZE_OPTIONS = [
+  "XS", "S", "M", "L", "XL", "XXL", "XXXL", "4XL", "5XL", "6XL",
+  ...Array.from({ length: 12 }, (_, index) => "EU " + String(42 + index * 2)),
+];
+
+const CLOTHING_WOMEN_DRESS_SIZE_OPTIONS = [
+  "XXS", "XS", "S", "M", "L", "XL", "XXL", "XXXL", "4XL", "5XL", "6XL",
+  ...Array.from({ length: 14 }, (_, index) => "EU " + String(30 + index * 2)),
+  ...Array.from({ length: 13 }, (_, index) => "US " + String(index * 2)),
+];
+
+const CLOTHING_WOMEN_SUIT_SIZE_OPTIONS = [
+  "XXS", "XS", "S", "M", "L", "XL", "XXL", "XXXL", "4XL", "5XL", "6XL",
+  ...Array.from({ length: 12 }, (_, index) => "EU " + String(32 + index * 2)),
+];
+
+const CLOTHING_BRA_BANDS = [
+  "28", "30", "32", "34", "36", "38", "40", "42", "44", "46", "48",
+] as const;
+
+const CLOTHING_BRA_CUPS = [
+  "AA", "A", "B", "C", "D", "DD/E", "F", "G",
+] as const;
+
+const CLOTHING_BRA_SIZE_OPTIONS = CLOTHING_BRA_BANDS.flatMap((band) =>
+  CLOTHING_BRA_CUPS.map((cup) => band + cup)
+);
+
+const CLOTHING_GLOVE_SIZE_OPTIONS = [
+  "XS", "S", "M", "L", "XL", "XXL",
+  "6", "6.5", "7", "7.5", "8", "8.5", "9", "9.5", "10", "10.5", "11",
+] as const;
+
+const CLOTHING_RING_SIZE_OPTIONS = [
+  ...Array.from({ length: 19 }, (_, index) => "US " + String(4 + index * 0.5)),
+  ...Array.from({ length: 26 }, (_, index) => "EU " + String(44 + index)),
+];
+
+const CLOTHING_ONE_SIZE_OPTIONS = ["One Size"] as const;
+
+function clothingRetailSizePresetFromCategoryName(
+  categoryName: string | null | undefined
+): RetailSizePreset | null {
+  const key = normalizedCategoryKey(categoryName);
+  if (!key) return null;
+
+  const hasAny = (...words: string[]) =>
+    words.some((word) => key.includes(word));
+
+  const isBaby = hasAny(
+    "baby", "toddler", "infant", "newborn",
+    "رضع", "رضيع", "بيبي", "حديثي الولادة"
+  );
+
+  const isKids =
+    !isBaby &&
+    hasAny(
+      "kids", "kid", "children", "child", "boys", "boy", "girls", "girl",
+      "youth", "junior", "أطفال", "طفل", "ولد", "بنت"
+    );
+
+  const isWomen =
+    !isKids &&
+    !isBaby &&
+    hasAny(
+      "women", "woman", "womens", "women's", "ladies", "lady", "female",
+      "نساء", "نسائي", "نسائية", "سيدات"
+    );
+
+  const isMen =
+    !isKids &&
+    !isBaby &&
+    hasAny(
+      "men", "man", "mens", "men's", "male",
+      "رجال", "رجالي", "رجالية"
+    );
+
+  const childOrBabyPreset = () => {
+    if (isBaby) {
+      return {
+        key: "clothing_baby",
+        label: {
+          en: "Baby & toddler sizes",
+          ar: "مقاسات ملابس الرضع والصغار",
+        },
+        required: true,
+        options: BABY_CLOTHING_SIZE_OPTIONS,
+        help: {
+          en: "Newborn, month ranges, and toddler sizes. A size is required.",
+          ar: "مقاسات حديثي الولادة والأشهر والصغار. يجب اختيار مقاس.",
+        },
+      } satisfies RetailSizePreset;
+    }
+
+    if (isKids) {
+      return {
+        key: "clothing_kids",
+        label: {
+          en: "Kids' clothing sizes",
+          ar: "مقاسات ملابس الأطفال",
+        },
+        required: true,
+        options: KIDS_CLOTHING_SIZE_OPTIONS,
+        help: {
+          en: "Choose an alpha, age, or height-based kids' size.",
+          ar: "اختر مقاسًا حرفيًا أو حسب العمر أو الطول للأطفال.",
+        },
+      } satisfies RetailSizePreset;
+    }
+
+    return null;
+  };
+
+  // Socks are sized by sock / shoe range rather than shirt sizing.
+  if (hasAny("sock", "socks", "جوارب", "جرابات")) {
+    return {
+      key: "clothing_socks",
+      label: { en: "Sock sizes", ar: "مقاسات الجوارب" },
+      required: true,
+      options: SOCK_SIZE_OPTIONS,
+      help: {
+        en: "Choose the sock size or EU shoe-size range.",
+        ar: "اختر مقاس الجورب أو نطاق مقاسات الأحذية الأوروبية.",
+      },
+    };
+  }
+
+  // Shoes carried by a Clothing retailer use EU sizes, but do not inherit the
+  // Shoes retail field's dedicated EU -> U.S. footwear mechanic.
+  if (
+    hasAny(
+      "shoe", "shoes", "footwear", "sneaker", "sneakers", "boot", "boots",
+      "sandal", "sandals", "slipper", "slippers", "heel", "heels",
+      "loafer", "loafers", "cleat", "cleats", "أحذية", "حذاء"
+    )
+  ) {
+    const footwearGroup: FootwearSizeGroup = isBaby
+      ? "baby_toddler"
+      : isKids
+        ? "kids"
+        : isWomen
+          ? "women"
+          : isMen
+            ? "men"
+            : "unisex";
+
+    return {
+      key: "clothing_footwear_" + footwearGroup,
+      label: { en: "European shoe sizes", ar: "مقاسات الأحذية الأوروبية" },
+      required: true,
+      options: euSizesForGroup(footwearGroup).map((size) => "EU " + size),
+      help: {
+        en: "Choose at least one EU shoe size for this Clothing-store product.",
+        ar: "اختر مقاس حذاء أوروبيًا واحدًا على الأقل لهذا المنتج.",
+      },
+    };
+  }
+
+  if (hasAny("bra", "bras", "bralette", "bralettes", "صدرية", "حمالة")) {
+    return {
+      key: "clothing_bras",
+      label: { en: "Bra sizes", ar: "مقاسات حمالات الصدر" },
+      required: true,
+      options: CLOTHING_BRA_SIZE_OPTIONS,
+      help: {
+        en: "Band and cup combinations are required.",
+        ar: "يجب اختيار مقاس الحزام والكوب.",
+      },
+    };
+  }
+
+  if (hasAny("hat", "hats", "cap", "caps", "beanie", "beanies", "قبعة", "قبعات")) {
+    return {
+      key: "clothing_hats",
+      label: { en: "Hat & cap sizes", ar: "مقاسات القبعات والكابات" },
+      required: true,
+      options: HAT_SIZE_OPTIONS,
+      help: {
+        en: "Choose adjustable, alpha, fitted, or circumference sizing.",
+        ar: "اختر المقاس القابل للتعديل أو الحرفي أو الثابت أو محيط الرأس.",
+      },
+    };
+  }
+
+  if (hasAny("belt", "belts", "حزام", "أحزمة")) {
+    return {
+      key: "clothing_belts",
+      label: { en: "Belt sizes", ar: "مقاسات الأحزمة" },
+      required: true,
+      options: BELT_SIZE_OPTIONS,
+      help: {
+        en: "Choose alpha, centimeter, or inch belt sizing.",
+        ar: "اختر المقاس الحرفي أو بالسنتيمتر أو بالإنش.",
+      },
+    };
+  }
+
+  if (hasAny("glove", "gloves", "قفاز", "قفازات")) {
+    return {
+      key: "clothing_gloves",
+      label: { en: "Glove sizes", ar: "مقاسات القفازات" },
+      required: true,
+      options: CLOTHING_GLOVE_SIZE_OPTIONS,
+      help: {
+        en: "Choose an alpha or numbered glove size.",
+        ar: "اختر مقاس قفاز حرفيًا أو رقميًا.",
+      },
+    };
+  }
+
+  if (hasAny("ring", "rings", "خاتم", "خواتم")) {
+    return {
+      key: "clothing_rings",
+      label: { en: "Ring sizes", ar: "مقاسات الخواتم" },
+      required: true,
+      options: CLOTHING_RING_SIZE_OPTIONS,
+      help: {
+        en: "US and EU ring sizes are available.",
+        ar: "تتوفر مقاسات الخواتم الأمريكية والأوروبية.",
+      },
+    };
+  }
+
+  if (hasAny("bag", "bags", "backpack", "backpacks", "handbag", "handbags", "حقيبة", "حقائب")) {
+    return {
+      key: "clothing_bags",
+      label: { en: "Bag / backpack size", ar: "حجم الحقيبة / حقيبة الظهر" },
+      required: true,
+      options: BAG_SIZE_OPTIONS,
+      help: {
+        en: "Choose One Size, a physical size, or capacity.",
+        ar: "اختر مقاسًا موحدًا أو حجمًا فعليًا أو السعة.",
+      },
+    };
+  }
+
+  if (
+    hasAny(
+      "watch", "watches", "sunglasses", "sunglass", "scarf", "scarves",
+      "tie", "ties", "necklace", "necklaces", "earring", "earrings",
+      "bracelet", "bracelets", "jewelry", "jewellery", "accessory", "accessories",
+      "ساعة", "ساعات", "نظارات", "وشاح", "أوشحة", "ربطة", "اكسسوارات", "إكسسوارات"
+    )
+  ) {
+    return {
+      key: "clothing_one_size_accessory",
+      label: { en: "Accessory size", ar: "مقاس الإكسسوار" },
+      required: true,
+      options: CLOTHING_ONE_SIZE_OPTIONS,
+      help: {
+        en: "Select One Size, or use Custom size when the accessory has a measured variant.",
+        ar: "اختر مقاسًا موحدًا، أو استخدم المقاس المخصص إذا كان للإكسسوار قياس محدد.",
+      },
+    };
+  }
+
+  // Baby/kids apparel always uses age/height sizing, regardless of garment type.
+  const childPreset = childOrBabyPreset();
+  if (childPreset) return childPreset;
+
+  if (
+    hasAny(
+      "pants", "pant", "jeans", "jean", "trousers", "trouser",
+      "chinos", "chino", "shorts", "short",
+      "بناطيل", "بنطال", "جينز", "شورت"
+    )
+  ) {
+    if (isWomen) {
+      return {
+        key: "clothing_women_bottoms",
+        label: { en: "Women's bottoms sizes", ar: "مقاسات الملابس السفلية النسائية" },
+        required: true,
+        options: CLOTHING_WOMEN_BOTTOM_SIZE_OPTIONS,
+        help: {
+          en: "Alpha, EU, and common US numeric bottom sizes are available.",
+          ar: "تتوفر المقاسات الحرفية والأوروبية والأرقام الأمريكية الشائعة.",
+        },
+      };
+    }
+
+    return {
+      key: isMen ? "clothing_men_bottoms" : "clothing_unisex_bottoms",
+      label: { en: "Bottom / waist sizes", ar: "مقاسات الخصر والملابس السفلية" },
+      required: true,
+      options: CLOTHING_MEN_BOTTOM_SIZE_OPTIONS,
+      help: {
+        en: "Alpha, waist, and EU trouser sizes are available.",
+        ar: "تتوفر المقاسات الحرفية ومقاسات الخصر والمقاسات الأوروبية.",
+      },
+    };
+  }
+
+  if (
+    hasAny(
+      "dress", "dresses", "skirt", "skirts", "legging", "leggings",
+      "فساتين", "فستان", "تنانير", "تنورة", "ليغنز"
+    )
+  ) {
+    return {
+      key: "clothing_women_dresses",
+      label: { en: "Dress / skirt sizes", ar: "مقاسات الفساتين والتنانير" },
+      required: true,
+      options: CLOTHING_WOMEN_DRESS_SIZE_OPTIONS,
+      help: {
+        en: "Alpha, EU, and common US numeric sizes are available.",
+        ar: "تتوفر المقاسات الحرفية والأوروبية والأرقام الأمريكية الشائعة.",
+      },
+    };
+  }
+
+  if (hasAny("suit", "suits", "blazer", "blazers", "بدلة", "بدلات", "بليزر")) {
+    if (isWomen) {
+      return {
+        key: "clothing_women_suits",
+        label: { en: "Women's suit / blazer sizes", ar: "مقاسات البدلات والبليزر النسائية" },
+        required: true,
+        options: CLOTHING_WOMEN_SUIT_SIZE_OPTIONS,
+        help: {
+          en: "Alpha and EU suit sizing is available.",
+          ar: "تتوفر مقاسات البدلات الحرفية والأوروبية.",
+        },
+      };
+    }
+
+    return {
+      key: "clothing_men_suits",
+      label: { en: "Suit / blazer sizes", ar: "مقاسات البدلات والبليزر" },
+      required: true,
+      options: CLOTHING_MEN_SUIT_SIZE_OPTIONS,
+      help: {
+        en: "Alpha and EU jacket/suit sizing is available.",
+        ar: "تتوفر المقاسات الحرفية والأوروبية للجاكيت والبدلة.",
+      },
+    };
+  }
+
+  if (
+    isMen &&
+    hasAny(
+      "shirt", "shirts", "dress shirt", "dress shirts",
+      "قميص", "قمصان"
+    )
+  ) {
+    return {
+      key: "clothing_men_shirts",
+      label: { en: "Men's shirt sizes", ar: "مقاسات القمصان الرجالية" },
+      required: true,
+      options: CLOTHING_MEN_SHIRT_SIZE_OPTIONS,
+      help: {
+        en: "Choose alpha sizing or neck/collar measurement.",
+        ar: "اختر المقاس الحرفي أو قياس الرقبة / الياقة.",
+      },
+    };
+  }
+
+  // General adult apparel covers tops, shirts, T-shirts, polos, blouses,
+  // hoodies, sweaters, jackets, coats, underwear, swimwear, pajamas,
+  // tracksuits, full outfits, and any custom Clothing category.
+  return {
+    key: isWomen
+      ? "clothing_women_general"
+      : isMen
+        ? "clothing_men_general"
+        : "clothing_adult_general",
+    label: { en: "Clothing sizes", ar: "مقاسات الملابس" },
+    required: true,
+    options: CLOTHING_ADULT_GENERAL_SIZE_OPTIONS,
+    help: {
+      en: "A size is mandatory. Choose a standard alpha/EU size or use Custom size for a brand-specific label.",
+      ar: "المقاس إلزامي. اختر مقاسًا حرفيًا أو أوروبيًا، أو استخدم المقاس المخصص لمقاس خاص بالعلامة التجارية.",
+    },
+  };
+}
 
 function cafeSizePresetFromCategoryName(
   categoryName: string | null | undefined
@@ -1405,30 +1803,41 @@ export default function DarikDirectProductsPage() {
       ? retailSizePresetFromCategoryName(selectedProductCategoryName)
       : null;
 
+  const clothingRetailSizePreset =
+    effectiveBusinessType === "clothing"
+      ? clothingRetailSizePresetFromCategoryName(
+          selectedProductCategoryName
+        )
+      : null;
+
   const cafeSizePreset =
     effectiveBusinessType === "cafe"
       ? cafeSizePresetFromCategoryName(selectedProductCategoryName)
       : null;
 
   // For Cafe, the existence of a size row is the opt-in state.
-  // New cafe products start with [], so the checkbox is off.
-  // Existing cafe products with saved direct_size_options reopen checked.
+  // New cafe products start with [], so the button starts on Yes.
+  // Existing cafe products with saved direct_size_options reopen enabled.
   const cafeHasDifferentSizes =
     effectiveBusinessType === "cafe" && form.sizeOptions.length > 0;
 
   const retailSizePreset =
     shoesRetailSizePreset ||
+    clothingRetailSizePreset ||
     (cafeHasDifferentSizes ? cafeSizePreset : null);
 
   useEffect(() => {
-    if (!shoesRetailSizePreset) return;
+    const mandatorySizePreset =
+      shoesRetailSizePreset || clothingRetailSizePreset;
+
+    if (!mandatorySizePreset) return;
 
     setForm((current) =>
       current.sizeOptions.length > 0
         ? current
         : { ...current, sizeOptions: [""] }
     );
-  }, [shoesRetailSizePreset?.key]);
+  }, [shoesRetailSizePreset?.key, clothingRetailSizePreset?.key]);
 
   useEffect(() => {
     if (!footwearSizeGroup) return;
