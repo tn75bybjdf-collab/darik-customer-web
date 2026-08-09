@@ -13,6 +13,7 @@
 // DARIK_CLOTHING_MANDATORY_CATEGORY_SIZES_060
 // DARIK_JEWELRY_CATEGORY_SIZING_061
 // DARIK_COSMETICS_OPTIONAL_CATEGORY_SIZES_062
+// DARIK_PERFUME_PHARMACY_OPTIONAL_CATEGORY_SIZES_063
 
 // DARIK_AUTOPARTS_FITMENT_FILTERS_033
 // Mobile-safe bilingual product form with automatic retail categories.
@@ -1432,6 +1433,737 @@ const COSMETICS_GENERAL_SIZE_OPTIONS = [
   "Mini / Travel Size", "Small", "Standard / Full Size", "Large", "Jumbo",
 ] as const;
 
+const PERFUME_STANDARD_BOTTLE_SIZE_OPTIONS = [
+  "5 ml", "10 ml", "15 ml", "20 ml", "30 ml", "40 ml", "50 ml",
+  "60 ml", "75 ml", "80 ml", "90 ml", "100 ml", "125 ml", "150 ml", "200 ml",
+] as const;
+
+const PERFUME_OIL_ATTAR_SIZE_OPTIONS = [
+  "3 ml", "6 ml", "10 ml", "12 ml", "15 ml", "20 ml", "25 ml",
+  "30 ml", "50 ml", "100 ml",
+] as const;
+
+const PERFUME_BODY_MIST_SIZE_OPTIONS = [
+  "50 ml", "75 ml", "100 ml", "125 ml", "150 ml", "200 ml", "250 ml",
+] as const;
+
+const PERFUME_HAIR_MIST_SIZE_OPTIONS = [
+  "30 ml", "50 ml", "75 ml", "100 ml", "150 ml",
+] as const;
+
+const PERFUME_HOME_FRAGRANCE_SIZE_OPTIONS = [
+  "50 ml", "100 ml", "150 ml", "200 ml", "250 ml", "300 ml", "500 ml",
+] as const;
+
+const PERFUME_SOLID_SIZE_OPTIONS = [
+  "5 g", "10 g", "15 g", "20 g", "30 g", "50 g",
+] as const;
+
+const PERFUME_CAR_FRAGRANCE_SIZE_OPTIONS = [
+  "6 ml", "8 ml", "10 ml", "12 ml", "15 ml", "20 ml", "30 ml", "50 ml",
+] as const;
+
+const PERFUME_GIFT_SET_SIZE_OPTIONS = [
+  "2-piece set", "3-piece set", "4-piece set", "5-piece set",
+  "Travel Set", "Standard Set", "Deluxe Set",
+] as const;
+
+function perfumeSizePresetFromCategoryName(
+  categoryName: string | null | undefined
+): RetailSizePreset {
+  const key = normalizedCategoryKey(categoryName);
+  const hasAny = (...words: string[]) =>
+    words.some((word) => key.includes(word));
+
+  if (
+    hasAny(
+      "gift set", "gift sets", "perfume set", "fragrance set",
+      "طقم", "أطقم", "مجموعة عطور"
+    )
+  ) {
+    return {
+      key: "perfume_gift_sets",
+      label: { en: "Gift set sizes", ar: "أحجام أطقم العطور" },
+      required: true,
+      options: PERFUME_GIFT_SET_SIZE_OPTIONS,
+      help: {
+        en: "Choose set size/piece count. Use Custom size for a specific bottle combination.",
+        ar: "اختر حجم الطقم أو عدد القطع. استخدم الحجم المخصص لتركيبة عبوات محددة.",
+      },
+    };
+  }
+
+  if (
+    hasAny(
+      "attar", "perfume oil", "fragrance oil", "oud oil", "musk oil",
+      "roll on", "roll-on", "دهن عود", "مسك", "عطر زيتي", "زيت عطري"
+    )
+  ) {
+    return {
+      key: "perfume_oils",
+      label: { en: "Perfume oil / attar sizes", ar: "أحجام دهن العطر / العطر الزيتي" },
+      required: true,
+      options: PERFUME_OIL_ATTAR_SIZE_OPTIONS,
+      help: {
+        en: "Choose vial/roll-on bottle volume.",
+        ar: "اختر حجم عبوة الزيت أو الرول.",
+      },
+    };
+  }
+
+  if (hasAny("hair mist", "hair perfume", "عطر شعر", "بخاخ شعر")) {
+    return {
+      key: "perfume_hair_mist",
+      label: { en: "Hair mist sizes", ar: "أحجام عطر الشعر" },
+      required: true,
+      options: PERFUME_HAIR_MIST_SIZE_OPTIONS,
+      help: {
+        en: "Choose bottle volume.",
+        ar: "اختر حجم العبوة.",
+      },
+    };
+  }
+
+  if (
+    hasAny(
+      "body mist", "body spray", "fragrance mist",
+      "بخاخ جسم", "بودي ميست", "معطر جسم"
+    )
+  ) {
+    return {
+      key: "perfume_body_mist",
+      label: { en: "Body mist / spray sizes", ar: "أحجام بخاخ / معطر الجسم" },
+      required: true,
+      options: PERFUME_BODY_MIST_SIZE_OPTIONS,
+      help: {
+        en: "Choose spray bottle volume.",
+        ar: "اختر حجم عبوة البخاخ.",
+      },
+    };
+  }
+
+  if (
+    hasAny(
+      "room spray", "home fragrance", "reed diffuser", "diffuser",
+      "linen spray", "معطر منزل", "معطر غرفة", "فواحة", "دفيوزر"
+    )
+  ) {
+    return {
+      key: "perfume_home_fragrance",
+      label: { en: "Home fragrance sizes", ar: "أحجام معطرات المنزل" },
+      required: true,
+      options: PERFUME_HOME_FRAGRANCE_SIZE_OPTIONS,
+      help: {
+        en: "Choose bottle/diffuser volume.",
+        ar: "اختر حجم عبوة المعطر أو الدفيوزر.",
+      },
+    };
+  }
+
+  if (hasAny("solid perfume", "عطر صلب")) {
+    return {
+      key: "perfume_solid",
+      label: { en: "Solid perfume sizes", ar: "أحجام العطر الصلب" },
+      required: true,
+      options: PERFUME_SOLID_SIZE_OPTIONS,
+      help: {
+        en: "Choose net weight in grams.",
+        ar: "اختر الوزن الصافي بالغرام.",
+      },
+    };
+  }
+
+  if (
+    hasAny(
+      "car fragrance", "car perfume", "car freshener",
+      "معطر سيارة", "عطر سيارة"
+    )
+  ) {
+    return {
+      key: "perfume_car",
+      label: { en: "Car fragrance sizes", ar: "أحجام معطر السيارة" },
+      required: true,
+      options: PERFUME_CAR_FRAGRANCE_SIZE_OPTIONS,
+      help: {
+        en: "Choose bottle/refill volume.",
+        ar: "اختر حجم العبوة أو التعبئة.",
+      },
+    };
+  }
+
+  return {
+    key: "perfume_standard",
+    label: { en: "Perfume bottle sizes", ar: "أحجام عبوات العطر" },
+    required: true,
+    options: PERFUME_STANDARD_BOTTLE_SIZE_OPTIONS,
+    help: {
+      en: "For parfum, EDP, EDT, cologne and standard fragrance bottles. Use Custom size for uncommon volumes.",
+      ar: "للعطر والـ EDP والـ EDT والكولونيا والعبوات العادية. استخدم الحجم المخصص للأحجام غير الشائعة.",
+    },
+  };
+}
+
+// ---------------------------------------------------------------------------
+// 3. Pharmacy size families.
+//
+// Pharmacy "size" means package count, net volume/weight, or physical device
+// size. Drug strength/dose (for example 500 mg) is intentionally NOT a size.
+// ---------------------------------------------------------------------------
+const PHARMACY_TABLET_COUNT_OPTIONS = [
+  "5 tablets", "10 tablets", "12 tablets", "14 tablets", "20 tablets",
+  "24 tablets", "28 tablets", "30 tablets", "50 tablets", "60 tablets",
+  "90 tablets", "100 tablets", "120 tablets", "180 tablets",
+] as const;
+
+const PHARMACY_CAPSULE_COUNT_OPTIONS = [
+  "5 capsules", "10 capsules", "14 capsules", "20 capsules", "28 capsules",
+  "30 capsules", "50 capsules", "60 capsules", "90 capsules",
+  "100 capsules", "120 capsules", "180 capsules",
+] as const;
+
+const PHARMACY_SACHET_COUNT_OPTIONS = [
+  "5 sachets", "10 sachets", "12 sachets", "14 sachets", "20 sachets",
+  "24 sachets", "30 sachets", "50 sachets", "60 sachets",
+] as const;
+
+const PHARMACY_ORAL_LIQUID_SIZE_OPTIONS = [
+  "30 ml", "60 ml", "90 ml", "100 ml", "120 ml", "125 ml", "150 ml",
+  "180 ml", "200 ml", "250 ml", "300 ml", "500 ml",
+] as const;
+
+const PHARMACY_DROP_SIZE_OPTIONS = [
+  "2.5 ml", "5 ml", "7.5 ml", "10 ml", "15 ml", "20 ml", "30 ml",
+] as const;
+
+const PHARMACY_TOPICAL_SIZE_OPTIONS = [
+  "5 g", "10 g", "15 g", "20 g", "25 g", "30 g", "40 g", "50 g",
+  "60 g", "75 g", "100 g", "150 g", "200 g", "250 g", "500 g",
+] as const;
+
+const PHARMACY_SPRAY_SIZE_OPTIONS = [
+  "10 ml", "15 ml", "20 ml", "30 ml", "50 ml", "75 ml", "100 ml",
+  "120 ml", "150 ml", "200 ml", "250 ml",
+] as const;
+
+const PHARMACY_INHALER_COUNT_OPTIONS = [
+  "30 actuations", "60 actuations", "100 actuations", "120 actuations",
+  "200 actuations",
+] as const;
+
+const PHARMACY_SUPPOSITORY_COUNT_OPTIONS = [
+  "5 suppositories", "6 suppositories", "10 suppositories",
+  "12 suppositories", "20 suppositories", "30 suppositories",
+] as const;
+
+const PHARMACY_POWDER_SIZE_OPTIONS = [
+  "10 g", "20 g", "30 g", "50 g", "100 g", "150 g",
+  "200 g", "250 g", "400 g", "500 g", "1 kg",
+] as const;
+
+const PHARMACY_SUPPLEMENT_COUNT_OPTIONS = [
+  "10 count", "20 count", "30 count", "50 count", "60 count",
+  "90 count", "100 count", "120 count", "180 count", "200 count",
+] as const;
+
+const PHARMACY_BABY_FORMULA_SIZE_OPTIONS = [
+  "200 g", "300 g", "400 g", "500 g", "600 g", "800 g", "900 g", "1 kg",
+] as const;
+
+const PHARMACY_BABY_DIAPER_SIZE_OPTIONS = [
+  "Newborn / NB", "Size 1", "Size 2", "Size 3", "Size 4",
+  "Size 5", "Size 6", "Size 7",
+] as const;
+
+const PHARMACY_ADULT_INCONTINENCE_SIZE_OPTIONS = [
+  "XS", "S", "M", "L", "XL", "XXL",
+] as const;
+
+const PHARMACY_GLOVE_SIZE_OPTIONS = [
+  "XS", "S", "M", "L", "XL", "XXL",
+] as const;
+
+const PHARMACY_SYRINGE_SIZE_OPTIONS = [
+  "0.5 ml", "1 ml", "2 ml", "2.5 ml", "3 ml", "5 ml",
+  "10 ml", "20 ml", "30 ml", "50 ml", "60 ml",
+] as const;
+
+const PHARMACY_NEEDLE_GAUGE_OPTIONS = [
+  "18G", "19G", "20G", "21G", "22G", "23G", "24G", "25G",
+  "26G", "27G", "28G", "29G", "30G", "31G", "32G",
+] as const;
+
+const PHARMACY_GAUZE_DRESSING_SIZE_OPTIONS = [
+  "5 x 5 cm", "7.5 x 7.5 cm", "10 x 10 cm", "10 x 20 cm",
+  "15 x 15 cm", "20 x 20 cm",
+] as const;
+
+const PHARMACY_BANDAGE_WIDTH_OPTIONS = [
+  "2.5 cm wide", "5 cm wide", "7.5 cm wide", "10 cm wide", "15 cm wide", "20 cm wide",
+] as const;
+
+const PHARMACY_MASK_PACK_OPTIONS = [
+  "1 mask", "5 masks", "10 masks", "20 masks", "25 masks",
+  "50 masks", "100 masks",
+] as const;
+
+const PHARMACY_ORAL_CARE_SIZE_OPTIONS = [
+  "25 ml", "50 ml", "75 ml", "100 ml", "125 ml", "150 ml",
+  "200 ml", "250 ml", "300 ml", "500 ml",
+  "25 g", "50 g", "75 g", "100 g", "125 g", "150 g",
+] as const;
+
+const PHARMACY_CONTACT_SOLUTION_SIZE_OPTIONS = [
+  "60 ml", "100 ml", "120 ml", "240 ml", "300 ml", "360 ml", "500 ml",
+] as const;
+
+const PHARMACY_BODY_HAIR_SIZE_OPTIONS = [
+  "50 ml", "75 ml", "100 ml", "150 ml", "200 ml", "250 ml", "300 ml",
+  "400 ml", "500 ml", "600 ml", "750 ml", "1 L",
+] as const;
+
+const PHARMACY_CONDOM_FIT_OPTIONS = [
+  "49 mm nominal width", "52 mm nominal width", "54 mm nominal width",
+  "56 mm nominal width", "60 mm nominal width",
+] as const;
+
+const PHARMACY_CATHETER_SIZE_OPTIONS = [
+  "6 Fr", "8 Fr", "10 Fr", "12 Fr", "14 Fr", "16 Fr",
+  "18 Fr", "20 Fr", "22 Fr", "24 Fr",
+] as const;
+
+const PHARMACY_FIRST_AID_KIT_OPTIONS = [
+  "Mini / Travel", "Small", "Medium", "Large", "Family", "Professional",
+] as const;
+
+const PHARMACY_GENERAL_PACKAGE_OPTIONS = [
+  "Small Pack", "Standard Pack", "Large Pack", "Family Pack",
+] as const;
+
+function pharmacySizePresetFromCategoryName(
+  categoryName: string | null | undefined
+): RetailSizePreset {
+  const key = normalizedCategoryKey(categoryName);
+  const hasAny = (...words: string[]) =>
+    words.some((word) => key.includes(word));
+
+  // Adult incontinence must resolve before the generic word "diaper",
+  // otherwise "Adult Diapers" would incorrectly inherit baby sizing.
+  if (
+    hasAny(
+      "adult diaper", "adult diapers", "incontinence", "adult brief",
+      "adult briefs", "سلس بول", "حفاضات كبار"
+    )
+  ) {
+    return {
+      key: "pharmacy_incontinence",
+      label: { en: "Incontinence product sizes", ar: "مقاسات منتجات سلس البول" },
+      required: true,
+      options: PHARMACY_ADULT_INCONTINENCE_SIZE_OPTIONS,
+      help: {
+        en: "Choose the wearable size.",
+        ar: "اختر مقاس اللبس.",
+      },
+    };
+  }
+
+  if (
+    hasAny(
+      "baby diaper", "baby diapers", "infant diaper", "infant diapers",
+      "diaper", "diapers", "حفاضات أطفال", "حفاضات"
+    )
+  ) {
+    return {
+      key: "pharmacy_baby_diapers",
+      label: { en: "Diaper sizes", ar: "مقاسات الحفاضات" },
+      required: true,
+      options: PHARMACY_BABY_DIAPER_SIZE_OPTIONS,
+      help: {
+        en: "Choose the manufacturer's diaper size. Use Custom size for weight-range labels.",
+        ar: "اختر مقاس الحفاض من الشركة المصنعة. استخدم المقاس المخصص لنطاقات الوزن.",
+      },
+    };
+  }
+
+  if (hasAny("tablet", "tablets", "pill", "pills", "أقراص", "حبوب")) {
+    return {
+      key: "pharmacy_tablets",
+      label: { en: "Tablet package sizes", ar: "أحجام عبوات الأقراص" },
+      required: true,
+      options: PHARMACY_TABLET_COUNT_OPTIONS,
+      help: {
+        en: "Package count only. Medicine strength/dose is not a size.",
+        ar: "عدد الأقراص في العبوة فقط. تركيز / جرعة الدواء ليست مقاسًا.",
+      },
+    };
+  }
+
+  if (hasAny("capsule", "capsules", "كبسول", "كبسولات")) {
+    return {
+      key: "pharmacy_capsules",
+      label: { en: "Capsule package sizes", ar: "أحجام عبوات الكبسولات" },
+      required: true,
+      options: PHARMACY_CAPSULE_COUNT_OPTIONS,
+      help: {
+        en: "Package count only. Strength remains separate.",
+        ar: "عدد الكبسولات فقط. التركيز يبقى منفصلاً.",
+      },
+    };
+  }
+
+  if (hasAny("sachet", "sachets", "packet", "packets", "أكياس", "أكياس دواء")) {
+    return {
+      key: "pharmacy_sachets",
+      label: { en: "Sachet package sizes", ar: "أحجام عبوات الأكياس" },
+      required: true,
+      options: PHARMACY_SACHET_COUNT_OPTIONS,
+      help: {
+        en: "Choose number of sachets/packets.",
+        ar: "اختر عدد الأكياس في العبوة.",
+      },
+    };
+  }
+
+  if (
+    hasAny(
+      "syrup", "syrups", "oral solution", "oral liquid", "suspension",
+      "شراب", "محلول فموي", "معلق"
+    )
+  ) {
+    return {
+      key: "pharmacy_oral_liquid",
+      label: { en: "Oral liquid bottle sizes", ar: "أحجام عبوات السوائل الفموية" },
+      required: true,
+      options: PHARMACY_ORAL_LIQUID_SIZE_OPTIONS,
+      help: {
+        en: "Bottle volume only. Drug concentration remains separate.",
+        ar: "حجم العبوة فقط. تركيز الدواء يبقى منفصلاً.",
+      },
+    };
+  }
+
+  if (
+    hasAny(
+      "eye drop", "eye drops", "ear drop", "ear drops", "nasal drop", "nasal drops",
+      "drops", "قطرة", "قطرات", "قطرة عين", "قطرة أذن", "قطرة أنف"
+    )
+  ) {
+    return {
+      key: "pharmacy_drops",
+      label: { en: "Drop bottle sizes", ar: "أحجام عبوات القطرات" },
+      required: true,
+      options: PHARMACY_DROP_SIZE_OPTIONS,
+      help: {
+        en: "Choose dropper bottle volume.",
+        ar: "اختر حجم عبوة القطارة.",
+      },
+    };
+  }
+
+  if (hasAny("inhaler", "inhalers", "puffer", "بخاخ ربو", "استنشاق")) {
+    return {
+      key: "pharmacy_inhalers",
+      label: { en: "Inhaler package sizes", ar: "أحجام عبوات البخاخات الاستنشاقية" },
+      required: true,
+      options: PHARMACY_INHALER_COUNT_OPTIONS,
+      help: {
+        en: "Choose labeled actuation count. Medicine strength remains separate.",
+        ar: "اختر عدد البخات المدوّن على العبوة. تركيز الدواء يبقى منفصلاً.",
+      },
+    };
+  }
+
+  if (
+    hasAny(
+      "cream", "ointment", "gel", "topical", "كريم", "مرهم", "جل", "موضعي"
+    )
+  ) {
+    return {
+      key: "pharmacy_topical",
+      label: { en: "Cream / ointment / gel sizes", ar: "أحجام الكريم / المرهم / الجل" },
+      required: true,
+      options: PHARMACY_TOPICAL_SIZE_OPTIONS,
+      help: {
+        en: "Choose net package weight.",
+        ar: "اختر الوزن الصافي للعبوة.",
+      },
+    };
+  }
+
+  if (hasAny("suppository", "suppositories", "تحاميل", "تحميلة")) {
+    return {
+      key: "pharmacy_suppositories",
+      label: { en: "Suppository package sizes", ar: "أحجام عبوات التحاميل" },
+      required: true,
+      options: PHARMACY_SUPPOSITORY_COUNT_OPTIONS,
+      help: {
+        en: "Choose package count.",
+        ar: "اختر عدد التحاميل في العبوة.",
+      },
+    };
+  }
+
+  if (
+    hasAny(
+      "powder", "granules", "oral powder", "بودرة", "مسحوق", "حبيبات"
+    )
+  ) {
+    return {
+      key: "pharmacy_powder",
+      label: { en: "Powder / granule package sizes", ar: "أحجام عبوات البودرة / الحبيبات" },
+      required: true,
+      options: PHARMACY_POWDER_SIZE_OPTIONS,
+      help: {
+        en: "Choose net package weight.",
+        ar: "اختر الوزن الصافي للعبوة.",
+      },
+    };
+  }
+
+  if (
+    hasAny(
+      "vitamin", "vitamins", "supplement", "supplements", "probiotic",
+      "minerals", "فيتامين", "فيتامينات", "مكمل", "مكملات"
+    )
+  ) {
+    return {
+      key: "pharmacy_supplements",
+      label: { en: "Supplement package sizes", ar: "أحجام عبوات المكملات" },
+      required: true,
+      options: PHARMACY_SUPPLEMENT_COUNT_OPTIONS,
+      help: {
+        en: "Count only. Ingredient strength stays separate.",
+        ar: "عدد الحبات فقط. تركيز المكونات يبقى منفصلاً.",
+      },
+    };
+  }
+
+  if (hasAny("baby formula", "infant formula", "formula milk", "حليب أطفال", "حليب رضع")) {
+    return {
+      key: "pharmacy_formula",
+      label: { en: "Infant formula package sizes", ar: "أحجام عبوات حليب الأطفال" },
+      required: true,
+      options: PHARMACY_BABY_FORMULA_SIZE_OPTIONS,
+      help: {
+        en: "Choose net powder weight.",
+        ar: "اختر الوزن الصافي للحليب المجفف.",
+      },
+    };
+  }
+
+  if (hasAny("glove", "gloves", "medical gloves", "قفازات", "قفاز")) {
+    return {
+      key: "pharmacy_gloves",
+      label: { en: "Medical glove sizes", ar: "مقاسات القفازات الطبية" },
+      required: true,
+      options: PHARMACY_GLOVE_SIZE_OPTIONS,
+      help: {
+        en: "Choose wearable glove size.",
+        ar: "اختر مقاس القفاز.",
+      },
+    };
+  }
+
+  if (hasAny("syringe", "syringes", "سرنجة", "سرنجات", "حقنة")) {
+    return {
+      key: "pharmacy_syringes",
+      label: { en: "Syringe capacities", ar: "أحجام السرنجات" },
+      required: true,
+      options: PHARMACY_SYRINGE_SIZE_OPTIONS,
+      help: {
+        en: "Choose syringe barrel capacity.",
+        ar: "اختر سعة السرنجة.",
+      },
+    };
+  }
+
+  if (hasAny("needle", "needles", "إبرة", "إبر")) {
+    return {
+      key: "pharmacy_needles",
+      label: { en: "Needle gauges", ar: "قياسات الإبر" },
+      required: true,
+      options: PHARMACY_NEEDLE_GAUGE_OPTIONS,
+      help: {
+        en: "Choose needle gauge. Use Custom size to include needle length when needed.",
+        ar: "اختر قياس الإبرة. استخدم المقاس المخصص لإضافة طول الإبرة عند الحاجة.",
+      },
+    };
+  }
+
+  if (
+    hasAny(
+      "gauze", "dressing", "dressings", "wound pad", "شاش", "ضماد", "ضمادات"
+    )
+  ) {
+    return {
+      key: "pharmacy_dressings",
+      label: { en: "Gauze / dressing dimensions", ar: "أبعاد الشاش / الضمادات" },
+      required: true,
+      options: PHARMACY_GAUZE_DRESSING_SIZE_OPTIONS,
+      help: {
+        en: "Choose physical dressing dimensions.",
+        ar: "اختر أبعاد الضماد الفعلية.",
+      },
+    };
+  }
+
+  if (
+    hasAny(
+      "bandage", "bandages", "elastic bandage", "medical tape",
+      "رباط", "أربطة", "شريط طبي"
+    )
+  ) {
+    return {
+      key: "pharmacy_bandages",
+      label: { en: "Bandage / tape sizes", ar: "أحجام الأربطة / الشريط الطبي" },
+      required: true,
+      options: PHARMACY_BANDAGE_WIDTH_OPTIONS,
+      help: {
+        en: "Choose product width. Use Custom size for width x length.",
+        ar: "اختر عرض المنتج. استخدم المقاس المخصص لإدخال العرض × الطول.",
+      },
+    };
+  }
+
+  if (
+    hasAny(
+      "face mask", "medical mask", "surgical mask", "masks",
+      "كمامة", "كمامات"
+    )
+  ) {
+    return {
+      key: "pharmacy_masks",
+      label: { en: "Mask package sizes", ar: "أحجام عبوات الكمامات" },
+      required: true,
+      options: PHARMACY_MASK_PACK_OPTIONS,
+      help: {
+        en: "Choose number of masks per package.",
+        ar: "اختر عدد الكمامات في العبوة.",
+      },
+    };
+  }
+
+  if (
+    hasAny(
+      "toothpaste", "mouthwash", "oral care", "tooth gel",
+      "معجون أسنان", "غسول فم", "عناية بالفم"
+    )
+  ) {
+    return {
+      key: "pharmacy_oral_care",
+      label: { en: "Oral-care package sizes", ar: "أحجام منتجات العناية بالفم" },
+      required: true,
+      options: PHARMACY_ORAL_CARE_SIZE_OPTIONS,
+      help: {
+        en: "Choose net volume/weight printed on the package.",
+        ar: "اختر الحجم أو الوزن الصافي المطبوع على العبوة.",
+      },
+    };
+  }
+
+  if (
+    hasAny(
+      "contact lens solution", "lens solution", "contact solution",
+      "محلول عدسات", "سائل عدسات"
+    )
+  ) {
+    return {
+      key: "pharmacy_contact_solution",
+      label: { en: "Contact-lens solution sizes", ar: "أحجام محلول العدسات" },
+      required: true,
+      options: PHARMACY_CONTACT_SOLUTION_SIZE_OPTIONS,
+      help: {
+        en: "Choose bottle volume.",
+        ar: "اختر حجم العبوة.",
+      },
+    };
+  }
+
+  if (
+    hasAny(
+      "shampoo", "conditioner", "body wash", "lotion", "skin care",
+      "hair care", "شامبو", "بلسم", "غسول جسم", "لوشن", "عناية بالبشرة", "عناية بالشعر"
+    )
+  ) {
+    return {
+      key: "pharmacy_body_hair",
+      label: { en: "Personal-care package sizes", ar: "أحجام منتجات العناية الشخصية" },
+      required: true,
+      options: PHARMACY_BODY_HAIR_SIZE_OPTIONS,
+      help: {
+        en: "Choose bottle/tube volume.",
+        ar: "اختر حجم العبوة أو الأنبوب.",
+      },
+    };
+  }
+
+  if (hasAny("condom", "condoms", "واقي", "واقيات")) {
+    return {
+      key: "pharmacy_condoms",
+      label: { en: "Condom fit sizes", ar: "مقاسات الواقي" },
+      required: true,
+      options: PHARMACY_CONDOM_FIT_OPTIONS,
+      help: {
+        en: "Choose the nominal width printed by the manufacturer. Package count is separate.",
+        ar: "اختر العرض الاسمي المطبوع من الشركة المصنعة. عدد القطع منفصل.",
+      },
+    };
+  }
+
+  if (hasAny("catheter", "catheters", "قسطرة", "قساطر")) {
+    return {
+      key: "pharmacy_catheters",
+      label: { en: "Catheter sizes", ar: "مقاسات القساطر" },
+      required: true,
+      options: PHARMACY_CATHETER_SIZE_OPTIONS,
+      help: {
+        en: "Choose French (Fr) size.",
+        ar: "اختر قياس Fr.",
+      },
+    };
+  }
+
+  if (hasAny("first aid kit", "first aid kits", "عدة إسعاف", "حقيبة إسعاف")) {
+    return {
+      key: "pharmacy_first_aid",
+      label: { en: "First-aid kit sizes", ar: "أحجام حقائب الإسعاف" },
+      required: true,
+      options: PHARMACY_FIRST_AID_KIT_OPTIONS,
+      help: {
+        en: "Choose kit class/physical size.",
+        ar: "اختر فئة / حجم حقيبة الإسعاف.",
+      },
+    };
+  }
+
+  if (
+    hasAny(
+      "nasal spray", "throat spray", "spray", "بخاخ أنف", "بخاخ حلق", "بخاخ"
+    )
+  ) {
+    return {
+      key: "pharmacy_sprays",
+      label: { en: "Spray bottle sizes", ar: "أحجام عبوات البخاخ" },
+      required: true,
+      options: PHARMACY_SPRAY_SIZE_OPTIONS,
+      help: {
+        en: "Choose bottle volume. Medicine strength remains separate.",
+        ar: "اختر حجم العبوة. تركيز الدواء يبقى منفصلاً.",
+      },
+    };
+  }
+
+  return {
+    key: "pharmacy_general",
+    label: { en: "Package sizes", ar: "أحجام العبوة" },
+    required: true,
+    options: PHARMACY_GENERAL_PACKAGE_OPTIONS,
+    help: {
+      en: "General Pharmacy fallback. Use Custom size to enter the exact package count, volume, weight, or physical measurement. Do not enter medicine strength here.",
+      ar: "خيار عام للصيدلية. استخدم الحجم المخصص لإدخال عدد العبوة أو الحجم أو الوزن أو القياس الفعلي. لا تدخل تركيز الدواء هنا.",
+    },
+  };
+}
+
 function cosmeticsSizePresetFromCategoryName(
   categoryName: string | null | undefined
 ): RetailSizePreset {
@@ -2694,24 +3426,46 @@ export default function DarikDirectProductsPage() {
         )
       : null;
 
+  const perfumeSizePreset =
+    effectiveBusinessType === "perfume"
+      ? perfumeSizePresetFromCategoryName(
+          selectedProductCategoryName
+        )
+      : null;
+
+  const pharmacySizePreset =
+    effectiveBusinessType === "pharmacy"
+      ? pharmacySizePresetFromCategoryName(
+          selectedProductCategoryName
+        )
+      : null;
+
   const cafeSizePreset =
     effectiveBusinessType === "cafe"
       ? cafeSizePresetFromCategoryName(selectedProductCategoryName)
       : null;
 
-  // Cafe and Cosmetics are opt-in mechanics. The existence of at least one
-  // size row is the persisted UI state because direct_size_options is already
-  // the canonical storage for these product variants.
+  // Cafe, Cosmetics, Perfume and Pharmacy are opt-in mechanics. The
+  // existence of at least one size row is the persisted UI state because
+  // direct_size_options is already the canonical storage for these variants.
   const cafeHasDifferentSizes =
     effectiveBusinessType === "cafe" && form.sizeOptions.length > 0;
 
   const cosmeticsHasDifferentSizes =
     effectiveBusinessType === "cosmetics" && form.sizeOptions.length > 0;
 
+  const perfumeHasDifferentSizes =
+    effectiveBusinessType === "perfume" && form.sizeOptions.length > 0;
+
+  const pharmacyHasDifferentSizes =
+    effectiveBusinessType === "pharmacy" && form.sizeOptions.length > 0;
+
   const retailSizePreset =
     shoesRetailSizePreset ||
     clothingRetailSizePreset ||
     jewelryRetailSizePreset ||
+    (pharmacyHasDifferentSizes ? pharmacySizePreset : null) ||
+    (perfumeHasDifferentSizes ? perfumeSizePreset : null) ||
     (cosmeticsHasDifferentSizes ? cosmeticsSizePreset : null) ||
     (cafeHasDifferentSizes ? cafeSizePreset : null);
 
@@ -2762,6 +3516,28 @@ export default function DarikDirectProductsPage() {
       return unchanged ? current : { ...current, shoeSizes: nextRows };
     });
   }, [footwearSizeGroup]);
+
+  function togglePerfumeDifferentSizes(enabled: boolean) {
+    setForm((current) => ({
+      ...current,
+      sizeOptions: enabled
+        ? current.sizeOptions.length > 0
+          ? current.sizeOptions
+          : [""]
+        : [],
+    }));
+  }
+
+  function togglePharmacyDifferentSizes(enabled: boolean) {
+    setForm((current) => ({
+      ...current,
+      sizeOptions: enabled
+        ? current.sizeOptions.length > 0
+          ? current.sizeOptions
+          : [""]
+        : [],
+    }));
+  }
 
   function toggleCosmeticsDifferentSizes(enabled: boolean) {
     setForm((current) => ({
@@ -4310,6 +5086,102 @@ export default function DarikDirectProductsPage() {
                     </div>
                   </section>
                 ) : null}
+                {effectiveBusinessType === "perfume" && perfumeSizePreset ? (
+                  <section className={styles.retailSizeMechanicPanel}>
+                    <div className={styles.shoeMechanicHeading}>
+                      <div>
+                        <strong>
+                          Does this item come in different sizes? / هل يتوفر هذا المنتج بأحجام مختلفة؟
+                        </strong>
+                        <span>
+                          Choose Yes only when the same fragrance product is sold in more than one bottle, oil, spray, or set size. /
+                          اختر نعم فقط عندما يباع نفس منتج العطر بأكثر من حجم للعبوة أو الزيت أو البخاخ أو الطقم.
+                        </span>
+                      </div>
+
+                      <button
+                        type="button"
+                        aria-pressed={perfumeHasDifferentSizes}
+                        onClick={() =>
+                          togglePerfumeDifferentSizes(
+                            !perfumeHasDifferentSizes
+                          )
+                        }
+                        style={{
+                          minWidth: 96,
+                          padding: "10px 18px",
+                          borderRadius: 12,
+                          border: perfumeHasDifferentSizes
+                            ? "1px solid #fecaca"
+                            : "1px solid #0f6fff",
+                          background: perfumeHasDifferentSizes
+                            ? "#fff1f2"
+                            : "#0f6fff",
+                          color: perfumeHasDifferentSizes
+                            ? "#b42318"
+                            : "#ffffff",
+                          fontWeight: 900,
+                          cursor: "pointer",
+                          whiteSpace: "nowrap",
+                          boxShadow: perfumeHasDifferentSizes
+                            ? "none"
+                            : "0 6px 16px rgba(15, 111, 255, 0.18)",
+                        }}
+                      >
+                        {perfumeHasDifferentSizes ? "No / لا" : "Yes / نعم"}
+                      </button>
+                    </div>
+                  </section>
+                ) : null}
+
+                {effectiveBusinessType === "pharmacy" && pharmacySizePreset ? (
+                  <section className={styles.retailSizeMechanicPanel}>
+                    <div className={styles.shoeMechanicHeading}>
+                      <div>
+                        <strong>
+                          Does this item come in different sizes? / هل يتوفر هذا المنتج بأحجام مختلفة؟
+                        </strong>
+                        <span>
+                          Choose Yes for different package counts, volumes, weights, or physical device sizes. Medicine strength or dose is not a size. /
+                          اختر نعم عند اختلاف عدد العبوة أو الحجم أو الوزن أو القياس الفعلي. تركيز أو جرعة الدواء ليست مقاسًا.
+                        </span>
+                      </div>
+
+                      <button
+                        type="button"
+                        aria-pressed={pharmacyHasDifferentSizes}
+                        onClick={() =>
+                          togglePharmacyDifferentSizes(
+                            !pharmacyHasDifferentSizes
+                          )
+                        }
+                        style={{
+                          minWidth: 96,
+                          padding: "10px 18px",
+                          borderRadius: 12,
+                          border: pharmacyHasDifferentSizes
+                            ? "1px solid #fecaca"
+                            : "1px solid #0f6fff",
+                          background: pharmacyHasDifferentSizes
+                            ? "#fff1f2"
+                            : "#0f6fff",
+                          color: pharmacyHasDifferentSizes
+                            ? "#b42318"
+                            : "#ffffff",
+                          fontWeight: 900,
+                          cursor: "pointer",
+                          whiteSpace: "nowrap",
+                          boxShadow: pharmacyHasDifferentSizes
+                            ? "none"
+                            : "0 6px 16px rgba(15, 111, 255, 0.18)",
+                        }}
+                      >
+                        {pharmacyHasDifferentSizes ? "No / لا" : "Yes / نعم"}
+                      </button>
+                    </div>
+                  </section>
+                ) : null}
+
                 {effectiveBusinessType === "cosmetics" && cosmeticsSizePreset ? (
                   <section className={styles.retailSizeMechanicPanel}>
                     <div className={styles.shoeMechanicHeading}>
