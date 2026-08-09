@@ -12,6 +12,7 @@
 // DARIK_CAFE_SIZE_YES_NO_BUTTON_059
 // DARIK_CLOTHING_MANDATORY_CATEGORY_SIZES_060
 // DARIK_JEWELRY_CATEGORY_SIZING_061
+// DARIK_COSMETICS_OPTIONAL_CATEGORY_SIZES_062
 
 // DARIK_AUTOPARTS_FITMENT_FILTERS_033
 // Mobile-safe bilingual product form with automatic retail categories.
@@ -1313,6 +1314,504 @@ function clothingRetailSizePresetFromCategoryName(
   };
 }
 
+const COSMETICS_FOUNDATION_SIZE_OPTIONS = [
+  "10 ml", "15 ml", "20 ml", "25 ml", "30 ml", "35 ml", "40 ml", "50 ml",
+] as const;
+
+const COSMETICS_CONCEALER_SIZE_OPTIONS = [
+  "2.5 ml", "3 ml", "4 ml", "5 ml", "6 ml", "7 ml", "8 ml", "10 ml", "15 ml",
+] as const;
+
+const COSMETICS_POWDER_SIZE_OPTIONS = [
+  "2 g", "3 g", "4 g", "5 g", "6 g", "8 g", "10 g", "12 g", "15 g", "20 g",
+] as const;
+
+const COSMETICS_PRIMER_SPRAY_SIZE_OPTIONS = [
+  "10 ml", "15 ml", "20 ml", "25 ml", "30 ml", "40 ml", "50 ml",
+  "60 ml", "75 ml", "100 ml",
+] as const;
+
+const COSMETICS_LIP_SOLID_SIZE_OPTIONS = [
+  "1.5 g", "2 g", "2.5 g", "3 g", "3.5 g", "4 g", "4.5 g", "5 g", "10 g",
+] as const;
+
+const COSMETICS_LIP_LIQUID_SIZE_OPTIONS = [
+  "2.5 ml", "3 ml", "4 ml", "5 ml", "6 ml", "7 ml", "8 ml", "10 ml", "15 ml",
+] as const;
+
+const COSMETICS_EYE_LIQUID_SIZE_OPTIONS = [
+  "2 ml", "3 ml", "4 ml", "5 ml", "6 ml", "7 ml", "8 ml", "10 ml", "12 ml", "15 ml",
+] as const;
+
+const COSMETICS_LASH_LENGTH_OPTIONS = [
+  "8 mm", "10 mm", "12 mm", "14 mm", "16 mm", "18 mm", "Mixed Length",
+] as const;
+
+const COSMETICS_SERUM_SIZE_OPTIONS = [
+  "5 ml", "10 ml", "15 ml", "20 ml", "30 ml", "40 ml", "50 ml", "60 ml", "100 ml",
+] as const;
+
+const COSMETICS_FACE_LIQUID_SIZE_OPTIONS = [
+  "30 ml", "50 ml", "75 ml", "100 ml", "120 ml", "150 ml",
+  "200 ml", "250 ml", "300 ml", "400 ml", "500 ml",
+] as const;
+
+const COSMETICS_FACE_CREAM_SIZE_OPTIONS = [
+  "10 ml", "15 ml", "20 ml", "30 ml", "40 ml", "50 ml", "60 ml",
+  "75 ml", "100 ml", "150 ml", "200 ml",
+  "15 g", "30 g", "50 g", "75 g", "100 g",
+] as const;
+
+const COSMETICS_SUNSCREEN_SIZE_OPTIONS = [
+  "15 ml", "30 ml", "40 ml", "50 ml", "60 ml", "75 ml",
+  "100 ml", "150 ml", "200 ml",
+] as const;
+
+const COSMETICS_FACE_MASK_SIZE_OPTIONS = [
+  "Single Sheet", "5 Sheets", "10 Sheets",
+  "10 ml", "15 ml", "20 ml", "25 ml", "30 ml", "50 ml", "100 ml",
+  "15 g", "25 g", "50 g", "100 g",
+] as const;
+
+const COSMETICS_HAIR_WASH_SIZE_OPTIONS = [
+  "100 ml", "150 ml", "200 ml", "250 ml", "300 ml", "350 ml",
+  "400 ml", "500 ml", "600 ml", "750 ml", "1 L",
+] as const;
+
+const COSMETICS_HAIR_MASK_SIZE_OPTIONS = [
+  "50 ml", "100 ml", "150 ml", "200 ml", "250 ml", "300 ml", "500 ml",
+  "50 g", "100 g", "150 g", "200 g", "250 g", "300 g", "500 g",
+] as const;
+
+const COSMETICS_HAIR_OIL_SIZE_OPTIONS = [
+  "15 ml", "30 ml", "50 ml", "75 ml", "100 ml", "150 ml", "200 ml", "250 ml",
+] as const;
+
+const COSMETICS_HAIR_TOOL_SIZE_OPTIONS = [
+  "13 mm", "16 mm", "19 mm", "22 mm", "25 mm", "28 mm",
+  "32 mm", "38 mm", "45 mm", "50 mm",
+] as const;
+
+const COSMETICS_NAIL_POLISH_SIZE_OPTIONS = [
+  "5 ml", "7 ml", "8 ml", "10 ml", "12 ml", "13.5 ml", "15 ml", "18 ml",
+] as const;
+
+const COSMETICS_NAIL_CARE_SIZE_OPTIONS = [
+  "5 ml", "10 ml", "15 ml", "30 ml", "50 ml", "75 ml", "100 ml", "150 ml",
+] as const;
+
+const COSMETICS_FRAGRANCE_SIZE_OPTIONS = [
+  "5 ml", "10 ml", "15 ml", "20 ml", "30 ml", "40 ml", "50 ml",
+  "60 ml", "75 ml", "80 ml", "90 ml", "100 ml", "125 ml", "150 ml", "200 ml",
+] as const;
+
+const COSMETICS_BODY_SPRAY_SIZE_OPTIONS = [
+  "50 ml", "75 ml", "100 ml", "125 ml", "150 ml", "200 ml", "250 ml",
+] as const;
+
+const COSMETICS_BODY_CARE_SIZE_OPTIONS = [
+  "50 ml", "75 ml", "100 ml", "150 ml", "200 ml", "250 ml", "300 ml",
+  "400 ml", "500 ml", "600 ml", "750 ml", "1 L",
+  "50 g", "100 g", "150 g", "200 g", "250 g", "500 g",
+] as const;
+
+const COSMETICS_DEODORANT_SIZE_OPTIONS = [
+  "50 ml", "75 ml", "100 ml", "150 ml", "200 ml",
+  "40 g", "50 g", "75 g", "100 g",
+] as const;
+
+const COSMETICS_TOOL_SIZE_OPTIONS = [
+  "Mini / Travel", "Small", "Medium", "Large", "XL",
+] as const;
+
+const COSMETICS_BAG_SIZE_OPTIONS = [
+  "Mini", "Small", "Medium", "Large", "XL",
+] as const;
+
+const COSMETICS_GENERAL_SIZE_OPTIONS = [
+  "Mini / Travel Size", "Small", "Standard / Full Size", "Large", "Jumbo",
+] as const;
+
+function cosmeticsSizePresetFromCategoryName(
+  categoryName: string | null | undefined
+): RetailSizePreset {
+  const key = normalizedCategoryKey(categoryName);
+
+  const hasAny = (...words: string[]) =>
+    words.some((word) => key.includes(word));
+
+  if (hasAny("foundation", "فاونديشن")) {
+    return {
+      key: "cosmetics_foundation",
+      label: { en: "Foundation package sizes", ar: "أحجام عبوة الفاونديشن" },
+      required: true,
+      options: COSMETICS_FOUNDATION_SIZE_OPTIONS,
+      help: {
+        en: "Choose package volume only. Shade/color is separate from size.",
+        ar: "اختر حجم العبوة فقط. درجة اللون منفصلة عن الحجم.",
+      },
+    };
+  }
+
+  if (hasAny("concealer", "كونسيلر")) {
+    return {
+      key: "cosmetics_concealer",
+      label: { en: "Concealer package sizes", ar: "أحجام عبوة الكونسيلر" },
+      required: true,
+      options: COSMETICS_CONCEALER_SIZE_OPTIONS,
+      help: {
+        en: "Choose the actual net volume.",
+        ar: "اختر الحجم الصافي الفعلي.",
+      },
+    };
+  }
+
+  if (
+    hasAny(
+      "powder", "blush", "highlighter", "bronzer", "eyeshadow",
+      "eyebrow powder", "بودرة", "بلاشر", "هايلايتر", "برونزر", "ظلال عيون"
+    )
+  ) {
+    return {
+      key: "cosmetics_powder",
+      label: { en: "Powder / compact sizes", ar: "أحجام البودرة / المكياج المضغوط" },
+      required: true,
+      options: COSMETICS_POWDER_SIZE_OPTIONS,
+      help: {
+        en: "Choose net weight in grams.",
+        ar: "اختر الوزن الصافي بالغرام.",
+      },
+    };
+  }
+
+  if (hasAny("primer", "setting spray", "برايمر", "سبراي تثبيت")) {
+    return {
+      key: "cosmetics_primer_spray",
+      label: { en: "Primer / setting spray sizes", ar: "أحجام البرايمر / سبراي التثبيت" },
+      required: true,
+      options: COSMETICS_PRIMER_SPRAY_SIZE_OPTIONS,
+      help: {
+        en: "Choose bottle/tube volume.",
+        ar: "اختر حجم العبوة أو الأنبوب.",
+      },
+    };
+  }
+
+  if (hasAny("lip gloss", "ملمع شفاه")) {
+    return {
+      key: "cosmetics_lip_liquid",
+      label: { en: "Lip gloss sizes", ar: "أحجام ملمع الشفاه" },
+      required: true,
+      options: COSMETICS_LIP_LIQUID_SIZE_OPTIONS,
+      help: {
+        en: "Choose net liquid volume.",
+        ar: "اختر الحجم الصافي للسائل.",
+      },
+    };
+  }
+
+  if (hasAny("lipstick", "lip liner", "lip balm", "روج", "أحمر شفاه", "محدد شفاه", "مرطب شفاه")) {
+    return {
+      key: "cosmetics_lip_solid",
+      label: { en: "Lip product sizes", ar: "أحجام منتجات الشفاه" },
+      required: true,
+      options: COSMETICS_LIP_SOLID_SIZE_OPTIONS,
+      help: {
+        en: "Choose net product weight. Use Custom size for a liquid-format exception.",
+        ar: "اختر الوزن الصافي. استخدم الحجم المخصص إذا كان المنتج سائلاً.",
+      },
+    };
+  }
+
+  if (hasAny("mascara", "eyeliner", "eyebrow gel", "ماسكارا", "آيلاينر", "كحل", "جل حواجب")) {
+    return {
+      key: "cosmetics_eye_liquid",
+      label: { en: "Eye makeup package sizes", ar: "أحجام عبوات مكياج العيون" },
+      required: true,
+      options: COSMETICS_EYE_LIQUID_SIZE_OPTIONS,
+      help: {
+        en: "Choose net liquid/gel volume.",
+        ar: "اختر الحجم الصافي للسائل أو الجل.",
+      },
+    };
+  }
+
+  if (hasAny("false lashes", "lashes", "رموش صناعية", "رموش")) {
+    return {
+      key: "cosmetics_lashes",
+      label: { en: "Lash lengths", ar: "أطوال الرموش" },
+      required: true,
+      options: COSMETICS_LASH_LENGTH_OPTIONS,
+      help: {
+        en: "Use only when the same lash style is sold in different lengths.",
+        ar: "استخدمها فقط عندما يباع نفس نوع الرموش بأطوال مختلفة.",
+      },
+    };
+  }
+
+  if (hasAny("serum", "serums", "سيروم")) {
+    return {
+      key: "cosmetics_serum",
+      label: { en: "Serum sizes", ar: "أحجام السيروم" },
+      required: true,
+      options: COSMETICS_SERUM_SIZE_OPTIONS,
+      help: {
+        en: "Choose dropper/pump bottle volume.",
+        ar: "اختر حجم عبوة القطارة أو المضخة.",
+      },
+    };
+  }
+
+  if (
+    hasAny(
+      "face cleanser", "cleanser", "toner", "makeup remover",
+      "غسول وجه", "تونر", "مزيل مكياج"
+    )
+  ) {
+    return {
+      key: "cosmetics_face_liquid",
+      label: { en: "Skin-care liquid sizes", ar: "أحجام سوائل العناية بالبشرة" },
+      required: true,
+      options: COSMETICS_FACE_LIQUID_SIZE_OPTIONS,
+      help: {
+        en: "Choose bottle volume.",
+        ar: "اختر حجم العبوة.",
+      },
+    };
+  }
+
+  if (hasAny("face mask", "face masks", "ماسكات وجه", "ماسك وجه")) {
+    return {
+      key: "cosmetics_face_mask",
+      label: { en: "Face mask sizes", ar: "أحجام ماسكات الوجه" },
+      required: true,
+      options: COSMETICS_FACE_MASK_SIZE_OPTIONS,
+      help: {
+        en: "Choose sheet count, liquid volume, or net weight as applicable.",
+        ar: "اختر عدد الماسكات أو الحجم أو الوزن حسب المنتج.",
+      },
+    };
+  }
+
+  if (hasAny("sunscreen", "sun screen", "spf", "واقي شمس")) {
+    return {
+      key: "cosmetics_sunscreen",
+      label: { en: "Sunscreen sizes", ar: "أحجام واقي الشمس" },
+      required: true,
+      options: COSMETICS_SUNSCREEN_SIZE_OPTIONS,
+      help: {
+        en: "Choose tube/bottle volume.",
+        ar: "اختر حجم الأنبوب أو العبوة.",
+      },
+    };
+  }
+
+  if (
+    hasAny(
+      "face moisturizer", "moisturizer", "face cream", "skin cream",
+      "مرطب وجه", "مرطب", "كريم وجه", "كريم بشرة"
+    )
+  ) {
+    return {
+      key: "cosmetics_face_cream",
+      label: { en: "Moisturizer / cream sizes", ar: "أحجام المرطب / الكريم" },
+      required: true,
+      options: COSMETICS_FACE_CREAM_SIZE_OPTIONS,
+      help: {
+        en: "Choose net volume or weight shown on the package.",
+        ar: "اختر الحجم أو الوزن الصافي المطبوع على العبوة.",
+      },
+    };
+  }
+
+  if (hasAny("shampoo", "conditioner", "شامبو", "بلسم شعر")) {
+    return {
+      key: "cosmetics_hair_wash",
+      label: { en: "Shampoo / conditioner sizes", ar: "أحجام الشامبو / البلسم" },
+      required: true,
+      options: COSMETICS_HAIR_WASH_SIZE_OPTIONS,
+      help: {
+        en: "Choose bottle volume.",
+        ar: "اختر حجم العبوة.",
+      },
+    };
+  }
+
+  if (hasAny("hair mask", "ماسك شعر")) {
+    return {
+      key: "cosmetics_hair_mask",
+      label: { en: "Hair mask sizes", ar: "أحجام ماسك الشعر" },
+      required: true,
+      options: COSMETICS_HAIR_MASK_SIZE_OPTIONS,
+      help: {
+        en: "Choose net volume or weight.",
+        ar: "اختر الحجم أو الوزن الصافي.",
+      },
+    };
+  }
+
+  if (hasAny("hair oil", "زيت شعر")) {
+    return {
+      key: "cosmetics_hair_oil",
+      label: { en: "Hair oil sizes", ar: "أحجام زيت الشعر" },
+      required: true,
+      options: COSMETICS_HAIR_OIL_SIZE_OPTIONS,
+      help: {
+        en: "Choose bottle volume.",
+        ar: "اختر حجم العبوة.",
+      },
+    };
+  }
+
+  if (hasAny("hair tool", "hair tools", "curling", "curler", "wand", "أدوات شعر")) {
+    return {
+      key: "cosmetics_hair_tools",
+      label: { en: "Hair tool sizes", ar: "أحجام أدوات الشعر" },
+      required: true,
+      options: COSMETICS_HAIR_TOOL_SIZE_OPTIONS,
+      help: {
+        en: "Use measured barrel/plate size when the same tool is sold in different diameters.",
+        ar: "استخدم قياس الأسطوانة أو اللوح عندما تباع نفس الأداة بأقطار مختلفة.",
+      },
+    };
+  }
+
+  if (hasAny("hair accessories", "hair accessory", "إكسسوارات شعر")) {
+    return {
+      key: "cosmetics_hair_accessories",
+      label: { en: "Hair accessory sizes", ar: "أحجام إكسسوارات الشعر" },
+      required: true,
+      options: COSMETICS_TOOL_SIZE_OPTIONS,
+      help: {
+        en: "Choose the physical size only when the same accessory has size variants.",
+        ar: "اختر الحجم الفعلي فقط عندما يتوفر نفس الإكسسوار بأحجام مختلفة.",
+      },
+    };
+  }
+
+  if (hasAny("nail polish", "مناكير")) {
+    return {
+      key: "cosmetics_nail_polish",
+      label: { en: "Nail polish sizes", ar: "أحجام المناكير" },
+      required: true,
+      options: COSMETICS_NAIL_POLISH_SIZE_OPTIONS,
+      help: {
+        en: "Choose bottle volume.",
+        ar: "اختر حجم العبوة.",
+      },
+    };
+  }
+
+  if (hasAny("nail care", "عناية بالأظافر")) {
+    return {
+      key: "cosmetics_nail_care",
+      label: { en: "Nail-care sizes", ar: "أحجام العناية بالأظافر" },
+      required: true,
+      options: COSMETICS_NAIL_CARE_SIZE_OPTIONS,
+      help: {
+        en: "Choose bottle/treatment volume.",
+        ar: "اختر حجم عبوة العلاج.",
+      },
+    };
+  }
+
+  if (hasAny("fragrance", "perfume", "عطور", "عطر")) {
+    return {
+      key: "cosmetics_fragrance",
+      label: { en: "Fragrance sizes", ar: "أحجام العطور" },
+      required: true,
+      options: COSMETICS_FRAGRANCE_SIZE_OPTIONS,
+      help: {
+        en: "Choose fragrance bottle volume.",
+        ar: "اختر حجم عبوة العطر.",
+      },
+    };
+  }
+
+  if (hasAny("body spray", "بخاخ جسم")) {
+    return {
+      key: "cosmetics_body_spray",
+      label: { en: "Body spray sizes", ar: "أحجام بخاخ الجسم" },
+      required: true,
+      options: COSMETICS_BODY_SPRAY_SIZE_OPTIONS,
+      help: {
+        en: "Choose spray bottle volume.",
+        ar: "اختر حجم عبوة البخاخ.",
+      },
+    };
+  }
+
+  if (hasAny("deodorant", "مزيل عرق")) {
+    return {
+      key: "cosmetics_deodorant",
+      label: { en: "Deodorant sizes", ar: "أحجام مزيل العرق" },
+      required: true,
+      options: COSMETICS_DEODORANT_SIZE_OPTIONS,
+      help: {
+        en: "Choose ml for roll-on/spray or grams for stick/solid products.",
+        ar: "اختر المل للسوائل والبخاخ أو الغرام للستيك والمنتجات الصلبة.",
+      },
+    };
+  }
+
+  if (hasAny("body lotion", "body wash", "body care", "لوشن جسم", "غسول جسم", "عناية بالجسم")) {
+    return {
+      key: "cosmetics_body_care",
+      label: { en: "Body-care sizes", ar: "أحجام العناية بالجسم" },
+      required: true,
+      options: COSMETICS_BODY_CARE_SIZE_OPTIONS,
+      help: {
+        en: "Choose the package's net volume or weight.",
+        ar: "اختر الحجم أو الوزن الصافي للعبوة.",
+      },
+    };
+  }
+
+  if (hasAny("makeup bag", "makeup bags", "شنط مكياج")) {
+    return {
+      key: "cosmetics_bags",
+      label: { en: "Makeup bag sizes", ar: "أحجام شنط المكياج" },
+      required: true,
+      options: COSMETICS_BAG_SIZE_OPTIONS,
+      help: {
+        en: "Choose the physical bag size.",
+        ar: "اختر الحجم الفعلي للشنطة.",
+      },
+    };
+  }
+
+  if (
+    hasAny(
+      "beauty tools", "beauty tool", "makeup brushes", "makeup brush",
+      "sponges", "beauty blender", "beauty blenders", "mirrors", "mirror",
+      "nail tools", "nail tool",
+      "أدوات تجميل", "فراشي مكياج", "إسفنج مكياج", "مرايات", "أدوات أظافر"
+    )
+  ) {
+    return {
+      key: "cosmetics_tools",
+      label: { en: "Beauty tool sizes", ar: "أحجام أدوات التجميل" },
+      required: true,
+      options: COSMETICS_TOOL_SIZE_OPTIONS,
+      help: {
+        en: "Use only when the same tool/accessory is offered in multiple physical sizes.",
+        ar: "استخدمها فقط عندما تتوفر نفس الأداة أو الإكسسوار بأحجام فعلية مختلفة.",
+      },
+    };
+  }
+
+  return {
+    key: "cosmetics_general",
+    label: { en: "Cosmetic package sizes", ar: "أحجام عبوة المنتج" },
+    required: true,
+    options: COSMETICS_GENERAL_SIZE_OPTIONS,
+    help: {
+      en: "General Cosmetics fallback. Choose a common package size label or Custom size.",
+      ar: "خيار عام لمستحضرات التجميل. اختر حجم عبوة شائعًا أو الحجم المخصص.",
+    },
+  };
+}
+
 function cafeSizePresetFromCategoryName(
   categoryName: string | null | undefined
 ): RetailSizePreset {
@@ -2188,21 +2687,32 @@ export default function DarikDirectProductsPage() {
         )
       : null;
 
+  const cosmeticsSizePreset =
+    effectiveBusinessType === "cosmetics"
+      ? cosmeticsSizePresetFromCategoryName(
+          selectedProductCategoryName
+        )
+      : null;
+
   const cafeSizePreset =
     effectiveBusinessType === "cafe"
       ? cafeSizePresetFromCategoryName(selectedProductCategoryName)
       : null;
 
-  // For Cafe, the existence of a size row is the opt-in state.
-  // New cafe products start with [], so the button starts on Yes.
-  // Existing cafe products with saved direct_size_options reopen enabled.
+  // Cafe and Cosmetics are opt-in mechanics. The existence of at least one
+  // size row is the persisted UI state because direct_size_options is already
+  // the canonical storage for these product variants.
   const cafeHasDifferentSizes =
     effectiveBusinessType === "cafe" && form.sizeOptions.length > 0;
+
+  const cosmeticsHasDifferentSizes =
+    effectiveBusinessType === "cosmetics" && form.sizeOptions.length > 0;
 
   const retailSizePreset =
     shoesRetailSizePreset ||
     clothingRetailSizePreset ||
     jewelryRetailSizePreset ||
+    (cosmeticsHasDifferentSizes ? cosmeticsSizePreset : null) ||
     (cafeHasDifferentSizes ? cafeSizePreset : null);
 
   useEffect(() => {
@@ -2252,6 +2762,17 @@ export default function DarikDirectProductsPage() {
       return unchanged ? current : { ...current, shoeSizes: nextRows };
     });
   }, [footwearSizeGroup]);
+
+  function toggleCosmeticsDifferentSizes(enabled: boolean) {
+    setForm((current) => ({
+      ...current,
+      sizeOptions: enabled
+        ? current.sizeOptions.length > 0
+          ? current.sizeOptions
+          : [""]
+        : [],
+    }));
+  }
 
   function toggleCafeDifferentSizes(enabled: boolean) {
     setForm((current) => ({
@@ -3789,6 +4310,56 @@ export default function DarikDirectProductsPage() {
                     </div>
                   </section>
                 ) : null}
+                {effectiveBusinessType === "cosmetics" && cosmeticsSizePreset ? (
+                  <section className={styles.retailSizeMechanicPanel}>
+                    <div className={styles.shoeMechanicHeading}>
+                      <div>
+                        <strong>
+                          Does this item come in different sizes? / هل يتوفر هذا المنتج بأحجام مختلفة؟
+                        </strong>
+                        <span>
+                          Choose Yes only when the same cosmetic product is sold in more than one package size. Shade or color is not a size. /
+                          اختر نعم فقط عندما يباع نفس المنتج بأكثر من حجم للعبوة. درجة اللون أو اللون ليست حجمًا.
+                        </span>
+                      </div>
+
+                      <button
+                        type="button"
+                        aria-pressed={cosmeticsHasDifferentSizes}
+                        onClick={() =>
+                          toggleCosmeticsDifferentSizes(
+                            !cosmeticsHasDifferentSizes
+                          )
+                        }
+                        style={{
+                          minWidth: 96,
+                          padding: "10px 18px",
+                          borderRadius: 12,
+                          border: cosmeticsHasDifferentSizes
+                            ? "1px solid #fecaca"
+                            : "1px solid #0f6fff",
+                          background: cosmeticsHasDifferentSizes
+                            ? "#fff1f2"
+                            : "#0f6fff",
+                          color: cosmeticsHasDifferentSizes
+                            ? "#b42318"
+                            : "#ffffff",
+                          fontWeight: 900,
+                          cursor: "pointer",
+                          whiteSpace: "nowrap",
+                          boxShadow: cosmeticsHasDifferentSizes
+                            ? "none"
+                            : "0 6px 16px rgba(15, 111, 255, 0.18)",
+                        }}
+                      >
+                        {cosmeticsHasDifferentSizes
+                          ? "No / لا"
+                          : "Yes / نعم"}
+                      </button>
+                    </div>
+                  </section>
+                ) : null}
+
                 {effectiveBusinessType === "cafe" && cafeSizePreset ? (
                   <section className={styles.retailSizeMechanicPanel}>
                     <div className={styles.shoeMechanicHeading}>
