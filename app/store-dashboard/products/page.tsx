@@ -6,6 +6,7 @@
 // DARIK_FOOTWEAR_SIZE_DROPDOWNS_052
 // DARIK_SHOE_CATEGORY_SIZE_GROUPS_053
 // DARIK_AUTO_MATCH_US_SHOE_SIZES_054
+// DARIK_SHOES_RETAIL_FINAL_056
 
 // DARIK_AUTOPARTS_FITMENT_FILTERS_033
 // Mobile-safe bilingual product form with automatic retail categories.
@@ -345,6 +346,172 @@ function defaultUsSizeForEu(group: FootwearSizeGroup, euValue: string) {
   return allowed.has(closest.us) ? closest.us : "";
 }
 
+type RetailSizePreset = {
+  key: string;
+  label: { en: string; ar: string };
+  required: boolean;
+  options: readonly string[];
+  help: { en: string; ar: string };
+};
+
+const CUSTOM_RETAIL_SIZE_VALUE = "__darik_custom_size__";
+
+const ADULT_CLOTHING_SIZE_OPTIONS = [
+  "One Size", "XXS", "XS", "S", "M", "L", "XL", "XXL", "XXXL", "4XL", "5XL", "6XL",
+] as const;
+
+const KIDS_CLOTHING_SIZE_OPTIONS = [
+  "XS", "S", "M", "L", "XL",
+  "2Y", "3Y", "4Y", "5Y", "6Y", "7Y", "8Y", "9Y", "10Y", "11Y", "12Y", "13Y", "14Y", "15Y", "16Y",
+  "92 cm", "98 cm", "104 cm", "110 cm", "116 cm", "122 cm", "128 cm", "134 cm", "140 cm", "146 cm", "152 cm", "158 cm", "164 cm", "170 cm", "176 cm",
+] as const;
+
+const BABY_CLOTHING_SIZE_OPTIONS = [
+  "Newborn", "0-3M", "3-6M", "6-9M", "9-12M", "12-18M", "18-24M", "2T", "3T", "4T", "5T",
+] as const;
+
+const SOCK_SIZE_OPTIONS = [
+  "One Size", "XS", "S", "S/M", "M", "M/L", "L", "L/XL", "XL", "XXL",
+  "EU 16-18", "EU 19-22", "EU 23-26", "EU 27-30", "EU 31-34", "EU 35-38", "EU 39-42", "EU 43-46", "EU 47-50",
+] as const;
+
+const HAT_SIZE_OPTIONS = [
+  "Adjustable / One Size", "XS", "S", "S/M", "M", "M/L", "L", "L/XL", "XL", "XXL",
+  "6 3/8", "6 1/2", "6 5/8", "6 3/4", "6 7/8", "7", "7 1/8", "7 1/4", "7 3/8", "7 1/2", "7 5/8", "7 3/4", "7 7/8", "8", "8 1/8",
+  "52 cm", "53 cm", "54 cm", "55 cm", "56 cm", "57 cm", "58 cm", "59 cm", "60 cm", "61 cm", "62 cm", "63 cm", "64 cm",
+] as const;
+
+const BAG_SIZE_OPTIONS = [
+  "One Size", "Mini", "Small", "Medium", "Large", "XL",
+  "10 L", "15 L", "20 L", "25 L", "30 L", "35 L", "40 L", "45 L", "50 L",
+] as const;
+
+const BELT_SIZE_OPTIONS = [
+  "One Size / Adjustable", "XS", "S", "M", "L", "XL", "XXL", "XXXL",
+  ...Array.from({ length: 18 }, (_, index) => String(65 + index * 5) + " cm"),
+  ...Array.from({ length: 18 }, (_, index) => String(26 + index * 2) + " in"),
+];
+
+const WALLET_SIZE_OPTIONS = ["One Size", "Small", "Medium", "Large"] as const;
+
+const INSOLE_SIZE_OPTIONS = [
+  ...EU_SHOE_SIZE_OPTIONS.map((value) => "EU " + value),
+  "EU 16-18", "EU 19-21", "EU 22-24", "EU 25-27", "EU 28-30", "EU 31-33", "EU 34-36",
+  "EU 35-38", "EU 37-40", "EU 39-42", "EU 41-44", "EU 43-46", "EU 45-48", "EU 47-50",
+];
+
+const SHOELACE_SIZE_OPTIONS = [
+  "45 cm", "60 cm", "75 cm", "90 cm", "100 cm", "110 cm", "120 cm", "130 cm", "140 cm", "150 cm", "160 cm", "180 cm", "200 cm",
+] as const;
+
+function retailSizePresetFromCategoryName(
+  categoryName: string | null | undefined
+): RetailSizePreset | null {
+  const key = normalizedCategoryKey(categoryName);
+
+  if (["men's clothing", "mens clothing", "women's clothing", "womens clothing", "unisex clothing", "clothing"].includes(key)) {
+    return {
+      key: "adult_clothing",
+      label: { en: "Clothing sizes", ar: "مقاسات الملابس" },
+      required: true,
+      options: ADULT_CLOTHING_SIZE_OPTIONS,
+      help: { en: "Standard apparel sizes. Add a custom brand size if needed.", ar: "مقاسات ملابس قياسية، ويمكن إضافة مقاس خاص بالعلامة التجارية عند الحاجة." },
+    };
+  }
+
+  if (["kids' clothing", "kids clothing", "children's clothing", "children clothing"].includes(key)) {
+    return {
+      key: "kids_clothing",
+      label: { en: "Kids' clothing sizes", ar: "مقاسات ملابس الأطفال" },
+      required: true,
+      options: KIDS_CLOTHING_SIZE_OPTIONS,
+      help: { en: "Age and common height-based kids' sizes are available.", ar: "تتوفر مقاسات الأطفال حسب العمر والطول الشائع." },
+    };
+  }
+
+  if (["baby & toddler clothing", "baby and toddler clothing", "baby clothing", "toddler clothing"].includes(key)) {
+    return {
+      key: "baby_clothing",
+      label: { en: "Baby & toddler clothing sizes", ar: "مقاسات ملابس الرضع والصغار" },
+      required: true,
+      options: BABY_CLOTHING_SIZE_OPTIONS,
+      help: { en: "Newborn, month ranges, and toddler sizes.", ar: "مقاسات حديثي الولادة والأشهر ومقاسات الصغار." },
+    };
+  }
+
+  if (key === "socks" || key.endsWith(" socks")) {
+    return {
+      key: "socks",
+      label: { en: "Sock sizes", ar: "مقاسات الجوارب" },
+      required: true,
+      options: SOCK_SIZE_OPTIONS,
+      help: { en: "Choose alpha, one-size, or EU shoe-size ranges.", ar: "اختر المقاس الحرفي أو المقاس الموحد أو نطاق المقاسات الأوروبية." },
+    };
+  }
+
+  if (["hats & caps", "hats and caps", "hats", "caps"].includes(key)) {
+    return {
+      key: "hats_caps",
+      label: { en: "Hat & cap sizes", ar: "مقاسات القبعات والكابات" },
+      required: true,
+      options: HAT_SIZE_OPTIONS,
+      help: { en: "Includes adjustable, alpha, and head-circumference sizes.", ar: "يشمل المقاس القابل للتعديل والمقاسات الحرفية ومحيط الرأس." },
+    };
+  }
+
+  if (["bags & backpacks", "bags and backpacks", "bags", "backpacks"].includes(key)) {
+    return {
+      key: "bags",
+      label: { en: "Bag / backpack size", ar: "حجم الحقيبة / حقيبة الظهر" },
+      required: false,
+      options: BAG_SIZE_OPTIONS,
+      help: { en: "Optional. Use physical size or capacity when the product has variants.", ar: "اختياري. استخدم الحجم أو السعة عندما يتوفر المنتج بعدة خيارات." },
+    };
+  }
+
+  if (key === "belts" || key === "belt") {
+    return {
+      key: "belts",
+      label: { en: "Belt sizes", ar: "مقاسات الأحزمة" },
+      required: true,
+      options: BELT_SIZE_OPTIONS,
+      help: { en: "Alpha, centimeter, and inch belt sizes are supported.", ar: "يدعم المقاسات الحرفية والسنتيمتر والإنش للأحزمة." },
+    };
+  }
+
+  if (key === "wallets" || key === "wallet") {
+    return {
+      key: "wallets",
+      label: { en: "Wallet size", ar: "حجم المحفظة" },
+      required: false,
+      options: WALLET_SIZE_OPTIONS,
+      help: { en: "Optional for wallets that come in multiple physical sizes.", ar: "اختياري للمحافظ التي تتوفر بأكثر من حجم." },
+    };
+  }
+
+  if (["insoles & inserts", "insoles and inserts", "insoles", "shoe inserts"].includes(key)) {
+    return {
+      key: "insoles",
+      label: { en: "Insole sizes", ar: "مقاسات الفرشات والنعال الداخلية" },
+      required: true,
+      options: INSOLE_SIZE_OPTIONS,
+      help: { en: "Choose an EU size or a trim-to-fit EU range.", ar: "اختر مقاسًا أوروبيًا أو نطاقًا أوروبيًا للفرشات القابلة للقص." },
+    };
+  }
+
+  if (["shoelaces", "shoe laces", "laces"].includes(key)) {
+    return {
+      key: "shoelaces",
+      label: { en: "Shoelace lengths", ar: "أطوال أربطة الأحذية" },
+      required: true,
+      options: SHOELACE_SIZE_OPTIONS,
+      help: { en: "Laces are sized by length in centimeters.", ar: "يتم تحديد مقاس الأربطة حسب الطول بالسنتيمتر." },
+    };
+  }
+
+  return null;
+}
+
 type DirectProduct = {
   id: string;
   retailer_id: string;
@@ -381,6 +548,7 @@ type DirectProduct = {
   direct_weight_step: number | string | null;
   direct_shoe_sizes: Array<{ eu?: string; us?: string | null }> | null;
   direct_shoe_us_sizes_enabled: boolean;
+  direct_size_options: Array<{ label?: string }> | null;
   direct_product_status: "draft" | "published" | "paused" | "archived";
   direct_updated_at: string | null;
   created_at: string;
@@ -403,6 +571,7 @@ type ProductForm = {
   soldByWeight: boolean;
   shoeSizes: ShoeSizeOption[];
   shoeUsSizesEnabled: boolean;
+  sizeOptions: string[];
   trackInventory: boolean;
   quantity: string;
   photoUrl: string;
@@ -430,6 +599,7 @@ const emptyForm: ProductForm = {
   soldByWeight: false,
   shoeSizes: [],
   shoeUsSizesEnabled: false,
+  sizeOptions: [],
   trackInventory: false,
   quantity: "0",
   photoUrl: "",
@@ -708,6 +878,7 @@ export default function DarikDirectProductsPage() {
             "direct_weight_step",
             "direct_shoe_sizes",
             "direct_shoe_us_sizes_enabled",
+            "direct_size_options",
             "direct_product_status",
             "direct_updated_at",
             "created_at",
@@ -905,9 +1076,10 @@ export default function DarikDirectProductsPage() {
     );
   })();
 
-  const footwearSizeGroup = footwearSizeGroupFromCategoryName(
-    selectedProductCategoryName
-  );
+  const footwearSizeGroup =
+    effectiveBusinessType === "shoes"
+      ? footwearSizeGroupFromCategoryName(selectedProductCategoryName)
+      : null;
 
   const isFootwearCategory = Boolean(footwearSizeGroup);
 
@@ -922,6 +1094,21 @@ export default function DarikDirectProductsPage() {
   const footwearGroupLabel = footwearSizeGroup
     ? FOOTWEAR_GROUP_LABELS[footwearSizeGroup]
     : null;
+
+  const retailSizePreset =
+    effectiveBusinessType === "shoes"
+      ? retailSizePresetFromCategoryName(selectedProductCategoryName)
+      : null;
+
+  useEffect(() => {
+    if (!retailSizePreset) return;
+
+    setForm((current) =>
+      current.sizeOptions.length > 0
+        ? current
+        : { ...current, sizeOptions: [""] }
+    );
+  }, [retailSizePreset?.key]);
 
   useEffect(() => {
     if (!footwearSizeGroup) return;
@@ -951,6 +1138,38 @@ export default function DarikDirectProductsPage() {
       return unchanged ? current : { ...current, shoeSizes: nextRows };
     });
   }, [footwearSizeGroup]);
+
+  function updateRetailSize(index: number, value: string) {
+    setForm((current) => {
+      const sizeOptions = current.sizeOptions.map((size, sizeIndex) =>
+        sizeIndex === index ? value : size
+      );
+
+      const enteredRealSize =
+        Boolean(value.trim()) && value !== CUSTOM_RETAIL_SIZE_VALUE;
+      const isLastRow = index === sizeOptions.length - 1;
+
+      if (isLastRow && enteredRealSize) {
+        sizeOptions.push("");
+      }
+
+      return { ...current, sizeOptions };
+    });
+  }
+
+  function removeRetailSize(index: number) {
+    setForm((current) => {
+      const sizeOptions = current.sizeOptions.filter(
+        (_, sizeIndex) => sizeIndex !== index
+      );
+
+      return {
+        ...current,
+        sizeOptions:
+          retailSizePreset && sizeOptions.length === 0 ? [""] : sizeOptions,
+      };
+    });
+  }
 
   function updateShoeSize(
     index: number,
@@ -1062,6 +1281,11 @@ export default function DarikDirectProductsPage() {
             .filter((size) => Boolean(size.eu))
         : [],
       shoeUsSizesEnabled: Boolean(product.direct_shoe_us_sizes_enabled),
+      sizeOptions: Array.isArray(product.direct_size_options)
+        ? product.direct_size_options
+            .map((size) => String(size?.label ?? "").trim())
+            .filter(Boolean)
+        : [],
       trackInventory: Boolean(product.direct_inventory_tracking_enabled),
       quantity: String(product.quantity_in_stock ?? 0),
       photoUrl: product.direct_photo_url || "",
@@ -1283,6 +1507,40 @@ export default function DarikDirectProductsPage() {
     ) {
       setError("Compare-at price must be equal to or higher than the selling price / يجب أن يكون السعر قبل الخصم مساويًا لسعر البيع أو أعلى منه.");
       return;
+    }
+
+    const genericSizesForSave = form.sizeOptions
+      .map((value) => value.trim())
+      .filter(
+        (value) => Boolean(value) && value !== CUSTOM_RETAIL_SIZE_VALUE
+      );
+
+    if (retailSizePreset) {
+      if (retailSizePreset.required && genericSizesForSave.length === 0) {
+        setError(
+          retailSizePreset.label.en + " require at least one size / " + retailSizePreset.label.ar + " تتطلب مقاسًا واحدًا على الأقل."
+        );
+        return;
+      }
+
+      const normalizedGenericSizes = genericSizesForSave.map((value) =>
+        value.toLowerCase()
+      );
+      if (
+        new Set(normalizedGenericSizes).size !== normalizedGenericSizes.length
+      ) {
+        setError(
+          "Product sizes cannot be duplicated / لا يمكن تكرار مقاسات المنتج."
+        );
+        return;
+      }
+
+      if (genericSizesForSave.some((value) => value.length > 40)) {
+        setError(
+          "A size label is too long / قيمة أحد المقاسات طويلة جدًا."
+        );
+        return;
+      }
     }
 
     const shoeSizeRows = form.shoeSizes.map((size) => ({
@@ -1525,6 +1783,25 @@ export default function DarikDirectProductsPage() {
       setSaving(false);
       setError(
         `The product was saved, but the shoe sizes failed. / تم حفظ المنتج، لكن تعذر حفظ المقاسات. ${shoeSizesResult.error.message}`
+      );
+      await loadCatalog();
+      return;
+    }
+
+    const genericSizesResult = await supabase.rpc(
+      "darik_direct_set_product_size_options_v1",
+      {
+        p_product_id: savedProductId,
+        p_sizes: retailSizePreset
+          ? genericSizesForSave.map((label) => ({ label }))
+          : [],
+      }
+    );
+
+    if (genericSizesResult.error) {
+      setSaving(false);
+      setError(
+        `The product was saved, but its category sizes failed. / تم حفظ المنتج، لكن تعذر حفظ مقاسات الفئة. ${genericSizesResult.error.message}`
       );
       await loadCatalog();
       return;
@@ -2376,6 +2653,117 @@ export default function DarikDirectProductsPage() {
                                 type="button"
                                 className={styles.removeShoeSizeButton}
                                 onClick={() => removeShoeSize(index)}
+                                disabled={saving}
+                              >
+                                Remove / حذف
+                              </button>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </section>
+                ) : null}
+                {retailSizePreset ? (
+                  <section className={styles.retailSizeMechanicPanel}>
+                    <div className={styles.shoeMechanicHeading}>
+                      <div>
+                        <strong>
+                          {retailSizePreset.label.en} / {retailSizePreset.label.ar}
+                          {retailSizePreset.required ? " *" : ""}
+                        </strong>
+                        <span>
+                          {retailSizePreset.help.en} / {retailSizePreset.help.ar}
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className={styles.shoeSizeRows}>
+                      {form.sizeOptions.map((size, index) => {
+                        const normalizedSize = size.trim();
+                        const isCustomSize =
+                          normalizedSize === CUSTOM_RETAIL_SIZE_VALUE ||
+                          (Boolean(normalizedSize) &&
+                            !retailSizePreset.options.includes(normalizedSize));
+                        const selectValue = isCustomSize
+                          ? CUSTOM_RETAIL_SIZE_VALUE
+                          : normalizedSize;
+                        const isAutomaticNextRow =
+                          index === form.sizeOptions.length - 1 &&
+                          !normalizedSize;
+
+                        return (
+                          <div
+                            className={styles.retailSizeRow}
+                            key={"retail-size-" + index}
+                          >
+                            <div className={styles.retailSizeInputs}>
+                              <label>
+                                <BilingualLabel
+                                  en={"Size " + (index + 1)}
+                                  ar={"المقاس " + (index + 1)}
+                                />
+                                <select
+                                  value={selectValue}
+                                  onChange={(event) =>
+                                    updateRetailSize(index, event.target.value)
+                                  }
+                                >
+                                  <option value="">
+                                    Select size / اختر المقاس
+                                  </option>
+                                  {retailSizePreset.options.map((option) => (
+                                    <option
+                                      key={option}
+                                      value={option}
+                                      disabled={form.sizeOptions.some(
+                                        (otherSize, otherIndex) =>
+                                          otherIndex !== index &&
+                                          otherSize.trim().toLowerCase() ===
+                                            option.toLowerCase()
+                                      )}
+                                    >
+                                      {option}
+                                    </option>
+                                  ))}
+                                  <option value={CUSTOM_RETAIL_SIZE_VALUE}>
+                                    Custom size / مقاس مخصص
+                                  </option>
+                                </select>
+                              </label>
+
+                              {isCustomSize ? (
+                                <label>
+                                  <BilingualLabel
+                                    en="Custom size label"
+                                    ar="اسم المقاس المخصص"
+                                  />
+                                  <input
+                                    type="text"
+                                    maxLength={40}
+                                    value={
+                                      normalizedSize === CUSTOM_RETAIL_SIZE_VALUE
+                                        ? ""
+                                        : size
+                                    }
+                                    onChange={(event) =>
+                                      updateRetailSize(index, event.target.value)
+                                    }
+                                    placeholder="Brand size / مقاس العلامة"
+                                  />
+                                </label>
+                              ) : null}
+                            </div>
+
+                            {isAutomaticNextRow ? (
+                              <span className={styles.shoeSizeNextLabel}>
+                                Next size / المقاس التالي
+                              </span>
+                            ) : (
+                              <button
+                                type="button"
+                                className={styles.removeShoeSizeButton}
+                                onClick={() => removeRetailSize(index)}
                                 disabled={saving}
                               >
                                 Remove / حذف

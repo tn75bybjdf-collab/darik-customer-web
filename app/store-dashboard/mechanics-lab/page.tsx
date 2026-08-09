@@ -47,9 +47,9 @@ function mechanicsSummary(field: string) {
   }
   if (field === "shoes") {
     return [
-      "Men / Women / Kids / Baby-Toddler / Unisex categories",
-      "European size range changes with category",
-      "Optional U.S. range changes with category",
+      "Footwear, apparel, bags, belts, insoles, laces, care, and accessories",
+      "Category-specific required or optional size presets with custom override",
+      "Footwear keeps EU-first sizing with automatic U.S. matching",
     ];
   }
   if (field === "smoke_shop") {
