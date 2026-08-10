@@ -20,6 +20,7 @@
 // DARIK_FURNITURE_OPTIONAL_ITEM_VIDEO_068
 // DARIK_FURNITURE_HOLD_TO_RECORD_CAMERA_069
 // DARIK_FURNITURE_SNAP_SIMPLE_RECORDER_070
+// DARIK_HOME_APPLIANCES_SHORT_ITEM_VIDEO_071
 
 // DARIK_AUTOPARTS_FITMENT_FILTERS_033
 // Mobile-safe bilingual product form with automatic retail categories.
@@ -42,7 +43,6 @@ import {
   withMechanicsPreview,
 } from "@/lib/darikMechanicsLab";
 import { getBusinessCategoryPreset } from "../categories/categoryPresetOverrides";
-import DashboardLogoutButton from "../components/DashboardLogoutButton";
 import styles from "./products.module.css";
 
 type StoreContext = {
@@ -4500,7 +4500,9 @@ export default function DarikDirectProductsPage() {
     }
   }
 
-  const isFurnitureMechanics = effectiveBusinessType === "furniture";
+  const isFurnitureMechanics = ["furniture", "home_appliances"].includes(
+    effectiveBusinessType
+  );
   const furnitureVideoDisplayUrl =
     furnitureVideoPreviewUrl ||
     (!furnitureVideoRemoveRequested ? furnitureVideoExistingUrl : "");
@@ -5010,7 +5012,7 @@ export default function DarikDirectProductsPage() {
       if (duration < 1 || duration > 10.05) {
         URL.revokeObjectURL(objectUrl);
         setFurnitureVideoError(
-          "Furniture video must be between 1 and 10 seconds / يجب أن يكون فيديو الأثاث من ثانية إلى 10 ثوانٍ."
+          "Item video must be between 1 and 10 seconds / يجب أن يكون فيديو المنتج من ثانية إلى 10 ثوانٍ."
         );
         return;
       }
@@ -5739,7 +5741,7 @@ export default function DarikDirectProductsPage() {
         } catch (videoUploadError) {
           setSaving(false);
           setError(
-            `The product was saved, but the furniture video could not be uploaded. / تم حفظ المنتج، لكن تعذر رفع فيديو الأثاث. ${
+            `The product was saved, but the item video could not be uploaded. / تم حفظ المنتج، لكن تعذر رفع فيديو المنتج. ${
               videoUploadError instanceof Error
                 ? videoUploadError.message
                 : String(videoUploadError)
@@ -5770,7 +5772,7 @@ export default function DarikDirectProductsPage() {
 
           setSaving(false);
           setError(
-            `The product was saved, but its furniture video could not be linked. / تم حفظ المنتج، لكن تعذر ربط فيديو الأثاث. ${videoResult.error.message}`
+            `The product was saved, but its item video could not be linked. / تم حفظ المنتج، لكن تعذر ربط فيديو المنتج. ${videoResult.error.message}`
           );
           await loadCatalog();
           return;
@@ -5947,7 +5949,6 @@ export default function DarikDirectProductsPage() {
         <div className={styles.sidebarFooter}>
           <span>{session.user.email}</span>
           <a href="/store-dashboard">Back to dashboard</a>
-          <DashboardLogoutButton />
         </div>
       </aside>
 
@@ -8444,8 +8445,8 @@ export default function DarikDirectProductsPage() {
                               Short item video / فيديو قصير للمنتج
                             </strong>
                             <span>
-                              Optional. Add one 1–10 second video showing the furniture item. Customer playback is always muted and loops automatically. /
-                              اختياري. أضف فيديو واحدًا من ثانية إلى 10 ثوانٍ لعرض قطعة الأثاث. يظهر للعميل بدون صوت ويتكرر تلقائيًا.
+                              Optional. Add one 1–10 second video showing the item. Customer playback is always muted and loops automatically. /
+                              اختياري. أضف فيديو واحدًا من ثانية إلى 10 ثوانٍ لعرض المنتج. يظهر للعميل بدون صوت ويتكرر تلقائيًا.
                             </span>
                           </div>
                           <b>1–10 SEC</b>

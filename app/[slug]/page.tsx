@@ -1,6 +1,7 @@
 "use client";
 
 // DARIK_FURNITURE_OPTIONAL_ITEM_VIDEO_068
+// DARIK_HOME_APPLIANCES_SHORT_ITEM_VIDEO_071
 // DARIK_MECHANICS_LAB_048
 
 // DARIK_DETAILS_MODAL_SCROLL_FIX_034
@@ -882,7 +883,9 @@ export default function DarikDirectStorefrontPage() {
     .trim()
     .toLowerCase();
   const isAutoParts = effectiveBusinessType === "auto_parts";
-  const isFurnitureStore = String(effectiveBusinessType || "retail").trim().toLowerCase() === "furniture";
+  const isFurnitureStore = ["furniture", "home_appliances"].includes(
+    String(effectiveBusinessType || "retail").trim().toLowerCase()
+  );
   const isGroceryStore = [
     "supermarket",
     "grocery",

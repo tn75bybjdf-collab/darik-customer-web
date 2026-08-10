@@ -2866,6 +2866,7 @@
 }
 
 /* DARIK_FURNITURE_SNAP_SIMPLE_RECORDER_070 - Furniture simple Snapchat-style recorder */
+/* DARIK_HOME_APPLIANCES_SHORT_ITEM_VIDEO_071 - Home Appliances same recorder + Products logout removal */
 
 .furnitureSnapStage,
 .furnitureSnapVideo,
@@ -3067,7 +3068,5 @@
     margin-top: 10px;
   }
 
-  .page [data-darik-mobile-hide-signout="true"] {
-    display: none !important;
-  }
+
 }

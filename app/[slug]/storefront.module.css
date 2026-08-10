@@ -6664,8 +6664,10 @@
 }
 
 /* DARIK_FURNITURE_OPTIONAL_ITEM_VIDEO_068 - Furniture short item-video presentation */
+/* DARIK_HOME_APPLIANCES_SHORT_ITEM_VIDEO_071 - same short item video for Home Appliances */
 
-.page[data-business="furniture"] .productImage {
+.page[data-business="furniture"] .productImage,
+.page[data-business="home_appliances"] .productImage {
   position: relative;
   overflow: hidden;
 }
