@@ -33,6 +33,9 @@ type Sale = {
   change_due: number;
   item_count: number;
   created_at: string;
+  voided_at: string | null;
+  void_reversed_at: string | null;
+  pre_void_status: string | null;
   customer_id: string | null;
   customer_name: string;
   customer_phone: string;
@@ -78,6 +81,32 @@ function isVoidedSale(sale: Sale) {
 function isReturnSale(sale: Sale) {
   const status = String(sale.status || "").toLowerCase();
   return status === "return" || status === "returned" || Number(sale.sale_total || 0) < 0;
+}
+
+const PARTPOS_TIME_ZONE = "Asia/Amman";
+
+function jordanDateKey(value: string | Date) {
+  const date = value instanceof Date ? value : new Date(value);
+  if (Number.isNaN(date.getTime())) return "";
+
+  const parts = new Intl.DateTimeFormat("en-US", {
+    timeZone: PARTPOS_TIME_ZONE,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).formatToParts(date);
+
+  const year = parts.find((part) => part.type === "year")?.value ?? "";
+  const month = parts.find((part) => part.type === "month")?.value ?? "";
+  const day = parts.find((part) => part.type === "day")?.value ?? "";
+
+  return year && month && day ? `${year}-${month}-${day}` : "";
+}
+
+function isSaleFromTodayInJordan(sale: Sale) {
+  const saleDay = jordanDateKey(sale.created_at);
+  const today = jordanDateKey(new Date());
+  return Boolean(saleDay && today && saleDay === today);
 }
 
 function normalizeQuantityInput(value: string) {
@@ -236,6 +265,10 @@ export default function PartPOSSalesHistoryPage() {
   const [voidPin, setVoidPin] = useState("");
   const [voidError, setVoidError] = useState("");
   const [voidingSaleId, setVoidingSaleId] = useState<string | null>(null);
+  const [reverseVoidSale, setReverseVoidSale] = useState<Sale | null>(null);
+  const [reverseVoidPin, setReverseVoidPin] = useState("");
+  const [reverseVoidError, setReverseVoidError] = useState("");
+  const [reversingVoidSaleId, setReversingVoidSaleId] = useState<string | null>(null);
   const [openSaleId, setOpenSaleId] = useState<string | null>(null);
 
   const [returnedQuantitiesByItemId, setReturnedQuantitiesByItemId] = useState<
@@ -340,7 +373,7 @@ export default function PartPOSSalesHistoryPage() {
         let salesQuery = supabase
           .from("partpos_sales")
           .select(
-            "id, sale_number, payment_method, status, sale_total, amount_paid, change_due, item_count, created_at, customer_id, customer_name, customer_phone, customer_credit_allowance",
+            "id, sale_number, payment_method, status, sale_total, amount_paid, change_due, item_count, created_at, voided_at, void_reversed_at, pre_void_status, customer_id, customer_name, customer_phone, customer_credit_allowance",
           )
           .order("created_at", { ascending: false });
 
@@ -415,6 +448,18 @@ export default function PartPOSSalesHistoryPage() {
           change_due: Number(sale.change_due ?? 0),
           item_count: Number(sale.item_count ?? 0),
           created_at: String(sale.created_at),
+          voided_at:
+            sale.voided_at === null || sale.voided_at === undefined
+              ? null
+              : String(sale.voided_at),
+          void_reversed_at:
+            sale.void_reversed_at === null || sale.void_reversed_at === undefined
+              ? null
+              : String(sale.void_reversed_at),
+          pre_void_status:
+            sale.pre_void_status === null || sale.pre_void_status === undefined
+              ? null
+              : String(sale.pre_void_status),
           customer_id:
             sale.customer_id === null || sale.customer_id === undefined
               ? null
@@ -542,13 +587,22 @@ export default function PartPOSSalesHistoryPage() {
       <p>نسخة العميل من سجل المبيعات / Customer copy from sales history</p>
     </div>
 
-    ${voided ? `<div class="voidStamp">VOID / ملغاة</div>` : ""}
+    ${voided ? `<div class="voidStamp">ملغاة / VOID</div>` : ""}
 
     <div class="meta">
       <div class="metaRow"><span>رقم الفاتورة / Receipt No.</span><strong>${escapeReceiptText(saleNumber)}</strong></div>
       <div class="metaRow"><span>التاريخ / Date</span><strong>${escapeReceiptText(formatArabicDateTime(sale.created_at))}</strong></div>
       <div class="metaRow"><span>طريقة الدفع / Payment Method</span><strong>${escapeReceiptText(tenderLabel(sale.payment_method))}</strong></div>
       <div class="metaRow"><span>الحالة / Status</span><strong>${escapeReceiptText(statusLabel(sale.status))}</strong></div>
+      ${
+        voided
+          ? `<div class="metaRow"><span>وقت الإلغاء / Voided</span><strong>${
+              sale.voided_at
+                ? escapeReceiptText(formatArabicDateTime(sale.voided_at))
+                : "غير مسجل للفاتورة القديمة / Not recorded for legacy void"
+            }</strong></div>`
+          : ""
+      }
     </div>
 
     <table>
@@ -599,8 +653,47 @@ export default function PartPOSSalesHistoryPage() {
     receiptWindow.document.close();
   }
 
+  function saleHasRecordedReturns(sale: Sale) {
+    return sale.items.some((item) => returnedQuantityForItem(item) > 0.0001);
+  }
+
+  function canVoidSale(sale: Sale) {
+    return (
+      !isVoidedSale(sale) &&
+      !isReturnSale(sale) &&
+      isSaleFromTodayInJordan(sale) &&
+      !saleHasRecordedReturns(sale)
+    );
+  }
+
+  function voidButtonLabel(sale: Sale) {
+    if (isReturnSale(sale)) return "فاتورة مرتجع / Return Receipt";
+    if (!isSaleFromTodayInJordan(sale)) return "مرتجع فقط بعد يوم البيع / Returns Only After Sale Day";
+    if (saleHasRecordedReturns(sale)) return "يوجد مرتجع مسجل / Return Already Recorded";
+    return "إلغاء / Void";
+  }
+
   function openVoidConfirm(sale: Sale) {
     if (isVoidedSale(sale)) return;
+
+    if (!isSaleFromTodayInJordan(sale)) {
+      setActionMessage(
+        "لا يمكن إلغاء الفاتورة بعد انتهاء يوم البيع. استخدم المرتجع بدلاً من ذلك. / A receipt cannot be voided after its sale day. Use Return instead.",
+      );
+      return;
+    }
+
+    if (isReturnSale(sale)) {
+      setActionMessage("لا يمكن إلغاء فاتورة مرتجع. / Return receipts cannot be voided.");
+      return;
+    }
+
+    if (saleHasRecordedReturns(sale)) {
+      setActionMessage(
+        "لا يمكن إلغاء فاتورة تم تسجيل مرتجع عليها. استخدم المرتجع لباقي الأصناف. / A receipt with recorded returns cannot be voided. Return any remaining items instead.",
+      );
+      return;
+    }
 
     setVoidSale(sale);
     setVoidPin("");
@@ -614,6 +707,23 @@ export default function PartPOSSalesHistoryPage() {
     setVoidSale(null);
     setVoidPin("");
     setVoidError("");
+  }
+
+  function openReverseVoidConfirm(sale: Sale) {
+    if (!isVoidedSale(sale)) return;
+
+    setReverseVoidSale(sale);
+    setReverseVoidPin("");
+    setReverseVoidError("");
+    setActionMessage("");
+  }
+
+  function closeReverseVoidConfirm() {
+    if (reversingVoidSaleId) return;
+
+    setReverseVoidSale(null);
+    setReverseVoidPin("");
+    setReverseVoidError("");
   }
 
   function returnedQuantityForItem(item: SaleItem) {
@@ -781,29 +891,105 @@ export default function PartPOSSalesHistoryPage() {
       return;
     }
 
+    if (!canVoidSale(voidSale)) {
+      setVoidError(
+        "لا يمكن إلغاء هذه الفاتورة. الإلغاء مسموح فقط في نفس يوم البيع وقبل تسجيل أي مرتجع. / This receipt cannot be voided. Voids are allowed only on the sale day and before any return is recorded.",
+      );
+      return;
+    }
+
     setVoidingSaleId(voidSale.id);
     setVoidError("");
 
     try {
-      const { error: updateError } = await supabase
-        .from("partpos_sales")
-        .update({ status: "voided" })
-        .eq("id", voidSale.id);
+      const { data, error: voidRpcError } = await supabase.rpc("partpos_void_sale", {
+        p_sale_id: voidSale.id,
+      });
 
-      if (updateError) throw updateError;
+      if (voidRpcError) throw voidRpcError;
+
+      const result = (data ?? {}) as Record<string, unknown>;
+      const voidedAt =
+        result.voided_at === null || result.voided_at === undefined
+          ? new Date().toISOString()
+          : String(result.voided_at);
 
       setSales((current) =>
         current.map((sale) =>
-          sale.id === voidSale.id ? { ...sale, status: "voided" } : sale,
+          sale.id === voidSale.id
+            ? {
+                ...sale,
+                status: "voided",
+                pre_void_status: sale.status || "cashed_out",
+                voided_at: voidedAt,
+                void_reversed_at: null,
+              }
+            : sale,
         ),
       );
-      setActionMessage(`تم إلغاء الفاتورة رقم ${voidSale.sale_number ?? "—"}. / Receipt voided.`);
+      setActionMessage(
+        `تم إلغاء الفاتورة رقم ${voidSale.sale_number ?? "—"}. / Receipt voided.`,
+      );
       setVoidSale(null);
       setVoidPin("");
     } catch (caught) {
       setVoidError(`خطأ Supabase / Supabase error: ${readSupabaseError(caught)}`);
     } finally {
       setVoidingSaleId(null);
+    }
+  }
+
+  async function confirmReverseVoid() {
+    if (!supabase || !reverseVoidSale) return;
+
+    if (reverseVoidPin !== EMPLOYEE_LOGIN_PIN) {
+      setReverseVoidError(
+        "الرمز غير صحيح. أدخل رمز الدخول لعكس الإلغاء. / Incorrect PIN. Enter the login PIN to reverse the void.",
+      );
+      setReverseVoidPin("");
+      return;
+    }
+
+    setReversingVoidSaleId(reverseVoidSale.id);
+    setReverseVoidError("");
+
+    try {
+      const { data, error: reverseRpcError } = await supabase.rpc("partpos_reverse_void", {
+        p_sale_id: reverseVoidSale.id,
+      });
+
+      if (reverseRpcError) throw reverseRpcError;
+
+      const result = (data ?? {}) as Record<string, unknown>;
+      const restoredStatus = String(
+        result.restored_status ?? reverseVoidSale.pre_void_status ?? "cashed_out",
+      );
+      const reversedAt =
+        result.void_reversed_at === null || result.void_reversed_at === undefined
+          ? new Date().toISOString()
+          : String(result.void_reversed_at);
+
+      setSales((current) =>
+        current.map((sale) =>
+          sale.id === reverseVoidSale.id
+            ? {
+                ...sale,
+                status: restoredStatus,
+                void_reversed_at: reversedAt,
+              }
+            : sale,
+        ),
+      );
+
+      setActionMessage(
+        `تم عكس إلغاء الفاتورة رقم ${reverseVoidSale.sale_number ?? "—"} وإعادتها للمبيعات. / Void reversed and receipt restored to sales.`,
+      );
+      setReverseVoidSale(null);
+      setReverseVoidPin("");
+    } catch (caught) {
+      setReverseVoidError(`خطأ Supabase / Supabase error: ${readSupabaseError(caught)}`);
+    } finally {
+      setReversingVoidSaleId(null);
     }
   }
 
@@ -891,7 +1077,20 @@ export default function PartPOSSalesHistoryPage() {
                     {sale.item_count} أصناف / items • {tenderLabel(sale.payment_method)} •{" "}
                     {statusLabel(sale.status)}
                   </span>
-                  {isVoidedSale(sale) && <em className="voidBadge">VOID / ملغاة</em>}
+                  {isVoidedSale(sale) && <em className="voidBadge">ملغاة / VOID</em>}
+                  {isVoidedSale(sale) && (
+                    <span className="voidAuditLine">
+                      وقت الإلغاء / Voided:{" "}
+                      {sale.voided_at
+                        ? formatArabicDateTime(sale.voided_at)
+                        : "غير مسجل للفاتورة القديمة / Not recorded for legacy void"}
+                    </span>
+                  )}
+                  {!isVoidedSale(sale) && sale.void_reversed_at && (
+                    <span className="reverseAuditLine">
+                      تم عكس الإلغاء / Void reversed: {formatArabicDateTime(sale.void_reversed_at)}
+                    </span>
+                  )}
                 </div>
 
                 <div className="saleMoneyBlock">
@@ -923,6 +1122,22 @@ export default function PartPOSSalesHistoryPage() {
                         {statusLabel(sale.status)}
                       </strong>
                     </div>
+                    {isVoidedSale(sale) && (
+                      <div>
+                        <span>وقت الإلغاء / Voided</span>
+                        <strong className="redText">
+                          {sale.voided_at
+                            ? formatArabicDateTime(sale.voided_at)
+                            : "غير مسجل للفاتورة القديمة / Not recorded for legacy void"}
+                        </strong>
+                      </div>
+                    )}
+                    {!isVoidedSale(sale) && sale.void_reversed_at && (
+                      <div>
+                        <span>عكس الإلغاء / Void Reversed</span>
+                        <strong>{formatArabicDateTime(sale.void_reversed_at)}</strong>
+                      </div>
+                    )}
                   </div>
 
                   <div className="receiptActions">
@@ -950,14 +1165,27 @@ export default function PartPOSSalesHistoryPage() {
                           ? "لا يوجد أصناف قابلة للمرتجع / No Returnable Items"
                           : "مرتجع أصناف / Return Items"}
                     </button>
-                    <button
-                      type="button"
-                      className="voidSaleButton"
-                      onClick={() => openVoidConfirm(sale)}
-                      disabled={isVoidedSale(sale) || voidingSaleId === sale.id}
-                    >
-                      {isVoidedSale(sale) ? "الفاتورة ملغاة / Receipt Voided" : "إلغاء / Void"}
-                    </button>
+                    {isVoidedSale(sale) ? (
+                      <button
+                        type="button"
+                        className="reverseVoidButton"
+                        onClick={() => openReverseVoidConfirm(sale)}
+                        disabled={reversingVoidSaleId === sale.id}
+                      >
+                        {reversingVoidSaleId === sale.id
+                          ? "جاري عكس الإلغاء... / Reversing Void..."
+                          : "عكس الإلغاء / Reverse Void"}
+                      </button>
+                    ) : (
+                      <button
+                        type="button"
+                        className="voidSaleButton"
+                        onClick={() => openVoidConfirm(sale)}
+                        disabled={!canVoidSale(sale) || voidingSaleId === sale.id}
+                      >
+                        {voidingSaleId === sale.id ? "جاري الإلغاء... / Voiding..." : voidButtonLabel(sale)}
+                      </button>
+                    )}
                   </div>
 
                   <div className="itemsTableWrap">
@@ -1023,7 +1251,7 @@ export default function PartPOSSalesHistoryPage() {
             <p className="eyebrow">تأكيد إلغاء الفاتورة / Confirm Void</p>
             <h2>إلغاء فاتورة رقم / Void Receipt No. {voidSale.sale_number ?? "—"}</h2>
             <p className="voidConfirmText">
-              هذا سيضع علامة VOID على الفاتورة داخل سجل المبيعات. أدخل رمز الدخول للتأكيد. / This marks the receipt VOID in sales history. Enter the login PIN to confirm.
+              الإلغاء مسموح فقط في نفس يوم البيع. بعد انتهاء يوم البيع يجب استخدام المرتجع. أدخل رمز الدخول للتأكيد. / A void is allowed only on the sale day. After the sale day, use Return instead. Enter the login PIN to confirm.
             </p>
 
             <label htmlFor="void-pin">رمز الدخول / Login PIN</label>
@@ -1062,6 +1290,72 @@ export default function PartPOSSalesHistoryPage() {
                 disabled={Boolean(voidingSaleId)}
               >
                 {voidingSaleId ? "جاري الإلغاء... / Voiding..." : "تأكيد الإلغاء / Confirm Void"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {reverseVoidSale && (
+        <div className="popupBackdrop" role="dialog" aria-modal="true">
+          <div className="voidConfirmCard">
+            <p className="eyebrow">عكس الإلغاء / Reverse Void</p>
+            <h2>
+              عكس إلغاء فاتورة رقم / Reverse Void for Receipt No.{" "}
+              {reverseVoidSale.sale_number ?? "—"}
+            </h2>
+            <p className="voidConfirmText">
+              سيعود هذا البيع إلى التقارير والمبيعات، وإذا كانت الفاتورة آجل فسيعود رصيدها إلى حساب العميل. استخدم هذا فقط لتصحيح إلغاء تم بالخطأ. / This restores the sale to reports and sales. If it was a credit sale, its balance returns to the customer account. Use this only to correct an accidental void.
+            </p>
+            <div className="reverseAuditBox">
+              <span>وقت الإلغاء / Voided</span>
+              <strong>
+                {reverseVoidSale.voided_at
+                  ? formatArabicDateTime(reverseVoidSale.voided_at)
+                  : "غير مسجل للفاتورة القديمة / Not recorded for legacy void"}
+              </strong>
+            </div>
+
+            <label htmlFor="reverse-void-pin">رمز الدخول / Login PIN</label>
+            <input
+              id="reverse-void-pin"
+              value={reverseVoidPin}
+              onChange={(event) =>
+                setReverseVoidPin(
+                  normalizeDigits(event.target.value).replace(/\D/g, "").slice(0, 6),
+                )
+              }
+              placeholder="أدخل رمز الدخول / Enter login PIN"
+              inputMode="numeric"
+              type="password"
+              autoFocus
+              onKeyDown={(event) => {
+                if (event.key === "Enter") {
+                  void confirmReverseVoid();
+                }
+              }}
+            />
+
+            {reverseVoidError && <div className="voidError">{reverseVoidError}</div>}
+
+            <div className="voidPopupActions">
+              <button
+                type="button"
+                className="cancelVoidButton"
+                onClick={closeReverseVoidConfirm}
+                disabled={Boolean(reversingVoidSaleId)}
+              >
+                رجوع / Back
+              </button>
+              <button
+                type="button"
+                className="reverseVoidConfirmButton"
+                onClick={() => void confirmReverseVoid()}
+                disabled={Boolean(reversingVoidSaleId)}
+              >
+                {reversingVoidSaleId
+                  ? "جاري عكس الإلغاء... / Reversing Void..."
+                  : "تأكيد عكس الإلغاء / Confirm Reverse Void"}
               </button>
             </div>
           </div>
@@ -1458,6 +1752,12 @@ export default function PartPOSSalesHistoryPage() {
           border: 1px solid #fecaca;
         }
 
+        .reverseVoidButton {
+          background: #dcfce7;
+          color: #166534;
+          border: 1px solid #bbf7d0;
+        }
+
         .returnSaleButton {
           background: #fff7ed;
           color: #9a3412;
@@ -1465,6 +1765,7 @@ export default function PartPOSSalesHistoryPage() {
         }
 
         .voidSaleButton:disabled,
+        .reverseVoidButton:disabled,
         .returnSaleButton:disabled {
           background: #f3f4f6;
           color: #9ca3af;
@@ -1473,6 +1774,16 @@ export default function PartPOSSalesHistoryPage() {
 
         .redText {
           color: #b91c1c;
+        }
+
+        .voidAuditLine {
+          color: #991b1b !important;
+          font-weight: 800;
+        }
+
+        .reverseAuditLine {
+          color: #166534 !important;
+          font-weight: 800;
         }
 
         .receiptMeta div {
@@ -1614,6 +1925,34 @@ export default function PartPOSSalesHistoryPage() {
         .confirmVoidButton {
           background: #b91c1c;
           color: white;
+        }
+
+        .reverseVoidConfirmButton {
+          background: #166534;
+          color: white;
+        }
+
+        .reverseAuditBox {
+          display: flex;
+          justify-content: space-between;
+          gap: 12px;
+          align-items: center;
+          margin: 0 0 16px;
+          padding: 12px 14px;
+          border-radius: 14px;
+          background: #f3f4f6;
+          border: 1px solid #e5e7eb;
+        }
+
+        .reverseAuditBox span {
+          color: #6b7280;
+          font-size: 13px;
+          font-weight: 700;
+        }
+
+        .reverseAuditBox strong {
+          text-align: left;
+          font-size: 13px;
         }
 
         .confirmReturnButton {
