@@ -21,6 +21,7 @@
 // DARIK_FURNITURE_HOLD_TO_RECORD_CAMERA_069
 // DARIK_FURNITURE_SNAP_SIMPLE_RECORDER_070
 // DARIK_HOME_APPLIANCES_SHORT_ITEM_VIDEO_071
+// DARIK_CAMERA_FIRST_FRAME_READY_072
 
 // DARIK_AUTOPARTS_FITMENT_FILTERS_033
 // Mobile-safe bilingual product form with automatic retail categories.
@@ -4628,6 +4629,96 @@ export default function DarikDirectProductsPage() {
     return "";
   }
 
+  async function waitForFurnitureCameraPreview(
+    video: HTMLVideoElement,
+    stream: MediaStream
+  ) {
+    if (video.srcObject !== stream) {
+      video.srcObject = stream;
+    }
+
+    video.muted = true;
+    video.playsInline = true;
+
+    try {
+      await video.play();
+    } catch {
+      // The element is muted + inline. If Safari has not completed its
+      // internal camera transition yet, the readiness waits below still
+      // give it time to produce the first live frame.
+    }
+
+    const readinessStartedAt = performance.now();
+
+    while (
+      performance.now() - readinessStartedAt < 1800 &&
+      (
+        video.readyState < HTMLMediaElement.HAVE_CURRENT_DATA ||
+        video.videoWidth <= 0 ||
+        video.videoHeight <= 0 ||
+        video.paused
+      )
+    ) {
+      await new Promise<void>((resolve) => {
+        window.setTimeout(resolve, 30);
+      });
+    }
+
+    const frameVideo = video as HTMLVideoElement & {
+      requestVideoFrameCallback?: (
+        callback: (now: number, metadata: unknown) => void
+      ) => number;
+    };
+
+    if (
+      typeof frameVideo.requestVideoFrameCallback === "function" &&
+      !video.paused
+    ) {
+      await new Promise<void>((resolve) => {
+        let resolved = false;
+        let renderedFrames = 0;
+
+        const finish = () => {
+          if (resolved) return;
+          resolved = true;
+          window.clearTimeout(timeoutId);
+          resolve();
+        };
+
+        const onVideoFrame = () => {
+          if (resolved) return;
+
+          renderedFrames += 1;
+          if (renderedFrames >= 2) {
+            finish();
+            return;
+          }
+
+          frameVideo.requestVideoFrameCallback?.(onVideoFrame);
+        };
+
+        const timeoutId = window.setTimeout(finish, 900);
+        frameVideo.requestVideoFrameCallback(onVideoFrame);
+      });
+    } else {
+      // Older Safari fallback: after metadata/current-data are available,
+      // allow a short paint window before MediaRecorder begins.
+      await new Promise<void>((resolve) => {
+        window.setTimeout(resolve, 160);
+      });
+    }
+
+    const liveTrack = stream
+      .getVideoTracks()
+      .find((track) => track.readyState === "live");
+
+    if (!liveTrack) {
+      throw new Error(
+        "Camera did not become ready. Try again / الكاميرا لم تصبح جاهزة. حاول مرة أخرى."
+      );
+    }
+  }
+
   async function ensureFurnitureCameraStream() {
     if (
       typeof window === "undefined" ||
@@ -4670,14 +4761,21 @@ export default function DarikDirectProductsPage() {
 
     furnitureMediaStreamRef.current = stream;
 
-    if (furnitureCameraVideoRef.current) {
-      furnitureCameraVideoRef.current.srcObject = stream;
-      try {
-        await furnitureCameraVideoRef.current.play();
-      } catch {
-        // Muted inline autoplay may already be handled by the browser.
+    const cameraVideo = furnitureCameraVideoRef.current;
+    if (!cameraVideo) {
+      for (const track of stream.getTracks()) {
+        track.stop();
       }
+      furnitureMediaStreamRef.current = null;
+      throw new Error(
+        "Camera preview is not ready. Try again / معاينة الكاميرا غير جاهزة. حاول مرة أخرى."
+      );
     }
+
+    await waitForFurnitureCameraPreview(
+      cameraVideo,
+      stream
+    );
 
     setFurnitureCameraReady(true);
     return stream;
