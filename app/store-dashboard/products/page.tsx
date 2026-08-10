@@ -23,6 +23,7 @@
 // DARIK_HOME_APPLIANCES_SHORT_ITEM_VIDEO_071
 // DARIK_CAMERA_FIRST_FRAME_READY_072
 // DARIK_REUSED_LIVE_CAMERA_PREVIEW_073
+// DARIK_ALL_FIELDS_GUIDED_ADD_PRODUCT_WIZARD_074
 
 // DARIK_AUTOPARTS_FITMENT_FILTERS_033
 // Mobile-safe bilingual product form with automatic retail categories.
@@ -3785,8 +3786,8 @@ export default function DarikDirectProductsPage() {
     });
   }
 
-  const isShoeCreateWizard =
-    effectiveBusinessType === "shoes" && editingProductId === null;
+  const isGuidedCreateWizard = editingProductId === null;
+  const guidedWizardBrandRequired = effectiveBusinessType === "shoes";
 
   const shoeWizardMissingMessage =
     "Please enter this field / يرجى تعبئة هذا الحقل";
@@ -3823,6 +3824,14 @@ export default function DarikDirectProductsPage() {
 
   function changeShoeWizardCategory(value: string) {
     setShoeWizardErrors({});
+    setMobileSubcategoryId("");
+    setMobileSubsubcategoryId("");
+    setMobileAddSubcategoryOpen(false);
+    setMobileAddDetailOpen(false);
+    setMobileCustomSubcategoryName("");
+    setMobileCustomSubcategoryNameAr("");
+    setMobileCustomDetailName("");
+    setMobileCustomDetailNameAr("");
     setForm((current) => ({
       ...current,
       directCategoryId: value,
@@ -3838,7 +3847,9 @@ export default function DarikDirectProductsPage() {
     if (step === 1) {
       if (!form.name.trim()) errors.name = shoeWizardMissingMessage;
       if (!form.nameAr.trim()) errors.nameAr = shoeWizardMissingMessage;
-      if (!form.brandName.trim()) errors.brandName = shoeWizardMissingMessage;
+      if (guidedWizardBrandRequired && !form.brandName.trim()) {
+        errors.brandName = shoeWizardMissingMessage;
+      }
     }
 
     if (step === 2 && !form.directCategoryId.trim()) {
@@ -3866,6 +3877,71 @@ export default function DarikDirectProductsPage() {
           errors.sizes =
             "Please select at least one size / يرجى اختيار مقاس واحد على الأقل";
         }
+      } else if (
+        (cafeHasDifferentSizes ||
+          cosmeticsHasDifferentSizes ||
+          perfumeHasDifferentSizes ||
+          pharmacyHasDifferentSizes) &&
+        shoeWizardGenericSizes.length === 0
+      ) {
+        errors.sizes =
+          "Please select at least one size after choosing Yes / يرجى اختيار حجم واحد على الأقل بعد اختيار نعم";
+      }
+
+      if (shoeWizardGenericSizes.length > 0) {
+        const normalizedSizes = shoeWizardGenericSizes.map((value) =>
+          value.toLowerCase()
+        );
+        if (new Set(normalizedSizes).size !== normalizedSizes.length) {
+          errors.sizes =
+            "The same size cannot be added twice / لا يمكن إضافة نفس المقاس مرتين";
+        }
+      }
+
+      if (isMobilePhoneMechanics) {
+        if (mobileSubcategoryOptions.length > 0 && !mobileSubcategoryId) {
+          errors.mobile =
+            "Please select a subcategory / يرجى اختيار التصنيف الفرعي";
+        } else if (
+          mobileSubsubcategoryOptions.length > 0 &&
+          !mobileSubsubcategoryId
+        ) {
+          errors.mobile =
+            "Please select the model or detail / يرجى اختيار الموديل أو التفصيل";
+        }
+      }
+
+      if (isAutoParts) {
+        const yearFrom = form.vehicleYearFrom
+          ? Number(form.vehicleYearFrom)
+          : null;
+        const yearTo = form.vehicleYearTo
+          ? Number(form.vehicleYearTo)
+          : yearFrom;
+
+        if (
+          yearFrom !== null &&
+          (!Number.isInteger(yearFrom) || yearFrom < 1950 || yearFrom > 2100)
+        ) {
+          errors.fitment =
+            "Enter a valid starting vehicle year between 1950 and 2100 / أدخل سنة بداية صحيحة بين 1950 و2100";
+        } else if (
+          yearTo !== null &&
+          (!Number.isInteger(yearTo) || yearTo < 1950 || yearTo > 2100)
+        ) {
+          errors.fitment =
+            "Enter a valid ending vehicle year between 1950 and 2100 / أدخل سنة نهاية صحيحة بين 1950 و2100";
+        } else if (
+          yearFrom !== null &&
+          yearTo !== null &&
+          yearTo < yearFrom
+        ) {
+          errors.fitment =
+            "The ending year cannot be before the starting year / لا يمكن أن تكون سنة النهاية قبل سنة البداية";
+        } else if (form.vehicleModel.trim() && !form.vehicleMake.trim()) {
+          errors.fitment =
+            "Enter the vehicle make before the model / أدخل نوع السيارة قبل الموديل";
+        }
       }
     }
 
@@ -3879,6 +3955,8 @@ export default function DarikDirectProductsPage() {
         ? Number(form.compareAtPrice)
         : null;
       const quantity = Number(form.quantity);
+      const effectiveTrackInventory =
+        form.soldByWeight ? false : form.trackInventory;
 
       if (!form.price.trim() || !Number.isFinite(price) || price <= 0) {
         errors.price =
@@ -3893,7 +3971,7 @@ export default function DarikDirectProductsPage() {
           "Compare-at price must be at least the selling price / يجب أن يكون السعر قبل الخصم مساويًا لسعر البيع أو أعلى";
       }
 
-      if (form.trackInventory) {
+      if (effectiveTrackInventory) {
         if (!Number.isInteger(quantity) || quantity < 0) {
           errors.quantity =
             "Please enter a whole inventory quantity of 0 or more / يرجى إدخال كمية مخزون صحيحة من 0 أو أكثر";
@@ -6478,7 +6556,7 @@ export default function DarikDirectProductsPage() {
               </button>
             </header>
 
-            {isShoeCreateWizard ? (
+            {isGuidedCreateWizard ? (
 <form
                   className={`${styles.productForm} ${styles.shoeWizardForm}`}
                   onSubmit={(event) => {
@@ -6493,7 +6571,7 @@ export default function DarikDirectProductsPage() {
                   <div className={styles.shoeWizardShell}>
                     <header className={styles.shoeWizardProgress}>
                       <div>
-                        <span>Add Shoes product / إضافة منتج للأحذية</span>
+                        <span>{mechanicsFieldLabel(effectiveBusinessType)}</span>
                         <strong>
                           Step {shoeWizardStep} of 7 / الخطوة {shoeWizardStep} من 7
                         </strong>
@@ -6528,8 +6606,8 @@ export default function DarikDirectProductsPage() {
                           <div>
                             <h3>Product identity / هوية المنتج</h3>
                             <p>
-                              Enter all three fields, then press Done. /
-                              أدخل الحقول الثلاثة ثم اضغط تم.
+                              Enter the product names, then add a brand when it applies. /
+                              أدخل أسماء المنتج ثم أضف العلامة التجارية عندما تنطبق.
                             </p>
                           </div>
                         </div>
@@ -6576,8 +6654,16 @@ export default function DarikDirectProductsPage() {
 
                         <label className={styles.shoeWizardField}>
                           <BilingualLabel
-                            en="Brand"
-                            ar="العلامة التجارية"
+                            en={
+                              guidedWizardBrandRequired
+                                ? "Brand"
+                                : "Brand (optional)"
+                            }
+                            ar={
+                              guidedWizardBrandRequired
+                                ? "العلامة التجارية"
+                                : "العلامة التجارية (اختياري)"
+                            }
                           />
                           <input
                             value={form.brandName}
@@ -6585,7 +6671,7 @@ export default function DarikDirectProductsPage() {
                               updateForm("brandName", event.target.value);
                               clearShoeWizardError("brandName");
                             }}
-                            placeholder="Nike, adidas, New Balance…"
+                            placeholder="Brand name / اسم العلامة التجارية"
                           />
                           {shoeWizardErrors.brandName ? (
                             <span className={styles.shoeWizardError}>
@@ -6690,13 +6776,437 @@ export default function DarikDirectProductsPage() {
                         <div className={styles.shoeWizardTitle}>
                           <b>3</b>
                           <div>
-                            <h3>Select sizes / اختر المقاسات</h3>
+                            <h3>Product options / خيارات المنتج</h3>
                             <p>
-                              Darik now shows only the size system for the category selected. /
-                              يعرض داريك فقط نظام المقاسات المناسب للفئة المختارة.
+                              Darik shows only the mechanics that belong to this retail field and category. /
+                              يعرض داريك فقط الخصائص المناسبة لنوع النشاط والفئة المختارة.
                             </p>
                           </div>
                         </div>
+
+
+
+                        {isMobilePhoneMechanics && form.directCategoryId ? (
+                                            <section className={styles.mobileHierarchyPanel}>
+                                              <div className={styles.mobileHierarchyHeading}>
+                                                <div>
+                                                  <strong>Product fit / التصنيف التفصيلي</strong>
+                                                  <span>
+                                                    Pick only what matters. Darik keeps this to two child levels so the catalog stays easy to use. /
+                                                    اختر التفاصيل المهمة فقط. دارك يحصرها بمستويين حتى يبقى الكتالوج بسيطًا.
+                                                  </span>
+                                                </div>
+                                                {mobileCategoryPath ? (
+                                                  <span className={styles.mobileHierarchyPath}>
+                                                    {mobileCategoryPath}
+                                                  </span>
+                                                ) : null}
+                                              </div>
+
+                                              <div className={styles.mobileHierarchyFields}>
+                                                <label>
+                                                  <BilingualLabel
+                                                    en="Subcategory / brand / type"
+                                                    ar="التصنيف الفرعي / العلامة / النوع"
+                                                  />
+                                                  <select
+                                                    value={mobileSubcategoryId}
+                                                    onChange={(event) => selectMobileSubcategory(event.target.value)}
+                                                    disabled={mobileNodeSaving}
+                                                  >
+                                                    <option value="">
+                                                      {mobileCategoryNodesError && !mobileMechanicsPreviewActive
+                                                        ? "Could not load subcategories / تعذر تحميل التصنيفات الفرعية"
+                                                        : mobileSubcategoryOptions.length > 0
+                                                          ? "Select subcategory / اختر التصنيف الفرعي"
+                                                          : "No preset subcategories / لا توجد تصنيفات جاهزة"}
+                                                    </option>
+                                                    {mobileSubcategoryOptions.map((node) => (
+                                                      <option key={node.id} value={node.id}>
+                                                        {node.name}{node.name_ar ? " / " + node.name_ar : ""}
+                                                      </option>
+                                                    ))}
+                                                  </select>
+                                                </label>
+
+                                                <button
+                                                  type="button"
+                                                  className={styles.mobileHierarchyAddButton}
+                                                  onClick={() => setMobileAddSubcategoryOpen((current) => !current)}
+                                                  disabled={mobileNodeSaving}
+                                                >
+                                                  + Add subcategory / إضافة تصنيف فرعي
+                                                </button>
+
+                                                {mobileAddSubcategoryOpen ? (
+                                                  <div className={styles.mobileHierarchyCustomBox}>
+                                                    <label>
+                                                      <BilingualLabel en="New subcategory (English)" ar="التصنيف الفرعي الجديد بالإنجليزي" />
+                                                      <input
+                                                        value={mobileCustomSubcategoryName}
+                                                        onChange={(event) => setMobileCustomSubcategoryName(event.target.value)}
+                                                        placeholder="Example: Google Pixel"
+                                                      />
+                                                    </label>
+                                                    <label>
+                                                      <BilingualLabel en="Arabic name (optional)" ar="الاسم بالعربي (اختياري)" />
+                                                      <input
+                                                        dir="rtl"
+                                                        value={mobileCustomSubcategoryNameAr}
+                                                        onChange={(event) => setMobileCustomSubcategoryNameAr(event.target.value)}
+                                                      />
+                                                    </label>
+                                                    <div className={styles.mobileHierarchyCustomActions}>
+                                                      <button
+                                                        type="button"
+                                                        onClick={() => void createMobileCategoryNode(1)}
+                                                        disabled={mobileNodeSaving}
+                                                      >
+                                                        {mobileNodeSaving ? "Adding… / جارٍ الإضافة…" : "Add / إضافة"}
+                                                      </button>
+                                                      <button
+                                                        type="button"
+                                                        className={styles.mobileHierarchyCancelButton}
+                                                        onClick={() => setMobileAddSubcategoryOpen(false)}
+                                                        disabled={mobileNodeSaving}
+                                                      >
+                                                        Cancel / إلغاء
+                                                      </button>
+                                                    </div>
+                                                  </div>
+                                                ) : null}
+
+                                                {mobileSubcategoryId ? (
+                                                  <>
+                                                    {mobileSubsubcategoryOptions.length > 0 ? (
+                                                      <label>
+                                                        <BilingualLabel
+                                                          en="Model / detail"
+                                                          ar="الموديل / التفصيل"
+                                                        />
+                                                        <select
+                                                          value={mobileSubsubcategoryId}
+                                                          onChange={(event) => setMobileSubsubcategoryId(event.target.value)}
+                                                          disabled={mobileNodeSaving}
+                                                        >
+                                                          <option value="">Select model/detail / اختر الموديل أو التفصيل</option>
+                                                          {mobileSubsubcategoryOptions.map((node) => (
+                                                            <option key={node.id} value={node.id}>
+                                                              {node.name}{node.name_ar ? " / " + node.name_ar : ""}
+                                                            </option>
+                                                          ))}
+                                                        </select>
+                                                      </label>
+                                                    ) : (
+                                                      <div className={styles.mobileHierarchyQuietNote}>
+                                                        No extra level is required for this choice. Add one only if you need a specific model or detail. /
+                                                        لا يلزم مستوى إضافي لهذا الخيار. أضفه فقط إذا احتجت موديلًا أو تفصيلًا محددًا.
+                                                      </div>
+                                                    )}
+
+                                                    <button
+                                                      type="button"
+                                                      className={styles.mobileHierarchyAddButton}
+                                                      onClick={() => setMobileAddDetailOpen((current) => !current)}
+                                                      disabled={mobileNodeSaving}
+                                                    >
+                                                      + Add model / detail / إضافة موديل أو تفصيل
+                                                    </button>
+
+                                                    {mobileAddDetailOpen ? (
+                                                      <div className={styles.mobileHierarchyCustomBox}>
+                                                        <label>
+                                                          <BilingualLabel en="New model/detail (English)" ar="الموديل أو التفصيل الجديد بالإنجليزي" />
+                                                          <input
+                                                            value={mobileCustomDetailName}
+                                                            onChange={(event) => setMobileCustomDetailName(event.target.value)}
+                                                            placeholder="Example: iPhone 15 Plus"
+                                                          />
+                                                        </label>
+                                                        <label>
+                                                          <BilingualLabel en="Arabic name (optional)" ar="الاسم بالعربي (اختياري)" />
+                                                          <input
+                                                            dir="rtl"
+                                                            value={mobileCustomDetailNameAr}
+                                                            onChange={(event) => setMobileCustomDetailNameAr(event.target.value)}
+                                                          />
+                                                        </label>
+                                                        <div className={styles.mobileHierarchyCustomActions}>
+                                                          <button
+                                                            type="button"
+                                                            onClick={() => void createMobileCategoryNode(2)}
+                                                            disabled={mobileNodeSaving}
+                                                          >
+                                                            {mobileNodeSaving ? "Adding… / جارٍ الإضافة…" : "Add / إضافة"}
+                                                          </button>
+                                                          <button
+                                                            type="button"
+                                                            className={styles.mobileHierarchyCancelButton}
+                                                            onClick={() => setMobileAddDetailOpen(false)}
+                                                            disabled={mobileNodeSaving}
+                                                          >
+                                                            Cancel / إلغاء
+                                                          </button>
+                                                        </div>
+                                                      </div>
+                                                    ) : null}
+                                                  </>
+                                                ) : null}
+                                              </div>
+                                            </section>
+                                          ) : null}
+
+                        {isAutoParts ? (
+                                          <section className={styles.fitmentPanel}>
+                                            <div className={styles.fitmentHeading}>
+                                              <div>
+                                                <strong>Vehicle fitment / توافق السيارة</strong>
+                                                <span>Customers can filter the catalog by year, make, and model. / يمكن للعملاء تصفية المنتجات حسب السنة والنوع والموديل.</span>
+                                              </div>
+                                            </div>
+                                            <div className={styles.fitmentGrid}>
+                                              <label>
+                                                <BilingualLabel en="Year from" ar="من سنة" />
+                                                <input
+                                                  type="number"
+                                                  inputMode="numeric"
+                                                  min="1950"
+                                                  max="2100"
+                                                  step="1"
+                                                  value={form.vehicleYearFrom}
+                                                  onChange={(event) => updateForm("vehicleYearFrom", event.target.value)}
+                                                  placeholder="Example: 2020"
+                                                />
+                                              </label>
+                                              <label>
+                                                <BilingualLabel en="Year to" ar="إلى سنة" />
+                                                <input
+                                                  type="number"
+                                                  inputMode="numeric"
+                                                  min="1950"
+                                                  max="2100"
+                                                  step="1"
+                                                  value={form.vehicleYearTo}
+                                                  onChange={(event) => updateForm("vehicleYearTo", event.target.value)}
+                                                  placeholder="Optional / اختياري"
+                                                />
+                                              </label>
+                                              <label>
+                                                <BilingualLabel en="Vehicle make" ar="نوع السيارة" />
+                                                <input
+                                                  value={form.vehicleMake}
+                                                  onChange={(event) => updateForm("vehicleMake", event.target.value)}
+                                                  placeholder="NETA, BYD, Toyota..."
+                                                  autoComplete="off"
+                                                />
+                                              </label>
+                                              <label>
+                                                <BilingualLabel en="Vehicle model" ar="موديل السيارة" />
+                                                <input
+                                                  value={form.vehicleModel}
+                                                  onChange={(event) => updateForm("vehicleModel", event.target.value)}
+                                                  placeholder="U, Song L, Corolla..."
+                                                  autoComplete="off"
+                                                />
+                                              </label>
+                                            </div>
+                                            <p className={styles.fitmentHint}>
+                                              Leave these fields blank for universal parts. Use the year range when the same part fits several model years. / اترك الحقول فارغة للقطع العامة، واستخدم نطاق السنوات عندما تناسب القطعة أكثر من سنة.
+                                            </p>
+                                          </section>
+                                        ) : null}
+
+                        {effectiveBusinessType === "perfume" && perfumeSizePreset ? (
+                                          <section className={styles.retailSizeMechanicPanel}>
+                                            <div className={styles.shoeMechanicHeading}>
+                                              <div>
+                                                <strong>
+                                                  Does this item come in different sizes? / هل يتوفر هذا المنتج بأحجام مختلفة؟
+                                                </strong>
+                                                <span>
+                                                  Choose Yes only when the same fragrance product is sold in more than one bottle, oil, spray, or set size. /
+                                                  اختر نعم فقط عندما يباع نفس منتج العطر بأكثر من حجم للعبوة أو الزيت أو البخاخ أو الطقم.
+                                                </span>
+                                              </div>
+
+                                              <button
+                                                type="button"
+                                                aria-pressed={perfumeHasDifferentSizes}
+                                                onClick={() =>
+                                                  togglePerfumeDifferentSizes(
+                                                    !perfumeHasDifferentSizes
+                                                  )
+                                                }
+                                                style={{
+                                                  minWidth: 96,
+                                                  padding: "10px 18px",
+                                                  borderRadius: 12,
+                                                  border: perfumeHasDifferentSizes
+                                                    ? "1px solid #fecaca"
+                                                    : "1px solid #0f6fff",
+                                                  background: perfumeHasDifferentSizes
+                                                    ? "#fff1f2"
+                                                    : "#0f6fff",
+                                                  color: perfumeHasDifferentSizes
+                                                    ? "#b42318"
+                                                    : "#ffffff",
+                                                  fontWeight: 900,
+                                                  cursor: "pointer",
+                                                  whiteSpace: "nowrap",
+                                                  boxShadow: perfumeHasDifferentSizes
+                                                    ? "none"
+                                                    : "0 6px 16px rgba(15, 111, 255, 0.18)",
+                                                }}
+                                              >
+                                                {perfumeHasDifferentSizes ? "No / لا" : "Yes / نعم"}
+                                              </button>
+                                            </div>
+                                          </section>
+                                        ) : null}
+
+                                        {effectiveBusinessType === "pharmacy" && pharmacySizePreset ? (
+                                          <section className={styles.retailSizeMechanicPanel}>
+                                            <div className={styles.shoeMechanicHeading}>
+                                              <div>
+                                                <strong>
+                                                  Does this item come in different sizes? / هل يتوفر هذا المنتج بأحجام مختلفة؟
+                                                </strong>
+                                                <span>
+                                                  Choose Yes for different package counts, volumes, weights, or physical device sizes. Medicine strength or dose is not a size. /
+                                                  اختر نعم عند اختلاف عدد العبوة أو الحجم أو الوزن أو القياس الفعلي. تركيز أو جرعة الدواء ليست مقاسًا.
+                                                </span>
+                                              </div>
+
+                                              <button
+                                                type="button"
+                                                aria-pressed={pharmacyHasDifferentSizes}
+                                                onClick={() =>
+                                                  togglePharmacyDifferentSizes(
+                                                    !pharmacyHasDifferentSizes
+                                                  )
+                                                }
+                                                style={{
+                                                  minWidth: 96,
+                                                  padding: "10px 18px",
+                                                  borderRadius: 12,
+                                                  border: pharmacyHasDifferentSizes
+                                                    ? "1px solid #fecaca"
+                                                    : "1px solid #0f6fff",
+                                                  background: pharmacyHasDifferentSizes
+                                                    ? "#fff1f2"
+                                                    : "#0f6fff",
+                                                  color: pharmacyHasDifferentSizes
+                                                    ? "#b42318"
+                                                    : "#ffffff",
+                                                  fontWeight: 900,
+                                                  cursor: "pointer",
+                                                  whiteSpace: "nowrap",
+                                                  boxShadow: pharmacyHasDifferentSizes
+                                                    ? "none"
+                                                    : "0 6px 16px rgba(15, 111, 255, 0.18)",
+                                                }}
+                                              >
+                                                {pharmacyHasDifferentSizes ? "No / لا" : "Yes / نعم"}
+                                              </button>
+                                            </div>
+                                          </section>
+                                        ) : null}
+
+                                        {effectiveBusinessType === "cosmetics" && cosmeticsSizePreset ? (
+                                          <section className={styles.retailSizeMechanicPanel}>
+                                            <div className={styles.shoeMechanicHeading}>
+                                              <div>
+                                                <strong>
+                                                  Does this item come in different sizes? / هل يتوفر هذا المنتج بأحجام مختلفة؟
+                                                </strong>
+                                                <span>
+                                                  Choose Yes only when the same cosmetic product is sold in more than one package size. Shade or color is not a size. /
+                                                  اختر نعم فقط عندما يباع نفس المنتج بأكثر من حجم للعبوة. درجة اللون أو اللون ليست حجمًا.
+                                                </span>
+                                              </div>
+
+                                              <button
+                                                type="button"
+                                                aria-pressed={cosmeticsHasDifferentSizes}
+                                                onClick={() =>
+                                                  toggleCosmeticsDifferentSizes(
+                                                    !cosmeticsHasDifferentSizes
+                                                  )
+                                                }
+                                                style={{
+                                                  minWidth: 96,
+                                                  padding: "10px 18px",
+                                                  borderRadius: 12,
+                                                  border: cosmeticsHasDifferentSizes
+                                                    ? "1px solid #fecaca"
+                                                    : "1px solid #0f6fff",
+                                                  background: cosmeticsHasDifferentSizes
+                                                    ? "#fff1f2"
+                                                    : "#0f6fff",
+                                                  color: cosmeticsHasDifferentSizes
+                                                    ? "#b42318"
+                                                    : "#ffffff",
+                                                  fontWeight: 900,
+                                                  cursor: "pointer",
+                                                  whiteSpace: "nowrap",
+                                                  boxShadow: cosmeticsHasDifferentSizes
+                                                    ? "none"
+                                                    : "0 6px 16px rgba(15, 111, 255, 0.18)",
+                                                }}
+                                              >
+                                                {cosmeticsHasDifferentSizes
+                                                  ? "No / لا"
+                                                  : "Yes / نعم"}
+                                              </button>
+                                            </div>
+                                          </section>
+                                        ) : null}
+
+                                        {effectiveBusinessType === "cafe" && cafeSizePreset ? (
+                                          <section className={styles.retailSizeMechanicPanel}>
+                                            <div className={styles.shoeMechanicHeading}>
+                                              <div>
+                                                <strong>
+                                                  This item has different sizes? / هل لهذا المنتج أحجام مختلفة؟
+                                                </strong>
+                                                <span>
+                                                  Choose Yes to add size choices. Once enabled, the button changes to No so you can remove them. /
+                                                  اختر نعم لإضافة خيارات الأحجام. بعد التفعيل يتحول الزر إلى لا حتى تتمكن من إلغاء الأحجام.
+                                                </span>
+                                              </div>
+
+                                              <button
+                                                type="button"
+                                                aria-pressed={cafeHasDifferentSizes}
+                                                onClick={() =>
+                                                  toggleCafeDifferentSizes(!cafeHasDifferentSizes)
+                                                }
+                                                style={{
+                                                  minWidth: 96,
+                                                  padding: "10px 18px",
+                                                  borderRadius: 12,
+                                                  border: cafeHasDifferentSizes
+                                                    ? "1px solid #fecaca"
+                                                    : "1px solid #0f6fff",
+                                                  background: cafeHasDifferentSizes
+                                                    ? "#fff1f2"
+                                                    : "#0f6fff",
+                                                  color: cafeHasDifferentSizes
+                                                    ? "#b42318"
+                                                    : "#ffffff",
+                                                  fontWeight: 900,
+                                                  cursor: "pointer",
+                                                  whiteSpace: "nowrap",
+                                                  boxShadow: cafeHasDifferentSizes
+                                                    ? "none"
+                                                    : "0 6px 16px rgba(15, 111, 255, 0.18)",
+                                                }}
+                                              >
+                                                {cafeHasDifferentSizes ? "No / لا" : "Yes / نعم"}
+                                              </button>
+                                            </div>
+                                          </section>
+                                        ) : null}
 
                         {footwearSizeGroup ? (
                           <div className={styles.shoeWizardSizeBox}>
@@ -6972,20 +7482,66 @@ export default function DarikDirectProductsPage() {
                         ) : (
                           <div className={styles.shoeWizardNoSize}>
                             <strong>
-                              No size required for this category /
-                              لا يتطلب هذا القسم مقاسًا
+                              No size system required for this category /
+                              لا تتطلب هذه الفئة نظام مقاسات
                             </strong>
                             <span>
-                              Press Done to continue. / اضغط تم للمتابعة.
+                              Complete any options above, then press Done. / أكمل أي خيارات أعلاه ثم اضغط تم.
                             </span>
                           </div>
                         )}
+
+                        {supportsWeightSelling ? (
+                                          <section className={styles.weightMechanicPanel}>
+                                            <label className={styles.weightMechanicToggle}>
+                                              <input
+                                                type="checkbox"
+                                                checked={form.soldByWeight}
+                                                onChange={(event) => {
+                                                  const checked = event.target.checked;
+                                                  setForm((current) => ({
+                                                    ...current,
+                                                    soldByWeight: checked,
+                                                    trackInventory: checked ? false : current.trackInventory,
+                                                    quantity: checked ? "0" : current.quantity,
+                                                  }));
+                                                }}
+                                              />
+                                              <span>
+                                                <strong>This item is sold by weight / هذا المنتج يباع بالوزن</strong>
+                                                <small>
+                                                  Turn this on for products priced per kilogram, including bakery and tobacco products sold by weight. /
+                                                  فعّل هذا الخيار للمنتجات التي يكون سعرها لكل كيلو، بما فيها منتجات المخبز والتبغ المباعة بالوزن.
+                                                </small>
+                                              </span>
+                                            </label>
+                                            {form.soldByWeight ? (
+                                              <div className={styles.weightMechanicActive}>
+                                                <strong>Weight unit: kg / وحدة الوزن: كيلو</strong>
+                                                <span>Enter the selling price for 1 kg. Whole-item inventory is disabled for this product.</span>
+                                              </div>
+                                            ) : null}
+                                          </section>
+                                        ) : null}
 
                         {shoeWizardErrors.sizes ? (
                           <span className={styles.shoeWizardError}>
                             {shoeWizardErrors.sizes}
                           </span>
                         ) : null}
+
+                        {shoeWizardErrors.mobile ? (
+                          <span className={styles.shoeWizardError}>
+                            {shoeWizardErrors.mobile}
+                          </span>
+                        ) : null}
+
+                        {shoeWizardErrors.fitment ? (
+                          <span className={styles.shoeWizardError}>
+                            {shoeWizardErrors.fitment}
+                          </span>
+                        ) : null}
+
 
                         <div className={styles.shoeWizardActions}>
                           <button
@@ -7077,11 +7633,58 @@ export default function DarikDirectProductsPage() {
                           </div>
                         </div>
 
+                        {isAutoParts ? (
+                          <label className={styles.shoeWizardField}>
+                            <BilingualLabel
+                              en="Price display on storefront"
+                              ar="طريقة عرض السعر في المتجر"
+                            />
+                            <select
+                              value={form.pricingMode}
+                              onChange={(event) =>
+                                updateForm(
+                                  "pricingMode",
+                                  event.target.value as ProductForm["pricingMode"]
+                                )
+                              }
+                            >
+                              <option value="price">
+                                Show price / عرض السعر
+                              </option>
+                              <option value="call">
+                                Call for pricing / اتصل لمعرفة السعر
+                              </option>
+                              <option value="whatsapp">
+                                WhatsApp for pricing / واتساب لمعرفة السعر
+                              </option>
+                              <option value="call_whatsapp">
+                                Call or WhatsApp / اتصال أو واتساب
+                              </option>
+                            </select>
+                            <small>
+                              Contact-pricing hides the public price but keeps the internal selling price in your dashboard. /
+                              خيارات التواصل تخفي السعر عن العميل مع إبقاء سعر البيع الداخلي في لوحة التحكم.
+                            </small>
+                          </label>
+                        ) : null}
+
                         <div className={styles.shoeWizardGrid}>
                           <label className={styles.shoeWizardField}>
                             <BilingualLabel
-                              en="Selling price"
-                              ar="سعر البيع"
+                              en={
+                                form.soldByWeight
+                                  ? "Price per kilogram"
+                                  : isAutoParts && form.pricingMode !== "price"
+                                    ? "Internal selling price"
+                                    : "Selling price"
+                              }
+                              ar={
+                                form.soldByWeight
+                                  ? "السعر لكل كيلو"
+                                  : isAutoParts && form.pricingMode !== "price"
+                                    ? "سعر البيع الداخلي"
+                                    : "سعر البيع"
+                              }
                             />
                             <input
                               type="number"
@@ -7106,8 +7709,16 @@ export default function DarikDirectProductsPage() {
 
                           <label className={styles.shoeWizardField}>
                             <BilingualLabel
-                              en="Compare-at price (optional)"
-                              ar="السعر قبل الخصم (اختياري)"
+                              en={
+                                form.soldByWeight
+                                  ? "Compare-at price per kilogram (optional)"
+                                  : "Compare-at price (optional)"
+                              }
+                              ar={
+                                form.soldByWeight
+                                  ? "السعر السابق لكل كيلو (اختياري)"
+                                  : "السعر قبل الخصم (اختياري)"
+                              }
                             />
                             <input
                               type="number"
@@ -7159,7 +7770,10 @@ export default function DarikDirectProductsPage() {
                           <label>
                             <input
                               type="checkbox"
-                              checked={form.trackInventory}
+                              checked={
+                                form.soldByWeight ? false : form.trackInventory
+                              }
+                              disabled={form.soldByWeight}
                               onChange={(event) => {
                                 updateForm(
                                   "trackInventory",
@@ -7179,7 +7793,17 @@ export default function DarikDirectProductsPage() {
                             </span>
                           </label>
 
-                          {form.trackInventory ? (
+                          {form.soldByWeight ? (
+                            <div className={styles.weightInventoryNote}>
+                              <strong>Weight item / منتج بالوزن</strong>
+                              <span>
+                                Whole-item inventory is disabled. Availability is controlled with Available / Out of stock. /
+                                تم تعطيل مخزون القطع الكاملة، ويتم التحكم بالتوفر عبر متوفر / غير متوفر.
+                              </span>
+                            </div>
+                          ) : null}
+
+                          {form.trackInventory && !form.soldByWeight ? (
                             <label className={styles.shoeWizardField}>
                               <BilingualLabel
                                 en="Inventory quantity"
@@ -7235,10 +7859,10 @@ export default function DarikDirectProductsPage() {
                         <div className={styles.shoeWizardTitle}>
                           <b>6</b>
                           <div>
-                            <h3>Product photos / صور المنتج</h3>
+                            <h3>Product media / وسائط المنتج</h3>
                             <p>
-                              Photo 1 is required. Extra photos are optional. /
-                              الصورة الأولى مطلوبة والصور الإضافية اختيارية.
+                              Photo 1 is required. Extra photos are optional, and supported fields may also show their own media option. /
+                              الصورة الأولى مطلوبة، والصور الإضافية اختيارية، وقد تظهر وسائط إضافية للأنشطة التي تدعمها.
                             </p>
                           </div>
                         </div>
@@ -7348,6 +7972,246 @@ export default function DarikDirectProductsPage() {
                           })}
                         </div>
 
+                        {isFurnitureMechanics ? (
+                                              <section className={styles.furnitureVideoPanel}>
+                                                <div className={styles.furnitureVideoHeading}>
+                                                  <div>
+                                                    <strong>
+                                                      Short item video / فيديو قصير للمنتج
+                                                    </strong>
+                                                    <span>
+                                                      Optional. Add one 1–10 second video showing the item. Customer playback is always muted and loops automatically. /
+                                                      اختياري. أضف فيديو واحدًا من ثانية إلى 10 ثوانٍ لعرض المنتج. يظهر للعميل بدون صوت ويتكرر تلقائيًا.
+                                                    </span>
+                                                  </div>
+                                                  <b>1–10 SEC</b>
+                                                </div>
+
+                                                {furnitureVideoDisplayUrl ? (
+                                                  <div className={styles.furnitureVideoPreview}>
+                                                    <video
+                                                      src={furnitureVideoDisplayUrl}
+                                                      autoPlay
+                                                      muted
+                                                      loop
+                                                      playsInline
+                                                      preload="metadata"
+                                                      controls={false}
+                                                      disablePictureInPicture
+                                                    />
+                                                    <span>
+                                                      {furnitureVideoDisplayDuration
+                                                        ? `${furnitureVideoDisplayDuration.toFixed(1)} sec`
+                                                        : "Short video"}
+                                                    </span>
+                                                  </div>
+                                                ) : (
+                                                  <div className={styles.furnitureVideoEmpty}>
+                                                    <strong>No video added / لم تتم إضافة فيديو</strong>
+                                                    <span>
+                                                      Photos remain required. This video is optional. /
+                                                      الصور تبقى مطلوبة، والفيديو اختياري.
+                                                    </span>
+                                                  </div>
+                                                )}
+
+                                                <div className={styles.furnitureMobileRecorder}>
+                                                  <div
+                                                    className={`${styles.furnitureSnapStage} ${
+                                                      furnitureRecording
+                                                        ? styles.furnitureSnapStageRecording
+                                                        : ""
+                                                    }`}
+                                                  >
+                                                    <video
+                                                      ref={furnitureCameraVideoRef}
+                                                      className={styles.furnitureSnapVideo}
+                                                      src={
+                                                        !furnitureCameraReady &&
+                                                        furnitureVideoDisplayUrl
+                                                          ? furnitureVideoDisplayUrl
+                                                          : undefined
+                                                      }
+                                                      muted
+                                                      playsInline
+                                                      controls={false}
+                                                      preload="metadata"
+                                                      disablePictureInPicture
+                                                      onPlay={() =>
+                                                        setFurniturePlaybackPlaying(true)
+                                                      }
+                                                      onPause={() =>
+                                                        setFurniturePlaybackPlaying(false)
+                                                      }
+                                                      onEnded={(event) => {
+                                                        event.currentTarget.currentTime = 0;
+                                                        setFurniturePlaybackPlaying(false);
+                                                      }}
+                                                    />
+
+                                                    {!furnitureCameraReady &&
+                                                    !furnitureVideoDisplayUrl &&
+                                                    !furnitureRecording ? (
+                                                      <div className={styles.furnitureSnapEmpty}>
+                                                        <span className={styles.furnitureSnapCameraGlyph}>
+                                                          ●
+                                                        </span>
+                                                        <strong>
+                                                          Hold to record / اضغط مطولاً للتسجيل
+                                                        </strong>
+                                                      </div>
+                                                    ) : null}
+
+                                                    {furnitureRecording ? (
+                                                      <div className={styles.furnitureSnapTimer}>
+                                                        {furnitureRecordingElapsed.toFixed(1)} / 10s
+                                                      </div>
+                                                    ) : furnitureVideoDisplayUrl ? (
+                                                      <div className={styles.furnitureSnapTimer}>
+                                                        {furnitureVideoDisplayDuration
+                                                          ? `${furnitureVideoDisplayDuration.toFixed(1)}s`
+                                                          : "Video"}
+                                                      </div>
+                                                    ) : null}
+
+                                                    {furnitureVideoDisplayUrl &&
+                                                    !furnitureCameraReady &&
+                                                    !furnitureRecording &&
+                                                    !furniturePlaybackPlaying ? (
+                                                      <button
+                                                        type="button"
+                                                        className={styles.furnitureSnapPlayButton}
+                                                        onClick={() => {
+                                                          void playFurnitureRecordedPreview();
+                                                        }}
+                                                        aria-label="Play recorded Furniture video"
+                                                      >
+                                                        ▶
+                                                      </button>
+                                                    ) : null}
+
+                                                    {furnitureVideoDisplayUrl &&
+                                                    !furnitureCameraReady &&
+                                                    !furnitureRecording ? (
+                                                      <button
+                                                        type="button"
+                                                        className={styles.furnitureSnapDeleteButton}
+                                                        onClick={removeFurnitureVideo}
+                                                        disabled={saving || uploadingFurnitureVideo}
+                                                        aria-label="Delete recorded Furniture video"
+                                                      >
+                                                        ×
+                                                      </button>
+                                                    ) : null}
+
+                                                    <div className={styles.furnitureSnapShutterDock}>
+                                                      <button
+                                                        type="button"
+                                                        className={`${styles.furnitureSnapShutter} ${
+                                                          furnitureRecording
+                                                            ? styles.furnitureSnapShutterRecording
+                                                            : ""
+                                                        }`}
+                                                        style={{
+                                                          background: furnitureRecording
+                                                            ? `conic-gradient(#ef4444 ${Math.min(
+                                                                100,
+                                                                (furnitureRecordingElapsed / 10) * 100
+                                                              )}%, rgba(255,255,255,0.38) 0)`
+                                                            : "rgba(255,255,255,0.96)",
+                                                        }}
+                                                        disabled={
+                                                          saving ||
+                                                          uploading ||
+                                                          uploadingFurnitureVideo
+                                                        }
+                                                        onPointerDown={(event) => {
+                                                          event.preventDefault();
+                                                          try {
+                                                            event.currentTarget.setPointerCapture(
+                                                              event.pointerId
+                                                            );
+                                                          } catch {
+                                                            // Pointer capture is optional.
+                                                          }
+                                                          void beginFurnitureHoldRecording();
+                                                        }}
+                                                        onPointerUp={(event) => {
+                                                          event.preventDefault();
+                                                          stopFurnitureHoldRecording();
+                                                          try {
+                                                            event.currentTarget.releasePointerCapture(
+                                                              event.pointerId
+                                                            );
+                                                          } catch {
+                                                            // Pointer may already be released.
+                                                          }
+                                                        }}
+                                                        onPointerCancel={(event) => {
+                                                          event.preventDefault();
+                                                          stopFurnitureHoldRecording();
+                                                        }}
+                                                        onContextMenu={(event) =>
+                                                          event.preventDefault()
+                                                        }
+                                                        aria-label={
+                                                          furnitureRecording
+                                                            ? "Release to stop recording"
+                                                            : furnitureVideoDisplayUrl
+                                                              ? "Hold to retake Furniture video"
+                                                              : "Hold to record Furniture video"
+                                                        }
+                                                      >
+                                                        <span />
+                                                      </button>
+                                                    </div>
+                                                  </div>
+                                                </div>
+
+                                                <div className={styles.furnitureVideoActions}>
+                                                  <label
+                                                    className={`${styles.furnitureVideoUploadButton} ${styles.furnitureDesktopVideoUpload}`}
+                                                  >
+                                                    {furnitureVideoDisplayUrl
+                                                      ? "Replace video / استبدال الفيديو"
+                                                      : "Add video / إضافة فيديو"}
+                                                    <input
+                                                      type="file"
+                                                      accept="video/mp4,video/webm,video/quicktime,.mp4,.webm,.mov"
+                                                      onChange={handleFurnitureVideoChange}
+                                                      disabled={saving || uploading || uploadingFurnitureVideo}
+                                                    />
+                                                  </label>
+
+                                                  {furnitureVideoDisplayUrl ? (
+                                                    <button
+                                                      type="button"
+                                                      className={styles.furnitureVideoRemoveButton}
+                                                      onClick={removeFurnitureVideo}
+                                                      disabled={
+                                                        saving ||
+                                                        uploadingFurnitureVideo ||
+                                                        furnitureRecording
+                                                      }
+                                                    >
+                                                      Remove video / حذف الفيديو
+                                                    </button>
+                                                  ) : null}
+                                                </div>
+
+                                                <small className={styles.furnitureVideoRules}>
+                                                  MP4, WebM or MOV · Maximum 25 MB · 1–10 seconds · No customer audio /
+                                                  MP4 أو WebM أو MOV · بحد أقصى 25 ميجابايت · من 1 إلى 10 ثوانٍ · بدون صوت للعميل
+                                                </small>
+
+                                                {furnitureVideoError ? (
+                                                  <span className={styles.furnitureVideoError}>
+                                                    {furnitureVideoError}
+                                                  </span>
+                                                ) : null}
+                                              </section>
+                                            ) : null}
+
                         {shoeWizardErrors.photo ? (
                           <span className={styles.shoeWizardError}>
                             {shoeWizardErrors.photo}
@@ -7414,7 +8278,7 @@ export default function DarikDirectProductsPage() {
                           </div>
                           <div>
                             <span>Brand / العلامة</span>
-                            <strong>{form.brandName}</strong>
+                            <strong>{form.brandName || "—"}</strong>
                           </div>
                           <div>
                             <span>Category / الفئة</span>
@@ -7444,6 +8308,57 @@ export default function DarikDirectProductsPage() {
                                   : "Not required / غير مطلوب"}
                             </strong>
                           </div>
+                          {isMobilePhoneMechanics && mobileCategoryPath ? (
+                            <div>
+                              <span>Product fit / التصنيف التفصيلي</span>
+                              <strong>{mobileCategoryPath}</strong>
+                            </div>
+                          ) : null}
+
+                          {isAutoParts &&
+                          (form.vehicleYearFrom.trim() ||
+                            form.vehicleMake.trim() ||
+                            form.vehicleModel.trim()) ? (
+                            <div>
+                              <span>Vehicle fitment / توافق السيارة</span>
+                              <strong>
+                                {[
+                                  form.vehicleYearFrom && form.vehicleYearTo
+                                    ? form.vehicleYearFrom === form.vehicleYearTo
+                                      ? form.vehicleYearFrom
+                                      : `${form.vehicleYearFrom}–${form.vehicleYearTo}`
+                                    : form.vehicleYearFrom,
+                                  form.vehicleMake,
+                                  form.vehicleModel,
+                                ]
+                                  .filter(Boolean)
+                                  .join(" ") || "Universal / عام"}
+                              </strong>
+                            </div>
+                          ) : null}
+
+                          {supportsWeightSelling ? (
+                            <div>
+                              <span>Sale unit / وحدة البيع</span>
+                              <strong>
+                                {form.soldByWeight
+                                  ? "By kilogram / بالكيلو"
+                                  : "By item / بالقطعة"}
+                              </strong>
+                            </div>
+                          ) : null}
+
+                          {isFurnitureMechanics ? (
+                            <div>
+                              <span>Short video / الفيديو القصير</span>
+                              <strong>
+                                {furnitureVideoDisplayUrl
+                                  ? "Added / تمت الإضافة"
+                                  : "Not added / غير مضاف"}
+                              </strong>
+                            </div>
+                          ) : null}
+
                           <div>
                             <span>Price / السعر</span>
                             <strong>
