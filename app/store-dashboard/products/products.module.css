@@ -3070,3 +3070,30 @@
 
 
 }
+
+/* DARIK_WIZARD_CAMERA_STICKY_ACTION_OVERLAP_FIX_075
+   Keep the Snap recorder and guided-wizard action controls in separate
+   stacking/layout zones on mobile. */
+.furnitureSnapStage {
+  isolation: isolate;
+}
+
+@media (max-width: 860px) {
+  .shoeWizardCard:has(.furnitureSnapStage) .shoeWizardActions {
+    position: static;
+    bottom: auto;
+    z-index: auto;
+    margin: 8px 0 0;
+    padding:
+      14px
+      0
+      calc(2px + env(safe-area-inset-bottom));
+    background: transparent;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+
+  .shoeWizardCard:has(.furnitureSnapStage) .furnitureSnapStage {
+    margin-bottom: 4px;
+  }
+}
