@@ -22,6 +22,7 @@
 // DARIK_FURNITURE_SNAP_SIMPLE_RECORDER_070
 // DARIK_HOME_APPLIANCES_SHORT_ITEM_VIDEO_071
 // DARIK_CAMERA_FIRST_FRAME_READY_072
+// DARIK_REUSED_LIVE_CAMERA_PREVIEW_073
 
 // DARIK_AUTOPARTS_FITMENT_FILTERS_033
 // Mobile-safe bilingual product form with automatic retail categories.
@@ -4747,8 +4748,25 @@ export default function DarikDirectProductsPage() {
     const existingStream = furnitureMediaStreamRef.current;
     if (
       existingStream &&
-      existingStream.getVideoTracks().some((track) => track.readyState === "live")
+      existingStream.getVideoTracks().some(
+        (track) => track.readyState === "live"
+      )
     ) {
+      const existingCameraVideo =
+        furnitureCameraVideoRef.current;
+
+      if (!existingCameraVideo) {
+        throw new Error(
+          "Camera preview is not ready. Try again / معاينة الكاميرا غير جاهزة. حاول مرة أخرى."
+        );
+      }
+
+      await waitForFurnitureCameraPreview(
+        existingCameraVideo,
+        existingStream
+      );
+
+      setFurnitureCameraReady(true);
       return existingStream;
     }
 
@@ -4829,7 +4847,18 @@ export default function DarikDirectProductsPage() {
     }
 
     setFurniturePlaybackPlaying(false);
-    if (furnitureCameraVideoRef.current) {
+
+    const existingCameraStream =
+      furnitureMediaStreamRef.current;
+    const hasLiveCameraStream =
+      existingCameraStream?.getVideoTracks().some(
+        (track) => track.readyState === "live"
+      ) ?? false;
+
+    if (
+      furnitureCameraVideoRef.current &&
+      !hasLiveCameraStream
+    ) {
       furnitureCameraVideoRef.current.pause();
       furnitureCameraVideoRef.current.currentTime = 0;
     }
