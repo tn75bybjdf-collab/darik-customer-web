@@ -1,4 +1,6 @@
 "use client";
+
+// DARIK_FURNITURE_OPTIONAL_ITEM_VIDEO_068
 // DARIK_MECHANICS_LAB_048
 
 // DARIK_DETAILS_MODAL_SCROLL_FIX_034
@@ -11,6 +13,7 @@ import { useParams } from "next/navigation";
 import { supabase } from "@/lib/supabaseBrowser";
 import { mechanicsFieldLabel, readMechanicsLabField } from "@/lib/darikMechanicsLab";
 import styles from "./storefront.module.css";
+import FurnitureItemVideo from "./FurnitureItemVideo";
 
 type Storefront = {
   id: string;
@@ -879,6 +882,7 @@ export default function DarikDirectStorefrontPage() {
     .trim()
     .toLowerCase();
   const isAutoParts = effectiveBusinessType === "auto_parts";
+  const isFurnitureStore = String(effectiveBusinessType || "retail").trim().toLowerCase() === "furniture";
   const isGroceryStore = [
     "supermarket",
     "grocery",
@@ -1625,6 +1629,12 @@ export default function DarikDirectStorefrontPage() {
     return (
       <article className={`${styles.productCard} ${isAutoPartsTheme ? styles.autoPartsProductCard : ""}`} key={product.id}>
         <div className={styles.productImage}>
+        <FurnitureItemVideo
+          enabled={isFurnitureStore}
+          productId={product.id}
+          productName={product.name}
+        />
+
           {photo ? (
             <img src={photo} alt={name} />
           ) : (

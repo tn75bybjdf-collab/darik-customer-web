@@ -17,6 +17,7 @@
 // DARIK_SHOES_ADD_PRODUCT_WIZARD_064
 // DARIK_MOBILE_PHONE_CATEGORY_HIERARCHY_066
 // DARIK_MOBILE_PHONE_MECHANICS_PREVIEW_HIERARCHY_067
+// DARIK_FURNITURE_OPTIONAL_ITEM_VIDEO_068
 
 // DARIK_AUTOPARTS_FITMENT_FILTERS_033
 // Mobile-safe bilingual product form with automatic retail categories.
@@ -2841,6 +2842,9 @@ type DirectProduct = {
   direct_store_category_id: string | null;
   direct_store_subcategory_id: string | null;
   direct_store_subsubcategory_id: string | null;
+  direct_item_video_url: string | null;
+  direct_item_video_duration_seconds: number | string | null;
+  direct_item_video_storage_path: string | null;
   name: string;
   retailer_submitted_name: string | null;
   official_marketplace_name: string | null;
@@ -3096,6 +3100,16 @@ export default function DarikDirectProductsPage() {
   const [shoeWizardErrors, setShoeWizardErrors] = useState<Record<string, string>>({});
   const [shoeWizardPhotoSlots, setShoeWizardPhotoSlots] = useState(1);
   const [form, setForm] = useState<ProductForm>(emptyForm);
+  const [furnitureVideoFile, setFurnitureVideoFile] = useState<File | null>(null);
+  const [furnitureVideoPreviewUrl, setFurnitureVideoPreviewUrl] = useState("");
+  const [furnitureVideoDuration, setFurnitureVideoDuration] = useState<number | null>(null);
+  const [furnitureVideoExistingUrl, setFurnitureVideoExistingUrl] = useState("");
+  const [furnitureVideoExistingDuration, setFurnitureVideoExistingDuration] = useState<number | null>(null);
+  const [furnitureVideoExistingPath, setFurnitureVideoExistingPath] = useState("");
+  const [furnitureVideoRemoveRequested, setFurnitureVideoRemoveRequested] = useState(false);
+  const [furnitureVideoError, setFurnitureVideoError] = useState("");
+  const [uploadingFurnitureVideo, setUploadingFurnitureVideo] = useState(false);
+
   const [mobileCategoryNodes, setMobileCategoryNodes] = useState<MobileCategoryNode[]>([]);
   const [mobileCategoryNodesError, setMobileCategoryNodesError] = useState("");
   const [mobilePreviewCustomNodes, setMobilePreviewCustomNodes] = useState<MobileCategoryNode[]>([]);
@@ -3189,6 +3203,9 @@ export default function DarikDirectProductsPage() {
             "direct_store_category_id",
             "direct_store_subcategory_id",
             "direct_store_subsubcategory_id",
+            "direct_item_video_url",
+            "direct_item_video_duration_seconds",
+            "direct_item_video_storage_path",
             "name",
             "retailer_submitted_name",
             "official_marketplace_name",
@@ -4468,7 +4485,191 @@ export default function DarikDirectProductsPage() {
     }
   }
 
+  const isFurnitureMechanics = effectiveBusinessType === "furniture";
+  const furnitureVideoDisplayUrl =
+    furnitureVideoPreviewUrl ||
+    (!furnitureVideoRemoveRequested ? furnitureVideoExistingUrl : "");
+  const furnitureVideoDisplayDuration =
+    furnitureVideoDuration ??
+    (!furnitureVideoRemoveRequested ? furnitureVideoExistingDuration : null);
+
+  useEffect(() => {
+    return () => {
+      if (furnitureVideoPreviewUrl.startsWith("blob:")) {
+        URL.revokeObjectURL(furnitureVideoPreviewUrl);
+      }
+    };
+  }, [furnitureVideoPreviewUrl]);
+
+  function resetFurnitureVideoState() {
+    setFurnitureVideoFile(null);
+    setFurnitureVideoPreviewUrl("");
+    setFurnitureVideoDuration(null);
+    setFurnitureVideoExistingUrl("");
+    setFurnitureVideoExistingDuration(null);
+    setFurnitureVideoExistingPath("");
+    setFurnitureVideoRemoveRequested(false);
+    setFurnitureVideoError("");
+    setUploadingFurnitureVideo(false);
+  }
+
+  async function readFurnitureVideoDuration(objectUrl: string) {
+    return await new Promise<number>((resolve, reject) => {
+      const video = document.createElement("video");
+      video.preload = "metadata";
+      video.muted = true;
+
+      const cleanup = () => {
+        video.removeAttribute("src");
+        video.load();
+      };
+
+      video.onloadedmetadata = () => {
+        const duration = Number(video.duration);
+        cleanup();
+        if (!Number.isFinite(duration)) {
+          reject(new Error("Could not read video duration."));
+          return;
+        }
+        resolve(duration);
+      };
+
+      video.onerror = () => {
+        cleanup();
+        reject(new Error("Could not read this video file."));
+      };
+
+      video.src = objectUrl;
+    });
+  }
+
+  async function handleFurnitureVideoChange(
+    event: ChangeEvent<HTMLInputElement>
+  ) {
+    const file = event.target.files?.[0] ?? null;
+    event.target.value = "";
+    if (!file) return;
+
+    setFurnitureVideoError("");
+
+    const allowedTypes = new Set([
+      "video/mp4",
+      "video/webm",
+      "video/quicktime",
+    ]);
+
+    if (!allowedTypes.has(file.type)) {
+      setFurnitureVideoError(
+        "Use MP4, WebM, or MOV video / استخدم فيديو MP4 أو WebM أو MOV."
+      );
+      return;
+    }
+
+    const maxBytes = 25 * 1024 * 1024;
+    if (file.size > maxBytes) {
+      setFurnitureVideoError(
+        "Video must be 25 MB or smaller / يجب ألا يتجاوز حجم الفيديو 25 ميجابايت."
+      );
+      return;
+    }
+
+    const objectUrl = URL.createObjectURL(file);
+
+    try {
+      const duration = await readFurnitureVideoDuration(objectUrl);
+
+      if (duration < 1 || duration > 10.05) {
+        URL.revokeObjectURL(objectUrl);
+        setFurnitureVideoError(
+          "Furniture video must be between 1 and 10 seconds / يجب أن يكون فيديو الأثاث من ثانية إلى 10 ثوانٍ."
+        );
+        return;
+      }
+
+      setFurnitureVideoFile(file);
+      setFurnitureVideoPreviewUrl(objectUrl);
+      setFurnitureVideoDuration(Math.min(10, Math.round(duration * 100) / 100));
+      setFurnitureVideoRemoveRequested(false);
+    } catch (videoError) {
+      URL.revokeObjectURL(objectUrl);
+      setFurnitureVideoError(
+        videoError instanceof Error
+          ? videoError.message
+          : "Could not read this video file."
+      );
+    }
+  }
+
+  function removeFurnitureVideo() {
+    setFurnitureVideoFile(null);
+    setFurnitureVideoPreviewUrl("");
+    setFurnitureVideoDuration(null);
+    setFurnitureVideoRemoveRequested(Boolean(furnitureVideoExistingUrl));
+    setFurnitureVideoError("");
+  }
+
+  async function uploadFurnitureVideo(productId: string) {
+    if (!furnitureVideoFile || !selectedRetailerId || !furnitureVideoDuration) {
+      return null;
+    }
+
+    const extensionFromName = furnitureVideoFile.name
+      .split(".")
+      .pop()
+      ?.toLowerCase();
+    const extension =
+      extensionFromName === "webm"
+        ? "webm"
+        : extensionFromName === "mov"
+          ? "mov"
+          : "mp4";
+
+    const contentType =
+      furnitureVideoFile.type ||
+      (extension === "webm"
+        ? "video/webm"
+        : extension === "mov"
+          ? "video/quicktime"
+          : "video/mp4");
+
+    const storagePath =
+      `retailers/${selectedRetailerId}/${productId}-item-${Date.now()}.${extension}`;
+
+    setUploadingFurnitureVideo(true);
+
+    try {
+      const uploadResult = await supabase.storage
+        .from("product-item-videos")
+        .upload(storagePath, furnitureVideoFile, {
+          contentType,
+          upsert: false,
+        });
+
+      if (uploadResult.error) {
+        throw uploadResult.error;
+      }
+
+      const publicUrlResult = supabase.storage
+        .from("product-item-videos")
+        .getPublicUrl(storagePath);
+
+      const publicUrl = publicUrlResult.data.publicUrl;
+      if (!publicUrl) {
+        throw new Error("Uploaded video URL could not be created.");
+      }
+
+      return {
+        publicUrl,
+        storagePath,
+        duration: furnitureVideoDuration,
+      };
+    } finally {
+      setUploadingFurnitureVideo(false);
+    }
+  }
+
   function openCreateForm() {
+    resetFurnitureVideoState();
     setMobileSubcategoryId("");
     setMobileSubsubcategoryId("");
     setMobileAddSubcategoryOpen(false);
@@ -4488,6 +4689,19 @@ export default function DarikDirectProductsPage() {
   }
 
   function openEditForm(product: DirectProduct) {
+    setFurnitureVideoFile(null);
+    setFurnitureVideoPreviewUrl("");
+    setFurnitureVideoDuration(null);
+    setFurnitureVideoExistingUrl(product.direct_item_video_url || "");
+    setFurnitureVideoExistingDuration(
+      product.direct_item_video_duration_seconds == null
+        ? null
+        : Number(product.direct_item_video_duration_seconds)
+    );
+    setFurnitureVideoExistingPath(product.direct_item_video_storage_path || "");
+    setFurnitureVideoRemoveRequested(false);
+    setFurnitureVideoError("");
+    setUploadingFurnitureVideo(false);
     setMobileSubcategoryId(product.direct_store_subcategory_id || "");
     setMobileSubsubcategoryId(product.direct_store_subsubcategory_id || "");
     setMobileAddSubcategoryOpen(false);
@@ -5072,6 +5286,73 @@ export default function DarikDirectProductsPage() {
         );
         await loadCatalog();
         return;
+      }
+    }
+
+    if (isFurnitureMechanics) {
+      let nextVideoUrl: string | null = null;
+      let nextVideoDuration: number | null = null;
+      let nextVideoPath: string | null = null;
+      let shouldPersistFurnitureVideo = furnitureVideoRemoveRequested;
+
+      if (furnitureVideoFile) {
+        try {
+          const upload = await uploadFurnitureVideo(savedProductId);
+          if (!upload) {
+            throw new Error("Furniture video upload did not return a file.");
+          }
+          nextVideoUrl = upload.publicUrl;
+          nextVideoDuration = upload.duration;
+          nextVideoPath = upload.storagePath;
+          shouldPersistFurnitureVideo = true;
+        } catch (videoUploadError) {
+          setSaving(false);
+          setError(
+            `The product was saved, but the furniture video could not be uploaded. / تم حفظ المنتج، لكن تعذر رفع فيديو الأثاث. ${
+              videoUploadError instanceof Error
+                ? videoUploadError.message
+                : String(videoUploadError)
+            }`
+          );
+          await loadCatalog();
+          return;
+        }
+      }
+
+      if (shouldPersistFurnitureVideo) {
+        const videoResult = await supabase.rpc(
+          "darik_direct_set_product_furniture_video_v1",
+          {
+            p_product_id: savedProductId,
+            p_video_url: nextVideoUrl,
+            p_duration_seconds: nextVideoDuration,
+            p_storage_path: nextVideoPath,
+          }
+        );
+
+        if (videoResult.error) {
+          if (nextVideoPath) {
+            await supabase.storage
+              .from("product-item-videos")
+              .remove([nextVideoPath]);
+          }
+
+          setSaving(false);
+          setError(
+            `The product was saved, but its furniture video could not be linked. / تم حفظ المنتج، لكن تعذر ربط فيديو الأثاث. ${videoResult.error.message}`
+          );
+          await loadCatalog();
+          return;
+        }
+
+        if (
+          furnitureVideoExistingPath &&
+          furnitureVideoExistingPath !== nextVideoPath
+        ) {
+          await supabase.storage
+            .from("product-item-videos")
+            .remove([furnitureVideoExistingPath]);
+        }
       }
     }
 
@@ -7723,7 +8004,89 @@ export default function DarikDirectProductsPage() {
                     صور المنتج المباشر لا تغيّر موافقة السوق أو بيانات المنتج الرسمية.
                   </p>
                 </div>
-              </aside>
+
+                    {isFurnitureMechanics ? (
+                      <section className={styles.furnitureVideoPanel}>
+                        <div className={styles.furnitureVideoHeading}>
+                          <div>
+                            <strong>
+                              Short item video / فيديو قصير للمنتج
+                            </strong>
+                            <span>
+                              Optional. Add one 1–10 second video showing the furniture item. Customer playback is always muted and loops automatically. /
+                              اختياري. أضف فيديو واحدًا من ثانية إلى 10 ثوانٍ لعرض قطعة الأثاث. يظهر للعميل بدون صوت ويتكرر تلقائيًا.
+                            </span>
+                          </div>
+                          <b>1–10 SEC</b>
+                        </div>
+
+                        {furnitureVideoDisplayUrl ? (
+                          <div className={styles.furnitureVideoPreview}>
+                            <video
+                              src={furnitureVideoDisplayUrl}
+                              autoPlay
+                              muted
+                              loop
+                              playsInline
+                              preload="metadata"
+                              controls={false}
+                              disablePictureInPicture
+                            />
+                            <span>
+                              {furnitureVideoDisplayDuration
+                                ? `${furnitureVideoDisplayDuration.toFixed(1)} sec`
+                                : "Short video"}
+                            </span>
+                          </div>
+                        ) : (
+                          <div className={styles.furnitureVideoEmpty}>
+                            <strong>No video added / لم تتم إضافة فيديو</strong>
+                            <span>
+                              Photos remain required. This video is optional. /
+                              الصور تبقى مطلوبة، والفيديو اختياري.
+                            </span>
+                          </div>
+                        )}
+
+                        <div className={styles.furnitureVideoActions}>
+                          <label className={styles.furnitureVideoUploadButton}>
+                            {furnitureVideoDisplayUrl
+                              ? "Replace video / استبدال الفيديو"
+                              : "Add video / إضافة فيديو"}
+                            <input
+                              type="file"
+                              accept="video/mp4,video/webm,video/quicktime,.mp4,.webm,.mov"
+                              onChange={handleFurnitureVideoChange}
+                              disabled={saving || uploading || uploadingFurnitureVideo}
+                            />
+                          </label>
+
+                          {furnitureVideoDisplayUrl ? (
+                            <button
+                              type="button"
+                              className={styles.furnitureVideoRemoveButton}
+                              onClick={removeFurnitureVideo}
+                              disabled={saving || uploadingFurnitureVideo}
+                            >
+                              Remove video / حذف الفيديو
+                            </button>
+                          ) : null}
+                        </div>
+
+                        <small className={styles.furnitureVideoRules}>
+                          MP4, WebM or MOV · Maximum 25 MB · 1–10 seconds · No customer audio /
+                          MP4 أو WebM أو MOV · بحد أقصى 25 ميجابايت · من 1 إلى 10 ثوانٍ · بدون صوت للعميل
+                        </small>
+
+                        {furnitureVideoError ? (
+                          <span className={styles.furnitureVideoError}>
+                            {furnitureVideoError}
+                          </span>
+                        ) : null}
+                      </section>
+                    ) : null}
+
+</aside>
               <footer className={styles.formFooter}>
                 <button
                   type="button"
