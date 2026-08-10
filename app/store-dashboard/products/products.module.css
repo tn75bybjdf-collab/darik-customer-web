@@ -2864,3 +2864,210 @@
     min-height: min(62vh, 520px);
   }
 }
+
+/* DARIK_FURNITURE_SNAP_SIMPLE_RECORDER_070 - Furniture simple Snapchat-style recorder */
+
+.furnitureSnapStage,
+.furnitureSnapVideo,
+.furnitureSnapEmpty,
+.furnitureSnapTimer,
+.furnitureSnapPlayButton,
+.furnitureSnapDeleteButton,
+.furnitureSnapShutterDock,
+.furnitureSnapShutter {
+  box-sizing: border-box;
+}
+
+.furnitureSnapStage {
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+  height: min(58vh, 560px);
+  min-height: 410px;
+  border-radius: 28px;
+  background: #0b1220;
+  box-shadow: 0 18px 44px rgba(15, 23, 42, 0.2);
+}
+
+.furnitureSnapVideo {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+  background: #0b1220;
+}
+
+.furnitureSnapEmpty {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-content: center;
+  gap: 10px;
+  padding: 24px;
+  color: #ffffff;
+  text-align: center;
+  pointer-events: none;
+}
+
+.furnitureSnapEmpty strong {
+  font-size: 16px;
+  font-weight: 900;
+}
+
+.furnitureSnapCameraGlyph {
+  display: grid;
+  place-items: center;
+  width: 54px;
+  height: 54px;
+  margin: 0 auto;
+  border: 4px solid rgba(255, 255, 255, 0.9);
+  border-radius: 999px;
+  color: #ef4444;
+  font-size: 30px;
+  line-height: 1;
+}
+
+.furnitureSnapTimer {
+  position: absolute;
+  top: 14px;
+  left: 14px;
+  z-index: 5;
+  min-width: 62px;
+  border-radius: 999px;
+  padding: 7px 10px;
+  background: rgba(0, 0, 0, 0.56);
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: 900;
+  text-align: center;
+  backdrop-filter: blur(10px);
+  pointer-events: none;
+}
+
+.furnitureSnapPlayButton {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  z-index: 6;
+  width: 74px;
+  height: 74px;
+  display: grid;
+  place-items: center;
+  border: 3px solid rgba(255, 255, 255, 0.94);
+  border-radius: 999px;
+  padding: 0 0 0 5px;
+  transform: translate(-50%, -50%);
+  background: rgba(0, 0, 0, 0.46);
+  color: #ffffff;
+  font-size: 32px;
+  line-height: 1;
+  backdrop-filter: blur(8px);
+}
+
+.furnitureSnapDeleteButton {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  z-index: 7;
+  width: 40px;
+  height: 40px;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: 999px;
+  padding: 0 0 3px;
+  background: rgba(0, 0, 0, 0.5);
+  color: #ffffff;
+  font-size: 30px;
+  font-weight: 400;
+  line-height: 1;
+  backdrop-filter: blur(8px);
+}
+
+.furnitureSnapShutterDock {
+  position: absolute;
+  right: 0;
+  bottom: 18px;
+  left: 0;
+  z-index: 8;
+  display: grid;
+  place-items: center;
+  pointer-events: none;
+}
+
+.furnitureSnapShutter {
+  width: 82px;
+  height: 82px;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: 999px;
+  padding: 6px;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+  pointer-events: auto;
+  box-shadow: 0 5px 22px rgba(0, 0, 0, 0.3);
+}
+
+.furnitureSnapShutter > span {
+  width: 64px;
+  height: 64px;
+  display: block;
+  border: 4px solid #ffffff;
+  border-radius: 999px;
+  background: #ef4444;
+  transition:
+    width 120ms ease,
+    height 120ms ease,
+    border-radius 120ms ease;
+}
+
+.furnitureSnapShutterRecording > span {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+}
+
+.furnitureSnapStageRecording {
+  box-shadow:
+    0 0 0 3px rgba(239, 68, 68, 0.92),
+    0 18px 44px rgba(15, 23, 42, 0.2);
+}
+
+@media (max-width: 700px) {
+  .furnitureVideoPanel {
+    display: block;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+  }
+
+  .furnitureVideoHeading,
+  .furnitureVideoPreview,
+  .furnitureVideoEmpty,
+  .furnitureVideoRules,
+  .furnitureVideoActions,
+  .furnitureCameraStatus,
+  .furnitureCameraStage,
+  .furnitureHoldRecordButton {
+    display: none !important;
+  }
+
+  .furnitureMobileRecorder {
+    display: block;
+  }
+
+  .furnitureVideoError {
+    margin-top: 10px;
+  }
+
+  .page [data-darik-mobile-hide-signout="true"] {
+    display: none !important;
+  }
+}

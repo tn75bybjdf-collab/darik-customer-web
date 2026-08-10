@@ -19,6 +19,7 @@
 // DARIK_MOBILE_PHONE_MECHANICS_PREVIEW_HIERARCHY_067
 // DARIK_FURNITURE_OPTIONAL_ITEM_VIDEO_068
 // DARIK_FURNITURE_HOLD_TO_RECORD_CAMERA_069
+// DARIK_FURNITURE_SNAP_SIMPLE_RECORDER_070
 
 // DARIK_AUTOPARTS_FITMENT_FILTERS_033
 // Mobile-safe bilingual product form with automatic retail categories.
@@ -3114,6 +3115,7 @@ export default function DarikDirectProductsPage() {
   const [furnitureRecording, setFurnitureRecording] = useState(false);
   const [furnitureRecordingElapsed, setFurnitureRecordingElapsed] = useState(0);
   const [furnitureCameraStatus, setFurnitureCameraStatus] = useState("");
+  const [furniturePlaybackPlaying, setFurniturePlaybackPlaying] = useState(false);
   const furnitureCameraVideoRef = useRef<HTMLVideoElement | null>(null);
   const furnitureMediaStreamRef = useRef<MediaStream | null>(null);
   const furnitureMediaRecorderRef = useRef<MediaRecorder | null>(null);
@@ -4601,6 +4603,7 @@ export default function DarikDirectProductsPage() {
     setFurnitureRecording(false);
     setFurnitureRecordingElapsed(0);
     setFurnitureCameraStatus("");
+    setFurniturePlaybackPlaying(false);
   }
 
   function furnitureRecorderMimeType() {
@@ -4678,6 +4681,30 @@ export default function DarikDirectProductsPage() {
     return stream;
   }
 
+  async function playFurnitureRecordedPreview() {
+    const video = furnitureCameraVideoRef.current;
+    if (
+      !video ||
+      !furnitureVideoDisplayUrl ||
+      furnitureCameraReady ||
+      furnitureRecording
+    ) {
+      return;
+    }
+
+    try {
+      if (
+        Number.isFinite(video.duration) &&
+        video.currentTime >= video.duration - 0.05
+      ) {
+        video.currentTime = 0;
+      }
+      await video.play();
+    } catch {
+      setFurniturePlaybackPlaying(false);
+    }
+  }
+
   function stopFurnitureHoldRecording() {
     furnitureHoldActiveRef.current = false;
 
@@ -4699,6 +4726,12 @@ export default function DarikDirectProductsPage() {
       uploadingFurnitureVideo
     ) {
       return;
+    }
+
+    setFurniturePlaybackPlaying(false);
+    if (furnitureCameraVideoRef.current) {
+      furnitureCameraVideoRef.current.pause();
+      furnitureCameraVideoRef.current.currentTime = 0;
     }
 
     furnitureHoldActiveRef.current = true;
@@ -4835,6 +4868,7 @@ export default function DarikDirectProductsPage() {
         setFurnitureVideoDuration(duration);
         setFurnitureVideoRemoveRequested(false);
         setFurnitureVideoError("");
+        setFurniturePlaybackPlaying(false);
         setFurnitureCameraStatus(
           "Video ready. Hold again to retake / الفيديو جاهز. اضغط مطولاً مرة أخرى لإعادة التصوير."
         );
@@ -8447,117 +8481,155 @@ export default function DarikDirectProductsPage() {
 
                         <div className={styles.furnitureMobileRecorder}>
                           <div
-                            className={`${styles.furnitureCameraStage} ${
+                            className={`${styles.furnitureSnapStage} ${
                               furnitureRecording
-                                ? styles.furnitureCameraStageRecording
+                                ? styles.furnitureSnapStageRecording
                                 : ""
                             }`}
                           >
                             <video
                               ref={furnitureCameraVideoRef}
-                              className={styles.furnitureCameraFeed}
-                              autoPlay
+                              className={styles.furnitureSnapVideo}
+                              src={
+                                !furnitureCameraReady &&
+                                furnitureVideoDisplayUrl
+                                  ? furnitureVideoDisplayUrl
+                                  : undefined
+                              }
                               muted
                               playsInline
                               controls={false}
+                              preload="metadata"
                               disablePictureInPicture
+                              onPlay={() =>
+                                setFurniturePlaybackPlaying(true)
+                              }
+                              onPause={() =>
+                                setFurniturePlaybackPlaying(false)
+                              }
+                              onEnded={(event) => {
+                                event.currentTarget.currentTime = 0;
+                                setFurniturePlaybackPlaying(false);
+                              }}
                             />
 
-                            {!furnitureCameraReady ? (
-                              <div className={styles.furnitureCameraIdle}>
-                                <strong>
-                                  Camera opens inside Darik / الكاميرا تفتح داخل Darik
-                                </strong>
-                                <span>
-                                  Hold the button below. Darik uses the rear camera and never requests microphone audio. /
-                                  اضغط مطولاً على الزر بالأسفل. يستخدم Darik الكاميرا الخلفية ولا يطلب الميكروفون.
+                            {!furnitureCameraReady &&
+                            !furnitureVideoDisplayUrl &&
+                            !furnitureRecording ? (
+                              <div className={styles.furnitureSnapEmpty}>
+                                <span className={styles.furnitureSnapCameraGlyph}>
+                                  ●
                                 </span>
+                                <strong>
+                                  Hold to record / اضغط مطولاً للتسجيل
+                                </strong>
                               </div>
                             ) : null}
 
                             {furnitureRecording ? (
-                              <div className={styles.furnitureRecordingBadge}>
-                                <i />
-                                REC {furnitureRecordingElapsed.toFixed(1)}s
+                              <div className={styles.furnitureSnapTimer}>
+                                {furnitureRecordingElapsed.toFixed(1)} / 10s
+                              </div>
+                            ) : furnitureVideoDisplayUrl ? (
+                              <div className={styles.furnitureSnapTimer}>
+                                {furnitureVideoDisplayDuration
+                                  ? `${furnitureVideoDisplayDuration.toFixed(1)}s`
+                                  : "Video"}
                               </div>
                             ) : null}
 
-                            <div className={styles.furnitureRecordingProgress}>
-                              <span
-                                style={{
-                                  width: `${Math.min(
-                                    100,
-                                    (furnitureRecordingElapsed / 10) * 100
-                                  )}%`,
+                            {furnitureVideoDisplayUrl &&
+                            !furnitureCameraReady &&
+                            !furnitureRecording &&
+                            !furniturePlaybackPlaying ? (
+                              <button
+                                type="button"
+                                className={styles.furnitureSnapPlayButton}
+                                onClick={() => {
+                                  void playFurnitureRecordedPreview();
                                 }}
-                              />
+                                aria-label="Play recorded Furniture video"
+                              >
+                                ▶
+                              </button>
+                            ) : null}
+
+                            {furnitureVideoDisplayUrl &&
+                            !furnitureCameraReady &&
+                            !furnitureRecording ? (
+                              <button
+                                type="button"
+                                className={styles.furnitureSnapDeleteButton}
+                                onClick={removeFurnitureVideo}
+                                disabled={saving || uploadingFurnitureVideo}
+                                aria-label="Delete recorded Furniture video"
+                              >
+                                ×
+                              </button>
+                            ) : null}
+
+                            <div className={styles.furnitureSnapShutterDock}>
+                              <button
+                                type="button"
+                                className={`${styles.furnitureSnapShutter} ${
+                                  furnitureRecording
+                                    ? styles.furnitureSnapShutterRecording
+                                    : ""
+                                }`}
+                                style={{
+                                  background: furnitureRecording
+                                    ? `conic-gradient(#ef4444 ${Math.min(
+                                        100,
+                                        (furnitureRecordingElapsed / 10) * 100
+                                      )}%, rgba(255,255,255,0.38) 0)`
+                                    : "rgba(255,255,255,0.96)",
+                                }}
+                                disabled={
+                                  saving ||
+                                  uploading ||
+                                  uploadingFurnitureVideo
+                                }
+                                onPointerDown={(event) => {
+                                  event.preventDefault();
+                                  try {
+                                    event.currentTarget.setPointerCapture(
+                                      event.pointerId
+                                    );
+                                  } catch {
+                                    // Pointer capture is optional.
+                                  }
+                                  void beginFurnitureHoldRecording();
+                                }}
+                                onPointerUp={(event) => {
+                                  event.preventDefault();
+                                  stopFurnitureHoldRecording();
+                                  try {
+                                    event.currentTarget.releasePointerCapture(
+                                      event.pointerId
+                                    );
+                                  } catch {
+                                    // Pointer may already be released.
+                                  }
+                                }}
+                                onPointerCancel={(event) => {
+                                  event.preventDefault();
+                                  stopFurnitureHoldRecording();
+                                }}
+                                onContextMenu={(event) =>
+                                  event.preventDefault()
+                                }
+                                aria-label={
+                                  furnitureRecording
+                                    ? "Release to stop recording"
+                                    : furnitureVideoDisplayUrl
+                                      ? "Hold to retake Furniture video"
+                                      : "Hold to record Furniture video"
+                                }
+                              >
+                                <span />
+                              </button>
                             </div>
                           </div>
-
-                          <button
-                            type="button"
-                            className={`${styles.furnitureHoldRecordButton} ${
-                              furnitureRecording
-                                ? styles.furnitureHoldRecordButtonActive
-                                : ""
-                            }`}
-                            disabled={
-                              saving ||
-                              uploading ||
-                              uploadingFurnitureVideo
-                            }
-                            onPointerDown={(event) => {
-                              event.preventDefault();
-                              try {
-                                event.currentTarget.setPointerCapture(
-                                  event.pointerId
-                                );
-                              } catch {
-                                // Pointer capture is optional.
-                              }
-                              void beginFurnitureHoldRecording();
-                            }}
-                            onPointerUp={(event) => {
-                              event.preventDefault();
-                              stopFurnitureHoldRecording();
-                              try {
-                                event.currentTarget.releasePointerCapture(
-                                  event.pointerId
-                                );
-                              } catch {
-                                // Pointer may already be released.
-                              }
-                            }}
-                            onPointerCancel={(event) => {
-                              event.preventDefault();
-                              stopFurnitureHoldRecording();
-                            }}
-                            onContextMenu={(event) => event.preventDefault()}
-                            aria-label={
-                              furnitureRecording
-                                ? "Release to stop recording"
-                                : "Hold to record Furniture video"
-                            }
-                          >
-                            <span className={styles.furnitureRecordDot} />
-                            <strong>
-                              {furnitureRecording
-                                ? "Release to stop / ارفع إصبعك للإيقاف"
-                                : furnitureVideoDisplayUrl
-                                  ? "Hold to retake / اضغط مطولاً لإعادة التصوير"
-                                  : "Hold to record / اضغط مطولاً للتسجيل"}
-                            </strong>
-                            <small>
-                              Release anytime · Automatically stops at 10 seconds /
-                              ارفع إصبعك في أي وقت · يتوقف تلقائياً عند 10 ثوانٍ
-                            </small>
-                          </button>
-
-                          {furnitureCameraStatus ? (
-                            <small className={styles.furnitureCameraStatus}>
-                              {furnitureCameraStatus}
-                            </small>
-                          ) : null}
                         </div>
 
                         <div className={styles.furnitureVideoActions}>
