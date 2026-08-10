@@ -16,6 +16,7 @@
 // DARIK_PERFUME_PHARMACY_OPTIONAL_CATEGORY_SIZES_063
 // DARIK_SHOES_ADD_PRODUCT_WIZARD_064
 // DARIK_MOBILE_PHONE_CATEGORY_HIERARCHY_066
+// DARIK_MOBILE_PHONE_MECHANICS_PREVIEW_HIERARCHY_067
 
 // DARIK_AUTOPARTS_FITMENT_FILTERS_033
 // Mobile-safe bilingual product form with automatic retail categories.
@@ -3096,6 +3097,8 @@ export default function DarikDirectProductsPage() {
   const [shoeWizardPhotoSlots, setShoeWizardPhotoSlots] = useState(1);
   const [form, setForm] = useState<ProductForm>(emptyForm);
   const [mobileCategoryNodes, setMobileCategoryNodes] = useState<MobileCategoryNode[]>([]);
+  const [mobileCategoryNodesError, setMobileCategoryNodesError] = useState("");
+  const [mobilePreviewCustomNodes, setMobilePreviewCustomNodes] = useState<MobileCategoryNode[]>([]);
   const [mobileSubcategoryId, setMobileSubcategoryId] = useState("");
   const [mobileSubsubcategoryId, setMobileSubsubcategoryId] = useState("");
   const [mobileNodeSaving, setMobileNodeSaving] = useState(false);
@@ -3290,8 +3293,22 @@ export default function DarikDirectProductsPage() {
     let cancelled = false;
 
     async function loadMobileCategoryNodes() {
+      // Mechanics Lab changes only the effective frontend field. The actual
+      // retailer can still be Auto Parts (or another field), so its database
+      // correctly has no Mobile Phones system nodes. Preview uses local nodes.
+      if (mechanicsTestField === "mobile_phones") {
+        if (!cancelled) {
+          setMobileCategoryNodes([]);
+          setMobileCategoryNodesError("");
+        }
+        return;
+      }
+
       if (!selectedRetailerId) {
-        if (!cancelled) setMobileCategoryNodes([]);
+        if (!cancelled) {
+          setMobileCategoryNodes([]);
+          setMobileCategoryNodesError("");
+        }
         return;
       }
 
@@ -3309,9 +3326,11 @@ export default function DarikDirectProductsPage() {
 
       if (result.error) {
         setMobileCategoryNodes([]);
+        setMobileCategoryNodesError(result.error.message);
         return;
       }
 
+      setMobileCategoryNodesError("");
       setMobileCategoryNodes(
         (result.data ?? []) as unknown as MobileCategoryNode[]
       );
@@ -3321,7 +3340,7 @@ export default function DarikDirectProductsPage() {
     return () => {
       cancelled = true;
     };
-  }, [selectedRetailerId]);
+  }, [selectedRetailerId, mechanicsTestField]);
 
 
   useEffect(() => {
@@ -3879,51 +3898,392 @@ export default function DarikDirectProductsPage() {
   }
 
   const isMobilePhoneMechanics = effectiveBusinessType === "mobile_phones";
+  const mobileMechanicsPreviewActive =
+    mechanicsTestField === "mobile_phones" && isMobilePhoneMechanics;
+
+  const mobileMechanicsPreviewCategory = useMemo(
+    () =>
+      mobileMechanicsPreviewActive
+        ? mechanicsPresetCategories.find(
+            (category) => category.value === form.directCategoryId
+          ) ?? null
+        : null,
+    [
+      mobileMechanicsPreviewActive,
+      mechanicsPresetCategories,
+      form.directCategoryId,
+    ]
+  );
+
+  function buildMobilePhonePreviewNodes(
+    categoryId: string,
+    categoryName: string,
+    categoryNameAr: string
+  ): MobileCategoryNode[] {
+    if (!categoryId) return [];
+
+    const key = normalizedCategoryKey(`${categoryName} ${categoryNameAr}`);
+    const nodes: MobileCategoryNode[] = [];
+    const retailerId = selectedRetailerId || "mechanics-preview";
+
+    function addRoot(
+      name: string,
+      nameAr: string,
+      slug: string,
+      sortOrder: number
+    ) {
+      const id = `preview-mobile:${categoryId}:${slug}`;
+      nodes.push({
+        id,
+        retailer_id: retailerId,
+        category_id: categoryId,
+        parent_node_id: null,
+        depth: 1,
+        name,
+        name_ar: nameAr,
+        slug,
+        sort_order: sortOrder,
+        node_status: "active",
+        is_system: true,
+      });
+      return id;
+    }
+
+    function addChild(
+      parentNodeId: string,
+      name: string,
+      nameAr: string,
+      slug: string,
+      sortOrder: number
+    ) {
+      nodes.push({
+        id: `${parentNodeId}:${slug}`,
+        retailer_id: retailerId,
+        category_id: categoryId,
+        parent_node_id: parentNodeId,
+        depth: 2,
+        name,
+        name_ar: nameAr,
+        slug,
+        sort_order: sortOrder,
+        node_status: "active",
+        is_system: true,
+      });
+    }
+
+    const isDeviceFitCategory =
+      /(screen[ -]?protector|tempered[ -]?glass|screen[ -]?glass|case|cases|cover|covers|phone|phones|mobile|mobiles|smartphone|smartphones|handset|handsets)/.test(
+        key
+      ) &&
+      !/(accessor|accessories)/.test(key);
+
+    if (isDeviceFitCategory) {
+      const apple = addRoot("Apple iPhone", "آيفون", "apple-iphone", 100);
+      [
+        ["iPhone 17 Pro Max", "آيفون 17 برو ماكس", "iphone-17-pro-max"],
+        ["iPhone 17 Pro", "آيفون 17 برو", "iphone-17-pro"],
+        ["iPhone 17", "آيفون 17", "iphone-17"],
+        ["iPhone 16 Pro Max", "آيفون 16 برو ماكس", "iphone-16-pro-max"],
+        ["iPhone 16 Pro", "آيفون 16 برو", "iphone-16-pro"],
+        ["iPhone 16", "آيفون 16", "iphone-16"],
+        ["iPhone 15 Pro Max", "آيفون 15 برو ماكس", "iphone-15-pro-max"],
+        ["iPhone 15 Pro", "آيفون 15 برو", "iphone-15-pro"],
+        ["iPhone 15", "آيفون 15", "iphone-15"],
+        ["iPhone 14 Pro Max", "آيفون 14 برو ماكس", "iphone-14-pro-max"],
+        ["iPhone 14 Pro", "آيفون 14 برو", "iphone-14-pro"],
+        ["iPhone 14", "آيفون 14", "iphone-14"],
+        ["iPhone 13", "آيفون 13", "iphone-13"],
+        ["iPhone 12", "آيفون 12", "iphone-12"],
+        ["iPhone 11", "آيفون 11", "iphone-11"],
+      ].forEach(([name, nameAr, slug], index) =>
+        addChild(apple, name, nameAr, slug, 100 + index * 10)
+      );
+
+      const samsung = addRoot(
+        "Samsung Galaxy",
+        "سامسونج جالكسي",
+        "samsung-galaxy",
+        200
+      );
+      [
+        ["Galaxy S25 Ultra", "جالكسي S25 ألترا", "galaxy-s25-ultra"],
+        ["Galaxy S25+", "جالكسي S25+", "galaxy-s25-plus"],
+        ["Galaxy S25", "جالكسي S25", "galaxy-s25"],
+        ["Galaxy S24 Ultra", "جالكسي S24 ألترا", "galaxy-s24-ultra"],
+        ["Galaxy S24+", "جالكسي S24+", "galaxy-s24-plus"],
+        ["Galaxy S24", "جالكسي S24", "galaxy-s24"],
+        ["Galaxy A56", "جالكسي A56", "galaxy-a56"],
+        ["Galaxy A36", "جالكسي A36", "galaxy-a36"],
+        ["Galaxy A26", "جالكسي A26", "galaxy-a26"],
+        ["Galaxy Z Fold7", "جالكسي Z Fold7", "galaxy-z-fold7"],
+        ["Galaxy Z Flip7", "جالكسي Z Flip7", "galaxy-z-flip7"],
+      ].forEach(([name, nameAr, slug], index) =>
+        addChild(samsung, name, nameAr, slug, 100 + index * 10)
+      );
+
+      addRoot("Infinix", "إنفينيكس", "infinix", 300);
+      addRoot("Tecno", "تكنو", "tecno", 400);
+      addRoot("Other brand", "علامة أخرى", "other-brand", 500);
+      return nodes;
+    }
+
+    if (/(power[ -]?bank|portable[ -]?charger)/.test(key)) {
+      addRoot("5,000 mAh", "5,000 mAh", "5000-mah", 100);
+      addRoot("10,000 mAh", "10,000 mAh", "10000-mah", 200);
+      addRoot("20,000 mAh+", "20,000 mAh فأكثر", "20000-mah-plus", 300);
+      addRoot(
+        "Magnetic / Wireless",
+        "مغناطيسي / لاسلكي",
+        "magnetic-wireless",
+        400
+      );
+      return nodes;
+    }
+
+    if (/(cable|cables|adapter|adapters|connector|connectors)/.test(key)) {
+      const usbC = addRoot("USB-C Cables", "كابلات USB-C", "usb-c-cables", 100);
+      addChild(usbC, "USB-C to USB-C", "USB-C إلى USB-C", "usb-c-to-usb-c", 100);
+      addChild(usbC, "USB-A to USB-C", "USB-A إلى USB-C", "usb-a-to-usb-c", 200);
+
+      const lightning = addRoot(
+        "Lightning Cables",
+        "كابلات آيفون",
+        "lightning-cables",
+        200
+      );
+      addChild(
+        lightning,
+        "USB-C to Lightning",
+        "USB-C إلى Lightning",
+        "usb-c-to-lightning",
+        100
+      );
+      addChild(
+        lightning,
+        "USB-A to Lightning",
+        "USB-A إلى Lightning",
+        "usb-a-to-lightning",
+        200
+      );
+
+      const micro = addRoot(
+        "Micro-USB Cables",
+        "كابلات Micro-USB",
+        "micro-usb-cables",
+        300
+      );
+      addChild(
+        micro,
+        "USB-A to Micro-USB",
+        "USB-A إلى Micro-USB",
+        "usb-a-to-micro-usb",
+        100
+      );
+
+      const adapters = addRoot(
+        "Adapters & Hubs",
+        "محولات وموزعات",
+        "adapters-hubs",
+        400
+      );
+      addChild(adapters, "USB-C Adapters", "محولات USB-C", "usb-c-adapters", 100);
+      addChild(adapters, "OTG Adapters", "محولات OTG", "otg-adapters", 200);
+      addChild(adapters, "Audio Adapters", "محولات صوت", "audio-adapters", 300);
+      return nodes;
+    }
+
+    if (/(charger|chargers|charging)/.test(key)) {
+      const wall = addRoot("Wall Chargers", "شواحن حائط", "wall-chargers", 100);
+      addChild(wall, "USB-C PD", "USB-C PD", "usb-c-pd", 100);
+      addChild(wall, "USB-A", "USB-A", "usb-a", 200);
+      addChild(wall, "Dual / Multi-Port", "متعدد المنافذ", "dual-multi-port", 300);
+
+      const wireless = addRoot(
+        "Wireless Chargers",
+        "شواحن لاسلكية",
+        "wireless-chargers",
+        200
+      );
+      addChild(wireless, "Qi Wireless", "Qi لاسلكي", "qi-wireless", 100);
+      addChild(
+        wireless,
+        "Magnetic / MagSafe",
+        "مغناطيسي / MagSafe",
+        "magnetic-magsafe",
+        200
+      );
+
+      const car = addRoot("Car Chargers", "شواحن سيارة", "car-chargers", 300);
+      addChild(
+        car,
+        "USB-C Car Charger",
+        "شاحن سيارة USB-C",
+        "usb-c-car-charger",
+        100
+      );
+      addChild(
+        car,
+        "USB-A Car Charger",
+        "شاحن سيارة USB-A",
+        "usb-a-car-charger",
+        200
+      );
+
+      const travel = addRoot(
+        "Travel Adapters",
+        "محولات سفر",
+        "travel-adapters",
+        400
+      );
+      addChild(travel, "Universal", "عالمي", "universal", 100);
+      addChild(travel, "Type G", "Type G", "type-g", 200);
+      return nodes;
+    }
+
+    if (/(earbud|earbuds|headphone|headphones|headset|headsets|earphone|earphones|audio)/.test(key)) {
+      addRoot(
+        "Wireless Earbuds",
+        "سماعات أذن لاسلكية",
+        "wireless-earbuds",
+        100
+      );
+      addRoot(
+        "Over-Ear Headphones",
+        "سماعات رأس",
+        "over-ear-headphones",
+        200
+      );
+      addRoot("Wired Earphones", "سماعات سلكية", "wired-earphones", 300);
+      addRoot("Gaming Headsets", "سماعات ألعاب", "gaming-headsets", 400);
+      return nodes;
+    }
+
+    if (/(smart[ -]?watch|smartwatch|watch|wearable|wearables)/.test(key)) {
+      addRoot("Apple Watch", "أبل ووتش", "apple-watch", 100);
+      addRoot(
+        "Samsung Galaxy Watch",
+        "سامسونج جالكسي ووتش",
+        "samsung-galaxy-watch",
+        200
+      );
+      addRoot("Huawei", "هواوي", "huawei-wearables", 300);
+      addRoot("Xiaomi / Redmi", "شاومي / ريدمي", "xiaomi-redmi-wearables", 400);
+      addRoot("Other wearable", "ساعة أخرى", "other-wearable", 500);
+      return nodes;
+    }
+
+    if (/(accessor|accessories|stand|mount|grip|holder|lens|sim|clean)/.test(key)) {
+      addRoot("Stands & Mounts", "ستاندات وحوامل", "stands-mounts", 100);
+      addRoot("Grips & Holders", "مسكات وحوامل", "grips-holders", 200);
+      addRoot(
+        "Camera Lens Protectors",
+        "حماية عدسات الكاميرا",
+        "camera-lens-protectors",
+        300
+      );
+      addRoot(
+        "SIM & Card Accessories",
+        "إكسسوارات SIM وبطاقات",
+        "sim-card-accessories",
+        400
+      );
+      addRoot("Cleaning & Care", "تنظيف وعناية", "cleaning-care", 500);
+      addRoot("Other accessory", "إكسسوار آخر", "other-accessory", 600);
+      return nodes;
+    }
+
+    // Unknown/custom top-level category: no forced preset. Retailer can use
+    // + Add subcategory and + Add model/detail.
+    return nodes;
+  }
+
+  const mobilePreviewPresetNodes = useMemo(
+    () =>
+      mobileMechanicsPreviewActive && form.directCategoryId
+        ? buildMobilePhonePreviewNodes(
+            form.directCategoryId,
+            mobileMechanicsPreviewCategory?.name || "",
+            mobileMechanicsPreviewCategory?.nameAr || ""
+          )
+        : [],
+    [
+      mobileMechanicsPreviewActive,
+      form.directCategoryId,
+      mobileMechanicsPreviewCategory?.name,
+      mobileMechanicsPreviewCategory?.nameAr,
+      selectedRetailerId,
+    ]
+  );
+
+  const mobileEffectiveCategoryNodes = useMemo(
+    () =>
+      mobileMechanicsPreviewActive
+        ? [...mobilePreviewPresetNodes, ...mobilePreviewCustomNodes]
+        : mobileCategoryNodes,
+    [
+      mobileMechanicsPreviewActive,
+      mobilePreviewPresetNodes,
+      mobilePreviewCustomNodes,
+      mobileCategoryNodes,
+    ]
+  );
 
   const mobileSubcategoryOptions = useMemo(
     () =>
-      mobileCategoryNodes.filter(
+      mobileEffectiveCategoryNodes.filter(
         (node) =>
           node.category_id === form.directCategoryId &&
           Number(node.depth) === 1 &&
           !node.parent_node_id &&
           node.node_status !== "archived"
       ),
-    [mobileCategoryNodes, form.directCategoryId]
+    [mobileEffectiveCategoryNodes, form.directCategoryId]
   );
 
   const selectedMobileSubcategory = useMemo(
     () =>
-      mobileCategoryNodes.find(
+      mobileEffectiveCategoryNodes.find(
         (node) =>
           node.id === mobileSubcategoryId &&
           node.category_id === form.directCategoryId &&
           Number(node.depth) === 1
       ) ?? null,
-    [mobileCategoryNodes, mobileSubcategoryId, form.directCategoryId]
+    [
+      mobileEffectiveCategoryNodes,
+      mobileSubcategoryId,
+      form.directCategoryId,
+    ]
   );
 
   const mobileSubsubcategoryOptions = useMemo(
     () =>
-      mobileCategoryNodes.filter(
+      mobileEffectiveCategoryNodes.filter(
         (node) =>
           node.category_id === form.directCategoryId &&
           node.parent_node_id === mobileSubcategoryId &&
           Number(node.depth) === 2 &&
           node.node_status !== "archived"
       ),
-    [mobileCategoryNodes, form.directCategoryId, mobileSubcategoryId]
+    [
+      mobileEffectiveCategoryNodes,
+      form.directCategoryId,
+      mobileSubcategoryId,
+    ]
   );
 
   const selectedMobileSubsubcategory = useMemo(
     () =>
-      mobileCategoryNodes.find(
+      mobileEffectiveCategoryNodes.find(
         (node) =>
           node.id === mobileSubsubcategoryId &&
           node.parent_node_id === mobileSubcategoryId &&
           Number(node.depth) === 2
       ) ?? null,
-    [mobileCategoryNodes, mobileSubsubcategoryId, mobileSubcategoryId]
+    [
+      mobileEffectiveCategoryNodes,
+      mobileSubsubcategoryId,
+      mobileSubcategoryId,
+    ]
   );
 
   const selectedMobileTopCategory = useMemo(
@@ -3932,10 +4292,16 @@ export default function DarikDirectProductsPage() {
   );
 
   const mobileCategoryPath = [
-    selectedMobileTopCategory?.name,
+    mobileMechanicsPreviewCategory?.name || selectedMobileTopCategory?.name,
     selectedMobileSubcategory?.name,
     selectedMobileSubsubcategory?.name,
   ].filter(Boolean).join(" → ");
+
+  useEffect(() => {
+    if (!mobileMechanicsPreviewActive && mobilePreviewCustomNodes.length > 0) {
+      setMobilePreviewCustomNodes([]);
+    }
+  }, [mobileMechanicsPreviewActive, mobilePreviewCustomNodes.length]);
 
   useEffect(() => {
     if (!mobileSubcategoryId) {
@@ -3943,7 +4309,7 @@ export default function DarikDirectProductsPage() {
       return;
     }
 
-    const subcategoryStillMatches = mobileCategoryNodes.some(
+    const subcategoryStillMatches = mobileEffectiveCategoryNodes.some(
       (node) =>
         node.id === mobileSubcategoryId &&
         node.category_id === form.directCategoryId &&
@@ -3957,7 +4323,7 @@ export default function DarikDirectProductsPage() {
     }
 
     if (mobileSubsubcategoryId) {
-      const detailStillMatches = mobileCategoryNodes.some(
+      const detailStillMatches = mobileEffectiveCategoryNodes.some(
         (node) =>
           node.id === mobileSubsubcategoryId &&
           node.category_id === form.directCategoryId &&
@@ -3969,7 +4335,7 @@ export default function DarikDirectProductsPage() {
     }
   }, [
     form.directCategoryId,
-    mobileCategoryNodes,
+    mobileEffectiveCategoryNodes,
     mobileSubcategoryId,
     mobileSubsubcategoryId,
   ]);
@@ -4012,6 +4378,50 @@ export default function DarikDirectProductsPage() {
     setMobileNodeSaving(true);
     setError("");
     setMessage("");
+
+    if (mobileMechanicsPreviewActive) {
+      const slugBase = name
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/^-+|-+$/g, "")
+        .slice(0, 50) || "custom";
+      const node: MobileCategoryNode = {
+        id: `preview-mobile:custom:${level}:${Date.now()}:${slugBase}`,
+        retailer_id: selectedRetailerId || "mechanics-preview",
+        category_id: form.directCategoryId,
+        parent_node_id: level === 2 ? mobileSubcategoryId : null,
+        depth: level,
+        name,
+        name_ar: nameAr || null,
+        slug: slugBase,
+        sort_order: 9000 + mobilePreviewCustomNodes.length,
+        node_status: "active",
+        is_system: false,
+      };
+
+      setMobilePreviewCustomNodes((current) => [...current, node]);
+      setMobileNodeSaving(false);
+
+      if (level === 1) {
+        setMobileSubcategoryId(node.id);
+        setMobileSubsubcategoryId("");
+        setMobileCustomSubcategoryName("");
+        setMobileCustomSubcategoryNameAr("");
+        setMobileAddSubcategoryOpen(false);
+        setMessage(
+          "Preview subcategory added / تمت إضافة التصنيف الفرعي للمعاينة."
+        );
+      } else {
+        setMobileSubsubcategoryId(node.id);
+        setMobileCustomDetailName("");
+        setMobileCustomDetailNameAr("");
+        setMobileAddDetailOpen(false);
+        setMessage(
+          "Preview model/detail added / تمت إضافة الموديل أو التفصيل للمعاينة."
+        );
+      }
+      return;
+    }
 
     const result = await supabase.rpc("darik_direct_create_category_node_v1", {
       p_category_id: form.directCategoryId,
@@ -4644,7 +5054,7 @@ export default function DarikDirectProductsPage() {
       return;
     }
 
-    if (isMobilePhoneMechanics) {
+    if (isMobilePhoneMechanics && !mobileMechanicsPreviewActive) {
       const categoryPathResult = await supabase.rpc(
         "darik_direct_set_product_category_path_v1",
         {
@@ -6360,9 +6770,11 @@ export default function DarikDirectProductsPage() {
                             disabled={mobileNodeSaving}
                           >
                             <option value="">
-                              {mobileSubcategoryOptions.length > 0
-                                ? "Select subcategory / اختر التصنيف الفرعي"
-                                : "No preset subcategories / لا توجد تصنيفات جاهزة"}
+                              {mobileCategoryNodesError && !mobileMechanicsPreviewActive
+                                ? "Could not load subcategories / تعذر تحميل التصنيفات الفرعية"
+                                : mobileSubcategoryOptions.length > 0
+                                  ? "Select subcategory / اختر التصنيف الفرعي"
+                                  : "No preset subcategories / لا توجد تصنيفات جاهزة"}
                             </option>
                             {mobileSubcategoryOptions.map((node) => (
                               <option key={node.id} value={node.id}>
