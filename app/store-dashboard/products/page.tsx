@@ -24,6 +24,7 @@
 // DARIK_CAMERA_FIRST_FRAME_READY_072
 // DARIK_REUSED_LIVE_CAMERA_PREVIEW_073
 // DARIK_ALL_FIELDS_GUIDED_ADD_PRODUCT_WIZARD_074
+// DARIK_PHOTO_UPLOAD_DECODE_LOADING_076
 
 // DARIK_AUTOPARTS_FITMENT_FILTERS_033
 // Mobile-safe bilingual product form with automatic retail categories.
@@ -3029,6 +3030,108 @@ const PRODUCT_PHOTO_SLOTS: Array<{
   { field: "photoUrl3", label: "Photo 3", labelAr: "الصورة 3", primary: false },
 ];
 
+function ProductPhotoPreview({
+  src,
+  alt,
+  loading,
+  label,
+  labelAr,
+}: {
+  src: string;
+  alt: string;
+  loading: boolean;
+  label: string;
+  labelAr: string;
+}) {
+  const [readySrc, setReadySrc] = useState("");
+  const [failedSrc, setFailedSrc] = useState("");
+
+  useEffect(() => {
+    if (!src) {
+      setReadySrc("");
+      setFailedSrc("");
+      return;
+    }
+
+    if (readySrc !== src) {
+      setReadySrc("");
+    }
+
+    if (failedSrc !== src) {
+      setFailedSrc("");
+    }
+  }, [src, readySrc, failedSrc]);
+
+  const ready = Boolean(src) && readySrc === src && !loading;
+  const failed = Boolean(src) && failedSrc === src && !loading;
+  const waiting = loading || (Boolean(src) && !ready && !failed);
+
+  return (
+    <div className={styles.imagePreview}>
+      {waiting ? (
+        <div
+          className={styles.photoLoadingState}
+          role="status"
+          aria-live="polite"
+        >
+          <span
+            className={styles.photoLoadingSpinner}
+            aria-hidden="true"
+          />
+          <strong>
+            {loading
+              ? "Uploading photo… / جارٍ رفع الصورة…"
+              : "Loading photo… / جارٍ تحميل الصورة…"}
+          </strong>
+          <span>
+            Please wait — the photo will appear when fully ready. /
+            يرجى الانتظار — ستظهر الصورة بعد اكتمال تحميلها بالكامل.
+          </span>
+        </div>
+      ) : failed ? (
+        <div className={styles.photoLoadError}>
+          <strong>Photo could not load / تعذر تحميل الصورة</strong>
+          <span>Choose the photo again or use another image.</span>
+        </div>
+      ) : !src ? (
+        <div>
+          <strong>
+            {label} / {labelAr}
+          </strong>
+          <span>JPG, PNG, WEBP or GIF</span>
+        </div>
+      ) : null}
+
+      {src ? (
+        <img
+          className={`${styles.photoPreviewImage} ${
+            ready ? styles.photoPreviewImageReady : ""
+          }`}
+          src={src}
+          alt={alt}
+          decoding="async"
+          onLoad={(event) => {
+            const image = event.currentTarget;
+            if (
+              image.complete &&
+              image.naturalWidth > 0 &&
+              image.naturalHeight > 0
+            ) {
+              setFailedSrc("");
+              setReadySrc(src);
+            }
+          }}
+          onError={() => {
+            setReadySrc("");
+            setFailedSrc(src);
+          }}
+        />
+      ) : null}
+    </div>
+  );
+}
+
+
 const WEIGHT_MECHANICS_FIELDS = new Set([
   "supermarket",
   "bakery",
@@ -3099,6 +3202,7 @@ export default function DarikDirectProductsPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [uploadingPhotoField, setUploadingPhotoField] = useState<PhotoField | null>(null);
   const [editingProductId, setEditingProductId] = useState<string | null>(null);
   const [formOpen, setFormOpen] = useState(false);
   const [shoeWizardStep, setShoeWizardStep] = useState<1 | 2 | 3 | 4 | 5 | 6 | 7>(1);
@@ -5434,8 +5538,6 @@ export default function DarikDirectProductsPage() {
         contentType: file.type,
       });
 
-    setUploading(false);
-
     if (uploadResult.error) {
       throw new Error(uploadResult.error.message);
     }
@@ -5445,6 +5547,44 @@ export default function DarikDirectProductsPage() {
       .getPublicUrl(uploadResult.data.path);
 
     return publicResult.data.publicUrl;
+  }
+
+  async function waitForUploadedImageReady(src: string) {
+    if (typeof window === "undefined") return;
+
+    const image = new Image();
+    image.decoding = "async";
+    image.src = src;
+
+    if (typeof image.decode === "function") {
+      try {
+        await image.decode();
+        if (image.naturalWidth > 0 && image.naturalHeight > 0) {
+          return;
+        }
+      } catch {
+        // Some Safari/WebKit builds can reject decode() even though the
+        // image subsequently completes normally. Fall through to onload.
+      }
+    }
+
+    if (
+      image.complete &&
+      image.naturalWidth > 0 &&
+      image.naturalHeight > 0
+    ) {
+      return;
+    }
+
+    await new Promise<void>((resolve, reject) => {
+      image.onload = () => resolve();
+      image.onerror = () =>
+        reject(
+          new Error(
+            "The uploaded image could not be loaded / تعذر تحميل الصورة المرفوعة."
+          )
+        );
+    });
   }
 
   async function handleImageChange(
@@ -5457,18 +5597,31 @@ export default function DarikDirectProductsPage() {
 
     setError("");
     setMessage("");
+    setUploadingPhotoField(field);
+
     try {
       const publicUrl = await uploadImage(file);
+      await waitForUploadedImageReady(publicUrl);
       updateForm(field, publicUrl);
+
+      await new Promise<void>((resolve) => {
+        window.requestAnimationFrame(() => resolve());
+      });
+
+      if (field === "photoUrl") {
+        clearShoeWizardError("photo");
+      }
+
       setMessage("Product image uploaded / تم رفع صورة المنتج.");
     } catch (uploadError) {
-      setUploading(false);
       setError(
         uploadError instanceof Error
           ? uploadError.message
           : "The image could not be uploaded / تعذر رفع الصورة."
       );
     } finally {
+      setUploading(false);
+      setUploadingPhotoField(null);
       event.target.value = "";
     }
   }
@@ -7892,23 +8045,13 @@ export default function DarikDirectProductsPage() {
                                   </span>
                                 </div>
 
-                                <div className={styles.imagePreview}>
-                                  {photoValue ? (
-                                    <img
-                                      src={photoValue}
-                                      alt={`Product ${slot.label} preview`}
-                                    />
-                                  ) : (
-                                    <div>
-                                      <strong>
-                                        {slot.label} / {slot.labelAr}
-                                      </strong>
-                                      <span>
-                                        JPG, PNG, WEBP or GIF
-                                      </span>
-                                    </div>
-                                  )}
-                                </div>
+                                <ProductPhotoPreview
+                                  src={photoValue}
+                                  alt={`Product ${slot.label} preview`}
+                                  loading={uploadingPhotoField === slot.field}
+                                  label={slot.label}
+                                  labelAr={slot.labelAr}
+                                />
 
                                 <label className={styles.uploadButton}>
                                   {uploading
@@ -9425,16 +9568,13 @@ export default function DarikDirectProductsPage() {
                           <strong>{slot.label} / {slot.labelAr}</strong>
                           {slot.primary ? <span>Main / الرئيسية</span> : null}
                         </div>
-                        <div className={styles.imagePreview}>
-                          {photoValue ? (
-                            <img src={photoValue} alt={`Product ${slot.label} preview`} />
-                          ) : (
-                            <div>
-                              <strong>{slot.label} / {slot.labelAr}</strong>
-                              <span>JPG, PNG, WEBP or GIF</span>
-                            </div>
-                          )}
-                        </div>
+                        <ProductPhotoPreview
+                          src={photoValue}
+                          alt={`Product ${slot.label} preview`}
+                          loading={uploadingPhotoField === slot.field}
+                          label={slot.label}
+                          labelAr={slot.labelAr}
+                        />
                         <label className={styles.uploadButton}>
                           {uploading
                             ? "Uploading… / جارٍ الرفع…"

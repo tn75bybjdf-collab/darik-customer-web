@@ -3097,3 +3097,74 @@
     margin-bottom: 4px;
   }
 }
+
+/* DARIK_PHOTO_UPLOAD_DECODE_LOADING_076
+   Never progressively reveal a photo while it uploads or decodes.
+   The preview box stays in a motion-loading state until the final image is ready. */
+.imagePreview {
+  position: relative;
+}
+
+.photoPreviewImage {
+  opacity: 0;
+  visibility: hidden;
+}
+
+.photoPreviewImageReady {
+  opacity: 1;
+  visibility: visible;
+}
+
+.photoLoadingState,
+.photoLoadError {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 9px;
+  padding: 18px;
+  text-align: center;
+  background: #f8fafc;
+}
+
+.photoLoadingState strong,
+.photoLoadError strong {
+  max-width: 280px;
+  color: #1d2939;
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.photoLoadingState > span:last-child,
+.photoLoadError > span:last-child {
+  max-width: 300px;
+  color: #667085;
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1.55;
+}
+
+.photoLoadingSpinner {
+  width: 42px;
+  height: 42px;
+  border: 4px solid #dbeafe;
+  border-top-color: #2563eb;
+  border-radius: 999px;
+  animation: darikPhotoPreviewSpin 0.82s linear infinite;
+}
+
+.photoLoadError {
+  background: #fff7f7;
+}
+
+.photoLoadError strong {
+  color: #b42318;
+}
+
+@keyframes darikPhotoPreviewSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}
