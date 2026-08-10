@@ -18,6 +18,7 @@
 // DARIK_MOBILE_PHONE_CATEGORY_HIERARCHY_066
 // DARIK_MOBILE_PHONE_MECHANICS_PREVIEW_HIERARCHY_067
 // DARIK_FURNITURE_OPTIONAL_ITEM_VIDEO_068
+// DARIK_FURNITURE_HOLD_TO_RECORD_CAMERA_069
 
 // DARIK_AUTOPARTS_FITMENT_FILTERS_033
 // Mobile-safe bilingual product form with automatic retail categories.
@@ -3109,6 +3110,18 @@ export default function DarikDirectProductsPage() {
   const [furnitureVideoRemoveRequested, setFurnitureVideoRemoveRequested] = useState(false);
   const [furnitureVideoError, setFurnitureVideoError] = useState("");
   const [uploadingFurnitureVideo, setUploadingFurnitureVideo] = useState(false);
+  const [furnitureCameraReady, setFurnitureCameraReady] = useState(false);
+  const [furnitureRecording, setFurnitureRecording] = useState(false);
+  const [furnitureRecordingElapsed, setFurnitureRecordingElapsed] = useState(0);
+  const [furnitureCameraStatus, setFurnitureCameraStatus] = useState("");
+  const furnitureCameraVideoRef = useRef<HTMLVideoElement | null>(null);
+  const furnitureMediaStreamRef = useRef<MediaStream | null>(null);
+  const furnitureMediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const furnitureRecordingChunksRef = useRef<Blob[]>([]);
+  const furnitureRecordingStartedAtRef = useRef<number | null>(null);
+  const furnitureRecordingIntervalRef = useRef<number | null>(null);
+  const furnitureRecordingStopTimerRef = useRef<number | null>(null);
+  const furnitureHoldActiveRef = useRef(false);
 
   const [mobileCategoryNodes, setMobileCategoryNodes] = useState<MobileCategoryNode[]>([]);
   const [mobileCategoryNodesError, setMobileCategoryNodesError] = useState("");
@@ -4501,7 +4514,389 @@ export default function DarikDirectProductsPage() {
     };
   }, [furnitureVideoPreviewUrl]);
 
+  useEffect(() => {
+    return () => {
+      furnitureHoldActiveRef.current = false;
+
+      if (furnitureRecordingIntervalRef.current !== null) {
+        window.clearInterval(furnitureRecordingIntervalRef.current);
+      }
+      if (furnitureRecordingStopTimerRef.current !== null) {
+        window.clearTimeout(furnitureRecordingStopTimerRef.current);
+      }
+
+      const recorder = furnitureMediaRecorderRef.current;
+      if (recorder && recorder.state !== "inactive") {
+        recorder.ondataavailable = null;
+        recorder.onstop = null;
+        recorder.onerror = null;
+        try {
+          recorder.stop();
+        } catch {
+          // The browser may already be shutting the recorder down.
+        }
+      }
+
+      const stream = furnitureMediaStreamRef.current;
+      if (stream) {
+        for (const track of stream.getTracks()) {
+          track.stop();
+        }
+      }
+    };
+  }, []);
+
+  function clearFurnitureRecordingTimers() {
+    if (furnitureRecordingIntervalRef.current !== null) {
+      window.clearInterval(furnitureRecordingIntervalRef.current);
+      furnitureRecordingIntervalRef.current = null;
+    }
+
+    if (furnitureRecordingStopTimerRef.current !== null) {
+      window.clearTimeout(furnitureRecordingStopTimerRef.current);
+      furnitureRecordingStopTimerRef.current = null;
+    }
+  }
+
+  function releaseFurnitureCameraStream(updateState = true) {
+    const stream = furnitureMediaStreamRef.current;
+    if (stream) {
+      for (const track of stream.getTracks()) {
+        track.stop();
+      }
+    }
+
+    furnitureMediaStreamRef.current = null;
+
+    if (furnitureCameraVideoRef.current) {
+      furnitureCameraVideoRef.current.srcObject = null;
+    }
+
+    if (updateState) {
+      setFurnitureCameraReady(false);
+    }
+  }
+
+  function resetFurnitureRecorderState() {
+    furnitureHoldActiveRef.current = false;
+    clearFurnitureRecordingTimers();
+
+    const recorder = furnitureMediaRecorderRef.current;
+    if (recorder && recorder.state !== "inactive") {
+      recorder.ondataavailable = null;
+      recorder.onstop = null;
+      recorder.onerror = null;
+      try {
+        recorder.stop();
+      } catch {
+        // Recorder may already be stopping.
+      }
+    }
+
+    furnitureMediaRecorderRef.current = null;
+    furnitureRecordingChunksRef.current = [];
+    furnitureRecordingStartedAtRef.current = null;
+    releaseFurnitureCameraStream(false);
+    setFurnitureCameraReady(false);
+    setFurnitureRecording(false);
+    setFurnitureRecordingElapsed(0);
+    setFurnitureCameraStatus("");
+  }
+
+  function furnitureRecorderMimeType() {
+    const candidates = [
+      "video/mp4",
+      "video/webm;codecs=vp8",
+      "video/webm",
+    ];
+
+    for (const candidate of candidates) {
+      if (
+        typeof MediaRecorder !== "undefined" &&
+        typeof MediaRecorder.isTypeSupported === "function" &&
+        MediaRecorder.isTypeSupported(candidate)
+      ) {
+        return candidate;
+      }
+    }
+
+    return "";
+  }
+
+  async function ensureFurnitureCameraStream() {
+    if (
+      typeof window === "undefined" ||
+      !window.isSecureContext
+    ) {
+      throw new Error(
+        "Camera recording requires the secure Darik website / تسجيل الكاميرا يحتاج موقع Darik الآمن."
+      );
+    }
+
+    if (
+      !navigator.mediaDevices ||
+      typeof navigator.mediaDevices.getUserMedia !== "function"
+    ) {
+      throw new Error(
+        "This browser cannot open the camera inside Darik / هذا المتصفح لا يستطيع فتح الكاميرا داخل Darik."
+      );
+    }
+
+    if (typeof MediaRecorder === "undefined") {
+      throw new Error(
+        "This browser does not support in-app video recording / هذا المتصفح لا يدعم تسجيل الفيديو داخل Darik."
+      );
+    }
+
+    const existingStream = furnitureMediaStreamRef.current;
+    if (
+      existingStream &&
+      existingStream.getVideoTracks().some((track) => track.readyState === "live")
+    ) {
+      return existingStream;
+    }
+
+    const stream = await navigator.mediaDevices.getUserMedia({
+      video: {
+        facingMode: { ideal: "environment" },
+      },
+      audio: false,
+    });
+
+    furnitureMediaStreamRef.current = stream;
+
+    if (furnitureCameraVideoRef.current) {
+      furnitureCameraVideoRef.current.srcObject = stream;
+      try {
+        await furnitureCameraVideoRef.current.play();
+      } catch {
+        // Muted inline autoplay may already be handled by the browser.
+      }
+    }
+
+    setFurnitureCameraReady(true);
+    return stream;
+  }
+
+  function stopFurnitureHoldRecording() {
+    furnitureHoldActiveRef.current = false;
+
+    const recorder = furnitureMediaRecorderRef.current;
+    if (recorder && recorder.state === "recording") {
+      try {
+        recorder.stop();
+      } catch {
+        // Browser is already stopping the recorder.
+      }
+    }
+  }
+
+  async function beginFurnitureHoldRecording() {
+    if (
+      furnitureRecording ||
+      saving ||
+      uploading ||
+      uploadingFurnitureVideo
+    ) {
+      return;
+    }
+
+    furnitureHoldActiveRef.current = true;
+    setFurnitureVideoError("");
+    setFurnitureCameraStatus(
+      "Opening camera... / جاري فتح الكاميرا..."
+    );
+
+    try {
+      const stream = await ensureFurnitureCameraStream();
+
+      if (!furnitureHoldActiveRef.current) {
+        setFurnitureCameraStatus(
+          "Camera ready. Hold again to record / الكاميرا جاهزة. اضغط مطولاً مرة أخرى للتسجيل."
+        );
+        return;
+      }
+
+      const selectedMimeType = furnitureRecorderMimeType();
+      const recorderOptions: MediaRecorderOptions = {
+        videoBitsPerSecond: 2500000,
+      };
+
+      if (selectedMimeType) {
+        recorderOptions.mimeType = selectedMimeType;
+      }
+
+      const recorder = new MediaRecorder(
+        stream,
+        recorderOptions
+      );
+
+      furnitureRecordingChunksRef.current = [];
+      furnitureMediaRecorderRef.current = recorder;
+
+      recorder.ondataavailable = (event) => {
+        if (event.data && event.data.size > 0) {
+          furnitureRecordingChunksRef.current.push(event.data);
+        }
+      };
+
+      recorder.onerror = () => {
+        setFurnitureVideoError(
+          "Camera recording failed. Try again / فشل تسجيل الفيديو. حاول مرة أخرى."
+        );
+      };
+
+      recorder.onstop = () => {
+        clearFurnitureRecordingTimers();
+
+        const startedAt = furnitureRecordingStartedAtRef.current;
+        const rawDuration =
+          startedAt === null
+            ? 0
+            : (performance.now() - startedAt) / 1000;
+        const duration = Math.min(
+          10,
+          Math.round(rawDuration * 100) / 100
+        );
+
+        furnitureMediaRecorderRef.current = null;
+        furnitureRecordingStartedAtRef.current = null;
+        setFurnitureRecording(false);
+        setFurnitureRecordingElapsed(duration);
+
+        const chunks = furnitureRecordingChunksRef.current;
+        furnitureRecordingChunksRef.current = [];
+
+        if (duration < 1) {
+          setFurnitureVideoError(
+            "Hold for at least 1 second / اضغط لمدة ثانية واحدة على الأقل."
+          );
+          setFurnitureCameraStatus("");
+          releaseFurnitureCameraStream();
+          return;
+        }
+
+        if (chunks.length === 0) {
+          setFurnitureVideoError(
+            "No video was captured. Try again / لم يتم تسجيل فيديو. حاول مرة أخرى."
+          );
+          setFurnitureCameraStatus("");
+          releaseFurnitureCameraStream();
+          return;
+        }
+
+        const recorderType = String(
+          recorder.mimeType || selectedMimeType || chunks[0]?.type || ""
+        )
+          .split(";")[0]
+          .trim()
+          .toLowerCase();
+
+        const safeType =
+          recorderType === "video/mp4"
+            ? "video/mp4"
+            : recorderType === "video/webm"
+              ? "video/webm"
+              : "";
+
+        if (!safeType) {
+          setFurnitureVideoError(
+            "This phone recorded an unsupported video format / سجّل الهاتف بصيغة فيديو غير مدعومة."
+          );
+          setFurnitureCameraStatus("");
+          releaseFurnitureCameraStream();
+          return;
+        }
+
+        const extension = safeType === "video/mp4" ? "mp4" : "webm";
+        const blob = new Blob(chunks, { type: safeType });
+        const file = new File(
+          [blob],
+          `furniture-camera-${Date.now()}.${extension}`,
+          { type: safeType }
+        );
+
+        if (file.size > 25 * 1024 * 1024) {
+          setFurnitureVideoError(
+            "Recorded video is too large. Try again / حجم الفيديو كبير جداً. حاول مرة أخرى."
+          );
+          setFurnitureCameraStatus("");
+          releaseFurnitureCameraStream();
+          return;
+        }
+
+        if (furnitureVideoPreviewUrl.startsWith("blob:")) {
+          URL.revokeObjectURL(furnitureVideoPreviewUrl);
+        }
+
+        const previewUrl = URL.createObjectURL(file);
+        setFurnitureVideoFile(file);
+        setFurnitureVideoPreviewUrl(previewUrl);
+        setFurnitureVideoDuration(duration);
+        setFurnitureVideoRemoveRequested(false);
+        setFurnitureVideoError("");
+        setFurnitureCameraStatus(
+          "Video ready. Hold again to retake / الفيديو جاهز. اضغط مطولاً مرة أخرى لإعادة التصوير."
+        );
+        releaseFurnitureCameraStream();
+      };
+
+      furnitureRecordingStartedAtRef.current = performance.now();
+      recorder.start(100);
+      setFurnitureRecording(true);
+      setFurnitureRecordingElapsed(0);
+      setFurnitureCameraStatus(
+        "Recording... release to stop / جاري التسجيل... ارفع إصبعك للإيقاف."
+      );
+
+      furnitureRecordingIntervalRef.current = window.setInterval(
+        () => {
+          const startedAt = furnitureRecordingStartedAtRef.current;
+          if (startedAt === null) return;
+
+          const elapsed = Math.min(
+            10,
+            (performance.now() - startedAt) / 1000
+          );
+          setFurnitureRecordingElapsed(elapsed);
+        },
+        100
+      );
+
+      furnitureRecordingStopTimerRef.current = window.setTimeout(
+        () => {
+          furnitureHoldActiveRef.current = false;
+          const activeRecorder = furnitureMediaRecorderRef.current;
+          if (
+            activeRecorder &&
+            activeRecorder.state === "recording"
+          ) {
+            activeRecorder.stop();
+          }
+        },
+        10000
+      );
+    } catch (cameraError) {
+      furnitureHoldActiveRef.current = false;
+      clearFurnitureRecordingTimers();
+      setFurnitureRecording(false);
+      setFurnitureRecordingElapsed(0);
+      setFurnitureCameraStatus("");
+      releaseFurnitureCameraStream();
+
+      const cameraMessage =
+        cameraError instanceof Error
+          ? cameraError.message
+          : "Could not open the camera.";
+
+      setFurnitureVideoError(
+        `${cameraMessage} Camera permission may be required. / قد تحتاج إلى السماح باستخدام الكاميرا.`
+      );
+    }
+  }
+
   function resetFurnitureVideoState() {
+    resetFurnitureRecorderState();
     setFurnitureVideoFile(null);
     setFurnitureVideoPreviewUrl("");
     setFurnitureVideoDuration(null);
@@ -4601,6 +4996,7 @@ export default function DarikDirectProductsPage() {
   }
 
   function removeFurnitureVideo() {
+    resetFurnitureRecorderState();
     setFurnitureVideoFile(null);
     setFurnitureVideoPreviewUrl("");
     setFurnitureVideoDuration(null);
@@ -4689,6 +5085,7 @@ export default function DarikDirectProductsPage() {
   }
 
   function openEditForm(product: DirectProduct) {
+    resetFurnitureRecorderState();
     setFurnitureVideoFile(null);
     setFurnitureVideoPreviewUrl("");
     setFurnitureVideoDuration(null);
@@ -8048,8 +8445,125 @@ export default function DarikDirectProductsPage() {
                           </div>
                         )}
 
+                        <div className={styles.furnitureMobileRecorder}>
+                          <div
+                            className={`${styles.furnitureCameraStage} ${
+                              furnitureRecording
+                                ? styles.furnitureCameraStageRecording
+                                : ""
+                            }`}
+                          >
+                            <video
+                              ref={furnitureCameraVideoRef}
+                              className={styles.furnitureCameraFeed}
+                              autoPlay
+                              muted
+                              playsInline
+                              controls={false}
+                              disablePictureInPicture
+                            />
+
+                            {!furnitureCameraReady ? (
+                              <div className={styles.furnitureCameraIdle}>
+                                <strong>
+                                  Camera opens inside Darik / الكاميرا تفتح داخل Darik
+                                </strong>
+                                <span>
+                                  Hold the button below. Darik uses the rear camera and never requests microphone audio. /
+                                  اضغط مطولاً على الزر بالأسفل. يستخدم Darik الكاميرا الخلفية ولا يطلب الميكروفون.
+                                </span>
+                              </div>
+                            ) : null}
+
+                            {furnitureRecording ? (
+                              <div className={styles.furnitureRecordingBadge}>
+                                <i />
+                                REC {furnitureRecordingElapsed.toFixed(1)}s
+                              </div>
+                            ) : null}
+
+                            <div className={styles.furnitureRecordingProgress}>
+                              <span
+                                style={{
+                                  width: `${Math.min(
+                                    100,
+                                    (furnitureRecordingElapsed / 10) * 100
+                                  )}%`,
+                                }}
+                              />
+                            </div>
+                          </div>
+
+                          <button
+                            type="button"
+                            className={`${styles.furnitureHoldRecordButton} ${
+                              furnitureRecording
+                                ? styles.furnitureHoldRecordButtonActive
+                                : ""
+                            }`}
+                            disabled={
+                              saving ||
+                              uploading ||
+                              uploadingFurnitureVideo
+                            }
+                            onPointerDown={(event) => {
+                              event.preventDefault();
+                              try {
+                                event.currentTarget.setPointerCapture(
+                                  event.pointerId
+                                );
+                              } catch {
+                                // Pointer capture is optional.
+                              }
+                              void beginFurnitureHoldRecording();
+                            }}
+                            onPointerUp={(event) => {
+                              event.preventDefault();
+                              stopFurnitureHoldRecording();
+                              try {
+                                event.currentTarget.releasePointerCapture(
+                                  event.pointerId
+                                );
+                              } catch {
+                                // Pointer may already be released.
+                              }
+                            }}
+                            onPointerCancel={(event) => {
+                              event.preventDefault();
+                              stopFurnitureHoldRecording();
+                            }}
+                            onContextMenu={(event) => event.preventDefault()}
+                            aria-label={
+                              furnitureRecording
+                                ? "Release to stop recording"
+                                : "Hold to record Furniture video"
+                            }
+                          >
+                            <span className={styles.furnitureRecordDot} />
+                            <strong>
+                              {furnitureRecording
+                                ? "Release to stop / ارفع إصبعك للإيقاف"
+                                : furnitureVideoDisplayUrl
+                                  ? "Hold to retake / اضغط مطولاً لإعادة التصوير"
+                                  : "Hold to record / اضغط مطولاً للتسجيل"}
+                            </strong>
+                            <small>
+                              Release anytime · Automatically stops at 10 seconds /
+                              ارفع إصبعك في أي وقت · يتوقف تلقائياً عند 10 ثوانٍ
+                            </small>
+                          </button>
+
+                          {furnitureCameraStatus ? (
+                            <small className={styles.furnitureCameraStatus}>
+                              {furnitureCameraStatus}
+                            </small>
+                          ) : null}
+                        </div>
+
                         <div className={styles.furnitureVideoActions}>
-                          <label className={styles.furnitureVideoUploadButton}>
+                          <label
+                            className={`${styles.furnitureVideoUploadButton} ${styles.furnitureDesktopVideoUpload}`}
+                          >
                             {furnitureVideoDisplayUrl
                               ? "Replace video / استبدال الفيديو"
                               : "Add video / إضافة فيديو"}
@@ -8066,7 +8580,11 @@ export default function DarikDirectProductsPage() {
                               type="button"
                               className={styles.furnitureVideoRemoveButton}
                               onClick={removeFurnitureVideo}
-                              disabled={saving || uploadingFurnitureVideo}
+                              disabled={
+                                saving ||
+                                uploadingFurnitureVideo ||
+                                furnitureRecording
+                              }
                             >
                               Remove video / حذف الفيديو
                             </button>
