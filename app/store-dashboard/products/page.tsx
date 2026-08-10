@@ -25,6 +25,7 @@
 // DARIK_REUSED_LIVE_CAMERA_PREVIEW_073
 // DARIK_ALL_FIELDS_GUIDED_ADD_PRODUCT_WIZARD_074
 // DARIK_PHOTO_UPLOAD_DECODE_LOADING_076
+// DARIK_PHOTO_PRELOAD_READY_STATE_077
 
 // DARIK_AUTOPARTS_FITMENT_FILTERS_033
 // Mobile-safe bilingual product form with automatic retail categories.
@@ -3047,20 +3048,73 @@ function ProductPhotoPreview({
   const [failedSrc, setFailedSrc] = useState("");
 
   useEffect(() => {
+    let cancelled = false;
+    let settled = false;
+
+    setReadySrc("");
+    setFailedSrc("");
+
     if (!src) {
-      setReadySrc("");
-      setFailedSrc("");
-      return;
+      return () => {
+        cancelled = true;
+      };
     }
 
-    if (readySrc !== src) {
+    const preload = new Image();
+    preload.decoding = "async";
+
+    const finishReady = async () => {
+      if (settled || cancelled) return;
+
+      try {
+        if (typeof preload.decode === "function") {
+          await preload.decode();
+        }
+      } catch {
+        // Safari/WebKit can reject decode() even after the image has loaded.
+        // A completed image with real dimensions is still safe to reveal.
+      }
+
+      if (settled || cancelled) return;
+
+      if (
+        preload.complete &&
+        preload.naturalWidth > 0 &&
+        preload.naturalHeight > 0
+      ) {
+        settled = true;
+        setFailedSrc("");
+        setReadySrc(src);
+      }
+    };
+
+    preload.onload = () => {
+      void finishReady();
+    };
+
+    preload.onerror = () => {
+      if (settled || cancelled) return;
+      settled = true;
       setReadySrc("");
+      setFailedSrc(src);
+    };
+
+    preload.src = src;
+
+    if (
+      preload.complete &&
+      preload.naturalWidth > 0 &&
+      preload.naturalHeight > 0
+    ) {
+      void finishReady();
     }
 
-    if (failedSrc !== src) {
-      setFailedSrc("");
-    }
-  }, [src, readySrc, failedSrc]);
+    return () => {
+      cancelled = true;
+      preload.onload = null;
+      preload.onerror = null;
+    };
+  }, [src]);
 
   const ready = Boolean(src) && readySrc === src && !loading;
   const failed = Boolean(src) && failedSrc === src && !loading;
@@ -3102,35 +3156,17 @@ function ProductPhotoPreview({
         </div>
       ) : null}
 
-      {src ? (
+      {ready ? (
         <img
-          className={`${styles.photoPreviewImage} ${
-            ready ? styles.photoPreviewImageReady : ""
-          }`}
+          className={`${styles.photoPreviewImage} ${styles.photoPreviewImageReady}`}
           src={src}
           alt={alt}
           decoding="async"
-          onLoad={(event) => {
-            const image = event.currentTarget;
-            if (
-              image.complete &&
-              image.naturalWidth > 0 &&
-              image.naturalHeight > 0
-            ) {
-              setFailedSrc("");
-              setReadySrc(src);
-            }
-          }}
-          onError={() => {
-            setReadySrc("");
-            setFailedSrc(src);
-          }}
         />
       ) : null}
     </div>
   );
 }
-
 
 const WEIGHT_MECHANICS_FIELDS = new Set([
   "supermarket",
@@ -5549,43 +5585,6 @@ export default function DarikDirectProductsPage() {
     return publicResult.data.publicUrl;
   }
 
-  async function waitForUploadedImageReady(src: string) {
-    if (typeof window === "undefined") return;
-
-    const image = new Image();
-    image.decoding = "async";
-    image.src = src;
-
-    if (typeof image.decode === "function") {
-      try {
-        await image.decode();
-        if (image.naturalWidth > 0 && image.naturalHeight > 0) {
-          return;
-        }
-      } catch {
-        // Some Safari/WebKit builds can reject decode() even though the
-        // image subsequently completes normally. Fall through to onload.
-      }
-    }
-
-    if (
-      image.complete &&
-      image.naturalWidth > 0 &&
-      image.naturalHeight > 0
-    ) {
-      return;
-    }
-
-    await new Promise<void>((resolve, reject) => {
-      image.onload = () => resolve();
-      image.onerror = () =>
-        reject(
-          new Error(
-            "The uploaded image could not be loaded / تعذر تحميل الصورة المرفوعة."
-          )
-        );
-    });
-  }
 
   async function handleImageChange(
     event: ChangeEvent<HTMLInputElement>,
@@ -5601,12 +5600,7 @@ export default function DarikDirectProductsPage() {
 
     try {
       const publicUrl = await uploadImage(file);
-      await waitForUploadedImageReady(publicUrl);
       updateForm(field, publicUrl);
-
-      await new Promise<void>((resolve) => {
-        window.requestAnimationFrame(() => resolve());
-      });
 
       if (field === "photoUrl") {
         clearShoeWizardError("photo");
