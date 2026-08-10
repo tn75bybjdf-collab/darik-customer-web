@@ -2,6 +2,7 @@
 
 // DARIK_FURNITURE_OPTIONAL_ITEM_VIDEO_068
 // DARIK_HOME_APPLIANCES_SHORT_ITEM_VIDEO_071
+// DARIK_DUAL_SIZE_PRODUCT_PHOTOS_078
 // DARIK_MECHANICS_LAB_048
 
 // DARIK_DETAILS_MODAL_SCROLL_FIX_034
@@ -1588,9 +1589,22 @@ export default function DarikDirectStorefrontPage() {
     (category) => category.id === selectedCategoryId
   );
 
+  function productThumbnailPhotoUrl(
+    photoUrl: string | null | undefined
+  ) {
+    const clean = String(photoUrl || "").trim();
+    if (!clean) return "";
+
+    return clean.replace(
+      /-full\.(jpe?g|png|webp)(\?.*)?$/i,
+      "-thumb.$1$2"
+    );
+  }
+
   function renderProductCard(product: Product) {
     const name = productName(product);
     const photo = productPhoto(product);
+    const thumbnailPhoto = productThumbnailPhotoUrl(photo);
     const stock = Number(product.quantity_in_stock ?? 0);
     const pricingMode = product.direct_pricing_mode || "price";
     const contactPricing = pricingMode !== "price";
@@ -1639,7 +1653,56 @@ export default function DarikDirectStorefrontPage() {
         />
 
           {photo ? (
-            <img src={photo} alt={name} />
+            <img
+              src={thumbnailPhoto || photo}
+              alt={name}
+              loading="lazy"
+              decoding="async"
+              role="button"
+              tabIndex={0}
+              title="View full photo / عرض الصورة كاملة"
+              aria-label={`View full photo for ${name}`}
+              style={{ cursor: "zoom-in" }}
+              onError={(event) => {
+                if (
+                  photo &&
+                  event.currentTarget.src !== photo
+                ) {
+                  event.currentTarget.src = photo;
+                }
+              }}
+              onClick={() => {
+                if (!photo) return;
+
+                const opened = window.open(
+                  photo,
+                  "_blank",
+                  "noopener,noreferrer"
+                );
+
+                if (opened) opened.opener = null;
+              }}
+              onKeyDown={(event) => {
+                if (!photo) return;
+
+                if (
+                  event.key !== "Enter" &&
+                  event.key !== " "
+                ) {
+                  return;
+                }
+
+                event.preventDefault();
+
+                const opened = window.open(
+                  photo,
+                  "_blank",
+                  "noopener,noreferrer"
+                );
+
+                if (opened) opened.opener = null;
+              }}
+            />
           ) : (
             <div className={styles.productPlaceholder}>
               <Icon name="store" size={30} />

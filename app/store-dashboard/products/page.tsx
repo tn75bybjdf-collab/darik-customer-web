@@ -26,6 +26,8 @@
 // DARIK_ALL_FIELDS_GUIDED_ADD_PRODUCT_WIZARD_074
 // DARIK_PHOTO_UPLOAD_DECODE_LOADING_076
 // DARIK_PHOTO_PRELOAD_READY_STATE_077
+// DARIK_DUAL_SIZE_PRODUCT_PHOTOS_078
+// DARIK_SNAP_VIDEO_COMPRESSION_078
 
 // DARIK_AUTOPARTS_FITMENT_FILTERS_033
 // Mobile-safe bilingual product form with automatic retail categories.
@@ -2958,6 +2960,17 @@ function safeFileName(name: string) {
     .replace(/^-|-$/g, "");
 }
 
+function productThumbnailUrl(photoUrl: string | null | undefined) {
+  const clean = String(photoUrl || "").trim();
+  if (!clean) return "";
+
+  return clean.replace(
+    /-full\.(jpe?g|png|webp)(\?.*)?$/i,
+    "-thumb.$1$2"
+  );
+}
+
+
 function abbreviateCategoryName(value: string | null, maxLength = 26) {
   const clean = String(value ?? "").trim();
   if (clean.length <= maxLength) return clean;
@@ -4991,6 +5004,9 @@ export default function DarikDirectProductsPage() {
     const stream = await navigator.mediaDevices.getUserMedia({
       video: {
         facingMode: { ideal: "environment" },
+        width: { ideal: 1280, max: 1280 },
+        height: { ideal: 720, max: 720 },
+        frameRate: { ideal: 30, max: 30 },
       },
       audio: false,
     });
@@ -5099,7 +5115,9 @@ export default function DarikDirectProductsPage() {
 
       const selectedMimeType = furnitureRecorderMimeType();
       const recorderOptions: MediaRecorderOptions = {
-        videoBitsPerSecond: 2500000,
+        // 720p at 1.5 Mbps keeps a 10-second item clip around 2 MB while
+        // preserving enough detail for storefront product viewing.
+        videoBitsPerSecond: 1500000,
       };
 
       if (selectedMimeType) {
@@ -5544,6 +5562,167 @@ export default function DarikDirectProductsPage() {
     setFormOpen(true);
   }
 
+  async function loadProductPhotoForResize(file: File) {
+    const objectUrl = URL.createObjectURL(file);
+    const image = new Image();
+    image.decoding = "async";
+
+    try {
+      await new Promise<void>((resolve, reject) => {
+        image.onload = () => resolve();
+        image.onerror = () =>
+          reject(
+            new Error(
+              "The photo could not be prepared / تعذر تجهيز الصورة."
+            )
+          );
+        image.src = objectUrl;
+      });
+
+      return {
+        image,
+        width: image.naturalWidth,
+        height: image.naturalHeight,
+        cleanup: () => URL.revokeObjectURL(objectUrl),
+      };
+    } catch (error) {
+      URL.revokeObjectURL(objectUrl);
+      throw error;
+    }
+  }
+
+  function resizeProductPhotoToBlob(
+    image: HTMLImageElement,
+    sourceWidth: number,
+    sourceHeight: number,
+    maxEdge: number,
+    mimeType: "image/jpeg" | "image/png" | "image/webp",
+    quality?: number
+  ) {
+    const safeWidth = Math.max(1, sourceWidth);
+    const safeHeight = Math.max(1, sourceHeight);
+    const scale = Math.min(
+      1,
+      maxEdge / Math.max(safeWidth, safeHeight)
+    );
+    const width = Math.max(1, Math.round(safeWidth * scale));
+    const height = Math.max(1, Math.round(safeHeight * scale));
+
+    const canvas = document.createElement("canvas");
+    canvas.width = width;
+    canvas.height = height;
+
+    const context = canvas.getContext("2d", {
+      alpha: mimeType === "image/png",
+    });
+
+    if (!context) {
+      throw new Error(
+        "The photo could not be resized / تعذر تغيير حجم الصورة."
+      );
+    }
+
+    if (mimeType === "image/jpeg") {
+      context.fillStyle = "#ffffff";
+      context.fillRect(0, 0, width, height);
+    }
+
+    context.drawImage(image, 0, 0, width, height);
+
+    return new Promise<Blob>((resolve, reject) => {
+      canvas.toBlob(
+        (blob) => {
+          if (!blob) {
+            reject(
+              new Error(
+                "The photo could not be compressed / تعذر ضغط الصورة."
+              )
+            );
+            return;
+          }
+
+          resolve(blob);
+        },
+        mimeType,
+        quality
+      );
+    });
+  }
+
+  async function prepareProductPhotoVariants(file: File) {
+    const lowerType = file.type.toLowerCase();
+
+    if (
+      lowerType === "image/gif" ||
+      lowerType === "image/svg+xml"
+    ) {
+      const extension =
+        safeFileName(file.name).split(".").pop() ||
+        (lowerType === "image/gif" ? "gif" : "svg");
+
+      return {
+        full: {
+          blob: file as Blob,
+          extension,
+          contentType: file.type || "application/octet-stream",
+        },
+        thumbnail: null,
+      };
+    }
+
+    const decoded = await loadProductPhotoForResize(file);
+
+    try {
+      let outputType:
+        | "image/jpeg"
+        | "image/png"
+        | "image/webp" = "image/jpeg";
+      let extension = "jpg";
+
+      if (lowerType === "image/png") {
+        outputType = "image/png";
+        extension = "png";
+      } else if (lowerType === "image/webp") {
+        outputType = "image/webp";
+        extension = "webp";
+      }
+
+      const [fullBlob, thumbnailBlob] = await Promise.all([
+        resizeProductPhotoToBlob(
+          decoded.image,
+          decoded.width,
+          decoded.height,
+          1600,
+          outputType,
+          outputType === "image/png" ? undefined : 0.84
+        ),
+        resizeProductPhotoToBlob(
+          decoded.image,
+          decoded.width,
+          decoded.height,
+          480,
+          outputType,
+          outputType === "image/png" ? undefined : 0.72
+        ),
+      ]);
+
+      return {
+        full: {
+          blob: fullBlob,
+          extension,
+          contentType: outputType,
+        },
+        thumbnail: {
+          blob: thumbnailBlob,
+          extension,
+          contentType: outputType,
+        },
+      };
+    } finally {
+      decoded.cleanup();
+    }
+  }
+
   async function uploadImage(file: File) {
     if (!selectedRetailerId) {
       throw new Error("No retailer is selected / لم يتم اختيار متجر.");
@@ -5553,38 +5732,72 @@ export default function DarikDirectProductsPage() {
       throw new Error("Choose an image file / اختر ملف صورة.");
     }
 
-    if (file.size > 8 * 1024 * 1024) {
-      throw new Error("The image must be 8 MB or smaller / يجب ألا يتجاوز حجم الصورة 8 ميجابايت.");
+    if (file.size > 25 * 1024 * 1024) {
+      throw new Error(
+        "The original image must be 25 MB or smaller / يجب ألا يتجاوز حجم الصورة الأصلية 25 ميجابايت."
+      );
     }
 
     setUploading(true);
 
-    const extension =
-      safeFileName(file.name).split(".").pop() ||
-      file.type.split("/").pop() ||
-      "jpg";
+    const variants = await prepareProductPhotoVariants(file);
+    const basePath =
+      `${selectedRetailerId}/${Date.now()}-${crypto.randomUUID()}`;
 
-    const objectPath = `${selectedRetailerId}/${Date.now()}-${crypto.randomUUID()}.${extension}`;
+    const fullPath =
+      `${basePath}-full.${variants.full.extension}`;
+    const thumbnailPath = variants.thumbnail
+      ? `${basePath}-thumb.${variants.thumbnail.extension}`
+      : null;
 
-    const uploadResult = await supabase.storage
-      .from("darik-direct-products")
-      .upload(objectPath, file, {
-        cacheControl: "3600",
-        upsert: false,
-        contentType: file.type,
-      });
+    const uploads = [
+      supabase.storage
+        .from("darik-direct-products")
+        .upload(fullPath, variants.full.blob, {
+          cacheControl: "31536000",
+          upsert: false,
+          contentType: variants.full.contentType,
+        }),
+      ...(variants.thumbnail && thumbnailPath
+        ? [
+            supabase.storage
+              .from("darik-direct-products")
+              .upload(thumbnailPath, variants.thumbnail.blob, {
+                cacheControl: "31536000",
+                upsert: false,
+                contentType: variants.thumbnail.contentType,
+              }),
+          ]
+        : []),
+    ];
 
-    if (uploadResult.error) {
-      throw new Error(uploadResult.error.message);
+    const uploadResults = await Promise.all(uploads);
+    const failedUpload = uploadResults.find(
+      (result) => result.error
+    );
+
+    if (failedUpload?.error) {
+      const uploadedPaths = uploadResults
+        .filter((result) => !result.error)
+        .map((result) => result.data?.path)
+        .filter((value): value is string => Boolean(value));
+
+      if (uploadedPaths.length > 0) {
+        await supabase.storage
+          .from("darik-direct-products")
+          .remove(uploadedPaths)
+          .catch(() => undefined);
+      }
+
+      throw new Error(failedUpload.error.message);
     }
 
     const publicResult = supabase.storage
       .from("darik-direct-products")
-      .getPublicUrl(uploadResult.data.path);
+      .getPublicUrl(fullPath);
 
     return publicResult.data.publicUrl;
   }
-
 
   async function handleImageChange(
     event: ChangeEvent<HTMLInputElement>,
@@ -6485,7 +6698,21 @@ export default function DarikDirectProductsPage() {
                       <article className={styles.productCard} key={product.id}>
                         <div className={styles.productPhoto}>
                           {product.direct_photo_url ? (
-                            <img src={product.direct_photo_url} alt={name} />
+                            <img
+                              src={productThumbnailUrl(product.direct_photo_url)}
+                              alt={name}
+                              loading="lazy"
+                              decoding="async"
+                              onError={(event) => {
+                                if (
+                                  event.currentTarget.src !==
+                                  product.direct_photo_url
+                                ) {
+                                  event.currentTarget.src =
+                                    product.direct_photo_url || "";
+                                }
+                              }}
+                            />
                           ) : (
                             <span>{name.slice(0, 1).toUpperCase()}</span>
                           )}
