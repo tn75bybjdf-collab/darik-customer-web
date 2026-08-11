@@ -16488,3 +16488,1201 @@
     display: none !important;
   }
 }
+
+/* DARIK_UNIQUE_HOME_APPLIANCES_HOME_DECOR_AUTO_PARTS_099
+   Unique visual identities for home_appliances, home_decor and auto_parts.
+   Visual styling follows data-theme-field.
+   Retail mechanics remain controlled by data-business.
+   Darik Marketplace catalog architecture is preserved. */
+
+/* ========================================================================== */
+/* HOME APPLIANCES / POLISHED APPLIANCE SHOWROOM                              */
+/* Porcelain white + brushed steel + cool aqua. Crisp, premium, efficient.    */
+/* ========================================================================== */
+
+.page[data-theme-field="home_appliances"] {
+  --appliance-ink: #21313c;
+  --appliance-muted: #738592;
+  --appliance-bg: #f3f7fa;
+  --appliance-paper: #ffffff;
+  --appliance-steel: #d8e1e8;
+  --appliance-line: rgba(46,73,90,.10);
+  --appliance-aqua: #27b9c6;
+  --appliance-aqua-deep: #1593a2;
+  --appliance-ice: #e7f8fb;
+
+  min-height: 100dvh;
+  padding-bottom: max(18px, env(safe-area-inset-bottom)) !important;
+  background:
+    radial-gradient(circle at 86% 4%, rgba(39,185,198,.09), transparent 20rem),
+    radial-gradient(circle at 10% 14%, rgba(216,225,232,.75), transparent 14rem),
+    linear-gradient(180deg, #f2f6f9 0%, #fcfeff 44%, #eef4f8 100%) !important;
+  color: #21313c !important;
+}
+
+.page[data-theme-field="home_appliances"] .announcementBar {
+  min-height: 32px !important;
+  border: 0 !important;
+  background: #21313c !important;
+  color: #ecf3f7 !important;
+}
+
+.page[data-theme-field="home_appliances"] .announcementBar strong,
+.page[data-theme-field="home_appliances"] .announcementBar span {
+  color: #ecf3f7 !important;
+}
+
+.page[data-theme-field="home_appliances"] .header {
+  min-height: 64px !important;
+  border-bottom: 1px solid rgba(46,73,90,.07) !important;
+  background: rgba(255,255,255,.94) !important;
+  color: #21313c !important;
+  box-shadow: 0 8px 26px rgba(33,49,60,.04) !important;
+  backdrop-filter: blur(18px) saturate(125%);
+  -webkit-backdrop-filter: blur(18px) saturate(125%);
+}
+
+.page[data-theme-field="home_appliances"] .headerLogo {
+  border: 1px solid rgba(46,73,90,.09) !important;
+  background: #ffffff !important;
+  box-shadow: 0 8px 18px rgba(33,49,60,.04) !important;
+}
+
+.page[data-theme-field="home_appliances"] .storeIdentity strong {
+  color: #21313c !important;
+}
+
+.page[data-theme-field="home_appliances"] .storeIdentity span {
+  color: #738592 !important;
+}
+
+.page[data-theme-field="home_appliances"] .headerActions button,
+.page[data-theme-field="home_appliances"] .headerActions .cartButton {
+  border: 1px solid rgba(46,73,90,.08) !important;
+  background: #ffffff !important;
+  color: #21313c !important;
+  box-shadow: none !important;
+}
+
+.page[data-theme-field="home_appliances"] .cartCount {
+  background: #27b9c6 !important;
+  color: #ffffff !important;
+}
+
+.page[data-theme-field="home_appliances"][data-hero] .hero {
+  width: min(1180px, calc(100% - 20px)) !important;
+  margin: 10px auto 0 !important;
+  overflow: hidden !important;
+  border: 1px solid rgba(46,73,90,.08) !important;
+  outline: 0 !important;
+  border-radius: 24px !important;
+  background-color: #edf4f8 !important;
+  box-shadow: 0 22px 56px rgba(33,49,60,.08) !important;
+}
+
+.page[data-theme-field="home_appliances"] .hero::after {
+  content: none !important;
+  display: none !important;
+}
+
+.page[data-theme-field="home_appliances"] .heroOverlay {
+  background:
+    linear-gradient(
+      90deg,
+      rgba(15,33,45,.74) 0%,
+      rgba(25,56,73,.38) 43%,
+      rgba(25,56,73,.12) 76%,
+      rgba(25,56,73,.03) 100%
+    ),
+    linear-gradient(0deg, rgba(15,33,45,.28), transparent 58%) !important;
+}
+
+.page[data-theme-field="home_appliances"] .heroTexture {
+  display: block !important;
+  background:
+    linear-gradient(120deg, rgba(255,255,255,.07) 0 36%, transparent 36% 100%),
+    radial-gradient(circle at 18% 12%, rgba(39,185,198,.16), transparent 24%),
+    linear-gradient(rgba(255,255,255,.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,.05) 1px, transparent 1px) !important;
+  background-size: auto, auto, 28px 28px, 28px 28px !important;
+}
+
+.page[data-theme-field="home_appliances"] .heroContent {
+  min-height: 382px !important;
+  justify-content: flex-end !important;
+  align-items: flex-end !important;
+  padding: 28px 28px 30px !important;
+}
+
+.page[data-theme-field="home_appliances"] .hero h1,
+.page[data-theme-field="home_appliances"] .heroCopy h1 {
+  max-width: 650px !important;
+  color: #ffffff !important;
+  font-family: inherit !important;
+  font-weight: 920 !important;
+  letter-spacing: -.055em !important;
+  text-shadow: 0 2px 18px rgba(0,0,0,.17);
+}
+
+.page[data-theme-field="home_appliances"] .tagline {
+  color: rgba(255,255,255,.84) !important;
+}
+
+.page[data-theme-field="home_appliances"] .heroLabel,
+.page[data-theme-field="home_appliances"] .heroLiveStatus,
+.page[data-theme-field="home_appliances"] .heroHoursChip {
+  border: 1px solid rgba(255,255,255,.16) !important;
+  background: rgba(255,255,255,.14) !important;
+  color: #ffffff !important;
+  box-shadow: none !important;
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+
+.page[data-theme-field="home_appliances"] .primaryHeroButton {
+  min-height: 52px !important;
+  border: 0 !important;
+  border-radius: 17px !important;
+  background: linear-gradient(135deg, #27b9c6, #1593a2) !important;
+  color: #ffffff !important;
+  box-shadow: 0 14px 30px rgba(39,185,198,.22) !important;
+}
+
+.page[data-theme-field="home_appliances"] .quickInfoStrip,
+.page[data-theme-field="home_appliances"] .catalogShell,
+.page[data-theme-field="home_appliances"] .storeStory,
+.page[data-theme-field="home_appliances"] .partsConcierge,
+.page[data-theme-field="home_appliances"] .footer {
+  width: min(1180px, calc(100% - 28px)) !important;
+}
+
+.page[data-theme-field="home_appliances"] .quickInfoStrip {
+  margin: 12px auto 0 !important;
+  gap: 8px !important;
+  border: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.page[data-theme-field="home_appliances"] .quickInfoStrip > a,
+.page[data-theme-field="home_appliances"] .quickInfoStrip > button,
+.page[data-theme-field="home_appliances"] .quickInfoStrip .locationQuickLink,
+.page[data-theme-field="home_appliances"] .quickInfoStrip .contactQuickLink {
+  border: 1px solid rgba(46,73,90,.08) !important;
+  border-radius: 16px !important;
+  background: #ffffff !important;
+  color: #21313c !important;
+  box-shadow: 0 8px 22px rgba(33,49,60,.03) !important;
+}
+
+.page[data-theme-field="home_appliances"] .quickIcon {
+  background: #e7f8fb !important;
+  color: #1593a2 !important;
+}
+
+.page[data-theme-field="home_appliances"] .catalogShell {
+  border: 0 !important;
+  background: transparent !important;
+  color: #21313c !important;
+  box-shadow: none !important;
+}
+
+.page[data-theme-field="home_appliances"] .searchBox {
+  border: 1px solid rgba(46,73,90,.09) !important;
+  border-radius: 16px !important;
+  background: #ffffff !important;
+  color: #738592 !important;
+  box-shadow: 0 8px 22px rgba(33,49,60,.03) !important;
+}
+
+.page[data-theme-field="home_appliances"] .searchBox input {
+  color: #21313c !important;
+}
+
+.page[data-theme-field="home_appliances"] .searchBox input::placeholder {
+  color: #92a0aa !important;
+}
+
+.page[data-theme-field="home_appliances"] .vehicleFilterPanel {
+  border: 1px solid rgba(46,73,90,.08) !important;
+  border-radius: 18px !important;
+  background:
+    radial-gradient(circle at 100% 0%, rgba(39,185,198,.08), transparent 13rem),
+    #ffffff !important;
+  color: #21313c !important;
+  box-shadow: 0 9px 23px rgba(33,49,60,.03) !important;
+}
+
+.page[data-theme-field="home_appliances"] .vehicleFilterHeading span,
+.page[data-theme-field="home_appliances"] .vehicleFilterGrid label > span,
+.page[data-theme-field="home_appliances"] .marketplaceCategoryNavLabel,
+.page[data-theme-field="home_appliances"] .marketplaceListingHeader span,
+.page[data-theme-field="home_appliances"] .storyCopy > span,
+.page[data-theme-field="home_appliances"] .partsConciergeCopy > span {
+  color: #1593a2 !important;
+}
+
+.page[data-theme-field="home_appliances"] .vehicleFilterHeading strong,
+.page[data-theme-field="home_appliances"] .marketplaceCategoryItem strong,
+.page[data-theme-field="home_appliances"] .marketplaceListingHeader h3,
+.page[data-theme-field="home_appliances"] .marketplaceBestSellerDepartmentTitle,
+.page[data-theme-field="home_appliances"] .storeStory h2,
+.page[data-theme-field="home_appliances"] .partsConcierge h2 {
+  color: #21313c !important;
+}
+
+.page[data-theme-field="home_appliances"] .vehicleFilterGrid select {
+  border: 1px solid rgba(46,73,90,.10) !important;
+  background: #f4f8fb !important;
+  color: #21313c !important;
+  border-radius: 13px !important;
+}
+
+.page[data-theme-field="home_appliances"] .vehicleMatchSummary,
+.page[data-theme-field="home_appliances"] .marketplaceCategoryProductList .productFitment {
+  background: #e7f8fb !important;
+  color: #1593a2 !important;
+}
+
+.page[data-theme-field="home_appliances"] .marketplaceCategoryCircle {
+  border: 1px solid rgba(46,73,90,.09) !important;
+  background: #ffffff !important;
+  box-shadow: 0 7px 17px rgba(33,49,60,.03) !important;
+}
+
+.page[data-theme-field="home_appliances"] .marketplaceCategoryBestSellers .marketplaceCategoryCircle {
+  border-color: rgba(39,185,198,.28) !important;
+  background:
+    radial-gradient(circle at 28% 22%, rgba(39,185,198,.14), transparent 42%),
+    linear-gradient(145deg, #ffffff, #ebf5f8) !important;
+}
+
+.page[data-theme-field="home_appliances"] .marketplaceCategoryStar {
+  color: #27b9c6 !important;
+}
+
+.page[data-theme-field="home_appliances"] .marketplaceCategoryItemActive .marketplaceCategoryCircle {
+  border-color: #27b9c6 !important;
+  box-shadow: 0 0 0 3px rgba(39,185,198,.08) !important;
+}
+
+.page[data-theme-field="home_appliances"] .marketplaceCategorySelectedDot {
+  border-color: #f3f7fa !important;
+  background: #27b9c6 !important;
+}
+
+.page[data-theme-field="home_appliances"] .marketplaceCategoryItem small,
+.page[data-theme-field="home_appliances"] .marketplaceListingHeader small,
+.page[data-theme-field="home_appliances"] .productArabic,
+.page[data-theme-field="home_appliances"] .storyCopy p,
+.page[data-theme-field="home_appliances"] .partsConciergeCopy p,
+.page[data-theme-field="home_appliances"] .storeIdentity span {
+  color: #738592 !important;
+}
+
+.page[data-theme-field="home_appliances"] .marketplaceBestSellerItem,
+.page[data-theme-field="home_appliances"] .marketplaceBestSellerCarousel .productCard,
+.page[data-theme-field="home_appliances"] .marketplaceBestSellerCarousel .autoPartsProductCard,
+.page[data-theme-field="home_appliances"] .marketplaceBestSellerCarousel .productBody,
+.page[data-theme-field="home_appliances"] .marketplaceCategoryProductList .productCard,
+.page[data-theme-field="home_appliances"] .marketplaceCategoryProductList .autoPartsProductCard {
+  height: auto !important;
+  min-height: 0 !important;
+  background: transparent !important;
+  color: #21313c !important;
+  box-shadow: none !important;
+}
+
+.page[data-theme-field="home_appliances"] .marketplaceBestSellerCarousel .productBody h3,
+.page[data-theme-field="home_appliances"] .marketplaceCategoryProductList .productBody h3 {
+  color: #21313c !important;
+}
+
+.page[data-theme-field="home_appliances"] .marketplaceBestSellerCarousel .productFooter strong {
+  color: #1593a2 !important;
+}
+
+.page[data-theme-field="home_appliances"] .marketplaceCategoryProductList .productCard,
+.page[data-theme-field="home_appliances"] .marketplaceCategoryProductList .autoPartsProductCard {
+  border-bottom: 1px solid rgba(46,73,90,.07) !important;
+}
+
+.page[data-theme-field="home_appliances"] .storeStory,
+.page[data-theme-field="home_appliances"] .partsConcierge {
+  min-height: 0 !important;
+  border: 1px solid rgba(46,73,90,.08) !important;
+  border-radius: 20px !important;
+  background: #ffffff !important;
+  color: #21313c !important;
+  box-shadow: 0 9px 23px rgba(33,49,60,.03) !important;
+}
+
+.page[data-theme-field="home_appliances"] .storeStory {
+  margin: 22px auto 0 !important;
+  padding: 22px !important;
+}
+
+.page[data-theme-field="home_appliances"] .partsConcierge {
+  margin: 16px auto 0 !important;
+  padding: 16px !important;
+}
+
+.page[data-theme-field="home_appliances"] .storyButton {
+  border: 0 !important;
+  background: #21313c !important;
+  color: #ffffff !important;
+}
+
+.page[data-theme-field="home_appliances"] .partsConciergeIcon {
+  background: #e7f8fb !important;
+  color: #1593a2 !important;
+}
+
+.page[data-theme-field="home_appliances"] .footer {
+  margin: 18px auto 0 !important;
+  padding: 16px 0 max(10px, env(safe-area-inset-bottom)) !important;
+  border: 0 !important;
+  border-top: 1px solid rgba(46,73,90,.08) !important;
+  background: transparent !important;
+  color: #21313c !important;
+  box-shadow: none !important;
+}
+
+/* ========================================================================== */
+/* HOME DECOR / EDITORIAL INTERIORS BOUTIQUE                                  */
+/* Sand + terracotta + olive + soft gallery styling.                          */
+/* ========================================================================== */
+
+.page[data-theme-field="home_decor"] {
+  --decor-ink: #3c312a;
+  --decor-muted: #85746a;
+  --decor-paper: #f9f5ef;
+  --decor-bg: #f3ece3;
+  --decor-sand: #eadfce;
+  --decor-terracotta: #be7652;
+  --decor-terracotta-deep: #9d5e40;
+  --decor-olive: #7e8560;
+  --decor-line: rgba(60,49,42,.08);
+
+  min-height: 100dvh;
+  padding-bottom: max(18px, env(safe-area-inset-bottom)) !important;
+  background:
+    radial-gradient(circle at 88% 4%, rgba(190,118,82,.10), transparent 19rem),
+    radial-gradient(circle at 8% 16%, rgba(126,133,96,.10), transparent 17rem),
+    linear-gradient(180deg, #f2ece3 0%, #fbf8f3 46%, #efe6da 100%) !important;
+  color: #3c312a !important;
+}
+
+.page[data-theme-field="home_decor"] .announcementBar {
+  min-height: 32px !important;
+  border: 0 !important;
+  background: #7e8560 !important;
+  color: #fffaf4 !important;
+}
+
+.page[data-theme-field="home_decor"] .announcementBar strong,
+.page[data-theme-field="home_decor"] .announcementBar span {
+  color: #fffaf4 !important;
+}
+
+.page[data-theme-field="home_decor"] .header {
+  min-height: 64px !important;
+  border-bottom: 1px solid rgba(60,49,42,.06) !important;
+  background: rgba(249,245,239,.92) !important;
+  color: #3c312a !important;
+  box-shadow: 0 8px 24px rgba(60,49,42,.03) !important;
+  backdrop-filter: blur(16px) saturate(120%);
+  -webkit-backdrop-filter: blur(16px) saturate(120%);
+}
+
+.page[data-theme-field="home_decor"] .headerLogo {
+  border: 1px solid rgba(60,49,42,.08) !important;
+  background: #fffdf8 !important;
+  box-shadow: 0 8px 18px rgba(60,49,42,.03) !important;
+}
+
+.page[data-theme-field="home_decor"] .storeIdentity strong {
+  color: #3c312a !important;
+}
+
+.page[data-theme-field="home_decor"] .storeIdentity span {
+  color: #85746a !important;
+}
+
+.page[data-theme-field="home_decor"] .headerActions button,
+.page[data-theme-field="home_decor"] .headerActions .cartButton {
+  border: 1px solid rgba(60,49,42,.07) !important;
+  background: #fffdf8 !important;
+  color: #3c312a !important;
+  box-shadow: none !important;
+}
+
+.page[data-theme-field="home_decor"] .cartCount {
+  background: #be7652 !important;
+  color: #ffffff !important;
+}
+
+.page[data-theme-field="home_decor"][data-hero] .hero {
+  width: min(1180px, calc(100% - 20px)) !important;
+  margin: 10px auto 0 !important;
+  overflow: hidden !important;
+  border: 0 !important;
+  outline: 0 !important;
+  border-radius: 26px !important;
+  background-color: #8f705c !important;
+  box-shadow: 0 22px 56px rgba(60,49,42,.11) !important;
+}
+
+.page[data-theme-field="home_decor"] .hero::after {
+  content: none !important;
+  display: none !important;
+}
+
+.page[data-theme-field="home_decor"] .heroOverlay {
+  background:
+    linear-gradient(
+      90deg,
+      rgba(55,42,35,.72) 0%,
+      rgba(72,54,45,.42) 42%,
+      rgba(72,54,45,.14) 76%,
+      rgba(72,54,45,.03) 100%
+    ),
+    linear-gradient(0deg, rgba(55,42,35,.23), transparent 58%) !important;
+}
+
+.page[data-theme-field="home_decor"] .heroTexture {
+  display: block !important;
+  background:
+    radial-gradient(circle at 16% 14%, rgba(255,255,255,.12), transparent 24%),
+    radial-gradient(circle at 82% 12%, rgba(126,133,96,.18), transparent 22%),
+    linear-gradient(135deg, transparent 0 68%, rgba(255,255,255,.05) 68% 70%, transparent 70%) !important;
+}
+
+.page[data-theme-field="home_decor"] .heroContent {
+  min-height: 388px !important;
+  justify-content: flex-end !important;
+  align-items: flex-end !important;
+  padding: 28px 28px 30px !important;
+}
+
+.page[data-theme-field="home_decor"] .hero h1,
+.page[data-theme-field="home_decor"] .heroCopy h1 {
+  max-width: 670px !important;
+  color: #fffaf4 !important;
+  font-family: Georgia, "Times New Roman", serif !important;
+  font-weight: 700 !important;
+  letter-spacing: -.045em !important;
+  text-shadow: 0 2px 18px rgba(0,0,0,.16);
+}
+
+.page[data-theme-field="home_decor"] .tagline {
+  color: rgba(255,250,244,.85) !important;
+}
+
+.page[data-theme-field="home_decor"] .heroLabel,
+.page[data-theme-field="home_decor"] .heroLiveStatus,
+.page[data-theme-field="home_decor"] .heroHoursChip {
+  border: 1px solid rgba(255,255,255,.16) !important;
+  background: rgba(255,255,255,.12) !important;
+  color: #fffaf4 !important;
+  box-shadow: none !important;
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+
+.page[data-theme-field="home_decor"] .primaryHeroButton {
+  min-height: 52px !important;
+  border: 0 !important;
+  border-radius: 18px !important;
+  background: #fff4e8 !important;
+  color: #7a4b35 !important;
+  box-shadow: 0 14px 30px rgba(60,49,42,.12) !important;
+}
+
+.page[data-theme-field="home_decor"] .quickInfoStrip,
+.page[data-theme-field="home_decor"] .catalogShell,
+.page[data-theme-field="home_decor"] .storeStory,
+.page[data-theme-field="home_decor"] .partsConcierge,
+.page[data-theme-field="home_decor"] .footer {
+  width: min(1180px, calc(100% - 28px)) !important;
+}
+
+.page[data-theme-field="home_decor"] .quickInfoStrip {
+  margin: 12px auto 0 !important;
+  gap: 8px !important;
+  border: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.page[data-theme-field="home_decor"] .quickInfoStrip > a,
+.page[data-theme-field="home_decor"] .quickInfoStrip > button,
+.page[data-theme-field="home_decor"] .quickInfoStrip .locationQuickLink,
+.page[data-theme-field="home_decor"] .quickInfoStrip .contactQuickLink {
+  border: 1px solid rgba(60,49,42,.07) !important;
+  border-radius: 18px !important;
+  background: #fffdf8 !important;
+  color: #3c312a !important;
+  box-shadow: 0 8px 22px rgba(60,49,42,.03) !important;
+}
+
+.page[data-theme-field="home_decor"] .quickIcon {
+  background: #f3eadf !important;
+  color: #7e8560 !important;
+}
+
+.page[data-theme-field="home_decor"] .catalogShell {
+  border: 0 !important;
+  background: transparent !important;
+  color: #3c312a !important;
+  box-shadow: none !important;
+}
+
+.page[data-theme-field="home_decor"] .searchBox {
+  border: 1px solid rgba(60,49,42,.08) !important;
+  border-radius: 18px !important;
+  background: #fffdf8 !important;
+  color: #85746a !important;
+  box-shadow: 0 8px 22px rgba(60,49,42,.03) !important;
+}
+
+.page[data-theme-field="home_decor"] .searchBox input {
+  color: #3c312a !important;
+}
+
+.page[data-theme-field="home_decor"] .searchBox input::placeholder {
+  color: #a19388 !important;
+}
+
+.page[data-theme-field="home_decor"] .vehicleFilterPanel {
+  border: 1px solid rgba(60,49,42,.08) !important;
+  border-radius: 18px !important;
+  background:
+    radial-gradient(circle at 100% 0%, rgba(190,118,82,.08), transparent 13rem),
+    #fffdf8 !important;
+  color: #3c312a !important;
+  box-shadow: 0 9px 23px rgba(60,49,42,.03) !important;
+}
+
+.page[data-theme-field="home_decor"] .vehicleFilterHeading span,
+.page[data-theme-field="home_decor"] .vehicleFilterGrid label > span,
+.page[data-theme-field="home_decor"] .marketplaceCategoryNavLabel,
+.page[data-theme-field="home_decor"] .marketplaceListingHeader span,
+.page[data-theme-field="home_decor"] .storyCopy > span,
+.page[data-theme-field="home_decor"] .partsConciergeCopy > span {
+  color: #7e8560 !important;
+}
+
+.page[data-theme-field="home_decor"] .vehicleFilterHeading strong,
+.page[data-theme-field="home_decor"] .marketplaceCategoryItem strong,
+.page[data-theme-field="home_decor"] .marketplaceListingHeader h3,
+.page[data-theme-field="home_decor"] .marketplaceBestSellerDepartmentTitle,
+.page[data-theme-field="home_decor"] .storeStory h2,
+.page[data-theme-field="home_decor"] .partsConcierge h2 {
+  color: #3c312a !important;
+}
+
+.page[data-theme-field="home_decor"] .marketplaceListingHeader h3,
+.page[data-theme-field="home_decor"] .marketplaceBestSellerDepartmentTitle,
+.page[data-theme-field="home_decor"] .storeStory h2,
+.page[data-theme-field="home_decor"] .partsConcierge h2 {
+  font-family: Georgia, "Times New Roman", serif !important;
+}
+
+.page[data-theme-field="home_decor"] .vehicleFilterGrid select {
+  border: 1px solid rgba(60,49,42,.10) !important;
+  background: #f6efe5 !important;
+  color: #3c312a !important;
+  border-radius: 13px !important;
+}
+
+.page[data-theme-field="home_decor"] .vehicleMatchSummary,
+.page[data-theme-field="home_decor"] .marketplaceCategoryProductList .productFitment {
+  background: #f2e7da !important;
+  color: #9d5e40 !important;
+}
+
+.page[data-theme-field="home_decor"] .marketplaceCategoryCircle {
+  border: 1px solid rgba(60,49,42,.08) !important;
+  background: #fffdf8 !important;
+  box-shadow: 0 7px 17px rgba(60,49,42,.03) !important;
+}
+
+.page[data-theme-field="home_decor"] .marketplaceCategoryBestSellers .marketplaceCategoryCircle {
+  border-color: rgba(190,118,82,.28) !important;
+  background:
+    radial-gradient(circle at 28% 22%, rgba(190,118,82,.14), transparent 42%),
+    linear-gradient(145deg, #fffdf8, #f4ebe1) !important;
+}
+
+.page[data-theme-field="home_decor"] .marketplaceCategoryStar {
+  color: #be7652 !important;
+}
+
+.page[data-theme-field="home_decor"] .marketplaceCategoryItemActive .marketplaceCategoryCircle {
+  border-color: #be7652 !important;
+  box-shadow: 0 0 0 3px rgba(190,118,82,.08) !important;
+}
+
+.page[data-theme-field="home_decor"] .marketplaceCategorySelectedDot {
+  border-color: #f2ece3 !important;
+  background: #7e8560 !important;
+}
+
+.page[data-theme-field="home_decor"] .marketplaceCategoryItem small,
+.page[data-theme-field="home_decor"] .marketplaceListingHeader small,
+.page[data-theme-field="home_decor"] .productArabic,
+.page[data-theme-field="home_decor"] .storyCopy p,
+.page[data-theme-field="home_decor"] .partsConciergeCopy p,
+.page[data-theme-field="home_decor"] .storeIdentity span {
+  color: #85746a !important;
+}
+
+.page[data-theme-field="home_decor"] .marketplaceBestSellerItem,
+.page[data-theme-field="home_decor"] .marketplaceBestSellerCarousel .productCard,
+.page[data-theme-field="home_decor"] .marketplaceBestSellerCarousel .autoPartsProductCard,
+.page[data-theme-field="home_decor"] .marketplaceBestSellerCarousel .productBody,
+.page[data-theme-field="home_decor"] .marketplaceCategoryProductList .productCard,
+.page[data-theme-field="home_decor"] .marketplaceCategoryProductList .autoPartsProductCard {
+  height: auto !important;
+  min-height: 0 !important;
+  background: transparent !important;
+  color: #3c312a !important;
+  box-shadow: none !important;
+}
+
+.page[data-theme-field="home_decor"] .marketplaceBestSellerCarousel .productBody h3,
+.page[data-theme-field="home_decor"] .marketplaceCategoryProductList .productBody h3 {
+  color: #3c312a !important;
+}
+
+.page[data-theme-field="home_decor"] .marketplaceBestSellerCarousel .productFooter strong {
+  color: #9d5e40 !important;
+}
+
+.page[data-theme-field="home_decor"] .marketplaceCategoryProductList .productCard,
+.page[data-theme-field="home_decor"] .marketplaceCategoryProductList .autoPartsProductCard {
+  border-bottom: 1px solid rgba(60,49,42,.07) !important;
+}
+
+.page[data-theme-field="home_decor"] .storeStory,
+.page[data-theme-field="home_decor"] .partsConcierge {
+  min-height: 0 !important;
+  border: 1px solid rgba(60,49,42,.07) !important;
+  border-radius: 22px !important;
+  background: #fffdf8 !important;
+  color: #3c312a !important;
+  box-shadow: 0 9px 23px rgba(60,49,42,.03) !important;
+}
+
+.page[data-theme-field="home_decor"] .storeStory {
+  margin: 22px auto 0 !important;
+  padding: 22px !important;
+}
+
+.page[data-theme-field="home_decor"] .partsConcierge {
+  margin: 16px auto 0 !important;
+  padding: 16px !important;
+}
+
+.page[data-theme-field="home_decor"] .storyButton {
+  border: 0 !important;
+  background: #7e8560 !important;
+  color: #fffaf4 !important;
+}
+
+.page[data-theme-field="home_decor"] .partsConciergeIcon {
+  background: #f3eadf !important;
+  color: #9d5e40 !important;
+}
+
+.page[data-theme-field="home_decor"] .footer {
+  margin: 18px auto 0 !important;
+  padding: 16px 0 max(10px, env(safe-area-inset-bottom)) !important;
+  border: 0 !important;
+  border-top: 1px solid rgba(60,49,42,.08) !important;
+  background: transparent !important;
+  color: #3c312a !important;
+  box-shadow: none !important;
+}
+
+/* ========================================================================== */
+/* AUTO PARTS / PERFORMANCE GARAGE                                            */
+/* Carbon + gunmetal + red-orange energy. Industrial motorsport feel.         */
+/* ========================================================================== */
+
+.page[data-theme-field="auto_parts"] {
+  --parts-ink: #eef1f4;
+  --parts-muted: #9aa2ab;
+  --parts-bg: #0f1216;
+  --parts-panel: #181d23;
+  --parts-panel-soft: #20262d;
+  --parts-carbon: #12161b;
+  --parts-gunmetal: #2b333d;
+  --parts-red: #e24f34;
+  --parts-red-deep: #b93d24;
+  --parts-orange: #f6912d;
+  --parts-line: rgba(255,255,255,.08);
+
+  min-height: 100dvh;
+  padding-bottom: max(18px, env(safe-area-inset-bottom)) !important;
+  background:
+    linear-gradient(135deg, rgba(226,79,52,.06) 0 12%, transparent 12% 100%),
+    linear-gradient(315deg, rgba(246,145,45,.04) 0 10%, transparent 10% 100%),
+    linear-gradient(180deg, #0c0f12 0%, #14181e 44%, #0e1115 100%) !important;
+  color: #eef1f4 !important;
+}
+
+.page[data-theme-field="auto_parts"] .announcementBar {
+  min-height: 32px !important;
+  border: 0 !important;
+  background: #07090b !important;
+  color: #dde3e9 !important;
+}
+
+.page[data-theme-field="auto_parts"] .announcementBar strong,
+.page[data-theme-field="auto_parts"] .announcementBar span {
+  color: #dde3e9 !important;
+}
+
+.page[data-theme-field="auto_parts"] .header {
+  min-height: 64px !important;
+  border-bottom: 1px solid rgba(255,255,255,.08) !important;
+  background: rgba(11,13,17,.95) !important;
+  color: #eef1f4 !important;
+  box-shadow: 0 10px 30px rgba(0,0,0,.28) !important;
+  backdrop-filter: blur(18px) saturate(120%);
+  -webkit-backdrop-filter: blur(18px) saturate(120%);
+}
+
+.page[data-theme-field="auto_parts"] .headerLogo {
+  border: 1px solid rgba(255,255,255,.10) !important;
+  background: #f6f7f8 !important;
+  box-shadow: 0 8px 20px rgba(0,0,0,.22) !important;
+}
+
+.page[data-theme-field="auto_parts"] .storeIdentity strong {
+  color: #eef1f4 !important;
+}
+
+.page[data-theme-field="auto_parts"] .storeIdentity span {
+  color: #9aa2ab !important;
+}
+
+.page[data-theme-field="auto_parts"] .headerActions button,
+.page[data-theme-field="auto_parts"] .headerActions .cartButton {
+  border: 1px solid rgba(255,255,255,.10) !important;
+  background: rgba(255,255,255,.04) !important;
+  color: #eef1f4 !important;
+  box-shadow: none !important;
+}
+
+.page[data-theme-field="auto_parts"] .cartCount {
+  background: #e24f34 !important;
+  color: #ffffff !important;
+}
+
+.page[data-theme-field="auto_parts"][data-hero] .hero {
+  width: min(1180px, calc(100% - 20px)) !important;
+  margin: 10px auto 0 !important;
+  overflow: hidden !important;
+  border: 0 !important;
+  outline: 0 !important;
+  border-radius: 14px !important;
+  background-color: #101419 !important;
+  box-shadow: 0 24px 56px rgba(0,0,0,.28) !important;
+}
+
+.page[data-theme-field="auto_parts"] .hero::after {
+  content: none !important;
+  display: none !important;
+}
+
+.page[data-theme-field="auto_parts"] .heroOverlay {
+  background:
+    linear-gradient(
+      90deg,
+      rgba(8,10,13,.88) 0%,
+      rgba(18,24,31,.60) 42%,
+      rgba(52,22,14,.18) 76%,
+      rgba(52,22,14,.04) 100%
+    ),
+    linear-gradient(0deg, rgba(8,10,13,.42), transparent 58%) !important;
+}
+
+.page[data-theme-field="auto_parts"] .heroTexture {
+  display: block !important;
+  background:
+    linear-gradient(135deg, rgba(255,255,255,.03) 0 8%, transparent 8% 100%),
+    linear-gradient(315deg, rgba(226,79,52,.10) 0 7%, transparent 7% 100%),
+    linear-gradient(rgba(255,255,255,.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,.03) 1px, transparent 1px) !important;
+  background-size: auto, auto, 24px 24px, 24px 24px !important;
+}
+
+.page[data-theme-field="auto_parts"] .heroContent {
+  min-height: 386px !important;
+  justify-content: flex-end !important;
+  align-items: flex-end !important;
+  padding: 28px 28px 30px !important;
+}
+
+.page[data-theme-field="auto_parts"] .hero h1,
+.page[data-theme-field="auto_parts"] .heroCopy h1 {
+  max-width: 670px !important;
+  color: #ffffff !important;
+  font-family: inherit !important;
+  font-weight: 950 !important;
+  letter-spacing: -.06em !important;
+  text-shadow: 0 2px 18px rgba(0,0,0,.24);
+}
+
+.page[data-theme-field="auto_parts"] .tagline {
+  color: rgba(255,255,255,.80) !important;
+}
+
+.page[data-theme-field="auto_parts"] .heroLabel,
+.page[data-theme-field="auto_parts"] .heroLiveStatus,
+.page[data-theme-field="auto_parts"] .heroHoursChip {
+  border: 1px solid rgba(255,255,255,.12) !important;
+  background: rgba(0,0,0,.24) !important;
+  color: #ffffff !important;
+  box-shadow: none !important;
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+
+.page[data-theme-field="auto_parts"] .primaryHeroButton {
+  min-height: 52px !important;
+  border: 0 !important;
+  border-radius: 10px !important;
+  background: linear-gradient(135deg, #e24f34, #f6912d) !important;
+  color: #ffffff !important;
+  box-shadow: 0 14px 30px rgba(226,79,52,.22) !important;
+}
+
+.page[data-theme-field="auto_parts"] .quickInfoStrip,
+.page[data-theme-field="auto_parts"] .catalogShell,
+.page[data-theme-field="auto_parts"] .storeStory,
+.page[data-theme-field="auto_parts"] .partsConcierge,
+.page[data-theme-field="auto_parts"] .footer {
+  width: min(1180px, calc(100% - 28px)) !important;
+}
+
+.page[data-theme-field="auto_parts"] .quickInfoStrip {
+  margin: 12px auto 0 !important;
+  gap: 8px !important;
+  border: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.page[data-theme-field="auto_parts"] .quickInfoStrip > a,
+.page[data-theme-field="auto_parts"] .quickInfoStrip > button,
+.page[data-theme-field="auto_parts"] .quickInfoStrip .locationQuickLink,
+.page[data-theme-field="auto_parts"] .quickInfoStrip .contactQuickLink {
+  border: 1px solid rgba(255,255,255,.08) !important;
+  border-radius: 10px !important;
+  background: #181d23 !important;
+  color: #eef1f4 !important;
+  box-shadow: 0 8px 22px rgba(0,0,0,.15) !important;
+}
+
+.page[data-theme-field="auto_parts"] .quickIcon {
+  background: #2b333d !important;
+  color: #f6912d !important;
+}
+
+.page[data-theme-field="auto_parts"] .catalogShell {
+  border: 0 !important;
+  background: transparent !important;
+  color: #eef1f4 !important;
+  box-shadow: none !important;
+}
+
+.page[data-theme-field="auto_parts"] .searchBox {
+  border: 1px solid rgba(255,255,255,.08) !important;
+  border-radius: 10px !important;
+  background: #181d23 !important;
+  color: #9aa2ab !important;
+  box-shadow: 0 8px 22px rgba(0,0,0,.13) !important;
+}
+
+.page[data-theme-field="auto_parts"] .searchBox input {
+  color: #eef1f4 !important;
+}
+
+.page[data-theme-field="auto_parts"] .searchBox input::placeholder {
+  color: #808892 !important;
+}
+
+.page[data-theme-field="auto_parts"] .vehicleFilterPanel {
+  border: 1px solid rgba(255,255,255,.08) !important;
+  border-radius: 12px !important;
+  background:
+    radial-gradient(circle at 100% 0%, rgba(226,79,52,.10), transparent 12rem),
+    #181d23 !important;
+  color: #eef1f4 !important;
+  box-shadow: 0 9px 23px rgba(0,0,0,.14) !important;
+}
+
+.page[data-theme-field="auto_parts"] .vehicleFilterHeading span,
+.page[data-theme-field="auto_parts"] .vehicleFilterGrid label > span,
+.page[data-theme-field="auto_parts"] .marketplaceCategoryNavLabel,
+.page[data-theme-field="auto_parts"] .marketplaceListingHeader span,
+.page[data-theme-field="auto_parts"] .storyCopy > span,
+.page[data-theme-field="auto_parts"] .partsConciergeCopy > span {
+  color: #f6912d !important;
+}
+
+.page[data-theme-field="auto_parts"] .vehicleFilterHeading strong,
+.page[data-theme-field="auto_parts"] .marketplaceCategoryItem strong,
+.page[data-theme-field="auto_parts"] .marketplaceListingHeader h3,
+.page[data-theme-field="auto_parts"] .marketplaceBestSellerDepartmentTitle,
+.page[data-theme-field="auto_parts"] .storeStory h2,
+.page[data-theme-field="auto_parts"] .partsConcierge h2 {
+  color: #eef1f4 !important;
+}
+
+.page[data-theme-field="auto_parts"] .vehicleFilterGrid select {
+  border: 1px solid rgba(255,255,255,.09) !important;
+  background: #101419 !important;
+  color: #eef1f4 !important;
+  border-radius: 10px !important;
+}
+
+.page[data-theme-field="auto_parts"] .vehicleMatchSummary,
+.page[data-theme-field="auto_parts"] .marketplaceCategoryProductList .productFitment {
+  background: #2b333d !important;
+  color: #f8a655 !important;
+}
+
+.page[data-theme-field="auto_parts"] .marketplaceCategoryCircle {
+  border: 1px solid rgba(255,255,255,.08) !important;
+  background: #181d23 !important;
+  box-shadow: 0 7px 17px rgba(0,0,0,.13) !important;
+}
+
+.page[data-theme-field="auto_parts"] .marketplaceCategoryBestSellers .marketplaceCategoryCircle {
+  border-color: rgba(226,79,52,.35) !important;
+  background:
+    radial-gradient(circle at 28% 22%, rgba(246,145,45,.16), transparent 42%),
+    linear-gradient(145deg, #2b333d, #181d23) !important;
+}
+
+.page[data-theme-field="auto_parts"] .marketplaceCategoryStar {
+  color: #e24f34 !important;
+}
+
+.page[data-theme-field="auto_parts"] .marketplaceCategoryItemActive .marketplaceCategoryCircle {
+  border-color: #e24f34 !important;
+  box-shadow: 0 0 0 3px rgba(226,79,52,.11) !important;
+}
+
+.page[data-theme-field="auto_parts"] .marketplaceCategorySelectedDot {
+  border-color: #0f1216 !important;
+  background: #f6912d !important;
+}
+
+.page[data-theme-field="auto_parts"] .marketplaceCategoryItem small,
+.page[data-theme-field="auto_parts"] .marketplaceListingHeader small,
+.page[data-theme-field="auto_parts"] .productArabic,
+.page[data-theme-field="auto_parts"] .storyCopy p,
+.page[data-theme-field="auto_parts"] .partsConciergeCopy p,
+.page[data-theme-field="auto_parts"] .storeIdentity span {
+  color: #9aa2ab !important;
+}
+
+.page[data-theme-field="auto_parts"] .marketplaceBestSellerItem,
+.page[data-theme-field="auto_parts"] .marketplaceBestSellerCarousel .productCard,
+.page[data-theme-field="auto_parts"] .marketplaceBestSellerCarousel .autoPartsProductCard,
+.page[data-theme-field="auto_parts"] .marketplaceBestSellerCarousel .productBody,
+.page[data-theme-field="auto_parts"] .marketplaceCategoryProductList .productCard,
+.page[data-theme-field="auto_parts"] .marketplaceCategoryProductList .autoPartsProductCard {
+  height: auto !important;
+  min-height: 0 !important;
+  background: transparent !important;
+  color: #eef1f4 !important;
+  box-shadow: none !important;
+}
+
+.page[data-theme-field="auto_parts"] .marketplaceBestSellerCarousel .productBody h3,
+.page[data-theme-field="auto_parts"] .marketplaceCategoryProductList .productBody h3 {
+  color: #eef1f4 !important;
+}
+
+.page[data-theme-field="auto_parts"] .marketplaceBestSellerCarousel .productFooter strong {
+  color: #f8a655 !important;
+}
+
+.page[data-theme-field="auto_parts"] .marketplaceCategoryProductList .productCard,
+.page[data-theme-field="auto_parts"] .marketplaceCategoryProductList .autoPartsProductCard {
+  border-bottom: 1px solid rgba(255,255,255,.08) !important;
+}
+
+.page[data-theme-field="auto_parts"] .storeStory,
+.page[data-theme-field="auto_parts"] .partsConcierge {
+  min-height: 0 !important;
+  border: 1px solid rgba(255,255,255,.08) !important;
+  border-radius: 12px !important;
+  background: #181d23 !important;
+  color: #eef1f4 !important;
+  box-shadow: 0 10px 24px rgba(0,0,0,.14) !important;
+}
+
+.page[data-theme-field="auto_parts"] .storeStory {
+  margin: 22px auto 0 !important;
+  padding: 22px !important;
+}
+
+.page[data-theme-field="auto_parts"] .partsConcierge {
+  margin: 16px auto 0 !important;
+  padding: 16px !important;
+}
+
+.page[data-theme-field="auto_parts"] .storyButton {
+  border: 0 !important;
+  background: #e24f34 !important;
+  color: #ffffff !important;
+}
+
+.page[data-theme-field="auto_parts"] .partsConciergeIcon {
+  background: #2b333d !important;
+  color: #f6912d !important;
+}
+
+.page[data-theme-field="auto_parts"] .footer {
+  margin: 18px auto 0 !important;
+  padding: 16px 0 max(10px, env(safe-area-inset-bottom)) !important;
+  border: 0 !important;
+  border-top: 1px solid rgba(255,255,255,.08) !important;
+  background: transparent !important;
+  color: #eef1f4 !important;
+  box-shadow: none !important;
+}
+
+/* ========================================================================== */
+/* Mobile tuning                                                               */
+/* ========================================================================== */
+
+@media (max-width: 760px) {
+  .page[data-theme-field="home_appliances"][data-hero] .hero,
+  .page[data-theme-field="home_decor"][data-hero] .hero,
+  .page[data-theme-field="auto_parts"][data-hero] .hero {
+    width: calc(100% - 18px) !important;
+    margin-top: 8px !important;
+  }
+
+  .page[data-theme-field="home_appliances"][data-hero] .hero,
+  .page[data-theme-field="home_decor"][data-hero] .hero {
+    border-radius: 21px !important;
+  }
+
+  .page[data-theme-field="auto_parts"][data-hero] .hero {
+    border-radius: 11px !important;
+  }
+
+  .page[data-theme-field="home_appliances"] .heroContent,
+  .page[data-theme-field="home_decor"] .heroContent,
+  .page[data-theme-field="auto_parts"] .heroContent {
+    min-height: 316px !important;
+    padding: 20px 18px 22px !important;
+  }
+
+  .page[data-theme-field="home_appliances"] .hero h1,
+  .page[data-theme-field="home_appliances"] .heroCopy h1,
+  .page[data-theme-field="auto_parts"] .hero h1,
+  .page[data-theme-field="auto_parts"] .heroCopy h1 {
+    font-size: clamp(29px, 8.4vw, 38px) !important;
+    line-height: .98 !important;
+  }
+
+  .page[data-theme-field="home_decor"] .hero h1,
+  .page[data-theme-field="home_decor"] .heroCopy h1 {
+    font-size: clamp(30px, 8.8vw, 39px) !important;
+    line-height: .97 !important;
+  }
+
+  .page[data-theme-field="home_appliances"] .quickInfoStrip,
+  .page[data-theme-field="home_appliances"] .catalogShell,
+  .page[data-theme-field="home_appliances"] .storeStory,
+  .page[data-theme-field="home_appliances"] .partsConcierge,
+  .page[data-theme-field="home_appliances"] .footer,
+  .page[data-theme-field="home_decor"] .quickInfoStrip,
+  .page[data-theme-field="home_decor"] .catalogShell,
+  .page[data-theme-field="home_decor"] .storeStory,
+  .page[data-theme-field="home_decor"] .partsConcierge,
+  .page[data-theme-field="home_decor"] .footer,
+  .page[data-theme-field="auto_parts"] .quickInfoStrip,
+  .page[data-theme-field="auto_parts"] .catalogShell,
+  .page[data-theme-field="auto_parts"] .storeStory,
+  .page[data-theme-field="auto_parts"] .partsConcierge,
+  .page[data-theme-field="auto_parts"] .footer {
+    width: calc(100% - 24px) !important;
+  }
+
+  .page[data-theme-field="home_appliances"] .marketplaceListingHeader,
+  .page[data-theme-field="home_decor"] .marketplaceListingHeader,
+  .page[data-theme-field="auto_parts"] .marketplaceListingHeader {
+    margin: 4px 0 11px !important;
+  }
+
+  .page[data-theme-field="home_appliances"] .marketplaceListingHeader h3,
+  .page[data-theme-field="home_decor"] .marketplaceListingHeader h3,
+  .page[data-theme-field="auto_parts"] .marketplaceListingHeader h3 {
+    font-size: 21px !important;
+  }
+
+  .page[data-theme-field="home_appliances"] .marketplaceBestSellerDepartmentTitle,
+  .page[data-theme-field="home_decor"] .marketplaceBestSellerDepartmentTitle,
+  .page[data-theme-field="auto_parts"] .marketplaceBestSellerDepartmentTitle {
+    margin-bottom: 9px !important;
+    font-size: 15px !important;
+    line-height: 19px !important;
+  }
+
+  .page[data-theme-field="home_appliances"] .storeStory,
+  .page[data-theme-field="home_decor"] .storeStory,
+  .page[data-theme-field="auto_parts"] .storeStory {
+    padding: 17px !important;
+  }
+
+  .page[data-theme-field="home_appliances"] .storyCopy h2,
+  .page[data-theme-field="home_decor"] .storyCopy h2,
+  .page[data-theme-field="auto_parts"] .storyCopy h2 {
+    margin: 4px 0 8px !important;
+    font-size: 23px !important;
+    line-height: 1.06 !important;
+  }
+
+  .page[data-theme-field="home_appliances"] .storyCopy p,
+  .page[data-theme-field="home_decor"] .storyCopy p,
+  .page[data-theme-field="auto_parts"] .storyCopy p {
+    display: -webkit-box;
+    margin: 0 !important;
+    overflow: hidden;
+    font-size: 11px !important;
+    line-height: 1.48 !important;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 3;
+  }
+
+  .page[data-theme-field="home_appliances"] .partsConcierge,
+  .page[data-theme-field="home_decor"] .partsConcierge,
+  .page[data-theme-field="auto_parts"] .partsConcierge {
+    padding: 13px !important;
+  }
+
+  .page[data-theme-field="home_appliances"] .partsConciergeCopy h2,
+  .page[data-theme-field="home_decor"] .partsConciergeCopy h2,
+  .page[data-theme-field="auto_parts"] .partsConciergeCopy h2 {
+    font-size: 16px !important;
+    line-height: 1.08 !important;
+  }
+
+  .page[data-theme-field="home_appliances"] .partsConciergeCopy p,
+  .page[data-theme-field="home_decor"] .partsConciergeCopy p,
+  .page[data-theme-field="auto_parts"] .partsConciergeCopy p {
+    display: none !important;
+  }
+}
