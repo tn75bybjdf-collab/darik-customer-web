@@ -13919,3 +13919,1286 @@
     display: none !important;
   }
 }
+
+/* DARIK_UNIQUE_COSMETICS_PERFUME_ELECTRONICS_097
+   Unique visual identities for cosmetics, perfume and electronics.
+   Visual styling follows data-theme-field.
+   Retail mechanics remain controlled by data-business.
+   Darik Marketplace catalog architecture is preserved. */
+
+/* ========================================================================== */
+/* COSMETICS / BEAUTY STUDIO                                                   */
+/* Porcelain + blush + muted plum + rose metal. Clean editorial beauty.        */
+/* ========================================================================== */
+
+.page[data-theme-field="cosmetics"] {
+  --beauty-ink: #2b2027;
+  --beauty-plum: #5c3348;
+  --beauty-rose: #c17891;
+  --beauty-rose-deep: #9d5870;
+  --beauty-porcelain: #fcf9f8;
+  --beauty-blush: #f5e8eb;
+  --beauty-mist: #eee9ef;
+  --beauty-muted: #82727b;
+
+  min-height: 100dvh;
+  padding-bottom: max(18px, env(safe-area-inset-bottom)) !important;
+  background:
+    radial-gradient(circle at 9% 3%, rgba(193,120,145,.10), transparent 20rem),
+    radial-gradient(circle at 89% 14%, rgba(92,51,72,.055), transparent 18rem),
+    linear-gradient(180deg, #fcf9f8 0%, #fff 46%, #faf6f7 100%) !important;
+  color: #2b2027 !important;
+}
+
+.page[data-theme-field="cosmetics"] .announcementBar {
+  min-height: 32px !important;
+  border: 0 !important;
+  background: #5c3348 !important;
+  color: #fff8fb !important;
+}
+
+.page[data-theme-field="cosmetics"] .announcementBar strong,
+.page[data-theme-field="cosmetics"] .announcementBar span {
+  color: #fff8fb !important;
+}
+
+.page[data-theme-field="cosmetics"] .header {
+  min-height: 64px !important;
+  border-bottom: 1px solid rgba(92,51,72,.07) !important;
+  background: rgba(252,249,248,.97) !important;
+  color: #2b2027 !important;
+  box-shadow: 0 8px 24px rgba(92,51,72,.035) !important;
+  backdrop-filter: blur(18px) saturate(125%);
+  -webkit-backdrop-filter: blur(18px) saturate(125%);
+}
+
+.page[data-theme-field="cosmetics"] .headerLogo {
+  border: 1px solid rgba(92,51,72,.08) !important;
+  background: #fff !important;
+  box-shadow: 0 7px 18px rgba(92,51,72,.04) !important;
+}
+
+.page[data-theme-field="cosmetics"] .storeIdentity strong {
+  color: #2b2027 !important;
+}
+
+.page[data-theme-field="cosmetics"] .storeIdentity span {
+  color: #82727b !important;
+}
+
+.page[data-theme-field="cosmetics"] .headerActions button,
+.page[data-theme-field="cosmetics"] .headerActions .cartButton {
+  border: 1px solid rgba(92,51,72,.08) !important;
+  background: #fff !important;
+  color: #5c3348 !important;
+  box-shadow: none !important;
+}
+
+.page[data-theme-field="cosmetics"] .cartCount {
+  background: #c17891 !important;
+  color: #fff !important;
+}
+
+/* Cosmetics hero: luminous studio treatment. */
+.page[data-theme-field="cosmetics"][data-hero] .hero {
+  width: min(1180px, calc(100% - 20px)) !important;
+  margin: 10px auto 0 !important;
+  overflow: hidden !important;
+  border: 0 !important;
+  outline: 0 !important;
+  border-radius: 28px !important;
+  background-color: #4f2f40 !important;
+  box-shadow: 0 24px 56px rgba(92,51,72,.16) !important;
+}
+
+.page[data-theme-field="cosmetics"] .hero::after {
+  content: none !important;
+  display: none !important;
+}
+
+.page[data-theme-field="cosmetics"] .heroOverlay {
+  background:
+    linear-gradient(
+      90deg,
+      rgba(46,30,39,.82) 0%,
+      rgba(79,47,64,.52) 43%,
+      rgba(79,47,64,.16) 76%,
+      rgba(79,47,64,.04) 100%
+    ),
+    linear-gradient(0deg, rgba(46,30,39,.34), transparent 58%) !important;
+}
+
+.page[data-theme-field="cosmetics"] .heroTexture {
+  display: block !important;
+  background:
+    radial-gradient(circle at 18% 14%, rgba(245,232,235,.18), transparent 28%),
+    radial-gradient(circle at 82% 12%, rgba(193,120,145,.14), transparent 23%) !important;
+}
+
+.page[data-theme-field="cosmetics"] .heroContent {
+  min-height: 382px !important;
+  justify-content: flex-end !important;
+  align-items: flex-end !important;
+  padding: 28px 27px 30px !important;
+}
+
+.page[data-theme-field="cosmetics"] .hero h1,
+.page[data-theme-field="cosmetics"] .heroCopy h1 {
+  max-width: 650px !important;
+  color: #fffafc !important;
+  font-family: inherit !important;
+  font-weight: 850 !important;
+  letter-spacing: -.045em !important;
+  text-shadow: 0 2px 18px rgba(0,0,0,.16);
+}
+
+.page[data-theme-field="cosmetics"] .tagline {
+  color: rgba(255,250,252,.82) !important;
+}
+
+.page[data-theme-field="cosmetics"] .heroLabel,
+.page[data-theme-field="cosmetics"] .heroLiveStatus,
+.page[data-theme-field="cosmetics"] .heroHoursChip {
+  border: 1px solid rgba(255,255,255,.15) !important;
+  background: rgba(76,43,59,.47) !important;
+  color: #fffafc !important;
+  box-shadow: none !important;
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+
+.page[data-theme-field="cosmetics"] .primaryHeroButton {
+  min-height: 52px !important;
+  border: 0 !important;
+  border-radius: 18px !important;
+  background: linear-gradient(135deg, #c17891, #a85f78) !important;
+  color: #fff !important;
+  box-shadow: 0 14px 30px rgba(157,88,112,.22) !important;
+}
+
+.page[data-theme-field="cosmetics"] .quickInfoStrip {
+  width: min(1180px, calc(100% - 28px)) !important;
+  margin: 12px auto 0 !important;
+  gap: 8px !important;
+  border: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.page[data-theme-field="cosmetics"] .quickInfoStrip > a,
+.page[data-theme-field="cosmetics"] .quickInfoStrip > button,
+.page[data-theme-field="cosmetics"] .quickInfoStrip .locationQuickLink,
+.page[data-theme-field="cosmetics"] .quickInfoStrip .contactQuickLink {
+  border: 1px solid rgba(92,51,72,.07) !important;
+  border-radius: 18px !important;
+  background: rgba(255,255,255,.96) !important;
+  color: #2b2027 !important;
+  box-shadow: 0 8px 22px rgba(92,51,72,.035) !important;
+}
+
+.page[data-theme-field="cosmetics"] .quickIcon {
+  background: #f5e8eb !important;
+  color: #9d5870 !important;
+}
+
+/* Beauty catalog + cross-field mechanics. */
+.page[data-theme-field="cosmetics"] .catalogShell {
+  width: min(1180px, calc(100% - 28px)) !important;
+  border: 0 !important;
+  background: transparent !important;
+  color: #2b2027 !important;
+  box-shadow: none !important;
+}
+
+.page[data-theme-field="cosmetics"] .searchBox {
+  border: 1px solid rgba(92,51,72,.09) !important;
+  border-radius: 17px !important;
+  background: #fff !important;
+  color: #82727b !important;
+  box-shadow: 0 8px 22px rgba(92,51,72,.03) !important;
+}
+
+.page[data-theme-field="cosmetics"] .searchBox input {
+  color: #2b2027 !important;
+}
+
+.page[data-theme-field="cosmetics"] .searchBox input::placeholder {
+  color: #a3919a !important;
+}
+
+.page[data-theme-field="cosmetics"] .vehicleFilterPanel {
+  border: 1px solid rgba(92,51,72,.08) !important;
+  border-radius: 20px !important;
+  background:
+    radial-gradient(circle at 100% 0%, rgba(193,120,145,.065), transparent 13rem),
+    #fff !important;
+  color: #2b2027 !important;
+  box-shadow: 0 9px 23px rgba(92,51,72,.035) !important;
+}
+
+.page[data-theme-field="cosmetics"] .vehicleFilterHeading span,
+.page[data-theme-field="cosmetics"] .vehicleFilterGrid label > span {
+  color: #9d5870 !important;
+}
+
+.page[data-theme-field="cosmetics"] .vehicleFilterHeading strong {
+  color: #2b2027 !important;
+}
+
+.page[data-theme-field="cosmetics"] .vehicleFilterGrid select {
+  border: 1px solid rgba(92,51,72,.10) !important;
+  background: #fcf9f8 !important;
+  color: #2b2027 !important;
+  border-radius: 14px !important;
+}
+
+.page[data-theme-field="cosmetics"] .vehicleMatchSummary {
+  background: #f5e8eb !important;
+  color: #7c4359 !important;
+}
+
+.page[data-theme-field="cosmetics"] .marketplaceCategoryNavLabel,
+.page[data-theme-field="cosmetics"] .marketplaceListingHeader span {
+  color: #9d5870 !important;
+}
+
+.page[data-theme-field="cosmetics"] .marketplaceCategoryCircle {
+  border: 1px solid rgba(92,51,72,.09) !important;
+  background: #fff !important;
+  box-shadow: 0 7px 17px rgba(92,51,72,.035) !important;
+}
+
+.page[data-theme-field="cosmetics"] .marketplaceCategoryBestSellers .marketplaceCategoryCircle {
+  border-color: rgba(193,120,145,.30) !important;
+  background:
+    radial-gradient(circle at 28% 22%, rgba(193,120,145,.18), transparent 42%),
+    linear-gradient(145deg, #fff, #f5e8eb) !important;
+}
+
+.page[data-theme-field="cosmetics"] .marketplaceCategoryStar {
+  color: #c17891 !important;
+}
+
+.page[data-theme-field="cosmetics"] .marketplaceCategoryItemActive .marketplaceCategoryCircle {
+  border-color: #c17891 !important;
+  box-shadow: 0 0 0 3px rgba(193,120,145,.08) !important;
+}
+
+.page[data-theme-field="cosmetics"] .marketplaceCategorySelectedDot {
+  border-color: #fcf9f8 !important;
+  background: #c17891 !important;
+}
+
+.page[data-theme-field="cosmetics"] .marketplaceCategoryItem strong,
+.page[data-theme-field="cosmetics"] .marketplaceListingHeader h3,
+.page[data-theme-field="cosmetics"] .marketplaceBestSellerDepartmentTitle {
+  color: #2b2027 !important;
+}
+
+.page[data-theme-field="cosmetics"] .marketplaceCategoryItem small,
+.page[data-theme-field="cosmetics"] .marketplaceListingHeader small {
+  color: #82727b !important;
+}
+
+.page[data-theme-field="cosmetics"] .marketplaceBestSellerItem,
+.page[data-theme-field="cosmetics"] .marketplaceBestSellerCarousel .productCard,
+.page[data-theme-field="cosmetics"] .marketplaceBestSellerCarousel .autoPartsProductCard,
+.page[data-theme-field="cosmetics"] .marketplaceBestSellerCarousel .productBody {
+  height: auto !important;
+  min-height: 0 !important;
+  background: transparent !important;
+  color: #2b2027 !important;
+  box-shadow: none !important;
+}
+
+.page[data-theme-field="cosmetics"] .marketplaceBestSellerCarousel .productBody h3 {
+  color: #2b2027 !important;
+}
+
+.page[data-theme-field="cosmetics"] .marketplaceBestSellerCarousel .productFooter,
+.page[data-theme-field="cosmetics"] .marketplaceBestSellerCarousel .productFooter > div:first-child {
+  height: auto !important;
+  min-height: 0 !important;
+}
+
+.page[data-theme-field="cosmetics"] .marketplaceBestSellerCarousel .productFooter strong {
+  color: #9d5870 !important;
+}
+
+.page[data-theme-field="cosmetics"] .marketplaceCategoryProductList .productCard,
+.page[data-theme-field="cosmetics"] .marketplaceCategoryProductList .autoPartsProductCard {
+  border-bottom: 1px solid rgba(92,51,72,.07) !important;
+  background: transparent !important;
+  color: #2b2027 !important;
+  box-shadow: none !important;
+}
+
+.page[data-theme-field="cosmetics"] .marketplaceCategoryProductList .productBody h3 {
+  color: #2b2027 !important;
+}
+
+.page[data-theme-field="cosmetics"] .marketplaceCategoryProductList .productArabic {
+  color: #82727b !important;
+}
+
+.page[data-theme-field="cosmetics"] .marketplaceCategoryProductList .productFitment {
+  background: #f5e8eb !important;
+  color: #7c4359 !important;
+}
+
+.page[data-theme-field="cosmetics"] .storeStory,
+.page[data-theme-field="cosmetics"] .partsConcierge {
+  width: min(1180px, calc(100% - 28px)) !important;
+  min-height: 0 !important;
+  border: 1px solid rgba(92,51,72,.07) !important;
+  border-radius: 21px !important;
+  background: #fff !important;
+  color: #2b2027 !important;
+  box-shadow: 0 9px 23px rgba(92,51,72,.03) !important;
+}
+
+.page[data-theme-field="cosmetics"] .storeStory {
+  margin: 22px auto 0 !important;
+  padding: 22px !important;
+}
+
+.page[data-theme-field="cosmetics"] .partsConcierge {
+  margin: 16px auto 0 !important;
+  padding: 16px !important;
+}
+
+.page[data-theme-field="cosmetics"] .storyCopy > span,
+.page[data-theme-field="cosmetics"] .partsConciergeCopy > span {
+  color: #9d5870 !important;
+}
+
+.page[data-theme-field="cosmetics"] .storyCopy h2,
+.page[data-theme-field="cosmetics"] .partsConciergeCopy h2 {
+  color: #2b2027 !important;
+}
+
+.page[data-theme-field="cosmetics"] .storyCopy p,
+.page[data-theme-field="cosmetics"] .partsConciergeCopy p {
+  color: #82727b !important;
+}
+
+.page[data-theme-field="cosmetics"] .storyButton {
+  border: 0 !important;
+  background: #5c3348 !important;
+  color: #fff !important;
+}
+
+.page[data-theme-field="cosmetics"] .partsConciergeIcon {
+  background: #f5e8eb !important;
+  color: #9d5870 !important;
+}
+
+.page[data-theme-field="cosmetics"] .footer {
+  width: min(1180px, calc(100% - 28px)) !important;
+  margin: 18px auto 0 !important;
+  padding: 16px 0 max(10px, env(safe-area-inset-bottom)) !important;
+  border: 0 !important;
+  border-top: 1px solid rgba(92,51,72,.08) !important;
+  background: transparent !important;
+  color: #2b2027 !important;
+  box-shadow: none !important;
+}
+
+/* ========================================================================== */
+/* PERFUME / FRAGRANCE HOUSE                                                   */
+/* Black-plum + burgundy + champagne. Dark, intimate, luxury fragrance mood.   */
+/* ========================================================================== */
+
+.page[data-theme-field="perfume"] {
+  --perfume-night: #151113;
+  --perfume-plum: #24151c;
+  --perfume-wine: #50172a;
+  --perfume-burgundy: #6e2139;
+  --perfume-gold: #c6a66a;
+  --perfume-gold-soft: #e1c995;
+  --perfume-ivory: #f6f0e8;
+  --perfume-muted: #aaa0a3;
+
+  min-height: 100dvh;
+  padding-bottom: max(18px, env(safe-area-inset-bottom)) !important;
+  background:
+    radial-gradient(circle at 10% 3%, rgba(198,166,106,.10), transparent 21rem),
+    radial-gradient(circle at 88% 15%, rgba(110,33,57,.10), transparent 18rem),
+    linear-gradient(180deg, #151113 0%, #1c1418 46%, #120f11 100%) !important;
+  color: #f6f0e8 !important;
+}
+
+.page[data-theme-field="perfume"] .announcementBar {
+  min-height: 32px !important;
+  border-bottom: 1px solid rgba(198,166,106,.11) !important;
+  background: #0c090b !important;
+  color: #e7dbc8 !important;
+}
+
+.page[data-theme-field="perfume"] .announcementBar strong,
+.page[data-theme-field="perfume"] .announcementBar span {
+  color: #e7dbc8 !important;
+}
+
+.page[data-theme-field="perfume"] .header {
+  min-height: 64px !important;
+  border-bottom: 1px solid rgba(198,166,106,.10) !important;
+  background: rgba(21,17,19,.97) !important;
+  color: #f6f0e8 !important;
+  box-shadow: 0 10px 30px rgba(0,0,0,.24) !important;
+  backdrop-filter: blur(18px) saturate(120%);
+  -webkit-backdrop-filter: blur(18px) saturate(120%);
+}
+
+.page[data-theme-field="perfume"] .headerLogo {
+  border: 1px solid rgba(198,166,106,.15) !important;
+  background: #f6f0e8 !important;
+  box-shadow: 0 8px 20px rgba(0,0,0,.22) !important;
+}
+
+.page[data-theme-field="perfume"] .storeIdentity strong {
+  color: #f6f0e8 !important;
+}
+
+.page[data-theme-field="perfume"] .storeIdentity span {
+  color: #aaa0a3 !important;
+}
+
+.page[data-theme-field="perfume"] .headerActions button,
+.page[data-theme-field="perfume"] .headerActions .cartButton {
+  border: 1px solid rgba(198,166,106,.12) !important;
+  background: rgba(255,255,255,.045) !important;
+  color: #f6f0e8 !important;
+  box-shadow: none !important;
+}
+
+.page[data-theme-field="perfume"] .cartCount {
+  background: #c6a66a !important;
+  color: #151113 !important;
+}
+
+/* Perfume hero: velvet darkness, champagne highlight. */
+.page[data-theme-field="perfume"][data-hero] .hero {
+  width: min(1180px, calc(100% - 20px)) !important;
+  margin: 10px auto 0 !important;
+  overflow: hidden !important;
+  border: 0 !important;
+  outline: 0 !important;
+  border-radius: 25px !important;
+  background-color: #120e10 !important;
+  box-shadow: 0 30px 70px rgba(0,0,0,.38) !important;
+}
+
+.page[data-theme-field="perfume"] .hero::after {
+  content: none !important;
+  display: none !important;
+}
+
+.page[data-theme-field="perfume"] .heroOverlay {
+  background:
+    linear-gradient(
+      90deg,
+      rgba(7,5,6,.93) 0%,
+      rgba(24,13,18,.72) 42%,
+      rgba(50,17,29,.31) 73%,
+      rgba(50,17,29,.12) 100%
+    ),
+    linear-gradient(0deg, rgba(7,5,6,.54), transparent 59%) !important;
+}
+
+.page[data-theme-field="perfume"] .heroTexture {
+  display: block !important;
+  background:
+    radial-gradient(circle at 19% 14%, rgba(198,166,106,.18), transparent 28%),
+    radial-gradient(circle at 82% 10%, rgba(110,33,57,.16), transparent 24%) !important;
+}
+
+.page[data-theme-field="perfume"] .heroContent {
+  min-height: 392px !important;
+  justify-content: flex-end !important;
+  align-items: flex-end !important;
+  padding: 28px 27px 30px !important;
+}
+
+.page[data-theme-field="perfume"] .hero h1,
+.page[data-theme-field="perfume"] .heroCopy h1 {
+  max-width: 650px !important;
+  color: #fbf6ee !important;
+  font-family: Georgia, "Times New Roman", serif !important;
+  font-weight: 700 !important;
+  letter-spacing: -.04em !important;
+  text-shadow: 0 2px 20px rgba(0,0,0,.30);
+}
+
+.page[data-theme-field="perfume"] .tagline {
+  color: rgba(246,240,232,.74) !important;
+}
+
+.page[data-theme-field="perfume"] .heroLabel,
+.page[data-theme-field="perfume"] .heroLiveStatus,
+.page[data-theme-field="perfume"] .heroHoursChip {
+  border: 1px solid rgba(198,166,106,.18) !important;
+  background: rgba(15,10,12,.64) !important;
+  color: #f6f0e8 !important;
+  box-shadow: none !important;
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+
+.page[data-theme-field="perfume"] .primaryHeroButton {
+  min-height: 52px !important;
+  border: 1px solid rgba(255,255,255,.06) !important;
+  border-radius: 15px !important;
+  background: linear-gradient(135deg, #c6a66a, #98783e) !important;
+  color: #151113 !important;
+  box-shadow: 0 14px 32px rgba(0,0,0,.24) !important;
+}
+
+.page[data-theme-field="perfume"] .quickInfoStrip {
+  width: min(1180px, calc(100% - 28px)) !important;
+  margin: 12px auto 0 !important;
+  gap: 8px !important;
+  border: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.page[data-theme-field="perfume"] .quickInfoStrip > a,
+.page[data-theme-field="perfume"] .quickInfoStrip > button,
+.page[data-theme-field="perfume"] .quickInfoStrip .locationQuickLink,
+.page[data-theme-field="perfume"] .quickInfoStrip .contactQuickLink {
+  border: 1px solid rgba(198,166,106,.11) !important;
+  border-radius: 15px !important;
+  background: #1e171a !important;
+  color: #f6f0e8 !important;
+  box-shadow: 0 9px 24px rgba(0,0,0,.16) !important;
+}
+
+.page[data-theme-field="perfume"] .quickIcon {
+  background: #2c211f !important;
+  color: #d7bc85 !important;
+}
+
+/* Perfume catalog. */
+.page[data-theme-field="perfume"] .catalogShell {
+  width: min(1180px, calc(100% - 28px)) !important;
+  border: 0 !important;
+  background: transparent !important;
+  color: #f6f0e8 !important;
+  box-shadow: none !important;
+}
+
+.page[data-theme-field="perfume"] .searchBox {
+  border: 1px solid rgba(198,166,106,.11) !important;
+  border-radius: 14px !important;
+  background: #1e171a !important;
+  color: #aaa0a3 !important;
+  box-shadow: 0 8px 22px rgba(0,0,0,.13) !important;
+}
+
+.page[data-theme-field="perfume"] .searchBox input {
+  color: #f6f0e8 !important;
+}
+
+.page[data-theme-field="perfume"] .searchBox input::placeholder {
+  color: #857c80 !important;
+}
+
+.page[data-theme-field="perfume"] .vehicleFilterPanel {
+  border: 1px solid rgba(198,166,106,.11) !important;
+  border-radius: 16px !important;
+  background:
+    radial-gradient(circle at 100% 0%, rgba(110,33,57,.10), transparent 13rem),
+    #1e171a !important;
+  color: #f6f0e8 !important;
+  box-shadow: 0 10px 26px rgba(0,0,0,.16) !important;
+}
+
+.page[data-theme-field="perfume"] .vehicleFilterHeading span,
+.page[data-theme-field="perfume"] .vehicleFilterGrid label > span {
+  color: #d7bc85 !important;
+}
+
+.page[data-theme-field="perfume"] .vehicleFilterHeading strong {
+  color: #f6f0e8 !important;
+}
+
+.page[data-theme-field="perfume"] .vehicleFilterGrid select {
+  border: 1px solid rgba(198,166,106,.12) !important;
+  background: #151113 !important;
+  color: #f6f0e8 !important;
+}
+
+.page[data-theme-field="perfume"] .vehicleMatchSummary {
+  border-color: rgba(198,166,106,.13) !important;
+  background: #2d2020 !important;
+  color: #d7bc85 !important;
+}
+
+.page[data-theme-field="perfume"] .marketplaceCategoryNavLabel,
+.page[data-theme-field="perfume"] .marketplaceListingHeader span {
+  color: #d7bc85 !important;
+}
+
+.page[data-theme-field="perfume"] .marketplaceCategoryCircle {
+  border: 1px solid rgba(198,166,106,.12) !important;
+  background: #1e171a !important;
+  box-shadow: 0 7px 17px rgba(0,0,0,.15) !important;
+}
+
+.page[data-theme-field="perfume"] .marketplaceCategoryBestSellers .marketplaceCategoryCircle {
+  border-color: rgba(198,166,106,.38) !important;
+  background:
+    radial-gradient(circle at 28% 22%, rgba(198,166,106,.18), transparent 42%),
+    linear-gradient(145deg, #2b1c20, #1e171a) !important;
+}
+
+.page[data-theme-field="perfume"] .marketplaceCategoryStar {
+  color: #d7bc85 !important;
+}
+
+.page[data-theme-field="perfume"] .marketplaceCategoryItemActive .marketplaceCategoryCircle {
+  border-color: #c6a66a !important;
+  box-shadow: 0 0 0 3px rgba(198,166,106,.09) !important;
+}
+
+.page[data-theme-field="perfume"] .marketplaceCategorySelectedDot {
+  border-color: #151113 !important;
+  background: #c6a66a !important;
+}
+
+.page[data-theme-field="perfume"] .marketplaceCategoryItem strong,
+.page[data-theme-field="perfume"] .marketplaceListingHeader h3,
+.page[data-theme-field="perfume"] .marketplaceBestSellerDepartmentTitle {
+  color: #f6f0e8 !important;
+}
+
+.page[data-theme-field="perfume"] .marketplaceCategoryItem small,
+.page[data-theme-field="perfume"] .marketplaceListingHeader small {
+  color: #aaa0a3 !important;
+}
+
+.page[data-theme-field="perfume"] .marketplaceListingHeader h3,
+.page[data-theme-field="perfume"] .marketplaceBestSellerDepartmentTitle {
+  font-family: Georgia, "Times New Roman", serif !important;
+}
+
+.page[data-theme-field="perfume"] .marketplaceBestSellerItem,
+.page[data-theme-field="perfume"] .marketplaceBestSellerCarousel .productCard,
+.page[data-theme-field="perfume"] .marketplaceBestSellerCarousel .autoPartsProductCard,
+.page[data-theme-field="perfume"] .marketplaceBestSellerCarousel .productBody {
+  height: auto !important;
+  min-height: 0 !important;
+  background: transparent !important;
+  color: #f6f0e8 !important;
+  box-shadow: none !important;
+}
+
+.page[data-theme-field="perfume"] .marketplaceBestSellerCarousel .productImage {
+  background: #191316 !important;
+}
+
+.page[data-theme-field="perfume"] .marketplaceBestSellerCarousel .productBody h3 {
+  color: #f6f0e8 !important;
+}
+
+.page[data-theme-field="perfume"] .marketplaceBestSellerCarousel .productFooter,
+.page[data-theme-field="perfume"] .marketplaceBestSellerCarousel .productFooter > div:first-child {
+  height: auto !important;
+  min-height: 0 !important;
+}
+
+.page[data-theme-field="perfume"] .marketplaceBestSellerCarousel .productFooter strong {
+  color: #d7bc85 !important;
+}
+
+.page[data-theme-field="perfume"] .marketplaceCategoryProductList .productCard,
+.page[data-theme-field="perfume"] .marketplaceCategoryProductList .autoPartsProductCard {
+  border-bottom: 1px solid rgba(198,166,106,.10) !important;
+  background: transparent !important;
+  color: #f6f0e8 !important;
+  box-shadow: none !important;
+}
+
+.page[data-theme-field="perfume"] .marketplaceCategoryProductList .productBody h3 {
+  color: #f6f0e8 !important;
+}
+
+.page[data-theme-field="perfume"] .marketplaceCategoryProductList .productArabic {
+  color: #aaa0a3 !important;
+}
+
+.page[data-theme-field="perfume"] .marketplaceCategoryProductList .productFitment {
+  background: #2d2020 !important;
+  color: #d7bc85 !important;
+}
+
+.page[data-theme-field="perfume"] .storeStory,
+.page[data-theme-field="perfume"] .partsConcierge {
+  width: min(1180px, calc(100% - 28px)) !important;
+  min-height: 0 !important;
+  border: 1px solid rgba(198,166,106,.11) !important;
+  border-radius: 17px !important;
+  background: #1e171a !important;
+  color: #f6f0e8 !important;
+  box-shadow: 0 10px 26px rgba(0,0,0,.15) !important;
+}
+
+.page[data-theme-field="perfume"] .storeStory {
+  margin: 22px auto 0 !important;
+  padding: 22px !important;
+}
+
+.page[data-theme-field="perfume"] .partsConcierge {
+  margin: 16px auto 0 !important;
+  padding: 16px !important;
+}
+
+.page[data-theme-field="perfume"] .storyCopy > span,
+.page[data-theme-field="perfume"] .partsConciergeCopy > span {
+  color: #d7bc85 !important;
+}
+
+.page[data-theme-field="perfume"] .storyCopy h2,
+.page[data-theme-field="perfume"] .partsConciergeCopy h2 {
+  color: #f6f0e8 !important;
+  font-family: Georgia, "Times New Roman", serif !important;
+}
+
+.page[data-theme-field="perfume"] .storyCopy p,
+.page[data-theme-field="perfume"] .partsConciergeCopy p {
+  color: #aaa0a3 !important;
+}
+
+.page[data-theme-field="perfume"] .storyButton {
+  border: 1px solid rgba(198,166,106,.14) !important;
+  background: #c6a66a !important;
+  color: #151113 !important;
+}
+
+.page[data-theme-field="perfume"] .partsConciergeIcon {
+  background: #2d2020 !important;
+  color: #d7bc85 !important;
+}
+
+.page[data-theme-field="perfume"] .footer {
+  width: min(1180px, calc(100% - 28px)) !important;
+  margin: 18px auto 0 !important;
+  padding: 16px 0 max(10px, env(safe-area-inset-bottom)) !important;
+  border: 0 !important;
+  border-top: 1px solid rgba(198,166,106,.10) !important;
+  background: transparent !important;
+  color: #f6f0e8 !important;
+  box-shadow: none !important;
+}
+
+/* ========================================================================== */
+/* ELECTRONICS / PRECISION TECH                                                */
+/* Cool white + graphite + electric cyan-blue. Technical, clean, exact.        */
+/* ========================================================================== */
+
+.page[data-theme-field="electronics"] {
+  --tech-ink: #0c1320;
+  --tech-slate: #172235;
+  --tech-white: #f7fafc;
+  --tech-panel: #ffffff;
+  --tech-line: #dbe5ef;
+  --tech-blue: #2563eb;
+  --tech-cyan: #06b6d4;
+  --tech-muted: #6b7a8e;
+
+  min-height: 100dvh;
+  padding-bottom: max(18px, env(safe-area-inset-bottom)) !important;
+  background:
+    linear-gradient(rgba(37,99,235,.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(37,99,235,.025) 1px, transparent 1px),
+    radial-gradient(circle at 88% 2%, rgba(6,182,212,.09), transparent 20rem),
+    linear-gradient(180deg, #f5f8fb 0%, #fff 48%, #f4f7fa 100%) !important;
+  background-size: 32px 32px, 32px 32px, auto, auto !important;
+  color: #0c1320 !important;
+}
+
+.page[data-theme-field="electronics"] .announcementBar {
+  min-height: 32px !important;
+  border: 0 !important;
+  background: #0c1320 !important;
+  color: #dce7f3 !important;
+}
+
+.page[data-theme-field="electronics"] .announcementBar strong,
+.page[data-theme-field="electronics"] .announcementBar span {
+  color: #dce7f3 !important;
+}
+
+.page[data-theme-field="electronics"] .header {
+  min-height: 64px !important;
+  border-bottom: 1px solid rgba(12,19,32,.08) !important;
+  background: rgba(247,250,252,.97) !important;
+  color: #0c1320 !important;
+  box-shadow: 0 8px 24px rgba(12,19,32,.04) !important;
+  backdrop-filter: blur(18px) saturate(125%);
+  -webkit-backdrop-filter: blur(18px) saturate(125%);
+}
+
+.page[data-theme-field="electronics"] .headerLogo {
+  border: 1px solid rgba(12,19,32,.08) !important;
+  background: #fff !important;
+  box-shadow: 0 7px 18px rgba(12,19,32,.04) !important;
+}
+
+.page[data-theme-field="electronics"] .storeIdentity strong {
+  color: #0c1320 !important;
+}
+
+.page[data-theme-field="electronics"] .storeIdentity span {
+  color: #6b7a8e !important;
+}
+
+.page[data-theme-field="electronics"] .headerActions button,
+.page[data-theme-field="electronics"] .headerActions .cartButton {
+  border: 1px solid rgba(12,19,32,.08) !important;
+  background: #fff !important;
+  color: #0c1320 !important;
+  box-shadow: none !important;
+}
+
+.page[data-theme-field="electronics"] .cartCount {
+  background: #2563eb !important;
+  color: #fff !important;
+}
+
+/* Electronics hero: dark technical display, hard clean geometry. */
+.page[data-theme-field="electronics"][data-hero] .hero {
+  width: min(1180px, calc(100% - 20px)) !important;
+  margin: 10px auto 0 !important;
+  overflow: hidden !important;
+  border: 0 !important;
+  outline: 0 !important;
+  border-radius: 14px !important;
+  background-color: #0c1320 !important;
+  box-shadow: 0 26px 58px rgba(12,19,32,.19) !important;
+}
+
+.page[data-theme-field="electronics"] .hero::after {
+  content: none !important;
+  display: none !important;
+}
+
+.page[data-theme-field="electronics"] .heroOverlay {
+  background:
+    linear-gradient(
+      90deg,
+      rgba(5,9,16,.94) 0%,
+      rgba(12,19,32,.69) 43%,
+      rgba(19,38,62,.27) 75%,
+      rgba(19,38,62,.07) 100%
+    ),
+    linear-gradient(0deg, rgba(5,9,16,.44), transparent 58%) !important;
+}
+
+.page[data-theme-field="electronics"] .heroTexture {
+  display: block !important;
+  background:
+    linear-gradient(rgba(6,182,212,.07) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(37,99,235,.07) 1px, transparent 1px),
+    radial-gradient(circle at 18% 14%, rgba(6,182,212,.16), transparent 28%) !important;
+  background-size: 28px 28px, 28px 28px, auto !important;
+}
+
+.page[data-theme-field="electronics"] .heroContent {
+  min-height: 380px !important;
+  justify-content: flex-end !important;
+  align-items: flex-end !important;
+  padding: 28px 27px 30px !important;
+}
+
+.page[data-theme-field="electronics"] .hero h1,
+.page[data-theme-field="electronics"] .heroCopy h1 {
+  max-width: 650px !important;
+  color: #f7fafc !important;
+  font-family: inherit !important;
+  font-weight: 950 !important;
+  letter-spacing: -.055em !important;
+  text-shadow: 0 2px 18px rgba(0,0,0,.24);
+}
+
+.page[data-theme-field="electronics"] .tagline {
+  color: rgba(220,231,243,.78) !important;
+}
+
+.page[data-theme-field="electronics"] .heroLabel,
+.page[data-theme-field="electronics"] .heroLiveStatus,
+.page[data-theme-field="electronics"] .heroHoursChip {
+  border: 1px solid rgba(6,182,212,.16) !important;
+  background: rgba(8,15,27,.62) !important;
+  color: #e8f7fb !important;
+  box-shadow: none !important;
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+
+.page[data-theme-field="electronics"] .primaryHeroButton {
+  min-height: 50px !important;
+  border: 0 !important;
+  border-radius: 9px !important;
+  background: linear-gradient(135deg, #2563eb, #06b6d4) !important;
+  color: #fff !important;
+  box-shadow: 0 14px 30px rgba(37,99,235,.22) !important;
+}
+
+.page[data-theme-field="electronics"] .quickInfoStrip {
+  width: min(1180px, calc(100% - 28px)) !important;
+  margin: 12px auto 0 !important;
+  gap: 8px !important;
+  border: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.page[data-theme-field="electronics"] .quickInfoStrip > a,
+.page[data-theme-field="electronics"] .quickInfoStrip > button,
+.page[data-theme-field="electronics"] .quickInfoStrip .locationQuickLink,
+.page[data-theme-field="electronics"] .quickInfoStrip .contactQuickLink {
+  border: 1px solid rgba(12,19,32,.08) !important;
+  border-radius: 10px !important;
+  background: #fff !important;
+  color: #0c1320 !important;
+  box-shadow: 0 8px 20px rgba(12,19,32,.035) !important;
+}
+
+.page[data-theme-field="electronics"] .quickIcon {
+  background: #e6f7fb !important;
+  color: #0e8fa8 !important;
+}
+
+/* Tech catalog. */
+.page[data-theme-field="electronics"] .catalogShell {
+  width: min(1180px, calc(100% - 28px)) !important;
+  border: 0 !important;
+  background: transparent !important;
+  color: #0c1320 !important;
+  box-shadow: none !important;
+}
+
+.page[data-theme-field="electronics"] .searchBox {
+  border: 1px solid rgba(12,19,32,.09) !important;
+  border-radius: 9px !important;
+  background: #fff !important;
+  color: #6b7a8e !important;
+  box-shadow: 0 8px 20px rgba(12,19,32,.035) !important;
+}
+
+.page[data-theme-field="electronics"] .searchBox input {
+  color: #0c1320 !important;
+}
+
+.page[data-theme-field="electronics"] .searchBox input::placeholder {
+  color: #94a0b0 !important;
+}
+
+.page[data-theme-field="electronics"] .vehicleFilterPanel {
+  border: 1px solid rgba(12,19,32,.08) !important;
+  border-radius: 11px !important;
+  background:
+    radial-gradient(circle at 100% 0%, rgba(6,182,212,.055), transparent 13rem),
+    #fff !important;
+  color: #0c1320 !important;
+  box-shadow: 0 8px 22px rgba(12,19,32,.035) !important;
+}
+
+.page[data-theme-field="electronics"] .vehicleFilterHeading span,
+.page[data-theme-field="electronics"] .vehicleFilterGrid label > span {
+  color: #2563eb !important;
+}
+
+.page[data-theme-field="electronics"] .vehicleFilterHeading strong {
+  color: #0c1320 !important;
+}
+
+.page[data-theme-field="electronics"] .vehicleFilterGrid select {
+  border: 1px solid rgba(12,19,32,.10) !important;
+  background: #f7fafc !important;
+  color: #0c1320 !important;
+  border-radius: 8px !important;
+}
+
+.page[data-theme-field="electronics"] .vehicleMatchSummary {
+  background: #e6f7fb !important;
+  color: #0e7490 !important;
+}
+
+.page[data-theme-field="electronics"] .marketplaceCategoryNavLabel,
+.page[data-theme-field="electronics"] .marketplaceListingHeader span {
+  color: #2563eb !important;
+}
+
+.page[data-theme-field="electronics"] .marketplaceCategoryCircle {
+  border: 1px solid rgba(12,19,32,.09) !important;
+  background: #fff !important;
+  box-shadow: 0 6px 16px rgba(12,19,32,.035) !important;
+}
+
+.page[data-theme-field="electronics"] .marketplaceCategoryBestSellers .marketplaceCategoryCircle {
+  border-color: rgba(37,99,235,.28) !important;
+  background:
+    radial-gradient(circle at 28% 22%, rgba(6,182,212,.13), transparent 42%),
+    linear-gradient(145deg, #fff, #eaf4ff) !important;
+}
+
+.page[data-theme-field="electronics"] .marketplaceCategoryStar {
+  color: #2563eb !important;
+}
+
+.page[data-theme-field="electronics"] .marketplaceCategoryItemActive .marketplaceCategoryCircle {
+  border-color: #2563eb !important;
+  box-shadow: 0 0 0 3px rgba(37,99,235,.08) !important;
+}
+
+.page[data-theme-field="electronics"] .marketplaceCategorySelectedDot {
+  border-color: #f5f8fb !important;
+  background: #06b6d4 !important;
+}
+
+.page[data-theme-field="electronics"] .marketplaceCategoryItem strong,
+.page[data-theme-field="electronics"] .marketplaceListingHeader h3,
+.page[data-theme-field="electronics"] .marketplaceBestSellerDepartmentTitle {
+  color: #0c1320 !important;
+}
+
+.page[data-theme-field="electronics"] .marketplaceCategoryItem small,
+.page[data-theme-field="electronics"] .marketplaceListingHeader small {
+  color: #6b7a8e !important;
+}
+
+.page[data-theme-field="electronics"] .marketplaceBestSellerItem,
+.page[data-theme-field="electronics"] .marketplaceBestSellerCarousel .productCard,
+.page[data-theme-field="electronics"] .marketplaceBestSellerCarousel .autoPartsProductCard,
+.page[data-theme-field="electronics"] .marketplaceBestSellerCarousel .productBody {
+  height: auto !important;
+  min-height: 0 !important;
+  background: transparent !important;
+  color: #0c1320 !important;
+  box-shadow: none !important;
+}
+
+.page[data-theme-field="electronics"] .marketplaceBestSellerCarousel .productBody h3 {
+  color: #0c1320 !important;
+}
+
+.page[data-theme-field="electronics"] .marketplaceBestSellerCarousel .productFooter,
+.page[data-theme-field="electronics"] .marketplaceBestSellerCarousel .productFooter > div:first-child {
+  height: auto !important;
+  min-height: 0 !important;
+}
+
+.page[data-theme-field="electronics"] .marketplaceBestSellerCarousel .productFooter strong {
+  color: #2563eb !important;
+}
+
+.page[data-theme-field="electronics"] .marketplaceCategoryProductList .productCard,
+.page[data-theme-field="electronics"] .marketplaceCategoryProductList .autoPartsProductCard {
+  border-bottom: 1px solid rgba(12,19,32,.08) !important;
+  background: transparent !important;
+  color: #0c1320 !important;
+  box-shadow: none !important;
+}
+
+.page[data-theme-field="electronics"] .marketplaceCategoryProductList .productBody h3 {
+  color: #0c1320 !important;
+}
+
+.page[data-theme-field="electronics"] .marketplaceCategoryProductList .productArabic {
+  color: #6b7a8e !important;
+}
+
+.page[data-theme-field="electronics"] .marketplaceCategoryProductList .productFitment {
+  background: #eaf4ff !important;
+  color: #1d4ed8 !important;
+}
+
+.page[data-theme-field="electronics"] .storeStory,
+.page[data-theme-field="electronics"] .partsConcierge {
+  width: min(1180px, calc(100% - 28px)) !important;
+  min-height: 0 !important;
+  border: 1px solid rgba(12,19,32,.08) !important;
+  border-radius: 11px !important;
+  background: #fff !important;
+  color: #0c1320 !important;
+  box-shadow: 0 8px 22px rgba(12,19,32,.035) !important;
+}
+
+.page[data-theme-field="electronics"] .storeStory {
+  margin: 22px auto 0 !important;
+  padding: 22px !important;
+}
+
+.page[data-theme-field="electronics"] .partsConcierge {
+  margin: 16px auto 0 !important;
+  padding: 16px !important;
+}
+
+.page[data-theme-field="electronics"] .storyCopy > span,
+.page[data-theme-field="electronics"] .partsConciergeCopy > span {
+  color: #2563eb !important;
+}
+
+.page[data-theme-field="electronics"] .storyCopy h2,
+.page[data-theme-field="electronics"] .partsConciergeCopy h2 {
+  color: #0c1320 !important;
+}
+
+.page[data-theme-field="electronics"] .storyCopy p,
+.page[data-theme-field="electronics"] .partsConciergeCopy p {
+  color: #6b7a8e !important;
+}
+
+.page[data-theme-field="electronics"] .storyButton {
+  border: 0 !important;
+  background: #0c1320 !important;
+  color: #fff !important;
+}
+
+.page[data-theme-field="electronics"] .partsConciergeIcon {
+  background: #e6f7fb !important;
+  color: #0e8fa8 !important;
+}
+
+.page[data-theme-field="electronics"] .footer {
+  width: min(1180px, calc(100% - 28px)) !important;
+  margin: 18px auto 0 !important;
+  padding: 16px 0 max(10px, env(safe-area-inset-bottom)) !important;
+  border: 0 !important;
+  border-top: 1px solid rgba(12,19,32,.09) !important;
+  background: transparent !important;
+  color: #0c1320 !important;
+  box-shadow: none !important;
+}
+
+/* ========================================================================== */
+/* Mobile tuning                                                               */
+/* ========================================================================== */
+
+@media (max-width: 760px) {
+  .page[data-theme-field="cosmetics"][data-hero] .hero,
+  .page[data-theme-field="perfume"][data-hero] .hero,
+  .page[data-theme-field="electronics"][data-hero] .hero {
+    width: calc(100% - 18px) !important;
+    margin-top: 8px !important;
+  }
+
+  .page[data-theme-field="cosmetics"][data-hero] .hero {
+    border-radius: 24px !important;
+  }
+
+  .page[data-theme-field="perfume"][data-hero] .hero {
+    border-radius: 21px !important;
+  }
+
+  .page[data-theme-field="electronics"][data-hero] .hero {
+    border-radius: 11px !important;
+  }
+
+  .page[data-theme-field="cosmetics"] .heroContent,
+  .page[data-theme-field="perfume"] .heroContent,
+  .page[data-theme-field="electronics"] .heroContent {
+    min-height: 316px !important;
+    padding: 20px 18px 22px !important;
+  }
+
+  .page[data-theme-field="cosmetics"] .hero h1,
+  .page[data-theme-field="cosmetics"] .heroCopy h1,
+  .page[data-theme-field="perfume"] .hero h1,
+  .page[data-theme-field="perfume"] .heroCopy h1 {
+    font-size: clamp(30px, 8.8vw, 39px) !important;
+    line-height: .97 !important;
+  }
+
+  .page[data-theme-field="electronics"] .hero h1,
+  .page[data-theme-field="electronics"] .heroCopy h1 {
+    font-size: clamp(29px, 8.4vw, 38px) !important;
+    line-height: .98 !important;
+  }
+
+  .page[data-theme-field="cosmetics"] .quickInfoStrip,
+  .page[data-theme-field="cosmetics"] .catalogShell,
+  .page[data-theme-field="cosmetics"] .storeStory,
+  .page[data-theme-field="cosmetics"] .partsConcierge,
+  .page[data-theme-field="cosmetics"] .footer,
+  .page[data-theme-field="perfume"] .quickInfoStrip,
+  .page[data-theme-field="perfume"] .catalogShell,
+  .page[data-theme-field="perfume"] .storeStory,
+  .page[data-theme-field="perfume"] .partsConcierge,
+  .page[data-theme-field="perfume"] .footer,
+  .page[data-theme-field="electronics"] .quickInfoStrip,
+  .page[data-theme-field="electronics"] .catalogShell,
+  .page[data-theme-field="electronics"] .storeStory,
+  .page[data-theme-field="electronics"] .partsConcierge,
+  .page[data-theme-field="electronics"] .footer {
+    width: calc(100% - 24px) !important;
+  }
+
+  .page[data-theme-field="cosmetics"] .marketplaceListingHeader,
+  .page[data-theme-field="perfume"] .marketplaceListingHeader,
+  .page[data-theme-field="electronics"] .marketplaceListingHeader {
+    margin: 4px 0 11px !important;
+  }
+
+  .page[data-theme-field="cosmetics"] .marketplaceListingHeader h3,
+  .page[data-theme-field="perfume"] .marketplaceListingHeader h3,
+  .page[data-theme-field="electronics"] .marketplaceListingHeader h3 {
+    font-size: 21px !important;
+  }
+
+  .page[data-theme-field="cosmetics"] .marketplaceBestSellerDepartmentTitle,
+  .page[data-theme-field="perfume"] .marketplaceBestSellerDepartmentTitle,
+  .page[data-theme-field="electronics"] .marketplaceBestSellerDepartmentTitle {
+    margin-bottom: 9px !important;
+    font-size: 15px !important;
+    line-height: 19px !important;
+  }
+
+  .page[data-theme-field="cosmetics"] .storeStory,
+  .page[data-theme-field="perfume"] .storeStory,
+  .page[data-theme-field="electronics"] .storeStory {
+    padding: 17px !important;
+  }
+
+  .page[data-theme-field="cosmetics"] .storyCopy h2,
+  .page[data-theme-field="perfume"] .storyCopy h2,
+  .page[data-theme-field="electronics"] .storyCopy h2 {
+    margin: 4px 0 8px !important;
+    font-size: 23px !important;
+    line-height: 1.06 !important;
+  }
+
+  .page[data-theme-field="cosmetics"] .storyCopy p,
+  .page[data-theme-field="perfume"] .storyCopy p,
+  .page[data-theme-field="electronics"] .storyCopy p {
+    display: -webkit-box;
+    margin: 0 !important;
+    overflow: hidden;
+    font-size: 11px !important;
+    line-height: 1.48 !important;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 3;
+  }
+
+  .page[data-theme-field="cosmetics"] .partsConcierge,
+  .page[data-theme-field="perfume"] .partsConcierge,
+  .page[data-theme-field="electronics"] .partsConcierge {
+    padding: 13px !important;
+  }
+
+  .page[data-theme-field="cosmetics"] .partsConciergeCopy h2,
+  .page[data-theme-field="perfume"] .partsConciergeCopy h2,
+  .page[data-theme-field="electronics"] .partsConciergeCopy h2 {
+    font-size: 16px !important;
+    line-height: 1.08 !important;
+  }
+
+  .page[data-theme-field="cosmetics"] .partsConciergeCopy p,
+  .page[data-theme-field="perfume"] .partsConciergeCopy p,
+  .page[data-theme-field="electronics"] .partsConciergeCopy p {
+    display: none !important;
+  }
+}
