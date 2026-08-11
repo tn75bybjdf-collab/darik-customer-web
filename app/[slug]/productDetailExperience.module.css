@@ -3445,3 +3445,149 @@
     display: flex !important;
   }
 }
+
+
+/* ========================================================================== */
+/* DARIK 087 - TRUE CONTENT-SIZED PRODUCT SHEET                                */
+/* Removes the last artificial detail-column stretch left behind by 086.       */
+/* ========================================================================== */
+
+@media (max-width: 900px) {
+  /*
+   * Keep media as the flexible row. The product sheet is now truly auto-sized.
+   */
+  .productLayout {
+    grid-template-rows:
+      minmax(0, 1fr)
+      auto;
+  }
+
+  /*
+   * Critical fix:
+   * 086 removed the outer percentage split but still gave .detailColumn a
+   * minimum height. That minimum height was the source of the remaining large
+   * white void. Use a flex column with NO minimum reserved height.
+   *
+   * Sparse products collapse tightly around their real content.
+   * Rich products may grow up to the max-height and then the detail body scrolls.
+   */
+  .detailColumn {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    height: auto;
+    max-height: min(58dvh, 620px);
+    align-self: end;
+    overflow: hidden;
+    margin-top: -24px;
+    border-radius: 28px 28px 0 0;
+  }
+
+  .detailScroll {
+    flex: 0 1 auto;
+    min-height: 0;
+    height: auto;
+    max-height: none;
+    overflow-y: auto;
+    padding:
+      15px
+      18px
+      9px;
+  }
+
+  /*
+   * The buying dock follows the last real piece of product content immediately.
+   * It no longer gets pushed to the bottom of an artificially tall sheet.
+   */
+  .actionDock {
+    flex: 0 0 auto;
+    min-height: 0;
+    margin-top: 0;
+    padding:
+      8px
+      14px
+      calc(8px + env(safe-area-inset-bottom));
+  }
+
+  .fulfillmentStrip {
+    margin-top: 8px;
+    margin-bottom: 0;
+    padding-top: 8px;
+    padding-bottom: 0;
+  }
+
+  .descriptionSection {
+    margin-top: 8px;
+    margin-bottom: 0;
+  }
+
+  .descriptionSection p {
+    margin-bottom: 0;
+  }
+
+  /*
+   * Keep the existing 085/086 media controls safely above the sheet overlap.
+   */
+  .mediaNav {
+    bottom: 34px;
+  }
+
+  .videoExpandButton,
+  .expandHint {
+    bottom: 31px;
+  }
+}
+
+@media (max-width: 520px) {
+  .detailColumn {
+    min-height: 0;
+    height: auto;
+    max-height: 60dvh;
+    margin-top: -23px;
+  }
+
+  .detailScroll {
+    padding:
+      14px
+      18px
+      8px;
+  }
+
+  .actionDock {
+    min-height: 0;
+    padding:
+      7px
+      14px
+      calc(7px + env(safe-area-inset-bottom));
+  }
+
+  .fulfillmentStrip {
+    margin-top: 7px;
+    padding-top: 7px;
+  }
+}
+
+@media (max-height: 720px) and (max-width: 900px) {
+  .detailColumn {
+    min-height: 0;
+    height: auto;
+    max-height: 64dvh;
+    margin-top: -20px;
+  }
+
+  .detailScroll {
+    padding-top: 10px;
+    padding-bottom: 6px;
+  }
+
+  .actionDock {
+    min-height: 0;
+    padding-top: 5px;
+    padding-bottom: calc(5px + env(safe-area-inset-bottom));
+  }
+
+  .fulfillmentStrip {
+    margin-top: 6px;
+    padding-top: 5px;
+  }
+}
