@@ -3,6 +3,7 @@
 // DARIK_CUSTOMER_PRODUCT_DETAIL_BEAUTY_079
 // DARIK_CUSTOMER_PRODUCT_VIEWPORT_MEDIA_PERFECTION_080
 // DARIK_CUSTOMER_PRODUCT_EXECUTIVE_SHOWCASE_081
+// DARIK_CUSTOMER_PRODUCT_PORTFOLIO_FINISH_082
 
 import {
   useEffect,
@@ -257,6 +258,16 @@ function ProductVideo({
 
   return (
     <div className={styles.videoFrame}>
+      {poster ? (
+        <img
+          className={styles.videoBackdrop}
+          src={poster}
+          alt=""
+          aria-hidden="true"
+          draggable={false}
+        />
+      ) : null}
+
       <video
         ref={videoRef}
         src={url}
