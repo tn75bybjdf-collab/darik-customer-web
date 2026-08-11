@@ -10377,3 +10377,948 @@
     margin-top: 14px !important;
   }
 }
+
+/* DARIK_UNIQUE_BAKERY_CAFE_THEMES_094
+   Restaurant remains untouched.
+   Bakery and Cafe now have distinct visual identities while preserving the
+   Darik Marketplace catalog architecture and all retail-field mechanics. */
+
+/* ========================================================================== */
+/* BAKERY / PATISSERIE                                                         */
+/* Ivory + berry + champagne. Soft editorial pastry-shop presentation.         */
+/* ========================================================================== */
+
+.page[data-theme-field="bakery"] {
+  --bakery-ink: #2a1720;
+  --bakery-berry: #6f1d3a;
+  --bakery-berry-bright: #b83262;
+  --bakery-champagne: #c99542;
+  --bakery-cream: #fff8f1;
+  --bakery-paper: #fffdf9;
+  --bakery-blush: #fbe8ee;
+  --bakery-muted: #806d75;
+
+  min-height: 100dvh;
+  padding-bottom: max(18px, env(safe-area-inset-bottom)) !important;
+  background:
+    radial-gradient(circle at 8% 3%, rgba(184,50,98,.075), transparent 19rem),
+    radial-gradient(circle at 91% 14%, rgba(201,149,66,.075), transparent 17rem),
+    linear-gradient(180deg, #fff8f1 0%, #fffdf9 43%, #fff8f3 100%) !important;
+  color: var(--bakery-ink) !important;
+}
+
+.page[data-theme-field="bakery"] .announcementBar {
+  min-height: 34px !important;
+  border: 0 !important;
+  background: #6f1d3a !important;
+  color: #fff8f1 !important;
+  box-shadow: none !important;
+}
+
+.page[data-theme-field="bakery"] .announcementBar strong,
+.page[data-theme-field="bakery"] .announcementBar span {
+  color: #fff8f1 !important;
+}
+
+.page[data-theme-field="bakery"] .header {
+  min-height: 64px !important;
+  border-bottom: 1px solid rgba(111,29,58,.07) !important;
+  background: rgba(255,253,249,.96) !important;
+  color: #2a1720 !important;
+  box-shadow: 0 8px 26px rgba(111,29,58,.045) !important;
+  backdrop-filter: blur(18px) saturate(135%);
+  -webkit-backdrop-filter: blur(18px) saturate(135%);
+}
+
+.page[data-theme-field="bakery"] .headerLogo {
+  border: 1px solid rgba(111,29,58,.08) !important;
+  background: #fff !important;
+  box-shadow: 0 8px 18px rgba(111,29,58,.055) !important;
+}
+
+.page[data-theme-field="bakery"] .storeIdentity strong {
+  color: #2a1720 !important;
+}
+
+.page[data-theme-field="bakery"] .storeIdentity span {
+  color: #806d75 !important;
+}
+
+.page[data-theme-field="bakery"] .headerActions button,
+.page[data-theme-field="bakery"] .headerActions .cartButton {
+  border: 1px solid rgba(111,29,58,.08) !important;
+  background: #fff !important;
+  color: #6f1d3a !important;
+  box-shadow: 0 7px 18px rgba(111,29,58,.045) !important;
+}
+
+.page[data-theme-field="bakery"] .cartCount {
+  background: #b83262 !important;
+  color: #fff !important;
+}
+
+/* Bakery hero: softer, editorial, patisserie-like. */
+.page[data-theme-field="bakery"][data-hero] .hero {
+  width: min(1180px, calc(100% - 20px)) !important;
+  margin: 10px auto 0 !important;
+  overflow: hidden !important;
+  border: 0 !important;
+  outline: 0 !important;
+  border-radius: 30px !important;
+  background-color: #3a1523 !important;
+  box-shadow: 0 24px 60px rgba(111,29,58,.18) !important;
+}
+
+.page[data-theme-field="bakery"] .hero::after {
+  content: none !important;
+  display: none !important;
+}
+
+.page[data-theme-field="bakery"] .heroOverlay {
+  background:
+    linear-gradient(
+      180deg,
+      rgba(42,23,32,.02) 0%,
+      rgba(63,24,39,.16) 34%,
+      rgba(74,22,43,.68) 76%,
+      rgba(44,15,29,.94) 100%
+    ),
+    linear-gradient(100deg, rgba(111,29,58,.20), transparent 72%) !important;
+}
+
+.page[data-theme-field="bakery"] .heroTexture {
+  display: block !important;
+  background:
+    radial-gradient(circle at 17% 14%, rgba(255,236,220,.13), transparent 28%),
+    radial-gradient(circle at 83% 12%, rgba(201,149,66,.12), transparent 23%) !important;
+}
+
+.page[data-theme-field="bakery"] .heroContent {
+  min-height: 382px !important;
+  justify-content: flex-end !important;
+  align-items: flex-end !important;
+  padding: 28px 26px 30px !important;
+}
+
+.page[data-theme-field="bakery"] .hero h1,
+.page[data-theme-field="bakery"] .heroCopy h1 {
+  max-width: 660px !important;
+  color: #fffaf6 !important;
+  font-family: Georgia, "Times New Roman", serif !important;
+  font-weight: 700 !important;
+  letter-spacing: -.045em !important;
+  text-shadow: 0 2px 18px rgba(0,0,0,.19);
+}
+
+.page[data-theme-field="bakery"] .tagline {
+  color: rgba(255,250,246,.85) !important;
+}
+
+.page[data-theme-field="bakery"] .heroLabel,
+.page[data-theme-field="bakery"] .heroLiveStatus,
+.page[data-theme-field="bakery"] .heroHoursChip {
+  border: 1px solid rgba(255,255,255,.15) !important;
+  background: rgba(64,20,37,.54) !important;
+  color: #fffaf6 !important;
+  box-shadow: none !important;
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+
+.page[data-theme-field="bakery"] .primaryHeroButton {
+  min-height: 52px !important;
+  border: 0 !important;
+  border-radius: 17px !important;
+  background: linear-gradient(135deg, #b83262, #8f244d) !important;
+  color: #fff !important;
+  box-shadow: 0 14px 30px rgba(184,50,98,.24) !important;
+}
+
+.page[data-theme-field="bakery"] .quickInfoStrip {
+  width: min(1180px, calc(100% - 28px)) !important;
+  margin: 12px auto 0 !important;
+  gap: 8px !important;
+  border: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.page[data-theme-field="bakery"] .quickInfoStrip > a,
+.page[data-theme-field="bakery"] .quickInfoStrip > button,
+.page[data-theme-field="bakery"] .quickInfoStrip .locationQuickLink,
+.page[data-theme-field="bakery"] .quickInfoStrip .contactQuickLink {
+  border: 1px solid rgba(111,29,58,.07) !important;
+  border-radius: 17px !important;
+  background: rgba(255,255,255,.94) !important;
+  color: #2a1720 !important;
+  box-shadow: 0 9px 24px rgba(111,29,58,.04) !important;
+}
+
+.page[data-theme-field="bakery"] .quickIcon {
+  background: #fbe8ee !important;
+  color: #8f244d !important;
+}
+
+/* Bakery catalog + cross-field mechanics. */
+.page[data-theme-field="bakery"] .catalogShell {
+  width: min(1180px, calc(100% - 28px)) !important;
+  border: 0 !important;
+  background: transparent !important;
+  color: #2a1720 !important;
+  box-shadow: none !important;
+}
+
+.page[data-theme-field="bakery"] .searchBox {
+  border: 1px solid rgba(111,29,58,.10) !important;
+  border-radius: 16px !important;
+  background: rgba(255,255,255,.96) !important;
+  color: #806d75 !important;
+  box-shadow: 0 8px 22px rgba(111,29,58,.04) !important;
+}
+
+.page[data-theme-field="bakery"] .searchBox input {
+  color: #2a1720 !important;
+}
+
+.page[data-theme-field="bakery"] .searchBox input::placeholder {
+  color: #a38f98 !important;
+}
+
+.page[data-theme-field="bakery"] .vehicleFilterPanel {
+  border: 1px solid rgba(111,29,58,.09) !important;
+  border-radius: 19px !important;
+  background:
+    radial-gradient(circle at 100% 0%, rgba(201,149,66,.055), transparent 13rem),
+    #fff !important;
+  color: #2a1720 !important;
+  box-shadow: 0 10px 26px rgba(111,29,58,.04) !important;
+}
+
+.page[data-theme-field="bakery"] .vehicleFilterHeading span,
+.page[data-theme-field="bakery"] .vehicleFilterGrid label > span {
+  color: #8f244d !important;
+}
+
+.page[data-theme-field="bakery"] .vehicleFilterHeading strong {
+  color: #2a1720 !important;
+}
+
+.page[data-theme-field="bakery"] .vehicleFilterGrid select {
+  border: 1px solid rgba(111,29,58,.11) !important;
+  background: #fffdf9 !important;
+  color: #2a1720 !important;
+}
+
+.page[data-theme-field="bakery"] .vehicleMatchSummary {
+  border-color: rgba(184,50,98,.10) !important;
+  background: #fbe8ee !important;
+  color: #6f1d3a !important;
+}
+
+.page[data-theme-field="bakery"] .marketplaceCategoryNavLabel,
+.page[data-theme-field="bakery"] .marketplaceListingHeader span {
+  color: #8f244d !important;
+}
+
+.page[data-theme-field="bakery"] .marketplaceCategoryCircle {
+  border: 1px solid rgba(111,29,58,.10) !important;
+  background: #fff !important;
+  box-shadow: 0 7px 17px rgba(111,29,58,.04) !important;
+}
+
+.page[data-theme-field="bakery"] .marketplaceCategoryBestSellers .marketplaceCategoryCircle {
+  border-color: rgba(184,50,98,.28) !important;
+  background:
+    radial-gradient(circle at 28% 22%, rgba(201,149,66,.17), transparent 42%),
+    linear-gradient(145deg, #fff8f1, #fbe8ee) !important;
+}
+
+.page[data-theme-field="bakery"] .marketplaceCategoryStar {
+  color: #b83262 !important;
+}
+
+.page[data-theme-field="bakery"] .marketplaceCategoryItemActive .marketplaceCategoryCircle {
+  border-color: #b83262 !important;
+  box-shadow: 0 0 0 3px rgba(184,50,98,.085) !important;
+}
+
+.page[data-theme-field="bakery"] .marketplaceCategorySelectedDot {
+  border-color: #fff8f1 !important;
+  background: #b83262 !important;
+}
+
+.page[data-theme-field="bakery"] .marketplaceCategoryItem strong,
+.page[data-theme-field="bakery"] .marketplaceListingHeader h3,
+.page[data-theme-field="bakery"] .marketplaceBestSellerDepartmentTitle {
+  color: #2a1720 !important;
+}
+
+.page[data-theme-field="bakery"] .marketplaceCategoryItem small,
+.page[data-theme-field="bakery"] .marketplaceListingHeader small {
+  color: #806d75 !important;
+}
+
+.page[data-theme-field="bakery"] .marketplaceListingHeader h3,
+.page[data-theme-field="bakery"] .marketplaceBestSellerDepartmentTitle {
+  font-family: Georgia, "Times New Roman", serif !important;
+}
+
+.page[data-theme-field="bakery"] .marketplaceBestSellerItem,
+.page[data-theme-field="bakery"] .marketplaceBestSellerCarousel .productCard,
+.page[data-theme-field="bakery"] .marketplaceBestSellerCarousel .autoPartsProductCard,
+.page[data-theme-field="bakery"] .marketplaceBestSellerCarousel .productBody {
+  height: auto !important;
+  min-height: 0 !important;
+  background: transparent !important;
+  color: #2a1720 !important;
+  box-shadow: none !important;
+}
+
+.page[data-theme-field="bakery"] .marketplaceBestSellerCarousel .productImage {
+  background: transparent !important;
+}
+
+.page[data-theme-field="bakery"] .marketplaceBestSellerCarousel .productBody h3 {
+  color: #2a1720 !important;
+}
+
+.page[data-theme-field="bakery"] .marketplaceBestSellerCarousel .productFooter,
+.page[data-theme-field="bakery"] .marketplaceBestSellerCarousel .productFooter > div:first-child {
+  height: auto !important;
+  min-height: 0 !important;
+}
+
+.page[data-theme-field="bakery"] .marketplaceBestSellerCarousel .productFooter strong {
+  color: #6f1d3a !important;
+}
+
+.page[data-theme-field="bakery"] .marketplaceCategoryProductList .productCard,
+.page[data-theme-field="bakery"] .marketplaceCategoryProductList .autoPartsProductCard {
+  border-bottom: 1px solid rgba(111,29,58,.07) !important;
+  background: transparent !important;
+  color: #2a1720 !important;
+  box-shadow: none !important;
+}
+
+.page[data-theme-field="bakery"] .marketplaceCategoryProductList .productBody h3 {
+  color: #2a1720 !important;
+}
+
+.page[data-theme-field="bakery"] .marketplaceCategoryProductList .productArabic {
+  color: #806d75 !important;
+}
+
+.page[data-theme-field="bakery"] .marketplaceCategoryProductList .productFitment {
+  background: #fbe8ee !important;
+  color: #6f1d3a !important;
+}
+
+/* Bakery store story + support. */
+.page[data-theme-field="bakery"] .storeStory {
+  width: min(1180px, calc(100% - 28px)) !important;
+  min-height: 0 !important;
+  margin: 22px auto 0 !important;
+  border: 1px solid rgba(111,29,58,.07) !important;
+  border-radius: 24px !important;
+  padding: 22px !important;
+  background:
+    linear-gradient(180deg, #fff, #fffdf9) !important;
+  color: #2a1720 !important;
+  box-shadow: 0 12px 30px rgba(111,29,58,.04) !important;
+}
+
+.page[data-theme-field="bakery"] .storyCopy > span {
+  color: #b83262 !important;
+}
+
+.page[data-theme-field="bakery"] .storyCopy h2 {
+  color: #2a1720 !important;
+  font-family: Georgia, "Times New Roman", serif !important;
+}
+
+.page[data-theme-field="bakery"] .storyCopy p {
+  color: #806d75 !important;
+}
+
+.page[data-theme-field="bakery"] .storyButton {
+  border: 0 !important;
+  background: #6f1d3a !important;
+  color: #fff !important;
+}
+
+.page[data-theme-field="bakery"] .partsConcierge {
+  width: min(1180px, calc(100% - 28px)) !important;
+  min-height: 0 !important;
+  margin: 16px auto 0 !important;
+  border: 1px solid rgba(111,29,58,.08) !important;
+  border-radius: 21px !important;
+  padding: 16px !important;
+  background:
+    radial-gradient(circle at 0% 100%, rgba(184,50,98,.07), transparent 14rem),
+    #fffaf7 !important;
+  color: #2a1720 !important;
+  box-shadow: 0 10px 26px rgba(111,29,58,.04) !important;
+}
+
+.page[data-theme-field="bakery"] .partsConciergeIcon {
+  background: #fbe8ee !important;
+  color: #8f244d !important;
+}
+
+.page[data-theme-field="bakery"] .partsConciergeCopy > span {
+  color: #b83262 !important;
+}
+
+.page[data-theme-field="bakery"] .partsConciergeCopy h2 {
+  color: #2a1720 !important;
+}
+
+.page[data-theme-field="bakery"] .partsConciergeCopy p {
+  color: #806d75 !important;
+}
+
+.page[data-theme-field="bakery"] .footer {
+  width: min(1180px, calc(100% - 28px)) !important;
+  margin: 18px auto 0 !important;
+  padding: 16px 0 max(10px, env(safe-area-inset-bottom)) !important;
+  border: 0 !important;
+  border-top: 1px solid rgba(111,29,58,.08) !important;
+  background: transparent !important;
+  color: #2a1720 !important;
+  box-shadow: none !important;
+}
+
+.page[data-theme-field="bakery"] .footerBrand strong {
+  color: #2a1720 !important;
+}
+
+.page[data-theme-field="bakery"] .footerBrand span,
+.page[data-theme-field="bakery"] .poweredBy {
+  color: #806d75 !important;
+}
+
+/* ========================================================================== */
+/* CAFE / COFFEEHOUSE                                                          */
+/* Espresso + oat + sage. More architectural, calmer, darker premium mood.     */
+/* ========================================================================== */
+
+.page[data-theme-field="cafe"] {
+  --cafe-espresso: #211713;
+  --cafe-espresso-soft: #33241e;
+  --cafe-oat: #f3ece4;
+  --cafe-latte: #e7d5bf;
+  --cafe-sage: #5f7a61;
+  --cafe-sage-deep: #48624b;
+  --cafe-ink: #211713;
+  --cafe-muted: #75685f;
+
+  min-height: 100dvh;
+  padding-bottom: max(18px, env(safe-area-inset-bottom)) !important;
+  background:
+    radial-gradient(circle at 12% 4%, rgba(95,122,97,.09), transparent 21rem),
+    radial-gradient(circle at 88% 13%, rgba(183,143,101,.08), transparent 18rem),
+    linear-gradient(180deg, #f2ebe3 0%, #f8f4ef 46%, #eee6dc 100%) !important;
+  color: #211713 !important;
+}
+
+.page[data-theme-field="cafe"] .announcementBar {
+  min-height: 34px !important;
+  border: 0 !important;
+  background: #211713 !important;
+  color: #f3ece4 !important;
+}
+
+.page[data-theme-field="cafe"] .announcementBar strong,
+.page[data-theme-field="cafe"] .announcementBar span {
+  color: #f3ece4 !important;
+}
+
+/* Cafe gets a deliberately dark header unlike Restaurant/Bakery. */
+.page[data-theme-field="cafe"] .header {
+  min-height: 64px !important;
+  border-bottom: 1px solid rgba(255,255,255,.06) !important;
+  background: rgba(33,23,19,.97) !important;
+  color: #f7f1eb !important;
+  box-shadow: 0 9px 28px rgba(33,23,19,.16) !important;
+  backdrop-filter: blur(18px) saturate(125%);
+  -webkit-backdrop-filter: blur(18px) saturate(125%);
+}
+
+.page[data-theme-field="cafe"] .headerLogo {
+  border: 1px solid rgba(255,255,255,.08) !important;
+  background: #f7f1eb !important;
+  box-shadow: 0 8px 18px rgba(0,0,0,.15) !important;
+}
+
+.page[data-theme-field="cafe"] .storeIdentity strong {
+  color: #f8f4ef !important;
+}
+
+.page[data-theme-field="cafe"] .storeIdentity span {
+  color: #c9bdb4 !important;
+}
+
+.page[data-theme-field="cafe"] .headerActions button,
+.page[data-theme-field="cafe"] .headerActions .cartButton {
+  border: 1px solid rgba(255,255,255,.08) !important;
+  background: rgba(255,255,255,.055) !important;
+  color: #f8f4ef !important;
+  box-shadow: none !important;
+}
+
+.page[data-theme-field="cafe"] .cartCount {
+  background: #5f7a61 !important;
+  color: #fff !important;
+}
+
+.page[data-theme-field="cafe"][data-hero] .hero {
+  width: min(1180px, calc(100% - 20px)) !important;
+  margin: 10px auto 0 !important;
+  overflow: hidden !important;
+  border: 0 !important;
+  outline: 0 !important;
+  border-radius: 22px !important;
+  background-color: #211713 !important;
+  box-shadow: 0 26px 62px rgba(33,23,19,.21) !important;
+}
+
+.page[data-theme-field="cafe"] .hero::after {
+  content: none !important;
+  display: none !important;
+}
+
+.page[data-theme-field="cafe"] .heroOverlay {
+  background:
+    linear-gradient(
+      90deg,
+      rgba(21,14,11,.90) 0%,
+      rgba(33,23,19,.66) 42%,
+      rgba(33,23,19,.24) 74%,
+      rgba(33,23,19,.12) 100%
+    ),
+    linear-gradient(0deg, rgba(21,14,11,.45), transparent 61%) !important;
+}
+
+.page[data-theme-field="cafe"] .heroTexture {
+  display: block !important;
+  background:
+    radial-gradient(circle at 18% 16%, rgba(95,122,97,.15), transparent 30%),
+    radial-gradient(circle at 80% 12%, rgba(231,213,191,.09), transparent 24%) !important;
+}
+
+.page[data-theme-field="cafe"] .heroContent {
+  min-height: 388px !important;
+  justify-content: flex-end !important;
+  align-items: flex-end !important;
+  padding: 28px 27px 30px !important;
+}
+
+.page[data-theme-field="cafe"] .hero h1,
+.page[data-theme-field="cafe"] .heroCopy h1 {
+  max-width: 620px !important;
+  color: #f8f4ef !important;
+  font-family: inherit !important;
+  font-weight: 900 !important;
+  letter-spacing: -.05em !important;
+  text-shadow: 0 2px 20px rgba(0,0,0,.22);
+}
+
+.page[data-theme-field="cafe"] .tagline {
+  color: rgba(248,244,239,.76) !important;
+}
+
+.page[data-theme-field="cafe"] .heroLabel,
+.page[data-theme-field="cafe"] .heroLiveStatus,
+.page[data-theme-field="cafe"] .heroHoursChip {
+  border: 1px solid rgba(255,255,255,.11) !important;
+  background: rgba(33,23,19,.58) !important;
+  color: #f8f4ef !important;
+  box-shadow: none !important;
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+
+.page[data-theme-field="cafe"] .primaryHeroButton {
+  min-height: 52px !important;
+  border: 0 !important;
+  border-radius: 14px !important;
+  background: linear-gradient(135deg, #5f7a61, #48624b) !important;
+  color: #fff !important;
+  box-shadow: 0 14px 30px rgba(72,98,75,.25) !important;
+}
+
+.page[data-theme-field="cafe"] .quickInfoStrip {
+  width: min(1180px, calc(100% - 28px)) !important;
+  margin: 12px auto 0 !important;
+  gap: 8px !important;
+  border: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.page[data-theme-field="cafe"] .quickInfoStrip > a,
+.page[data-theme-field="cafe"] .quickInfoStrip > button,
+.page[data-theme-field="cafe"] .quickInfoStrip .locationQuickLink,
+.page[data-theme-field="cafe"] .quickInfoStrip .contactQuickLink {
+  border: 1px solid rgba(33,23,19,.08) !important;
+  border-radius: 14px !important;
+  background: rgba(248,244,239,.94) !important;
+  color: #211713 !important;
+  box-shadow: 0 9px 23px rgba(33,23,19,.045) !important;
+}
+
+.page[data-theme-field="cafe"] .quickIcon {
+  background: #e4eadf !important;
+  color: #48624b !important;
+}
+
+/* Cafe catalog: quieter editorial retail presentation. */
+.page[data-theme-field="cafe"] .catalogShell {
+  width: min(1180px, calc(100% - 28px)) !important;
+  border: 0 !important;
+  background: transparent !important;
+  color: #211713 !important;
+  box-shadow: none !important;
+}
+
+.page[data-theme-field="cafe"] .searchBox {
+  border: 1px solid rgba(33,23,19,.10) !important;
+  border-radius: 13px !important;
+  background: #f8f4ef !important;
+  color: #75685f !important;
+  box-shadow: 0 8px 22px rgba(33,23,19,.04) !important;
+}
+
+.page[data-theme-field="cafe"] .searchBox input {
+  color: #211713 !important;
+}
+
+.page[data-theme-field="cafe"] .searchBox input::placeholder {
+  color: #9a8e86 !important;
+}
+
+.page[data-theme-field="cafe"] .vehicleFilterPanel {
+  border: 1px solid rgba(33,23,19,.08) !important;
+  border-radius: 16px !important;
+  background:
+    radial-gradient(circle at 100% 0%, rgba(95,122,97,.065), transparent 13rem),
+    #f8f4ef !important;
+  color: #211713 !important;
+  box-shadow: 0 10px 25px rgba(33,23,19,.045) !important;
+}
+
+.page[data-theme-field="cafe"] .vehicleFilterHeading span,
+.page[data-theme-field="cafe"] .vehicleFilterGrid label > span {
+  color: #48624b !important;
+}
+
+.page[data-theme-field="cafe"] .vehicleFilterHeading strong {
+  color: #211713 !important;
+}
+
+.page[data-theme-field="cafe"] .vehicleFilterGrid select {
+  border: 1px solid rgba(33,23,19,.11) !important;
+  background: #fff !important;
+  color: #211713 !important;
+}
+
+.page[data-theme-field="cafe"] .vehicleMatchSummary {
+  border-color: rgba(95,122,97,.12) !important;
+  background: #e7ede4 !important;
+  color: #48624b !important;
+}
+
+.page[data-theme-field="cafe"] .marketplaceCategoryNavLabel,
+.page[data-theme-field="cafe"] .marketplaceListingHeader span {
+  color: #48624b !important;
+}
+
+.page[data-theme-field="cafe"] .marketplaceCategoryCircle {
+  border: 1px solid rgba(33,23,19,.10) !important;
+  background: #f8f4ef !important;
+  box-shadow: 0 7px 17px rgba(33,23,19,.04) !important;
+}
+
+.page[data-theme-field="cafe"] .marketplaceCategoryBestSellers .marketplaceCategoryCircle {
+  border-color: rgba(95,122,97,.32) !important;
+  background:
+    radial-gradient(circle at 28% 22%, rgba(231,213,191,.34), transparent 42%),
+    linear-gradient(145deg, #edf1e9, #dfe8db) !important;
+}
+
+.page[data-theme-field="cafe"] .marketplaceCategoryStar {
+  color: #48624b !important;
+}
+
+.page[data-theme-field="cafe"] .marketplaceCategoryItemActive .marketplaceCategoryCircle {
+  border-color: #5f7a61 !important;
+  box-shadow: 0 0 0 3px rgba(95,122,97,.09) !important;
+}
+
+.page[data-theme-field="cafe"] .marketplaceCategorySelectedDot {
+  border-color: #f2ebe3 !important;
+  background: #5f7a61 !important;
+}
+
+.page[data-theme-field="cafe"] .marketplaceCategoryItem strong,
+.page[data-theme-field="cafe"] .marketplaceListingHeader h3,
+.page[data-theme-field="cafe"] .marketplaceBestSellerDepartmentTitle {
+  color: #211713 !important;
+}
+
+.page[data-theme-field="cafe"] .marketplaceCategoryItem small,
+.page[data-theme-field="cafe"] .marketplaceListingHeader small {
+  color: #75685f !important;
+}
+
+.page[data-theme-field="cafe"] .marketplaceBestSellerItem,
+.page[data-theme-field="cafe"] .marketplaceBestSellerCarousel .productCard,
+.page[data-theme-field="cafe"] .marketplaceBestSellerCarousel .autoPartsProductCard,
+.page[data-theme-field="cafe"] .marketplaceBestSellerCarousel .productBody {
+  height: auto !important;
+  min-height: 0 !important;
+  background: transparent !important;
+  color: #211713 !important;
+  box-shadow: none !important;
+}
+
+.page[data-theme-field="cafe"] .marketplaceBestSellerCarousel .productImage {
+  background: transparent !important;
+}
+
+.page[data-theme-field="cafe"] .marketplaceBestSellerCarousel .productBody h3 {
+  color: #211713 !important;
+}
+
+.page[data-theme-field="cafe"] .marketplaceBestSellerCarousel .productFooter,
+.page[data-theme-field="cafe"] .marketplaceBestSellerCarousel .productFooter > div:first-child {
+  height: auto !important;
+  min-height: 0 !important;
+}
+
+.page[data-theme-field="cafe"] .marketplaceBestSellerCarousel .productFooter strong {
+  color: #48624b !important;
+}
+
+.page[data-theme-field="cafe"] .marketplaceCategoryProductList .productCard,
+.page[data-theme-field="cafe"] .marketplaceCategoryProductList .autoPartsProductCard {
+  border-bottom: 1px solid rgba(33,23,19,.075) !important;
+  background: transparent !important;
+  color: #211713 !important;
+  box-shadow: none !important;
+}
+
+.page[data-theme-field="cafe"] .marketplaceCategoryProductList .productBody h3 {
+  color: #211713 !important;
+}
+
+.page[data-theme-field="cafe"] .marketplaceCategoryProductList .productArabic {
+  color: #75685f !important;
+}
+
+.page[data-theme-field="cafe"] .marketplaceCategoryProductList .productFitment {
+  background: #e7ede4 !important;
+  color: #48624b !important;
+}
+
+/* Cafe story/support use more architectural, squared-off surfaces. */
+.page[data-theme-field="cafe"] .storeStory {
+  width: min(1180px, calc(100% - 28px)) !important;
+  min-height: 0 !important;
+  margin: 22px auto 0 !important;
+  border: 1px solid rgba(33,23,19,.08) !important;
+  border-radius: 16px !important;
+  padding: 22px !important;
+  background: #f8f4ef !important;
+  color: #211713 !important;
+  box-shadow: 0 11px 28px rgba(33,23,19,.04) !important;
+}
+
+.page[data-theme-field="cafe"] .storyCopy > span {
+  color: #48624b !important;
+}
+
+.page[data-theme-field="cafe"] .storyCopy h2 {
+  color: #211713 !important;
+  font-family: inherit !important;
+}
+
+.page[data-theme-field="cafe"] .storyCopy p {
+  color: #75685f !important;
+}
+
+.page[data-theme-field="cafe"] .storyButton {
+  border: 0 !important;
+  background: #211713 !important;
+  color: #f8f4ef !important;
+}
+
+.page[data-theme-field="cafe"] .partsConcierge {
+  width: min(1180px, calc(100% - 28px)) !important;
+  min-height: 0 !important;
+  margin: 16px auto 0 !important;
+  border: 1px solid rgba(33,23,19,.08) !important;
+  border-radius: 16px !important;
+  padding: 16px !important;
+  background:
+    radial-gradient(circle at 0% 100%, rgba(95,122,97,.07), transparent 14rem),
+    #f3ece4 !important;
+  color: #211713 !important;
+  box-shadow: 0 10px 25px rgba(33,23,19,.04) !important;
+}
+
+.page[data-theme-field="cafe"] .partsConciergeIcon {
+  background: #dfe8db !important;
+  color: #48624b !important;
+}
+
+.page[data-theme-field="cafe"] .partsConciergeCopy > span {
+  color: #48624b !important;
+}
+
+.page[data-theme-field="cafe"] .partsConciergeCopy h2 {
+  color: #211713 !important;
+}
+
+.page[data-theme-field="cafe"] .partsConciergeCopy p {
+  color: #75685f !important;
+}
+
+.page[data-theme-field="cafe"] .partsConciergeActions a:first-child {
+  border: 0 !important;
+  background: #5f7a61 !important;
+  color: #fff !important;
+}
+
+.page[data-theme-field="cafe"] .partsConciergeActions a:last-child {
+  border: 1px solid rgba(33,23,19,.10) !important;
+  background: #f8f4ef !important;
+  color: #211713 !important;
+}
+
+.page[data-theme-field="cafe"] .footer {
+  width: min(1180px, calc(100% - 28px)) !important;
+  margin: 18px auto 0 !important;
+  padding: 16px 0 max(10px, env(safe-area-inset-bottom)) !important;
+  border: 0 !important;
+  border-top: 1px solid rgba(33,23,19,.09) !important;
+  background: transparent !important;
+  color: #211713 !important;
+  box-shadow: none !important;
+}
+
+.page[data-theme-field="cafe"] .footerBrand strong {
+  color: #211713 !important;
+}
+
+.page[data-theme-field="cafe"] .footerBrand span,
+.page[data-theme-field="cafe"] .poweredBy {
+  color: #75685f !important;
+}
+
+/* ========================================================================== */
+/* Mobile tuning for both unique themes                                        */
+/* ========================================================================== */
+
+@media (max-width: 760px) {
+  .page[data-theme-field="bakery"][data-hero] .hero,
+  .page[data-theme-field="cafe"][data-hero] .hero {
+    width: calc(100% - 18px) !important;
+    margin-top: 8px !important;
+  }
+
+  .page[data-theme-field="bakery"][data-hero] .hero {
+    border-radius: 24px !important;
+  }
+
+  .page[data-theme-field="cafe"][data-hero] .hero {
+    border-radius: 18px !important;
+  }
+
+  .page[data-theme-field="bakery"] .heroContent,
+  .page[data-theme-field="cafe"] .heroContent {
+    min-height: 318px !important;
+    padding: 20px 18px 22px !important;
+  }
+
+  .page[data-theme-field="bakery"] .hero h1,
+  .page[data-theme-field="bakery"] .heroCopy h1 {
+    font-size: clamp(30px, 8.8vw, 39px) !important;
+    line-height: .97 !important;
+  }
+
+  .page[data-theme-field="cafe"] .hero h1,
+  .page[data-theme-field="cafe"] .heroCopy h1 {
+    font-size: clamp(29px, 8.3vw, 37px) !important;
+    line-height: .98 !important;
+  }
+
+  .page[data-theme-field="bakery"] .quickInfoStrip,
+  .page[data-theme-field="bakery"] .catalogShell,
+  .page[data-theme-field="bakery"] .storeStory,
+  .page[data-theme-field="bakery"] .partsConcierge,
+  .page[data-theme-field="bakery"] .footer,
+  .page[data-theme-field="cafe"] .quickInfoStrip,
+  .page[data-theme-field="cafe"] .catalogShell,
+  .page[data-theme-field="cafe"] .storeStory,
+  .page[data-theme-field="cafe"] .partsConcierge,
+  .page[data-theme-field="cafe"] .footer {
+    width: calc(100% - 24px) !important;
+  }
+
+  .page[data-theme-field="bakery"] .marketplaceListingHeader,
+  .page[data-theme-field="cafe"] .marketplaceListingHeader {
+    margin: 4px 0 11px !important;
+  }
+
+  .page[data-theme-field="bakery"] .marketplaceListingHeader h3,
+  .page[data-theme-field="cafe"] .marketplaceListingHeader h3 {
+    font-size: 21px !important;
+  }
+
+  .page[data-theme-field="bakery"] .marketplaceBestSellerDepartmentTitle,
+  .page[data-theme-field="cafe"] .marketplaceBestSellerDepartmentTitle {
+    margin-bottom: 9px !important;
+    font-size: 15px !important;
+    line-height: 19px !important;
+  }
+
+  .page[data-theme-field="bakery"] .storeStory,
+  .page[data-theme-field="cafe"] .storeStory {
+    padding: 17px !important;
+  }
+
+  .page[data-theme-field="bakery"] .storyCopy h2,
+  .page[data-theme-field="cafe"] .storyCopy h2 {
+    margin: 4px 0 8px !important;
+    font-size: 23px !important;
+    line-height: 1.06 !important;
+  }
+
+  .page[data-theme-field="bakery"] .storyCopy p,
+  .page[data-theme-field="cafe"] .storyCopy p {
+    display: -webkit-box;
+    margin: 0 !important;
+    overflow: hidden;
+    font-size: 11px !important;
+    line-height: 1.48 !important;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 3;
+  }
+
+  .page[data-theme-field="bakery"] .partsConcierge,
+  .page[data-theme-field="cafe"] .partsConcierge {
+    padding: 13px !important;
+  }
+
+  .page[data-theme-field="bakery"] .partsConciergeCopy h2,
+  .page[data-theme-field="cafe"] .partsConciergeCopy h2 {
+    font-size: 16px !important;
+    line-height: 1.08 !important;
+  }
+
+  .page[data-theme-field="bakery"] .partsConciergeCopy p,
+  .page[data-theme-field="cafe"] .partsConciergeCopy p {
+    display: none !important;
+  }
+}
