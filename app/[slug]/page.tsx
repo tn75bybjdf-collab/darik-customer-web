@@ -4,6 +4,7 @@
 // DARIK_HOME_APPLIANCES_SHORT_ITEM_VIDEO_071
 // DARIK_DUAL_SIZE_PRODUCT_PHOTOS_078
 // DARIK_CUSTOMER_PRODUCT_DETAIL_BEAUTY_079
+// DARIK_STOREFRONT_PORTFOLIO_COMPOSITION_089
 // DARIK_MECHANICS_LAB_048
 
 // DARIK_DETAILS_MODAL_SCROLL_FIX_034
@@ -16,6 +17,7 @@ import { useParams } from "next/navigation";
 import { supabase } from "@/lib/supabaseBrowser";
 import { mechanicsFieldLabel, readMechanicsLabField } from "@/lib/darikMechanicsLab";
 import styles from "./storefront.module.css";
+import portfolioStyles from "./storefrontPortfolio089.module.css";
 import ProductDetailExperience from "./ProductDetailExperience";
 
 type Storefront = {
@@ -1682,7 +1684,7 @@ export default function DarikDirectStorefrontPage() {
           : "Contact for price / \u062a\u0648\u0627\u0635\u0644 \u0644\u0644\u0633\u0639\u0631";
     return (
       <article
-        className={`${styles.productCard} ${isAutoPartsTheme ? styles.autoPartsProductCard : ""}`}
+        className={`${styles.productCard} ${isAutoPartsTheme ? styles.autoPartsProductCard : ""} ${portfolioStyles.productCardPolish}`}
         key={product.id}
         role="button"
         tabIndex={0}
@@ -1700,7 +1702,7 @@ export default function DarikDirectStorefrontPage() {
           openProductDetail(product);
         }}
       >
-        <div className={styles.productImage}>
+        <div className={`${styles.productImage} ${portfolioStyles.productImagePolish}`}>
           {photo ? (
             <img
               src={thumbnailPhoto || photo}
@@ -1745,7 +1747,7 @@ export default function DarikDirectStorefrontPage() {
           </div>
         </div>
 
-        <div className={styles.productBody}>
+        <div className={`${styles.productBody} ${portfolioStyles.productBodyPolish}`}>
           <p className={styles.productMeta}>
             {product.direct_store_category_name ||
               product.brand_name ||
@@ -1839,7 +1841,7 @@ export default function DarikDirectStorefrontPage() {
     .join(" ");
   return (
     <main
-      className={styles.page}
+      className={`${styles.page} ${portfolioStyles.pagePolish}`}
       style={themeStyle}
       data-theme={storefrontTheme}
       data-appearance={appearanceMode}
@@ -1903,7 +1905,7 @@ export default function DarikDirectStorefrontPage() {
         <a href="/">Powered by Darik</a>
       </div>
 
-      <header className={styles.header}>
+      <header className={`${styles.header} ${portfolioStyles.headerPolish}`}>
         <a className={styles.storeIdentity} href={`/${storefront.slug}`}>
           <div className={styles.headerLogo}>
             {storefront.logo_url ? (
@@ -1950,7 +1952,7 @@ export default function DarikDirectStorefrontPage() {
       </header>
 
       <section
-        className={`${styles.hero} ${
+        className={`${styles.hero} ${portfolioStyles.heroPolish} ${
           storefront.hero_image_url ? styles.heroWithImage : styles.heroWithoutImage
         }`}
         style={heroStyle}
@@ -2077,7 +2079,7 @@ export default function DarikDirectStorefrontPage() {
         </aside>
       </section>
 
-      <section className={styles.quickInfoStrip}>
+      <section className={`${styles.quickInfoStrip} ${portfolioStyles.quickInfoPolish}`}>
         {(storefront.address_text || storefront.address_text_ar) ? (
           <a
             className={styles.locationQuickLink}
@@ -2129,7 +2131,7 @@ export default function DarikDirectStorefrontPage() {
         ))}
       </section>
 
-      <div className={styles.reorderableSections}>
+      <div className={`${styles.reorderableSections} ${portfolioStyles.sectionsPolish}`}>
       {isGroceryStore ? (
         <section className={styles.grocerySearchPanel}>
           <label className={styles.grocerySearchBox}>
@@ -2149,7 +2151,7 @@ export default function DarikDirectStorefrontPage() {
       ) : null}
       {visibleCategories.length > 0 ? (
         <section
-          className={`${styles.categorySection} ${isGroceryStore ? styles.groceryCategorySection : ""}`}
+          className={`${styles.categorySection} ${isGroceryStore ? styles.groceryCategorySection : ""} ${portfolioStyles.categoriesPolish}`}
           style={{ order: sectionOrder.indexOf("categories") }}
         >
           <div className={styles.sectionHeading}>
@@ -2160,7 +2162,7 @@ export default function DarikDirectStorefrontPage() {
             <button onClick={jumpToCatalog}>{isGroceryStore ? "All groceries / \u0643\u0644 \u0627\u0644\u0645\u0646\u062a\u062c\u0627\u062a" : "All products / \u0643\u0644 \u0627\u0644\u0645\u0646\u062a\u062c\u0627\u062a"}</button>
           </div>
 
-          <div className={styles.categoryScroller}>
+          <div className={`${styles.categoryScroller} ${portfolioStyles.categoryScrollerPolish}`}>
             <button
               className={`${styles.categoryCard} ${
                 selectedCategoryId === "all" ? styles.activeCategoryCard : ""
@@ -2232,11 +2234,11 @@ export default function DarikDirectStorefrontPage() {
         </section>
       ) : null}
 <section
-        className={styles.catalogShell}
+        className={`${styles.catalogShell} ${portfolioStyles.catalogPolish}`}
         id="catalog"
         style={{ order: sectionOrder.indexOf("catalog") }}
       >
-        <div className={`${styles.catalogTopbar} ${isGroceryStore ? styles.groceryCatalogTopbar : ""}`}>
+        <div className={`${styles.catalogTopbar} ${isGroceryStore ? styles.groceryCatalogTopbar : ""} ${portfolioStyles.catalogTopbarPolish}`}>
           <div>
             <span>Shop {storefront.display_name}</span>
             <h2>
@@ -2244,7 +2246,7 @@ export default function DarikDirectStorefrontPage() {
             </h2>
           </div>
 
-          <label className={styles.searchBox}>
+          <label className={`${styles.searchBox} ${portfolioStyles.searchBoxPolish}`}>
             <Icon name="search" size={20} />
             <input
               value={search}
@@ -2396,7 +2398,7 @@ export default function DarikDirectStorefrontPage() {
         {loadError ? <p className={styles.notice}>{loadError}</p> : null}
 
         {featuredProducts.length > 0 ? (
-          <section className={`${styles.productSection} ${isGroceryStore ? styles.groceryFeaturedProducts : ""}`}>
+          <section className={`${styles.productSection} ${isGroceryStore ? styles.groceryFeaturedProducts : ""} ${portfolioStyles.productSectionPolish}`}>
             <div className={styles.productSectionHeading}>
               <div>
                 <span>{isGroceryStore ? "Featured products / \u0645\u0646\u062a\u062c\u0627\u062a \u0645\u0645\u064a\u0632\u0629" : "Handpicked by the store"}</span>
@@ -2404,13 +2406,13 @@ export default function DarikDirectStorefrontPage() {
               </div>
               <small>{featuredProducts.length} featured</small>
             </div>
-            <div className={styles.productGrid}>
+            <div className={`${styles.productGrid} ${portfolioStyles.productGridPolish}`}>
               {featuredProducts.map(renderProductCard)}
             </div>
           </section>
         ) : null}
 
-        <section className={`${styles.productSection} ${isGroceryStore ? styles.groceryCatalogProducts : ""}`}>
+        <section className={`${styles.productSection} ${isGroceryStore ? styles.groceryCatalogProducts : ""} ${portfolioStyles.productSectionPolish}`}>
           <div className={styles.productSectionHeading}>
             <div>
               <span>{isAutoParts ? "Parts catalog / \u0643\u062a\u0627\u0644\u0648\u062c \u0627\u0644\u0642\u0637\u0639" : isGroceryStore ? "Store catalog / \u0643\u062a\u0627\u0644\u0648\u062c \u0627\u0644\u0645\u062a\u062c\u0631" : search ? `Results for “${search}”` : "Store catalog"}</span>
@@ -2449,7 +2451,7 @@ export default function DarikDirectStorefrontPage() {
               ) : null}
             </div>
           ) : catalogProducts.length > 0 ? (
-            <div className={styles.productGrid}>
+            <div className={`${styles.productGrid} ${portfolioStyles.productGridPolish}`}>
               {catalogProducts.map(renderProductCard)}
             </div>
           ) : null}
@@ -2458,7 +2460,7 @@ export default function DarikDirectStorefrontPage() {
 
       {showStoreStory ? (
       <section
-        className={styles.storeStory}
+        className={`${styles.storeStory} ${portfolioStyles.storyPolish}`}
         style={{ order: sectionOrder.indexOf("story") }}
       >
         <div className={styles.storyCopy}>
@@ -2516,7 +2518,7 @@ export default function DarikDirectStorefrontPage() {
       </div>
 
       {isAutoParts && (partsHelpWhatsappHref || phone) ? (
-        <section className={styles.partsConcierge}>
+        <section className={`${styles.partsConcierge} ${portfolioStyles.conciergePolish}`}>
           <div className={styles.partsConciergeIcon}>
             <Icon name="store" size={24} />
           </div>
@@ -2548,7 +2550,7 @@ export default function DarikDirectStorefrontPage() {
           </div>
         </section>
       ) : null}
-      <footer className={styles.footer}>
+      <footer className={`${styles.footer} ${portfolioStyles.footerPolish}`}>
         <div className={styles.footerBrand}>
           <div className={styles.footerLogo}>
             {storefront.logo_url ? (
