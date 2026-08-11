@@ -3298,3 +3298,150 @@
     bottom: 27px;
   }
 }
+
+
+/* ========================================================================== */
+/* DARIK 086 - CONTENT-DRIVEN PRODUCT SHEET / FINAL COMMERCE COMPOSITION       */
+/* The product sheet now owns only the height its real content needs.           */
+/* Media receives the remaining viewport instead of leaving fake empty space.  */
+/* ========================================================================== */
+
+@media (max-width: 900px) {
+  /*
+   * The previous percentage split was the source of the large dead white zone.
+   * Row 2 is now content-driven. Row 1 consumes the remaining screen.
+   */
+  .productLayout {
+    grid-template-rows:
+      minmax(0, 1fr)
+      auto;
+  }
+
+  /*
+   * Give sparse products enough breathing room to still feel premium, but do
+   * not reserve half the phone for content that does not exist.
+   */
+  .detailColumn {
+    min-height: clamp(430px, 39dvh, 535px);
+    max-height: min(58dvh, 620px);
+    margin-top: -24px;
+    overflow: hidden;
+    border-radius: 28px 28px 0 0;
+  }
+
+  .detailScroll {
+    min-height: 0;
+    max-height: none;
+    overflow-y: auto;
+    padding:
+      15px
+      18px
+      10px;
+  }
+
+  /*
+   * The content stack remains compact and intentional. There is no synthetic
+   * spacer between fulfillment and the buying action.
+   */
+  .fulfillmentStrip {
+    margin-top: 10px;
+    padding-top: 9px;
+  }
+
+  .actionDock {
+    min-height: 76px;
+    padding:
+      8px
+      14px
+      calc(8px + env(safe-area-inset-bottom));
+  }
+
+  /*
+   * Media chrome remains above the sheet overlap regardless of the dynamically
+   * calculated media height.
+   */
+  .mediaNav {
+    bottom: 34px;
+  }
+
+  .videoExpandButton,
+  .expandHint {
+    bottom: 31px;
+  }
+
+  /*
+   * Keep real product information visibly structured, not compressed into stray
+   * text simply to chase a fixed-height layout.
+   */
+  .descriptionSection {
+    margin-top: 9px;
+  }
+
+  .descriptionSection .sectionLabel {
+    display: flex !important;
+    margin-bottom: 4px;
+  }
+
+  .descriptionSection p {
+    margin-top: 0;
+    -webkit-line-clamp: 2;
+  }
+}
+
+@media (max-width: 520px) {
+  .detailColumn {
+    min-height: clamp(420px, 38dvh, 510px);
+    max-height: 60dvh;
+    margin-top: -23px;
+  }
+
+  .detailScroll {
+    padding:
+      14px
+      18px
+      9px;
+  }
+
+  .fulfillmentStrip {
+    margin-top: 9px;
+    padding-top: 8px;
+  }
+
+  .actionDock {
+    min-height: 74px;
+    padding-top: 7px;
+    padding-bottom: calc(7px + env(safe-area-inset-bottom));
+  }
+}
+
+@media (max-height: 720px) and (max-width: 900px) {
+  /*
+   * On short phones, content still wins over decorative media. The sheet may
+   * use a little more of the screen and its internal content can scroll.
+   */
+  .detailColumn {
+    min-height: 390px;
+    max-height: 62dvh;
+    margin-top: -20px;
+  }
+
+  .detailScroll {
+    padding-top: 10px;
+    padding-bottom: 7px;
+  }
+
+  .fulfillmentStrip {
+    margin-top: 7px;
+    padding-top: 6px;
+  }
+
+  .actionDock {
+    min-height: 58px;
+    padding-top: 5px;
+    padding-bottom: calc(5px + env(safe-area-inset-bottom));
+  }
+
+  .descriptionSection .sectionLabel {
+    display: flex !important;
+  }
+}
