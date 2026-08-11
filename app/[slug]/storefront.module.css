@@ -6698,14 +6698,14 @@
    - storefront mechanics remain unchanged */
 
 /* Never allow the old auto-parts hero outline to win again. */
-.page[data-business="auto_parts"] .hero,
-.page[data-business="auto_parts"][data-hero="immersive"] .hero {
+.page[data-business="auto_parts"][data-theme-field="auto_parts"] .hero,
+.page[data-business="auto_parts"][data-theme-field="auto_parts"][data-hero="immersive"] .hero {
   border: 0 !important;
   outline: 0 !important;
 }
 
-.page[data-business="auto_parts"] .hero::after,
-.page[data-business="auto_parts"][data-hero="immersive"] .hero::after {
+.page[data-business="auto_parts"][data-theme-field="auto_parts"] .hero::after,
+.page[data-business="auto_parts"][data-theme-field="auto_parts"][data-hero="immersive"] .hero::after {
   content: none !important;
   display: none !important;
   border: 0 !important;
@@ -6714,7 +6714,7 @@
 
 @media (max-width: 760px) {
   /* Header: quiet chrome. The store should own the screen. */
-  .page[data-business="auto_parts"] .header {
+  .page[data-business="auto_parts"][data-theme-field="auto_parts"] .header {
     min-height: 62px;
     gap: 9px;
     padding: 8px 12px;
@@ -6723,7 +6723,7 @@
     box-shadow: none;
   }
 
-  .page[data-business="auto_parts"] .headerLogo {
+  .page[data-business="auto_parts"][data-theme-field="auto_parts"] .headerLogo {
     width: 44px;
     height: 44px;
     border: 0;
@@ -6731,11 +6731,11 @@
     box-shadow: 0 7px 18px rgba(2, 6, 23, .18);
   }
 
-  .page[data-business="auto_parts"] .storeIdentity {
+  .page[data-business="auto_parts"][data-theme-field="auto_parts"] .storeIdentity {
     min-width: 0;
   }
 
-  .page[data-business="auto_parts"] .storeIdentity strong {
+  .page[data-business="auto_parts"][data-theme-field="auto_parts"] .storeIdentity strong {
     max-width: min(54vw, 235px);
     overflow: hidden;
     color: #fff;
@@ -6746,12 +6746,12 @@
     white-space: nowrap;
   }
 
-  .page[data-business="auto_parts"] .headerActions {
+  .page[data-business="auto_parts"][data-theme-field="auto_parts"] .headerActions {
     gap: 7px;
   }
 
-  .page[data-business="auto_parts"] .headerActions button,
-  .page[data-business="auto_parts"] .headerActions .cartButton {
+  .page[data-business="auto_parts"][data-theme-field="auto_parts"] .headerActions button,
+  .page[data-business="auto_parts"][data-theme-field="auto_parts"] .headerActions .cartButton {
     min-height: 42px;
     border: 0;
     border-radius: 13px;
@@ -6760,8 +6760,8 @@
   }
 
   /* Hero: full-bleed storefront image, not a floating photo card. */
-  .page[data-business="auto_parts"] .hero,
-  .page[data-business="auto_parts"][data-hero="immersive"] .hero {
+  .page[data-business="auto_parts"][data-theme-field="auto_parts"] .hero,
+  .page[data-business="auto_parts"][data-theme-field="auto_parts"][data-hero="immersive"] .hero {
     width: 100% !important;
     min-height: 0 !important;
     margin: 0 !important;
@@ -6774,19 +6774,19 @@
     box-shadow: none !important;
   }
 
-  .page[data-business="auto_parts"] .hero::before,
-  .page[data-business="auto_parts"][data-hero="immersive"] .hero::before,
-  .page[data-business="auto_parts"] .hero::after,
-  .page[data-business="auto_parts"][data-hero="immersive"] .hero::after {
+  .page[data-business="auto_parts"][data-theme-field="auto_parts"] .hero::before,
+  .page[data-business="auto_parts"][data-theme-field="auto_parts"][data-hero="immersive"] .hero::before,
+  .page[data-business="auto_parts"][data-theme-field="auto_parts"] .hero::after,
+  .page[data-business="auto_parts"][data-theme-field="auto_parts"][data-hero="immersive"] .hero::after {
     content: none !important;
     display: none !important;
   }
 
-  .page[data-business="auto_parts"] .heroTexture {
+  .page[data-business="auto_parts"][data-theme-field="auto_parts"] .heroTexture {
     display: none !important;
   }
 
-  .page[data-business="auto_parts"] .heroOverlay {
+  .page[data-business="auto_parts"][data-theme-field="auto_parts"] .heroOverlay {
     background:
       linear-gradient(
         180deg,
@@ -6798,15 +6798,15 @@
       linear-gradient(100deg, rgba(2, 8, 20, .16), transparent 72%);
   }
 
-  .page[data-business="auto_parts"] .heroContent,
-  .page[data-business="auto_parts"][data-hero="immersive"] .heroContent {
+  .page[data-business="auto_parts"][data-theme-field="auto_parts"] .heroContent,
+  .page[data-business="auto_parts"][data-theme-field="auto_parts"][data-hero="immersive"] .heroContent {
     min-height: 346px !important;
     justify-content: flex-end;
     gap: 8px;
     padding: 0 !important;
   }
 
-  .page[data-business="auto_parts"] .heroLogo {
+  .page[data-business="auto_parts"][data-theme-field="auto_parts"] .heroLogo {
     width: 50px;
     height: 50px;
     border: 0;
@@ -6814,7 +6814,7 @@
     box-shadow: 0 10px 24px rgba(0, 0, 0, .24);
   }
 
-  .page[data-business="auto_parts"] .heroLabel {
+  .page[data-business="auto_parts"][data-theme-field="auto_parts"] .heroLabel {
     margin-bottom: 2px;
     padding: 5px 9px;
     border: 0;
@@ -6825,27 +6825,27 @@
     -webkit-backdrop-filter: blur(12px);
   }
 
-  .page[data-business="auto_parts"] .hero h1,
-  .page[data-business="auto_parts"][data-hero="immersive"] .heroCopy h1 {
+  .page[data-business="auto_parts"][data-theme-field="auto_parts"] .hero h1,
+  .page[data-business="auto_parts"][data-theme-field="auto_parts"][data-hero="immersive"] .heroCopy h1 {
     max-width: 92%;
     font-size: clamp(31px, 9vw, 39px);
     line-height: .96;
     letter-spacing: -.05em;
   }
 
-  .page[data-business="auto_parts"] .tagline {
+  .page[data-business="auto_parts"][data-theme-field="auto_parts"] .tagline {
     max-width: 92%;
     margin-top: 5px;
     font-size: 11.5px;
     line-height: 1.35;
   }
 
-  .page[data-business="auto_parts"] .heroButtons {
+  .page[data-business="auto_parts"][data-theme-field="auto_parts"] .heroButtons {
     width: 100%;
     margin-top: 10px;
   }
 
-  .page[data-business="auto_parts"] .primaryHeroButton {
+  .page[data-business="auto_parts"][data-theme-field="auto_parts"] .primaryHeroButton {
     width: 100%;
     min-height: 48px;
     border: 0;
@@ -6857,7 +6857,7 @@
   }
 
   /* Location / Call / WhatsApp: utilities, not another framed panel. */
-  .page[data-business="auto_parts"] .quickInfoStrip {
+  .page[data-business="auto_parts"][data-theme-field="auto_parts"] .quickInfoStrip {
     width: calc(100% - 24px);
     margin: 11px auto 0;
     gap: 7px;
@@ -6868,44 +6868,44 @@
     overflow: visible;
   }
 
-  .page[data-business="auto_parts"] .quickInfoStrip > a,
-  .page[data-business="auto_parts"] .quickInfoStrip > button,
-  .page[data-business="auto_parts"] .quickInfoStrip .locationQuickLink,
-  .page[data-business="auto_parts"] .quickInfoStrip .contactQuickLink {
+  .page[data-business="auto_parts"][data-theme-field="auto_parts"] .quickInfoStrip > a,
+  .page[data-business="auto_parts"][data-theme-field="auto_parts"] .quickInfoStrip > button,
+  .page[data-business="auto_parts"][data-theme-field="auto_parts"] .quickInfoStrip .locationQuickLink,
+  .page[data-business="auto_parts"][data-theme-field="auto_parts"] .quickInfoStrip .contactQuickLink {
     border: 0 !important;
     border-radius: 14px;
     background: rgba(14, 37, 63, .84);
     box-shadow: inset 0 1px 0 rgba(255, 255, 255, .03);
   }
 
-  .page[data-business="auto_parts"] .quickInfoStrip .locationQuickLink {
+  .page[data-business="auto_parts"][data-theme-field="auto_parts"] .quickInfoStrip .locationQuickLink {
     min-height: 48px;
     padding: 7px 10px;
   }
 
-  .page[data-business="auto_parts"] .quickInfoStrip .contactQuickLink {
+  .page[data-business="auto_parts"][data-theme-field="auto_parts"] .quickInfoStrip .contactQuickLink {
     min-height: 43px;
     padding: 7px 9px;
   }
 
-  .page[data-business="auto_parts"] .quickIcon {
+  .page[data-business="auto_parts"][data-theme-field="auto_parts"] .quickIcon {
     width: 31px;
     height: 31px;
     border-radius: 10px;
   }
 
   /* Catalog: products arrive faster. */
-  .page[data-business="auto_parts"] .catalogShell {
+  .page[data-business="auto_parts"][data-theme-field="auto_parts"] .catalogShell {
     width: calc(100% - 24px);
     padding: 17px 0 28px;
   }
 
-  .page[data-business="auto_parts"] .catalogTopbar {
+  .page[data-business="auto_parts"][data-theme-field="auto_parts"] .catalogTopbar {
     gap: 9px;
     margin-bottom: 12px;
   }
 
-  .page[data-business="auto_parts"] .searchBox {
+  .page[data-business="auto_parts"][data-theme-field="auto_parts"] .searchBox {
     min-height: 46px;
     border: 0;
     border-radius: 14px;
@@ -6913,33 +6913,33 @@
     box-shadow: none;
   }
 
-  .page[data-business="auto_parts"] .searchBox input {
+  .page[data-business="auto_parts"][data-theme-field="auto_parts"] .searchBox input {
     font-size: 12.5px;
     font-weight: 700;
   }
 
-  .page[data-business="auto_parts"] .productSectionHeading {
+  .page[data-business="auto_parts"][data-theme-field="auto_parts"] .productSectionHeading {
     margin-bottom: 10px;
   }
 
-  .page[data-business="auto_parts"] .productSectionHeading > div > span {
+  .page[data-business="auto_parts"][data-theme-field="auto_parts"] .productSectionHeading > div > span {
     margin-bottom: 4px;
     font-size: 7.5px;
     letter-spacing: .12em;
   }
 
-  .page[data-business="auto_parts"] .productSectionHeading h3 {
+  .page[data-business="auto_parts"][data-theme-field="auto_parts"] .productSectionHeading h3 {
     font-size: 23px;
     line-height: 1;
     letter-spacing: -.03em;
   }
 
-  .page[data-business="auto_parts"] .productGrid {
+  .page[data-business="auto_parts"][data-theme-field="auto_parts"] .productGrid {
     gap: 14px;
   }
 
   /* Product card: editorial image + compact buying information. */
-  .page[data-business="auto_parts"] .autoPartsProductCard {
+  .page[data-business="auto_parts"][data-theme-field="auto_parts"] .autoPartsProductCard {
     display: block;
     overflow: hidden;
     border: 0;
@@ -6948,7 +6948,7 @@
     box-shadow: 0 14px 36px rgba(2, 6, 23, .20);
   }
 
-  .page[data-business="auto_parts"] .autoPartsProductCard .productImage {
+  .page[data-business="auto_parts"][data-theme-field="auto_parts"] .autoPartsProductCard .productImage {
     min-height: 0;
     height: auto;
     aspect-ratio: 2.05 / 1;
@@ -6958,14 +6958,14 @@
     background: #eef3f7;
   }
 
-  .page[data-business="auto_parts"] .autoPartsProductCard .productImage img {
+  .page[data-business="auto_parts"][data-theme-field="auto_parts"] .autoPartsProductCard .productImage img {
     width: 100%;
     height: 100%;
     object-fit: cover;
     object-position: center;
   }
 
-  .page[data-business="auto_parts"] .autoPartsProductCard .productBody {
+  .page[data-business="auto_parts"][data-theme-field="auto_parts"] .autoPartsProductCard .productBody {
     display: flex;
     flex-direction: column;
     justify-content: flex-start !important;
@@ -6973,26 +6973,26 @@
     padding: 13px 15px 14px;
   }
 
-  .page[data-business="auto_parts"] .autoPartsProductCard .productMeta {
+  .page[data-business="auto_parts"][data-theme-field="auto_parts"] .autoPartsProductCard .productMeta {
     margin-bottom: 4px;
     font-size: 7.5px;
     letter-spacing: .115em;
   }
 
-  .page[data-business="auto_parts"] .autoPartsProductCard .productBody h3 {
+  .page[data-business="auto_parts"][data-theme-field="auto_parts"] .autoPartsProductCard .productBody h3 {
     margin: 0;
     font-size: 19px;
     line-height: 1.17;
     letter-spacing: -.025em;
   }
 
-  .page[data-business="auto_parts"] .autoPartsProductCard .productArabic {
+  .page[data-business="auto_parts"][data-theme-field="auto_parts"] .autoPartsProductCard .productArabic {
     margin-top: 5px;
     font-size: 11.5px;
     line-height: 1.35;
   }
 
-  .page[data-business="auto_parts"] .autoPartsProductCard .productFitment {
+  .page[data-business="auto_parts"][data-theme-field="auto_parts"] .autoPartsProductCard .productFitment {
     margin-top: 9px;
     padding: 8px 10px;
     border: 0;
@@ -7000,26 +7000,26 @@
     background: rgba(47, 102, 255, .075);
   }
 
-  .page[data-business="auto_parts"] .autoPartsProductCard .productFitment span {
+  .page[data-business="auto_parts"][data-theme-field="auto_parts"] .autoPartsProductCard .productFitment span {
     font-size: 7.5px;
   }
 
-  .page[data-business="auto_parts"] .autoPartsProductCard .productFitment strong {
+  .page[data-business="auto_parts"][data-theme-field="auto_parts"] .autoPartsProductCard .productFitment strong {
     font-size: 12.5px;
   }
 
-  .page[data-business="auto_parts"] .autoPartsProductCard .productFooter {
+  .page[data-business="auto_parts"][data-theme-field="auto_parts"] .autoPartsProductCard .productFooter {
     margin-top: 9px !important;
     gap: 7px;
     padding-top: 0 !important;
   }
 
-  .page[data-business="auto_parts"] .autoPartsProductCard .productFooter > div:first-child > strong {
+  .page[data-business="auto_parts"][data-theme-field="auto_parts"] .autoPartsProductCard .productFooter > div:first-child > strong {
     font-size: 10px;
   }
 
-  .page[data-business="auto_parts"] .autoPartsProductCard .productFooter > button,
-  .page[data-business="auto_parts"] .autoPartsProductCard .productFooter > div + button {
+  .page[data-business="auto_parts"][data-theme-field="auto_parts"] .autoPartsProductCard .productFooter > button,
+  .page[data-business="auto_parts"][data-theme-field="auto_parts"] .autoPartsProductCard .productFooter > div + button {
     width: auto;
     min-width: 132px;
     min-height: 43px;
@@ -7028,72 +7028,72 @@
     border-radius: 13px;
   }
 
-  .page[data-business="auto_parts"] .autoPartsProductCard .pricingActions {
+  .page[data-business="auto_parts"][data-theme-field="auto_parts"] .autoPartsProductCard .pricingActions {
     gap: 7px;
     margin-top: 1px;
   }
 
-  .page[data-business="auto_parts"] .autoPartsProductCard .pricingCallButton,
-  .page[data-business="auto_parts"] .autoPartsProductCard .pricingWhatsappButton,
-  .page[data-business="auto_parts"] .autoPartsProductCard .pricingActions .productContactButton {
+  .page[data-business="auto_parts"][data-theme-field="auto_parts"] .autoPartsProductCard .pricingCallButton,
+  .page[data-business="auto_parts"][data-theme-field="auto_parts"] .autoPartsProductCard .pricingWhatsappButton,
+  .page[data-business="auto_parts"][data-theme-field="auto_parts"] .autoPartsProductCard .pricingActions .productContactButton {
     min-height: 43px;
     border-radius: 13px;
     font-size: 10.5px;
   }
 
   /* Categories are navigation, not another hero. */
-  .page[data-business="auto_parts"] .categorySection {
+  .page[data-business="auto_parts"][data-theme-field="auto_parts"] .categorySection {
     width: calc(100% - 24px);
     padding-top: 22px;
     padding-bottom: 3px;
   }
 
-  .page[data-business="auto_parts"] .sectionHeading > div > span {
+  .page[data-business="auto_parts"][data-theme-field="auto_parts"] .sectionHeading > div > span {
     margin-bottom: 4px;
     font-size: 7.5px;
     letter-spacing: .11em;
   }
 
-  .page[data-business="auto_parts"] .sectionHeading h2 {
+  .page[data-business="auto_parts"][data-theme-field="auto_parts"] .sectionHeading h2 {
     max-width: 76%;
     font-size: 21px;
     line-height: 1.02;
   }
 
-  .page[data-business="auto_parts"] .categoryScroller {
+  .page[data-business="auto_parts"][data-theme-field="auto_parts"] .categoryScroller {
     grid-auto-columns: 76px;
     gap: 8px;
     margin-top: 12px;
     padding-bottom: 3px;
   }
 
-  .page[data-business="auto_parts"] .categoryCard {
+  .page[data-business="auto_parts"][data-theme-field="auto_parts"] .categoryCard {
     min-width: 76px;
     gap: 3px;
     padding: 0 1px 4px;
   }
 
-  .page[data-business="auto_parts"] .categoryVisual,
-  .page[data-business="auto_parts"] .allCategoryVisual {
+  .page[data-business="auto_parts"][data-theme-field="auto_parts"] .categoryVisual,
+  .page[data-business="auto_parts"][data-theme-field="auto_parts"] .allCategoryVisual {
     width: 58px;
     height: 58px;
     margin-bottom: 5px;
     border: 0;
   }
 
-  .page[data-business="auto_parts"] .categoryCard > span {
+  .page[data-business="auto_parts"][data-theme-field="auto_parts"] .categoryCard > span {
     font-size: 9.5px;
     line-height: 1.15;
   }
 
-  .page[data-business="auto_parts"] .categoryCard > small,
-  .page[data-business="auto_parts"] .categoryCard > em {
+  .page[data-business="auto_parts"][data-theme-field="auto_parts"] .categoryCard > small,
+  .page[data-business="auto_parts"][data-theme-field="auto_parts"] .categoryCard > em {
     font-size: 8px;
     line-height: 1.15;
   }
 
   /* Footer ends the page instead of looking like another floating card. */
-  .page[data-business="auto_parts"] .footer {
+  .page[data-business="auto_parts"][data-theme-field="auto_parts"] .footer {
     width: calc(100% - 24px);
     margin-top: 24px;
     padding: 15px 0 25px;
@@ -7104,7 +7104,7 @@
     box-shadow: none;
   }
 
-  .page[data-business="auto_parts"] .poweredBy {
+  .page[data-business="auto_parts"][data-theme-field="auto_parts"] .poweredBy {
     margin-top: 7px;
     opacity: .52;
     font-size: 8px;
@@ -7112,17 +7112,17 @@
 }
 
 @media (max-width: 430px) {
-  .page[data-business="auto_parts"] .heroContent,
-  .page[data-business="auto_parts"][data-hero="immersive"] .heroContent {
+  .page[data-business="auto_parts"][data-theme-field="auto_parts"] .heroContent,
+  .page[data-business="auto_parts"][data-theme-field="auto_parts"][data-hero="immersive"] .heroContent {
     min-height: 332px !important;
   }
 
-  .page[data-business="auto_parts"] .hero h1,
-  .page[data-business="auto_parts"][data-hero="immersive"] .heroCopy h1 {
+  .page[data-business="auto_parts"][data-theme-field="auto_parts"] .hero h1,
+  .page[data-business="auto_parts"][data-theme-field="auto_parts"][data-hero="immersive"] .heroCopy h1 {
     font-size: clamp(29px, 8.8vw, 36px);
   }
 
-  .page[data-business="auto_parts"] .autoPartsProductCard .productImage {
+  .page[data-business="auto_parts"][data-theme-field="auto_parts"] .autoPartsProductCard .productImage {
     aspect-ratio: 1.95 / 1;
   }
 }
@@ -7134,62 +7134,62 @@
    compact parts support, and no dead footer space. */
 
 @media (max-width: 760px) {
-  .page[data-business="auto_parts"] {
+  .page[data-business="auto_parts"][data-theme-field="auto_parts"] {
     padding-bottom: max(22px, env(safe-area-inset-bottom)) !important;
   }
 
   /* Slightly shorter first impression without undoing the frameless hero. */
-  .page[data-business="auto_parts"] .heroContent,
-  .page[data-business="auto_parts"][data-hero="immersive"] .heroContent {
+  .page[data-business="auto_parts"][data-theme-field="auto_parts"] .heroContent,
+  .page[data-business="auto_parts"][data-theme-field="auto_parts"][data-hero="immersive"] .heroContent {
     min-height: 306px !important;
   }
 
-  .page[data-business="auto_parts"] .heroExperienceRail {
+  .page[data-business="auto_parts"][data-theme-field="auto_parts"] .heroExperienceRail {
     margin-bottom: 4px;
   }
 
-  .page[data-business="auto_parts"] .heroLiveStatus,
-  .page[data-business="auto_parts"] .heroHoursChip {
+  .page[data-business="auto_parts"][data-theme-field="auto_parts"] .heroLiveStatus,
+  .page[data-business="auto_parts"][data-theme-field="auto_parts"] .heroHoursChip {
     min-height: 29px;
     padding: 5px 9px;
     font-size: 8px;
   }
 
-  .page[data-business="auto_parts"] .heroLogo {
+  .page[data-business="auto_parts"][data-theme-field="auto_parts"] .heroLogo {
     width: 46px;
     height: 46px;
   }
 
-  .page[data-business="auto_parts"] .hero h1,
-  .page[data-business="auto_parts"][data-hero="immersive"] .heroCopy h1 {
+  .page[data-business="auto_parts"][data-theme-field="auto_parts"] .hero h1,
+  .page[data-business="auto_parts"][data-theme-field="auto_parts"][data-hero="immersive"] .heroCopy h1 {
     font-size: clamp(29px, 8.4vw, 36px);
   }
 
-  .page[data-business="auto_parts"] .primaryHeroButton {
+  .page[data-business="auto_parts"][data-theme-field="auto_parts"] .primaryHeroButton {
     min-height: 46px;
   }
 
   /* Search should be a utility, not a giant banner. */
-  .page[data-business="auto_parts"] .catalogShell {
+  .page[data-business="auto_parts"][data-theme-field="auto_parts"] .catalogShell {
     width: calc(100% - 24px);
     padding-top: 13px;
     padding-bottom: 22px;
   }
 
-  .page[data-business="auto_parts"] .searchBox {
+  .page[data-business="auto_parts"][data-theme-field="auto_parts"] .searchBox {
     min-height: 44px !important;
     padding-top: 0 !important;
     padding-bottom: 0 !important;
     border-radius: 13px;
   }
 
-  .page[data-business="auto_parts"] .searchBox input {
+  .page[data-business="auto_parts"][data-theme-field="auto_parts"] .searchBox input {
     min-height: 42px;
     font-size: 12px;
   }
 
   /* Vehicle finder: one compact automotive tool instead of half a screen. */
-  .page[data-business="auto_parts"] .vehicleFilterPanel {
+  .page[data-business="auto_parts"][data-theme-field="auto_parts"] .vehicleFilterPanel {
     margin: 8px 0 14px !important;
     gap: 8px !important;
     border-radius: 16px !important;
@@ -7199,53 +7199,53 @@
       inset 0 1px 0 rgba(255,255,255,.04) !important;
   }
 
-  .page[data-business="auto_parts"] .vehicleFilterPanel::before,
-  .page[data-business="auto_parts"] .vehicleFilterPanel::after {
+  .page[data-business="auto_parts"][data-theme-field="auto_parts"] .vehicleFilterPanel::before,
+  .page[data-business="auto_parts"][data-theme-field="auto_parts"] .vehicleFilterPanel::after {
     display: none !important;
   }
 
-  .page[data-business="auto_parts"] .vehicleFilterHeading {
+  .page[data-business="auto_parts"][data-theme-field="auto_parts"] .vehicleFilterHeading {
     gap: 6px;
   }
 
-  .page[data-business="auto_parts"] .vehicleFilterHeading span {
+  .page[data-business="auto_parts"][data-theme-field="auto_parts"] .vehicleFilterHeading span {
     font-size: 7px;
     letter-spacing: .10em;
   }
 
-  .page[data-business="auto_parts"] .vehicleFilterHeading strong {
+  .page[data-business="auto_parts"][data-theme-field="auto_parts"] .vehicleFilterHeading strong {
     margin-top: 1px;
     font-size: 14.5px;
     line-height: 1.12;
   }
 
-  .page[data-business="auto_parts"] .vehicleFilterHeading button {
+  .page[data-business="auto_parts"][data-theme-field="auto_parts"] .vehicleFilterHeading button {
     min-height: 27px;
     padding: 0 8px;
     border-radius: 999px;
     font-size: 7.5px;
   }
 
-  .page[data-business="auto_parts"] .vehicleFilterGrid {
+  .page[data-business="auto_parts"][data-theme-field="auto_parts"] .vehicleFilterGrid {
     grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
     gap: 6px !important;
   }
 
-  .page[data-business="auto_parts"] .vehicleFilterGrid label:first-child {
+  .page[data-business="auto_parts"][data-theme-field="auto_parts"] .vehicleFilterGrid label:first-child {
     grid-column: auto !important;
   }
 
-  .page[data-business="auto_parts"] .vehicleFilterGrid label {
+  .page[data-business="auto_parts"][data-theme-field="auto_parts"] .vehicleFilterGrid label {
     min-width: 0;
   }
 
-  .page[data-business="auto_parts"] .vehicleFilterGrid label > span {
+  .page[data-business="auto_parts"][data-theme-field="auto_parts"] .vehicleFilterGrid label > span {
     margin-bottom: 3px;
     font-size: 7px;
     line-height: 1;
   }
 
-  .page[data-business="auto_parts"] .vehicleFilterGrid select {
+  .page[data-business="auto_parts"][data-theme-field="auto_parts"] .vehicleFilterGrid select {
     width: 100%;
     min-width: 0;
     min-height: 40px !important;
@@ -7257,11 +7257,11 @@
   }
 
   /* The summary is redundant until the customer actually selects a vehicle. */
-  .page[data-business="auto_parts"] .vehicleMatchSummary {
+  .page[data-business="auto_parts"][data-theme-field="auto_parts"] .vehicleMatchSummary {
     display: none !important;
   }
 
-  .page[data-business="auto_parts"] .vehicleMatchSummary.vehicleMatchActive {
+  .page[data-business="auto_parts"][data-theme-field="auto_parts"] .vehicleMatchSummary.vehicleMatchActive {
     min-height: 42px;
     display: grid !important;
     grid-template-columns: 30px 1fr auto;
@@ -7270,63 +7270,63 @@
     border-radius: 11px;
   }
 
-  .page[data-business="auto_parts"] .vehicleMatchActive .vehicleMatchIcon {
+  .page[data-business="auto_parts"][data-theme-field="auto_parts"] .vehicleMatchActive .vehicleMatchIcon {
     width: 29px;
     height: 29px;
     border-radius: 8px;
   }
 
-  .page[data-business="auto_parts"] .vehicleMatchActive small {
+  .page[data-business="auto_parts"][data-theme-field="auto_parts"] .vehicleMatchActive small {
     font-size: 6.5px;
   }
 
-  .page[data-business="auto_parts"] .vehicleMatchActive strong {
+  .page[data-business="auto_parts"][data-theme-field="auto_parts"] .vehicleMatchActive strong {
     font-size: 9px;
   }
 
   /* Keep interface headings modern; reserve editorial serif for the hero only. */
-  .page[data-business="auto_parts"] .productSectionHeading h3,
-  .page[data-business="auto_parts"] .sectionHeading h2 {
+  .page[data-business="auto_parts"][data-theme-field="auto_parts"] .productSectionHeading h3,
+  .page[data-business="auto_parts"][data-theme-field="auto_parts"] .sectionHeading h2 {
     font-family: inherit !important;
     letter-spacing: -.025em !important;
   }
 
-  .page[data-business="auto_parts"] .productSection {
+  .page[data-business="auto_parts"][data-theme-field="auto_parts"] .productSection {
     margin-top: 15px;
   }
 
-  .page[data-business="auto_parts"] .productSectionHeading {
+  .page[data-business="auto_parts"][data-theme-field="auto_parts"] .productSectionHeading {
     margin-bottom: 10px;
   }
 
-  .page[data-business="auto_parts"] .productSectionHeading h3 {
+  .page[data-business="auto_parts"][data-theme-field="auto_parts"] .productSectionHeading h3 {
     margin-top: 2px;
     font-size: 21px !important;
     line-height: 1.05;
   }
 
-  .page[data-business="auto_parts"] .productSectionHeading::after {
+  .page[data-business="auto_parts"][data-theme-field="auto_parts"] .productSectionHeading::after {
     bottom: -6px;
     width: 32px;
     height: 2px;
   }
 
-  .page[data-business="auto_parts"] .productGrid {
+  .page[data-business="auto_parts"][data-theme-field="auto_parts"] .productGrid {
     gap: 12px !important;
   }
 
   /* Product photography stays useful, but cards stop consuming whole screens. */
-  .page[data-business="auto_parts"] .autoPartsProductCard {
+  .page[data-business="auto_parts"][data-theme-field="auto_parts"] .autoPartsProductCard {
     min-height: 0 !important;
     border-radius: 16px !important;
     box-shadow: 0 10px 28px rgba(2,6,23,.16) !important;
   }
 
-  .page[data-business="auto_parts"] .autoPartsProductCard::before {
+  .page[data-business="auto_parts"][data-theme-field="auto_parts"] .autoPartsProductCard::before {
     display: none !important;
   }
 
-  .page[data-business="auto_parts"] .autoPartsProductCard .productImage {
+  .page[data-business="auto_parts"][data-theme-field="auto_parts"] .autoPartsProductCard .productImage {
     width: 100%;
     min-height: 0 !important;
     height: clamp(158px, 46vw, 198px) !important;
@@ -7336,41 +7336,41 @@
     background: #eef2f6;
   }
 
-  .page[data-business="auto_parts"] .autoPartsProductCard .productImage::after {
+  .page[data-business="auto_parts"][data-theme-field="auto_parts"] .autoPartsProductCard .productImage::after {
     display: none !important;
   }
 
-  .page[data-business="auto_parts"] .autoPartsProductCard .productImage img {
+  .page[data-business="auto_parts"][data-theme-field="auto_parts"] .autoPartsProductCard .productImage img {
     width: 100%;
     height: 100%;
     object-fit: contain !important;
     object-position: center;
   }
 
-  .page[data-business="auto_parts"] .productBadges {
+  .page[data-business="auto_parts"][data-theme-field="auto_parts"] .productBadges {
     inset: 8px 8px auto !important;
   }
 
-  .page[data-business="auto_parts"] .featuredTag,
-  .page[data-business="auto_parts"] .stockTag,
-  .page[data-business="auto_parts"] .availableTag,
-  .page[data-business="auto_parts"] .outOfStockTag {
+  .page[data-business="auto_parts"][data-theme-field="auto_parts"] .featuredTag,
+  .page[data-business="auto_parts"][data-theme-field="auto_parts"] .stockTag,
+  .page[data-business="auto_parts"][data-theme-field="auto_parts"] .availableTag,
+  .page[data-business="auto_parts"][data-theme-field="auto_parts"] .outOfStockTag {
     padding: 5px 8px !important;
     font-size: 7.5px !important;
   }
 
-  .page[data-business="auto_parts"] .autoPartsProductCard .productBody {
+  .page[data-business="auto_parts"][data-theme-field="auto_parts"] .autoPartsProductCard .productBody {
     min-height: 0 !important;
     justify-content: flex-start !important;
     padding: 11px 13px 12px !important;
   }
 
-  .page[data-business="auto_parts"] .autoPartsProductCard .productMeta {
+  .page[data-business="auto_parts"][data-theme-field="auto_parts"] .autoPartsProductCard .productMeta {
     margin-bottom: 4px !important;
     font-size: 7px !important;
   }
 
-  .page[data-business="auto_parts"] .autoPartsProductCard .productBody h3 {
+  .page[data-business="auto_parts"][data-theme-field="auto_parts"] .autoPartsProductCard .productBody h3 {
     display: -webkit-box;
     margin: 0;
     overflow: hidden;
@@ -7380,7 +7380,7 @@
     -webkit-line-clamp: 2;
   }
 
-  .page[data-business="auto_parts"] .autoPartsProductCard .productArabic {
+  .page[data-business="auto_parts"][data-theme-field="auto_parts"] .autoPartsProductCard .productArabic {
     display: -webkit-box;
     margin-top: 4px !important;
     overflow: hidden;
@@ -7390,23 +7390,23 @@
     -webkit-line-clamp: 1 !important;
   }
 
-  .page[data-business="auto_parts"] .autoPartsProductCard .productFitment {
+  .page[data-business="auto_parts"][data-theme-field="auto_parts"] .autoPartsProductCard .productFitment {
     margin-top: 7px !important;
     gap: 4px 6px;
     padding: 6px 8px !important;
     border-radius: 9px !important;
   }
 
-  .page[data-business="auto_parts"] .autoPartsProductCard .productFitment span {
+  .page[data-business="auto_parts"][data-theme-field="auto_parts"] .autoPartsProductCard .productFitment span {
     font-size: 7px !important;
   }
 
-  .page[data-business="auto_parts"] .autoPartsProductCard .productFitment strong {
+  .page[data-business="auto_parts"][data-theme-field="auto_parts"] .autoPartsProductCard .productFitment strong {
     font-size: 11px !important;
   }
 
   /* Price and action share one row. */
-  .page[data-business="auto_parts"] .autoPartsProductCard .productFooter {
+  .page[data-business="auto_parts"][data-theme-field="auto_parts"] .autoPartsProductCard .productFooter {
     display: grid !important;
     grid-template-columns: minmax(0, 1fr) auto !important;
     align-items: center !important;
@@ -7415,32 +7415,32 @@
     padding-top: 0 !important;
   }
 
-  .page[data-business="auto_parts"] .autoPartsProductCard .productFooter > div:first-child {
+  .page[data-business="auto_parts"][data-theme-field="auto_parts"] .autoPartsProductCard .productFooter > div:first-child {
     min-width: 0;
   }
 
-  .page[data-business="auto_parts"] .autoPartsProductCard .productFooter > div:first-child > strong {
+  .page[data-business="auto_parts"][data-theme-field="auto_parts"] .autoPartsProductCard .productFooter > div:first-child > strong {
     font-size: 9.5px !important;
     line-height: 1.2;
   }
 
-  .page[data-business="auto_parts"] .autoPartsProductCard .productFooter > button {
+  .page[data-business="auto_parts"][data-theme-field="auto_parts"] .autoPartsProductCard .productFooter > button {
     min-width: 112px !important;
     min-height: 40px !important;
     padding: 0 15px !important;
     border-radius: 11px !important;
   }
 
-  .page[data-business="auto_parts"] .autoPartsProductCard .pricingActions {
+  .page[data-business="auto_parts"][data-theme-field="auto_parts"] .autoPartsProductCard .pricingActions {
     width: auto !important;
     display: grid !important;
     grid-template-columns: repeat(2, 44px) !important;
     gap: 6px !important;
   }
 
-  .page[data-business="auto_parts"] .autoPartsProductCard .pricingCallButton,
-  .page[data-business="auto_parts"] .autoPartsProductCard .pricingWhatsappButton,
-  .page[data-business="auto_parts"] .autoPartsProductCard .pricingActions .productContactButton {
+  .page[data-business="auto_parts"][data-theme-field="auto_parts"] .autoPartsProductCard .pricingCallButton,
+  .page[data-business="auto_parts"][data-theme-field="auto_parts"] .autoPartsProductCard .pricingWhatsappButton,
+  .page[data-business="auto_parts"][data-theme-field="auto_parts"] .autoPartsProductCard .pricingActions .productContactButton {
     width: 44px !important;
     min-width: 44px !important;
     min-height: 40px !important;
@@ -7448,32 +7448,32 @@
     border-radius: 11px !important;
   }
 
-  .page[data-business="auto_parts"] .autoPartsProductCard .pricingActions span {
+  .page[data-business="auto_parts"][data-theme-field="auto_parts"] .autoPartsProductCard .pricingActions span {
     display: none !important;
   }
 
   /* Categories: actual horizontal navigation instead of three giant vertical cards. */
-  .page[data-business="auto_parts"] .categorySection {
+  .page[data-business="auto_parts"][data-theme-field="auto_parts"] .categorySection {
     width: calc(100% - 24px) !important;
     padding-top: 16px !important;
     padding-bottom: 0 !important;
   }
 
-  .page[data-business="auto_parts"] .sectionHeading {
+  .page[data-business="auto_parts"][data-theme-field="auto_parts"] .sectionHeading {
     margin-bottom: 0;
   }
 
-  .page[data-business="auto_parts"] .sectionHeading h2 {
+  .page[data-business="auto_parts"][data-theme-field="auto_parts"] .sectionHeading h2 {
     max-width: 100% !important;
     font-size: 18px !important;
     line-height: 1.08 !important;
   }
 
-  .page[data-business="auto_parts"] .sectionHeading > div > span {
+  .page[data-business="auto_parts"][data-theme-field="auto_parts"] .sectionHeading > div > span {
     font-size: 7px !important;
   }
 
-  .page[data-business="auto_parts"] .categoryScroller {
+  .page[data-business="auto_parts"][data-theme-field="auto_parts"] .categoryScroller {
     display: grid !important;
     grid-template-columns: none !important;
     grid-auto-flow: column !important;
@@ -7488,7 +7488,7 @@
     -webkit-overflow-scrolling: touch;
   }
 
-  .page[data-business="auto_parts"] .categoryCard {
+  .page[data-business="auto_parts"][data-theme-field="auto_parts"] .categoryCard {
     width: 84px !important;
     min-width: 84px !important;
     min-height: 0 !important;
@@ -7504,8 +7504,8 @@
     scroll-snap-align: start;
   }
 
-  .page[data-business="auto_parts"] .categoryVisual,
-  .page[data-business="auto_parts"] .allCategoryVisual {
+  .page[data-business="auto_parts"][data-theme-field="auto_parts"] .categoryVisual,
+  .page[data-business="auto_parts"][data-theme-field="auto_parts"] .allCategoryVisual {
     width: 58px !important;
     min-width: 58px !important;
     height: 58px !important;
@@ -7516,7 +7516,7 @@
     box-shadow: none !important;
   }
 
-  .page[data-business="auto_parts"] .categoryCard > span {
+  .page[data-business="auto_parts"][data-theme-field="auto_parts"] .categoryCard > span {
     max-width: 84px;
     overflow: hidden;
     font-size: 9px !important;
@@ -7525,8 +7525,8 @@
     text-overflow: ellipsis;
   }
 
-  .page[data-business="auto_parts"] .categoryCard > small,
-  .page[data-business="auto_parts"] .categoryCard > em {
+  .page[data-business="auto_parts"][data-theme-field="auto_parts"] .categoryCard > small,
+  .page[data-business="auto_parts"][data-theme-field="auto_parts"] .categoryCard > em {
     max-width: 84px;
     overflow: hidden;
     font-size: 7.5px !important;
@@ -7537,7 +7537,7 @@
   }
 
   /* Parts support: a compact fallback, not another hero card. */
-  .page[data-business="auto_parts"] .partsConcierge {
+  .page[data-business="auto_parts"][data-theme-field="auto_parts"] .partsConcierge {
     width: calc(100% - 24px) !important;
     margin: 16px auto 14px !important;
     grid-template-columns: 34px minmax(0, 1fr) !important;
@@ -7547,61 +7547,61 @@
     box-shadow: 0 10px 28px rgba(2,6,23,.18) !important;
   }
 
-  .page[data-business="auto_parts"] .partsConcierge::after {
+  .page[data-business="auto_parts"][data-theme-field="auto_parts"] .partsConcierge::after {
     display: none !important;
   }
 
-  .page[data-business="auto_parts"] .partsConciergeIcon {
+  .page[data-business="auto_parts"][data-theme-field="auto_parts"] .partsConciergeIcon {
     width: 34px !important;
     height: 34px !important;
     border-radius: 10px !important;
   }
 
-  .page[data-business="auto_parts"] .partsConciergeCopy > span {
+  .page[data-business="auto_parts"][data-theme-field="auto_parts"] .partsConciergeCopy > span {
     font-size: 6.5px !important;
   }
 
-  .page[data-business="auto_parts"] .partsConciergeCopy h2 {
+  .page[data-business="auto_parts"][data-theme-field="auto_parts"] .partsConciergeCopy h2 {
     margin-top: 2px !important;
     font-size: 15.5px !important;
     line-height: 1.08 !important;
   }
 
-  .page[data-business="auto_parts"] .partsConciergeCopy p {
+  .page[data-business="auto_parts"][data-theme-field="auto_parts"] .partsConciergeCopy p {
     display: none !important;
   }
 
-  .page[data-business="auto_parts"] .partsConciergeActions {
+  .page[data-business="auto_parts"][data-theme-field="auto_parts"] .partsConciergeActions {
     grid-column: 1 / -1 !important;
     grid-template-columns: 1fr 1fr !important;
     gap: 6px !important;
     margin-top: 1px !important;
   }
 
-  .page[data-business="auto_parts"] .partsConciergeActions a {
+  .page[data-business="auto_parts"][data-theme-field="auto_parts"] .partsConciergeActions a {
     min-height: 39px !important;
     border-radius: 11px !important;
     font-size: 9.5px !important;
   }
 
   /* Finish cleanly. No empty dark runway below the retailer. */
-  .page[data-business="auto_parts"] .footer {
+  .page[data-business="auto_parts"][data-theme-field="auto_parts"] .footer {
     width: calc(100% - 24px) !important;
     margin-top: 12px !important;
     margin-bottom: 0 !important;
     padding: 14px 0 max(10px, env(safe-area-inset-bottom)) !important;
   }
 
-  .page[data-business="auto_parts"] .footerLogo {
+  .page[data-business="auto_parts"][data-theme-field="auto_parts"] .footerLogo {
     width: 42px;
     height: 42px;
   }
 
-  .page[data-business="auto_parts"] .footerBrand strong {
+  .page[data-business="auto_parts"][data-theme-field="auto_parts"] .footerBrand strong {
     font-size: 12px;
   }
 
-  .page[data-business="auto_parts"] .poweredBy {
+  .page[data-business="auto_parts"][data-theme-field="auto_parts"] .poweredBy {
     margin-top: 4px !important;
   }
 
@@ -7611,18 +7611,18 @@
 }
 
 @media (max-width: 430px) {
-  .page[data-business="auto_parts"] .heroContent,
-  .page[data-business="auto_parts"][data-hero="immersive"] .heroContent {
+  .page[data-business="auto_parts"][data-theme-field="auto_parts"] .heroContent,
+  .page[data-business="auto_parts"][data-theme-field="auto_parts"][data-hero="immersive"] .heroContent {
     min-height: 292px !important;
   }
 
-  .page[data-business="auto_parts"] .vehicleFilterGrid select {
+  .page[data-business="auto_parts"][data-theme-field="auto_parts"] .vehicleFilterGrid select {
     font-size: 8.5px !important;
     padding-left: 6px !important;
     padding-right: 18px !important;
   }
 
-  .page[data-business="auto_parts"] .autoPartsProductCard .productImage {
+  .page[data-business="auto_parts"][data-theme-field="auto_parts"] .autoPartsProductCard .productImage {
     height: clamp(152px, 45vw, 184px) !important;
   }
 }
@@ -8196,5 +8196,1030 @@
     min-width: 112px !important;
     height: 112px !important;
     min-height: 112px !important;
+  }
+}
+
+/* DARIK_THEME_FIELD_VISUAL_ISOLATION_092
+   Visual theme authority belongs to data-theme-field.
+   Retail mechanics remain controlled by data-business.
+   This block specifically restores the supermarket / grocery visual family
+   while preserving Darik Marketplace catalog architecture and auto-parts mechanics. */
+
+.page:is(
+  [data-theme-field="supermarket"],
+  [data-theme-field="grocery"],
+  [data-theme-field="mini_market"],
+  [data-theme-field="butcher"],
+  [data-theme-field="produce"],
+  [data-theme-field="frozen_food"]
+) {
+  --marketplace-text: #0f172a;
+  --marketplace-muted: #64748b;
+  --marketplace-soft: #94a3b8;
+  --marketplace-surface: #ffffff;
+  --marketplace-surface-soft: #f5faf6;
+  --marketplace-border: rgba(15, 23, 42, .08);
+  --marketplace-accent: #16a34a;
+  --marketplace-accent-soft: #dcfce7;
+
+  background:
+    radial-gradient(circle at 10% 4%, rgba(34,197,94,.09), transparent 24rem),
+    linear-gradient(180deg, #f4faf5 0%, #fff 34%, #f8fbf9 100%) !important;
+  color: var(--marketplace-text) !important;
+}
+
+/* Header must look like the supermarket theme even when mechanics are auto parts. */
+.page:is(
+  [data-theme-field="supermarket"],
+  [data-theme-field="grocery"],
+  [data-theme-field="mini_market"],
+  [data-theme-field="butcher"],
+  [data-theme-field="produce"],
+  [data-theme-field="frozen_food"]
+) .header {
+  min-height: 62px;
+  border-bottom: 1px solid rgba(15,23,42,.06) !important;
+  background: rgba(255,255,255,.95) !important;
+  color: #0f172a !important;
+  box-shadow: 0 8px 26px rgba(15,23,42,.055) !important;
+  backdrop-filter: blur(18px) saturate(140%);
+  -webkit-backdrop-filter: blur(18px) saturate(140%);
+}
+
+.page:is(
+  [data-theme-field="supermarket"],
+  [data-theme-field="grocery"],
+  [data-theme-field="mini_market"],
+  [data-theme-field="butcher"],
+  [data-theme-field="produce"],
+  [data-theme-field="frozen_food"]
+) .storeIdentity strong {
+  color: #0f172a !important;
+}
+
+.page:is(
+  [data-theme-field="supermarket"],
+  [data-theme-field="grocery"],
+  [data-theme-field="mini_market"],
+  [data-theme-field="butcher"],
+  [data-theme-field="produce"],
+  [data-theme-field="frozen_food"]
+) .storeIdentity span {
+  color: #64748b !important;
+}
+
+.page:is(
+  [data-theme-field="supermarket"],
+  [data-theme-field="grocery"],
+  [data-theme-field="mini_market"],
+  [data-theme-field="butcher"],
+  [data-theme-field="produce"],
+  [data-theme-field="frozen_food"]
+) .headerActions button,
+.page:is(
+  [data-theme-field="supermarket"],
+  [data-theme-field="grocery"],
+  [data-theme-field="mini_market"],
+  [data-theme-field="butcher"],
+  [data-theme-field="produce"],
+  [data-theme-field="frozen_food"]
+) .headerActions .cartButton {
+  border: 1px solid rgba(15,23,42,.07) !important;
+  background: #fff !important;
+  color: #0f172a !important;
+  box-shadow: 0 6px 18px rgba(15,23,42,.045) !important;
+}
+
+/* Premium supermarket hero: clearly intentional, no accidental outline. */
+.page:is(
+  [data-theme-field="supermarket"],
+  [data-theme-field="grocery"],
+  [data-theme-field="mini_market"],
+  [data-theme-field="butcher"],
+  [data-theme-field="produce"],
+  [data-theme-field="frozen_food"]
+)[data-hero] .hero {
+  width: min(1180px, calc(100% - 20px)) !important;
+  margin: 10px auto 0 !important;
+  overflow: hidden !important;
+  border: 0 !important;
+  outline: 0 !important;
+  border-radius: 26px !important;
+  box-shadow: 0 22px 54px rgba(15,23,42,.15) !important;
+}
+
+.page:is(
+  [data-theme-field="supermarket"],
+  [data-theme-field="grocery"],
+  [data-theme-field="mini_market"],
+  [data-theme-field="butcher"],
+  [data-theme-field="produce"],
+  [data-theme-field="frozen_food"]
+) .hero::after {
+  content: none !important;
+  display: none !important;
+}
+
+.page:is(
+  [data-theme-field="supermarket"],
+  [data-theme-field="grocery"],
+  [data-theme-field="mini_market"],
+  [data-theme-field="butcher"],
+  [data-theme-field="produce"],
+  [data-theme-field="frozen_food"]
+) .heroOverlay {
+  background:
+    linear-gradient(
+      90deg,
+      rgba(5,18,13,.88) 0%,
+      rgba(8,28,18,.63) 43%,
+      rgba(5,18,13,.19) 76%,
+      rgba(5,18,13,.08) 100%
+    ),
+    linear-gradient(0deg, rgba(5,18,13,.38), transparent 58%) !important;
+}
+
+.page:is(
+  [data-theme-field="supermarket"],
+  [data-theme-field="grocery"],
+  [data-theme-field="mini_market"],
+  [data-theme-field="butcher"],
+  [data-theme-field="produce"],
+  [data-theme-field="frozen_food"]
+) .heroTexture {
+  display: block !important;
+  background:
+    radial-gradient(circle at 18% 16%, rgba(34,197,94,.18), transparent 30%),
+    radial-gradient(circle at 78% 10%, rgba(253,224,71,.10), transparent 22%) !important;
+}
+
+.page:is(
+  [data-theme-field="supermarket"],
+  [data-theme-field="grocery"],
+  [data-theme-field="mini_market"],
+  [data-theme-field="butcher"],
+  [data-theme-field="produce"],
+  [data-theme-field="frozen_food"]
+) .heroContent {
+  min-height: 380px !important;
+  padding: 28px 26px 30px !important;
+  align-items: flex-end !important;
+}
+
+.page:is(
+  [data-theme-field="supermarket"],
+  [data-theme-field="grocery"],
+  [data-theme-field="mini_market"],
+  [data-theme-field="butcher"],
+  [data-theme-field="produce"],
+  [data-theme-field="frozen_food"]
+) .hero h1,
+.page:is(
+  [data-theme-field="supermarket"],
+  [data-theme-field="grocery"],
+  [data-theme-field="mini_market"],
+  [data-theme-field="butcher"],
+  [data-theme-field="produce"],
+  [data-theme-field="frozen_food"]
+) .heroCopy h1 {
+  color: #fff !important;
+}
+
+.page:is(
+  [data-theme-field="supermarket"],
+  [data-theme-field="grocery"],
+  [data-theme-field="mini_market"],
+  [data-theme-field="butcher"],
+  [data-theme-field="produce"],
+  [data-theme-field="frozen_food"]
+) .tagline {
+  color: rgba(255,255,255,.86) !important;
+}
+
+.page:is(
+  [data-theme-field="supermarket"],
+  [data-theme-field="grocery"],
+  [data-theme-field="mini_market"],
+  [data-theme-field="butcher"],
+  [data-theme-field="produce"],
+  [data-theme-field="frozen_food"]
+) .primaryHeroButton {
+  border: 0 !important;
+  background: linear-gradient(135deg, #16a34a, #22c55e) !important;
+  color: #fff !important;
+  box-shadow: 0 16px 34px rgba(22,163,74,.26) !important;
+}
+
+/* Store location/contact surfaces. */
+.page:is(
+  [data-theme-field="supermarket"],
+  [data-theme-field="grocery"],
+  [data-theme-field="mini_market"],
+  [data-theme-field="butcher"],
+  [data-theme-field="produce"],
+  [data-theme-field="frozen_food"]
+) .quickInfoStrip {
+  width: min(1180px, calc(100% - 28px)) !important;
+  margin: 12px auto 0 !important;
+  overflow: hidden !important;
+  border: 1px solid rgba(15,23,42,.07) !important;
+  border-radius: 20px !important;
+  background: #fff !important;
+  box-shadow: 0 12px 30px rgba(15,23,42,.05) !important;
+}
+
+.page:is(
+  [data-theme-field="supermarket"],
+  [data-theme-field="grocery"],
+  [data-theme-field="mini_market"],
+  [data-theme-field="butcher"],
+  [data-theme-field="produce"],
+  [data-theme-field="frozen_food"]
+) .quickInfoStrip > a,
+.page:is(
+  [data-theme-field="supermarket"],
+  [data-theme-field="grocery"],
+  [data-theme-field="mini_market"],
+  [data-theme-field="butcher"],
+  [data-theme-field="produce"],
+  [data-theme-field="frozen_food"]
+) .quickInfoStrip > button,
+.page:is(
+  [data-theme-field="supermarket"],
+  [data-theme-field="grocery"],
+  [data-theme-field="mini_market"],
+  [data-theme-field="butcher"],
+  [data-theme-field="produce"],
+  [data-theme-field="frozen_food"]
+) .quickInfoStrip .locationQuickLink,
+.page:is(
+  [data-theme-field="supermarket"],
+  [data-theme-field="grocery"],
+  [data-theme-field="mini_market"],
+  [data-theme-field="butcher"],
+  [data-theme-field="produce"],
+  [data-theme-field="frozen_food"]
+) .quickInfoStrip .contactQuickLink {
+  border-color: rgba(15,23,42,.06) !important;
+  background: #fff !important;
+  color: #0f172a !important;
+}
+
+.page:is(
+  [data-theme-field="supermarket"],
+  [data-theme-field="grocery"],
+  [data-theme-field="mini_market"],
+  [data-theme-field="butcher"],
+  [data-theme-field="produce"],
+  [data-theme-field="frozen_food"]
+) .quickIcon {
+  background: #ecfdf3 !important;
+  color: #16a34a !important;
+}
+
+/* Search and vehicle fitment are mechanics; presentation follows this theme. */
+.page:is(
+  [data-theme-field="supermarket"],
+  [data-theme-field="grocery"],
+  [data-theme-field="mini_market"],
+  [data-theme-field="butcher"],
+  [data-theme-field="produce"],
+  [data-theme-field="frozen_food"]
+) .catalogShell {
+  border: 0 !important;
+  background: transparent !important;
+  color: #0f172a !important;
+  box-shadow: none !important;
+}
+
+.page:is(
+  [data-theme-field="supermarket"],
+  [data-theme-field="grocery"],
+  [data-theme-field="mini_market"],
+  [data-theme-field="butcher"],
+  [data-theme-field="produce"],
+  [data-theme-field="frozen_food"]
+) .searchBox {
+  border: 1px solid rgba(148,163,184,.22) !important;
+  background: #fff !important;
+  color: #64748b !important;
+  box-shadow: 0 8px 24px rgba(15,23,42,.045) !important;
+}
+
+.page:is(
+  [data-theme-field="supermarket"],
+  [data-theme-field="grocery"],
+  [data-theme-field="mini_market"],
+  [data-theme-field="butcher"],
+  [data-theme-field="produce"],
+  [data-theme-field="frozen_food"]
+) .searchBox input {
+  color: #0f172a !important;
+}
+
+.page:is(
+  [data-theme-field="supermarket"],
+  [data-theme-field="grocery"],
+  [data-theme-field="mini_market"],
+  [data-theme-field="butcher"],
+  [data-theme-field="produce"],
+  [data-theme-field="frozen_food"]
+) .searchBox input::placeholder {
+  color: #94a3b8 !important;
+}
+
+.page:is(
+  [data-theme-field="supermarket"],
+  [data-theme-field="grocery"],
+  [data-theme-field="mini_market"],
+  [data-theme-field="butcher"],
+  [data-theme-field="produce"],
+  [data-theme-field="frozen_food"]
+) .vehicleFilterPanel {
+  border: 1px solid rgba(22,163,74,.12) !important;
+  background:
+    radial-gradient(circle at 100% 0%, rgba(34,197,94,.08), transparent 14rem),
+    #fff !important;
+  color: #0f172a !important;
+  box-shadow: 0 10px 28px rgba(15,23,42,.05) !important;
+}
+
+.page:is(
+  [data-theme-field="supermarket"],
+  [data-theme-field="grocery"],
+  [data-theme-field="mini_market"],
+  [data-theme-field="butcher"],
+  [data-theme-field="produce"],
+  [data-theme-field="frozen_food"]
+) .vehicleFilterHeading span,
+.page:is(
+  [data-theme-field="supermarket"],
+  [data-theme-field="grocery"],
+  [data-theme-field="mini_market"],
+  [data-theme-field="butcher"],
+  [data-theme-field="produce"],
+  [data-theme-field="frozen_food"]
+) .vehicleFilterGrid label > span {
+  color: #15803d !important;
+}
+
+.page:is(
+  [data-theme-field="supermarket"],
+  [data-theme-field="grocery"],
+  [data-theme-field="mini_market"],
+  [data-theme-field="butcher"],
+  [data-theme-field="produce"],
+  [data-theme-field="frozen_food"]
+) .vehicleFilterHeading strong {
+  color: #0f172a !important;
+}
+
+.page:is(
+  [data-theme-field="supermarket"],
+  [data-theme-field="grocery"],
+  [data-theme-field="mini_market"],
+  [data-theme-field="butcher"],
+  [data-theme-field="produce"],
+  [data-theme-field="frozen_food"]
+) .vehicleFilterGrid select {
+  border: 1px solid rgba(148,163,184,.22) !important;
+  background-color: #fff !important;
+  color: #0f172a !important;
+}
+
+/* -------------------------------------------------------------------------- */
+/* Darik Marketplace architecture: same layout, correct light-theme palette.   */
+/* -------------------------------------------------------------------------- */
+
+.page:is(
+  [data-theme-field="supermarket"],
+  [data-theme-field="grocery"],
+  [data-theme-field="mini_market"],
+  [data-theme-field="butcher"],
+  [data-theme-field="produce"],
+  [data-theme-field="frozen_food"]
+) .marketplaceCategoryNavLabel,
+.page:is(
+  [data-theme-field="supermarket"],
+  [data-theme-field="grocery"],
+  [data-theme-field="mini_market"],
+  [data-theme-field="butcher"],
+  [data-theme-field="produce"],
+  [data-theme-field="frozen_food"]
+) .marketplaceListingHeader span {
+  color: #15803d !important;
+}
+
+.page:is(
+  [data-theme-field="supermarket"],
+  [data-theme-field="grocery"],
+  [data-theme-field="mini_market"],
+  [data-theme-field="butcher"],
+  [data-theme-field="produce"],
+  [data-theme-field="frozen_food"]
+) .marketplaceCategoryCircle {
+  border-color: rgba(15,23,42,.09) !important;
+  background: #fff !important;
+  box-shadow: 0 7px 18px rgba(15,23,42,.045) !important;
+}
+
+.page:is(
+  [data-theme-field="supermarket"],
+  [data-theme-field="grocery"],
+  [data-theme-field="mini_market"],
+  [data-theme-field="butcher"],
+  [data-theme-field="produce"],
+  [data-theme-field="frozen_food"]
+) .marketplaceCategoryBestSellers .marketplaceCategoryCircle {
+  border-color: rgba(22,163,74,.32) !important;
+  background:
+    radial-gradient(circle at 30% 22%, rgba(253,224,71,.20), transparent 42%),
+    linear-gradient(145deg, #ecfdf3, #dcfce7) !important;
+}
+
+.page:is(
+  [data-theme-field="supermarket"],
+  [data-theme-field="grocery"],
+  [data-theme-field="mini_market"],
+  [data-theme-field="butcher"],
+  [data-theme-field="produce"],
+  [data-theme-field="frozen_food"]
+) .marketplaceCategoryStar {
+  color: #15803d !important;
+}
+
+.page:is(
+  [data-theme-field="supermarket"],
+  [data-theme-field="grocery"],
+  [data-theme-field="mini_market"],
+  [data-theme-field="butcher"],
+  [data-theme-field="produce"],
+  [data-theme-field="frozen_food"]
+) .marketplaceCategoryItemActive .marketplaceCategoryCircle {
+  border-color: #16a34a !important;
+  box-shadow: 0 0 0 3px rgba(22,163,74,.09), 0 7px 18px rgba(15,23,42,.045) !important;
+}
+
+.page:is(
+  [data-theme-field="supermarket"],
+  [data-theme-field="grocery"],
+  [data-theme-field="mini_market"],
+  [data-theme-field="butcher"],
+  [data-theme-field="produce"],
+  [data-theme-field="frozen_food"]
+) .marketplaceCategorySelectedDot {
+  border-color: #f7faf7 !important;
+  background: #16a34a !important;
+}
+
+.page:is(
+  [data-theme-field="supermarket"],
+  [data-theme-field="grocery"],
+  [data-theme-field="mini_market"],
+  [data-theme-field="butcher"],
+  [data-theme-field="produce"],
+  [data-theme-field="frozen_food"]
+) .marketplaceCategoryItem strong,
+.page:is(
+  [data-theme-field="supermarket"],
+  [data-theme-field="grocery"],
+  [data-theme-field="mini_market"],
+  [data-theme-field="butcher"],
+  [data-theme-field="produce"],
+  [data-theme-field="frozen_food"]
+) .marketplaceListingHeader h3,
+.page:is(
+  [data-theme-field="supermarket"],
+  [data-theme-field="grocery"],
+  [data-theme-field="mini_market"],
+  [data-theme-field="butcher"],
+  [data-theme-field="produce"],
+  [data-theme-field="frozen_food"]
+) .marketplaceBestSellerDepartmentTitle {
+  color: #0f172a !important;
+}
+
+.page:is(
+  [data-theme-field="supermarket"],
+  [data-theme-field="grocery"],
+  [data-theme-field="mini_market"],
+  [data-theme-field="butcher"],
+  [data-theme-field="produce"],
+  [data-theme-field="frozen_food"]
+) .marketplaceCategoryItem small,
+.page:is(
+  [data-theme-field="supermarket"],
+  [data-theme-field="grocery"],
+  [data-theme-field="mini_market"],
+  [data-theme-field="butcher"],
+  [data-theme-field="produce"],
+  [data-theme-field="frozen_food"]
+) .marketplaceListingHeader small {
+  color: #64748b !important;
+}
+
+/* Best Seller shelf: exact no-box layout, but fully readable on light themes. */
+.page:is(
+  [data-theme-field="supermarket"],
+  [data-theme-field="grocery"],
+  [data-theme-field="mini_market"],
+  [data-theme-field="butcher"],
+  [data-theme-field="produce"],
+  [data-theme-field="frozen_food"]
+) .marketplaceBestSellerItem,
+.page:is(
+  [data-theme-field="supermarket"],
+  [data-theme-field="grocery"],
+  [data-theme-field="mini_market"],
+  [data-theme-field="butcher"],
+  [data-theme-field="produce"],
+  [data-theme-field="frozen_food"]
+) .marketplaceBestSellerCarousel .productCard,
+.page:is(
+  [data-theme-field="supermarket"],
+  [data-theme-field="grocery"],
+  [data-theme-field="mini_market"],
+  [data-theme-field="butcher"],
+  [data-theme-field="produce"],
+  [data-theme-field="frozen_food"]
+) .marketplaceBestSellerCarousel .autoPartsProductCard {
+  height: auto !important;
+  min-height: 0 !important;
+  background: transparent !important;
+  color: #0f172a !important;
+  box-shadow: none !important;
+}
+
+.page:is(
+  [data-theme-field="supermarket"],
+  [data-theme-field="grocery"],
+  [data-theme-field="mini_market"],
+  [data-theme-field="butcher"],
+  [data-theme-field="produce"],
+  [data-theme-field="frozen_food"]
+) .marketplaceBestSellerCarousel .productImage {
+  background: transparent !important;
+}
+
+.page:is(
+  [data-theme-field="supermarket"],
+  [data-theme-field="grocery"],
+  [data-theme-field="mini_market"],
+  [data-theme-field="butcher"],
+  [data-theme-field="produce"],
+  [data-theme-field="frozen_food"]
+) .marketplaceBestSellerCarousel .productBody {
+  height: auto !important;
+  min-height: 0 !important;
+  padding-top: 8px !important;
+  color: #0f172a !important;
+}
+
+.page:is(
+  [data-theme-field="supermarket"],
+  [data-theme-field="grocery"],
+  [data-theme-field="mini_market"],
+  [data-theme-field="butcher"],
+  [data-theme-field="produce"],
+  [data-theme-field="frozen_food"]
+) .marketplaceBestSellerCarousel .productBody h3 {
+  color: #0f172a !important;
+}
+
+.page:is(
+  [data-theme-field="supermarket"],
+  [data-theme-field="grocery"],
+  [data-theme-field="mini_market"],
+  [data-theme-field="butcher"],
+  [data-theme-field="produce"],
+  [data-theme-field="frozen_food"]
+) .marketplaceBestSellerCarousel .productFooter,
+.page:is(
+  [data-theme-field="supermarket"],
+  [data-theme-field="grocery"],
+  [data-theme-field="mini_market"],
+  [data-theme-field="butcher"],
+  [data-theme-field="produce"],
+  [data-theme-field="frozen_food"]
+) .marketplaceBestSellerCarousel .productFooter > div:first-child {
+  height: auto !important;
+  min-height: 0 !important;
+}
+
+.page:is(
+  [data-theme-field="supermarket"],
+  [data-theme-field="grocery"],
+  [data-theme-field="mini_market"],
+  [data-theme-field="butcher"],
+  [data-theme-field="produce"],
+  [data-theme-field="frozen_food"]
+) .marketplaceBestSellerCarousel .productFooter > div:first-child > strong,
+.page:is(
+  [data-theme-field="supermarket"],
+  [data-theme-field="grocery"],
+  [data-theme-field="mini_market"],
+  [data-theme-field="butcher"],
+  [data-theme-field="produce"],
+  [data-theme-field="frozen_food"]
+) .marketplaceBestSellerCarousel .productFooter strong {
+  color: #0f172a !important;
+}
+
+/* Category product rows use the same Marketplace layout with a light-theme divider. */
+.page:is(
+  [data-theme-field="supermarket"],
+  [data-theme-field="grocery"],
+  [data-theme-field="mini_market"],
+  [data-theme-field="butcher"],
+  [data-theme-field="produce"],
+  [data-theme-field="frozen_food"]
+) .marketplaceCategoryProductList .productCard,
+.page:is(
+  [data-theme-field="supermarket"],
+  [data-theme-field="grocery"],
+  [data-theme-field="mini_market"],
+  [data-theme-field="butcher"],
+  [data-theme-field="produce"],
+  [data-theme-field="frozen_food"]
+) .marketplaceCategoryProductList .autoPartsProductCard {
+  border-bottom: 1px solid rgba(15,23,42,.07) !important;
+  background: transparent !important;
+  color: #0f172a !important;
+  box-shadow: none !important;
+}
+
+.page:is(
+  [data-theme-field="supermarket"],
+  [data-theme-field="grocery"],
+  [data-theme-field="mini_market"],
+  [data-theme-field="butcher"],
+  [data-theme-field="produce"],
+  [data-theme-field="frozen_food"]
+) .marketplaceCategoryProductList .productBody h3 {
+  color: #0f172a !important;
+}
+
+.page:is(
+  [data-theme-field="supermarket"],
+  [data-theme-field="grocery"],
+  [data-theme-field="mini_market"],
+  [data-theme-field="butcher"],
+  [data-theme-field="produce"],
+  [data-theme-field="frozen_food"]
+) .marketplaceCategoryProductList .productArabic {
+  color: #64748b !important;
+}
+
+.page:is(
+  [data-theme-field="supermarket"],
+  [data-theme-field="grocery"],
+  [data-theme-field="mini_market"],
+  [data-theme-field="butcher"],
+  [data-theme-field="produce"],
+  [data-theme-field="frozen_food"]
+) .marketplaceCategoryProductList .productFitment {
+  background: #ecfdf3 !important;
+  color: #166534 !important;
+}
+
+/* Store story becomes a compact intentional section on a shopping page. */
+.page:is(
+  [data-theme-field="supermarket"],
+  [data-theme-field="grocery"],
+  [data-theme-field="mini_market"],
+  [data-theme-field="butcher"],
+  [data-theme-field="produce"],
+  [data-theme-field="frozen_food"]
+) .storeStory {
+  width: min(1180px, calc(100% - 28px)) !important;
+  margin: 24px auto 0 !important;
+  border: 1px solid rgba(15,23,42,.07) !important;
+  border-radius: 22px !important;
+  padding: 22px !important;
+  background: #fff !important;
+  color: #0f172a !important;
+  box-shadow: 0 12px 30px rgba(15,23,42,.045) !important;
+}
+
+.page:is(
+  [data-theme-field="supermarket"],
+  [data-theme-field="grocery"],
+  [data-theme-field="mini_market"],
+  [data-theme-field="butcher"],
+  [data-theme-field="produce"],
+  [data-theme-field="frozen_food"]
+) .storyCopy > span {
+  color: #15803d !important;
+}
+
+.page:is(
+  [data-theme-field="supermarket"],
+  [data-theme-field="grocery"],
+  [data-theme-field="mini_market"],
+  [data-theme-field="butcher"],
+  [data-theme-field="produce"],
+  [data-theme-field="frozen_food"]
+) .storyCopy h2 {
+  color: #0f172a !important;
+}
+
+.page:is(
+  [data-theme-field="supermarket"],
+  [data-theme-field="grocery"],
+  [data-theme-field="mini_market"],
+  [data-theme-field="butcher"],
+  [data-theme-field="produce"],
+  [data-theme-field="frozen_food"]
+) .storyCopy p {
+  color: #64748b !important;
+}
+
+/* Auto-parts mechanics displayed inside a supermarket theme use supermarket styling. */
+.page:is(
+  [data-theme-field="supermarket"],
+  [data-theme-field="grocery"],
+  [data-theme-field="mini_market"],
+  [data-theme-field="butcher"],
+  [data-theme-field="produce"],
+  [data-theme-field="frozen_food"]
+) .partsConcierge {
+  width: min(1180px, calc(100% - 28px)) !important;
+  margin: 18px auto 0 !important;
+  border: 1px solid rgba(22,163,74,.12) !important;
+  border-radius: 20px !important;
+  padding: 18px !important;
+  background:
+    radial-gradient(circle at 0% 100%, rgba(34,197,94,.10), transparent 17rem),
+    linear-gradient(180deg, #fbfefb, #f1f8f2) !important;
+  color: #0f172a !important;
+  box-shadow: 0 10px 28px rgba(15,23,42,.045) !important;
+}
+
+.page:is(
+  [data-theme-field="supermarket"],
+  [data-theme-field="grocery"],
+  [data-theme-field="mini_market"],
+  [data-theme-field="butcher"],
+  [data-theme-field="produce"],
+  [data-theme-field="frozen_food"]
+) .partsConciergeCopy > span {
+  color: #15803d !important;
+}
+
+.page:is(
+  [data-theme-field="supermarket"],
+  [data-theme-field="grocery"],
+  [data-theme-field="mini_market"],
+  [data-theme-field="butcher"],
+  [data-theme-field="produce"],
+  [data-theme-field="frozen_food"]
+) .partsConciergeCopy h2 {
+  color: #0f172a !important;
+}
+
+.page:is(
+  [data-theme-field="supermarket"],
+  [data-theme-field="grocery"],
+  [data-theme-field="mini_market"],
+  [data-theme-field="butcher"],
+  [data-theme-field="produce"],
+  [data-theme-field="frozen_food"]
+) .partsConciergeCopy p {
+  color: #64748b !important;
+}
+
+.page:is(
+  [data-theme-field="supermarket"],
+  [data-theme-field="grocery"],
+  [data-theme-field="mini_market"],
+  [data-theme-field="butcher"],
+  [data-theme-field="produce"],
+  [data-theme-field="frozen_food"]
+) .partsConciergeActions a:first-child {
+  background: linear-gradient(135deg, #16a34a, #22c55e) !important;
+  color: #fff !important;
+  box-shadow: 0 8px 20px rgba(22,163,74,.18) !important;
+}
+
+.page:is(
+  [data-theme-field="supermarket"],
+  [data-theme-field="grocery"],
+  [data-theme-field="mini_market"],
+  [data-theme-field="butcher"],
+  [data-theme-field="produce"],
+  [data-theme-field="frozen_food"]
+) .partsConciergeActions a:last-child {
+  border-color: rgba(15,23,42,.10) !important;
+  background: #fff !important;
+  color: #0f172a !important;
+}
+
+/* Footer returns to the light supermarket visual family. */
+.page:is(
+  [data-theme-field="supermarket"],
+  [data-theme-field="grocery"],
+  [data-theme-field="mini_market"],
+  [data-theme-field="butcher"],
+  [data-theme-field="produce"],
+  [data-theme-field="frozen_food"]
+) .footer {
+  width: min(1180px, calc(100% - 28px)) !important;
+  margin: 20px auto 0 !important;
+  border-top: 1px solid rgba(15,23,42,.08) !important;
+  background: transparent !important;
+  color: #0f172a !important;
+}
+
+.page:is(
+  [data-theme-field="supermarket"],
+  [data-theme-field="grocery"],
+  [data-theme-field="mini_market"],
+  [data-theme-field="butcher"],
+  [data-theme-field="produce"],
+  [data-theme-field="frozen_food"]
+) .footerBrand strong {
+  color: #0f172a !important;
+}
+
+.page:is(
+  [data-theme-field="supermarket"],
+  [data-theme-field="grocery"],
+  [data-theme-field="mini_market"],
+  [data-theme-field="butcher"],
+  [data-theme-field="produce"],
+  [data-theme-field="frozen_food"]
+) .footerBrand span,
+.page:is(
+  [data-theme-field="supermarket"],
+  [data-theme-field="grocery"],
+  [data-theme-field="mini_market"],
+  [data-theme-field="butcher"],
+  [data-theme-field="produce"],
+  [data-theme-field="frozen_food"]
+) .poweredBy {
+  color: #64748b !important;
+}
+
+/* Phone composition. */
+@media (max-width: 760px) {
+  .page:is(
+    [data-theme-field="supermarket"],
+    [data-theme-field="grocery"],
+    [data-theme-field="mini_market"],
+    [data-theme-field="butcher"],
+    [data-theme-field="produce"],
+    [data-theme-field="frozen_food"]
+  )[data-hero] .hero {
+    width: calc(100% - 18px) !important;
+    margin-top: 8px !important;
+    border-radius: 23px !important;
+  }
+
+  .page:is(
+    [data-theme-field="supermarket"],
+    [data-theme-field="grocery"],
+    [data-theme-field="mini_market"],
+    [data-theme-field="butcher"],
+    [data-theme-field="produce"],
+    [data-theme-field="frozen_food"]
+  ) .heroContent {
+    min-height: 330px !important;
+    padding: 22px 18px 24px !important;
+  }
+
+  .page:is(
+    [data-theme-field="supermarket"],
+    [data-theme-field="grocery"],
+    [data-theme-field="mini_market"],
+    [data-theme-field="butcher"],
+    [data-theme-field="produce"],
+    [data-theme-field="frozen_food"]
+  ) .quickInfoStrip,
+  .page:is(
+    [data-theme-field="supermarket"],
+    [data-theme-field="grocery"],
+    [data-theme-field="mini_market"],
+    [data-theme-field="butcher"],
+    [data-theme-field="produce"],
+    [data-theme-field="frozen_food"]
+  ) .storeStory,
+  .page:is(
+    [data-theme-field="supermarket"],
+    [data-theme-field="grocery"],
+    [data-theme-field="mini_market"],
+    [data-theme-field="butcher"],
+    [data-theme-field="produce"],
+    [data-theme-field="frozen_food"]
+  ) .partsConcierge,
+  .page:is(
+    [data-theme-field="supermarket"],
+    [data-theme-field="grocery"],
+    [data-theme-field="mini_market"],
+    [data-theme-field="butcher"],
+    [data-theme-field="produce"],
+    [data-theme-field="frozen_food"]
+  ) .footer {
+    width: calc(100% - 24px) !important;
+  }
+
+  .page:is(
+    [data-theme-field="supermarket"],
+    [data-theme-field="grocery"],
+    [data-theme-field="mini_market"],
+    [data-theme-field="butcher"],
+    [data-theme-field="produce"],
+    [data-theme-field="frozen_food"]
+  ) .marketplaceListingHeader {
+    margin-top: 3px;
+    margin-bottom: 11px;
+  }
+
+  .page:is(
+    [data-theme-field="supermarket"],
+    [data-theme-field="grocery"],
+    [data-theme-field="mini_market"],
+    [data-theme-field="butcher"],
+    [data-theme-field="produce"],
+    [data-theme-field="frozen_food"]
+  ) .marketplaceBestSellerDepartment {
+    min-height: 0 !important;
+  }
+
+  .page:is(
+    [data-theme-field="supermarket"],
+    [data-theme-field="grocery"],
+    [data-theme-field="mini_market"],
+    [data-theme-field="butcher"],
+    [data-theme-field="produce"],
+    [data-theme-field="frozen_food"]
+  ) .marketplaceBestSellerCarousel {
+    min-height: 0 !important;
+    padding-bottom: 2px !important;
+  }
+
+  .page:is(
+    [data-theme-field="supermarket"],
+    [data-theme-field="grocery"],
+    [data-theme-field="mini_market"],
+    [data-theme-field="butcher"],
+    [data-theme-field="produce"],
+    [data-theme-field="frozen_food"]
+  ) .storeStory {
+    min-height: 0 !important;
+    padding: 17px !important;
+  }
+
+  .page:is(
+    [data-theme-field="supermarket"],
+    [data-theme-field="grocery"],
+    [data-theme-field="mini_market"],
+    [data-theme-field="butcher"],
+    [data-theme-field="produce"],
+    [data-theme-field="frozen_food"]
+  ) .storyCopy h2 {
+    margin: 4px 0 8px !important;
+    font-size: 24px !important;
+    line-height: 1.06 !important;
+  }
+
+  .page:is(
+    [data-theme-field="supermarket"],
+    [data-theme-field="grocery"],
+    [data-theme-field="mini_market"],
+    [data-theme-field="butcher"],
+    [data-theme-field="produce"],
+    [data-theme-field="frozen_food"]
+  ) .storyCopy p {
+    display: -webkit-box;
+    margin: 0 !important;
+    overflow: hidden;
+    font-size: 11px !important;
+    line-height: 1.5 !important;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 3;
+  }
+
+  .page:is(
+    [data-theme-field="supermarket"],
+    [data-theme-field="grocery"],
+    [data-theme-field="mini_market"],
+    [data-theme-field="butcher"],
+    [data-theme-field="produce"],
+    [data-theme-field="frozen_food"]
+  ) .partsConcierge {
+    min-height: 0 !important;
+    padding: 13px !important;
+  }
+
+  .page:is(
+    [data-theme-field="supermarket"],
+    [data-theme-field="grocery"],
+    [data-theme-field="mini_market"],
+    [data-theme-field="butcher"],
+    [data-theme-field="produce"],
+    [data-theme-field="frozen_food"]
+  ) .partsConciergeCopy h2 {
+    font-size: 16px !important;
+    line-height: 1.08 !important;
   }
 }
