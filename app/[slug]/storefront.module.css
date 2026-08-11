@@ -15202,3 +15202,1289 @@
     display: none !important;
   }
 }
+
+/* DARIK_UNIQUE_COMPUTERS_MOBILE_FURNITURE_098
+   Unique visual identities for computers, mobile_phones and furniture.
+   Visual styling follows data-theme-field.
+   Retail mechanics remain controlled by data-business.
+   Darik Marketplace catalog architecture is preserved. */
+
+/* ========================================================================== */
+/* COMPUTERS / WORKSTATION LAB                                                 */
+/* Deep graphite + indigo violet + terminal green. Precise, technical, pro.    */
+/* ========================================================================== */
+
+.page[data-theme-field="computers"] {
+  --computer-bg: #101318;
+  --computer-panel: #171b22;
+  --computer-panel-soft: #1d222b;
+  --computer-ink: #eef2f7;
+  --computer-muted: #9aa5b3;
+  --computer-indigo: #635bff;
+  --computer-indigo-deep: #4640c9;
+  --computer-green: #62d98b;
+  --computer-line: rgba(125,135,255,.14);
+
+  min-height: 100dvh;
+  padding-bottom: max(18px, env(safe-area-inset-bottom)) !important;
+  background:
+    linear-gradient(rgba(99,91,255,.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(99,91,255,.03) 1px, transparent 1px),
+    radial-gradient(circle at 12% 4%, rgba(99,91,255,.14), transparent 22rem),
+    radial-gradient(circle at 88% 16%, rgba(98,217,139,.07), transparent 18rem),
+    linear-gradient(180deg, #0f1217 0%, #15191f 46%, #0e1115 100%) !important;
+  background-size: 30px 30px, 30px 30px, auto, auto, auto !important;
+  color: #eef2f7 !important;
+}
+
+.page[data-theme-field="computers"] .announcementBar {
+  min-height: 32px !important;
+  border-bottom: 1px solid rgba(125,135,255,.10) !important;
+  background: #090b0f !important;
+  color: #cbd3df !important;
+}
+
+.page[data-theme-field="computers"] .announcementBar strong,
+.page[data-theme-field="computers"] .announcementBar span {
+  color: #cbd3df !important;
+}
+
+.page[data-theme-field="computers"] .header {
+  min-height: 64px !important;
+  border-bottom: 1px solid rgba(125,135,255,.10) !important;
+  background: rgba(15,18,23,.97) !important;
+  color: #eef2f7 !important;
+  box-shadow: 0 10px 30px rgba(0,0,0,.24) !important;
+  backdrop-filter: blur(18px) saturate(120%);
+  -webkit-backdrop-filter: blur(18px) saturate(120%);
+}
+
+.page[data-theme-field="computers"] .headerLogo {
+  border: 1px solid rgba(125,135,255,.13) !important;
+  background: #f4f6f9 !important;
+  box-shadow: 0 8px 20px rgba(0,0,0,.22) !important;
+}
+
+.page[data-theme-field="computers"] .storeIdentity strong {
+  color: #eef2f7 !important;
+}
+
+.page[data-theme-field="computers"] .storeIdentity span {
+  color: #9aa5b3 !important;
+}
+
+.page[data-theme-field="computers"] .headerActions button,
+.page[data-theme-field="computers"] .headerActions .cartButton {
+  border: 1px solid rgba(125,135,255,.11) !important;
+  background: rgba(255,255,255,.045) !important;
+  color: #eef2f7 !important;
+  box-shadow: none !important;
+}
+
+.page[data-theme-field="computers"] .cartCount {
+  background: #62d98b !important;
+  color: #101318 !important;
+}
+
+.page[data-theme-field="computers"][data-hero] .hero {
+  width: min(1180px, calc(100% - 20px)) !important;
+  margin: 10px auto 0 !important;
+  overflow: hidden !important;
+  border: 0 !important;
+  outline: 0 !important;
+  border-radius: 12px !important;
+  background-color: #0d1015 !important;
+  box-shadow: 0 28px 66px rgba(0,0,0,.36) !important;
+}
+
+.page[data-theme-field="computers"] .hero::after {
+  content: none !important;
+  display: none !important;
+}
+
+.page[data-theme-field="computers"] .heroOverlay {
+  background:
+    linear-gradient(
+      90deg,
+      rgba(6,8,11,.94) 0%,
+      rgba(14,18,24,.72) 43%,
+      rgba(26,24,49,.28) 74%,
+      rgba(26,24,49,.08) 100%
+    ),
+    linear-gradient(0deg, rgba(6,8,11,.48), transparent 58%) !important;
+}
+
+.page[data-theme-field="computers"] .heroTexture {
+  display: block !important;
+  background:
+    linear-gradient(rgba(99,91,255,.08) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(99,91,255,.08) 1px, transparent 1px),
+    radial-gradient(circle at 18% 14%, rgba(98,217,139,.11), transparent 27%) !important;
+  background-size: 26px 26px, 26px 26px, auto !important;
+}
+
+.page[data-theme-field="computers"] .heroContent {
+  min-height: 386px !important;
+  justify-content: flex-end !important;
+  align-items: flex-end !important;
+  padding: 28px 27px 30px !important;
+}
+
+.page[data-theme-field="computers"] .hero h1,
+.page[data-theme-field="computers"] .heroCopy h1 {
+  max-width: 660px !important;
+  color: #f4f6f9 !important;
+  font-family: inherit !important;
+  font-weight: 950 !important;
+  letter-spacing: -.055em !important;
+  text-shadow: 0 2px 18px rgba(0,0,0,.25);
+}
+
+.page[data-theme-field="computers"] .tagline {
+  color: rgba(238,242,247,.72) !important;
+}
+
+.page[data-theme-field="computers"] .heroLabel,
+.page[data-theme-field="computers"] .heroLiveStatus,
+.page[data-theme-field="computers"] .heroHoursChip {
+  border: 1px solid rgba(125,135,255,.16) !important;
+  background: rgba(10,13,18,.64) !important;
+  color: #eef2f7 !important;
+  box-shadow: none !important;
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+
+.page[data-theme-field="computers"] .primaryHeroButton {
+  min-height: 50px !important;
+  border: 0 !important;
+  border-radius: 8px !important;
+  background: linear-gradient(135deg, #635bff, #4640c9) !important;
+  color: #fff !important;
+  box-shadow: 0 14px 30px rgba(99,91,255,.24) !important;
+}
+
+.page[data-theme-field="computers"] .quickInfoStrip {
+  width: min(1180px, calc(100% - 28px)) !important;
+  margin: 12px auto 0 !important;
+  gap: 8px !important;
+  border: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.page[data-theme-field="computers"] .quickInfoStrip > a,
+.page[data-theme-field="computers"] .quickInfoStrip > button,
+.page[data-theme-field="computers"] .quickInfoStrip .locationQuickLink,
+.page[data-theme-field="computers"] .quickInfoStrip .contactQuickLink {
+  border: 1px solid rgba(125,135,255,.11) !important;
+  border-radius: 8px !important;
+  background: #171b22 !important;
+  color: #eef2f7 !important;
+  box-shadow: 0 9px 24px rgba(0,0,0,.16) !important;
+}
+
+.page[data-theme-field="computers"] .quickIcon {
+  background: #23253f !important;
+  color: #8f8aff !important;
+}
+
+.page[data-theme-field="computers"] .catalogShell {
+  width: min(1180px, calc(100% - 28px)) !important;
+  border: 0 !important;
+  background: transparent !important;
+  color: #eef2f7 !important;
+  box-shadow: none !important;
+}
+
+.page[data-theme-field="computers"] .searchBox {
+  border: 1px solid rgba(125,135,255,.11) !important;
+  border-radius: 8px !important;
+  background: #171b22 !important;
+  color: #9aa5b3 !important;
+  box-shadow: 0 8px 22px rgba(0,0,0,.13) !important;
+}
+
+.page[data-theme-field="computers"] .searchBox input {
+  color: #eef2f7 !important;
+}
+
+.page[data-theme-field="computers"] .searchBox input::placeholder {
+  color: #788391 !important;
+}
+
+.page[data-theme-field="computers"] .vehicleFilterPanel {
+  border: 1px solid rgba(125,135,255,.11) !important;
+  border-radius: 10px !important;
+  background:
+    radial-gradient(circle at 100% 0%, rgba(99,91,255,.08), transparent 13rem),
+    #171b22 !important;
+  color: #eef2f7 !important;
+  box-shadow: 0 9px 24px rgba(0,0,0,.16) !important;
+}
+
+.page[data-theme-field="computers"] .vehicleFilterHeading span,
+.page[data-theme-field="computers"] .vehicleFilterGrid label > span {
+  color: #8f8aff !important;
+}
+
+.page[data-theme-field="computers"] .vehicleFilterHeading strong {
+  color: #eef2f7 !important;
+}
+
+.page[data-theme-field="computers"] .vehicleFilterGrid select {
+  border: 1px solid rgba(125,135,255,.12) !important;
+  background: #101318 !important;
+  color: #eef2f7 !important;
+  border-radius: 8px !important;
+}
+
+.page[data-theme-field="computers"] .vehicleMatchSummary {
+  background: #202b25 !important;
+  color: #77e29b !important;
+}
+
+.page[data-theme-field="computers"] .marketplaceCategoryNavLabel,
+.page[data-theme-field="computers"] .marketplaceListingHeader span {
+  color: #8f8aff !important;
+}
+
+.page[data-theme-field="computers"] .marketplaceCategoryCircle {
+  border: 1px solid rgba(125,135,255,.12) !important;
+  background: #171b22 !important;
+  box-shadow: 0 7px 17px rgba(0,0,0,.15) !important;
+}
+
+.page[data-theme-field="computers"] .marketplaceCategoryBestSellers .marketplaceCategoryCircle {
+  border-color: rgba(99,91,255,.40) !important;
+  background:
+    radial-gradient(circle at 28% 22%, rgba(98,217,139,.11), transparent 42%),
+    linear-gradient(145deg, #23253f, #171b22) !important;
+}
+
+.page[data-theme-field="computers"] .marketplaceCategoryStar {
+  color: #8f8aff !important;
+}
+
+.page[data-theme-field="computers"] .marketplaceCategoryItemActive .marketplaceCategoryCircle {
+  border-color: #635bff !important;
+  box-shadow: 0 0 0 3px rgba(99,91,255,.11) !important;
+}
+
+.page[data-theme-field="computers"] .marketplaceCategorySelectedDot {
+  border-color: #101318 !important;
+  background: #62d98b !important;
+}
+
+.page[data-theme-field="computers"] .marketplaceCategoryItem strong,
+.page[data-theme-field="computers"] .marketplaceListingHeader h3,
+.page[data-theme-field="computers"] .marketplaceBestSellerDepartmentTitle {
+  color: #eef2f7 !important;
+}
+
+.page[data-theme-field="computers"] .marketplaceCategoryItem small,
+.page[data-theme-field="computers"] .marketplaceListingHeader small {
+  color: #9aa5b3 !important;
+}
+
+.page[data-theme-field="computers"] .marketplaceBestSellerItem,
+.page[data-theme-field="computers"] .marketplaceBestSellerCarousel .productCard,
+.page[data-theme-field="computers"] .marketplaceBestSellerCarousel .autoPartsProductCard,
+.page[data-theme-field="computers"] .marketplaceBestSellerCarousel .productBody {
+  height: auto !important;
+  min-height: 0 !important;
+  background: transparent !important;
+  color: #eef2f7 !important;
+  box-shadow: none !important;
+}
+
+.page[data-theme-field="computers"] .marketplaceBestSellerCarousel .productImage {
+  background: #15191f !important;
+}
+
+.page[data-theme-field="computers"] .marketplaceBestSellerCarousel .productBody h3 {
+  color: #eef2f7 !important;
+}
+
+.page[data-theme-field="computers"] .marketplaceBestSellerCarousel .productFooter,
+.page[data-theme-field="computers"] .marketplaceBestSellerCarousel .productFooter > div:first-child {
+  height: auto !important;
+  min-height: 0 !important;
+}
+
+.page[data-theme-field="computers"] .marketplaceBestSellerCarousel .productFooter strong {
+  color: #77e29b !important;
+}
+
+.page[data-theme-field="computers"] .marketplaceCategoryProductList .productCard,
+.page[data-theme-field="computers"] .marketplaceCategoryProductList .autoPartsProductCard {
+  border-bottom: 1px solid rgba(125,135,255,.10) !important;
+  background: transparent !important;
+  color: #eef2f7 !important;
+  box-shadow: none !important;
+}
+
+.page[data-theme-field="computers"] .marketplaceCategoryProductList .productBody h3 {
+  color: #eef2f7 !important;
+}
+
+.page[data-theme-field="computers"] .marketplaceCategoryProductList .productArabic {
+  color: #9aa5b3 !important;
+}
+
+.page[data-theme-field="computers"] .marketplaceCategoryProductList .productFitment {
+  background: #23253f !important;
+  color: #a09cff !important;
+}
+
+.page[data-theme-field="computers"] .storeStory,
+.page[data-theme-field="computers"] .partsConcierge {
+  width: min(1180px, calc(100% - 28px)) !important;
+  min-height: 0 !important;
+  border: 1px solid rgba(125,135,255,.11) !important;
+  border-radius: 10px !important;
+  background: #171b22 !important;
+  color: #eef2f7 !important;
+  box-shadow: 0 10px 26px rgba(0,0,0,.15) !important;
+}
+
+.page[data-theme-field="computers"] .storeStory {
+  margin: 22px auto 0 !important;
+  padding: 22px !important;
+}
+
+.page[data-theme-field="computers"] .partsConcierge {
+  margin: 16px auto 0 !important;
+  padding: 16px !important;
+}
+
+.page[data-theme-field="computers"] .storyCopy > span,
+.page[data-theme-field="computers"] .partsConciergeCopy > span {
+  color: #8f8aff !important;
+}
+
+.page[data-theme-field="computers"] .storyCopy h2,
+.page[data-theme-field="computers"] .partsConciergeCopy h2 {
+  color: #eef2f7 !important;
+}
+
+.page[data-theme-field="computers"] .storyCopy p,
+.page[data-theme-field="computers"] .partsConciergeCopy p {
+  color: #9aa5b3 !important;
+}
+
+.page[data-theme-field="computers"] .storyButton {
+  border: 0 !important;
+  background: #635bff !important;
+  color: #fff !important;
+}
+
+.page[data-theme-field="computers"] .partsConciergeIcon {
+  background: #23253f !important;
+  color: #8f8aff !important;
+}
+
+.page[data-theme-field="computers"] .footer {
+  width: min(1180px, calc(100% - 28px)) !important;
+  margin: 18px auto 0 !important;
+  padding: 16px 0 max(10px, env(safe-area-inset-bottom)) !important;
+  border: 0 !important;
+  border-top: 1px solid rgba(125,135,255,.10) !important;
+  background: transparent !important;
+  color: #eef2f7 !important;
+  box-shadow: none !important;
+}
+
+/* ========================================================================== */
+/* MOBILE PHONES / FLAGSHIP PHONE BOUTIQUE                                     */
+/* Titanium silver + glossy black + violet blue + glass.                       */
+/* ========================================================================== */
+
+.page[data-theme-field="mobile_phones"] {
+  --phone-ink: #14161a;
+  --phone-black: #0f1115;
+  --phone-titanium: #d8d9dd;
+  --phone-silver: #f5f6f8;
+  --phone-violet: #6d5dfc;
+  --phone-blue: #3b82f6;
+  --phone-muted: #7b7f88;
+
+  min-height: 100dvh;
+  padding-bottom: max(18px, env(safe-area-inset-bottom)) !important;
+  background:
+    radial-gradient(circle at 86% 3%, rgba(109,93,252,.12), transparent 21rem),
+    radial-gradient(circle at 10% 16%, rgba(59,130,246,.07), transparent 18rem),
+    linear-gradient(180deg, #f2f3f6 0%, #fff 46%, #f4f5f7 100%) !important;
+  color: #14161a !important;
+}
+
+.page[data-theme-field="mobile_phones"] .announcementBar {
+  min-height: 32px !important;
+  border: 0 !important;
+  background: #0f1115 !important;
+  color: #eceef2 !important;
+}
+
+.page[data-theme-field="mobile_phones"] .announcementBar strong,
+.page[data-theme-field="mobile_phones"] .announcementBar span {
+  color: #eceef2 !important;
+}
+
+.page[data-theme-field="mobile_phones"] .header {
+  min-height: 64px !important;
+  border-bottom: 1px solid rgba(20,22,26,.07) !important;
+  background: rgba(245,246,248,.82) !important;
+  color: #14161a !important;
+  box-shadow: 0 8px 26px rgba(20,22,26,.05) !important;
+  backdrop-filter: blur(22px) saturate(140%);
+  -webkit-backdrop-filter: blur(22px) saturate(140%);
+}
+
+.page[data-theme-field="mobile_phones"] .headerLogo {
+  border: 1px solid rgba(20,22,26,.08) !important;
+  background: rgba(255,255,255,.92) !important;
+  box-shadow: 0 7px 18px rgba(20,22,26,.04) !important;
+}
+
+.page[data-theme-field="mobile_phones"] .storeIdentity strong {
+  color: #14161a !important;
+}
+
+.page[data-theme-field="mobile_phones"] .storeIdentity span {
+  color: #7b7f88 !important;
+}
+
+.page[data-theme-field="mobile_phones"] .headerActions button,
+.page[data-theme-field="mobile_phones"] .headerActions .cartButton {
+  border: 1px solid rgba(20,22,26,.07) !important;
+  background: rgba(255,255,255,.82) !important;
+  color: #14161a !important;
+  box-shadow: none !important;
+}
+
+.page[data-theme-field="mobile_phones"] .cartCount {
+  background: #6d5dfc !important;
+  color: #fff !important;
+}
+
+.page[data-theme-field="mobile_phones"][data-hero] .hero {
+  width: min(1180px, calc(100% - 20px)) !important;
+  margin: 10px auto 0 !important;
+  overflow: hidden !important;
+  border: 0 !important;
+  outline: 0 !important;
+  border-radius: 30px !important;
+  background-color: #0f1115 !important;
+  box-shadow: 0 28px 64px rgba(20,22,26,.21) !important;
+}
+
+.page[data-theme-field="mobile_phones"] .hero::after {
+  content: none !important;
+  display: none !important;
+}
+
+.page[data-theme-field="mobile_phones"] .heroOverlay {
+  background:
+    linear-gradient(
+      90deg,
+      rgba(8,9,12,.92) 0%,
+      rgba(18,21,28,.62) 42%,
+      rgba(44,37,88,.24) 74%,
+      rgba(44,37,88,.06) 100%
+    ),
+    linear-gradient(0deg, rgba(8,9,12,.42), transparent 58%) !important;
+}
+
+.page[data-theme-field="mobile_phones"] .heroTexture {
+  display: block !important;
+  background:
+    radial-gradient(circle at 18% 14%, rgba(109,93,252,.19), transparent 28%),
+    radial-gradient(circle at 82% 10%, rgba(59,130,246,.13), transparent 24%),
+    linear-gradient(115deg, transparent 0 72%, rgba(255,255,255,.05) 72% 73%, transparent 73%) !important;
+}
+
+.page[data-theme-field="mobile_phones"] .heroContent {
+  min-height: 390px !important;
+  justify-content: flex-end !important;
+  align-items: flex-end !important;
+  padding: 28px 27px 30px !important;
+}
+
+.page[data-theme-field="mobile_phones"] .hero h1,
+.page[data-theme-field="mobile_phones"] .heroCopy h1 {
+  max-width: 650px !important;
+  color: #fff !important;
+  font-family: inherit !important;
+  font-weight: 950 !important;
+  letter-spacing: -.06em !important;
+  text-shadow: 0 2px 18px rgba(0,0,0,.22);
+}
+
+.page[data-theme-field="mobile_phones"] .tagline {
+  color: rgba(255,255,255,.76) !important;
+}
+
+.page[data-theme-field="mobile_phones"] .heroLabel,
+.page[data-theme-field="mobile_phones"] .heroLiveStatus,
+.page[data-theme-field="mobile_phones"] .heroHoursChip {
+  border: 1px solid rgba(255,255,255,.13) !important;
+  background: rgba(17,19,24,.54) !important;
+  color: #fff !important;
+  box-shadow: none !important;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+
+.page[data-theme-field="mobile_phones"] .primaryHeroButton {
+  min-height: 52px !important;
+  border: 1px solid rgba(255,255,255,.08) !important;
+  border-radius: 18px !important;
+  background: linear-gradient(135deg, #6d5dfc, #3b82f6) !important;
+  color: #fff !important;
+  box-shadow: 0 14px 30px rgba(78,91,230,.25) !important;
+}
+
+.page[data-theme-field="mobile_phones"] .quickInfoStrip {
+  width: min(1180px, calc(100% - 28px)) !important;
+  margin: 12px auto 0 !important;
+  gap: 8px !important;
+  border: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.page[data-theme-field="mobile_phones"] .quickInfoStrip > a,
+.page[data-theme-field="mobile_phones"] .quickInfoStrip > button,
+.page[data-theme-field="mobile_phones"] .quickInfoStrip .locationQuickLink,
+.page[data-theme-field="mobile_phones"] .quickInfoStrip .contactQuickLink {
+  border: 1px solid rgba(20,22,26,.07) !important;
+  border-radius: 18px !important;
+  background: rgba(255,255,255,.86) !important;
+  color: #14161a !important;
+  box-shadow: 0 8px 22px rgba(20,22,26,.04) !important;
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+}
+
+.page[data-theme-field="mobile_phones"] .quickIcon {
+  background: #ecebff !important;
+  color: #6d5dfc !important;
+}
+
+.page[data-theme-field="mobile_phones"] .catalogShell {
+  width: min(1180px, calc(100% - 28px)) !important;
+  border: 0 !important;
+  background: transparent !important;
+  color: #14161a !important;
+  box-shadow: none !important;
+}
+
+.page[data-theme-field="mobile_phones"] .searchBox {
+  border: 1px solid rgba(20,22,26,.08) !important;
+  border-radius: 17px !important;
+  background: rgba(255,255,255,.88) !important;
+  color: #7b7f88 !important;
+  box-shadow: 0 8px 22px rgba(20,22,26,.035) !important;
+}
+
+.page[data-theme-field="mobile_phones"] .searchBox input {
+  color: #14161a !important;
+}
+
+.page[data-theme-field="mobile_phones"] .searchBox input::placeholder {
+  color: #979ba3 !important;
+}
+
+.page[data-theme-field="mobile_phones"] .vehicleFilterPanel {
+  border: 1px solid rgba(20,22,26,.08) !important;
+  border-radius: 19px !important;
+  background:
+    radial-gradient(circle at 100% 0%, rgba(109,93,252,.07), transparent 13rem),
+    rgba(255,255,255,.90) !important;
+  color: #14161a !important;
+  box-shadow: 0 9px 23px rgba(20,22,26,.04) !important;
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+}
+
+.page[data-theme-field="mobile_phones"] .vehicleFilterHeading span,
+.page[data-theme-field="mobile_phones"] .vehicleFilterGrid label > span {
+  color: #6d5dfc !important;
+}
+
+.page[data-theme-field="mobile_phones"] .vehicleFilterHeading strong {
+  color: #14161a !important;
+}
+
+.page[data-theme-field="mobile_phones"] .vehicleFilterGrid select {
+  border: 1px solid rgba(20,22,26,.10) !important;
+  background: #f5f6f8 !important;
+  color: #14161a !important;
+  border-radius: 14px !important;
+}
+
+.page[data-theme-field="mobile_phones"] .vehicleMatchSummary {
+  background: #ecebff !important;
+  color: #5044cf !important;
+}
+
+.page[data-theme-field="mobile_phones"] .marketplaceCategoryNavLabel,
+.page[data-theme-field="mobile_phones"] .marketplaceListingHeader span {
+  color: #6d5dfc !important;
+}
+
+.page[data-theme-field="mobile_phones"] .marketplaceCategoryCircle {
+  border: 1px solid rgba(20,22,26,.08) !important;
+  background: rgba(255,255,255,.90) !important;
+  box-shadow: 0 7px 17px rgba(20,22,26,.035) !important;
+}
+
+.page[data-theme-field="mobile_phones"] .marketplaceCategoryBestSellers .marketplaceCategoryCircle {
+  border-color: rgba(109,93,252,.30) !important;
+  background:
+    radial-gradient(circle at 28% 22%, rgba(109,93,252,.14), transparent 42%),
+    linear-gradient(145deg, #fff, #ecebff) !important;
+}
+
+.page[data-theme-field="mobile_phones"] .marketplaceCategoryStar {
+  color: #6d5dfc !important;
+}
+
+.page[data-theme-field="mobile_phones"] .marketplaceCategoryItemActive .marketplaceCategoryCircle {
+  border-color: #6d5dfc !important;
+  box-shadow: 0 0 0 3px rgba(109,93,252,.09) !important;
+}
+
+.page[data-theme-field="mobile_phones"] .marketplaceCategorySelectedDot {
+  border-color: #f2f3f6 !important;
+  background: #3b82f6 !important;
+}
+
+.page[data-theme-field="mobile_phones"] .marketplaceCategoryItem strong,
+.page[data-theme-field="mobile_phones"] .marketplaceListingHeader h3,
+.page[data-theme-field="mobile_phones"] .marketplaceBestSellerDepartmentTitle {
+  color: #14161a !important;
+}
+
+.page[data-theme-field="mobile_phones"] .marketplaceCategoryItem small,
+.page[data-theme-field="mobile_phones"] .marketplaceListingHeader small {
+  color: #7b7f88 !important;
+}
+
+.page[data-theme-field="mobile_phones"] .marketplaceBestSellerItem,
+.page[data-theme-field="mobile_phones"] .marketplaceBestSellerCarousel .productCard,
+.page[data-theme-field="mobile_phones"] .marketplaceBestSellerCarousel .autoPartsProductCard,
+.page[data-theme-field="mobile_phones"] .marketplaceBestSellerCarousel .productBody {
+  height: auto !important;
+  min-height: 0 !important;
+  background: transparent !important;
+  color: #14161a !important;
+  box-shadow: none !important;
+}
+
+.page[data-theme-field="mobile_phones"] .marketplaceBestSellerCarousel .productBody h3 {
+  color: #14161a !important;
+}
+
+.page[data-theme-field="mobile_phones"] .marketplaceBestSellerCarousel .productFooter,
+.page[data-theme-field="mobile_phones"] .marketplaceBestSellerCarousel .productFooter > div:first-child {
+  height: auto !important;
+  min-height: 0 !important;
+}
+
+.page[data-theme-field="mobile_phones"] .marketplaceBestSellerCarousel .productFooter strong {
+  color: #5044cf !important;
+}
+
+.page[data-theme-field="mobile_phones"] .marketplaceCategoryProductList .productCard,
+.page[data-theme-field="mobile_phones"] .marketplaceCategoryProductList .autoPartsProductCard {
+  border-bottom: 1px solid rgba(20,22,26,.07) !important;
+  background: transparent !important;
+  color: #14161a !important;
+  box-shadow: none !important;
+}
+
+.page[data-theme-field="mobile_phones"] .marketplaceCategoryProductList .productBody h3 {
+  color: #14161a !important;
+}
+
+.page[data-theme-field="mobile_phones"] .marketplaceCategoryProductList .productArabic {
+  color: #7b7f88 !important;
+}
+
+.page[data-theme-field="mobile_phones"] .marketplaceCategoryProductList .productFitment {
+  background: #ecebff !important;
+  color: #5044cf !important;
+}
+
+.page[data-theme-field="mobile_phones"] .storeStory,
+.page[data-theme-field="mobile_phones"] .partsConcierge {
+  width: min(1180px, calc(100% - 28px)) !important;
+  min-height: 0 !important;
+  border: 1px solid rgba(20,22,26,.07) !important;
+  border-radius: 20px !important;
+  background: rgba(255,255,255,.88) !important;
+  color: #14161a !important;
+  box-shadow: 0 9px 23px rgba(20,22,26,.035) !important;
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+}
+
+.page[data-theme-field="mobile_phones"] .storeStory {
+  margin: 22px auto 0 !important;
+  padding: 22px !important;
+}
+
+.page[data-theme-field="mobile_phones"] .partsConcierge {
+  margin: 16px auto 0 !important;
+  padding: 16px !important;
+}
+
+.page[data-theme-field="mobile_phones"] .storyCopy > span,
+.page[data-theme-field="mobile_phones"] .partsConciergeCopy > span {
+  color: #6d5dfc !important;
+}
+
+.page[data-theme-field="mobile_phones"] .storyCopy h2,
+.page[data-theme-field="mobile_phones"] .partsConciergeCopy h2 {
+  color: #14161a !important;
+}
+
+.page[data-theme-field="mobile_phones"] .storyCopy p,
+.page[data-theme-field="mobile_phones"] .partsConciergeCopy p {
+  color: #7b7f88 !important;
+}
+
+.page[data-theme-field="mobile_phones"] .storyButton {
+  border: 0 !important;
+  background: #14161a !important;
+  color: #fff !important;
+}
+
+.page[data-theme-field="mobile_phones"] .partsConciergeIcon {
+  background: #ecebff !important;
+  color: #6d5dfc !important;
+}
+
+.page[data-theme-field="mobile_phones"] .footer {
+  width: min(1180px, calc(100% - 28px)) !important;
+  margin: 18px auto 0 !important;
+  padding: 16px 0 max(10px, env(safe-area-inset-bottom)) !important;
+  border: 0 !important;
+  border-top: 1px solid rgba(20,22,26,.08) !important;
+  background: transparent !important;
+  color: #14161a !important;
+  box-shadow: none !important;
+}
+
+/* ========================================================================== */
+/* FURNITURE / INTERIOR SHOWROOM                                               */
+/* Linen + walnut + clay + muted sage. Warm, spacious, residential editorial.  */
+/* ========================================================================== */
+
+.page[data-theme-field="furniture"] {
+  --furniture-ink: #2e2925;
+  --furniture-walnut: #6b4935;
+  --furniture-walnut-deep: #4d3528;
+  --furniture-linen: #f5f0e8;
+  --furniture-paper: #fffdf8;
+  --furniture-clay: #b9785e;
+  --furniture-sage: #7d8b72;
+  --furniture-muted: #7e746b;
+
+  min-height: 100dvh;
+  padding-bottom: max(18px, env(safe-area-inset-bottom)) !important;
+  background:
+    radial-gradient(circle at 8% 4%, rgba(125,139,114,.11), transparent 21rem),
+    radial-gradient(circle at 90% 14%, rgba(185,120,94,.09), transparent 18rem),
+    linear-gradient(180deg, #f3eee6 0%, #fffdf8 46%, #f0e9df 100%) !important;
+  color: #2e2925 !important;
+}
+
+.page[data-theme-field="furniture"] .announcementBar {
+  min-height: 32px !important;
+  border: 0 !important;
+  background: #4d3528 !important;
+  color: #f8f2eb !important;
+}
+
+.page[data-theme-field="furniture"] .announcementBar strong,
+.page[data-theme-field="furniture"] .announcementBar span {
+  color: #f8f2eb !important;
+}
+
+.page[data-theme-field="furniture"] .header {
+  min-height: 64px !important;
+  border-bottom: 1px solid rgba(107,73,53,.07) !important;
+  background: rgba(245,240,232,.96) !important;
+  color: #2e2925 !important;
+  box-shadow: 0 8px 24px rgba(77,53,40,.04) !important;
+  backdrop-filter: blur(18px) saturate(125%);
+  -webkit-backdrop-filter: blur(18px) saturate(125%);
+}
+
+.page[data-theme-field="furniture"] .headerLogo {
+  border: 1px solid rgba(107,73,53,.08) !important;
+  background: #fffdf8 !important;
+  box-shadow: 0 7px 18px rgba(77,53,40,.04) !important;
+}
+
+.page[data-theme-field="furniture"] .storeIdentity strong {
+  color: #2e2925 !important;
+}
+
+.page[data-theme-field="furniture"] .storeIdentity span {
+  color: #7e746b !important;
+}
+
+.page[data-theme-field="furniture"] .headerActions button,
+.page[data-theme-field="furniture"] .headerActions .cartButton {
+  border: 1px solid rgba(107,73,53,.08) !important;
+  background: #fffdf8 !important;
+  color: #4d3528 !important;
+  box-shadow: none !important;
+}
+
+.page[data-theme-field="furniture"] .cartCount {
+  background: #b9785e !important;
+  color: #fff !important;
+}
+
+/* Furniture hero: airy interior editorial, warm natural shadow. */
+.page[data-theme-field="furniture"][data-hero] .hero {
+  width: min(1180px, calc(100% - 20px)) !important;
+  margin: 10px auto 0 !important;
+  overflow: hidden !important;
+  border: 0 !important;
+  outline: 0 !important;
+  border-radius: 26px !important;
+  background-color: #5b4637 !important;
+  box-shadow: 0 24px 56px rgba(77,53,40,.16) !important;
+}
+
+.page[data-theme-field="furniture"] .hero::after {
+  content: none !important;
+  display: none !important;
+}
+
+.page[data-theme-field="furniture"] .heroOverlay {
+  background:
+    linear-gradient(
+      90deg,
+      rgba(47,35,28,.79) 0%,
+      rgba(73,53,41,.48) 42%,
+      rgba(73,53,41,.15) 76%,
+      rgba(73,53,41,.03) 100%
+    ),
+    linear-gradient(0deg, rgba(47,35,28,.33), transparent 58%) !important;
+}
+
+.page[data-theme-field="furniture"] .heroTexture {
+  display: block !important;
+  background:
+    radial-gradient(circle at 17% 14%, rgba(245,240,232,.14), transparent 29%),
+    radial-gradient(circle at 83% 12%, rgba(125,139,114,.12), transparent 23%) !important;
+}
+
+.page[data-theme-field="furniture"] .heroContent {
+  min-height: 382px !important;
+  justify-content: flex-end !important;
+  align-items: flex-end !important;
+  padding: 28px 28px 30px !important;
+}
+
+.page[data-theme-field="furniture"] .hero h1,
+.page[data-theme-field="furniture"] .heroCopy h1 {
+  max-width: 680px !important;
+  color: #fffdf8 !important;
+  font-family: Georgia, "Times New Roman", serif !important;
+  font-weight: 700 !important;
+  letter-spacing: -.045em !important;
+  text-shadow: 0 2px 18px rgba(0,0,0,.18);
+}
+
+.page[data-theme-field="furniture"] .tagline {
+  color: rgba(255,253,248,.82) !important;
+}
+
+.page[data-theme-field="furniture"] .heroLabel,
+.page[data-theme-field="furniture"] .heroLiveStatus,
+.page[data-theme-field="furniture"] .heroHoursChip {
+  border: 1px solid rgba(255,255,255,.14) !important;
+  background: rgba(69,50,39,.47) !important;
+  color: #fffdf8 !important;
+  box-shadow: none !important;
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+
+.page[data-theme-field="furniture"] .primaryHeroButton {
+  min-height: 52px !important;
+  border: 0 !important;
+  border-radius: 17px !important;
+  background: #f5f0e8 !important;
+  color: #4d3528 !important;
+  box-shadow: 0 14px 30px rgba(77,53,40,.18) !important;
+}
+
+.page[data-theme-field="furniture"] .quickInfoStrip {
+  width: min(1180px, calc(100% - 28px)) !important;
+  margin: 12px auto 0 !important;
+  gap: 8px !important;
+  border: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.page[data-theme-field="furniture"] .quickInfoStrip > a,
+.page[data-theme-field="furniture"] .quickInfoStrip > button,
+.page[data-theme-field="furniture"] .quickInfoStrip .locationQuickLink,
+.page[data-theme-field="furniture"] .quickInfoStrip .contactQuickLink {
+  border: 1px solid rgba(107,73,53,.07) !important;
+  border-radius: 17px !important;
+  background: #fffdf8 !important;
+  color: #2e2925 !important;
+  box-shadow: 0 8px 22px rgba(77,53,40,.035) !important;
+}
+
+.page[data-theme-field="furniture"] .quickIcon {
+  background: #ece8df !important;
+  color: #7d8b72 !important;
+}
+
+.page[data-theme-field="furniture"] .catalogShell {
+  width: min(1180px, calc(100% - 28px)) !important;
+  border: 0 !important;
+  background: transparent !important;
+  color: #2e2925 !important;
+  box-shadow: none !important;
+}
+
+.page[data-theme-field="furniture"] .searchBox {
+  border: 1px solid rgba(107,73,53,.09) !important;
+  border-radius: 16px !important;
+  background: #fffdf8 !important;
+  color: #7e746b !important;
+  box-shadow: 0 8px 22px rgba(77,53,40,.03) !important;
+}
+
+.page[data-theme-field="furniture"] .searchBox input {
+  color: #2e2925 !important;
+}
+
+.page[data-theme-field="furniture"] .searchBox input::placeholder {
+  color: #9a9087 !important;
+}
+
+.page[data-theme-field="furniture"] .vehicleFilterPanel {
+  border: 1px solid rgba(107,73,53,.08) !important;
+  border-radius: 18px !important;
+  background:
+    radial-gradient(circle at 100% 0%, rgba(125,139,114,.07), transparent 13rem),
+    #fffdf8 !important;
+  color: #2e2925 !important;
+  box-shadow: 0 9px 23px rgba(77,53,40,.03) !important;
+}
+
+.page[data-theme-field="furniture"] .vehicleFilterHeading span,
+.page[data-theme-field="furniture"] .vehicleFilterGrid label > span {
+  color: #7d8b72 !important;
+}
+
+.page[data-theme-field="furniture"] .vehicleFilterHeading strong {
+  color: #2e2925 !important;
+}
+
+.page[data-theme-field="furniture"] .vehicleFilterGrid select {
+  border: 1px solid rgba(107,73,53,.10) !important;
+  background: #f5f0e8 !important;
+  color: #2e2925 !important;
+  border-radius: 14px !important;
+}
+
+.page[data-theme-field="furniture"] .vehicleMatchSummary {
+  background: #ece8df !important;
+  color: #5f6f56 !important;
+}
+
+.page[data-theme-field="furniture"] .marketplaceCategoryNavLabel,
+.page[data-theme-field="furniture"] .marketplaceListingHeader span {
+  color: #7d8b72 !important;
+}
+
+.page[data-theme-field="furniture"] .marketplaceCategoryCircle {
+  border: 1px solid rgba(107,73,53,.09) !important;
+  background: #fffdf8 !important;
+  box-shadow: 0 7px 17px rgba(77,53,40,.03) !important;
+}
+
+.page[data-theme-field="furniture"] .marketplaceCategoryBestSellers .marketplaceCategoryCircle {
+  border-color: rgba(185,120,94,.28) !important;
+  background:
+    radial-gradient(circle at 28% 22%, rgba(125,139,114,.15), transparent 42%),
+    linear-gradient(145deg, #fffdf8, #efe6dc) !important;
+}
+
+.page[data-theme-field="furniture"] .marketplaceCategoryStar {
+  color: #b9785e !important;
+}
+
+.page[data-theme-field="furniture"] .marketplaceCategoryItemActive .marketplaceCategoryCircle {
+  border-color: #b9785e !important;
+  box-shadow: 0 0 0 3px rgba(185,120,94,.08) !important;
+}
+
+.page[data-theme-field="furniture"] .marketplaceCategorySelectedDot {
+  border-color: #f3eee6 !important;
+  background: #7d8b72 !important;
+}
+
+.page[data-theme-field="furniture"] .marketplaceCategoryItem strong,
+.page[data-theme-field="furniture"] .marketplaceListingHeader h3,
+.page[data-theme-field="furniture"] .marketplaceBestSellerDepartmentTitle {
+  color: #2e2925 !important;
+}
+
+.page[data-theme-field="furniture"] .marketplaceCategoryItem small,
+.page[data-theme-field="furniture"] .marketplaceListingHeader small {
+  color: #7e746b !important;
+}
+
+.page[data-theme-field="furniture"] .marketplaceListingHeader h3,
+.page[data-theme-field="furniture"] .marketplaceBestSellerDepartmentTitle {
+  font-family: Georgia, "Times New Roman", serif !important;
+}
+
+.page[data-theme-field="furniture"] .marketplaceBestSellerItem,
+.page[data-theme-field="furniture"] .marketplaceBestSellerCarousel .productCard,
+.page[data-theme-field="furniture"] .marketplaceBestSellerCarousel .autoPartsProductCard,
+.page[data-theme-field="furniture"] .marketplaceBestSellerCarousel .productBody {
+  height: auto !important;
+  min-height: 0 !important;
+  background: transparent !important;
+  color: #2e2925 !important;
+  box-shadow: none !important;
+}
+
+.page[data-theme-field="furniture"] .marketplaceBestSellerCarousel .productBody h3 {
+  color: #2e2925 !important;
+}
+
+.page[data-theme-field="furniture"] .marketplaceBestSellerCarousel .productFooter,
+.page[data-theme-field="furniture"] .marketplaceBestSellerCarousel .productFooter > div:first-child {
+  height: auto !important;
+  min-height: 0 !important;
+}
+
+.page[data-theme-field="furniture"] .marketplaceBestSellerCarousel .productFooter strong {
+  color: #6b4935 !important;
+}
+
+.page[data-theme-field="furniture"] .marketplaceCategoryProductList .productCard,
+.page[data-theme-field="furniture"] .marketplaceCategoryProductList .autoPartsProductCard {
+  border-bottom: 1px solid rgba(107,73,53,.07) !important;
+  background: transparent !important;
+  color: #2e2925 !important;
+  box-shadow: none !important;
+}
+
+.page[data-theme-field="furniture"] .marketplaceCategoryProductList .productBody h3 {
+  color: #2e2925 !important;
+}
+
+.page[data-theme-field="furniture"] .marketplaceCategoryProductList .productArabic {
+  color: #7e746b !important;
+}
+
+.page[data-theme-field="furniture"] .marketplaceCategoryProductList .productFitment {
+  background: #ece8df !important;
+  color: #5f6f56 !important;
+}
+
+.page[data-theme-field="furniture"] .storeStory,
+.page[data-theme-field="furniture"] .partsConcierge {
+  width: min(1180px, calc(100% - 28px)) !important;
+  min-height: 0 !important;
+  border: 1px solid rgba(107,73,53,.07) !important;
+  border-radius: 20px !important;
+  background: #fffdf8 !important;
+  color: #2e2925 !important;
+  box-shadow: 0 9px 23px rgba(77,53,40,.03) !important;
+}
+
+.page[data-theme-field="furniture"] .storeStory {
+  margin: 22px auto 0 !important;
+  padding: 22px !important;
+}
+
+.page[data-theme-field="furniture"] .partsConcierge {
+  margin: 16px auto 0 !important;
+  padding: 16px !important;
+}
+
+.page[data-theme-field="furniture"] .storyCopy > span,
+.page[data-theme-field="furniture"] .partsConciergeCopy > span {
+  color: #7d8b72 !important;
+}
+
+.page[data-theme-field="furniture"] .storyCopy h2,
+.page[data-theme-field="furniture"] .partsConciergeCopy h2 {
+  color: #2e2925 !important;
+  font-family: Georgia, "Times New Roman", serif !important;
+}
+
+.page[data-theme-field="furniture"] .storyCopy p,
+.page[data-theme-field="furniture"] .partsConciergeCopy p {
+  color: #7e746b !important;
+}
+
+.page[data-theme-field="furniture"] .storyButton {
+  border: 0 !important;
+  background: #4d3528 !important;
+  color: #fffdf8 !important;
+}
+
+.page[data-theme-field="furniture"] .partsConciergeIcon {
+  background: #ece8df !important;
+  color: #7d8b72 !important;
+}
+
+.page[data-theme-field="furniture"] .footer {
+  width: min(1180px, calc(100% - 28px)) !important;
+  margin: 18px auto 0 !important;
+  padding: 16px 0 max(10px, env(safe-area-inset-bottom)) !important;
+  border: 0 !important;
+  border-top: 1px solid rgba(107,73,53,.08) !important;
+  background: transparent !important;
+  color: #2e2925 !important;
+  box-shadow: none !important;
+}
+
+/* ========================================================================== */
+/* Mobile tuning                                                               */
+/* ========================================================================== */
+
+@media (max-width: 760px) {
+  .page[data-theme-field="computers"][data-hero] .hero,
+  .page[data-theme-field="mobile_phones"][data-hero] .hero,
+  .page[data-theme-field="furniture"][data-hero] .hero {
+    width: calc(100% - 18px) !important;
+    margin-top: 8px !important;
+  }
+
+  .page[data-theme-field="computers"][data-hero] .hero {
+    border-radius: 9px !important;
+  }
+
+  .page[data-theme-field="mobile_phones"][data-hero] .hero {
+    border-radius: 24px !important;
+  }
+
+  .page[data-theme-field="furniture"][data-hero] .hero {
+    border-radius: 22px !important;
+  }
+
+  .page[data-theme-field="computers"] .heroContent,
+  .page[data-theme-field="mobile_phones"] .heroContent,
+  .page[data-theme-field="furniture"] .heroContent {
+    min-height: 316px !important;
+    padding: 20px 18px 22px !important;
+  }
+
+  .page[data-theme-field="computers"] .hero h1,
+  .page[data-theme-field="computers"] .heroCopy h1,
+  .page[data-theme-field="mobile_phones"] .hero h1,
+  .page[data-theme-field="mobile_phones"] .heroCopy h1 {
+    font-size: clamp(29px, 8.4vw, 38px) !important;
+    line-height: .98 !important;
+  }
+
+  .page[data-theme-field="furniture"] .hero h1,
+  .page[data-theme-field="furniture"] .heroCopy h1 {
+    font-size: clamp(30px, 8.8vw, 39px) !important;
+    line-height: .97 !important;
+  }
+
+  .page[data-theme-field="computers"] .quickInfoStrip,
+  .page[data-theme-field="computers"] .catalogShell,
+  .page[data-theme-field="computers"] .storeStory,
+  .page[data-theme-field="computers"] .partsConcierge,
+  .page[data-theme-field="computers"] .footer,
+  .page[data-theme-field="mobile_phones"] .quickInfoStrip,
+  .page[data-theme-field="mobile_phones"] .catalogShell,
+  .page[data-theme-field="mobile_phones"] .storeStory,
+  .page[data-theme-field="mobile_phones"] .partsConcierge,
+  .page[data-theme-field="mobile_phones"] .footer,
+  .page[data-theme-field="furniture"] .quickInfoStrip,
+  .page[data-theme-field="furniture"] .catalogShell,
+  .page[data-theme-field="furniture"] .storeStory,
+  .page[data-theme-field="furniture"] .partsConcierge,
+  .page[data-theme-field="furniture"] .footer {
+    width: calc(100% - 24px) !important;
+  }
+
+  .page[data-theme-field="computers"] .marketplaceListingHeader,
+  .page[data-theme-field="mobile_phones"] .marketplaceListingHeader,
+  .page[data-theme-field="furniture"] .marketplaceListingHeader {
+    margin: 4px 0 11px !important;
+  }
+
+  .page[data-theme-field="computers"] .marketplaceListingHeader h3,
+  .page[data-theme-field="mobile_phones"] .marketplaceListingHeader h3,
+  .page[data-theme-field="furniture"] .marketplaceListingHeader h3 {
+    font-size: 21px !important;
+  }
+
+  .page[data-theme-field="computers"] .marketplaceBestSellerDepartmentTitle,
+  .page[data-theme-field="mobile_phones"] .marketplaceBestSellerDepartmentTitle,
+  .page[data-theme-field="furniture"] .marketplaceBestSellerDepartmentTitle {
+    margin-bottom: 9px !important;
+    font-size: 15px !important;
+    line-height: 19px !important;
+  }
+
+  .page[data-theme-field="computers"] .storeStory,
+  .page[data-theme-field="mobile_phones"] .storeStory,
+  .page[data-theme-field="furniture"] .storeStory {
+    padding: 17px !important;
+  }
+
+  .page[data-theme-field="computers"] .storyCopy h2,
+  .page[data-theme-field="mobile_phones"] .storyCopy h2,
+  .page[data-theme-field="furniture"] .storyCopy h2 {
+    margin: 4px 0 8px !important;
+    font-size: 23px !important;
+    line-height: 1.06 !important;
+  }
+
+  .page[data-theme-field="computers"] .storyCopy p,
+  .page[data-theme-field="mobile_phones"] .storyCopy p,
+  .page[data-theme-field="furniture"] .storyCopy p {
+    display: -webkit-box;
+    margin: 0 !important;
+    overflow: hidden;
+    font-size: 11px !important;
+    line-height: 1.48 !important;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 3;
+  }
+
+  .page[data-theme-field="computers"] .partsConcierge,
+  .page[data-theme-field="mobile_phones"] .partsConcierge,
+  .page[data-theme-field="furniture"] .partsConcierge {
+    padding: 13px !important;
+  }
+
+  .page[data-theme-field="computers"] .partsConciergeCopy h2,
+  .page[data-theme-field="mobile_phones"] .partsConciergeCopy h2,
+  .page[data-theme-field="furniture"] .partsConciergeCopy h2 {
+    font-size: 16px !important;
+    line-height: 1.08 !important;
+  }
+
+  .page[data-theme-field="computers"] .partsConciergeCopy p,
+  .page[data-theme-field="mobile_phones"] .partsConciergeCopy p,
+  .page[data-theme-field="furniture"] .partsConciergeCopy p {
+    display: none !important;
+  }
+}
