@@ -12660,3 +12660,1262 @@
     display: none !important;
   }
 }
+
+/* DARIK_SMOKE_HERO_FIX_FASHION_THEMES_096
+   - Removes the accidental-looking Smoke Shop storefront hero outline.
+   - Adds three distinct visual identities: clothing, shoes, jewelry.
+   - Marketplace catalog architecture and retail-field mechanics remain unchanged. */
+
+/* ========================================================================== */
+/* SMOKE SHOP - FRAMELESS HERO CORRECTION                                      */
+/* ========================================================================== */
+
+.page[data-theme-field="smoke_shop"][data-hero] .hero {
+  border: 0 !important;
+  outline: 0 !important;
+  box-shadow: 0 28px 68px rgba(0,0,0,.38) !important;
+}
+
+/* ========================================================================== */
+/* CLOTHING / FASHION EDITORIAL                                                */
+/* Gallery white + ink black + stone gray + restrained cobalt.                 */
+/* ========================================================================== */
+
+.page[data-theme-field="clothing"] {
+  --fashion-ink: #111214;
+  --fashion-paper: #fbfbfa;
+  --fashion-white: #ffffff;
+  --fashion-stone: #ececea;
+  --fashion-muted: #77797d;
+  --fashion-blue: #3157d8;
+  --fashion-blue-soft: #e9edff;
+
+  min-height: 100dvh;
+  padding-bottom: max(18px, env(safe-area-inset-bottom)) !important;
+  background:
+    radial-gradient(circle at 8% 3%, rgba(49,87,216,.045), transparent 20rem),
+    linear-gradient(180deg, #fbfbfa 0%, #fff 46%, #f7f7f5 100%) !important;
+  color: #111214 !important;
+}
+
+.page[data-theme-field="clothing"] .announcementBar {
+  min-height: 32px !important;
+  border: 0 !important;
+  background: #111214 !important;
+  color: #f7f7f5 !important;
+}
+
+.page[data-theme-field="clothing"] .announcementBar strong,
+.page[data-theme-field="clothing"] .announcementBar span {
+  color: #f7f7f5 !important;
+}
+
+.page[data-theme-field="clothing"] .header {
+  min-height: 64px !important;
+  border-bottom: 1px solid rgba(17,18,20,.07) !important;
+  background: rgba(251,251,250,.97) !important;
+  color: #111214 !important;
+  box-shadow: 0 8px 24px rgba(17,18,20,.035) !important;
+  backdrop-filter: blur(18px) saturate(120%);
+  -webkit-backdrop-filter: blur(18px) saturate(120%);
+}
+
+.page[data-theme-field="clothing"] .headerLogo {
+  border: 1px solid rgba(17,18,20,.08) !important;
+  background: #fff !important;
+  box-shadow: 0 7px 18px rgba(17,18,20,.04) !important;
+}
+
+.page[data-theme-field="clothing"] .storeIdentity strong {
+  color: #111214 !important;
+}
+
+.page[data-theme-field="clothing"] .storeIdentity span {
+  color: #77797d !important;
+}
+
+.page[data-theme-field="clothing"] .headerActions button,
+.page[data-theme-field="clothing"] .headerActions .cartButton {
+  border: 1px solid rgba(17,18,20,.08) !important;
+  background: #fff !important;
+  color: #111214 !important;
+  box-shadow: none !important;
+}
+
+.page[data-theme-field="clothing"] .cartCount {
+  background: #3157d8 !important;
+  color: #fff !important;
+}
+
+/* Fashion hero: full-bleed editorial image, minimal chrome. */
+.page[data-theme-field="clothing"][data-hero] .hero {
+  width: min(1180px, calc(100% - 20px)) !important;
+  margin: 10px auto 0 !important;
+  overflow: hidden !important;
+  border: 0 !important;
+  outline: 0 !important;
+  border-radius: 8px !important;
+  background-color: #18191b !important;
+  box-shadow: 0 24px 52px rgba(17,18,20,.14) !important;
+}
+
+.page[data-theme-field="clothing"] .hero::after {
+  content: none !important;
+  display: none !important;
+}
+
+.page[data-theme-field="clothing"] .heroOverlay {
+  background:
+    linear-gradient(
+      90deg,
+      rgba(10,11,12,.76) 0%,
+      rgba(16,17,19,.47) 39%,
+      rgba(16,17,19,.12) 75%,
+      rgba(16,17,19,.03) 100%
+    ),
+    linear-gradient(0deg, rgba(10,11,12,.38), transparent 58%) !important;
+}
+
+.page[data-theme-field="clothing"] .heroTexture {
+  display: block !important;
+  background:
+    linear-gradient(90deg, transparent 49.7%, rgba(255,255,255,.04) 50%, transparent 50.3%) !important;
+}
+
+.page[data-theme-field="clothing"] .heroContent {
+  min-height: 390px !important;
+  justify-content: flex-end !important;
+  align-items: flex-end !important;
+  padding: 28px 28px 30px !important;
+}
+
+.page[data-theme-field="clothing"] .hero h1,
+.page[data-theme-field="clothing"] .heroCopy h1 {
+  max-width: 660px !important;
+  color: #fff !important;
+  font-family: Georgia, "Times New Roman", serif !important;
+  font-weight: 700 !important;
+  letter-spacing: -.045em !important;
+  text-shadow: 0 2px 18px rgba(0,0,0,.18);
+}
+
+.page[data-theme-field="clothing"] .tagline {
+  color: rgba(255,255,255,.76) !important;
+}
+
+.page[data-theme-field="clothing"] .heroLabel,
+.page[data-theme-field="clothing"] .heroLiveStatus,
+.page[data-theme-field="clothing"] .heroHoursChip {
+  border: 1px solid rgba(255,255,255,.14) !important;
+  background: rgba(17,18,20,.48) !important;
+  color: #fff !important;
+  box-shadow: none !important;
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+
+.page[data-theme-field="clothing"] .primaryHeroButton {
+  min-height: 50px !important;
+  border: 0 !important;
+  border-radius: 6px !important;
+  background: #fff !important;
+  color: #111214 !important;
+  box-shadow: 0 12px 28px rgba(0,0,0,.16) !important;
+}
+
+.page[data-theme-field="clothing"] .quickInfoStrip {
+  width: min(1180px, calc(100% - 28px)) !important;
+  margin: 12px auto 0 !important;
+  gap: 8px !important;
+  border: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.page[data-theme-field="clothing"] .quickInfoStrip > a,
+.page[data-theme-field="clothing"] .quickInfoStrip > button,
+.page[data-theme-field="clothing"] .quickInfoStrip .locationQuickLink,
+.page[data-theme-field="clothing"] .quickInfoStrip .contactQuickLink {
+  border: 1px solid rgba(17,18,20,.07) !important;
+  border-radius: 7px !important;
+  background: #fff !important;
+  color: #111214 !important;
+  box-shadow: 0 8px 20px rgba(17,18,20,.035) !important;
+}
+
+.page[data-theme-field="clothing"] .quickIcon {
+  background: #f0f0ee !important;
+  color: #111214 !important;
+}
+
+.page[data-theme-field="clothing"] .catalogShell {
+  width: min(1180px, calc(100% - 28px)) !important;
+  border: 0 !important;
+  background: transparent !important;
+  color: #111214 !important;
+  box-shadow: none !important;
+}
+
+.page[data-theme-field="clothing"] .searchBox {
+  border: 1px solid rgba(17,18,20,.09) !important;
+  border-radius: 6px !important;
+  background: #fff !important;
+  color: #77797d !important;
+  box-shadow: none !important;
+}
+
+.page[data-theme-field="clothing"] .searchBox input {
+  color: #111214 !important;
+}
+
+.page[data-theme-field="clothing"] .searchBox input::placeholder {
+  color: #9a9b9e !important;
+}
+
+.page[data-theme-field="clothing"] .vehicleFilterPanel {
+  border: 1px solid rgba(17,18,20,.08) !important;
+  border-radius: 8px !important;
+  background: #fff !important;
+  color: #111214 !important;
+  box-shadow: 0 8px 20px rgba(17,18,20,.03) !important;
+}
+
+.page[data-theme-field="clothing"] .vehicleFilterHeading span,
+.page[data-theme-field="clothing"] .vehicleFilterGrid label > span {
+  color: #3157d8 !important;
+}
+
+.page[data-theme-field="clothing"] .vehicleFilterHeading strong {
+  color: #111214 !important;
+}
+
+.page[data-theme-field="clothing"] .vehicleFilterGrid select {
+  border: 1px solid rgba(17,18,20,.10) !important;
+  background: #fbfbfa !important;
+  color: #111214 !important;
+  border-radius: 6px !important;
+}
+
+.page[data-theme-field="clothing"] .vehicleMatchSummary {
+  background: #e9edff !important;
+  color: #3157d8 !important;
+}
+
+.page[data-theme-field="clothing"] .marketplaceCategoryNavLabel,
+.page[data-theme-field="clothing"] .marketplaceListingHeader span {
+  color: #3157d8 !important;
+}
+
+.page[data-theme-field="clothing"] .marketplaceCategoryCircle {
+  border: 1px solid rgba(17,18,20,.10) !important;
+  background: #fff !important;
+  box-shadow: none !important;
+}
+
+.page[data-theme-field="clothing"] .marketplaceCategoryBestSellers .marketplaceCategoryCircle {
+  border-color: rgba(49,87,216,.25) !important;
+  background: linear-gradient(145deg, #fff, #e9edff) !important;
+}
+
+.page[data-theme-field="clothing"] .marketplaceCategoryStar {
+  color: #3157d8 !important;
+}
+
+.page[data-theme-field="clothing"] .marketplaceCategoryItemActive .marketplaceCategoryCircle {
+  border-color: #3157d8 !important;
+  box-shadow: 0 0 0 3px rgba(49,87,216,.08) !important;
+}
+
+.page[data-theme-field="clothing"] .marketplaceCategorySelectedDot {
+  border-color: #fbfbfa !important;
+  background: #3157d8 !important;
+}
+
+.page[data-theme-field="clothing"] .marketplaceCategoryItem strong,
+.page[data-theme-field="clothing"] .marketplaceListingHeader h3,
+.page[data-theme-field="clothing"] .marketplaceBestSellerDepartmentTitle {
+  color: #111214 !important;
+}
+
+.page[data-theme-field="clothing"] .marketplaceCategoryItem small,
+.page[data-theme-field="clothing"] .marketplaceListingHeader small {
+  color: #77797d !important;
+}
+
+.page[data-theme-field="clothing"] .marketplaceListingHeader h3,
+.page[data-theme-field="clothing"] .marketplaceBestSellerDepartmentTitle {
+  font-family: Georgia, "Times New Roman", serif !important;
+}
+
+.page[data-theme-field="clothing"] .marketplaceBestSellerItem,
+.page[data-theme-field="clothing"] .marketplaceBestSellerCarousel .productCard,
+.page[data-theme-field="clothing"] .marketplaceBestSellerCarousel .autoPartsProductCard,
+.page[data-theme-field="clothing"] .marketplaceBestSellerCarousel .productBody {
+  height: auto !important;
+  min-height: 0 !important;
+  background: transparent !important;
+  color: #111214 !important;
+  box-shadow: none !important;
+}
+
+.page[data-theme-field="clothing"] .marketplaceBestSellerCarousel .productBody h3 {
+  color: #111214 !important;
+}
+
+.page[data-theme-field="clothing"] .marketplaceBestSellerCarousel .productFooter,
+.page[data-theme-field="clothing"] .marketplaceBestSellerCarousel .productFooter > div:first-child {
+  height: auto !important;
+  min-height: 0 !important;
+}
+
+.page[data-theme-field="clothing"] .marketplaceBestSellerCarousel .productFooter strong {
+  color: #111214 !important;
+}
+
+.page[data-theme-field="clothing"] .marketplaceCategoryProductList .productCard,
+.page[data-theme-field="clothing"] .marketplaceCategoryProductList .autoPartsProductCard {
+  border-bottom: 1px solid rgba(17,18,20,.07) !important;
+  background: transparent !important;
+  color: #111214 !important;
+  box-shadow: none !important;
+}
+
+.page[data-theme-field="clothing"] .marketplaceCategoryProductList .productBody h3 {
+  color: #111214 !important;
+}
+
+.page[data-theme-field="clothing"] .marketplaceCategoryProductList .productArabic {
+  color: #77797d !important;
+}
+
+.page[data-theme-field="clothing"] .marketplaceCategoryProductList .productFitment {
+  background: #e9edff !important;
+  color: #3157d8 !important;
+}
+
+.page[data-theme-field="clothing"] .storeStory,
+.page[data-theme-field="clothing"] .partsConcierge {
+  width: min(1180px, calc(100% - 28px)) !important;
+  min-height: 0 !important;
+  border: 1px solid rgba(17,18,20,.07) !important;
+  border-radius: 8px !important;
+  background: #fff !important;
+  color: #111214 !important;
+  box-shadow: 0 8px 22px rgba(17,18,20,.03) !important;
+}
+
+.page[data-theme-field="clothing"] .storeStory {
+  margin: 22px auto 0 !important;
+  padding: 22px !important;
+}
+
+.page[data-theme-field="clothing"] .partsConcierge {
+  margin: 16px auto 0 !important;
+  padding: 16px !important;
+}
+
+.page[data-theme-field="clothing"] .storyCopy > span,
+.page[data-theme-field="clothing"] .partsConciergeCopy > span {
+  color: #3157d8 !important;
+}
+
+.page[data-theme-field="clothing"] .storyCopy h2,
+.page[data-theme-field="clothing"] .partsConciergeCopy h2 {
+  color: #111214 !important;
+}
+
+.page[data-theme-field="clothing"] .storyCopy p,
+.page[data-theme-field="clothing"] .partsConciergeCopy p {
+  color: #77797d !important;
+}
+
+.page[data-theme-field="clothing"] .storyButton {
+  border: 0 !important;
+  background: #111214 !important;
+  color: #fff !important;
+}
+
+.page[data-theme-field="clothing"] .footer {
+  width: min(1180px, calc(100% - 28px)) !important;
+  margin: 18px auto 0 !important;
+  padding: 16px 0 max(10px, env(safe-area-inset-bottom)) !important;
+  border: 0 !important;
+  border-top: 1px solid rgba(17,18,20,.08) !important;
+  background: transparent !important;
+  color: #111214 !important;
+  box-shadow: none !important;
+}
+
+/* ========================================================================== */
+/* SHOES / SNEAKER BOUTIQUE                                                    */
+/* Bone + graphite + electric blue. Sportier, sharper, kinetic.                 */
+/* ========================================================================== */
+
+.page[data-theme-field="shoes"] {
+  --shoe-ink: #17191d;
+  --shoe-graphite: #24272d;
+  --shoe-bone: #f5f3ee;
+  --shoe-white: #ffffff;
+  --shoe-blue: #2457ff;
+  --shoe-blue-dark: #173cc7;
+  --shoe-muted: #6e737b;
+
+  min-height: 100dvh;
+  padding-bottom: max(18px, env(safe-area-inset-bottom)) !important;
+  background:
+    radial-gradient(circle at 88% 2%, rgba(36,87,255,.10), transparent 20rem),
+    radial-gradient(circle at 7% 16%, rgba(36,39,45,.05), transparent 18rem),
+    linear-gradient(180deg, #f3f1eb 0%, #fff 45%, #f5f3ee 100%) !important;
+  color: #17191d !important;
+}
+
+.page[data-theme-field="shoes"] .announcementBar {
+  min-height: 32px !important;
+  border: 0 !important;
+  background: #2457ff !important;
+  color: #fff !important;
+}
+
+.page[data-theme-field="shoes"] .announcementBar strong,
+.page[data-theme-field="shoes"] .announcementBar span {
+  color: #fff !important;
+}
+
+.page[data-theme-field="shoes"] .header {
+  min-height: 64px !important;
+  border-bottom: 1px solid rgba(23,25,29,.07) !important;
+  background: rgba(245,243,238,.97) !important;
+  color: #17191d !important;
+  box-shadow: 0 8px 24px rgba(23,25,29,.04) !important;
+  backdrop-filter: blur(18px) saturate(125%);
+  -webkit-backdrop-filter: blur(18px) saturate(125%);
+}
+
+.page[data-theme-field="shoes"] .headerLogo {
+  border: 1px solid rgba(23,25,29,.08) !important;
+  background: #fff !important;
+  box-shadow: 0 7px 18px rgba(23,25,29,.04) !important;
+}
+
+.page[data-theme-field="shoes"] .storeIdentity strong {
+  color: #17191d !important;
+}
+
+.page[data-theme-field="shoes"] .storeIdentity span {
+  color: #6e737b !important;
+}
+
+.page[data-theme-field="shoes"] .headerActions button,
+.page[data-theme-field="shoes"] .headerActions .cartButton {
+  border: 1px solid rgba(23,25,29,.08) !important;
+  background: #fff !important;
+  color: #17191d !important;
+  box-shadow: none !important;
+}
+
+.page[data-theme-field="shoes"] .cartCount {
+  background: #2457ff !important;
+  color: #fff !important;
+}
+
+/* Sneaker hero: angular and bold. */
+.page[data-theme-field="shoes"][data-hero] .hero {
+  width: min(1180px, calc(100% - 20px)) !important;
+  margin: 10px auto 0 !important;
+  overflow: hidden !important;
+  border: 0 !important;
+  outline: 0 !important;
+  border-radius: 18px !important;
+  background-color: #1d2025 !important;
+  box-shadow: 0 26px 58px rgba(23,25,29,.18) !important;
+}
+
+.page[data-theme-field="shoes"] .hero::after {
+  content: none !important;
+  display: none !important;
+}
+
+.page[data-theme-field="shoes"] .heroOverlay {
+  background:
+    linear-gradient(
+      90deg,
+      rgba(15,17,20,.90) 0%,
+      rgba(24,27,32,.62) 44%,
+      rgba(24,27,32,.22) 75%,
+      rgba(24,27,32,.07) 100%
+    ),
+    linear-gradient(0deg, rgba(15,17,20,.38), transparent 59%) !important;
+}
+
+.page[data-theme-field="shoes"] .heroTexture {
+  display: block !important;
+  background:
+    linear-gradient(120deg, transparent 0 72%, rgba(36,87,255,.14) 72% 78%, transparent 78%),
+    radial-gradient(circle at 20% 15%, rgba(36,87,255,.15), transparent 28%) !important;
+}
+
+.page[data-theme-field="shoes"] .heroContent {
+  min-height: 384px !important;
+  justify-content: flex-end !important;
+  align-items: flex-end !important;
+  padding: 28px 26px 30px !important;
+}
+
+.page[data-theme-field="shoes"] .hero h1,
+.page[data-theme-field="shoes"] .heroCopy h1 {
+  max-width: 650px !important;
+  color: #fff !important;
+  font-family: inherit !important;
+  font-weight: 950 !important;
+  letter-spacing: -.06em !important;
+  text-transform: none !important;
+  text-shadow: 0 2px 18px rgba(0,0,0,.23);
+}
+
+.page[data-theme-field="shoes"] .tagline {
+  color: rgba(255,255,255,.75) !important;
+}
+
+.page[data-theme-field="shoes"] .heroLabel,
+.page[data-theme-field="shoes"] .heroLiveStatus,
+.page[data-theme-field="shoes"] .heroHoursChip {
+  border: 1px solid rgba(255,255,255,.13) !important;
+  background: rgba(19,22,27,.55) !important;
+  color: #fff !important;
+  box-shadow: none !important;
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+
+.page[data-theme-field="shoes"] .primaryHeroButton {
+  min-height: 52px !important;
+  border: 0 !important;
+  border-radius: 11px !important;
+  background: linear-gradient(135deg, #2457ff, #173cc7) !important;
+  color: #fff !important;
+  box-shadow: 0 14px 30px rgba(36,87,255,.24) !important;
+}
+
+.page[data-theme-field="shoes"] .quickInfoStrip {
+  width: min(1180px, calc(100% - 28px)) !important;
+  margin: 12px auto 0 !important;
+  gap: 8px !important;
+  border: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.page[data-theme-field="shoes"] .quickInfoStrip > a,
+.page[data-theme-field="shoes"] .quickInfoStrip > button,
+.page[data-theme-field="shoes"] .quickInfoStrip .locationQuickLink,
+.page[data-theme-field="shoes"] .quickInfoStrip .contactQuickLink {
+  border: 1px solid rgba(23,25,29,.08) !important;
+  border-radius: 12px !important;
+  background: #fff !important;
+  color: #17191d !important;
+  box-shadow: 0 8px 20px rgba(23,25,29,.035) !important;
+}
+
+.page[data-theme-field="shoes"] .quickIcon {
+  background: #e9edff !important;
+  color: #2457ff !important;
+}
+
+.page[data-theme-field="shoes"] .catalogShell {
+  width: min(1180px, calc(100% - 28px)) !important;
+  border: 0 !important;
+  background: transparent !important;
+  color: #17191d !important;
+  box-shadow: none !important;
+}
+
+.page[data-theme-field="shoes"] .searchBox {
+  border: 1px solid rgba(23,25,29,.09) !important;
+  border-radius: 11px !important;
+  background: #fff !important;
+  color: #6e737b !important;
+  box-shadow: 0 8px 20px rgba(23,25,29,.035) !important;
+}
+
+.page[data-theme-field="shoes"] .searchBox input {
+  color: #17191d !important;
+}
+
+.page[data-theme-field="shoes"] .vehicleFilterPanel {
+  border: 1px solid rgba(23,25,29,.08) !important;
+  border-radius: 13px !important;
+  background:
+    radial-gradient(circle at 100% 0%, rgba(36,87,255,.055), transparent 13rem),
+    #fff !important;
+  color: #17191d !important;
+  box-shadow: 0 8px 22px rgba(23,25,29,.035) !important;
+}
+
+.page[data-theme-field="shoes"] .vehicleFilterHeading span,
+.page[data-theme-field="shoes"] .vehicleFilterGrid label > span {
+  color: #2457ff !important;
+}
+
+.page[data-theme-field="shoes"] .vehicleFilterHeading strong {
+  color: #17191d !important;
+}
+
+.page[data-theme-field="shoes"] .vehicleFilterGrid select {
+  border: 1px solid rgba(23,25,29,.10) !important;
+  background: #f5f3ee !important;
+  color: #17191d !important;
+  border-radius: 10px !important;
+}
+
+.page[data-theme-field="shoes"] .vehicleMatchSummary {
+  background: #e9edff !important;
+  color: #173cc7 !important;
+}
+
+.page[data-theme-field="shoes"] .marketplaceCategoryNavLabel,
+.page[data-theme-field="shoes"] .marketplaceListingHeader span {
+  color: #2457ff !important;
+}
+
+.page[data-theme-field="shoes"] .marketplaceCategoryCircle {
+  border: 1px solid rgba(23,25,29,.10) !important;
+  background: #fff !important;
+  box-shadow: 0 6px 16px rgba(23,25,29,.04) !important;
+}
+
+.page[data-theme-field="shoes"] .marketplaceCategoryBestSellers .marketplaceCategoryCircle {
+  border-color: rgba(36,87,255,.28) !important;
+  background:
+    radial-gradient(circle at 26% 20%, rgba(36,87,255,.12), transparent 42%),
+    linear-gradient(145deg, #fff, #e9edff) !important;
+}
+
+.page[data-theme-field="shoes"] .marketplaceCategoryStar {
+  color: #2457ff !important;
+}
+
+.page[data-theme-field="shoes"] .marketplaceCategoryItemActive .marketplaceCategoryCircle {
+  border-color: #2457ff !important;
+  box-shadow: 0 0 0 3px rgba(36,87,255,.09) !important;
+}
+
+.page[data-theme-field="shoes"] .marketplaceCategorySelectedDot {
+  border-color: #f5f3ee !important;
+  background: #2457ff !important;
+}
+
+.page[data-theme-field="shoes"] .marketplaceCategoryItem strong,
+.page[data-theme-field="shoes"] .marketplaceListingHeader h3,
+.page[data-theme-field="shoes"] .marketplaceBestSellerDepartmentTitle {
+  color: #17191d !important;
+}
+
+.page[data-theme-field="shoes"] .marketplaceCategoryItem small,
+.page[data-theme-field="shoes"] .marketplaceListingHeader small {
+  color: #6e737b !important;
+}
+
+.page[data-theme-field="shoes"] .marketplaceBestSellerItem,
+.page[data-theme-field="shoes"] .marketplaceBestSellerCarousel .productCard,
+.page[data-theme-field="shoes"] .marketplaceBestSellerCarousel .autoPartsProductCard,
+.page[data-theme-field="shoes"] .marketplaceBestSellerCarousel .productBody {
+  height: auto !important;
+  min-height: 0 !important;
+  background: transparent !important;
+  color: #17191d !important;
+  box-shadow: none !important;
+}
+
+.page[data-theme-field="shoes"] .marketplaceBestSellerCarousel .productBody h3 {
+  color: #17191d !important;
+}
+
+.page[data-theme-field="shoes"] .marketplaceBestSellerCarousel .productFooter,
+.page[data-theme-field="shoes"] .marketplaceBestSellerCarousel .productFooter > div:first-child {
+  height: auto !important;
+  min-height: 0 !important;
+}
+
+.page[data-theme-field="shoes"] .marketplaceBestSellerCarousel .productFooter strong {
+  color: #2457ff !important;
+}
+
+.page[data-theme-field="shoes"] .marketplaceCategoryProductList .productCard,
+.page[data-theme-field="shoes"] .marketplaceCategoryProductList .autoPartsProductCard {
+  border-bottom: 1px solid rgba(23,25,29,.08) !important;
+  background: transparent !important;
+  color: #17191d !important;
+  box-shadow: none !important;
+}
+
+.page[data-theme-field="shoes"] .marketplaceCategoryProductList .productBody h3 {
+  color: #17191d !important;
+}
+
+.page[data-theme-field="shoes"] .marketplaceCategoryProductList .productArabic {
+  color: #6e737b !important;
+}
+
+.page[data-theme-field="shoes"] .marketplaceCategoryProductList .productFitment {
+  background: #e9edff !important;
+  color: #173cc7 !important;
+}
+
+.page[data-theme-field="shoes"] .storeStory,
+.page[data-theme-field="shoes"] .partsConcierge {
+  width: min(1180px, calc(100% - 28px)) !important;
+  min-height: 0 !important;
+  border: 1px solid rgba(23,25,29,.08) !important;
+  border-radius: 13px !important;
+  background: #fff !important;
+  color: #17191d !important;
+  box-shadow: 0 9px 23px rgba(23,25,29,.04) !important;
+}
+
+.page[data-theme-field="shoes"] .storeStory {
+  margin: 22px auto 0 !important;
+  padding: 22px !important;
+}
+
+.page[data-theme-field="shoes"] .partsConcierge {
+  margin: 16px auto 0 !important;
+  padding: 16px !important;
+}
+
+.page[data-theme-field="shoes"] .storyCopy > span,
+.page[data-theme-field="shoes"] .partsConciergeCopy > span {
+  color: #2457ff !important;
+}
+
+.page[data-theme-field="shoes"] .storyCopy h2,
+.page[data-theme-field="shoes"] .partsConciergeCopy h2 {
+  color: #17191d !important;
+}
+
+.page[data-theme-field="shoes"] .storyCopy p,
+.page[data-theme-field="shoes"] .partsConciergeCopy p {
+  color: #6e737b !important;
+}
+
+.page[data-theme-field="shoes"] .storyButton {
+  border: 0 !important;
+  background: #17191d !important;
+  color: #fff !important;
+}
+
+.page[data-theme-field="shoes"] .footer {
+  width: min(1180px, calc(100% - 28px)) !important;
+  margin: 18px auto 0 !important;
+  padding: 16px 0 max(10px, env(safe-area-inset-bottom)) !important;
+  border: 0 !important;
+  border-top: 1px solid rgba(23,25,29,.09) !important;
+  background: transparent !important;
+  color: #17191d !important;
+  box-shadow: none !important;
+}
+
+/* ========================================================================== */
+/* JEWELRY / LUXURY ATELIER                                                    */
+/* Midnight navy + warm ivory + champagne gold.                                */
+/* ========================================================================== */
+
+.page[data-theme-field="jewelry"] {
+  --jewel-night: #111827;
+  --jewel-night-soft: #172033;
+  --jewel-ivory: #f9f6ef;
+  --jewel-white: #fffdf8;
+  --jewel-gold: #c8a96b;
+  --jewel-gold-soft: #e3cf9e;
+  --jewel-muted: #8b8790;
+
+  min-height: 100dvh;
+  padding-bottom: max(18px, env(safe-area-inset-bottom)) !important;
+  background:
+    radial-gradient(circle at 12% 2%, rgba(200,169,107,.10), transparent 21rem),
+    radial-gradient(circle at 87% 15%, rgba(17,24,39,.05), transparent 18rem),
+    linear-gradient(180deg, #f9f6ef 0%, #fffdf8 44%, #f5f0e7 100%) !important;
+  color: #111827 !important;
+}
+
+.page[data-theme-field="jewelry"] .announcementBar {
+  min-height: 32px !important;
+  border: 0 !important;
+  background: #111827 !important;
+  color: #f9f6ef !important;
+}
+
+.page[data-theme-field="jewelry"] .announcementBar strong,
+.page[data-theme-field="jewelry"] .announcementBar span {
+  color: #f9f6ef !important;
+}
+
+.page[data-theme-field="jewelry"] .header {
+  min-height: 64px !important;
+  border-bottom: 1px solid rgba(200,169,107,.11) !important;
+  background: rgba(249,246,239,.97) !important;
+  color: #111827 !important;
+  box-shadow: 0 8px 24px rgba(17,24,39,.04) !important;
+  backdrop-filter: blur(18px) saturate(125%);
+  -webkit-backdrop-filter: blur(18px) saturate(125%);
+}
+
+.page[data-theme-field="jewelry"] .headerLogo {
+  border: 1px solid rgba(200,169,107,.14) !important;
+  background: #fff !important;
+  box-shadow: 0 7px 18px rgba(17,24,39,.04) !important;
+}
+
+.page[data-theme-field="jewelry"] .storeIdentity strong {
+  color: #111827 !important;
+}
+
+.page[data-theme-field="jewelry"] .storeIdentity span {
+  color: #8b8790 !important;
+}
+
+.page[data-theme-field="jewelry"] .headerActions button,
+.page[data-theme-field="jewelry"] .headerActions .cartButton {
+  border: 1px solid rgba(200,169,107,.13) !important;
+  background: #fff !important;
+  color: #111827 !important;
+  box-shadow: none !important;
+}
+
+.page[data-theme-field="jewelry"] .cartCount {
+  background: #c8a96b !important;
+  color: #111827 !important;
+}
+
+/* Jewelry hero: deep velvet-style luxury. */
+.page[data-theme-field="jewelry"][data-hero] .hero {
+  width: min(1180px, calc(100% - 20px)) !important;
+  margin: 10px auto 0 !important;
+  overflow: hidden !important;
+  border: 0 !important;
+  outline: 0 !important;
+  border-radius: 26px !important;
+  background-color: #0e1422 !important;
+  box-shadow: 0 28px 64px rgba(17,24,39,.22) !important;
+}
+
+.page[data-theme-field="jewelry"] .hero::after {
+  content: none !important;
+  display: none !important;
+}
+
+.page[data-theme-field="jewelry"] .heroOverlay {
+  background:
+    linear-gradient(
+      90deg,
+      rgba(7,11,20,.90) 0%,
+      rgba(17,24,39,.65) 43%,
+      rgba(17,24,39,.22) 75%,
+      rgba(17,24,39,.07) 100%
+    ),
+    linear-gradient(0deg, rgba(7,11,20,.43), transparent 59%) !important;
+}
+
+.page[data-theme-field="jewelry"] .heroTexture {
+  display: block !important;
+  background:
+    radial-gradient(circle at 19% 14%, rgba(200,169,107,.19), transparent 28%),
+    radial-gradient(circle at 84% 12%, rgba(227,207,158,.09), transparent 23%) !important;
+}
+
+.page[data-theme-field="jewelry"] .heroContent {
+  min-height: 390px !important;
+  justify-content: flex-end !important;
+  align-items: flex-end !important;
+  padding: 28px 27px 30px !important;
+}
+
+.page[data-theme-field="jewelry"] .hero h1,
+.page[data-theme-field="jewelry"] .heroCopy h1 {
+  max-width: 650px !important;
+  color: #fffdf8 !important;
+  font-family: Georgia, "Times New Roman", serif !important;
+  font-weight: 700 !important;
+  letter-spacing: -.04em !important;
+  text-shadow: 0 2px 18px rgba(0,0,0,.22);
+}
+
+.page[data-theme-field="jewelry"] .tagline {
+  color: rgba(255,253,248,.77) !important;
+}
+
+.page[data-theme-field="jewelry"] .heroLabel,
+.page[data-theme-field="jewelry"] .heroLiveStatus,
+.page[data-theme-field="jewelry"] .heroHoursChip {
+  border: 1px solid rgba(227,207,158,.18) !important;
+  background: rgba(12,18,31,.58) !important;
+  color: #fffdf8 !important;
+  box-shadow: none !important;
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+
+.page[data-theme-field="jewelry"] .primaryHeroButton {
+  min-height: 52px !important;
+  border: 1px solid rgba(255,255,255,.08) !important;
+  border-radius: 16px !important;
+  background: linear-gradient(135deg, #c8a96b, #a88647) !important;
+  color: #111827 !important;
+  box-shadow: 0 14px 30px rgba(0,0,0,.20) !important;
+}
+
+.page[data-theme-field="jewelry"] .quickInfoStrip {
+  width: min(1180px, calc(100% - 28px)) !important;
+  margin: 12px auto 0 !important;
+  gap: 8px !important;
+  border: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.page[data-theme-field="jewelry"] .quickInfoStrip > a,
+.page[data-theme-field="jewelry"] .quickInfoStrip > button,
+.page[data-theme-field="jewelry"] .quickInfoStrip .locationQuickLink,
+.page[data-theme-field="jewelry"] .quickInfoStrip .contactQuickLink {
+  border: 1px solid rgba(200,169,107,.11) !important;
+  border-radius: 16px !important;
+  background: #fffdf8 !important;
+  color: #111827 !important;
+  box-shadow: 0 8px 22px rgba(17,24,39,.035) !important;
+}
+
+.page[data-theme-field="jewelry"] .quickIcon {
+  background: #f1e8d4 !important;
+  color: #9c7d42 !important;
+}
+
+.page[data-theme-field="jewelry"] .catalogShell {
+  width: min(1180px, calc(100% - 28px)) !important;
+  border: 0 !important;
+  background: transparent !important;
+  color: #111827 !important;
+  box-shadow: none !important;
+}
+
+.page[data-theme-field="jewelry"] .searchBox {
+  border: 1px solid rgba(200,169,107,.11) !important;
+  border-radius: 15px !important;
+  background: #fffdf8 !important;
+  color: #8b8790 !important;
+  box-shadow: 0 8px 22px rgba(17,24,39,.035) !important;
+}
+
+.page[data-theme-field="jewelry"] .searchBox input {
+  color: #111827 !important;
+}
+
+.page[data-theme-field="jewelry"] .vehicleFilterPanel {
+  border: 1px solid rgba(200,169,107,.10) !important;
+  border-radius: 17px !important;
+  background:
+    radial-gradient(circle at 100% 0%, rgba(200,169,107,.06), transparent 13rem),
+    #fffdf8 !important;
+  color: #111827 !important;
+  box-shadow: 0 9px 23px rgba(17,24,39,.035) !important;
+}
+
+.page[data-theme-field="jewelry"] .vehicleFilterHeading span,
+.page[data-theme-field="jewelry"] .vehicleFilterGrid label > span {
+  color: #9c7d42 !important;
+}
+
+.page[data-theme-field="jewelry"] .vehicleFilterHeading strong {
+  color: #111827 !important;
+}
+
+.page[data-theme-field="jewelry"] .vehicleFilterGrid select {
+  border: 1px solid rgba(200,169,107,.12) !important;
+  background: #f9f6ef !important;
+  color: #111827 !important;
+}
+
+.page[data-theme-field="jewelry"] .vehicleMatchSummary {
+  background: #f1e8d4 !important;
+  color: #7f6433 !important;
+}
+
+.page[data-theme-field="jewelry"] .marketplaceCategoryNavLabel,
+.page[data-theme-field="jewelry"] .marketplaceListingHeader span {
+  color: #9c7d42 !important;
+}
+
+.page[data-theme-field="jewelry"] .marketplaceCategoryCircle {
+  border: 1px solid rgba(200,169,107,.12) !important;
+  background: #fffdf8 !important;
+  box-shadow: 0 7px 17px rgba(17,24,39,.035) !important;
+}
+
+.page[data-theme-field="jewelry"] .marketplaceCategoryBestSellers .marketplaceCategoryCircle {
+  border-color: rgba(200,169,107,.34) !important;
+  background:
+    radial-gradient(circle at 28% 22%, rgba(227,207,158,.27), transparent 42%),
+    linear-gradient(145deg, #fffdf8, #f1e8d4) !important;
+}
+
+.page[data-theme-field="jewelry"] .marketplaceCategoryStar {
+  color: #c8a96b !important;
+}
+
+.page[data-theme-field="jewelry"] .marketplaceCategoryItemActive .marketplaceCategoryCircle {
+  border-color: #c8a96b !important;
+  box-shadow: 0 0 0 3px rgba(200,169,107,.09) !important;
+}
+
+.page[data-theme-field="jewelry"] .marketplaceCategorySelectedDot {
+  border-color: #f9f6ef !important;
+  background: #c8a96b !important;
+}
+
+.page[data-theme-field="jewelry"] .marketplaceCategoryItem strong,
+.page[data-theme-field="jewelry"] .marketplaceListingHeader h3,
+.page[data-theme-field="jewelry"] .marketplaceBestSellerDepartmentTitle {
+  color: #111827 !important;
+}
+
+.page[data-theme-field="jewelry"] .marketplaceCategoryItem small,
+.page[data-theme-field="jewelry"] .marketplaceListingHeader small {
+  color: #8b8790 !important;
+}
+
+.page[data-theme-field="jewelry"] .marketplaceListingHeader h3,
+.page[data-theme-field="jewelry"] .marketplaceBestSellerDepartmentTitle {
+  font-family: Georgia, "Times New Roman", serif !important;
+}
+
+.page[data-theme-field="jewelry"] .marketplaceBestSellerItem,
+.page[data-theme-field="jewelry"] .marketplaceBestSellerCarousel .productCard,
+.page[data-theme-field="jewelry"] .marketplaceBestSellerCarousel .autoPartsProductCard,
+.page[data-theme-field="jewelry"] .marketplaceBestSellerCarousel .productBody {
+  height: auto !important;
+  min-height: 0 !important;
+  background: transparent !important;
+  color: #111827 !important;
+  box-shadow: none !important;
+}
+
+.page[data-theme-field="jewelry"] .marketplaceBestSellerCarousel .productBody h3 {
+  color: #111827 !important;
+}
+
+.page[data-theme-field="jewelry"] .marketplaceBestSellerCarousel .productFooter,
+.page[data-theme-field="jewelry"] .marketplaceBestSellerCarousel .productFooter > div:first-child {
+  height: auto !important;
+  min-height: 0 !important;
+}
+
+.page[data-theme-field="jewelry"] .marketplaceBestSellerCarousel .productFooter strong {
+  color: #9c7d42 !important;
+}
+
+.page[data-theme-field="jewelry"] .marketplaceCategoryProductList .productCard,
+.page[data-theme-field="jewelry"] .marketplaceCategoryProductList .autoPartsProductCard {
+  border-bottom: 1px solid rgba(200,169,107,.10) !important;
+  background: transparent !important;
+  color: #111827 !important;
+  box-shadow: none !important;
+}
+
+.page[data-theme-field="jewelry"] .marketplaceCategoryProductList .productBody h3 {
+  color: #111827 !important;
+}
+
+.page[data-theme-field="jewelry"] .marketplaceCategoryProductList .productArabic {
+  color: #8b8790 !important;
+}
+
+.page[data-theme-field="jewelry"] .marketplaceCategoryProductList .productFitment {
+  background: #f1e8d4 !important;
+  color: #7f6433 !important;
+}
+
+.page[data-theme-field="jewelry"] .storeStory,
+.page[data-theme-field="jewelry"] .partsConcierge {
+  width: min(1180px, calc(100% - 28px)) !important;
+  min-height: 0 !important;
+  border: 1px solid rgba(200,169,107,.11) !important;
+  border-radius: 18px !important;
+  background: #fffdf8 !important;
+  color: #111827 !important;
+  box-shadow: 0 9px 24px rgba(17,24,39,.035) !important;
+}
+
+.page[data-theme-field="jewelry"] .storeStory {
+  margin: 22px auto 0 !important;
+  padding: 22px !important;
+}
+
+.page[data-theme-field="jewelry"] .partsConcierge {
+  margin: 16px auto 0 !important;
+  padding: 16px !important;
+}
+
+.page[data-theme-field="jewelry"] .storyCopy > span,
+.page[data-theme-field="jewelry"] .partsConciergeCopy > span {
+  color: #9c7d42 !important;
+}
+
+.page[data-theme-field="jewelry"] .storyCopy h2,
+.page[data-theme-field="jewelry"] .partsConciergeCopy h2 {
+  color: #111827 !important;
+  font-family: Georgia, "Times New Roman", serif !important;
+}
+
+.page[data-theme-field="jewelry"] .storyCopy p,
+.page[data-theme-field="jewelry"] .partsConciergeCopy p {
+  color: #8b8790 !important;
+}
+
+.page[data-theme-field="jewelry"] .storyButton {
+  border: 0 !important;
+  background: #111827 !important;
+  color: #fffdf8 !important;
+}
+
+.page[data-theme-field="jewelry"] .partsConciergeIcon {
+  background: #f1e8d4 !important;
+  color: #9c7d42 !important;
+}
+
+.page[data-theme-field="jewelry"] .footer {
+  width: min(1180px, calc(100% - 28px)) !important;
+  margin: 18px auto 0 !important;
+  padding: 16px 0 max(10px, env(safe-area-inset-bottom)) !important;
+  border: 0 !important;
+  border-top: 1px solid rgba(200,169,107,.11) !important;
+  background: transparent !important;
+  color: #111827 !important;
+  box-shadow: none !important;
+}
+
+/* ========================================================================== */
+/* Mobile tuning                                                               */
+/* ========================================================================== */
+
+@media (max-width: 760px) {
+  .page[data-theme-field="clothing"][data-hero] .hero,
+  .page[data-theme-field="shoes"][data-hero] .hero,
+  .page[data-theme-field="jewelry"][data-hero] .hero {
+    width: calc(100% - 18px) !important;
+    margin-top: 8px !important;
+  }
+
+  .page[data-theme-field="clothing"][data-hero] .hero {
+    border-radius: 6px !important;
+  }
+
+  .page[data-theme-field="shoes"][data-hero] .hero {
+    border-radius: 15px !important;
+  }
+
+  .page[data-theme-field="jewelry"][data-hero] .hero {
+    border-radius: 22px !important;
+  }
+
+  .page[data-theme-field="clothing"] .heroContent,
+  .page[data-theme-field="shoes"] .heroContent,
+  .page[data-theme-field="jewelry"] .heroContent {
+    min-height: 316px !important;
+    padding: 20px 18px 22px !important;
+  }
+
+  .page[data-theme-field="clothing"] .hero h1,
+  .page[data-theme-field="clothing"] .heroCopy h1,
+  .page[data-theme-field="jewelry"] .hero h1,
+  .page[data-theme-field="jewelry"] .heroCopy h1 {
+    font-size: clamp(30px, 8.8vw, 39px) !important;
+    line-height: .97 !important;
+  }
+
+  .page[data-theme-field="shoes"] .hero h1,
+  .page[data-theme-field="shoes"] .heroCopy h1 {
+    font-size: clamp(29px, 8.4vw, 38px) !important;
+    line-height: .98 !important;
+  }
+
+  .page[data-theme-field="clothing"] .quickInfoStrip,
+  .page[data-theme-field="clothing"] .catalogShell,
+  .page[data-theme-field="clothing"] .storeStory,
+  .page[data-theme-field="clothing"] .partsConcierge,
+  .page[data-theme-field="clothing"] .footer,
+  .page[data-theme-field="shoes"] .quickInfoStrip,
+  .page[data-theme-field="shoes"] .catalogShell,
+  .page[data-theme-field="shoes"] .storeStory,
+  .page[data-theme-field="shoes"] .partsConcierge,
+  .page[data-theme-field="shoes"] .footer,
+  .page[data-theme-field="jewelry"] .quickInfoStrip,
+  .page[data-theme-field="jewelry"] .catalogShell,
+  .page[data-theme-field="jewelry"] .storeStory,
+  .page[data-theme-field="jewelry"] .partsConcierge,
+  .page[data-theme-field="jewelry"] .footer {
+    width: calc(100% - 24px) !important;
+  }
+
+  .page[data-theme-field="clothing"] .marketplaceListingHeader,
+  .page[data-theme-field="shoes"] .marketplaceListingHeader,
+  .page[data-theme-field="jewelry"] .marketplaceListingHeader {
+    margin: 4px 0 11px !important;
+  }
+
+  .page[data-theme-field="clothing"] .marketplaceListingHeader h3,
+  .page[data-theme-field="shoes"] .marketplaceListingHeader h3,
+  .page[data-theme-field="jewelry"] .marketplaceListingHeader h3 {
+    font-size: 21px !important;
+  }
+
+  .page[data-theme-field="clothing"] .marketplaceBestSellerDepartmentTitle,
+  .page[data-theme-field="shoes"] .marketplaceBestSellerDepartmentTitle,
+  .page[data-theme-field="jewelry"] .marketplaceBestSellerDepartmentTitle {
+    margin-bottom: 9px !important;
+    font-size: 15px !important;
+    line-height: 19px !important;
+  }
+
+  .page[data-theme-field="clothing"] .storeStory,
+  .page[data-theme-field="shoes"] .storeStory,
+  .page[data-theme-field="jewelry"] .storeStory {
+    padding: 17px !important;
+  }
+
+  .page[data-theme-field="clothing"] .storyCopy h2,
+  .page[data-theme-field="shoes"] .storyCopy h2,
+  .page[data-theme-field="jewelry"] .storyCopy h2 {
+    margin: 4px 0 8px !important;
+    font-size: 23px !important;
+    line-height: 1.06 !important;
+  }
+
+  .page[data-theme-field="clothing"] .storyCopy p,
+  .page[data-theme-field="shoes"] .storyCopy p,
+  .page[data-theme-field="jewelry"] .storyCopy p {
+    display: -webkit-box;
+    margin: 0 !important;
+    overflow: hidden;
+    font-size: 11px !important;
+    line-height: 1.48 !important;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 3;
+  }
+
+  .page[data-theme-field="clothing"] .partsConcierge,
+  .page[data-theme-field="shoes"] .partsConcierge,
+  .page[data-theme-field="jewelry"] .partsConcierge {
+    padding: 13px !important;
+  }
+
+  .page[data-theme-field="clothing"] .partsConciergeCopy h2,
+  .page[data-theme-field="shoes"] .partsConciergeCopy h2,
+  .page[data-theme-field="jewelry"] .partsConciergeCopy h2 {
+    font-size: 16px !important;
+    line-height: 1.08 !important;
+  }
+
+  .page[data-theme-field="clothing"] .partsConciergeCopy p,
+  .page[data-theme-field="shoes"] .partsConciergeCopy p,
+  .page[data-theme-field="jewelry"] .partsConciergeCopy p {
+    display: none !important;
+  }
+}
