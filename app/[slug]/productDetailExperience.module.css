@@ -3116,3 +3116,185 @@
     height: 48px;
   }
 }
+
+
+/* ========================================================================== */
+/* DARIK 085 - UNIFIED MEDIA STAGE / COMMERCE BALANCE                         */
+/* Photos and videos now share one intentional mobile hero composition.        */
+/* The hero no longer steals the screen from the product, and media chrome     */
+/* stays safely above the overlapping product sheet.                           */
+/* ========================================================================== */
+
+@media (max-width: 900px) {
+  /*
+   * 084 let the hero consume every spare pixel. That made the media impressive
+   * but pushed the product toward a social-story composition rather than a
+   * premium commerce composition. Give the hero a deliberate visual ceiling.
+   */
+  .productLayout {
+    grid-template-rows:
+      clamp(330px, 52dvh, 500px)
+      minmax(0, 1fr);
+  }
+
+  /*
+   * Product photos are the hero preview, not the full-resolution inspection
+   * view. Fill the hero beautifully here; the existing lightbox remains
+   * object-fit: contain so tapping the image still reveals the entire photo.
+   */
+  .photoButton {
+    overflow: hidden;
+    background: #eef3f7;
+  }
+
+  .photoButton img {
+    width: 100%;
+    height: 100%;
+    padding: 0;
+    object-fit: cover;
+    object-position: center center;
+    filter: none;
+  }
+
+  /*
+   * Keep video completely uncropped. The blurred poster backdrop already fills
+   * any unavoidable contain-space, so centering the sharp video is now more
+   * balanced inside the deliberately shorter hero.
+   */
+  .videoFrame video,
+  .videoBackdrop {
+    object-position: center center;
+  }
+
+  /*
+   * The white sheet overlaps the media by ~24px. Media controls must live
+   * comfortably above that boundary instead of being cut in half by it.
+   */
+  .detailColumn {
+    min-height: 0;
+    max-height: none;
+    margin-top: -24px;
+    border-radius: 28px 28px 0 0;
+  }
+
+  .mediaNav {
+    bottom: 34px;
+  }
+
+  .videoExpandButton,
+  .expandHint {
+    right: 13px;
+    bottom: 31px;
+  }
+
+  /*
+   * Restore an actual Details label even on shorter Safari viewports. Earlier
+   * short-screen rules hid it, which made the description look orphaned.
+   */
+  .descriptionSection .sectionLabel {
+    display: flex !important;
+    align-items: baseline;
+    justify-content: flex-start;
+    gap: 6px;
+    margin-bottom: 4px;
+  }
+
+  .descriptionSection .sectionLabel span {
+    display: inline;
+    color: #667386;
+    font-size: 8px;
+    line-height: 1;
+    font-weight: 900;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  .descriptionSection .sectionLabel small {
+    display: inline;
+    color: #98a2b3;
+    font-size: 8px;
+    line-height: 1;
+    font-weight: 800;
+  }
+
+  .descriptionSection p {
+    margin-top: 0;
+    color: #4f5c6d;
+    font-size: 10px;
+    line-height: 1.4;
+    -webkit-line-clamp: 2;
+  }
+
+  /*
+   * The details area owns the remaining viewport. It may scroll internally on
+   * exceptionally content-heavy products, but normal products remain one-screen.
+   */
+  .detailScroll {
+    min-height: 0;
+    max-height: none;
+    overflow-y: auto;
+    padding-top: 15px;
+  }
+
+  .actionDock {
+    flex: 0 0 auto;
+  }
+}
+
+@media (max-width: 520px) {
+  .productLayout {
+    grid-template-rows:
+      clamp(315px, 50dvh, 455px)
+      minmax(0, 1fr);
+  }
+
+  .detailColumn {
+    max-height: none;
+    margin-top: -23px;
+  }
+
+  .detailScroll {
+    max-height: none;
+    padding-top: 14px;
+  }
+
+  .mediaNav {
+    bottom: 32px;
+  }
+
+  .videoExpandButton,
+  .expandHint {
+    bottom: 29px;
+  }
+}
+
+@media (max-height: 720px) and (max-width: 900px) {
+  .productLayout {
+    grid-template-rows:
+      clamp(285px, 48dvh, 365px)
+      minmax(0, 1fr);
+  }
+
+  .detailColumn {
+    max-height: none;
+    margin-top: -20px;
+  }
+
+  .detailScroll {
+    max-height: none;
+    padding-top: 11px;
+  }
+
+  .descriptionSection .sectionLabel {
+    display: flex !important;
+  }
+
+  .mediaNav {
+    bottom: 29px;
+  }
+
+  .videoExpandButton,
+  .expandHint {
+    bottom: 27px;
+  }
+}
