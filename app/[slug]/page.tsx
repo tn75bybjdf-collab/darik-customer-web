@@ -2251,7 +2251,7 @@ export default function DarikDirectStorefrontPage() {
             <input
               value={search}
               onChange={(event) => setSearch(event.target.value)}
-              placeholder={isAutoParts ? "Search parts / \u0627\u0628\u062d \u0639\u0646 \u0642\u0637\u0639\u0629" : "Search this store"}
+              placeholder={isAutoParts ? "Search parts / \u0627\u0628\u062d\u062b \u0639\u0646 \u0642\u0637\u0639\u0629" : "Search this store"}
             />
             {search ? (
               <button type="button" onClick={() => setSearch("")}>

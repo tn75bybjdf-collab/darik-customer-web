@@ -7126,3 +7126,503 @@
     aspect-ratio: 1.95 / 1;
   }
 }
+
+/* DARIK_STOREFRONT_MOBILE_DENSITY_090
+   Phone-reviewed follow-up to 089.
+   Targets the exact remaining problems seen in Safari:
+   compact vehicle finder, compact merchandise cards, real horizontal categories,
+   compact parts support, and no dead footer space. */
+
+@media (max-width: 760px) {
+  .page[data-business="auto_parts"] {
+    padding-bottom: max(22px, env(safe-area-inset-bottom)) !important;
+  }
+
+  /* Slightly shorter first impression without undoing the frameless hero. */
+  .page[data-business="auto_parts"] .heroContent,
+  .page[data-business="auto_parts"][data-hero="immersive"] .heroContent {
+    min-height: 306px !important;
+  }
+
+  .page[data-business="auto_parts"] .heroExperienceRail {
+    margin-bottom: 4px;
+  }
+
+  .page[data-business="auto_parts"] .heroLiveStatus,
+  .page[data-business="auto_parts"] .heroHoursChip {
+    min-height: 29px;
+    padding: 5px 9px;
+    font-size: 8px;
+  }
+
+  .page[data-business="auto_parts"] .heroLogo {
+    width: 46px;
+    height: 46px;
+  }
+
+  .page[data-business="auto_parts"] .hero h1,
+  .page[data-business="auto_parts"][data-hero="immersive"] .heroCopy h1 {
+    font-size: clamp(29px, 8.4vw, 36px);
+  }
+
+  .page[data-business="auto_parts"] .primaryHeroButton {
+    min-height: 46px;
+  }
+
+  /* Search should be a utility, not a giant banner. */
+  .page[data-business="auto_parts"] .catalogShell {
+    width: calc(100% - 24px);
+    padding-top: 13px;
+    padding-bottom: 22px;
+  }
+
+  .page[data-business="auto_parts"] .searchBox {
+    min-height: 44px !important;
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+    border-radius: 13px;
+  }
+
+  .page[data-business="auto_parts"] .searchBox input {
+    min-height: 42px;
+    font-size: 12px;
+  }
+
+  /* Vehicle finder: one compact automotive tool instead of half a screen. */
+  .page[data-business="auto_parts"] .vehicleFilterPanel {
+    margin: 8px 0 14px !important;
+    gap: 8px !important;
+    border-radius: 16px !important;
+    padding: 11px !important;
+    box-shadow:
+      0 10px 28px rgba(2,6,23,.16),
+      inset 0 1px 0 rgba(255,255,255,.04) !important;
+  }
+
+  .page[data-business="auto_parts"] .vehicleFilterPanel::before,
+  .page[data-business="auto_parts"] .vehicleFilterPanel::after {
+    display: none !important;
+  }
+
+  .page[data-business="auto_parts"] .vehicleFilterHeading {
+    gap: 6px;
+  }
+
+  .page[data-business="auto_parts"] .vehicleFilterHeading span {
+    font-size: 7px;
+    letter-spacing: .10em;
+  }
+
+  .page[data-business="auto_parts"] .vehicleFilterHeading strong {
+    margin-top: 1px;
+    font-size: 14.5px;
+    line-height: 1.12;
+  }
+
+  .page[data-business="auto_parts"] .vehicleFilterHeading button {
+    min-height: 27px;
+    padding: 0 8px;
+    border-radius: 999px;
+    font-size: 7.5px;
+  }
+
+  .page[data-business="auto_parts"] .vehicleFilterGrid {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    gap: 6px !important;
+  }
+
+  .page[data-business="auto_parts"] .vehicleFilterGrid label:first-child {
+    grid-column: auto !important;
+  }
+
+  .page[data-business="auto_parts"] .vehicleFilterGrid label {
+    min-width: 0;
+  }
+
+  .page[data-business="auto_parts"] .vehicleFilterGrid label > span {
+    margin-bottom: 3px;
+    font-size: 7px;
+    line-height: 1;
+  }
+
+  .page[data-business="auto_parts"] .vehicleFilterGrid select {
+    width: 100%;
+    min-width: 0;
+    min-height: 40px !important;
+    border-radius: 11px !important;
+    padding: 0 22px 0 7px !important;
+    font-size: 9px !important;
+    font-weight: 850;
+    box-shadow: none !important;
+  }
+
+  /* The summary is redundant until the customer actually selects a vehicle. */
+  .page[data-business="auto_parts"] .vehicleMatchSummary {
+    display: none !important;
+  }
+
+  .page[data-business="auto_parts"] .vehicleMatchSummary.vehicleMatchActive {
+    min-height: 42px;
+    display: grid !important;
+    grid-template-columns: 30px 1fr auto;
+    gap: 7px;
+    padding: 6px 7px;
+    border-radius: 11px;
+  }
+
+  .page[data-business="auto_parts"] .vehicleMatchActive .vehicleMatchIcon {
+    width: 29px;
+    height: 29px;
+    border-radius: 8px;
+  }
+
+  .page[data-business="auto_parts"] .vehicleMatchActive small {
+    font-size: 6.5px;
+  }
+
+  .page[data-business="auto_parts"] .vehicleMatchActive strong {
+    font-size: 9px;
+  }
+
+  /* Keep interface headings modern; reserve editorial serif for the hero only. */
+  .page[data-business="auto_parts"] .productSectionHeading h3,
+  .page[data-business="auto_parts"] .sectionHeading h2 {
+    font-family: inherit !important;
+    letter-spacing: -.025em !important;
+  }
+
+  .page[data-business="auto_parts"] .productSection {
+    margin-top: 15px;
+  }
+
+  .page[data-business="auto_parts"] .productSectionHeading {
+    margin-bottom: 10px;
+  }
+
+  .page[data-business="auto_parts"] .productSectionHeading h3 {
+    margin-top: 2px;
+    font-size: 21px !important;
+    line-height: 1.05;
+  }
+
+  .page[data-business="auto_parts"] .productSectionHeading::after {
+    bottom: -6px;
+    width: 32px;
+    height: 2px;
+  }
+
+  .page[data-business="auto_parts"] .productGrid {
+    gap: 12px !important;
+  }
+
+  /* Product photography stays useful, but cards stop consuming whole screens. */
+  .page[data-business="auto_parts"] .autoPartsProductCard {
+    min-height: 0 !important;
+    border-radius: 16px !important;
+    box-shadow: 0 10px 28px rgba(2,6,23,.16) !important;
+  }
+
+  .page[data-business="auto_parts"] .autoPartsProductCard::before {
+    display: none !important;
+  }
+
+  .page[data-business="auto_parts"] .autoPartsProductCard .productImage {
+    width: 100%;
+    min-height: 0 !important;
+    height: clamp(158px, 46vw, 198px) !important;
+    aspect-ratio: auto !important;
+    border: 0 !important;
+    border-radius: 16px 16px 0 0 !important;
+    background: #eef2f6;
+  }
+
+  .page[data-business="auto_parts"] .autoPartsProductCard .productImage::after {
+    display: none !important;
+  }
+
+  .page[data-business="auto_parts"] .autoPartsProductCard .productImage img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain !important;
+    object-position: center;
+  }
+
+  .page[data-business="auto_parts"] .productBadges {
+    inset: 8px 8px auto !important;
+  }
+
+  .page[data-business="auto_parts"] .featuredTag,
+  .page[data-business="auto_parts"] .stockTag,
+  .page[data-business="auto_parts"] .availableTag,
+  .page[data-business="auto_parts"] .outOfStockTag {
+    padding: 5px 8px !important;
+    font-size: 7.5px !important;
+  }
+
+  .page[data-business="auto_parts"] .autoPartsProductCard .productBody {
+    min-height: 0 !important;
+    justify-content: flex-start !important;
+    padding: 11px 13px 12px !important;
+  }
+
+  .page[data-business="auto_parts"] .autoPartsProductCard .productMeta {
+    margin-bottom: 4px !important;
+    font-size: 7px !important;
+  }
+
+  .page[data-business="auto_parts"] .autoPartsProductCard .productBody h3 {
+    display: -webkit-box;
+    margin: 0;
+    overflow: hidden;
+    font-size: 16.5px !important;
+    line-height: 1.18 !important;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+  }
+
+  .page[data-business="auto_parts"] .autoPartsProductCard .productArabic {
+    display: -webkit-box;
+    margin-top: 4px !important;
+    overflow: hidden;
+    font-size: 10.5px !important;
+    line-height: 1.32 !important;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 1 !important;
+  }
+
+  .page[data-business="auto_parts"] .autoPartsProductCard .productFitment {
+    margin-top: 7px !important;
+    gap: 4px 6px;
+    padding: 6px 8px !important;
+    border-radius: 9px !important;
+  }
+
+  .page[data-business="auto_parts"] .autoPartsProductCard .productFitment span {
+    font-size: 7px !important;
+  }
+
+  .page[data-business="auto_parts"] .autoPartsProductCard .productFitment strong {
+    font-size: 11px !important;
+  }
+
+  /* Price and action share one row. */
+  .page[data-business="auto_parts"] .autoPartsProductCard .productFooter {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) auto !important;
+    align-items: center !important;
+    gap: 8px !important;
+    margin-top: 7px !important;
+    padding-top: 0 !important;
+  }
+
+  .page[data-business="auto_parts"] .autoPartsProductCard .productFooter > div:first-child {
+    min-width: 0;
+  }
+
+  .page[data-business="auto_parts"] .autoPartsProductCard .productFooter > div:first-child > strong {
+    font-size: 9.5px !important;
+    line-height: 1.2;
+  }
+
+  .page[data-business="auto_parts"] .autoPartsProductCard .productFooter > button {
+    min-width: 112px !important;
+    min-height: 40px !important;
+    padding: 0 15px !important;
+    border-radius: 11px !important;
+  }
+
+  .page[data-business="auto_parts"] .autoPartsProductCard .pricingActions {
+    width: auto !important;
+    display: grid !important;
+    grid-template-columns: repeat(2, 44px) !important;
+    gap: 6px !important;
+  }
+
+  .page[data-business="auto_parts"] .autoPartsProductCard .pricingCallButton,
+  .page[data-business="auto_parts"] .autoPartsProductCard .pricingWhatsappButton,
+  .page[data-business="auto_parts"] .autoPartsProductCard .pricingActions .productContactButton {
+    width: 44px !important;
+    min-width: 44px !important;
+    min-height: 40px !important;
+    padding: 0 !important;
+    border-radius: 11px !important;
+  }
+
+  .page[data-business="auto_parts"] .autoPartsProductCard .pricingActions span {
+    display: none !important;
+  }
+
+  /* Categories: actual horizontal navigation instead of three giant vertical cards. */
+  .page[data-business="auto_parts"] .categorySection {
+    width: calc(100% - 24px) !important;
+    padding-top: 16px !important;
+    padding-bottom: 0 !important;
+  }
+
+  .page[data-business="auto_parts"] .sectionHeading {
+    margin-bottom: 0;
+  }
+
+  .page[data-business="auto_parts"] .sectionHeading h2 {
+    max-width: 100% !important;
+    font-size: 18px !important;
+    line-height: 1.08 !important;
+  }
+
+  .page[data-business="auto_parts"] .sectionHeading > div > span {
+    font-size: 7px !important;
+  }
+
+  .page[data-business="auto_parts"] .categoryScroller {
+    display: grid !important;
+    grid-template-columns: none !important;
+    grid-auto-flow: column !important;
+    grid-auto-columns: 84px !important;
+    justify-content: start !important;
+    gap: 8px !important;
+    margin-top: 11px !important;
+    padding: 1px 0 5px !important;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    scroll-snap-type: x proximity;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .page[data-business="auto_parts"] .categoryCard {
+    width: 84px !important;
+    min-width: 84px !important;
+    min-height: 0 !important;
+    height: auto !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    gap: 3px !important;
+    padding: 0 2px 4px !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    scroll-snap-align: start;
+  }
+
+  .page[data-business="auto_parts"] .categoryVisual,
+  .page[data-business="auto_parts"] .allCategoryVisual {
+    width: 58px !important;
+    min-width: 58px !important;
+    height: 58px !important;
+    margin: 0 auto 5px !important;
+    border: 1px solid rgba(148,163,184,.14) !important;
+    border-radius: 50% !important;
+    background-color: #102641 !important;
+    box-shadow: none !important;
+  }
+
+  .page[data-business="auto_parts"] .categoryCard > span {
+    max-width: 84px;
+    overflow: hidden;
+    font-size: 9px !important;
+    line-height: 1.12 !important;
+    text-align: center;
+    text-overflow: ellipsis;
+  }
+
+  .page[data-business="auto_parts"] .categoryCard > small,
+  .page[data-business="auto_parts"] .categoryCard > em {
+    max-width: 84px;
+    overflow: hidden;
+    font-size: 7.5px !important;
+    line-height: 1.1 !important;
+    text-align: center;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  /* Parts support: a compact fallback, not another hero card. */
+  .page[data-business="auto_parts"] .partsConcierge {
+    width: calc(100% - 24px) !important;
+    margin: 16px auto 14px !important;
+    grid-template-columns: 34px minmax(0, 1fr) !important;
+    gap: 8px !important;
+    border-radius: 16px !important;
+    padding: 11px !important;
+    box-shadow: 0 10px 28px rgba(2,6,23,.18) !important;
+  }
+
+  .page[data-business="auto_parts"] .partsConcierge::after {
+    display: none !important;
+  }
+
+  .page[data-business="auto_parts"] .partsConciergeIcon {
+    width: 34px !important;
+    height: 34px !important;
+    border-radius: 10px !important;
+  }
+
+  .page[data-business="auto_parts"] .partsConciergeCopy > span {
+    font-size: 6.5px !important;
+  }
+
+  .page[data-business="auto_parts"] .partsConciergeCopy h2 {
+    margin-top: 2px !important;
+    font-size: 15.5px !important;
+    line-height: 1.08 !important;
+  }
+
+  .page[data-business="auto_parts"] .partsConciergeCopy p {
+    display: none !important;
+  }
+
+  .page[data-business="auto_parts"] .partsConciergeActions {
+    grid-column: 1 / -1 !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 6px !important;
+    margin-top: 1px !important;
+  }
+
+  .page[data-business="auto_parts"] .partsConciergeActions a {
+    min-height: 39px !important;
+    border-radius: 11px !important;
+    font-size: 9.5px !important;
+  }
+
+  /* Finish cleanly. No empty dark runway below the retailer. */
+  .page[data-business="auto_parts"] .footer {
+    width: calc(100% - 24px) !important;
+    margin-top: 12px !important;
+    margin-bottom: 0 !important;
+    padding: 14px 0 max(10px, env(safe-area-inset-bottom)) !important;
+  }
+
+  .page[data-business="auto_parts"] .footerLogo {
+    width: 42px;
+    height: 42px;
+  }
+
+  .page[data-business="auto_parts"] .footerBrand strong {
+    font-size: 12px;
+  }
+
+  .page[data-business="auto_parts"] .poweredBy {
+    margin-top: 4px !important;
+  }
+
+  .mobileContactDock {
+    display: none !important;
+  }
+}
+
+@media (max-width: 430px) {
+  .page[data-business="auto_parts"] .heroContent,
+  .page[data-business="auto_parts"][data-hero="immersive"] .heroContent {
+    min-height: 292px !important;
+  }
+
+  .page[data-business="auto_parts"] .vehicleFilterGrid select {
+    font-size: 8.5px !important;
+    padding-left: 6px !important;
+    padding-right: 18px !important;
+  }
+
+  .page[data-business="auto_parts"] .autoPartsProductCard .productImage {
+    height: clamp(152px, 45vw, 184px) !important;
+  }
+}
