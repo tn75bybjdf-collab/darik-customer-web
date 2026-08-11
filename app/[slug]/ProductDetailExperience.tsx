@@ -4,6 +4,7 @@
 // DARIK_CUSTOMER_PRODUCT_VIEWPORT_MEDIA_PERFECTION_080
 // DARIK_CUSTOMER_PRODUCT_EXECUTIVE_SHOWCASE_081
 // DARIK_CUSTOMER_PRODUCT_PORTFOLIO_FINISH_082
+// DARIK_CUSTOMER_PRODUCT_FINAL_RESTRAINT_083
 
 import {
   useEffect,
@@ -719,8 +720,7 @@ export default function ProductDetailExperience({
               {product.description ? (
                 <section className={styles.descriptionSection}>
                   <div className={styles.sectionLabel}>
-                    <span>Product details</span>
-                    <small>تفاصيل المنتج</small>
+                    <span>Details / التفاصيل</span>
                   </div>
                   <p>{product.description}</p>
                 </section>

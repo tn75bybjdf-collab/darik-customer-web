@@ -2,6 +2,7 @@
 /* DARIK_CUSTOMER_PRODUCT_VIEWPORT_MEDIA_PERFECTION_080 */
 /* DARIK_CUSTOMER_PRODUCT_EXECUTIVE_SHOWCASE_081 */
 /* DARIK_CUSTOMER_PRODUCT_PORTFOLIO_FINISH_082 */
+/* DARIK_CUSTOMER_PRODUCT_FINAL_RESTRAINT_083 */
 
 .overlay,
 .overlay * {
@@ -2778,5 +2779,239 @@
   .primaryAction,
   .secondaryAction {
     min-height: 45px;
+  }
+}
+
+
+/* ==========================================================================
+   DARIK 083 - FINAL RESTRAINT / PORTFOLIO POLISH
+   The composition was already strong in 082. This pass removes the remaining
+   visual friction without adding any new UI or product mechanics.
+   ========================================================================== */
+
+@media (max-width: 900px) {
+  /*
+   * The landscape/short-video letterbox is not allowed to become a dead dark
+   * header. The sharp video remains 100% contained (never cropped), while the
+   * existing poster fills unused hero space as a bright cinematic backdrop.
+   */
+  .videoFrame {
+    background: #e8edf3;
+  }
+
+  .videoBackdrop {
+    inset: -16%;
+    width: 132%;
+    height: 132%;
+    opacity: 0.96;
+    filter: blur(24px) saturate(1.16) brightness(0.9);
+    transform: scale(1.1);
+  }
+
+  .videoFrame::after {
+    background:
+      linear-gradient(180deg, rgba(2, 6, 16, 0.015), rgba(2, 6, 16, 0.06)),
+      radial-gradient(circle at 50% 50%, transparent 44%, rgba(2, 6, 16, 0.08) 100%);
+  }
+
+  /* Back + Share stay over the media and visually get out of the product's way. */
+  .topBar {
+    inset:
+      calc(8px + env(safe-area-inset-top))
+      12px
+      auto
+      12px;
+    height: 38px;
+  }
+
+  .backButton,
+  .iconButton {
+    width: 38px;
+    height: 38px;
+    border-color: rgba(255, 255, 255, 0.58);
+    background: rgba(255, 255, 255, 0.84);
+    box-shadow:
+      0 6px 18px rgba(2, 6, 23, 0.1),
+      inset 0 1px 0 rgba(255, 255, 255, 0.86);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+  }
+
+  .backButton svg,
+  .iconButton svg {
+    width: 17px;
+    height: 17px;
+  }
+
+  /* Media chrome should whisper, not compete with the product. */
+  .mediaCounter {
+    left: 14px;
+    bottom: 17px;
+    min-height: 23px;
+    padding: 4px 8px;
+    font-size: 7px;
+    background: rgba(6, 10, 18, 0.5);
+    box-shadow: 0 4px 12px rgba(2, 6, 23, 0.1);
+  }
+
+  .expandHint,
+  .videoExpandButton {
+    right: 14px;
+    bottom: 15px;
+    width: 31px;
+    height: 31px;
+    min-height: 31px;
+    background: rgba(6, 10, 18, 0.44);
+    border-color: rgba(255, 255, 255, 0.38);
+    box-shadow: 0 4px 14px rgba(2, 6, 23, 0.09);
+  }
+
+  .expandHint svg,
+  .videoExpandButton svg {
+    width: 15px;
+    height: 15px;
+  }
+
+  .mediaNav {
+    bottom: 17px;
+    gap: 5px;
+  }
+
+  .mediaThumb {
+    width: 5px;
+    height: 5px;
+    min-width: 5px;
+    box-shadow: 0 1px 4px rgba(2, 6, 23, 0.22);
+  }
+
+  .mediaThumbActive {
+    width: 15px;
+  }
+
+  /* Pull the product sheet into the hero a little more. */
+  .detailColumn {
+    margin-top: -32px;
+    border-radius: 30px 30px 0 0;
+  }
+
+  .detailScroll {
+    padding: 16px 18px 7px;
+  }
+
+  /* Product details now reads as a designed section, not an orphaned line. */
+  .descriptionSection {
+    margin-top: 8px;
+  }
+
+  .descriptionSection .sectionLabel {
+    justify-content: flex-start;
+    margin-bottom: 3px;
+  }
+
+  .descriptionSection .sectionLabel span {
+    color: #7b8797;
+    font-size: 7px;
+    line-height: 1;
+    font-weight: 900;
+    letter-spacing: 0.11em;
+    text-transform: uppercase;
+  }
+
+  .descriptionSection p {
+    color: #566273;
+    font-size: 10px;
+    line-height: 1.42;
+    -webkit-line-clamp: 2;
+  }
+
+  /* Reassurance is a single slim rail, not another block competing for space. */
+  .fulfillmentStrip {
+    margin-top: 7px;
+    padding-top: 6px;
+  }
+
+  .fulfillmentStrip > div {
+    grid-template-columns: 20px minmax(0, 1fr);
+    gap: 5px;
+    padding: 2px 7px;
+  }
+
+  .fulfillmentIcon {
+    width: 20px;
+    height: 20px;
+    flex-basis: 20px;
+    border-radius: 6px;
+    font-size: 7px;
+  }
+
+  .fulfillmentStrip strong {
+    font-size: 7.5px;
+  }
+
+  /* The purchase action stays premium but no longer feels oversized. */
+  .actionDock {
+    min-height: 62px;
+    padding:
+      7px
+      14px
+      calc(8px + env(safe-area-inset-bottom));
+    box-shadow: 0 -8px 20px rgba(15, 23, 42, 0.028);
+  }
+
+  .primaryAction,
+  .secondaryAction {
+    min-height: 47px;
+    border-radius: 16px;
+    font-size: 12.5px;
+  }
+
+  .primaryAction {
+    box-shadow: 0 8px 20px color-mix(in srgb, var(--pd-accent) 20%, transparent);
+  }
+}
+
+@media (max-width: 520px) {
+  .detailColumn {
+    margin-top: -30px;
+    border-radius: 28px 28px 0 0;
+  }
+
+  .detailScroll {
+    padding: 15px 16px 6px;
+  }
+
+  .fulfillmentStrip {
+    margin-top: 6px;
+    padding-top: 5px;
+  }
+
+  .fulfillmentStrip > div {
+    padding-inline: 6px;
+  }
+}
+
+@media (max-height: 720px) and (max-width: 900px) {
+  .detailColumn {
+    margin-top: -26px;
+  }
+
+  .descriptionSection {
+    margin-top: 5px;
+  }
+
+  .fulfillmentStrip {
+    margin-top: 5px;
+    padding-top: 4px;
+  }
+
+  .actionDock {
+    min-height: 56px;
+    padding-top: 4px;
+    padding-bottom: calc(5px + env(safe-area-inset-bottom));
+  }
+
+  .primaryAction,
+  .secondaryAction {
+    min-height: 44px;
   }
 }
