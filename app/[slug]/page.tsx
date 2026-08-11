@@ -644,7 +644,7 @@ export default function DarikDirectStorefrontPage() {
   const [publicStatus, setPublicStatus] = useState<PublicStoreStatus | null>(null);
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
-  const [selectedCategoryId, setSelectedCategoryId] = useState("all");
+  const [selectedCategoryId, setSelectedCategoryId] = useState("BestSellers");
   const [search, setSearch] = useState("");
   const [selectedVehicleMake, setSelectedVehicleMake] = useState("all");
   const [selectedVehicleModel, setSelectedVehicleModel] = useState("all");
@@ -972,6 +972,7 @@ export default function DarikDirectStorefrontPage() {
 
     return products.filter((product) => {
       if (
+        selectedCategoryId !== "BestSellers" &&
         selectedCategoryId !== "all" &&
         product.direct_store_category_id !== selectedCategoryId
       ) {
@@ -1057,6 +1058,22 @@ export default function DarikDirectStorefrontPage() {
     const featuredIds = new Set(featuredProducts.map((product) => product.id));
     return filteredProducts.filter((product) => !featuredIds.has(product.id));
   }, [featuredProducts, filteredProducts]);
+
+
+  // DARIK_DIRECT_MARKETPLACE_CATALOG_091
+  // Darik Marketplace parity: Best Sellers is the default and is grouped by
+  // the store's real categories. Search and field-specific filters are already
+  // reflected in filteredProducts.
+  const marketplaceBestSellerGroups = useMemo(() => {
+    if (selectedCategoryId !== "BestSellers") return [];
+
+    return visibleCategories
+      .map((category) => ({
+        category,
+        products: filteredProducts.filter((product) => product.direct_store_category_id === category.id),
+      }))
+      .filter((group) => group.products.length > 0);
+  }, [filteredProducts, selectedCategoryId, visibleCategories]);
 
   const cartCount = useMemo(
     () => cart.reduce((total, line) => total + line.quantity, 0),
@@ -2397,7 +2414,79 @@ export default function DarikDirectStorefrontPage() {
 
         {loadError ? <p className={styles.notice}>{loadError}</p> : null}
 
-        {featuredProducts.length > 0 ? (
+        {visibleCategories.length > 0 ? (
+          <section className={styles.marketplaceCategoryNav} aria-label="Store categories">
+            <div className={styles.marketplaceCategoryNavLabel}>
+              {"Categories / \u0627\u0644\u0623\u0642\u0633\u0627\u0645"}
+            </div>
+
+            <div className={styles.marketplaceCategoryScroller}>
+              <button
+                type="button"
+                className={`${styles.marketplaceCategoryItem} ${styles.marketplaceCategoryBestSellers} ${selectedCategoryId === "BestSellers" ? styles.marketplaceCategoryItemActive : ""}`}
+                onClick={() => setSelectedCategoryId("BestSellers")}
+              >
+                <span className={styles.marketplaceCategoryCircle}>
+                  <span className={styles.marketplaceCategoryStar}>★</span>
+                  {selectedCategoryId === "BestSellers" ? (
+                    <span className={styles.marketplaceCategorySelectedDot} />
+                  ) : null}
+                </span>
+                <strong>Best Sellers</strong>
+                <small dir="rtl">{"\u0627\u0644\u0623\u0643\u062b\u0631 \u0645\u0628\u064a\u0639\u0627\u064b"}</small>
+              </button>
+
+              {visibleCategories.map((category) => {
+                const categoryArabic = isAutoParts
+                  ? cleanAutoPartsCategoryArabic(category)
+                  : category.name_ar;
+                const active = selectedCategoryId === category.id;
+
+                return (
+                  <button
+                    type="button"
+                    key={`marketplace-category-${category.id}`}
+                    className={`${styles.marketplaceCategoryItem} ${active ? styles.marketplaceCategoryItemActive : ""}`}
+                    onClick={() => setSelectedCategoryId(category.id)}
+                  >
+                    <span className={styles.marketplaceCategoryCircle}>
+                      {category.image_url ? (
+                        <img src={category.image_url} alt="" />
+                      ) : (
+                        <span>{category.name.slice(0, 1).toUpperCase()}</span>
+                      )}
+                      {active ? (
+                        <span className={styles.marketplaceCategorySelectedDot} />
+                      ) : null}
+                    </span>
+                    <strong>{category.name}</strong>
+                    {categoryArabic ? <small dir="rtl">{categoryArabic}</small> : null}
+                  </button>
+                );
+              })}
+            </div>
+          </section>
+        ) : null}
+
+        <div className={styles.marketplaceListingHeader}>
+          <div>
+            <span>
+              {selectedCategoryId === "BestSellers"
+                ? "CURATED FOR THIS STORE"
+                : "STORE CATEGORY"}
+            </span>
+            <h3>
+              {selectedCategoryId === "BestSellers"
+                ? "Best Sellers / \u0627\u0644\u0623\u0643\u062b\u0631 \u0645\u0628\u064a\u0639\u0627\u064b"
+                : selectedCategory?.name || "Products"}
+            </h3>
+          </div>
+          <small>
+            {filteredProducts.length} {filteredProducts.length === 1 ? "item" : "items"}
+          </small>
+        </div>
+
+        {featuredProducts.length > 0 && selectedCategoryId === "__legacy_featured_disabled__" ? (
           <section className={`${styles.productSection} ${isGroceryStore ? styles.groceryFeaturedProducts : ""} ${portfolioStyles.productSectionPolish}`}>
             <div className={styles.productSectionHeading}>
               <div>
@@ -2450,10 +2539,45 @@ export default function DarikDirectStorefrontPage() {
                 <a href={contactLinks[0].href}>Contact the store</a>
               ) : null}
             </div>
-          ) : catalogProducts.length > 0 ? (
-            <div className={`${styles.productGrid} ${portfolioStyles.productGridPolish}`}>
-              {catalogProducts.map(renderProductCard)}
-            </div>
+          ) : filteredProducts.length > 0 ? (
+            selectedCategoryId === "BestSellers" ? (
+              <div className={styles.marketplaceBestSellerStack}>
+                {marketplaceBestSellerGroups.map(({ category, products: categoryProducts }) => (
+                  <section
+                    key={`best-sellers-${category.id}`}
+                    className={styles.marketplaceBestSellerDepartment}
+                  >
+                    <button
+                      type="button"
+                      className={styles.marketplaceBestSellerDepartmentTitle}
+                      onClick={() => setSelectedCategoryId(category.id)}
+                    >
+                      {"Best Sellers in " + category.name + " →"}
+                    </button>
+
+                    <div className={styles.marketplaceBestSellerCarousel}>
+                      {categoryProducts.map((product) => (
+                        <div
+                          key={`best-seller-${product.id}`}
+                          className={styles.marketplaceBestSellerItem}
+                        >
+                          {renderProductCard(product)}
+                          <a
+                            className={styles.marketplaceBestSellerTapTarget}
+                            href={`/${storefront.slug}?product=${encodeURIComponent(product.id)}#catalog`}
+                            aria-label={`View ${productName(product)}`}
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  </section>
+                ))}
+              </div>
+            ) : (
+              <div className={`${styles.productGrid} ${styles.marketplaceCategoryProductList}`}>
+                {filteredProducts.map(renderProductCard)}
+              </div>
+            )
           ) : null}
         </section>
       </section>

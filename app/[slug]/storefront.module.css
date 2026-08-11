@@ -7626,3 +7626,575 @@
     height: clamp(152px, 45vw, 184px) !important;
   }
 }
+
+/* DARIK_DIRECT_MARKETPLACE_CATALOG_091
+   Exact Darik Marketplace catalog architecture ported to Darik Direct:
+   - Best Sellers is the default browsing mode
+   - Best Sellers is first in the horizontal circular category rail
+   - Best Sellers renders category-by-category horizontal no-box product shelves
+   - real category view renders horizontal image-left/details-right no-box rows
+   - Direct-specific pricing, fitment, availability and cart mechanics remain in the existing card renderer */
+
+/* The new Marketplace category rail replaces the old bottom Browse Categories section. */
+.categorySection {
+  display: none !important;
+}
+
+.marketplaceCategoryNav {
+  width: 100%;
+  margin: 15px 0 13px;
+}
+
+.marketplaceCategoryNavLabel {
+  margin: 0 0 9px;
+  color: #60a5fa;
+  font-size: 8px;
+  font-weight: 950;
+  letter-spacing: .11em;
+  text-transform: uppercase;
+}
+
+.marketplaceCategoryScroller {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 1px 1px 6px;
+  scrollbar-width: none;
+  overscroll-behavior-x: contain;
+  -webkit-overflow-scrolling: touch;
+}
+
+.marketplaceCategoryScroller::-webkit-scrollbar {
+  display: none;
+}
+
+.marketplaceCategoryItem {
+  position: relative;
+  flex: 0 0 74px;
+  width: 74px;
+  min-width: 74px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: #dbeafe;
+  text-align: center;
+  cursor: pointer;
+}
+
+.marketplaceCategoryCircle {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 64px;
+  height: 64px;
+  margin: 0 auto;
+  overflow: hidden;
+  border: 1px solid rgba(148,163,184,.16);
+  border-radius: 50%;
+  background: #102641;
+  box-shadow: none;
+}
+
+.marketplaceCategoryCircle img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.marketplaceCategoryBestSellers .marketplaceCategoryCircle {
+  border-color: rgba(96,165,250,.52);
+  background:
+    radial-gradient(circle at 30% 22%, rgba(59,130,246,.36), transparent 42%),
+    linear-gradient(145deg, #102641, #173f77);
+}
+
+.marketplaceCategoryStar {
+  color: #7db5ff;
+  font-size: 28px;
+  font-weight: 950;
+  line-height: 1;
+}
+
+.marketplaceCategoryItemActive .marketplaceCategoryCircle {
+  border: 2px solid #60a5fa;
+  box-shadow: 0 0 0 3px rgba(96,165,250,.10);
+}
+
+.marketplaceCategorySelectedDot {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  width: 15px;
+  height: 15px;
+  border: 3px solid #071426;
+  border-radius: 50%;
+  background: #60a5fa;
+}
+
+.marketplaceCategoryItem strong {
+  display: -webkit-box;
+  min-height: 27px;
+  margin-top: 7px;
+  overflow: hidden;
+  color: #f8fafc;
+  font-size: 10.5px;
+  font-weight: 900;
+  line-height: 13px;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.marketplaceCategoryItem small {
+  display: block;
+  max-width: 74px;
+  margin-top: 2px;
+  overflow: hidden;
+  color: #7f95b1;
+  font-size: 8px;
+  font-weight: 700;
+  line-height: 10px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.marketplaceListingHeader {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 5px 0 13px;
+}
+
+.marketplaceListingHeader > div {
+  min-width: 0;
+}
+
+.marketplaceListingHeader span {
+  display: block;
+  margin-bottom: 4px;
+  color: #60a5fa;
+  font-size: 8px;
+  font-weight: 950;
+  letter-spacing: .11em;
+  text-transform: uppercase;
+}
+
+.marketplaceListingHeader h3 {
+  margin: 0;
+  color: #fff;
+  font-family: inherit;
+  font-size: 24px;
+  font-weight: 950;
+  line-height: 1.05;
+  letter-spacing: -.03em;
+}
+
+.marketplaceListingHeader small {
+  flex: 0 0 auto;
+  padding-bottom: 2px;
+  color: #8da2bf;
+  font-size: 9px;
+  font-weight: 850;
+}
+
+/* The old section heading is superseded by the exact Marketplace-style header above. */
+.productSectionHeading {
+  display: none !important;
+}
+
+/* Best Sellers: exact marketplace idea — category shelves, no card chrome. */
+.marketplaceBestSellerStack {
+  display: grid;
+  gap: 25px;
+}
+
+.marketplaceBestSellerDepartment {
+  min-width: 0;
+}
+
+.marketplaceBestSellerDepartmentTitle {
+  display: inline-flex;
+  align-items: center;
+  margin: 0 0 11px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: #f8fafc;
+  font: inherit;
+  font-size: 17px;
+  font-weight: 950;
+  line-height: 1.18;
+  text-align: left;
+  cursor: pointer;
+}
+
+.marketplaceBestSellerCarousel {
+  display: flex;
+  align-items: flex-start;
+  gap: 18px;
+  width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 0 1px 4px;
+  scrollbar-width: none;
+  scroll-snap-type: x proximity;
+  overscroll-behavior-x: contain;
+  -webkit-overflow-scrolling: touch;
+}
+
+.marketplaceBestSellerCarousel::-webkit-scrollbar {
+  display: none;
+}
+
+.marketplaceBestSellerItem {
+  position: relative;
+  flex: 0 0 184px;
+  width: 184px;
+  min-width: 184px;
+  scroll-snap-align: start;
+}
+
+.marketplaceBestSellerTapTarget {
+  position: absolute;
+  inset: 0;
+  z-index: 20;
+  border-radius: 0;
+}
+
+/* Strip existing Direct card chrome only inside Best Sellers. */
+.marketplaceBestSellerCarousel .productCard,
+.marketplaceBestSellerCarousel .autoPartsProductCard {
+  display: block !important;
+  width: 184px !important;
+  min-width: 184px !important;
+  min-height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: visible !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.marketplaceBestSellerCarousel .productCard::before,
+.marketplaceBestSellerCarousel .autoPartsProductCard::before {
+  display: none !important;
+}
+
+.marketplaceBestSellerCarousel .productImage {
+  width: 184px !important;
+  min-width: 184px !important;
+  height: 184px !important;
+  min-height: 184px !important;
+  aspect-ratio: 1 / 1 !important;
+  overflow: hidden !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.marketplaceBestSellerCarousel .productImage::after {
+  display: none !important;
+}
+
+.marketplaceBestSellerCarousel .productImage img {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: contain !important;
+  object-position: center !important;
+}
+
+.marketplaceBestSellerCarousel .productBadges,
+.marketplaceBestSellerCarousel .productMeta,
+.marketplaceBestSellerCarousel .productArabic,
+.marketplaceBestSellerCarousel .productFitment {
+  display: none !important;
+}
+
+.marketplaceBestSellerCarousel .productBody {
+  display: block !important;
+  min-height: 0 !important;
+  padding: 9px 0 0 !important;
+  background: transparent !important;
+}
+
+.marketplaceBestSellerCarousel .productBody h3 {
+  display: -webkit-box !important;
+  min-height: 20px;
+  margin: 0 !important;
+  overflow: hidden !important;
+  color: #f8fafc !important;
+  font-size: 15px !important;
+  font-weight: 850 !important;
+  line-height: 20px !important;
+  letter-spacing: 0 !important;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 1;
+}
+
+.marketplaceBestSellerCarousel .productFooter {
+  display: block !important;
+  margin: 4px 0 0 !important;
+  padding: 0 !important;
+}
+
+.marketplaceBestSellerCarousel .productFooter > div:first-child {
+  display: block !important;
+}
+
+.marketplaceBestSellerCarousel .productFooter > div:first-child > strong,
+.marketplaceBestSellerCarousel .productFooter strong {
+  color: #fff !important;
+  font-size: 17px !important;
+  font-weight: 950 !important;
+  line-height: 21px !important;
+}
+
+.marketplaceBestSellerCarousel .productFooter > button,
+.marketplaceBestSellerCarousel .pricingActions,
+.marketplaceBestSellerCarousel .quantityControl,
+.marketplaceBestSellerCarousel .productFooter > :not(div:first-child) {
+  display: none !important;
+}
+
+/* Real category view: exact Marketplace no-box horizontal row concept. */
+.marketplaceCategoryProductList {
+  display: block !important;
+}
+
+.marketplaceCategoryProductList .productCard,
+.marketplaceCategoryProductList .autoPartsProductCard {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  width: 100% !important;
+  min-height: 124px !important;
+  margin: 0 0 7px !important;
+  padding: 8px 0 !important;
+  overflow: visible !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.marketplaceCategoryProductList .productCard::before,
+.marketplaceCategoryProductList .autoPartsProductCard::before {
+  display: none !important;
+}
+
+.marketplaceCategoryProductList .productImage {
+  flex: 0 0 112px !important;
+  width: 112px !important;
+  min-width: 112px !important;
+  height: 112px !important;
+  min-height: 112px !important;
+  aspect-ratio: 1 / 1 !important;
+  overflow: hidden !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.marketplaceCategoryProductList .productImage::after {
+  display: none !important;
+}
+
+.marketplaceCategoryProductList .productImage img {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: contain !important;
+  object-position: center !important;
+}
+
+.marketplaceCategoryProductList .productBadges {
+  display: none !important;
+}
+
+.marketplaceCategoryProductList .productBody {
+  flex: 1 1 auto !important;
+  min-width: 0 !important;
+  min-height: 108px !important;
+  padding: 0 0 0 14px !important;
+  justify-content: space-between !important;
+  background: transparent !important;
+}
+
+.marketplaceCategoryProductList .productMeta {
+  margin: 0 0 3px !important;
+  font-size: 7.5px !important;
+}
+
+.marketplaceCategoryProductList .productBody h3 {
+  display: -webkit-box;
+  margin: 0 !important;
+  overflow: hidden;
+  color: #f8fafc !important;
+  font-size: 14.5px !important;
+  font-weight: 900 !important;
+  line-height: 18px !important;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.marketplaceCategoryProductList .productArabic {
+  display: -webkit-box;
+  margin: 3px 0 0 !important;
+  overflow: hidden;
+  color: #8da2bf !important;
+  font-size: 9.5px !important;
+  line-height: 13px !important;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 1;
+}
+
+.marketplaceCategoryProductList .productFitment {
+  margin: 5px 0 0 !important;
+  padding: 5px 7px !important;
+  border: 0 !important;
+  border-radius: 8px !important;
+  background: rgba(47,102,255,.08) !important;
+}
+
+.marketplaceCategoryProductList .productFitment span {
+  font-size: 6.5px !important;
+}
+
+.marketplaceCategoryProductList .productFitment strong {
+  font-size: 9.5px !important;
+}
+
+.marketplaceCategoryProductList .productFooter {
+  display: grid !important;
+  grid-template-columns: minmax(0,1fr) auto !important;
+  align-items: end !important;
+  gap: 7px !important;
+  margin: 6px 0 0 !important;
+  padding: 0 !important;
+}
+
+.marketplaceCategoryProductList .productFooter > div:first-child > strong,
+.marketplaceCategoryProductList .productFooter strong {
+  font-size: 11px !important;
+  line-height: 14px !important;
+}
+
+.marketplaceCategoryProductList .productFooter > button {
+  min-width: 62px !important;
+  width: auto !important;
+  min-height: 34px !important;
+  padding: 0 10px !important;
+  border-radius: 10px !important;
+  font-size: 9px !important;
+}
+
+.marketplaceCategoryProductList .pricingActions {
+  display: flex !important;
+  gap: 5px !important;
+}
+
+.marketplaceCategoryProductList .pricingCallButton,
+.marketplaceCategoryProductList .pricingWhatsappButton,
+.marketplaceCategoryProductList .pricingActions .productContactButton {
+  width: 36px !important;
+  min-width: 36px !important;
+  min-height: 34px !important;
+  padding: 0 !important;
+  border-radius: 10px !important;
+}
+
+.marketplaceCategoryProductList .pricingActions span {
+  display: none !important;
+}
+
+/* Desktop keeps the architecture but allows slightly more breathing room. */
+@media (min-width: 761px) {
+  .marketplaceBestSellerItem,
+  .marketplaceBestSellerCarousel .productCard,
+  .marketplaceBestSellerCarousel .autoPartsProductCard {
+    flex-basis: 210px;
+    width: 210px !important;
+    min-width: 210px !important;
+  }
+
+  .marketplaceBestSellerCarousel .productImage {
+    width: 210px !important;
+    min-width: 210px !important;
+    height: 210px !important;
+    min-height: 210px !important;
+  }
+}
+
+/* Phone dimensions match the Darik Customer App source of truth. */
+@media (max-width: 760px) {
+  .marketplaceCategoryNav {
+    margin-top: 12px;
+    margin-bottom: 12px;
+  }
+
+  .marketplaceCategoryItem {
+    flex-basis: 74px;
+    width: 74px;
+    min-width: 74px;
+  }
+
+  .marketplaceCategoryCircle {
+    width: 64px;
+    height: 64px;
+  }
+
+  .marketplaceListingHeader h3 {
+    font-size: 21px;
+  }
+
+  .marketplaceBestSellerStack {
+    gap: 26px;
+  }
+
+  .marketplaceBestSellerDepartmentTitle {
+    font-size: 16px;
+    line-height: 20px;
+  }
+
+  .marketplaceBestSellerItem,
+  .marketplaceBestSellerCarousel .productCard,
+  .marketplaceBestSellerCarousel .autoPartsProductCard {
+    flex: 0 0 154px !important;
+    width: 154px !important;
+    min-width: 154px !important;
+  }
+
+  .marketplaceBestSellerCarousel .productImage {
+    width: 154px !important;
+    min-width: 154px !important;
+    height: 154px !important;
+    min-height: 154px !important;
+  }
+
+  .marketplaceBestSellerCarousel {
+    gap: 18px;
+  }
+
+  .marketplaceBestSellerCarousel .productBody h3 {
+    font-size: 14px !important;
+  }
+
+  .marketplaceBestSellerCarousel .productFooter > div:first-child > strong,
+  .marketplaceBestSellerCarousel .productFooter strong {
+    font-size: 16px !important;
+  }
+
+  .marketplaceCategoryProductList .productImage {
+    flex-basis: 112px !important;
+    width: 112px !important;
+    min-width: 112px !important;
+    height: 112px !important;
+    min-height: 112px !important;
+  }
+}
