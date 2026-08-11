@@ -3591,3 +3591,85 @@
     padding-top: 5px;
   }
 }
+
+
+/* ========================================================================== */
+/* DARIK 088 - RESILIENT VIDEO PLAYBACK STATE / FIRST-PLAY POLISH              */
+/* Play is an action, not a permanent watermark over moving product footage.   */
+/* ========================================================================== */
+
+.videoFramePlaybackIdle .videoBackdrop {
+  opacity: 0.72;
+}
+
+.videoFramePlaybackActive .videoBackdrop {
+  /*
+   * Once real frames are moving, the blurred photo should become supporting
+   * atmosphere rather than visually competing with the video.
+   */
+  opacity: 0.34;
+  filter: blur(38px) saturate(0.82) brightness(0.48);
+}
+
+.videoFramePlaybackActive video {
+  /*
+   * Do not apply decorative filtering to already-compressed moving footage.
+   * GPU compositing helps Safari keep the short clip stable during playback.
+   */
+  filter: none;
+  backface-visibility: hidden;
+  transform: translateZ(0);
+  will-change: transform;
+}
+
+.videoPlaybackSpinner {
+  position: absolute;
+  z-index: 7;
+  left: 50%;
+  top: 50%;
+  width: 30px;
+  height: 30px;
+  margin: -15px 0 0 -15px;
+  border: 3px solid rgba(255, 255, 255, 0.34);
+  border-top-color: rgba(255, 255, 255, 0.96);
+  border-radius: 50%;
+  pointer-events: none;
+  animation: darikVideoPlaybackSpin 680ms linear infinite;
+  filter: drop-shadow(0 5px 14px rgba(2, 6, 23, 0.3));
+}
+
+.videoFrame[data-playback="starting"] .videoPlayButton,
+.videoFrame[data-playback="playing"] .videoPlayButton {
+  display: none !important;
+}
+
+@media (max-width: 900px) {
+  .videoFramePlaybackActive video {
+    /*
+     * Keep the video uncropped. Remove the old decorative shadow during motion
+     * because it makes lower-bitrate frames look softer than they really are.
+     */
+    object-fit: contain;
+    filter: none;
+    transform: translateZ(0);
+  }
+
+  .videoPlaybackSpinner {
+    width: 26px;
+    height: 26px;
+    margin: -13px 0 0 -13px;
+    border-width: 2px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .videoPlaybackSpinner {
+    animation-duration: 1.4s;
+  }
+}
+
+@keyframes darikVideoPlaybackSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}

@@ -5,6 +5,7 @@
 // DARIK_CUSTOMER_PRODUCT_EXECUTIVE_SHOWCASE_081
 // DARIK_CUSTOMER_PRODUCT_PORTFOLIO_FINISH_082
 // DARIK_CUSTOMER_PRODUCT_FINAL_RESTRAINT_083
+// DARIK_CUSTOMER_VIDEO_PLAYBACK_STATE_088
 
 import {
   useEffect,
@@ -229,36 +230,75 @@ function ProductVideo({
   onExpand: () => void;
 }) {
   const videoRef = useRef<HTMLVideoElement | null>(null);
-  const [playing, setPlaying] = useState(false);
+  const [playbackState, setPlaybackState] = useState<
+    "idle" | "starting" | "playing" | "paused"
+  >("idle");
+
+  const playbackActive =
+    playbackState === "starting" ||
+    playbackState === "playing";
 
   useEffect(() => {
     if (active) return;
     const video = videoRef.current;
     if (!video) return;
     video.pause();
-    setPlaying(false);
+    setPlaybackState(video.currentTime > 0 ? "paused" : "idle");
   }, [active]);
 
   async function togglePlayback() {
     const video = videoRef.current;
     if (!video) return;
 
-    if (video.paused) {
+    if (video.paused || video.ended) {
       try {
+        if (video.ended) {
+          video.currentTime = 0;
+        }
+
+        // Hide the giant Play control immediately. Safari may take a fraction
+        // of a second before its onPlaying event fires even though the tap is
+        // valid and playback is already being prepared.
+        setPlaybackState("starting");
         await video.play();
-        setPlaying(true);
+
+        if (!video.paused && !video.ended) {
+          setPlaybackState("playing");
+        }
       } catch {
-        setPlaying(false);
+        setPlaybackState(video.currentTime > 0 ? "paused" : "idle");
       }
       return;
     }
 
     video.pause();
-    setPlaying(false);
+    setPlaybackState("paused");
+  }
+
+  function syncPlayingState() {
+    const video = videoRef.current;
+    if (!video || video.paused || video.ended) return;
+    setPlaybackState("playing");
+  }
+
+  function syncPausedState() {
+    const video = videoRef.current;
+    if (!video) return;
+
+    window.setTimeout(() => {
+      const current = videoRef.current;
+      if (!current || !current.paused || current.ended) return;
+      setPlaybackState(current.currentTime > 0 ? "paused" : "idle");
+    }, 60);
   }
 
   return (
-    <div className={styles.videoFrame}>
+    <div
+      className={`${styles.videoFrame} ${
+        playbackActive ? styles.videoFramePlaybackActive : styles.videoFramePlaybackIdle
+      }`}
+      data-playback={playbackState}
+    >
       {poster ? (
         <img
           className={styles.videoBackdrop}
@@ -274,26 +314,50 @@ function ProductVideo({
         src={url}
         muted
         playsInline
-        preload="metadata"
+        preload="auto"
         poster={poster}
         aria-label={`${name} product video`}
         onClick={togglePlayback}
-        onPlay={() => setPlaying(true)}
-        onPause={() => setPlaying(false)}
-        onEnded={() => setPlaying(false)}
+        onPlay={syncPlayingState}
+        onPlaying={syncPlayingState}
+        onCanPlay={syncPlayingState}
+        onTimeUpdate={syncPlayingState}
+        onWaiting={() => {
+          const video = videoRef.current;
+          if (video && !video.paused && !video.ended) {
+            setPlaybackState("starting");
+          }
+        }}
+        onPause={syncPausedState}
+        onEnded={() => {
+          const video = videoRef.current;
+          if (video) {
+            video.currentTime = 0;
+          }
+          setPlaybackState("idle");
+        }}
       />
 
       <span className={styles.videoStatus}>Muted</span>
 
-      {!playing ? (
+      {playbackState === "idle" || playbackState === "paused" ? (
         <button
           type="button"
           className={styles.videoPlayButton}
           onClick={togglePlayback}
-          aria-label={`Play ${name} product video`}
+          aria-label={`${
+            playbackState === "paused" ? "Resume" : "Play"
+          } ${name} product video`}
         >
           <PlayIcon />
         </button>
+      ) : null}
+
+      {playbackState === "starting" ? (
+        <span
+          className={styles.videoPlaybackSpinner}
+          aria-label="Loading video"
+        />
       ) : null}
 
       <button
