@@ -2,6 +2,7 @@
 
 // DARIK_CUSTOMER_PRODUCT_DETAIL_BEAUTY_079
 // DARIK_CUSTOMER_PRODUCT_VIEWPORT_MEDIA_PERFECTION_080
+// DARIK_CUSTOMER_PRODUCT_EXECUTIVE_SHOWCASE_081
 
 import {
   useEffect,
@@ -11,6 +12,7 @@ import {
   type CSSProperties,
   type ReactNode,
 } from "react";
+import { createPortal } from "react-dom";
 import { supabase } from "@/lib/supabaseBrowser";
 import styles from "./productDetailExperience.module.css";
 
@@ -193,6 +195,108 @@ function ShareIcon() {
       <circle cx="18" cy="19" r="2.5" />
       <path d="m8.2 10.8 7.5-4.4M8.2 13.2l7.5 4.4" />
     </Icon>
+  );
+}
+
+
+function PlayIcon() {
+  return (
+    <svg
+      aria-hidden="true"
+      viewBox="0 0 24 24"
+      width="25"
+      height="25"
+      fill="currentColor"
+    >
+      <path d="M8.3 5.4c0-1.1 1.2-1.7 2.1-1.1l8.1 6.5c.8.6.8 1.8 0 2.4l-8.1 6.5c-.9.7-2.1.1-2.1-1.1V5.4Z" />
+    </svg>
+  );
+}
+
+function ProductVideo({
+  url,
+  poster,
+  name,
+  active,
+  onExpand,
+}: {
+  url: string;
+  poster?: string;
+  name: string;
+  active: boolean;
+  onExpand: () => void;
+}) {
+  const videoRef = useRef<HTMLVideoElement | null>(null);
+  const [playing, setPlaying] = useState(false);
+
+  useEffect(() => {
+    if (active) return;
+    const video = videoRef.current;
+    if (!video) return;
+    video.pause();
+    setPlaying(false);
+  }, [active]);
+
+  async function togglePlayback() {
+    const video = videoRef.current;
+    if (!video) return;
+
+    if (video.paused) {
+      try {
+        await video.play();
+        setPlaying(true);
+      } catch {
+        setPlaying(false);
+      }
+      return;
+    }
+
+    video.pause();
+    setPlaying(false);
+  }
+
+  return (
+    <div className={styles.videoFrame}>
+      <video
+        ref={videoRef}
+        src={url}
+        muted
+        playsInline
+        preload="metadata"
+        poster={poster}
+        aria-label={`${name} product video`}
+        onClick={togglePlayback}
+        onPlay={() => setPlaying(true)}
+        onPause={() => setPlaying(false)}
+        onEnded={() => setPlaying(false)}
+      />
+
+      <span className={styles.videoStatus}>Muted</span>
+
+      {!playing ? (
+        <button
+          type="button"
+          className={styles.videoPlayButton}
+          onClick={togglePlayback}
+          aria-label={`Play ${name} product video`}
+        >
+          <PlayIcon />
+        </button>
+      ) : null}
+
+      <button
+        type="button"
+        className={styles.videoExpandButton}
+        onClick={(event) => {
+          event.stopPropagation();
+          onExpand();
+        }}
+        aria-label="Open product video full screen"
+      >
+        <ExpandIcon />
+        <span>Full screen</span>
+      </button>
+    </div>
   );
 }
 
@@ -413,7 +517,9 @@ export default function ProductDetailExperience({
     }
   }
 
-  return (
+  if (typeof document === "undefined") return null;
+
+  return createPortal(
     <div className={styles.overlay} style={rootStyle} role="dialog" aria-modal="true" aria-label={`${name} product details`}>
       <div className={styles.ambientOne} />
       <div className={styles.ambientTwo} />
@@ -461,26 +567,13 @@ export default function ProductDetailExperience({
                           </span>
                         </button>
                       ) : (
-                        <div className={styles.videoFrame}>
-                          <video
-                            src={slide.url}
-                            controls
-                            playsInline
-                            preload="metadata"
-                            poster={photos[0] || undefined}
-                            aria-label={`${name} product video`}
-                          />
-                          <span className={styles.videoBadge}>Product video</span>
-                          <button
-                            type="button"
-                            className={styles.videoExpandButton}
-                            onClick={() => openViewer(index)}
-                            aria-label="Open product video full screen"
-                          >
-                            <ExpandIcon />
-                            <span>Full screen</span>
-                          </button>
-                        </div>
+                        <ProductVideo
+                          url={slide.url}
+                          poster={photos[0] || undefined}
+                          name={name}
+                          active={galleryIndex === index}
+                          onExpand={() => openViewer(index)}
+                        />
                       )}
                     </div>
                   ))}
@@ -793,6 +886,7 @@ export default function ProductDetailExperience({
           ) : null}
         </div>
       ) : null}
-    </div>
+    </div>,
+    document.body
   );
 }
