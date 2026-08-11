@@ -3,6 +3,7 @@
 // DARIK_FURNITURE_OPTIONAL_ITEM_VIDEO_068
 // DARIK_HOME_APPLIANCES_SHORT_ITEM_VIDEO_071
 // DARIK_DUAL_SIZE_PRODUCT_PHOTOS_078
+// DARIK_CUSTOMER_PRODUCT_DETAIL_BEAUTY_079
 // DARIK_MECHANICS_LAB_048
 
 // DARIK_DETAILS_MODAL_SCROLL_FIX_034
@@ -15,7 +16,7 @@ import { useParams } from "next/navigation";
 import { supabase } from "@/lib/supabaseBrowser";
 import { mechanicsFieldLabel, readMechanicsLabField } from "@/lib/darikMechanicsLab";
 import styles from "./storefront.module.css";
-import FurnitureItemVideo from "./FurnitureItemVideo";
+import ProductDetailExperience from "./ProductDetailExperience";
 
 type Storefront = {
   id: string;
@@ -119,6 +120,12 @@ type Product = {
   official_product_photo_url: string | null;
   official_product_thumbnail_url: string | null;
   official_product_photo_url_2: string | null;
+  direct_compare_at_price?: number | string | null;
+  direct_sold_by_weight?: boolean | null;
+  direct_weight_unit?: string | null;
+  direct_weight_step?: number | string | null;
+  direct_size_options?: Array<{ label?: string | null }> | null;
+  direct_shoe_sizes?: Array<{ eu?: string | null; us?: string | null }> | null;
   storefront_featured: boolean;
   storefront_sort_order: number | string;
 };
@@ -618,6 +625,18 @@ export default function DarikDirectStorefrontPage() {
     setPreviewMechanicsField(readMechanicsLabField());
   }, []);
 
+  useEffect(() => {
+    const syncProductFromUrl = () => {
+      const productId = new URLSearchParams(window.location.search)
+        .get("product")
+        ?.trim();
+      setActiveProductId(productId || "");
+    };
+
+    syncProductFromUrl();
+    window.addEventListener("popstate", syncProductFromUrl);
+    return () => window.removeEventListener("popstate", syncProductFromUrl);
+  }, []);
 
   const [storefront, setStorefront] = useState<Storefront | null>(null);
   const [publicStatus, setPublicStatus] = useState<PublicStoreStatus | null>(null);
@@ -629,6 +648,7 @@ export default function DarikDirectStorefrontPage() {
   const [selectedVehicleModel, setSelectedVehicleModel] = useState("all");
   const [selectedVehicleYear, setSelectedVehicleYear] = useState("all");
   const [cart, setCart] = useState<CartLine[]>([]);
+  const [activeProductId, setActiveProductId] = useState("");
   const [cartOpen, setCartOpen] = useState(false);
   const [onlineCheckoutOpen, setOnlineCheckoutOpen] = useState(false);
   const [checkoutForm, setCheckoutForm] = useState<OnlineCheckoutForm>({
@@ -884,9 +904,6 @@ export default function DarikDirectStorefrontPage() {
     .trim()
     .toLowerCase();
   const isAutoParts = effectiveBusinessType === "auto_parts";
-  const isFurnitureStore = ["furniture", "home_appliances"].includes(
-    String(effectiveBusinessType || "retail").trim().toLowerCase()
-  );
   const isGroceryStore = [
     "supermarket",
     "grocery",
@@ -1076,6 +1093,26 @@ export default function DarikDirectStorefrontPage() {
   const orderTotal = cartSubtotal + deliveryFee;
   const minimumOrder = Number(storefront?.minimum_order ?? 0);
   const minimumReached = cartSubtotal >= minimumOrder;
+  const activeProduct = useMemo(
+    () => products.find((product) => product.id === activeProductId) ?? null,
+    [activeProductId, products]
+  );
+
+  function openProductDetail(product: Product) {
+    setActiveProductId(product.id);
+
+    const url = new URL(window.location.href);
+    url.searchParams.set("product", product.id);
+    window.history.replaceState(window.history.state, "", url.toString());
+  }
+
+  function closeProductDetail() {
+    setActiveProductId("");
+
+    const url = new URL(window.location.href);
+    url.searchParams.delete("product");
+    window.history.replaceState(window.history.state, "", url.toString());
+  }
 
   function addToCart(product: Product) {
     setOrderConfirmation(null);
@@ -1644,63 +1681,37 @@ export default function DarikDirectStorefrontPage() {
           ? money(product.app_price)
           : "Contact for price / \u062a\u0648\u0627\u0635\u0644 \u0644\u0644\u0633\u0639\u0631";
     return (
-      <article className={`${styles.productCard} ${isAutoPartsTheme ? styles.autoPartsProductCard : ""}`} key={product.id}>
+      <article
+        className={`${styles.productCard} ${isAutoPartsTheme ? styles.autoPartsProductCard : ""}`}
+        key={product.id}
+        role="button"
+        tabIndex={0}
+        aria-label={`Open ${name} product details`}
+        style={{ cursor: "pointer" }}
+        onClick={(event) => {
+          const target = event.target;
+          if (target instanceof Element && target.closest("button,a")) return;
+          openProductDetail(product);
+        }}
+        onKeyDown={(event) => {
+          if (event.key !== "Enter" && event.key !== " ") return;
+          if (event.target !== event.currentTarget) return;
+          event.preventDefault();
+          openProductDetail(product);
+        }}
+      >
         <div className={styles.productImage}>
-        <FurnitureItemVideo
-          enabled={isFurnitureStore}
-          productId={product.id}
-          productName={product.name}
-        />
-
           {photo ? (
             <img
               src={thumbnailPhoto || photo}
               alt={name}
               loading="lazy"
               decoding="async"
-              role="button"
-              tabIndex={0}
-              title="View full photo / عرض الصورة كاملة"
-              aria-label={`View full photo for ${name}`}
-              style={{ cursor: "zoom-in" }}
+              title="Open product / افتح المنتج"
               onError={(event) => {
-                if (
-                  photo &&
-                  event.currentTarget.src !== photo
-                ) {
+                if (photo && event.currentTarget.src !== photo) {
                   event.currentTarget.src = photo;
                 }
-              }}
-              onClick={() => {
-                if (!photo) return;
-
-                const opened = window.open(
-                  photo,
-                  "_blank",
-                  "noopener,noreferrer"
-                );
-
-                if (opened) opened.opener = null;
-              }}
-              onKeyDown={(event) => {
-                if (!photo) return;
-
-                if (
-                  event.key !== "Enter" &&
-                  event.key !== " "
-                ) {
-                  return;
-                }
-
-                event.preventDefault();
-
-                const opened = window.open(
-                  photo,
-                  "_blank",
-                  "noopener,noreferrer"
-                );
-
-                if (opened) opened.opener = null;
               }}
             />
           ) : (
@@ -1842,6 +1853,33 @@ export default function DarikDirectStorefrontPage() {
       data-category-count={String(visibleCategories.length)}
       data-direct-purchase={hasDirectPurchaseProducts ? "yes" : "no"}
     >
+      <ProductDetailExperience
+        open={Boolean(activeProduct)}
+        product={activeProduct}
+        storeName={storefront.display_name}
+        storeSlug={storefront.slug}
+        primaryColor={fieldDesign.primaryColor}
+        accentColor={fieldDesign.accentColor}
+        phoneHref={phone}
+        whatsappNumber={storefront.whatsapp_number}
+        showPrices={showPrices}
+        showOrdering={showOrdering}
+        acceptingOrders={effectiveAcceptingOrders}
+        deliveryEnabled={deliveryEnabled}
+        pickupEnabled={pickupEnabled}
+        estimatedDeliveryMinutes={storefront.estimated_delivery_minutes}
+        inCart={
+          activeProduct
+            ? cart.find((line) => line.productId === activeProduct.id)?.quantity ?? 0
+            : 0
+        }
+        onClose={closeProductDetail}
+        onAddToCart={() => {
+          if (!activeProduct) return;
+          addToCart(activeProduct);
+        }}
+      />
+
       {previewMechanicsField ? (
         <div className={styles.mechanicsPreviewBanner}>
           <strong>MECHANICS TEST / اختبار الخصائص</strong>
