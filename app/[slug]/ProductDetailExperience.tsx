@@ -1,6 +1,7 @@
 "use client";
 
 // DARIK_CUSTOMER_PRODUCT_DETAIL_BEAUTY_079
+// DARIK_CUSTOMER_PRODUCT_VIEWPORT_MEDIA_PERFECTION_080
 
 import {
   useEffect,
@@ -370,6 +371,19 @@ export default function ProductDetailExperience({
     setGalleryIndex(index);
   }
 
+  function openViewer(index: number) {
+    galleryRef.current
+      ?.querySelectorAll<HTMLVideoElement>("video")
+      .forEach((video) => video.pause());
+    setLightboxIndex(index);
+  }
+
+  function scrollViewer(index: number) {
+    const width = lightboxRef.current?.clientWidth || 0;
+    lightboxRef.current?.scrollTo({ left: width * index, behavior: "smooth" });
+    setLightboxIndex(index);
+  }
+
   function handleGalleryScroll() {
     const node = galleryRef.current;
     if (!node || node.clientWidth <= 0) return;
@@ -437,7 +451,7 @@ export default function ProductDetailExperience({
                         <button
                           type="button"
                           className={styles.photoButton}
-                          onClick={() => setLightboxIndex(Math.min(index, photos.length - 1))}
+                          onClick={() => openViewer(index)}
                           aria-label={`Enlarge ${slide.label}`}
                         >
                           <img src={slide.url} alt={`${name} — ${slide.label}`} draggable={false} />
@@ -457,6 +471,15 @@ export default function ProductDetailExperience({
                             aria-label={`${name} product video`}
                           />
                           <span className={styles.videoBadge}>Product video</span>
+                          <button
+                            type="button"
+                            className={styles.videoExpandButton}
+                            onClick={() => openViewer(index)}
+                            aria-label="Open product video full screen"
+                          >
+                            <ExpandIcon />
+                            <span>Full screen</span>
+                          </button>
                         </div>
                       )}
                     </div>
@@ -683,40 +706,90 @@ export default function ProductDetailExperience({
         </div>
       </section>
 
-      {lightboxIndex !== null && photos.length > 0 ? (
-        <div className={styles.lightbox} role="dialog" aria-modal="true" aria-label={`${name} full-size photos`}>
+      {lightboxIndex !== null && slides.length > 0 ? (
+        <div
+          className={styles.lightbox}
+          role="dialog"
+          aria-modal="true"
+          aria-label={`${name} full-screen product media`}
+        >
           <div className={styles.lightboxTop}>
             <span>{name}</span>
-            <strong>{lightboxIndex + 1} / {photos.length}</strong>
-            <button type="button" onClick={() => setLightboxIndex(null)} aria-label="Close full-size photo">
+            <strong>
+              {slides[lightboxIndex]?.kind === "video" ? "VIDEO" : "PHOTO"} · {lightboxIndex + 1} / {slides.length}
+            </strong>
+            <button
+              type="button"
+              onClick={() => setLightboxIndex(null)}
+              aria-label="Close full-screen product media"
+            >
               <CloseIcon />
             </button>
           </div>
 
-          <div className={styles.lightboxGallery} ref={lightboxRef} onScroll={handleLightboxScroll}>
-            {photos.map((url, index) => (
-              <div className={styles.lightboxSlide} key={`lightbox-${url}`}>
-                <img src={url} alt={`${name} — enlarged photo ${index + 1}`} draggable={false} />
+          <div
+            className={styles.lightboxGallery}
+            ref={lightboxRef}
+            onScroll={handleLightboxScroll}
+          >
+            {slides.map((slide, index) => (
+              <div
+                className={`${styles.lightboxSlide} ${slide.kind === "video" ? styles.lightboxVideoSlide : ""}`}
+                key={`lightbox-${slide.kind}-${slide.url}`}
+              >
+                {slide.kind === "photo" ? (
+                  <img
+                    src={slide.url}
+                    alt={`${name} — enlarged photo ${index + 1}`}
+                    draggable={false}
+                  />
+                ) : (
+                  <video
+                    src={slide.url}
+                    controls
+                    playsInline
+                    preload="metadata"
+                    poster={photos[0] || undefined}
+                    aria-label={`${name} full-screen product video`}
+                  />
+                )}
               </div>
             ))}
           </div>
 
-          {photos.length > 1 ? (
-            <div className={styles.lightboxDots}>
-              {photos.map((url, index) => (
-                <button
-                  type="button"
-                  key={`lightbox-dot-${url}`}
-                  className={index === lightboxIndex ? styles.lightboxDotActive : ""}
-                  onClick={() => {
-                    const width = lightboxRef.current?.clientWidth || 0;
-                    lightboxRef.current?.scrollTo({ left: width * index, behavior: "smooth" });
-                    setLightboxIndex(index);
-                  }}
-                  aria-label={`Show enlarged photo ${index + 1}`}
-                />
-              ))}
-            </div>
+          {slides.length > 1 ? (
+            <>
+              <button
+                type="button"
+                className={`${styles.lightboxArrow} ${styles.lightboxArrowLeft}`}
+                onClick={() => scrollViewer(Math.max(0, lightboxIndex - 1))}
+                disabled={lightboxIndex === 0}
+                aria-label="Previous full-screen media"
+              >
+                <ArrowIcon direction="left" />
+              </button>
+              <button
+                type="button"
+                className={`${styles.lightboxArrow} ${styles.lightboxArrowRight}`}
+                onClick={() => scrollViewer(Math.min(slides.length - 1, lightboxIndex + 1))}
+                disabled={lightboxIndex >= slides.length - 1}
+                aria-label="Next full-screen media"
+              >
+                <ArrowIcon direction="right" />
+              </button>
+
+              <div className={styles.lightboxDots}>
+                {slides.map((slide, index) => (
+                  <button
+                    type="button"
+                    key={`lightbox-dot-${slide.kind}-${slide.url}`}
+                    className={index === lightboxIndex ? styles.lightboxDotActive : ""}
+                    onClick={() => scrollViewer(index)}
+                    aria-label={`Show full-screen ${slide.label}`}
+                  />
+                ))}
+              </div>
+            </>
           ) : null}
         </div>
       ) : null}
