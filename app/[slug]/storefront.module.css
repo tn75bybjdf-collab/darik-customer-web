@@ -17686,3 +17686,1292 @@
     display: none !important;
   }
 }
+
+/* DARIK_UNIQUE_TRADE_RETAIL_THEMES_100
+   Unique visual identities for:
+   tires, hardware, building_materials, electrical_supplies, plumbing, tools.
+   Visuals follow data-theme-field. Retail mechanics remain controlled by data-business.
+   Darik Marketplace catalog architecture is preserved. */
+
+/* ========================================================================== */
+/* THEME TOKENS                                                                */
+/* ========================================================================== */
+
+.page[data-theme-field="tires"] {
+  --t-bg: #0d1012;
+  --t-panel: #171b1e;
+  --t-panel-soft: #20262a;
+  --t-ink: #f2f5f6;
+  --t-muted: #9da5a8;
+  --t-accent: #b6ff3b;
+  --t-accent-2: #d9ff8a;
+  --t-line: rgba(182,255,59,.12);
+  --t-hero-radius: 18px;
+  --t-card-radius: 12px;
+  background:
+    radial-gradient(circle at 85% 4%, rgba(182,255,59,.10), transparent 19rem),
+    linear-gradient(145deg, rgba(255,255,255,.025) 0 10%, transparent 10% 100%),
+    linear-gradient(180deg, #0b0e10 0%, #121619 48%, #0b0e10 100%) !important;
+}
+
+.page[data-theme-field="hardware"] {
+  --t-bg: #f4efe4;
+  --t-panel: #fffdf8;
+  --t-panel-soft: #ede3cf;
+  --t-ink: #26352d;
+  --t-muted: #766e61;
+  --t-accent: #315f4d;
+  --t-accent-2: #d79d4a;
+  --t-line: rgba(49,95,77,.10);
+  --t-hero-radius: 10px;
+  --t-card-radius: 9px;
+  background:
+    linear-gradient(rgba(49,95,77,.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(49,95,77,.025) 1px, transparent 1px),
+    linear-gradient(180deg, #f2ebde 0%, #fffdf8 48%, #eee5d6 100%) !important;
+  background-size: 34px 34px, 34px 34px, auto !important;
+}
+
+.page[data-theme-field="building_materials"] {
+  --t-bg: #e8e4dd;
+  --t-panel: #f7f4ef;
+  --t-panel-soft: #ddd5c8;
+  --t-ink: #2f3234;
+  --t-muted: #74716d;
+  --t-accent: #a65335;
+  --t-accent-2: #c9a773;
+  --t-line: rgba(47,50,52,.11);
+  --t-hero-radius: 6px;
+  --t-card-radius: 6px;
+  background:
+    linear-gradient(135deg, rgba(47,50,52,.035) 25%, transparent 25%) 0 0 / 28px 28px,
+    linear-gradient(315deg, rgba(166,83,53,.025) 25%, transparent 25%) 0 0 / 28px 28px,
+    linear-gradient(180deg, #e4dfd7 0%, #f6f3ee 48%, #ddd7cd 100%) !important;
+}
+
+.page[data-theme-field="electrical_supplies"] {
+  --t-bg: #171525;
+  --t-panel: #211e31;
+  --t-panel-soft: #2a263d;
+  --t-ink: #f7f5ff;
+  --t-muted: #aaa5bb;
+  --t-accent: #ffd43b;
+  --t-accent-2: #8e7dff;
+  --t-line: rgba(255,212,59,.12);
+  --t-hero-radius: 16px;
+  --t-card-radius: 10px;
+  background:
+    radial-gradient(circle at 12% 4%, rgba(255,212,59,.08), transparent 19rem),
+    radial-gradient(circle at 88% 14%, rgba(142,125,255,.11), transparent 19rem),
+    linear-gradient(180deg, #13111f 0%, #1b1828 48%, #12101c 100%) !important;
+}
+
+.page[data-theme-field="plumbing"] {
+  --t-bg: #eff7f8;
+  --t-panel: #ffffff;
+  --t-panel-soft: #dff1f2;
+  --t-ink: #153a43;
+  --t-muted: #657f85;
+  --t-accent: #167a8b;
+  --t-accent-2: #b87333;
+  --t-line: rgba(22,122,139,.10);
+  --t-hero-radius: 22px;
+  --t-card-radius: 16px;
+  background:
+    radial-gradient(circle at 88% 2%, rgba(22,122,139,.10), transparent 20rem),
+    radial-gradient(circle at 8% 16%, rgba(184,115,51,.07), transparent 18rem),
+    linear-gradient(180deg, #edf6f7 0%, #ffffff 48%, #e8f2f3 100%) !important;
+}
+
+.page[data-theme-field="tools"] {
+  --t-bg: #20221d;
+  --t-panel: #2a2d26;
+  --t-panel-soft: #34382f;
+  --t-ink: #f4f2e8;
+  --t-muted: #aaa99b;
+  --t-accent: #f29934;
+  --t-accent-2: #a7b36e;
+  --t-line: rgba(242,153,52,.12);
+  --t-hero-radius: 8px;
+  --t-card-radius: 8px;
+  background:
+    linear-gradient(120deg, rgba(242,153,52,.04) 0 9%, transparent 9% 100%),
+    radial-gradient(circle at 88% 12%, rgba(167,179,110,.08), transparent 18rem),
+    linear-gradient(180deg, #1b1d19 0%, #252820 48%, #1c1e19 100%) !important;
+}
+
+/* ========================================================================== */
+/* SHARED PREMIUM COMPOSITION USING THEME TOKENS                               */
+/* ========================================================================== */
+
+.page:is(
+  [data-theme-field="tires"],
+  [data-theme-field="hardware"],
+  [data-theme-field="building_materials"],
+  [data-theme-field="electrical_supplies"],
+  [data-theme-field="plumbing"],
+  [data-theme-field="tools"]
+) {
+  min-height: 100dvh;
+  padding-bottom: max(18px, env(safe-area-inset-bottom)) !important;
+  color: var(--t-ink) !important;
+}
+
+.page:is(
+  [data-theme-field="tires"],
+  [data-theme-field="hardware"],
+  [data-theme-field="building_materials"],
+  [data-theme-field="electrical_supplies"],
+  [data-theme-field="plumbing"],
+  [data-theme-field="tools"]
+) .announcementBar {
+  min-height: 32px !important;
+  border-bottom: 1px solid var(--t-line) !important;
+  background: var(--t-ink) !important;
+  color: var(--t-bg) !important;
+  box-shadow: none !important;
+}
+
+.page:is(
+  [data-theme-field="tires"],
+  [data-theme-field="hardware"],
+  [data-theme-field="building_materials"],
+  [data-theme-field="electrical_supplies"],
+  [data-theme-field="plumbing"],
+  [data-theme-field="tools"]
+) .announcementBar strong,
+.page:is(
+  [data-theme-field="tires"],
+  [data-theme-field="hardware"],
+  [data-theme-field="building_materials"],
+  [data-theme-field="electrical_supplies"],
+  [data-theme-field="plumbing"],
+  [data-theme-field="tools"]
+) .announcementBar span {
+  color: var(--t-bg) !important;
+}
+
+.page:is(
+  [data-theme-field="tires"],
+  [data-theme-field="hardware"],
+  [data-theme-field="building_materials"],
+  [data-theme-field="electrical_supplies"],
+  [data-theme-field="plumbing"],
+  [data-theme-field="tools"]
+) .header {
+  min-height: 64px !important;
+  border-bottom: 1px solid var(--t-line) !important;
+  background: color-mix(in srgb, var(--t-bg) 92%, transparent) !important;
+  color: var(--t-ink) !important;
+  box-shadow: 0 8px 26px rgba(0,0,0,.06) !important;
+  backdrop-filter: blur(18px) saturate(125%);
+  -webkit-backdrop-filter: blur(18px) saturate(125%);
+}
+
+.page:is(
+  [data-theme-field="tires"],
+  [data-theme-field="hardware"],
+  [data-theme-field="building_materials"],
+  [data-theme-field="electrical_supplies"],
+  [data-theme-field="plumbing"],
+  [data-theme-field="tools"]
+) .headerLogo {
+  border: 1px solid var(--t-line) !important;
+  background: #fff !important;
+  box-shadow: 0 7px 18px rgba(0,0,0,.06) !important;
+}
+
+.page:is(
+  [data-theme-field="tires"],
+  [data-theme-field="hardware"],
+  [data-theme-field="building_materials"],
+  [data-theme-field="electrical_supplies"],
+  [data-theme-field="plumbing"],
+  [data-theme-field="tools"]
+) .storeIdentity strong {
+  color: var(--t-ink) !important;
+}
+
+.page:is(
+  [data-theme-field="tires"],
+  [data-theme-field="hardware"],
+  [data-theme-field="building_materials"],
+  [data-theme-field="electrical_supplies"],
+  [data-theme-field="plumbing"],
+  [data-theme-field="tools"]
+) .storeIdentity span {
+  color: var(--t-muted) !important;
+}
+
+.page:is(
+  [data-theme-field="tires"],
+  [data-theme-field="hardware"],
+  [data-theme-field="building_materials"],
+  [data-theme-field="electrical_supplies"],
+  [data-theme-field="plumbing"],
+  [data-theme-field="tools"]
+) .headerActions button,
+.page:is(
+  [data-theme-field="tires"],
+  [data-theme-field="hardware"],
+  [data-theme-field="building_materials"],
+  [data-theme-field="electrical_supplies"],
+  [data-theme-field="plumbing"],
+  [data-theme-field="tools"]
+) .headerActions .cartButton {
+  border: 1px solid var(--t-line) !important;
+  background: var(--t-panel) !important;
+  color: var(--t-ink) !important;
+  box-shadow: none !important;
+}
+
+.page:is(
+  [data-theme-field="tires"],
+  [data-theme-field="hardware"],
+  [data-theme-field="building_materials"],
+  [data-theme-field="electrical_supplies"],
+  [data-theme-field="plumbing"],
+  [data-theme-field="tools"]
+) .cartCount {
+  background: var(--t-accent) !important;
+  color: #111 !important;
+}
+
+.page:is(
+  [data-theme-field="tires"],
+  [data-theme-field="hardware"],
+  [data-theme-field="building_materials"],
+  [data-theme-field="electrical_supplies"],
+  [data-theme-field="plumbing"],
+  [data-theme-field="tools"]
+)[data-hero] .hero {
+  width: min(1180px, calc(100% - 20px)) !important;
+  margin: 10px auto 0 !important;
+  overflow: hidden !important;
+  border: 0 !important;
+  outline: 0 !important;
+  border-radius: var(--t-hero-radius) !important;
+  background-color: var(--t-panel) !important;
+  box-shadow: 0 25px 60px rgba(0,0,0,.18) !important;
+}
+
+.page:is(
+  [data-theme-field="tires"],
+  [data-theme-field="hardware"],
+  [data-theme-field="building_materials"],
+  [data-theme-field="electrical_supplies"],
+  [data-theme-field="plumbing"],
+  [data-theme-field="tools"]
+) .hero::after {
+  content: none !important;
+  display: none !important;
+}
+
+.page:is(
+  [data-theme-field="tires"],
+  [data-theme-field="hardware"],
+  [data-theme-field="building_materials"],
+  [data-theme-field="electrical_supplies"],
+  [data-theme-field="plumbing"],
+  [data-theme-field="tools"]
+) .heroOverlay {
+  background:
+    linear-gradient(
+      90deg,
+      rgba(0,0,0,.82) 0%,
+      rgba(0,0,0,.52) 43%,
+      rgba(0,0,0,.15) 76%,
+      rgba(0,0,0,.03) 100%
+    ),
+    linear-gradient(0deg, rgba(0,0,0,.31), transparent 58%) !important;
+}
+
+.page:is(
+  [data-theme-field="tires"],
+  [data-theme-field="hardware"],
+  [data-theme-field="building_materials"],
+  [data-theme-field="electrical_supplies"],
+  [data-theme-field="plumbing"],
+  [data-theme-field="tools"]
+) .heroContent {
+  min-height: 382px !important;
+  justify-content: flex-end !important;
+  align-items: flex-end !important;
+  padding: 28px 28px 30px !important;
+}
+
+.page:is(
+  [data-theme-field="tires"],
+  [data-theme-field="hardware"],
+  [data-theme-field="building_materials"],
+  [data-theme-field="electrical_supplies"],
+  [data-theme-field="plumbing"],
+  [data-theme-field="tools"]
+) .hero h1,
+.page:is(
+  [data-theme-field="tires"],
+  [data-theme-field="hardware"],
+  [data-theme-field="building_materials"],
+  [data-theme-field="electrical_supplies"],
+  [data-theme-field="plumbing"],
+  [data-theme-field="tools"]
+) .heroCopy h1 {
+  max-width: 670px !important;
+  color: #fff !important;
+  font-weight: 950 !important;
+  letter-spacing: -.055em !important;
+  text-shadow: 0 2px 18px rgba(0,0,0,.24);
+}
+
+.page:is(
+  [data-theme-field="tires"],
+  [data-theme-field="hardware"],
+  [data-theme-field="building_materials"],
+  [data-theme-field="electrical_supplies"],
+  [data-theme-field="plumbing"],
+  [data-theme-field="tools"]
+) .tagline {
+  color: rgba(255,255,255,.80) !important;
+}
+
+.page:is(
+  [data-theme-field="tires"],
+  [data-theme-field="hardware"],
+  [data-theme-field="building_materials"],
+  [data-theme-field="electrical_supplies"],
+  [data-theme-field="plumbing"],
+  [data-theme-field="tools"]
+) .heroLabel,
+.page:is(
+  [data-theme-field="tires"],
+  [data-theme-field="hardware"],
+  [data-theme-field="building_materials"],
+  [data-theme-field="electrical_supplies"],
+  [data-theme-field="plumbing"],
+  [data-theme-field="tools"]
+) .heroLiveStatus,
+.page:is(
+  [data-theme-field="tires"],
+  [data-theme-field="hardware"],
+  [data-theme-field="building_materials"],
+  [data-theme-field="electrical_supplies"],
+  [data-theme-field="plumbing"],
+  [data-theme-field="tools"]
+) .heroHoursChip {
+  border: 1px solid rgba(255,255,255,.14) !important;
+  background: rgba(0,0,0,.26) !important;
+  color: #fff !important;
+  box-shadow: none !important;
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+
+.page:is(
+  [data-theme-field="tires"],
+  [data-theme-field="hardware"],
+  [data-theme-field="building_materials"],
+  [data-theme-field="electrical_supplies"],
+  [data-theme-field="plumbing"],
+  [data-theme-field="tools"]
+) .primaryHeroButton {
+  min-height: 52px !important;
+  border: 0 !important;
+  border-radius: var(--t-card-radius) !important;
+  background: var(--t-accent) !important;
+  color: #111 !important;
+  box-shadow: 0 14px 30px rgba(0,0,0,.14) !important;
+}
+
+.page:is(
+  [data-theme-field="tires"],
+  [data-theme-field="hardware"],
+  [data-theme-field="building_materials"],
+  [data-theme-field="electrical_supplies"],
+  [data-theme-field="plumbing"],
+  [data-theme-field="tools"]
+) .quickInfoStrip,
+.page:is(
+  [data-theme-field="tires"],
+  [data-theme-field="hardware"],
+  [data-theme-field="building_materials"],
+  [data-theme-field="electrical_supplies"],
+  [data-theme-field="plumbing"],
+  [data-theme-field="tools"]
+) .catalogShell,
+.page:is(
+  [data-theme-field="tires"],
+  [data-theme-field="hardware"],
+  [data-theme-field="building_materials"],
+  [data-theme-field="electrical_supplies"],
+  [data-theme-field="plumbing"],
+  [data-theme-field="tools"]
+) .storeStory,
+.page:is(
+  [data-theme-field="tires"],
+  [data-theme-field="hardware"],
+  [data-theme-field="building_materials"],
+  [data-theme-field="electrical_supplies"],
+  [data-theme-field="plumbing"],
+  [data-theme-field="tools"]
+) .partsConcierge,
+.page:is(
+  [data-theme-field="tires"],
+  [data-theme-field="hardware"],
+  [data-theme-field="building_materials"],
+  [data-theme-field="electrical_supplies"],
+  [data-theme-field="plumbing"],
+  [data-theme-field="tools"]
+) .footer {
+  width: min(1180px, calc(100% - 28px)) !important;
+}
+
+.page:is(
+  [data-theme-field="tires"],
+  [data-theme-field="hardware"],
+  [data-theme-field="building_materials"],
+  [data-theme-field="electrical_supplies"],
+  [data-theme-field="plumbing"],
+  [data-theme-field="tools"]
+) .quickInfoStrip {
+  margin: 12px auto 0 !important;
+  gap: 8px !important;
+  border: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.page:is(
+  [data-theme-field="tires"],
+  [data-theme-field="hardware"],
+  [data-theme-field="building_materials"],
+  [data-theme-field="electrical_supplies"],
+  [data-theme-field="plumbing"],
+  [data-theme-field="tools"]
+) .quickInfoStrip > a,
+.page:is(
+  [data-theme-field="tires"],
+  [data-theme-field="hardware"],
+  [data-theme-field="building_materials"],
+  [data-theme-field="electrical_supplies"],
+  [data-theme-field="plumbing"],
+  [data-theme-field="tools"]
+) .quickInfoStrip > button,
+.page:is(
+  [data-theme-field="tires"],
+  [data-theme-field="hardware"],
+  [data-theme-field="building_materials"],
+  [data-theme-field="electrical_supplies"],
+  [data-theme-field="plumbing"],
+  [data-theme-field="tools"]
+) .quickInfoStrip .locationQuickLink,
+.page:is(
+  [data-theme-field="tires"],
+  [data-theme-field="hardware"],
+  [data-theme-field="building_materials"],
+  [data-theme-field="electrical_supplies"],
+  [data-theme-field="plumbing"],
+  [data-theme-field="tools"]
+) .quickInfoStrip .contactQuickLink {
+  border: 1px solid var(--t-line) !important;
+  border-radius: var(--t-card-radius) !important;
+  background: var(--t-panel) !important;
+  color: var(--t-ink) !important;
+  box-shadow: 0 8px 22px rgba(0,0,0,.05) !important;
+}
+
+.page:is(
+  [data-theme-field="tires"],
+  [data-theme-field="hardware"],
+  [data-theme-field="building_materials"],
+  [data-theme-field="electrical_supplies"],
+  [data-theme-field="plumbing"],
+  [data-theme-field="tools"]
+) .quickIcon {
+  background: var(--t-panel-soft) !important;
+  color: var(--t-accent) !important;
+}
+
+.page:is(
+  [data-theme-field="tires"],
+  [data-theme-field="hardware"],
+  [data-theme-field="building_materials"],
+  [data-theme-field="electrical_supplies"],
+  [data-theme-field="plumbing"],
+  [data-theme-field="tools"]
+) .catalogShell {
+  border: 0 !important;
+  background: transparent !important;
+  color: var(--t-ink) !important;
+  box-shadow: none !important;
+}
+
+.page:is(
+  [data-theme-field="tires"],
+  [data-theme-field="hardware"],
+  [data-theme-field="building_materials"],
+  [data-theme-field="electrical_supplies"],
+  [data-theme-field="plumbing"],
+  [data-theme-field="tools"]
+) .searchBox {
+  border: 1px solid var(--t-line) !important;
+  border-radius: var(--t-card-radius) !important;
+  background: var(--t-panel) !important;
+  color: var(--t-muted) !important;
+  box-shadow: 0 8px 22px rgba(0,0,0,.045) !important;
+}
+
+.page:is(
+  [data-theme-field="tires"],
+  [data-theme-field="hardware"],
+  [data-theme-field="building_materials"],
+  [data-theme-field="electrical_supplies"],
+  [data-theme-field="plumbing"],
+  [data-theme-field="tools"]
+) .searchBox input {
+  color: var(--t-ink) !important;
+}
+
+.page:is(
+  [data-theme-field="tires"],
+  [data-theme-field="hardware"],
+  [data-theme-field="building_materials"],
+  [data-theme-field="electrical_supplies"],
+  [data-theme-field="plumbing"],
+  [data-theme-field="tools"]
+) .searchBox input::placeholder {
+  color: var(--t-muted) !important;
+}
+
+.page:is(
+  [data-theme-field="tires"],
+  [data-theme-field="hardware"],
+  [data-theme-field="building_materials"],
+  [data-theme-field="electrical_supplies"],
+  [data-theme-field="plumbing"],
+  [data-theme-field="tools"]
+) .vehicleFilterPanel {
+  border: 1px solid var(--t-line) !important;
+  border-radius: calc(var(--t-card-radius) + 2px) !important;
+  background: var(--t-panel) !important;
+  color: var(--t-ink) !important;
+  box-shadow: 0 9px 23px rgba(0,0,0,.05) !important;
+}
+
+.page:is(
+  [data-theme-field="tires"],
+  [data-theme-field="hardware"],
+  [data-theme-field="building_materials"],
+  [data-theme-field="electrical_supplies"],
+  [data-theme-field="plumbing"],
+  [data-theme-field="tools"]
+) .vehicleFilterHeading span,
+.page:is(
+  [data-theme-field="tires"],
+  [data-theme-field="hardware"],
+  [data-theme-field="building_materials"],
+  [data-theme-field="electrical_supplies"],
+  [data-theme-field="plumbing"],
+  [data-theme-field="tools"]
+) .vehicleFilterGrid label > span,
+.page:is(
+  [data-theme-field="tires"],
+  [data-theme-field="hardware"],
+  [data-theme-field="building_materials"],
+  [data-theme-field="electrical_supplies"],
+  [data-theme-field="plumbing"],
+  [data-theme-field="tools"]
+) .marketplaceCategoryNavLabel,
+.page:is(
+  [data-theme-field="tires"],
+  [data-theme-field="hardware"],
+  [data-theme-field="building_materials"],
+  [data-theme-field="electrical_supplies"],
+  [data-theme-field="plumbing"],
+  [data-theme-field="tools"]
+) .marketplaceListingHeader span,
+.page:is(
+  [data-theme-field="tires"],
+  [data-theme-field="hardware"],
+  [data-theme-field="building_materials"],
+  [data-theme-field="electrical_supplies"],
+  [data-theme-field="plumbing"],
+  [data-theme-field="tools"]
+) .storyCopy > span,
+.page:is(
+  [data-theme-field="tires"],
+  [data-theme-field="hardware"],
+  [data-theme-field="building_materials"],
+  [data-theme-field="electrical_supplies"],
+  [data-theme-field="plumbing"],
+  [data-theme-field="tools"]
+) .partsConciergeCopy > span {
+  color: var(--t-accent) !important;
+}
+
+.page:is(
+  [data-theme-field="tires"],
+  [data-theme-field="hardware"],
+  [data-theme-field="building_materials"],
+  [data-theme-field="electrical_supplies"],
+  [data-theme-field="plumbing"],
+  [data-theme-field="tools"]
+) .vehicleFilterHeading strong,
+.page:is(
+  [data-theme-field="tires"],
+  [data-theme-field="hardware"],
+  [data-theme-field="building_materials"],
+  [data-theme-field="electrical_supplies"],
+  [data-theme-field="plumbing"],
+  [data-theme-field="tools"]
+) .marketplaceCategoryItem strong,
+.page:is(
+  [data-theme-field="tires"],
+  [data-theme-field="hardware"],
+  [data-theme-field="building_materials"],
+  [data-theme-field="electrical_supplies"],
+  [data-theme-field="plumbing"],
+  [data-theme-field="tools"]
+) .marketplaceListingHeader h3,
+.page:is(
+  [data-theme-field="tires"],
+  [data-theme-field="hardware"],
+  [data-theme-field="building_materials"],
+  [data-theme-field="electrical_supplies"],
+  [data-theme-field="plumbing"],
+  [data-theme-field="tools"]
+) .marketplaceBestSellerDepartmentTitle,
+.page:is(
+  [data-theme-field="tires"],
+  [data-theme-field="hardware"],
+  [data-theme-field="building_materials"],
+  [data-theme-field="electrical_supplies"],
+  [data-theme-field="plumbing"],
+  [data-theme-field="tools"]
+) .storeStory h2,
+.page:is(
+  [data-theme-field="tires"],
+  [data-theme-field="hardware"],
+  [data-theme-field="building_materials"],
+  [data-theme-field="electrical_supplies"],
+  [data-theme-field="plumbing"],
+  [data-theme-field="tools"]
+) .partsConcierge h2 {
+  color: var(--t-ink) !important;
+}
+
+.page:is(
+  [data-theme-field="tires"],
+  [data-theme-field="hardware"],
+  [data-theme-field="building_materials"],
+  [data-theme-field="electrical_supplies"],
+  [data-theme-field="plumbing"],
+  [data-theme-field="tools"]
+) .vehicleFilterGrid select {
+  border: 1px solid var(--t-line) !important;
+  background: var(--t-bg) !important;
+  color: var(--t-ink) !important;
+  border-radius: var(--t-card-radius) !important;
+}
+
+.page:is(
+  [data-theme-field="tires"],
+  [data-theme-field="hardware"],
+  [data-theme-field="building_materials"],
+  [data-theme-field="electrical_supplies"],
+  [data-theme-field="plumbing"],
+  [data-theme-field="tools"]
+) .vehicleMatchSummary,
+.page:is(
+  [data-theme-field="tires"],
+  [data-theme-field="hardware"],
+  [data-theme-field="building_materials"],
+  [data-theme-field="electrical_supplies"],
+  [data-theme-field="plumbing"],
+  [data-theme-field="tools"]
+) .marketplaceCategoryProductList .productFitment {
+  background: var(--t-panel-soft) !important;
+  color: var(--t-accent-2) !important;
+}
+
+.page:is(
+  [data-theme-field="tires"],
+  [data-theme-field="hardware"],
+  [data-theme-field="building_materials"],
+  [data-theme-field="electrical_supplies"],
+  [data-theme-field="plumbing"],
+  [data-theme-field="tools"]
+) .marketplaceCategoryCircle {
+  border: 1px solid var(--t-line) !important;
+  background: var(--t-panel) !important;
+  box-shadow: 0 7px 17px rgba(0,0,0,.045) !important;
+}
+
+.page:is(
+  [data-theme-field="tires"],
+  [data-theme-field="hardware"],
+  [data-theme-field="building_materials"],
+  [data-theme-field="electrical_supplies"],
+  [data-theme-field="plumbing"],
+  [data-theme-field="tools"]
+) .marketplaceCategoryBestSellers .marketplaceCategoryCircle {
+  border-color: var(--t-accent) !important;
+  background:
+    radial-gradient(circle at 28% 22%, color-mix(in srgb, var(--t-accent) 18%, transparent), transparent 42%),
+    var(--t-panel-soft) !important;
+}
+
+.page:is(
+  [data-theme-field="tires"],
+  [data-theme-field="hardware"],
+  [data-theme-field="building_materials"],
+  [data-theme-field="electrical_supplies"],
+  [data-theme-field="plumbing"],
+  [data-theme-field="tools"]
+) .marketplaceCategoryStar {
+  color: var(--t-accent) !important;
+}
+
+.page:is(
+  [data-theme-field="tires"],
+  [data-theme-field="hardware"],
+  [data-theme-field="building_materials"],
+  [data-theme-field="electrical_supplies"],
+  [data-theme-field="plumbing"],
+  [data-theme-field="tools"]
+) .marketplaceCategoryItemActive .marketplaceCategoryCircle {
+  border-color: var(--t-accent) !important;
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--t-accent) 10%, transparent) !important;
+}
+
+.page:is(
+  [data-theme-field="tires"],
+  [data-theme-field="hardware"],
+  [data-theme-field="building_materials"],
+  [data-theme-field="electrical_supplies"],
+  [data-theme-field="plumbing"],
+  [data-theme-field="tools"]
+) .marketplaceCategorySelectedDot {
+  border-color: var(--t-bg) !important;
+  background: var(--t-accent) !important;
+}
+
+.page:is(
+  [data-theme-field="tires"],
+  [data-theme-field="hardware"],
+  [data-theme-field="building_materials"],
+  [data-theme-field="electrical_supplies"],
+  [data-theme-field="plumbing"],
+  [data-theme-field="tools"]
+) .marketplaceCategoryItem small,
+.page:is(
+  [data-theme-field="tires"],
+  [data-theme-field="hardware"],
+  [data-theme-field="building_materials"],
+  [data-theme-field="electrical_supplies"],
+  [data-theme-field="plumbing"],
+  [data-theme-field="tools"]
+) .marketplaceListingHeader small,
+.page:is(
+  [data-theme-field="tires"],
+  [data-theme-field="hardware"],
+  [data-theme-field="building_materials"],
+  [data-theme-field="electrical_supplies"],
+  [data-theme-field="plumbing"],
+  [data-theme-field="tools"]
+) .productArabic,
+.page:is(
+  [data-theme-field="tires"],
+  [data-theme-field="hardware"],
+  [data-theme-field="building_materials"],
+  [data-theme-field="electrical_supplies"],
+  [data-theme-field="plumbing"],
+  [data-theme-field="tools"]
+) .storyCopy p,
+.page:is(
+  [data-theme-field="tires"],
+  [data-theme-field="hardware"],
+  [data-theme-field="building_materials"],
+  [data-theme-field="electrical_supplies"],
+  [data-theme-field="plumbing"],
+  [data-theme-field="tools"]
+) .partsConciergeCopy p {
+  color: var(--t-muted) !important;
+}
+
+.page:is(
+  [data-theme-field="tires"],
+  [data-theme-field="hardware"],
+  [data-theme-field="building_materials"],
+  [data-theme-field="electrical_supplies"],
+  [data-theme-field="plumbing"],
+  [data-theme-field="tools"]
+) .marketplaceBestSellerItem,
+.page:is(
+  [data-theme-field="tires"],
+  [data-theme-field="hardware"],
+  [data-theme-field="building_materials"],
+  [data-theme-field="electrical_supplies"],
+  [data-theme-field="plumbing"],
+  [data-theme-field="tools"]
+) .marketplaceBestSellerCarousel .productCard,
+.page:is(
+  [data-theme-field="tires"],
+  [data-theme-field="hardware"],
+  [data-theme-field="building_materials"],
+  [data-theme-field="electrical_supplies"],
+  [data-theme-field="plumbing"],
+  [data-theme-field="tools"]
+) .marketplaceBestSellerCarousel .autoPartsProductCard,
+.page:is(
+  [data-theme-field="tires"],
+  [data-theme-field="hardware"],
+  [data-theme-field="building_materials"],
+  [data-theme-field="electrical_supplies"],
+  [data-theme-field="plumbing"],
+  [data-theme-field="tools"]
+) .marketplaceBestSellerCarousel .productBody,
+.page:is(
+  [data-theme-field="tires"],
+  [data-theme-field="hardware"],
+  [data-theme-field="building_materials"],
+  [data-theme-field="electrical_supplies"],
+  [data-theme-field="plumbing"],
+  [data-theme-field="tools"]
+) .marketplaceCategoryProductList .productCard,
+.page:is(
+  [data-theme-field="tires"],
+  [data-theme-field="hardware"],
+  [data-theme-field="building_materials"],
+  [data-theme-field="electrical_supplies"],
+  [data-theme-field="plumbing"],
+  [data-theme-field="tools"]
+) .marketplaceCategoryProductList .autoPartsProductCard {
+  height: auto !important;
+  min-height: 0 !important;
+  background: transparent !important;
+  color: var(--t-ink) !important;
+  box-shadow: none !important;
+}
+
+.page:is(
+  [data-theme-field="tires"],
+  [data-theme-field="hardware"],
+  [data-theme-field="building_materials"],
+  [data-theme-field="electrical_supplies"],
+  [data-theme-field="plumbing"],
+  [data-theme-field="tools"]
+) .marketplaceBestSellerCarousel .productBody h3,
+.page:is(
+  [data-theme-field="tires"],
+  [data-theme-field="hardware"],
+  [data-theme-field="building_materials"],
+  [data-theme-field="electrical_supplies"],
+  [data-theme-field="plumbing"],
+  [data-theme-field="tools"]
+) .marketplaceCategoryProductList .productBody h3 {
+  color: var(--t-ink) !important;
+}
+
+.page:is(
+  [data-theme-field="tires"],
+  [data-theme-field="hardware"],
+  [data-theme-field="building_materials"],
+  [data-theme-field="electrical_supplies"],
+  [data-theme-field="plumbing"],
+  [data-theme-field="tools"]
+) .marketplaceBestSellerCarousel .productFooter,
+.page:is(
+  [data-theme-field="tires"],
+  [data-theme-field="hardware"],
+  [data-theme-field="building_materials"],
+  [data-theme-field="electrical_supplies"],
+  [data-theme-field="plumbing"],
+  [data-theme-field="tools"]
+) .marketplaceBestSellerCarousel .productFooter > div:first-child {
+  height: auto !important;
+  min-height: 0 !important;
+}
+
+.page:is(
+  [data-theme-field="tires"],
+  [data-theme-field="hardware"],
+  [data-theme-field="building_materials"],
+  [data-theme-field="electrical_supplies"],
+  [data-theme-field="plumbing"],
+  [data-theme-field="tools"]
+) .marketplaceBestSellerCarousel .productFooter strong {
+  color: var(--t-accent-2) !important;
+}
+
+.page:is(
+  [data-theme-field="tires"],
+  [data-theme-field="hardware"],
+  [data-theme-field="building_materials"],
+  [data-theme-field="electrical_supplies"],
+  [data-theme-field="plumbing"],
+  [data-theme-field="tools"]
+) .marketplaceCategoryProductList .productCard,
+.page:is(
+  [data-theme-field="tires"],
+  [data-theme-field="hardware"],
+  [data-theme-field="building_materials"],
+  [data-theme-field="electrical_supplies"],
+  [data-theme-field="plumbing"],
+  [data-theme-field="tools"]
+) .marketplaceCategoryProductList .autoPartsProductCard {
+  border-bottom: 1px solid var(--t-line) !important;
+}
+
+.page:is(
+  [data-theme-field="tires"],
+  [data-theme-field="hardware"],
+  [data-theme-field="building_materials"],
+  [data-theme-field="electrical_supplies"],
+  [data-theme-field="plumbing"],
+  [data-theme-field="tools"]
+) .storeStory,
+.page:is(
+  [data-theme-field="tires"],
+  [data-theme-field="hardware"],
+  [data-theme-field="building_materials"],
+  [data-theme-field="electrical_supplies"],
+  [data-theme-field="plumbing"],
+  [data-theme-field="tools"]
+) .partsConcierge {
+  min-height: 0 !important;
+  border: 1px solid var(--t-line) !important;
+  border-radius: calc(var(--t-card-radius) + 3px) !important;
+  background: var(--t-panel) !important;
+  color: var(--t-ink) !important;
+  box-shadow: 0 9px 23px rgba(0,0,0,.05) !important;
+}
+
+.page:is(
+  [data-theme-field="tires"],
+  [data-theme-field="hardware"],
+  [data-theme-field="building_materials"],
+  [data-theme-field="electrical_supplies"],
+  [data-theme-field="plumbing"],
+  [data-theme-field="tools"]
+) .storeStory {
+  margin: 22px auto 0 !important;
+  padding: 22px !important;
+}
+
+.page:is(
+  [data-theme-field="tires"],
+  [data-theme-field="hardware"],
+  [data-theme-field="building_materials"],
+  [data-theme-field="electrical_supplies"],
+  [data-theme-field="plumbing"],
+  [data-theme-field="tools"]
+) .partsConcierge {
+  margin: 16px auto 0 !important;
+  padding: 16px !important;
+}
+
+.page:is(
+  [data-theme-field="tires"],
+  [data-theme-field="hardware"],
+  [data-theme-field="building_materials"],
+  [data-theme-field="electrical_supplies"],
+  [data-theme-field="plumbing"],
+  [data-theme-field="tools"]
+) .storyButton {
+  border: 0 !important;
+  background: var(--t-accent) !important;
+  color: #111 !important;
+}
+
+.page:is(
+  [data-theme-field="tires"],
+  [data-theme-field="hardware"],
+  [data-theme-field="building_materials"],
+  [data-theme-field="electrical_supplies"],
+  [data-theme-field="plumbing"],
+  [data-theme-field="tools"]
+) .partsConciergeIcon {
+  background: var(--t-panel-soft) !important;
+  color: var(--t-accent) !important;
+}
+
+.page:is(
+  [data-theme-field="tires"],
+  [data-theme-field="hardware"],
+  [data-theme-field="building_materials"],
+  [data-theme-field="electrical_supplies"],
+  [data-theme-field="plumbing"],
+  [data-theme-field="tools"]
+) .footer {
+  margin: 18px auto 0 !important;
+  padding: 16px 0 max(10px, env(safe-area-inset-bottom)) !important;
+  border: 0 !important;
+  border-top: 1px solid var(--t-line) !important;
+  background: transparent !important;
+  color: var(--t-ink) !important;
+  box-shadow: none !important;
+}
+
+/* ========================================================================== */
+/* INDIVIDUAL SIGNATURE DETAILS - ENSURE THEY DO NOT FEEL LIKE RECOLORS        */
+/* ========================================================================== */
+
+/* Tires: diagonal tread/performance texture, compact hard-edged typography. */
+.page[data-theme-field="tires"] .heroTexture {
+  display: block !important;
+  background:
+    repeating-linear-gradient(135deg, transparent 0 22px, rgba(182,255,59,.06) 22px 27px, transparent 27px 52px),
+    radial-gradient(circle at 18% 13%, rgba(182,255,59,.13), transparent 25%) !important;
+}
+
+.page[data-theme-field="tires"] .hero h1,
+.page[data-theme-field="tires"] .marketplaceListingHeader h3 {
+  font-family: Arial, Helvetica, sans-serif !important;
+  text-transform: uppercase;
+}
+
+/* Hardware: warm workshop / maker-bench character. */
+.page[data-theme-field="hardware"] .heroTexture {
+  display: block !important;
+  background:
+    repeating-linear-gradient(90deg, rgba(215,157,74,.05) 0 2px, transparent 2px 22px),
+    linear-gradient(145deg, rgba(49,95,77,.10), transparent 45%) !important;
+}
+
+.page[data-theme-field="hardware"] .hero h1,
+.page[data-theme-field="hardware"] .marketplaceListingHeader h3 {
+  font-family: Georgia, "Times New Roman", serif !important;
+  letter-spacing: -.035em !important;
+}
+
+/* Building materials: architectural grid + concrete geometry. */
+.page[data-theme-field="building_materials"] .heroTexture {
+  display: block !important;
+  background:
+    linear-gradient(rgba(255,255,255,.055) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,.055) 1px, transparent 1px),
+    linear-gradient(135deg, rgba(166,83,53,.12), transparent 35%) !important;
+  background-size: 32px 32px, 32px 32px, auto !important;
+}
+
+.page[data-theme-field="building_materials"] .hero h1,
+.page[data-theme-field="building_materials"] .marketplaceListingHeader h3 {
+  font-family: "Arial Narrow", Arial, sans-serif !important;
+  text-transform: uppercase;
+  letter-spacing: -.025em !important;
+}
+
+/* Electrical: energized circuit traces, yellow/violet signature. */
+.page[data-theme-field="electrical_supplies"] .heroTexture {
+  display: block !important;
+  background:
+    linear-gradient(90deg, transparent 0 16%, rgba(255,212,59,.08) 16% 16.5%, transparent 16.5% 100%),
+    linear-gradient(0deg, transparent 0 42%, rgba(142,125,255,.10) 42% 42.5%, transparent 42.5% 100%),
+    radial-gradient(circle at 18% 14%, rgba(255,212,59,.14), transparent 23%) !important;
+}
+
+/* Plumbing: porcelain waterworks with copper secondary detail. */
+.page[data-theme-field="plumbing"] .heroTexture {
+  display: block !important;
+  background:
+    radial-gradient(circle at 18% 13%, rgba(255,255,255,.17), transparent 24%),
+    radial-gradient(circle at 82% 12%, rgba(184,115,51,.12), transparent 22%),
+    repeating-radial-gradient(circle at 80% 80%, transparent 0 14px, rgba(22,122,139,.055) 15px 16px) !important;
+}
+
+.page[data-theme-field="plumbing"] .hero h1,
+.page[data-theme-field="plumbing"] .marketplaceListingHeader h3 {
+  font-family: Georgia, "Times New Roman", serif !important;
+}
+
+/* Tools: rugged power-bay stripes with olive field-work character. */
+.page[data-theme-field="tools"] .heroTexture {
+  display: block !important;
+  background:
+    repeating-linear-gradient(120deg, transparent 0 28px, rgba(242,153,52,.08) 28px 34px, transparent 34px 62px),
+    radial-gradient(circle at 18% 14%, rgba(167,179,110,.11), transparent 24%) !important;
+}
+
+.page[data-theme-field="tools"] .hero h1,
+.page[data-theme-field="tools"] .marketplaceListingHeader h3 {
+  font-family: Arial, Helvetica, sans-serif !important;
+  font-weight: 950 !important;
+}
+
+/* ========================================================================== */
+/* MOBILE                                                                      */
+/* ========================================================================== */
+
+@media (max-width: 760px) {
+  .page:is(
+    [data-theme-field="tires"],
+    [data-theme-field="hardware"],
+    [data-theme-field="building_materials"],
+    [data-theme-field="electrical_supplies"],
+    [data-theme-field="plumbing"],
+    [data-theme-field="tools"]
+  )[data-hero] .hero {
+    width: calc(100% - 18px) !important;
+    margin-top: 8px !important;
+  }
+
+  .page:is(
+    [data-theme-field="tires"],
+    [data-theme-field="hardware"],
+    [data-theme-field="building_materials"],
+    [data-theme-field="electrical_supplies"],
+    [data-theme-field="plumbing"],
+    [data-theme-field="tools"]
+  ) .heroContent {
+    min-height: 316px !important;
+    padding: 20px 18px 22px !important;
+  }
+
+  .page:is(
+    [data-theme-field="tires"],
+    [data-theme-field="hardware"],
+    [data-theme-field="building_materials"],
+    [data-theme-field="electrical_supplies"],
+    [data-theme-field="plumbing"],
+    [data-theme-field="tools"]
+  ) .hero h1,
+  .page:is(
+    [data-theme-field="tires"],
+    [data-theme-field="hardware"],
+    [data-theme-field="building_materials"],
+    [data-theme-field="electrical_supplies"],
+    [data-theme-field="plumbing"],
+    [data-theme-field="tools"]
+  ) .heroCopy h1 {
+    font-size: clamp(29px, 8.5vw, 39px) !important;
+    line-height: .98 !important;
+  }
+
+  .page:is(
+    [data-theme-field="tires"],
+    [data-theme-field="hardware"],
+    [data-theme-field="building_materials"],
+    [data-theme-field="electrical_supplies"],
+    [data-theme-field="plumbing"],
+    [data-theme-field="tools"]
+  ) .quickInfoStrip,
+  .page:is(
+    [data-theme-field="tires"],
+    [data-theme-field="hardware"],
+    [data-theme-field="building_materials"],
+    [data-theme-field="electrical_supplies"],
+    [data-theme-field="plumbing"],
+    [data-theme-field="tools"]
+  ) .catalogShell,
+  .page:is(
+    [data-theme-field="tires"],
+    [data-theme-field="hardware"],
+    [data-theme-field="building_materials"],
+    [data-theme-field="electrical_supplies"],
+    [data-theme-field="plumbing"],
+    [data-theme-field="tools"]
+  ) .storeStory,
+  .page:is(
+    [data-theme-field="tires"],
+    [data-theme-field="hardware"],
+    [data-theme-field="building_materials"],
+    [data-theme-field="electrical_supplies"],
+    [data-theme-field="plumbing"],
+    [data-theme-field="tools"]
+  ) .partsConcierge,
+  .page:is(
+    [data-theme-field="tires"],
+    [data-theme-field="hardware"],
+    [data-theme-field="building_materials"],
+    [data-theme-field="electrical_supplies"],
+    [data-theme-field="plumbing"],
+    [data-theme-field="tools"]
+  ) .footer {
+    width: calc(100% - 24px) !important;
+  }
+
+  .page:is(
+    [data-theme-field="tires"],
+    [data-theme-field="hardware"],
+    [data-theme-field="building_materials"],
+    [data-theme-field="electrical_supplies"],
+    [data-theme-field="plumbing"],
+    [data-theme-field="tools"]
+  ) .marketplaceListingHeader {
+    margin: 4px 0 11px !important;
+  }
+
+  .page:is(
+    [data-theme-field="tires"],
+    [data-theme-field="hardware"],
+    [data-theme-field="building_materials"],
+    [data-theme-field="electrical_supplies"],
+    [data-theme-field="plumbing"],
+    [data-theme-field="tools"]
+  ) .marketplaceListingHeader h3 {
+    font-size: 21px !important;
+  }
+
+  .page:is(
+    [data-theme-field="tires"],
+    [data-theme-field="hardware"],
+    [data-theme-field="building_materials"],
+    [data-theme-field="electrical_supplies"],
+    [data-theme-field="plumbing"],
+    [data-theme-field="tools"]
+  ) .marketplaceBestSellerDepartmentTitle {
+    margin-bottom: 9px !important;
+    font-size: 15px !important;
+    line-height: 19px !important;
+  }
+
+  .page:is(
+    [data-theme-field="tires"],
+    [data-theme-field="hardware"],
+    [data-theme-field="building_materials"],
+    [data-theme-field="electrical_supplies"],
+    [data-theme-field="plumbing"],
+    [data-theme-field="tools"]
+  ) .storeStory {
+    padding: 17px !important;
+  }
+
+  .page:is(
+    [data-theme-field="tires"],
+    [data-theme-field="hardware"],
+    [data-theme-field="building_materials"],
+    [data-theme-field="electrical_supplies"],
+    [data-theme-field="plumbing"],
+    [data-theme-field="tools"]
+  ) .storyCopy p {
+    display: -webkit-box;
+    margin: 0 !important;
+    overflow: hidden;
+    font-size: 11px !important;
+    line-height: 1.48 !important;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 3;
+  }
+
+  .page:is(
+    [data-theme-field="tires"],
+    [data-theme-field="hardware"],
+    [data-theme-field="building_materials"],
+    [data-theme-field="electrical_supplies"],
+    [data-theme-field="plumbing"],
+    [data-theme-field="tools"]
+  ) .partsConcierge {
+    padding: 13px !important;
+  }
+
+  .page:is(
+    [data-theme-field="tires"],
+    [data-theme-field="hardware"],
+    [data-theme-field="building_materials"],
+    [data-theme-field="electrical_supplies"],
+    [data-theme-field="plumbing"],
+    [data-theme-field="tools"]
+  ) .partsConciergeCopy p {
+    display: none !important;
+  }
+}
