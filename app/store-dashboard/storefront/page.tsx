@@ -3570,917 +3570,166 @@ export default function DarikDirectStorefrontSettingsPage() {
                   />
                   <div className={designStyles.liveBuilderEditorPane}>
 
-                <div className={styles.formSection}>
-                  <div
-                  data-darik-setup-step="3"
-                  className={storefrontSetupVisibleStep109 === 3 ? styles.formSection : styles.formSection + " " + designStyles.storefrontSetupHidden109}
-                >
-                    <div>
-                      <span>Identity / الهوية</span>
-                      <h3>Store name and link / اسم المتجر والرابط</h3>
-                    </div>
-                    <p>This is what customers see at the top of your store / هذا ما يراه العملاء في أعلى المتجر.</p>
-                  </div>
-
-                  <div className={styles.formGrid}>
-                    <label className={styles.wideField}>
-                      Permanent store link / رابط المتجر الدائم
-                      <div className={styles.slugInput}>
-                        <span>getdarik.com/</span>
-                        <input
-                          value={setupForm.slug}
-                          onChange={(event) =>
-                            updateSetupField(
-                              "slug",
-                              cleanSlug(event.target.value)
-                            )
-                          }
-                          inputMode="url"
-                          autoCapitalize="none"
-                          autoCorrect="off"
-                          spellCheck={false}
-                          required
-                        />
+{/* DARIK_EXACT_STOREFRONT_WIZARD_109_V6 */}
+                <div className={designStyles.exactWizardStage109V5}>
+                  {storefrontSetupVisibleStep109 === 1 ? (
+                    <section data-darik-exact-step="1" className={designStyles.exactWizardPanel109V5}>
+                      <div className={designStyles.exactWizardHeading109V5}>
+                        <span>STEP 1 / الخطوة ١</span>
+                        <h3>Choose a theme / اختر القالب</h3>
+                        <p>Choose the visual style first. You can change it later at any time.</p>
                       </div>
-                      <span style={{ marginTop: 6, display: "block", fontSize: 12, color: slugState === "taken" ? "#b42318" : slugState === "available" ? "#08745f" : "#667085", fontWeight: 800 }}>
-                        {slugState === "checking"
-                          ? "Checking availability… / جاري التحقق من توفر الرابط…"
-                          : slugState === "taken"
-                            ? "Already in use or reserved / الرابط مستخدم أو محجوز"
-                            : slugState === "available"
-                              ? storefront && setupForm.slug === storefront.slug
-                                ? "Current link / الرابط الحالي"
-                                : "Available / متاح"
-                              : "Use English letters, numbers, and hyphens / استخدم أحرفاً إنجليزية وأرقاماً وشرطات"}
-                      </span>
-                    </label>
-
-                    <label>
-                      Customer-facing name / اسم المتجر الظاهر للعملاء
-                      <input
-                        value={setupForm.displayName}
-                        onChange={(event) =>
-                          updateSetupField("displayName", event.target.value)
-                        }
-                        required
-                      />
-                    </label>
-
-                    <label>
-                      Store tagline / العبارة التعريفية للمتجر
-                      <input
-                        value={setupForm.tagline}
-                        onChange={(event) =>
-                          updateSetupField("tagline", event.target.value)
-                        }
-                      />
-                    </label>
-                  </div>
-                </div>
-
-                <div className={styles.formSection}>
-                  <div
-                  data-darik-setup-step="2"
-                  className={storefrontSetupVisibleStep109 === 2 ? styles.formSection : styles.formSection + " " + designStyles.storefrontSetupHidden109}
-                >
-                    <div>
-                      <span>Branding / الهوية البصرية</span>
-                      <h3>Logo and storefront cover / الشعار وصورة الغلاف</h3>
-                    </div>
-                    <p>Upload images or paste a hosted image URL / حمّل الصور أو الصق رابط صورة.</p>
-                  </div>
-
-                  <div className={styles.assetGrid}>
-                    <article className={styles.assetCard}>
-                      <div className={styles.logoPreview}>
-                        {setupForm.logoUrl ? (
-                          <img src={setupForm.logoUrl} alt="Store logo preview" />
-                        ) : (
-                          <span>
-                            {(setupForm.displayName || "S")
-                              .slice(0, 1)
-                              .toUpperCase()}
-                          </span>
-                        )}
-                      </div>
-
-                      <div className={styles.assetControls}>
-                        <strong>Store logo / شعار المتجر</strong>
-                        <p>Square logo recommended / يُفضّل شعار مربع. PNG or JPG, up to 8 MB / حتى 8 ميجابايت.</p>
-                        <label className={styles.uploadAssetButton}>
-                          {uploadingAsset === "logo"
-                            ? "Uploading… / جارٍ التحميل…"
-                            : "Upload logo / تحميل الشعار"}
-                          <input
-                            type="file"
-                            accept="image/jpeg,image/png,image/webp,image/gif"
-                            onChange={(event) =>
-                              uploadStorefrontAsset(event, "logo")
-                            }
-                            disabled={uploadingAsset !== null}
-                          />
-                        </label>
-                        <input
-                          type="url"
-                          value={setupForm.logoUrl}
-                          onChange={(event) =>
-                            updateSetupField("logoUrl", event.target.value)
-                          }
-                          placeholder="Or paste logo URL / أو الصق رابط الشعار"
-                        />
-                      </div>
-                    </article>
-
-                    <article className={styles.assetCard}>
-                      <div className={styles.heroPreview}>
-                        {setupForm.heroImageUrl ? (
-                          <img
-                            src={setupForm.heroImageUrl}
-                            alt="Store cover preview"
-                          />
-                        ) : (
-                          <span>Cover image / صورة الغلاف</span>
-                        )}
-                      </div>
-
-                      <div className={styles.assetControls}>
-                        <strong>Storefront cover / صورة غلاف المتجر</strong>
-                        <p>Wide image recommended / يُفضّل صورة عريضة. It appears behind your store name / تظهر خلف اسم المتجر.</p>
-                        <label className={styles.uploadAssetButton}>
-                          {uploadingAsset === "hero"
-                            ? "Uploading… / جارٍ التحميل…"
-                            : "Upload cover / تحميل الغلاف"}
-                          <input
-                            type="file"
-                            accept="image/jpeg,image/png,image/webp,image/gif"
-                            onChange={(event) =>
-                              uploadStorefrontAsset(event, "hero")
-                            }
-                            disabled={uploadingAsset !== null}
-                          />
-                        </label>
-                        <input
-                          type="url"
-                          value={setupForm.heroImageUrl}
-                          onChange={(event) =>
-                            updateSetupField("heroImageUrl", event.target.value)
-                          }
-                          placeholder="Or paste cover image URL / أو الصق رابط صورة الغلاف"
-                        />
-                      </div>
-                    </article>
-                  </div>
-                </div>
-
-                <div className={styles.formSection}>
-                  <div
-                  data-darik-setup-step="5"
-                  className={storefrontSetupVisibleStep109 === 5 ? styles.formSection : styles.formSection + " " + designStyles.storefrontSetupHidden109}
-                >
-                    <div>
-                      <span>Contact / التواصل</span>
-                      <h3>How customers reach you / كيف يتواصل العملاء معك</h3>
-                    </div>
-                    <p>Only completed fields appear publicly / تظهر الحقول المكتملة فقط للعملاء.</p>
-                  </div>
-
-                  <div className={styles.formGrid}>
-                    <label>
-                      Store phone / هاتف المتجر
-                      <input
-                        type="tel"
-                        value={setupForm.phone}
-                        onChange={(event) =>
-                          updateSetupField("phone", event.target.value)
-                        }
-                        placeholder="07XXXXXXXX"
-                      />
-                    </label>
-
-                    <label>
-                      WhatsApp / واتساب
-                      <input
-                        type="tel"
-                        value={setupForm.whatsapp}
-                        onChange={(event) =>
-                          updateSetupField("whatsapp", event.target.value)
-                        }
-                        placeholder="+9627XXXXXXXX"
-                      />
-                    </label>
-
-                    <label>
-                      Public email / البريد الإلكتروني الظاهر للعملاء
-                      <input
-                        type="email"
-                        value={setupForm.publicEmail}
-                        onChange={(event) =>
-                          updateSetupField("publicEmail", event.target.value)
-                        }
-                        placeholder="store@example.com"
-                      />
-                    </label>
-
-                    <label>
-                      Website / الموقع الإلكتروني
-                      <input
-                        type="url"
-                        value={setupForm.websiteUrl}
-                        onChange={(event) =>
-                          updateSetupField("websiteUrl", event.target.value)
-                        }
-                        placeholder="https://yourstore.com"
-                      />
-                    </label>
-
-                    <label>
-                      Facebook page / صفحة فيسبوك
-                      <input
-                        type="url"
-                        value={setupForm.facebookUrl}
-                        onChange={(event) =>
-                          updateSetupField("facebookUrl", event.target.value)
-                        }
-                        placeholder="https://facebook.com/..."
-                      />
-                    </label>
-
-                    <label>
-                      Instagram page / صفحة إنستغرام
-                      <input
-                        type="url"
-                        value={setupForm.instagramUrl}
-                        onChange={(event) =>
-                          updateSetupField("instagramUrl", event.target.value)
-                        }
-                        placeholder="https://instagram.com/..."
-                      />
-                    </label>
-
-                    <label className={styles.wideField}>
-                      {"Store location / \u0645\u0648\u0642\u0639 \u0627\u0644\u0645\u062a\u062c\u0631"}
-                      <input
-                        value={setupForm.addressText}
-                        onChange={(event) =>
-                          updateSetupField("addressText", event.target.value)
-                        }
-                        disabled={locationLocked || locatingStore}
-                        placeholder="Store address or use current location"
-                      />
-                    </label>
-                    <div
-                      className={styles.wideField}
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "0.75rem",
-                        flexWrap: "wrap",
-                      }}
-                    >
-                      {locationLocked ? (
-                        <>
-                          <span
-                            style={{
-                              display: "inline-flex",
-                              alignItems: "center",
-                              gap: "0.4rem",
-                              padding: "0.6rem 0.8rem",
-                              borderRadius: "0.8rem",
-                              background: "#ecfdf5",
-                              color: "#166534",
-                              fontWeight: 800,
-                            }}
-                          >
-                            {"Location locked / \u0627\u0644\u0645\u0648\u0642\u0639 \u0645\u0642\u0641\u0644"}
-                          </span>
-                          <button
-                            type="button"
-                            onClick={unlockStoreLocation}
-                            disabled={saving || locatingStore}
-                          >
-                            {"Unlock location / \u0641\u062a\u062d \u0642\u0641\u0644 \u0627\u0644\u0645\u0648\u0642\u0639"}
-                          </button>
-                        </>
-                      ) : (
-                        <>
-                          <button
-                            type="button"
-                            onClick={getCurrentStoreLocation}
-                            disabled={saving || locatingStore}
-                          >
-                            {locatingStore
-                              ? "Getting location... / \u062c\u0627\u0631\u064a \u062a\u062d\u062f\u064a\u062f \u0627\u0644\u0645\u0648\u0642\u0639..."
-                              : "Get current location / \u062a\u062d\u062f\u064a\u062f \u0627\u0644\u0645\u0648\u0642\u0639 \u0627\u0644\u062d\u0627\u0644\u064a"}
-                          </button>
-                          {showDesktopLocationHint ? (
-                            <span
-                              style={{
-                                color: "#92400e",
-                                fontSize: "0.9rem",
-                                fontWeight: 800,
-                              }}
-                            >
-                              {"For a more accurate location, use Get current location from your mobile device. / \u0644\u062f\u0642\u0629 \u0623\u0641\u0636\u0644\u060c \u0627\u0633\u062a\u062e\u062f\u0645 \u062a\u062d\u062f\u064a\u062f \u0627\u0644\u0645\u0648\u0642\u0639 \u0627\u0644\u062d\u0627\u0644\u064a \u0645\u0646 \u0647\u0627\u062a\u0641\u0643."}
-                            </span>
-                          ) : null}
-                          <span style={{ color: "#64748b", fontSize: "0.9rem" }}>
-                            {"Use this while you are physically at the store, or type the address manually. / \u0627\u0633\u062a\u062e\u062f\u0645\u0647 \u0648\u0623\u0646\u062a \u0641\u064a \u0627\u0644\u0645\u062a\u062c\u0631 \u0623\u0648 \u0623\u062f\u062e\u0644 \u0627\u0644\u0639\u0646\u0648\u0627\u0646 \u064a\u062f\u0648\u064a\u0627."}
-                          </span>
-                        </>
-                      )}
-                    </div>
-                  </div>
-                </div>
-
-                <div className={styles.formSection}>
-                  <div
-                  data-darik-setup-step="6"
-                  className={storefrontSetupVisibleStep109 === 6 ? styles.formSection : styles.formSection + " " + designStyles.storefrontSetupHidden109}
-                >
-                    <div>
-                      <span>About / نبذة</span>
-                      <h3>Tell customers about the business / عرّف العملاء بمتجرك</h3>
-                    </div>
-                    <p>Explain what you sell, your experience, or why customers should choose you / اشرح ما تبيعه وخبرتك ولماذا يختار العملاء متجرك.</p>
-                  </div>
-
-                  <div className={styles.formGrid}>
-                    <label className={styles.wideField}>
-                      About the store / نبذة عن المتجر
-                      <textarea
-                        rows={5}
-                        value={setupForm.aboutText}
-                        onChange={(event) =>
-                          updateSetupField("aboutText", event.target.value)
-                        }
-                      />
-                    </label>
-                  </div>
-                </div>
-
-                <div className={styles.formSection}>
-                  <div
-                  data-darik-setup-step="6"
-                  className={storefrontSetupVisibleStep109 === 6 ? styles.formSection : styles.formSection + " " + designStyles.storefrontSetupHidden109}
-                >
-                    <div>
-                      <span>Business hours / ساعات العمل</span>
-                      <h3>When the store is open / متى يكون المتجر مفتوحًا</h3>
-                    </div>
-                    <p>Use any wording you prefer, such as 9:00 AM–10:00 PM or Closed / اكتب الساعات بالطريقة التي تفضّلها أو اكتب مغلق.</p>
-                  </div>
-
-                  <div className={styles.hoursGrid}>
-                    {operatingDays.map(([day, label, labelAr]) => (
-                      <div className={styles.hoursRow} key={day}>
-                        <div className={styles.hoursDay}>
-                          <strong>{label}</strong>
-                          <span dir="rtl">{labelAr}</span>
+                      <div className={designStyles.exactWizardTheme109V5}>
+                        <div>
+                          <small>Current theme / القالب الحالي</small>
+                          <strong>{selectedThemeOption?.name || "Choose a theme"}</strong>
+                          <span>{selectedThemeOption?.vibe || "Choose the look that fits your store."}</span>
                         </div>
-                        <label>
-                          Hours / ساعات العمل
-                          <div className={designStyles.businessHourSelectors109}>
-                          <select
-                            aria-label={`${label} opening time`}
-                            value={
-                              parseDarikOperatingHours109(
-                                setupForm.operatingHours[day] ?? ""
-                              ).open
-                            }
-                            onChange={(event) =>
-                              updateOperatingHourDropdown109(
-                                day,
-                                "open",
-                                event.target.value
-                              )
-                            }
-                          >
-                            <option value="">Open time / وقت الفتح</option>
-                            <option value="Closed">Closed / مغلق</option>
-                            {darikStorefrontTimeOptions109.map((time) => (
-                              <option value={time} key={`${day}-open-${time}`}>
-                                {time}
-                              </option>
-                            ))}
-                          </select>
-
-                          <select
-                            aria-label={`${label} closing time`}
-                            value={
-                              parseDarikOperatingHours109(
-                                setupForm.operatingHours[day] ?? ""
-                              ).close
-                            }
-                            disabled={
-                              parseDarikOperatingHours109(
-                                setupForm.operatingHours[day] ?? ""
-                              ).closed
-                            }
-                            onChange={(event) =>
-                              updateOperatingHourDropdown109(
-                                day,
-                                "close",
-                                event.target.value
-                              )
-                            }
-                          >
-                            <option value="">Close time / وقت الإغلاق</option>
-                            {darikStorefrontTimeOptions109.map((time) => (
-                              <option value={time} key={`${day}-close-${time}`}>
-                                {time}
-                              </option>
-                            ))}
-                          </select>
-                        </div>
-                        </label>
+                        <button type="button" onClick={() => setThemePickerOpen(true)}>
+                          Change theme / تغيير القالب
+                        </button>
                       </div>
-                    ))}
-                  </div>
-                </div>
+                    </section>
+                  ) : null}
 
-                <div className={styles.formSection}>
-                  <div
-                  data-darik-setup-step="7"
-                  className={storefrontSetupVisibleStep109 === 7 ? styles.formSection : styles.formSection + " " + designStyles.storefrontSetupHidden109}
-                >
-                    <div>
-                      <span>Custom links / روابط إضافية</span>
-                      <h3>Add any links you want / أضف الروابط التي تريدها</h3>
-                    </div>
-                    <button
-                      type="button"
-                      className={styles.addRowButton}
-                      onClick={addCustomLink}
-                    >
-                      + Add link / إضافة رابط
-                    </button>
-                  </div>
-
-                  {setupForm.customLinks.length === 0 ? (
-                    <p className={styles.optionalEmpty}>
-                      Add TikTok, YouTube, a map pin, a catalog, a warranty page,
-                      or any other public link / أضف تيك توك أو يوتيوب أو موقعًا
-                      على الخريطة أو كتالوجًا أو صفحة ضمان أو أي رابط عام آخر.
-                    </p>
-                  ) : (
-                    <div className={styles.repeatRows}>
-                      {setupForm.customLinks.map((link, index) => (
-                        <div
-                          className={styles.bilingualLinkRow}
-                          key={`link-${index}`}
-                        >
-                          <label>
-                            Link label / اسم الرابط
-                            <input
-                              value={link.label}
-                              onChange={(event) =>
-                                updateCustomLink(
-                                  index,
-                                  "label",
-                                  event.target.value
-                                )
-                              }
-                            />
-                          </label>
-                          <label className={styles.linkUrlField}>
-                            Link URL / رابط الصفحة
+                  {storefrontSetupVisibleStep109 === 2 ? (
+                    <section data-darik-exact-step="2" className={designStyles.exactWizardPanel109V5}>
+                      <div className={designStyles.exactWizardHeading109V5}>
+                        <span>STEP 2 / الخطوة ٢</span>
+                        <h3>Logo & storefront image / الشعار وصورة واجهة المتجر</h3>
+                        <p>This step contains only your logo and storefront image.</p>
+                      </div>
+                      <div className={designStyles.exactWizardAssetGrid109V5}>
+                        <article className={designStyles.exactWizardAssetCard109V5}>
+                          <div className={designStyles.exactWizardLogo109V5}>
+                            {setupForm.logoUrl ? (
+                              <img src={setupForm.logoUrl} alt="Store logo preview" />
+                            ) : (
+                              <span>{(setupForm.displayName || "S").slice(0, 1).toUpperCase()}</span>
+                            )}
+                          </div>
+                          <div>
+                            <strong>Store logo / شعار المتجر</strong>
+                            <p>Square image recommended.</p>
+                            <label className={designStyles.exactWizardUpload109V5}>
+                              {uploadingAsset === "logo" ? "Uploading... / جارٍ الرفع..." : "Upload logo / رفع الشعار"}
+                              <input
+                                type="file"
+                                accept="image/jpeg,image/png,image/webp,image/gif"
+                                onChange={(event) => uploadStorefrontAsset(event, "logo")}
+                                disabled={uploadingAsset !== null}
+                              />
+                            </label>
                             <input
                               type="url"
-                              value={link.url}
-                              onChange={(event) =>
-                                updateCustomLink(
-                                  index,
-                                  "url",
-                                  event.target.value
-                                )
-                              }
+                              value={setupForm.logoUrl}
+                              onChange={(event) => updateSetupField("logoUrl", event.target.value)}
+                              placeholder="Or paste logo URL"
                             />
-                          </label>
-                          <button
-                            type="button"
-                            onClick={() => removeCustomLink(index)}
-                            aria-label="Remove custom link / حذف الرابط"
-                          >
-                            Remove / حذف
-                          </button>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
+                          </div>
+                        </article>
 
-                <div className={styles.formSection}>
-                  <div
-                  data-darik-setup-step="8"
-                  className={storefrontSetupVisibleStep109 === 8 ? styles.formSection : styles.formSection + " " + designStyles.storefrontSetupHidden109}
-                >
-                    <div>
-                      <span>Custom store information / معلومات إضافية عن المتجر</span>
-                      <h3>Add anything else customers should know / أضف أي معلومات أخرى يحتاجها العملاء</h3>
-                    </div>
-                    <button
-                      type="button"
-                      className={styles.addRowButton}
-                      onClick={addCustomInformation}
-                    >
-                      + Add information / إضافة معلومات
-                    </button>
-                  </div>
-
-                  {setupForm.customInformation.length === 0 ? (
-                    <p className={styles.optionalEmpty}>
-                      Delivery areas, payment options, warranty, installation,
-                      parking, or return policy / مناطق التوصيل أو طرق الدفع أو
-                      الضمان أو التركيب أو المواقف أو سياسة الإرجاع.
-                    </p>
-                  ) : (
-                    <div className={styles.repeatRows}>
-                      {setupForm.customInformation.map((item, index) => (
-                        <div
-                          className={styles.bilingualInformationRow}
-                          key={`info-${index}`}
-                        >
-                          <label>
-                            Heading / العنوان
-                            <input
-                              value={item.label}
-                              onChange={(event) =>
-                                updateCustomInformation(
-                                  index,
-                                  "label",
-                                  event.target.value
-                                )
-                              }
-                            />
-                          </label>
-                          <label>
-                            Information / المعلومات
-                            <textarea
-                              rows={3}
-                              value={item.value}
-                              onChange={(event) =>
-                                updateCustomInformation(
-                                  index,
-                                  "value",
-                                  event.target.value
-                                )
-                              }
-                            />
-                          </label>
-                          <button
-                            type="button"
-                            onClick={() => removeCustomInformation(index)}
-                            aria-label="Remove custom information / حذف المعلومات"
-                          >
-                            Remove / حذف
-                          </button>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-
-                <div className={styles.formSection}>
-                  <div
-                  data-darik-setup-step="9"
-                  className={storefrontSetupVisibleStep109 === 9 ? styles.formSection : styles.formSection + " " + designStyles.storefrontSetupHidden109}
-                >
-                    <div>
-                      <span>Delivery / التوصيل</span>
-                      <h3>Ordering and delivery settings / إعدادات الطلب والتوصيل</h3>
-                    </div>
-                  </div>
-
-                  <div className={styles.orderMethodChoices}>
-                    <button
-                      type="button"
-                      className={
-                        setupForm.fulfillmentMode === "delivery"
-                          ? styles.activeOrderMethod
-                          : ""
-                      }
-                      onClick={() =>
-                        updateSetupField("fulfillmentMode", "delivery")
-                      }
-                    >
-                      <strong>Delivery / توصيل</strong>
-                      <span>
-                        Customers order for delivery inside your configured radius
-                        / يطلب العملاء للتوصيل ضمن النطاق الذي تحدده.
-                      </span>
-                    </button>
-
-                    <button
-                      type="button"
-                      className={
-                        setupForm.fulfillmentMode === "pickup"
-                          ? styles.activeOrderMethod
-                          : ""
-                      }
-                      onClick={() =>
-                        updateSetupField("fulfillmentMode", "pickup")
-                      }
-                    >
-                      <strong>Local pickup only / استلام محلي فقط</strong>
-                      <span>
-                        No delivery is offered. Customers collect the order from the store
-                        / لا يوجد توصيل ويستلم العميل الطلب من المتجر.
-                      </span>
-                    </button>
-                  </div>
-
-                  <div className={styles.formSectionHeading}>
-                    <div>
-                      <span>Order channel / طريقة إرسال الطلب</span>
-                      <h3>How customers submit orders / كيف يرسل العملاء الطلبات</h3>
-                    </div>
-                  </div>
-
-                  <div className={styles.orderMethodChoices}>
-                    <button
-                      type="button"
-                      className={
-                        setupForm.orderSubmissionMode === "phone"
-                          ? styles.activeOrderMethod
-                          : ""
-                      }
-                      onClick={() =>
-                        updateSetupField("orderSubmissionMode", "phone")
-                      }
-                    >
-                      <strong>Phone orders / طلبات الهاتف</strong>
-                      <span>
-                        Customers call the store or send the cart through
-                        WhatsApp / يتصل العملاء بالمتجر أو يرسلون السلة عبر واتساب.
-                      </span>
-                    </button>
-
-                    <button
-                      type="button"
-                      className={
-                        setupForm.orderSubmissionMode === "online"
-                          ? styles.activeOrderMethod
-                          : ""
-                      }
-                      onClick={() =>
-                        updateSetupField("orderSubmissionMode", "online")
-                      }
-                    >
-                      <strong>Online orders / الطلبات الإلكترونية</strong>
-                      <span>
-                        Customers enter their delivery details and submit the
-                        order directly / يُدخل العملاء بيانات التوصيل ويرسلون
-                        الطلب مباشرةً إلى لوحة التحكم.
-                      </span>
-                    </button>
-
-                    <button
-                      type="button"
-                      className={
-                        setupForm.orderSubmissionMode === "both"
-                          ? styles.activeOrderMethod
-                          : ""
-                      }
-                      onClick={() =>
-                        updateSetupField("orderSubmissionMode", "both")
-                      }
-                    >
-                      <strong>Phone + online / الهاتف والإلكتروني</strong>
-                      <span>
-                        Customers choose whether to call, use WhatsApp, or place
-                        the order online / يختار العملاء الاتصال أو واتساب أو
-                        تقديم الطلب إلكترونيًا.
-                      </span>
-                    </button>
-                  </div>
-
-
-                  <div className={designStyles.deliveryZones109}>
-                    <div className={designStyles.deliveryZonesHeading109}>
-                      <div>
-                        <span>DELIVERY ZONES / مناطق التوصيل</span>
-                        <h4>Set your own distance and price rules</h4>
-                        <p>
-                          Zones are cumulative. The first matching distance wins.
-                          Add as many zones as your store needs.
-                        </p>
-                      </div>
-                      <button type="button" onClick={addDeliveryZone109}>
-                        + Add delivery zone / إضافة منطقة
-                      </button>
-                    </div>
-
-                    {deliveryZones109.length === 0 ? (
-                      <div className={designStyles.deliveryZonesEmpty109}>
-                        <strong>No delivery zones yet / لا توجد مناطق توصيل بعد</strong>
-                        <span>
-                          Example: up to 1 km free, up to 5 km for 2 JOD,
-                          then add another zone for a wider area.
-                        </span>
-                      </div>
-                    ) : (
-                      <div className={designStyles.deliveryZoneList109}>
-                        {deliveryZones109.map((zone, index) => (
-                          <article
-                            className={designStyles.deliveryZoneCard109}
-                            key={zone.id}
-                          >
-                            <div className={designStyles.deliveryZoneNumber109}>
-                              <span>ZONE</span>
-                              <strong>{index + 1}</strong>
-                            </div>
-
-                            <label>
-                              <span>Up to / حتى</span>
-                              <div>
-                                <input
-                                  type="number"
-                                  min="0.1"
-                                  step="0.1"
-                                  value={zone.maxKm}
-                                  onChange={(event) =>
-                                    updateDeliveryZone109(
-                                      zone.id,
-                                      "maxKm",
-                                      event.target.value
-                                    )
-                                  }
-                                />
-                                <b>km</b>
-                              </div>
+                        <article className={designStyles.exactWizardAssetCard109V5}>
+                          <div className={designStyles.exactWizardCover109V5}>
+                            {setupForm.heroImageUrl ? (
+                              <img src={setupForm.heroImageUrl} alt="Storefront preview" />
+                            ) : (
+                              <span>Storefront image / صورة الواجهة</span>
+                            )}
+                          </div>
+                          <div>
+                            <strong>Storefront image / صورة واجهة المتجر</strong>
+                            <p>Wide image recommended.</p>
+                            <label className={designStyles.exactWizardUpload109V5}>
+                              {uploadingAsset === "hero" ? "Uploading... / جارٍ الرفع..." : "Upload storefront / رفع صورة الواجهة"}
+                              <input
+                                type="file"
+                                accept="image/jpeg,image/png,image/webp,image/gif"
+                                onChange={(event) => uploadStorefrontAsset(event, "hero")}
+                                disabled={uploadingAsset !== null}
+                              />
                             </label>
-
-
-
-                            <button
-                              type="button"
-                              className={designStyles.deliveryZoneRemove109}
-                              onClick={() => removeDeliveryZone109(zone.id)}
-                            >
-                              Remove / حذف
-                            </button>
-                          </article>
-                        ))}
+                            <input
+                              type="url"
+                              value={setupForm.heroImageUrl}
+                              onChange={(event) => updateSetupField("heroImageUrl", event.target.value)}
+                              placeholder="Or paste storefront image URL"
+                            />
+                          </div>
+                        </article>
                       </div>
-                    )}
+                    </section>
+                  ) : null}
 
-                    <div className={designStyles.deliveryZonesStatus109}>
-                      <span>
-                        {deliveryZonesSaveState109 === "saving"
-                          ? "Saving zones... / جارٍ الحفظ..."
-                          : deliveryZonesSaveState109 === "saved"
-                            ? "Delivery zones saved / تم حفظ مناطق التوصيل"
-                            : deliveryZonesSaveState109 === "error"
-                              ? "Could not save zones / تعذر حفظ المناطق"
-                              : "Changes save automatically / يتم الحفظ تلقائياً"}
-                      </span>
-                    </div>
-                  </div>
-
-
-                  <div className={styles.formGrid}>
-                    {setupForm.fulfillmentMode === "delivery" ? (
-                      <>
+                  {storefrontSetupVisibleStep109 === 3 ? (
+                    <section data-darik-exact-step="3" className={designStyles.exactWizardPanel109V5}>
+                      <div className={designStyles.exactWizardHeading109V5}>
+                        <span>STEP 3 / الخطوة ٣</span>
+                        <h3>Store name & link / اسم المتجر والرابط</h3>
+                        <p>English and Arabic customer-facing identity stay together in this step.</p>
+                      </div>
+                      <div className={designStyles.exactWizardGrid109V5}>
+                        <label className={designStyles.exactWizardWide109V5}>
+                          <span>Permanent store link / رابط المتجر</span>
+                          <div className={designStyles.exactWizardSlug109V5}>
+                            <b>getdarik.com/store/</b>
+                            <input
+                              value={setupForm.slug}
+                              onChange={(event) => updateSetupField("slug", cleanSlug(event.target.value))}
+                              required
+                            />
+                          </div>
+                        </label>
                         <label>
-                          Delivery fee / رسوم التوصيل
+                          <span>Customer-facing name / اسم المتجر للعملاء</span>
                           <input
-                            type="number"
-                            min="0"
-                            step="0.01"
-                            value={setupForm.deliveryFee}
-                            onChange={(event) =>
-                              updateSetupField("deliveryFee", event.target.value)
-                            }
+                            value={setupForm.displayName}
+                            onChange={(event) => updateSetupField("displayName", event.target.value)}
+                            required
                           />
                         </label>
-
-
-                        <label>
-                          Estimated delivery (minutes) / مدة التوصيل المتوقعة (دقيقة)
+                        <label dir="rtl">
+                          <span>اسم المتجر بالعربية / Arabic customer-facing name</span>
                           <input
-                            type="number"
-                            min="1"
-                            value={setupForm.estimatedDeliveryMinutes}
-                            onChange={(event) =>
-                              updateSetupField(
-                                "estimatedDeliveryMinutes",
-                                event.target.value
-                              )
-                            }
+                            dir="rtl"
+                            value={setupForm.displayNameAr}
+                            onChange={(event) => updateSetupField("displayNameAr", event.target.value)}
                           />
                         </label>
-                      </>
-                    ) : (
-                      <div style={{
-                        padding: "1rem",
-                        borderRadius: "1rem",
-                        border: "1px solid #bbf7d0",
-                        background: "#f0fdf4",
-                        color: "#166534",
-                        fontWeight: 800,
-                      }}>
-                        Local pickup only is enabled. Delivery fee, delivery radius, and delivery time are disabled
-                        / تم تفعيل الاستلام المحلي فقط، وتم إيقاف رسوم ونطاق ووقت التوصيل.
+                        <label>
+                          <span>Store tagline / شعار المتجر</span>
+                          <input
+                            value={setupForm.tagline}
+                            onChange={(event) => updateSetupField("tagline", event.target.value)}
+                          />
+                        </label>
+                        <label dir="rtl">
+                          <span>الشعار بالعربية / Arabic store tagline</span>
+                          <input
+                            dir="rtl"
+                            value={setupForm.taglineAr}
+                            onChange={(event) => updateSetupField("taglineAr", event.target.value)}
+                          />
+                        </label>
                       </div>
-                    )}
+                    </section>
+                  ) : null}
 
-                    <label>
-                      Minimum order / الحد الأدنى للطلب
-                      <input
-                        type="number"
-                        min="0"
-                        step="0.01"
-                        value={setupForm.minimumOrder}
-                        onChange={(event) =>
-                          updateSetupField("minimumOrder", event.target.value)
-                        }
-                      />
-                    </label>
-                  </div>
-                </div>
-
-                                                <div className={designStyles.storefrontSetupDesignGroup109}>
-<section
-                  data-darik-setup-step="3"
-                  className={storefrontSetupVisibleStep109 === 3 ? designStyles.arabicIdentity106 : designStyles.arabicIdentity106 + " " + designStyles.storefrontSetupHidden109}
-                >
-                    <div className={designStyles.arabicIdentity106Header}>
-                      <div>
-                        <span>ARABIC STOREFRONT IDENTITY / هوية المتجر بالعربية</span>
-                        <h3>Arabic customer-facing text / النص العربي للعملاء</h3>
-                      </div>
-                      <p>
-                        Add the Arabic version of the store name and tagline. These update
-                        the live storefront preview while you type.
-                      </p>
-                    </div>
-
-                    <div className={designStyles.arabicIdentity106Grid}>
-                      <label>
-                        <span>Customer-facing name in Arabic / اسم المتجر بالعربية</span>
-                        <input
-                          dir="rtl"
-                          value={setupForm.displayNameAr}
-                          onChange={(event) =>
-                            updateSetupField("displayNameAr", event.target.value)
-                          }
-                          placeholder="اسم المتجر"
-                        />
-                      </label>
-
-                      <label>
-                        <span>Store tagline in Arabic / شعار المتجر بالعربية</span>
-                        <input
-                          dir="rtl"
-                          value={setupForm.taglineAr}
-                          onChange={(event) =>
-                            updateSetupField("taglineAr", event.target.value)
-                          }
-                          placeholder="اكتب شعار المتجر بالعربية"
-                        />
-                      </label>
-                    </div>
-                  </section>
-
-                  <section
-                  data-darik-setup-step="4"
-                  className={storefrontSetupVisibleStep109 === 4 ? designStyles.typographyStudio : designStyles.typographyStudio + " " + designStyles.storefrontSetupHidden109}
-                >
-                    <div className={designStyles.typographyStudioHeader}>
-                      <div>
-                        <span>TYPOGRAPHY STUDIO / استوديو الخطوط</span>
-                        <h3>Style every text bar independently</h3>
-                        <p>
-                          Give each customer-facing identity element its own font and size.
-                          Changing one never changes the others.
-                        </p>
-                      </div>
-                      <small>
-                        {typographySaveState === "saving"
-                          ? "Saving..."
-                          : typographySaveState === "error"
-                            ? "Save needs attention"
-                            : typographySaveState === "saved"
-                              ? "Saved"
-                              : "Live preview"}
-                      </small>
-                    </div>
-
-                    <div className={designStyles.typographyPageFont106}>
-                      <div className={designStyles.typographyPageFont106Copy}>
-                        <span>ENTIRE STOREFRONT FONT / خط المتجر بالكامل</span>
-                        <h4>Choose the base font for the whole customer-facing page</h4>
-                        <p>
-                          Products, categories, buttons, headings and body text follow this
-                          font. The individual controls below can override only the text bar
-                          you choose without changing the rest of the storefront.
-                        </p>
+                  {storefrontSetupVisibleStep109 === 4 ? (
+                    <section data-darik-exact-step="4" className={designStyles.exactWizardPanel109V5}>
+                      <div className={designStyles.exactWizardHeading109V5}>
+                        <span>STEP 4 / الخطوة ٤</span>
+                        <h3>Fonts / الخطوط</h3>
+                        <p>Choose the entire-page font first, then optionally override only a name or tagline.</p>
                       </div>
 
-                      <label className={designStyles.typographyPageFont106Control}>
-                        <span>Entire storefront font / خط المتجر بالكامل</span>
+                      <div className={designStyles.exactWizardGlobalFont109V5}>
+                        <div>
+                          <small>ENTIRE STOREFRONT / المتجر بالكامل</small>
+                          <strong>Whole-page font / خط الصفحة بالكامل</strong>
+                          <span>Everything follows this font unless you override an identity item below.</span>
+                        </div>
                         <select
-                          aria-label="Entire storefront font"
                           value={storefrontTypographyDraft.page.font}
                           onChange={(event) =>
                             updateStorefrontTypography("page", {
@@ -4494,50 +3743,45 @@ export default function DarikDirectStorefrontSettingsPage() {
                           {storefrontTypographyFontGroups.map((group) => (
                             <optgroup key={group.label} label={group.label}>
                               {group.options.map((option) => (
-                                <option key={option.key} value={option.key}>
-                                  {option.key === "theme"
-                                    ? "Theme default"
-                                    : option.label}
-                                </option>
+                                <option key={option.key} value={option.key}>{option.label}</option>
                               ))}
                             </optgroup>
                           ))}
                         </select>
-                      </label>
+                        <button type="button" onClick={() => resetStorefrontTypography("page")}>
+                          Theme default / خط القالب
+                        </button>
+                      </div>
 
-                      <button
-                        type="button"
-                        className={designStyles.typographyPageFont106Reset}
-                        onClick={() => resetStorefrontTypography("page")}
-                      >
-                        Reset whole page to theme font
-                      </button>
-                    </div>
+                      <div className={designStyles.exactWizardOptionalTitle109V5}>
+                        <strong>Optional individual overrides / تعديلات فردية اختيارية</strong>
+                        <span>Change only the text you want; everything else keeps the whole-page font.</span>
+                      </div>
 
-                    <div className={designStyles.typographyStudioGrid}>
-                      {([
-                        ["display_name", "Customer-facing name", "اسم المتجر للعملاء"],
-                        ["display_name_ar", "Arabic customer-facing name", "اسم المتجر بالعربية"],
-                        ["tagline", "Store tagline", "شعار المتجر"],
-                        ["tagline_ar", "Arabic store tagline", "شعار المتجر بالعربية"],
-                      ] as Array<[StorefrontTypographyKey, string, string]>).map(
-                        ([key, label, arabicLabel]) => {
-                          const current = storefrontTypographyDraft[key];
+                      <div className={designStyles.exactWizardFontGrid109V5}>
+                        {[
+                          ["display_name", "Customer-facing name", "اسم المتجر للعملاء"],
+                          ["display_name_ar", "Arabic customer-facing name", "اسم المتجر بالعربية"],
+                          ["tagline", "Store tagline", "شعار المتجر"],
+                          ["tagline_ar", "Arabic store tagline", "الشعار بالعربية"],
+                        ].map(([key, en, ar]) => {
+                          const typographyKey = key as
+                            | "display_name"
+                            | "display_name_ar"
+                            | "tagline"
+                            | "tagline_ar";
+                          const setting = storefrontTypographyDraft[typographyKey];
 
                           return (
-                            <article className={designStyles.typographyStudioRow} key={key}>
-                              <div className={designStyles.typographyStudioIdentity}>
-                                <span>{label}</span>
-                                <small dir="rtl">{arabicLabel}</small>
-                              </div>
-
-                              <label className={designStyles.typographyStudioControl}>
+                            <article key={key} className={designStyles.exactWizardFontCard109V5}>
+                              <div><strong>{en}</strong><span>{ar}</span></div>
+                              <label>
                                 <span>Font / الخط</span>
                                 <select
-                                  aria-label={`${label} font`}
-                                  value={current.font}
+                                  value={setting.font}
                                   onChange={(event) =>
-                                    updateStorefrontTypography(key, {
+                                    updateStorefrontTypography(typographyKey, {
+                                      ...setting,
                                       font: isStorefrontTypographyFontKey(event.target.value)
                                         ? event.target.value
                                         : "theme",
@@ -4547,201 +3791,284 @@ export default function DarikDirectStorefrontSettingsPage() {
                                   {storefrontTypographyFontGroups.map((group) => (
                                     <optgroup key={group.label} label={group.label}>
                                       {group.options.map((option) => (
-                                        <option key={option.key} value={option.key}>
-                                          {option.label}
-                                        </option>
+                                        <option key={option.key} value={option.key}>{option.label}</option>
                                       ))}
                                     </optgroup>
                                   ))}
                                 </select>
                               </label>
-
-                              <label className={designStyles.typographyStudioControl}>
+                              <label>
                                 <span>Size / الحجم</span>
                                 <select
-                                  aria-label={`${label} size`}
-                                  value={String(current.size)}
+                                  value={setting.size}
                                   onChange={(event) =>
-                                    updateStorefrontTypography(key, {
+                                    updateStorefrontTypography(typographyKey, {
+                                      ...setting,
                                       size: Number(event.target.value),
                                     })
                                   }
                                 >
-                                  {storefrontTypographySizeOptions.map((size) => (
-                                    <option key={size} value={size}>
-                                      {size === 0 ? "Theme size" : `${size}px`}
-                                    </option>
+                                  <option value={0}>Theme default / تلقائي</option>
+                                  {[12,14,16,18,20,22,24,28,32,36,40,48,56,64,72,80,88,96].map((size) => (
+                                    <option key={size} value={size}>{size}px</option>
                                   ))}
                                 </select>
                               </label>
-
-                              <button
-                                type="button"
-                                className={designStyles.typographyStudioReset}
-                                onClick={() => resetStorefrontTypography(key)}
-                              >
-                                Reset
+                              <button type="button" onClick={() => resetStorefrontTypography(typographyKey)}>
+                                Reset / إعادة
                               </button>
                             </article>
                           );
-                        }
-                      )}
-                    </div>
-
-                    <div className={designStyles.typographyStudioFoot}>
-                      <strong>Theme default</strong>
-                      <span>
-                        makes that individual text bar follow the Entire storefront font.
-                        If the whole page is set to Theme default, it follows the selected Darik theme.
-                      </span>
-                    </div>
-                  </section>
-
-                                  <section
-                  data-darik-setup-step="10"
-                  className={`${designStyles.storefrontSetupSynthetic109} ${
-                    storefrontSetupVisibleStep109 === 10
-                      ? ""
-                      : designStyles.storefrontSetupHidden109
-                  }`}
-                >
-                  <div className={designStyles.storefrontSetupSyntheticHeading109}>
-                    <span>PAYMENT METHODS / طرق الدفع</span>
-                    <h3>Choose how customers can pay / اختر طرق الدفع</h3>
-                    <p>
-                      Keep payment choices separate from delivery so retailers can
-                      understand exactly what customers will see at checkout.
-                    </p>
-                  </div>
-<div className={styles.onlinePaymentSettings}>
-                    <div className={styles.paymentSettingsHeading}>
-                      <div>
-                        <span>Online payment methods / طرق الدفع الإلكترونية</span>
-                        <h4>What can customers use? / ما طرق الدفع المتاحة للعملاء؟</h4>
+                        })}
                       </div>
-                      <p>Check one or both / اختر طريقة أو الطريقتين. Cash remains enabled by default / الدفع النقدي مفعّل افتراضيًا.</p>
-                    </div>
+                    </section>
+                  ) : null}
 
-                    <div className={styles.paymentCheckboxGrid}>
-                      <label
-                        className={
-                          setupForm.acceptCash
-                            ? styles.activePaymentCheckbox
-                            : ""
-                        }
-                      >
-                        <input
-                          type="checkbox"
-                          checked={setupForm.acceptCash}
-                          onChange={(event) =>
-                            updateSetupField("acceptCash", event.target.checked)
-                          }
-                        />
-                        <span>
-                          <strong>Accept cash / قبول الدفع نقدًا</strong>
-                          <small>
-                            {setupForm.fulfillmentMode === "pickup"
-                              ? "Customer pays when collecting the order / يدفع العميل عند استلام الطلب من المتجر."
-                              : "Customer pays the store or driver on delivery / يدفع العميل للمتجر أو السائق عند التوصيل."}
-                          </small>
-                        </span>
-                      </label>
-
-                      <label
-                        className={
-                          setupForm.acceptCliq
-                            ? styles.activePaymentCheckbox
-                            : ""
-                        }
-                      >
-                        <input
-                          type="checkbox"
-                          checked={setupForm.acceptCliq}
-                          onChange={(event) =>
-                            updateSetupField("acceptCliq", event.target.checked)
-                          }
-                        />
-                        <span>
-                          <strong>Accept CliQ / قبول الدفع عبر كليك</strong>
-                          <small>Customer transfers the total before submitting / يحوّل العميل المبلغ قبل إرسال الطلب.</small>
-                        </span>
-                      </label>
-                    </div>
-
-                    {setupForm.acceptCliq ? (
-                      <div className={styles.cliqSettingsPanel}>
-                        <div className={styles.formGrid}>
-                          <label>
-                            CliQ account holder or business name / اسم صاحب حساب كليك أو اسم المنشأة
-                            <input
-                              value={setupForm.cliqAccountName}
-                              onChange={(event) =>
-                                updateSetupField(
-                                  "cliqAccountName",
-                                  event.target.value
-                                )
-                              }
-                              placeholder="Al Salam Market"
-                            />
-                          </label>
-
-                          <label>
-                            CliQ alias or registered mobile number / اسم كليك المستعار أو رقم الهاتف المسجل
-                            <input
-                              value={setupForm.cliqIdentifier}
-                              onChange={(event) =>
-                                updateSetupField(
-                                  "cliqIdentifier",
-                                  event.target.value
-                                )
-                              }
-                              placeholder="Store alias or 07XXXXXXXX"
-                            />
-                          </label>
-                        </div>
-                        <p>
-                          Customers see these details only when they select CliQ
-                          / تظهر هذه البيانات للعملاء فقط عند اختيار كليك.
-                        </p>
+                  {storefrontSetupVisibleStep109 === 5 ? (
+                    <section data-darik-exact-step="5" className={designStyles.exactWizardPanel109V5}>
+                      <div className={designStyles.exactWizardHeading109V5}>
+                        <span>STEP 5 / الخطوة ٥</span>
+                        <h3>Contact information / معلومات التواصل</h3>
+                        <p>Only contact and public location information belong here.</p>
                       </div>
-                    ) : null}
-                  </div>
-                </section>
-
-<div
-                    data-darik-setup-step="11"
-                    className={storefrontSetupVisibleStep109 === 11 ? designStyles.functionControls : designStyles.functionControls + " " + designStyles.storefrontSetupHidden109}
-                  >
-                    <div>
-                      <span>Store functions / وظائف المتجر</span>
-                      <h4>Store features stay connected to your retail field / وظائف المتجر تبقى مرتبطة بنشاطك</h4>
-                    </div>
-                    <div className={designStyles.toggleGrid}>
-                      {[
-                        ["showPrices", "Show prices / إظهار الأسعار", "Turn off for catalog or quote-based businesses"],
-                        ["showOrdering", "Enable cart and checkout / تفعيل السلة والطلب", "Turn off for a showcase-only website"],
-                        ["showPhone", "Show phone / إظهار الهاتف", "Customers can tap to call"],
-                        ["showWhatsapp", "Show WhatsApp / إظهار واتساب", "Customers can open a WhatsApp conversation"],
-                        ["showStoreStory", "Show About section / إظهار قسم عن المتجر", "Display the store story when the field design uses it"],
-                      ].map(([field, label, helper]) => (
-                        <label className={designStyles.switchCard} key={field}>
-                          <span><strong>{label}</strong><small>{helper}</small></span>
-                          <input
-                            type="checkbox"
-                            checked={Boolean(setupForm[field as keyof StorefrontForm])}
-                            onChange={(event) =>
-                              updateSetupField(
-                                field as keyof StorefrontForm,
-                                event.target.checked as never
-                              )
-                            }
-                          />
+                      <div className={designStyles.exactWizardGrid109V5}>
+                        <label><span>Store phone / هاتف المتجر</span><input type="tel" value={setupForm.phone} onChange={(event) => updateSetupField("phone", event.target.value)} /></label>
+                        <label><span>WhatsApp / واتساب</span><input type="tel" value={setupForm.whatsapp} onChange={(event) => updateSetupField("whatsapp", event.target.value)} /></label>
+                        <label><span>Public email / البريد الإلكتروني</span><input type="email" value={setupForm.publicEmail} onChange={(event) => updateSetupField("publicEmail", event.target.value)} /></label>
+                        <label><span>Website / الموقع الإلكتروني</span><input type="url" value={setupForm.websiteUrl} onChange={(event) => updateSetupField("websiteUrl", event.target.value)} /></label>
+                        <label><span>Facebook / فيسبوك</span><input type="url" value={setupForm.facebookUrl} onChange={(event) => updateSetupField("facebookUrl", event.target.value)} /></label>
+                        <label><span>Instagram / إنستغرام</span><input type="url" value={setupForm.instagramUrl} onChange={(event) => updateSetupField("instagramUrl", event.target.value)} /></label>
+                        <label className={designStyles.exactWizardWide109V5}>
+                          <span>Public store address / عنوان المتجر</span>
+                          <input value={setupForm.addressText} onChange={(event) => updateSetupField("addressText", event.target.value)} />
                         </label>
-                      ))}
-                    </div>
-                  </div>
+                      </div>
+                    </section>
+                  ) : null}
+
+                  {storefrontSetupVisibleStep109 === 6 ? (
+                    <section data-darik-exact-step="6" className={designStyles.exactWizardPanel109V5}>
+                      <div className={designStyles.exactWizardHeading109V5}>
+                        <span>STEP 6 / الخطوة ٦</span>
+                        <h3>About the store & business hours / عن المتجر وساعات العمل</h3>
+                        <p>About the store and every day's hours stay together here.</p>
+                      </div>
+                      <div className={designStyles.exactWizardAbout109V5}>
+                        <label>
+                          <span>About the store / عن المتجر</span>
+                          <textarea rows={6} value={setupForm.aboutText} onChange={(event) => updateSetupField("aboutText", event.target.value)} />
+                        </label>
+                        <label dir="rtl">
+                          <span>عن المتجر بالعربية / Arabic about the store</span>
+                          <textarea dir="rtl" rows={6} value={setupForm.aboutTextAr} onChange={(event) => updateSetupField("aboutTextAr", event.target.value)} />
+                        </label>
+                      </div>
+
+                      <div className={designStyles.exactWizardHoursTitle109V5}>
+                        <strong>Business hours / ساعات العمل</strong>
+                        <span>Select Closed from Open to automatically close that day.</span>
+                      </div>
+                      <div className={designStyles.exactWizardHours109V5}>
+                        {operatingDays.map(([day, label]) => {
+                          const parsed = parseDarikOperatingHours109(setupForm.operatingHours[day] ?? "");
+                          return (
+                            <article key={day}>
+                              <strong>{label}</strong>
+                              <label>
+                                <span>Open / فتح</span>
+                                <select
+                                  value={parsed.open}
+                                  onChange={(event) => updateOperatingHourDropdown109(day, "open", event.target.value)}
+                                >
+                                  <option value="">Choose time / اختر الوقت</option>
+                                  <option value="Closed">Closed / مغلق</option>
+                                  {darikStorefrontTimeOptions109.map((time) => <option value={time} key={`${day}-v5-open-${time}`}>{time}</option>)}
+                                </select>
+                              </label>
+                              <label>
+                                <span>Close / إغلاق</span>
+                                <select
+                                  value={parsed.close}
+                                  disabled={parsed.closed}
+                                  onChange={(event) => updateOperatingHourDropdown109(day, "close", event.target.value)}
+                                >
+                                  <option value="">Choose time / اختر الوقت</option>
+                                  {darikStorefrontTimeOptions109.map((time) => <option value={time} key={`${day}-v5-close-${time}`}>{time}</option>)}
+                                </select>
+                              </label>
+                            </article>
+                          );
+                        })}
+                      </div>
+                    </section>
+                  ) : null}
+
+                  {storefrontSetupVisibleStep109 === 7 ? (
+                    <section data-darik-exact-step="7" className={designStyles.exactWizardPanel109V5}>
+                      <div className={designStyles.exactWizardHeadingRow109V5}>
+                        <div className={designStyles.exactWizardHeading109V5}>
+                          <span>STEP 7 · OPTIONAL / الخطوة ٧ · اختياري</span>
+                          <h3>Custom links / روابط إضافية</h3>
+                          <p>Add only the extra links your store needs.</p>
+                        </div>
+                        <button type="button" onClick={addCustomLink}>+ Add link / إضافة رابط</button>
+                      </div>
+                      {setupForm.customLinks.length === 0 ? (
+                        <div className={designStyles.exactWizardEmpty109V5}>No custom links yet / لا توجد روابط إضافية</div>
+                      ) : (
+                        <div className={designStyles.exactWizardRows109V5}>
+                          {setupForm.customLinks.map((link, index) => (
+                            <article key={`v5-link-${index}`}>
+                              <input value={link.label} onChange={(event) => updateCustomLink(index, "label", event.target.value)} placeholder="Link label / اسم الرابط" />
+                              <input type="url" value={link.url} onChange={(event) => updateCustomLink(index, "url", event.target.value)} placeholder="https://..." />
+                              <button type="button" onClick={() => removeCustomLink(index)}>Remove / حذف</button>
+                            </article>
+                          ))}
+                        </div>
+                      )}
+                    </section>
+                  ) : null}
+
+                  {storefrontSetupVisibleStep109 === 8 ? (
+                    <section data-darik-exact-step="8" className={designStyles.exactWizardPanel109V5}>
+                      <div className={designStyles.exactWizardHeadingRow109V5}>
+                        <div className={designStyles.exactWizardHeading109V5}>
+                          <span>STEP 8 · OPTIONAL / الخطوة ٨ · اختياري</span>
+                          <h3>Custom store information / معلومات إضافية</h3>
+                          <p>Add anything unique customers should know.</p>
+                        </div>
+                        <button type="button" onClick={addCustomInformation}>+ Add information / إضافة معلومة</button>
+                      </div>
+                      {setupForm.customInformation.length === 0 ? (
+                        <div className={designStyles.exactWizardEmpty109V5}>No custom information yet / لا توجد معلومات إضافية</div>
+                      ) : (
+                        <div className={designStyles.exactWizardRows109V5}>
+                          {setupForm.customInformation.map((item, index) => (
+                            <article key={`v5-info-${index}`}>
+                              <input value={item.label} onChange={(event) => updateCustomInformation(index, "label", event.target.value)} placeholder="Heading / العنوان" />
+                              <input value={item.value} onChange={(event) => updateCustomInformation(index, "value", event.target.value)} placeholder="Information / المعلومة" />
+                              <button type="button" onClick={() => removeCustomInformation(index)}>Remove / حذف</button>
+                            </article>
+                          ))}
+                        </div>
+                      )}
+                    </section>
+                  ) : null}
+
+                  {storefrontSetupVisibleStep109 === 9 ? (
+                    <section data-darik-exact-step="9" className={designStyles.exactWizardPanel109V5}>
+                      <div className={designStyles.exactWizardHeading109V5}>
+                        <span>STEP 9 / الخطوة ٩</span>
+                        <h3>Delivery / التوصيل</h3>
+                        <p>All delivery configuration belongs here, including unlimited distance zones.</p>
+                      </div>
+
+                      <div className={designStyles.exactWizardOrderModes109V5}>
+                        <button type="button" className={setupForm.orderSubmissionMode === "phone" ? designStyles.exactWizardSelected109V5 : ""} onClick={() => updateSetupField("orderSubmissionMode", "phone")}><strong>Phone / WhatsApp</strong><span>هاتف / واتساب</span></button>
+                        <button type="button" className={setupForm.orderSubmissionMode === "online" ? designStyles.exactWizardSelected109V5 : ""} onClick={() => updateSetupField("orderSubmissionMode", "online")}><strong>Online orders</strong><span>طلبات إلكترونية</span></button>
+                        <button type="button" className={setupForm.orderSubmissionMode === "both" ? designStyles.exactWizardSelected109V5 : ""} onClick={() => updateSetupField("orderSubmissionMode", "both")}><strong>Phone + online</strong><span>هاتف + إلكتروني</span></button>
+                      </div>
+
+                      <label className={designStyles.exactWizardDeliveryTime109V5}>
+                        <span>Estimated delivery time / وقت التوصيل المتوقع</span>
+                        <div>
+                          <input
+                            type="number"
+                            min="1"
+                            value={setupForm.estimatedDeliveryMinutes}
+                            onChange={(event) => updateSetupField("estimatedDeliveryMinutes", event.target.value)}
+                          />
+                          <b>minutes / دقيقة</b>
+                        </div>
+                      </label>
+
+                      <div className={designStyles.exactWizardZones109V5}>
+                        <div className={designStyles.exactWizardZonesHead109V5}>
+                          <div>
+                            <small>DELIVERY ZONES / مناطق التوصيل</small>
+                            <strong>Add as many zones as you want / أضف أي عدد من المناطق</strong>
+                            <span>Example: up to 1 km free; up to 5 km for 2 JOD; up to 10 km for another fee. Minimum order is optional per zone.</span>
+                          </div>
+                          <button type="button" onClick={addDeliveryZone109}>+ Add zone / إضافة منطقة</button>
+                        </div>
+                        {deliveryZones109.length === 0 ? (
+                          <div className={designStyles.exactWizardEmpty109V5}>No delivery zones yet / لا توجد مناطق توصيل</div>
+                        ) : (
+                          <div className={designStyles.exactWizardZoneList109V5}>
+                            {deliveryZones109.map((zone, index) => (
+                              <article key={zone.id}>
+                                <div className={designStyles.exactWizardZoneNumber109V5}><span>ZONE</span><strong>{index + 1}</strong></div>
+                                <label><span>Up to / حتى</span><div><input type="number" min="0.1" step="0.1" value={zone.maxKm} onChange={(event) => updateDeliveryZone109(zone.id, "maxKm", event.target.value)} /><b>km</b></div></label>
+                                <label><span>Delivery fee / رسوم التوصيل</span><div><input type="number" min="0" step="0.01" value={zone.deliveryFeeJod} onChange={(event) => updateDeliveryZone109(zone.id, "deliveryFeeJod", event.target.value)} /><b>JOD</b></div></label>
+                                <label><span>Minimum order / الحد الأدنى</span><div><input type="number" min="0" step="0.01" value={zone.minimumOrderJod} onChange={(event) => updateDeliveryZone109(zone.id, "minimumOrderJod", event.target.value)} placeholder="Optional" /><b>JOD</b></div></label>
+                                <button type="button" onClick={() => removeDeliveryZone109(zone.id)}>Remove / حذف</button>
+                              </article>
+                            ))}
+                          </div>
+                        )}
+                        <small className={designStyles.exactWizardZoneStatus109V5}>
+                          {deliveryZonesSaveState109 === "saving" ? "Saving... / جارٍ الحفظ..." : deliveryZonesSaveState109 === "saved" ? "Zones saved / تم الحفظ" : deliveryZonesSaveState109 === "error" ? "Could not save / تعذر الحفظ" : "Zones save automatically / حفظ تلقائي"}
+                        </small>
+                      </div>
+                    </section>
+                  ) : null}
+
+                  {storefrontSetupVisibleStep109 === 10 ? (
+                    <section data-darik-exact-step="10" className={designStyles.exactWizardPanel109V5}>
+                      <div className={designStyles.exactWizardHeading109V5}>
+                        <span>STEP 10 / الخطوة ١٠</span>
+                        <h3>Payment methods / طرق الدفع</h3>
+                        <p>Payment methods are completely separate from delivery.</p>
+                      </div>
+                      <div className={designStyles.exactWizardPayments109V5}>
+                        <label className={setupForm.acceptCash ? designStyles.exactWizardSelected109V5 : ""}>
+                          <input type="checkbox" checked={setupForm.acceptCash} onChange={(event) => updateSetupField("acceptCash", event.target.checked)} />
+                          <span><strong>Cash / نقداً</strong><small>Pay on collection or delivery.</small></span>
+                        </label>
+                        <label className={setupForm.acceptCliq ? designStyles.exactWizardSelected109V5 : ""}>
+                          <input type="checkbox" checked={setupForm.acceptCliq} onChange={(event) => updateSetupField("acceptCliq", event.target.checked)} />
+                          <span><strong>CliQ / كليك</strong><small>Transfer before submitting.</small></span>
+                        </label>
+                      </div>
+                      {setupForm.acceptCliq ? (
+                        <div className={designStyles.exactWizardGrid109V5}>
+                          <label><span>CliQ account holder / اسم صاحب الحساب</span><input value={setupForm.cliqAccountName} onChange={(event) => updateSetupField("cliqAccountName", event.target.value)} /></label>
+                          <label><span>CliQ alias or mobile / اسم كليك أو رقم الهاتف</span><input value={setupForm.cliqIdentifier} onChange={(event) => updateSetupField("cliqIdentifier", event.target.value)} /></label>
+                        </div>
+                      ) : null}
+                    </section>
+                  ) : null}
+
+                  {storefrontSetupVisibleStep109 === 11 ? (
+                    <section data-darik-exact-step="11" className={designStyles.exactWizardPanel109V5}>
+                      <div className={designStyles.exactWizardHeading109V5}>
+                        <span>STEP 11 / الخطوة ١١</span>
+                        <h3>Store features & functions / خصائص ووظائف المتجر</h3>
+                        <p>These controls change storefront functions, not the selected visual theme.</p>
+                      </div>
+                      <div className={designStyles.exactWizardFeatures109V5}>
+                        {[
+                          ["showPrices", "Show prices", "إظهار الأسعار", "Useful for normal retail; turn off for quote/catalog stores."],
+                          ["showOrdering", "Enable cart & checkout", "تفعيل السلة والطلب", "Turn off for a showcase-only storefront."],
+                          ["showPhone", "Show phone", "إظهار الهاتف", "Customers can tap to call."],
+                          ["showWhatsapp", "Show WhatsApp", "إظهار واتساب", "Customers can open WhatsApp."],
+                          ["showStoreStory", "Show About section", "إظهار قسم عن المتجر", "Show the store story publicly."],
+                        ].map(([field, en, ar, helper]) => (
+                          <label key={field}>
+                            <span><strong>{en}</strong><b>{ar}</b><small>{helper}</small></span>
+                            <input
+                              type="checkbox"
+                              checked={Boolean(setupForm[field as keyof StorefrontForm])}
+                              onChange={(event) => updateSetupField(field as keyof StorefrontForm, event.target.checked as never)}
+                            />
+                          </label>
+                        ))}
+                      </div>
+                    </section>
+                  ) : null}
                 </div>
-                                {storefrontSetupMode109 === "wizard" ? (
+
+                {storefrontSetupMode109 === "wizard" ? (
                   <div className={designStyles.storefrontSetupWizardActions109}>
                     <button
                       type="button"
