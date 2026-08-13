@@ -910,6 +910,86 @@ export default function DarikDirectStorefrontPage() {
     [categories]
   );
 
+  // DARIK_LIVE_STOREFRONT_BUILDER_103
+  useEffect(() => {
+    const builderMode =
+      new URLSearchParams(window.location.search).get("builderPreview") === "1";
+
+    if (!builderMode) return;
+
+    const allowedKeys = new Set([
+      "display_name",
+      "display_name_ar",
+      "tagline",
+      "tagline_ar",
+      "logo_url",
+      "hero_image_url",
+      "business_phone",
+      "whatsapp_number",
+      "public_email",
+      "website_url",
+      "facebook_url",
+      "instagram_url",
+      "address_text",
+      "address_text_ar",
+      "about_text",
+      "about_text_ar",
+      "operating_hours",
+      "minimum_order",
+      "delivery_fee",
+      "delivery_radius_km",
+      "estimated_delivery_minutes",
+      "show_prices",
+      "show_ordering",
+      "show_phone",
+      "show_whatsapp",
+      "show_store_story",
+      "pickup_enabled",
+      "is_accepting_orders",
+    ]);
+
+    function receiveBuilderDraft(event: MessageEvent) {
+      if (event.origin !== window.location.origin) return;
+      if (event.data?.type !== "DARIK_STOREFRONT_BUILDER_DRAFT_103") return;
+
+      const raw =
+        event.data && typeof event.data.payload === "object" && event.data.payload
+          ? (event.data.payload as Record<string, unknown>)
+          : {};
+
+      const clean: Record<string, unknown> = {};
+
+      for (const [key, value] of Object.entries(raw)) {
+        if (!allowedKeys.has(key) || value === undefined) continue;
+        clean[key] = value;
+      }
+
+      setStorefront((current) =>
+        current ? ({ ...current, ...clean } as Storefront) : current
+      );
+    }
+
+    window.addEventListener("message", receiveBuilderDraft);
+
+    return () => {
+      window.removeEventListener("message", receiveBuilderDraft);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!storefront?.id) return;
+
+    const builderMode =
+      new URLSearchParams(window.location.search).get("builderPreview") === "1";
+
+    if (!builderMode || window.parent === window) return;
+
+    window.parent.postMessage(
+      { type: "DARIK_STOREFRONT_BUILDER_READY_103" },
+      window.location.origin
+    );
+  }, [storefront?.id]);
+
   const actualBusinessType = String(
     storefront?.business_type ||
     publicStatus?.business_type ||

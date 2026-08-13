@@ -541,6 +541,99 @@ export default function DarikDirectStorefrontSettingsPage() {
     ...defaultStorefrontDesign,
   });
 
+  const [themePickerOpen, setThemePickerOpen] = useState(false);
+  const liveBuilderPreviewRef = useRef<HTMLIFrameElement | null>(null);
+
+  const selectedThemeOption =
+    storefrontThemeOptions.find((theme) => theme.key === selectedThemeField) ?? null;
+
+  function liveBuilderDraftValue(...keys: string[]) {
+    const draft = setupForm as unknown as Record<string, unknown>;
+    for (const key of keys) {
+      const value = draft[key];
+      if (value !== undefined && value !== null) return value;
+    }
+    return undefined;
+  }
+
+  function liveBuilderDraftText(...keys: string[]) {
+    const value = liveBuilderDraftValue(...keys);
+    return typeof value === "string" ? value : "";
+  }
+
+  function getLiveBuilderDraftPayload() {
+    return {
+      display_name: liveBuilderDraftValue("displayName", "display_name"),
+      display_name_ar: liveBuilderDraftValue("displayNameAr", "display_name_ar"),
+      tagline: liveBuilderDraftValue("tagline"),
+      tagline_ar: liveBuilderDraftValue("taglineAr", "tagline_ar"),
+      logo_url: liveBuilderDraftValue("logoUrl", "logo_url"),
+      hero_image_url: liveBuilderDraftValue("heroImageUrl", "hero_image_url"),
+      business_phone: liveBuilderDraftValue("phone", "businessPhone", "business_phone"),
+      whatsapp_number: liveBuilderDraftValue("whatsapp", "whatsappNumber", "whatsapp_number"),
+      public_email: liveBuilderDraftValue("publicEmail", "public_email"),
+      website_url: liveBuilderDraftValue("websiteUrl", "website_url"),
+      facebook_url: liveBuilderDraftValue("facebookUrl", "facebook_url"),
+      instagram_url: liveBuilderDraftValue("instagramUrl", "instagram_url"),
+      address_text: liveBuilderDraftValue("addressText", "address_text"),
+      address_text_ar: liveBuilderDraftValue("addressTextAr", "address_text_ar"),
+      about_text: liveBuilderDraftValue("aboutText", "about_text"),
+      about_text_ar: liveBuilderDraftValue("aboutTextAr", "about_text_ar"),
+      operating_hours: liveBuilderDraftValue("operatingHours", "operating_hours"),
+      minimum_order: liveBuilderDraftValue("minimumOrder", "minimum_order"),
+      delivery_fee: liveBuilderDraftValue("deliveryFee", "delivery_fee"),
+      delivery_radius_km: liveBuilderDraftValue("deliveryRadiusKm", "delivery_radius_km"),
+      estimated_delivery_minutes: liveBuilderDraftValue(
+        "estimatedDeliveryMinutes",
+        "estimated_delivery_minutes"
+      ),
+      show_prices: liveBuilderDraftValue("showPrices", "show_prices"),
+      show_ordering: liveBuilderDraftValue("showOrdering", "show_ordering"),
+      show_phone: liveBuilderDraftValue("showPhone", "show_phone"),
+      show_whatsapp: liveBuilderDraftValue("showWhatsapp", "show_whatsapp"),
+      show_store_story: liveBuilderDraftValue("showStoreStory", "show_store_story"),
+      pickup_enabled: liveBuilderDraftValue("pickupEnabled", "pickup_enabled"),
+      is_accepting_orders: liveBuilderDraftValue(
+        "isAcceptingOrders",
+        "is_accepting_orders"
+      ),
+    };
+  }
+
+  function pushLiveBuilderDraft() {
+    const target = liveBuilderPreviewRef.current?.contentWindow;
+    if (!target || !selectedThemeField) return;
+
+    target.postMessage(
+      {
+        type: "DARIK_STOREFRONT_BUILDER_DRAFT_103",
+        payload: getLiveBuilderDraftPayload(),
+      },
+      window.location.origin
+    );
+  }
+
+  useEffect(() => {
+    if (!selectedThemeField) return;
+
+    const animation = window.requestAnimationFrame(() => {
+      pushLiveBuilderDraft();
+    });
+
+    return () => window.cancelAnimationFrame(animation);
+  }, [setupForm, selectedThemeField, storefront?.slug]);
+
+  useEffect(() => {
+    function handleBuilderReady(event: MessageEvent) {
+      if (event.origin !== window.location.origin) return;
+      if (event.data?.type !== "DARIK_STOREFRONT_BUILDER_READY_103") return;
+      pushLiveBuilderDraft();
+    }
+
+    window.addEventListener("message", handleBuilderReady);
+    return () => window.removeEventListener("message", handleBuilderReady);
+  }, [setupForm, selectedThemeField, storefront?.slug]);
+
   const [formDirty, setFormDirty] = useState(false);
   const [draftSavedAt, setDraftSavedAt] = useState<string | null>(null);
   const setupFormDirtyRef = useRef(false);
@@ -1736,12 +1829,22 @@ export default function DarikDirectStorefrontSettingsPage() {
   }, [storefront?.id, storefront?.slug]);
 
   async function chooseStorefrontTheme(themeField: string) {
-    if (!storefront) {
-      setError("Create the storefront before choosing a theme.");
+    if (themeSaveState === "saving" || themeField === selectedThemeField) {
+      if (themeField === selectedThemeField) setThemePickerOpen(false);
       return;
     }
 
-    if (themeSaveState === "saving" || themeField === selectedThemeField) {
+    if (!storefront) {
+      setSelectedThemeField(themeField);
+      setThemePickerOpen(false);
+
+      if (selectedStore?.retailer_id) {
+        window.localStorage.setItem(
+          `darik-pending-theme-${selectedStore.retailer_id}`,
+          themeField
+        );
+      }
+
       return;
     }
 
@@ -1762,11 +1865,44 @@ export default function DarikDirectStorefrontSettingsPage() {
       return;
     }
 
+    setThemePickerOpen(false);
+    if (selectedStore?.retailer_id) {
+      window.localStorage.removeItem(`darik-pending-theme-${selectedStore.retailer_id}`);
+    }
     setThemeSaveState("saved");
     window.setTimeout(() => {
       setThemeSaveState((current) => (current === "saved" ? "idle" : current));
     }, 1800);
   }
+
+  useEffect(() => {
+    if (!storefront?.id || !selectedStore?.retailer_id) return;
+
+    const pending = window.localStorage.getItem(
+      `darik-pending-theme-${selectedStore.retailer_id}`
+    );
+
+    if (!pending) return;
+
+    const valid = storefrontThemeOptions.some((theme) => theme.key === pending);
+    if (!valid) {
+      window.localStorage.removeItem(`darik-pending-theme-${selectedStore.retailer_id}`);
+      return;
+    }
+
+    setSelectedThemeField(pending);
+
+    void (async () => {
+      const result = await supabase.rpc("darik_direct_set_storefront_theme", {
+        p_storefront_id: storefront.id,
+        p_theme_field: pending,
+      });
+
+      if (!result.error) {
+        window.localStorage.removeItem(`darik-pending-theme-${selectedStore.retailer_id}`);
+      }
+    })();
+  }, [storefront?.id, selectedStore?.retailer_id]);
 
   function previewSelectedTheme() {
     if (!storefront || !selectedThemeField) return;
@@ -1951,6 +2087,192 @@ export default function DarikDirectStorefrontSettingsPage() {
               </div>
 
               <form className={styles.setupForm} onSubmit={saveStorefront} noValidate>
+              {!selectedThemeField || themePickerOpen ? (
+                <section className={designStyles.themeFirstStepScreen}>
+                  <div className={designStyles.themeFirstStepHeader}>
+                    <div>
+                      <span className={designStyles.themeStepBadge}>STEP 1</span>
+                      <span className={designStyles.themeFirstEyebrow}>
+                        STOREFRONT THEMES / قوالب واجهة المتجر
+                      </span>
+                      <h2>Choose your look / اختر تصميم متجرك</h2>
+                      <p>
+                        Pick the storefront style that feels right for your business.
+                        <strong> You can change this at any time.</strong>
+                        {" / اختر التصميم الأنسب لمتجرك. يمكنك تغيير القالب في أي وقت."}
+                      </p>
+                    </div>
+                    {selectedThemeField ? (
+                      <button
+                        type="button"
+                        className={designStyles.themeKeepCurrentButton}
+                        onClick={() => setThemePickerOpen(false)}
+                      >
+                        Keep current theme / الاحتفاظ بالقالب الحالي
+                      </button>
+                    ) : null}
+                  </div>
+
+                  <div className={designStyles.themeGalleryGrid}>
+                    {storefrontThemeOptions.map((theme) => {
+                      const selected = selectedThemeField === theme.key;
+
+                      return (
+                        <button
+                          type="button"
+                          className={`${designStyles.themeCard} ${
+                            selected ? designStyles.themeCardSelected : ""
+                          }`}
+                          key={theme.key}
+                          aria-pressed={selected}
+                          disabled={themeSaveState === "saving"}
+                          onClick={() => void chooseStorefrontTheme(theme.key)}
+                        >
+                          <div
+                            className={designStyles.themeMiniBrowser}
+                            style={{ background: theme.palette[2] }}
+                          >
+                            <div className={designStyles.themeMiniTopbar}>
+                              <i style={{ background: theme.palette[0] }} />
+                              <span style={{ background: theme.palette[0] }} />
+                              <span style={{ background: theme.palette[1] }} />
+                            </div>
+                            <div
+                              className={designStyles.themeMiniHero}
+                              style={{
+                                background: `linear-gradient(135deg, ${theme.palette[0]}, ${theme.palette[1]})`,
+                              }}
+                            >
+                              <span />
+                              <strong />
+                            </div>
+                            <div className={designStyles.themeMiniCatalog}>
+                              <i style={{ borderColor: theme.palette[1] }} />
+                              <i style={{ borderColor: theme.palette[1] }} />
+                              <i style={{ borderColor: theme.palette[1] }} />
+                            </div>
+                          </div>
+
+                          <div className={designStyles.themeCardTop}>
+                            <div>
+                              <strong className={designStyles.themeCardName}>
+                                {theme.name}
+                              </strong>
+                              <small className={designStyles.themeCardVibe}>
+                                {theme.vibe}
+                              </small>
+                            </div>
+                            {selected ? (
+                              <span className={designStyles.themeSelectedPill}>
+                                Selected / مختار
+                              </span>
+                            ) : null}
+                          </div>
+
+                          <div className={designStyles.themeSwatches} aria-hidden="true">
+                            {theme.palette.map((color) => (
+                              <i key={color} style={{ background: color }} />
+                            ))}
+                          </div>
+                        </button>
+                      );
+                    })}
+                  </div>
+
+                  <div className={designStyles.themeFirstStepFoot}>
+                    <strong>
+                      Theme changes appearance only.
+                    </strong>
+                    <span>
+                      Your real retail field still controls sizes, fitment, category mechanics,
+                      product behavior, ordering features, and every field-specific function.
+                    </span>
+                  </div>
+                </section>
+              ) : (
+                <>
+                <section className={designStyles.liveBuilderPreviewShell}>
+                  <div className={designStyles.liveBuilderPreviewBar}>
+                    <div className={designStyles.liveBuilderPreviewIdentity}>
+                      <span className={designStyles.liveBuilderLiveDot} />
+                      <div>
+                        <strong>LIVE STOREFRONT PREVIEW</strong>
+                        <small>
+                          {selectedThemeOption?.name || "Darik Theme"} · Scroll inside the preview
+                        </small>
+                      </div>
+                    </div>
+
+                    <div className={designStyles.liveBuilderPreviewActions}>
+                      <button
+                        type="button"
+                        onClick={() => setThemePickerOpen(true)}
+                      >
+                        Change theme
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const frame = liveBuilderPreviewRef.current;
+                          if (frame?.requestFullscreen) {
+                            void frame.requestFullscreen();
+                          }
+                        }}
+                        disabled={!storefront}
+                      >
+                        Full screen
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className={designStyles.liveBuilderPreviewViewport}>
+                    {storefront ? (
+                      <iframe
+                        ref={liveBuilderPreviewRef}
+                        title="Live Darik storefront preview"
+                        src={`/${storefront.slug}?previewField=${encodeURIComponent(
+                          selectedThemeField
+                        )}&fieldLab=1&builderPreview=1`}
+                        onLoad={pushLiveBuilderDraft}
+                      />
+                    ) : (
+                      <div
+                        className={designStyles.liveBuilderLocalPreview}
+                        style={{
+                          background: selectedThemeOption?.palette[2] || "#F8FAFC",
+                        }}
+                      >
+                        <div
+                          className={designStyles.liveBuilderLocalHero}
+                          style={{
+                            background: `linear-gradient(135deg, ${
+                              selectedThemeOption?.palette[0] || "#111827"
+                            }, ${selectedThemeOption?.palette[1] || "#2563EB"})`,
+                          }}
+                        >
+                          <span>LIVE DRAFT</span>
+                          <strong>{liveBuilderDraftText("displayName") || "Your Store"}</strong>
+                          <p>
+                            {liveBuilderDraftText("tagline") ||
+                              "Your storefront will come alive here as you enter your information."}
+                          </p>
+                        </div>
+                        <div className={designStyles.liveBuilderLocalCatalog}>
+                          <i />
+                          <i />
+                          <i />
+                          <i />
+                        </div>
+                        <small>
+                          The real scrollable storefront preview will connect automatically as soon
+                          as Darik creates your draft storefront.
+                        </small>
+                      </div>
+                    )}
+                  </div>
+                </section>
+                  <div className={designStyles.liveBuilderEditorPane}>
+
                 <div className={styles.formSection}>
                   <div className={styles.formSectionHeading}>
                     <div>
@@ -2734,119 +3056,21 @@ export default function DarikDirectStorefrontSettingsPage() {
                   </div>
                 </div>
 
-                <div className={`${styles.formSection} ${designStyles.fieldLockedStudio}`}>
-                  <div className={designStyles.themeGalleryIntro}>
-                    <div className={designStyles.themeGalleryHeading}>
-                      <span className={designStyles.themeStepBadge}>STEP 1</span>
-                      <div>
-                        <span>Storefront Themes / قوالب واجهة المتجر</span>
-                        <h3>Choose your look / اختر تصميم متجرك</h3>
-                      </div>
-                    </div>
-                    <p className={designStyles.themeGalleryLead}>
-                      Choose the storefront style that best represents your business.
-                      <strong> You can change this at any time.</strong>
-                      {" / اختر التصميم الذي يمثل متجرك بأفضل شكل. يمكنك تغيير هذا القالب في أي وقت."}
-                    </p>
-                  </div>
-
-                  <div className={designStyles.themeGalleryGrid}>
-                    {storefrontThemeOptions.map((theme) => {
-                      const selected = selectedThemeField === theme.key;
-
-                      return (
-                        <button
-                          type="button"
-                          className={`${designStyles.themeCard} ${
-                            selected ? designStyles.themeCardSelected : ""
-                          }`}
-                          key={theme.key}
-                          aria-pressed={selected}
-                          disabled={themeSaveState === "saving"}
-                          onClick={() => void chooseStorefrontTheme(theme.key)}
-                        >
-                          <div
-                            className={designStyles.themeMiniBrowser}
-                            style={{ background: theme.palette[2] }}
-                          >
-                            <div className={designStyles.themeMiniTopbar}>
-                              <i style={{ background: theme.palette[0] }} />
-                              <span style={{ background: theme.palette[0] }} />
-                              <span style={{ background: theme.palette[1] }} />
-                            </div>
-                            <div
-                              className={designStyles.themeMiniHero}
-                              style={{
-                                background: `linear-gradient(135deg, ${theme.palette[0]}, ${theme.palette[1]})`,
-                              }}
-                            >
-                              <span />
-                              <strong />
-                            </div>
-                            <div className={designStyles.themeMiniCatalog}>
-                              <i style={{ borderColor: theme.palette[1] }} />
-                              <i style={{ borderColor: theme.palette[1] }} />
-                              <i style={{ borderColor: theme.palette[1] }} />
-                            </div>
-                          </div>
-
-                          <div className={designStyles.themeCardTop}>
-                            <div>
-                              <strong className={designStyles.themeCardName}>
-                                {theme.name}
-                              </strong>
-                              <small className={designStyles.themeCardVibe}>
-                                {theme.vibe}
-                              </small>
-                            </div>
-                            {selected ? (
-                              <span className={designStyles.themeSelectedPill}>
-                                Selected / مختار
-                              </span>
-                            ) : null}
-                          </div>
-
-                          <div className={designStyles.themeSwatches} aria-hidden="true">
-                            {theme.palette.map((color) => (
-                              <i key={color} style={{ background: color }} />
-                            ))}
-                          </div>
-                        </button>
-                      );
-                    })}
-                  </div>
-
-                  <div className={designStyles.themeGalleryFooter}>
+                                <div className={`${styles.formSection} ${designStyles.fieldLockedStudio} ${designStyles.themeCompactSection}`}>
+                  <div className={designStyles.themeCompactBar}>
                     <div>
-                      <strong>
-                        {themeSaveState === "loading"
-                          ? "Loading your current theme..."
-                          : themeSaveState === "saving"
-                            ? "Saving theme..."
-                            : themeSaveState === "saved"
-                              ? "Theme saved."
-                              : themeSaveState === "error"
-                                ? "Theme could not be saved."
-                                : selectedThemeField
-                                  ? "Your selected theme is live."
-                                  : "Choose a theme to personalize your storefront."}
-                      </strong>
-                      <span>
-                        Theme choice changes the storefront appearance only. Your retail field
-                        continues to control store features and product mechanics.
-                      </span>
+                      <span>YOUR STOREFRONT THEME / قالب واجهة متجرك</span>
+                      <strong>{selectedThemeOption?.name || "Darik Theme"}</strong>
+                      <small>You can change this at any time.</small>
                     </div>
                     <button
                       type="button"
-                      className={designStyles.themePreviewButton}
-                      onClick={previewSelectedTheme}
-                      disabled={!storefront || !selectedThemeField}
+                      onClick={() => setThemePickerOpen(true)}
                     >
-                      Preview selected theme / معاينة القالب
+                      Change theme / تغيير القالب
                     </button>
                   </div>
-
-                  <div className={designStyles.functionControls}>
+<div className={designStyles.functionControls}>
                     <div>
                       <span>Store functions / وظائف المتجر</span>
                       <h4>Store features stay connected to your retail field / وظائف المتجر تبقى مرتبطة بنشاطك</h4>
@@ -2926,7 +3150,11 @@ export default function DarikDirectStorefrontSettingsPage() {
                         : "Create now / إنشاء الآن"}
                   </button>
                 </div>
-              </form>
+
+                  </div>
+                </>
+              )}
+</form>
             </section>
 
           </>
