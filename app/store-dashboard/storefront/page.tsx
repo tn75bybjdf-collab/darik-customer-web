@@ -1008,6 +1008,8 @@ export default function DarikDirectStorefrontSettingsPage() {
 
   const [themePickerOpen, setThemePickerOpen] = useState(false);
   const liveBuilderPreviewRef = useRef<HTMLIFrameElement | null>(null);
+  // DARIK_PREVIEW_CONTROLS_CLEANUP_107
+  const [liveBuilderPreviewOpen, setLiveBuilderPreviewOpen] = useState(true);
   // DARIK_INDEPENDENT_STOREFRONT_TYPOGRAPHY_105
   const [storefrontTypographyDraft, setStorefrontTypographyDraft] =
     useState<StorefrontTypographyState>(() => storefrontTypographyDefaultState());
@@ -2665,31 +2667,9 @@ export default function DarikDirectStorefrontSettingsPage() {
 
                 {storefront ? (
                   <div className={styles.panelActions}>
-                    <button
-                      type="button"
-                      onClick={() => setPreviewOpen(true)}
-                    >
-                      Preview store / معاينة المتجر
-                    </button>
 
                     {storefront.activation_status === "active" ? (
                       <>
-                        <a
-                          href={`/${storefront.slug}`}
-                          target="_blank"
-                          rel="noreferrer"
-                        >
-                          Open live store / فتح المتجر المباشر
-                        </a>
-                        <button
-                          type="button"
-                          onClick={toggleOrders}
-                          disabled={saving}
-                        >
-                          {storefront.is_accepting_orders
-                            ? "Pause orders / إيقاف الطلبات"
-                            : "Accept orders / استقبال الطلبات"}
-                        </button>
                       </>
                     ) : (
                       <a href="/store-dashboard/activation">Pay by CliQ to go live / ادفع عبر كليك لتفعيل المتجر</a>
@@ -2803,7 +2783,22 @@ export default function DarikDirectStorefrontSettingsPage() {
                 </section>
               ) : (
                 <>
-                <section className={designStyles.liveBuilderPreviewShell}>
+                {!liveBuilderPreviewOpen ? (
+                  <button
+                    type="button"
+                    className={designStyles.liveBuilderOpenPreviewTab107}
+                    onClick={() => setLiveBuilderPreviewOpen(true)}
+                  >
+                    Open preview / فتح المعاينة
+                  </button>
+                ) : null}
+                <section
+                  className={`${designStyles.liveBuilderPreviewShell} ${
+                    !liveBuilderPreviewOpen
+                      ? designStyles.liveBuilderPreviewShellClosed107
+                      : ""
+                  }`}
+                >
                   <div className={designStyles.liveBuilderPreviewBar}>
                     <div className={designStyles.liveBuilderPreviewIdentity}>
                       <span className={designStyles.liveBuilderLiveDot} />
@@ -2820,7 +2815,7 @@ export default function DarikDirectStorefrontSettingsPage() {
                         type="button"
                         onClick={() => setThemePickerOpen(true)}
                       >
-                        Change theme
+                        Change theme / تغيير القالب
                       </button>
                       <button
                         type="button"
@@ -2832,7 +2827,14 @@ export default function DarikDirectStorefrontSettingsPage() {
                         }}
                         disabled={!storefront}
                       >
-                        Full screen
+                        Full screen / ملء الشاشة
+                      </button>
+                      <button
+                        type="button"
+                        className={designStyles.liveBuilderClosePreview107}
+                        onClick={() => setLiveBuilderPreviewOpen(false)}
+                      >
+                        Close preview / إغلاق المعاينة
                       </button>
                     </div>
                   </div>
@@ -2896,7 +2898,11 @@ export default function DarikDirectStorefrontSettingsPage() {
                   </div>
                 </section>
                   <div
-                    className={designStyles.liveBuilderPreviewSpacer}
+                    className={`${designStyles.liveBuilderPreviewSpacer} ${
+                      !liveBuilderPreviewOpen
+                        ? designStyles.liveBuilderPreviewSpacerClosed107
+                        : ""
+                    }`}
                     aria-hidden="true"
                   />
                   <div className={designStyles.liveBuilderEditorPane}>
