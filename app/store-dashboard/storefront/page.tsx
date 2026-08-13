@@ -936,6 +936,98 @@ function storefrontTypographyPreviewStyle(
   return style;
 }
 
+// DARIK_FIRST_TIME_STOREFRONT_WIZARD_109
+type DarikStorefrontSetupStep109 =
+  | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11;
+
+type DarikDeliveryZone109 = {
+  id: string;
+  maxKm: string;
+  deliveryFeeJod: string;
+  minimumOrderJod: string;
+};
+
+const darikStorefrontSetupSteps109: Array<{
+  step: DarikStorefrontSetupStep109;
+  en: string;
+  ar: string;
+  optional?: boolean;
+}> = [
+  { step: 1, en: "Theme", ar: "القالب" },
+  { step: 2, en: "Logo & cover", ar: "الشعار والواجهة" },
+  { step: 3, en: "Name & link", ar: "الاسم والرابط" },
+  { step: 4, en: "Fonts", ar: "الخطوط" },
+  { step: 5, en: "Contact", ar: "التواصل" },
+  { step: 6, en: "About & hours", ar: "عن المتجر والساعات" },
+  { step: 7, en: "Custom links", ar: "روابط إضافية", optional: true },
+  { step: 8, en: "Store info", ar: "معلومات إضافية", optional: true },
+  { step: 9, en: "Delivery", ar: "التوصيل" },
+  { step: 10, en: "Payments", ar: "الدفع" },
+  { step: 11, en: "Features", ar: "الخصائص" },
+];
+
+const darikStorefrontTimeOptions109 = Array.from(
+  { length: 48 },
+  (_, index) => {
+    const totalMinutes = index * 30;
+    const hour24 = Math.floor(totalMinutes / 60);
+    const minute = totalMinutes % 60;
+    const period = hour24 >= 12 ? "PM" : "AM";
+    const hour12 = hour24 % 12 || 12;
+    return `${hour12}:${String(minute).padStart(2, "0")} ${period}`;
+  }
+);
+
+function parseDarikOperatingHours109(rawValue: string | null | undefined) {
+  const raw = String(rawValue ?? "").trim();
+
+  if (!raw) {
+    return { open: "", close: "", closed: false };
+  }
+
+  if (raw.toLowerCase() === "closed") {
+    return { open: "Closed", close: "", closed: true };
+  }
+
+  const match = raw.match(
+    /(\d{1,2}:\d{2}\s*(?:AM|PM))\s*(?:-|–|—)\s*(\d{1,2}:\d{2}\s*(?:AM|PM))/i
+  );
+
+  if (!match) {
+    return { open: "", close: "", closed: false };
+  }
+
+  return {
+    open: match[1].toUpperCase().replace(/\s+/g, " "),
+    close: match[2].toUpperCase().replace(/\s+/g, " "),
+    closed: false,
+  };
+}
+
+function normalizeDarikDeliveryZones109(value: unknown): DarikDeliveryZone109[] {
+  if (!Array.isArray(value)) return [];
+
+  return value
+    .map((item, index) => {
+      const row =
+        item && typeof item === "object"
+          ? (item as Record<string, unknown>)
+          : {};
+
+      return {
+        id: `saved-${index}-${String(row.max_km ?? "")}`,
+        maxKm: String(row.max_km ?? ""),
+        deliveryFeeJod: String(row.delivery_fee_jod ?? "0"),
+        minimumOrderJod:
+          row.minimum_order_jod === null ||
+          row.minimum_order_jod === undefined
+            ? ""
+            : String(row.minimum_order_jod),
+      };
+    })
+    .filter((zone) => zone.maxKm.trim() !== "");
+}
+
 export default function DarikDirectStorefrontSettingsPage() {
   useDarikTypographyFontLibrary105V5();
   const [session, setSession] = useState<Session | null>(null);
@@ -1264,6 +1356,457 @@ export default function DarikDirectStorefrontSettingsPage() {
   ]);
 
   const authUserId = session?.user.id ?? null;
+
+  const [storefrontSetupMode109, setStorefrontSetupMode109] = useState<
+    "loading" | "wizard" | "tabs"
+  >("loading");
+  const [storefrontSetupStep109, setStorefrontSetupStep109] =
+    useState<DarikStorefrontSetupStep109>(1);
+  const [storefrontSetupTab109, setStorefrontSetupTab109] =
+    useState<DarikStorefrontSetupStep109>(1);
+  const [storefrontSetupNotice109, setStorefrontSetupNotice109] = useState("");
+  const [storefrontSetupBusy109, setStorefrontSetupBusy109] = useState(false);
+  const [deliveryZones109, setDeliveryZones109] = useState<DarikDeliveryZone109[]>([]);
+  const [deliveryZonesLoaded109, setDeliveryZonesLoaded109] = useState(false);
+  const [deliveryZonesSaveState109, setDeliveryZonesSaveState109] = useState<
+    "idle" | "saving" | "saved" | "error"
+  >("idle");
+  const storefrontSetupLoadedId109 = useRef("");
+  const deliveryZonesSaveTimer109 = useRef<number | null>(null);
+
+  const storefrontSetupVisibleStep109: DarikStorefrontSetupStep109 | 0 =
+    storefrontSetupMode109 === "tabs"
+      ? storefrontSetupTab109
+      : storefrontSetupMode109 === "wizard"
+        ? storefrontSetupStep109
+        : 0;
+
+  useEffect(() => {
+    if (!storefront?.id) {
+      if (!storefront) {
+        setStorefrontSetupMode109("wizard");
+        setDeliveryZonesLoaded109(true);
+      }
+      return;
+    }
+
+    if (storefrontSetupLoadedId109.current === storefront.id) return;
+
+    storefrontSetupLoadedId109.current = storefront.id;
+    let cancelled = false;
+
+    void (async () => {
+      setStorefrontSetupMode109("loading");
+      setDeliveryZonesLoaded109(false);
+
+      const result = await supabase.rpc("darik_direct_storefront_setup_state", {
+        p_storefront_id: storefront.id,
+      });
+
+      if (cancelled) return;
+
+      if (result.error) {
+        setStorefrontSetupMode109("wizard");
+        setDeliveryZonesLoaded109(true);
+        setError(
+          result.error.message ||
+            "Could not load the storefront setup state. Run the FRONTEND 109 SQL migration first."
+        );
+        return;
+      }
+
+      const payload =
+        result.data && typeof result.data === "object"
+          ? (result.data as Record<string, unknown>)
+          : {};
+
+      setDeliveryZones109(
+        normalizeDarikDeliveryZones109(payload.delivery_zones)
+      );
+      setDeliveryZonesLoaded109(true);
+
+      if (payload.setup_completed === true) {
+        setStorefrontSetupMode109("tabs");
+        setStorefrontSetupTab109(1);
+      } else {
+        setStorefrontSetupMode109("wizard");
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [storefront?.id]);
+
+  useEffect(() => {
+    if (
+      storefrontSetupMode109 === "wizard" &&
+      storefrontSetupStep109 === 1 &&
+      selectedThemeField
+    ) {
+      setStorefrontSetupStep109(2);
+    }
+  }, [
+    selectedThemeField,
+    storefrontSetupMode109,
+    storefrontSetupStep109,
+  ]);
+
+  function serializeDeliveryZones109() {
+    const normalized = deliveryZones109
+      .map((zone) => {
+        const maxKm = Number(zone.maxKm);
+        const deliveryFeeJod = Number(zone.deliveryFeeJod);
+        const minimumOrderJod =
+          zone.minimumOrderJod.trim() === ""
+            ? null
+            : Number(zone.minimumOrderJod);
+
+        if (
+          !Number.isFinite(maxKm) ||
+          maxKm <= 0 ||
+          !Number.isFinite(deliveryFeeJod) ||
+          deliveryFeeJod < 0 ||
+          (minimumOrderJod !== null &&
+            (!Number.isFinite(minimumOrderJod) || minimumOrderJod < 0))
+        ) {
+          return null;
+        }
+
+        return {
+          max_km: Number(maxKm.toFixed(2)),
+          delivery_fee_jod: Number(deliveryFeeJod.toFixed(2)),
+          minimum_order_jod:
+            minimumOrderJod === null
+              ? null
+              : Number(minimumOrderJod.toFixed(2)),
+        };
+      });
+
+    if (normalized.some((zone) => zone === null)) return null;
+
+    const clean = normalized
+      .filter(
+        (zone): zone is {
+          max_km: number;
+          delivery_fee_jod: number;
+          minimum_order_jod: number | null;
+        } => zone !== null
+      )
+      .sort((a, b) => a.max_km - b.max_km);
+
+    for (let index = 1; index < clean.length; index += 1) {
+      if (clean[index].max_km <= clean[index - 1].max_km) {
+        return null;
+      }
+    }
+
+    return clean;
+  }
+
+  async function saveDeliveryZones109(showError = false) {
+    if (!storefront?.id || !deliveryZonesLoaded109) return true;
+
+    const payload = serializeDeliveryZones109();
+
+    if (!payload) {
+      if (showError) {
+        setStorefrontSetupNotice109(
+          "Check your delivery zones. Distance must be above 0 and each fee/minimum must be 0 or higher. / تحقق من مناطق التوصيل."
+        );
+      }
+      return false;
+    }
+
+    setDeliveryZonesSaveState109("saving");
+
+    const result = await supabase.rpc("darik_direct_set_delivery_zones", {
+      p_storefront_id: storefront.id,
+      p_zones: payload,
+    });
+
+    if (result.error) {
+      setDeliveryZonesSaveState109("error");
+      if (showError) {
+        setStorefrontSetupNotice109(
+          result.error.message || "Could not save delivery zones."
+        );
+      }
+      return false;
+    }
+
+    setDeliveryZonesSaveState109("saved");
+    window.setTimeout(() => {
+      setDeliveryZonesSaveState109((current) =>
+        current === "saved" ? "idle" : current
+      );
+    }, 1600);
+    return true;
+  }
+
+  useEffect(() => {
+    if (!storefront?.id || !deliveryZonesLoaded109) return;
+
+    const payload = serializeDeliveryZones109();
+    if (!payload) return;
+
+    if (deliveryZonesSaveTimer109.current) {
+      window.clearTimeout(deliveryZonesSaveTimer109.current);
+    }
+
+    deliveryZonesSaveTimer109.current = window.setTimeout(() => {
+      void saveDeliveryZones109(false);
+    }, 750);
+
+    return () => {
+      if (deliveryZonesSaveTimer109.current) {
+        window.clearTimeout(deliveryZonesSaveTimer109.current);
+      }
+    };
+  }, [deliveryZones109, deliveryZonesLoaded109, storefront?.id]);
+
+  function addDeliveryZone109() {
+    const lastMax = deliveryZones109.reduce((highest, zone) => {
+      const value = Number(zone.maxKm);
+      return Number.isFinite(value) ? Math.max(highest, value) : highest;
+    }, 0);
+
+    setDeliveryZones109((current) => [
+      ...current,
+      {
+        id: `zone-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+        maxKm: String(lastMax > 0 ? Number((lastMax + 1).toFixed(1)) : 1),
+        deliveryFeeJod: "0",
+        minimumOrderJod: "",
+      },
+    ]);
+  }
+
+  function updateDeliveryZone109(
+    id: string,
+    field: "maxKm" | "deliveryFeeJod" | "minimumOrderJod",
+    value: string
+  ) {
+    setDeliveryZones109((current) =>
+      current.map((zone) =>
+        zone.id === id ? { ...zone, [field]: value } : zone
+      )
+    );
+  }
+
+  function removeDeliveryZone109(id: string) {
+    setDeliveryZones109((current) =>
+      current.filter((zone) => zone.id !== id)
+    );
+  }
+
+  function updateOperatingHourDropdown109(
+    day: string,
+    part: "open" | "close",
+    value: string
+  ) {
+    const current = parseDarikOperatingHours109(
+      setupForm.operatingHours[day] ?? ""
+    );
+
+    if (part === "open" && value === "Closed") {
+      updateOperatingHour(day, "Closed");
+      return;
+    }
+
+    const nextOpen = part === "open" ? value : current.open;
+    const nextClose = part === "close" ? value : current.close;
+
+    if (!nextOpen && !nextClose) {
+      updateOperatingHour(day, "");
+      return;
+    }
+
+    if (nextOpen === "Closed") {
+      updateOperatingHour(day, "Closed");
+      return;
+    }
+
+    updateOperatingHour(
+      day,
+      nextOpen && nextClose ? `${nextOpen} – ${nextClose}` : nextOpen || ""
+    );
+  }
+
+  function storefrontSetupStepReady109(step: DarikStorefrontSetupStep109) {
+    if (step === 1) return Boolean(selectedThemeField);
+    if (step === 2) {
+      return Boolean(
+        setupForm.logoUrl.trim() && setupForm.heroImageUrl.trim()
+      );
+    }
+    if (step === 3) {
+      return Boolean(
+        setupForm.slug.trim().length >= 2 &&
+          setupForm.displayName.trim().length >= 2
+      );
+    }
+    if (step === 5) {
+      return Boolean(
+        setupForm.phone.trim() ||
+          setupForm.whatsapp.trim() ||
+          setupForm.publicEmail.trim()
+      );
+    }
+    if (step === 9) {
+      const fulfillmentMode = String(
+        (setupForm as StorefrontForm & { fulfillmentMode?: string })
+          .fulfillmentMode ?? "delivery"
+      );
+      const orderingEnabled = Boolean(
+        (setupForm as StorefrontForm & { showOrdering?: boolean }).showOrdering
+      );
+
+      if (
+        orderingEnabled &&
+        fulfillmentMode !== "pickup" &&
+        deliveryZones109.length === 0
+      ) {
+        return false;
+      }
+
+      return serializeDeliveryZones109() !== null;
+    }
+    if (step === 10) {
+      const orderMode = String(setupForm.orderSubmissionMode ?? "phone");
+      if (orderMode === "phone") return true;
+      return Boolean(setupForm.acceptCash || setupForm.acceptCliq);
+    }
+
+    return true;
+  }
+
+  function storefrontSetupMissingMessage109(
+    step: DarikStorefrontSetupStep109
+  ) {
+    if (step === 1) {
+      return "Choose a storefront theme first. / اختر قالب واجهة المتجر أولاً.";
+    }
+    if (step === 2) {
+      return "Upload both your logo and storefront cover to continue. / حمّل الشعار وصورة واجهة المتجر للمتابعة.";
+    }
+    if (step === 3) {
+      return "Enter a store link and customer-facing store name. / أدخل رابط المتجر واسم المتجر للعملاء.";
+    }
+    if (step === 5) {
+      return "Add at least one customer contact method. / أضف وسيلة تواصل واحدة على الأقل.";
+    }
+    if (step === 9) {
+      return "Add at least one valid delivery zone when delivery is enabled. / أضف منطقة توصيل صالحة واحدة على الأقل.";
+    }
+    if (step === 10) {
+      return "Choose at least one payment method for online orders. / اختر طريقة دفع واحدة على الأقل للطلبات الإلكترونية.";
+    }
+    return "Complete the required information before continuing. / أكمل المعلومات المطلوبة للمتابعة.";
+  }
+
+  async function goToNextStorefrontSetupStep109() {
+    const step = storefrontSetupStep109;
+
+    if (!storefrontSetupStepReady109(step)) {
+      setStorefrontSetupNotice109(storefrontSetupMissingMessage109(step));
+      return;
+    }
+
+    if (step === 9) {
+      const zonesSaved = await saveDeliveryZones109(true);
+      if (!zonesSaved) return;
+    }
+
+    setStorefrontSetupNotice109("");
+    setStorefrontSetupStep109(
+      Math.min(11, step + 1) as DarikStorefrontSetupStep109
+    );
+  }
+
+  function goToPreviousStorefrontSetupStep109() {
+    setStorefrontSetupNotice109("");
+    setStorefrontSetupStep109(
+      Math.max(1, storefrontSetupStep109 - 1) as DarikStorefrontSetupStep109
+    );
+  }
+
+  async function finishStorefrontSetup109() {
+    if (storefrontSetupBusy109) return;
+
+    setStorefrontSetupBusy109(true);
+    setStorefrontSetupNotice109("");
+
+    try {
+      await saveStorefront(undefined, "manual");
+
+      let storefrontId = storefront?.id ?? null;
+
+      if (!storefrontId && selectedStore?.retailer_id) {
+        const lookup = await supabase
+          .from("retailer_storefronts")
+          .select("id")
+          .eq("retailer_id", selectedStore.retailer_id)
+          .limit(1)
+          .maybeSingle();
+
+        if (lookup.error) {
+          throw lookup.error;
+        }
+
+        storefrontId = String(lookup.data?.id ?? "") || null;
+      }
+
+      if (!storefrontId) {
+        throw new Error(
+          "Your storefront draft is still being created. Save once more, then finish setup."
+        );
+      }
+
+      const zonesPayload = serializeDeliveryZones109();
+
+      if (!zonesPayload) {
+        throw new Error("Check your delivery-zone values before finishing.");
+      }
+
+      const zonesResult = await supabase.rpc(
+        "darik_direct_set_delivery_zones",
+        {
+          p_storefront_id: storefrontId,
+          p_zones: zonesPayload,
+        }
+      );
+
+      if (zonesResult.error) {
+        throw zonesResult.error;
+      }
+
+      const completeResult = await supabase.rpc(
+        "darik_direct_complete_storefront_setup",
+        {
+          p_storefront_id: storefrontId,
+        }
+      );
+
+      if (completeResult.error) {
+        throw completeResult.error;
+      }
+
+      setStorefrontSetupMode109("tabs");
+      setStorefrontSetupTab109(1);
+      setMessage(
+        "Storefront setup complete. You can now edit every section from the tabs. / اكتمل إعداد المتجر ويمكنك تعديل أي قسم من التبويبات."
+      );
+    } catch (finishError) {
+      setStorefrontSetupNotice109(
+        finishError instanceof Error
+          ? finishError.message
+          : "Could not finish storefront setup."
+      );
+    } finally {
+      setStorefrontSetupBusy109(false);
+    }
+  }
 
   const markSetupDirty = useCallback(() => {
     setupFormDirtyRef.current = true;
@@ -2679,6 +3222,126 @@ export default function DarikDirectStorefrontSettingsPage() {
               </div>
 
               <form className={styles.setupForm} onSubmit={saveStorefront} noValidate>
+                  <section className={designStyles.storefrontSetupController109}>
+                    <div className={designStyles.storefrontSetupControllerTop109}>
+                      <div>
+                        <span>
+                          {storefrontSetupMode109 === "tabs"
+                            ? "STOREFRONT SETTINGS / إعدادات واجهة المتجر"
+                            : "FIRST-TIME STOREFRONT SETUP / إعداد واجهة المتجر لأول مرة"}
+                        </span>
+                        <h3>
+                          {storefrontSetupMode109 === "tabs"
+                            ? "Edit your storefront / عدّل واجهة متجرك"
+                            : `Step ${storefrontSetupStep109} of 11 / الخطوة ${storefrontSetupStep109} من 11`}
+                        </h3>
+                        <p>
+                          {storefrontSetupMode109 === "tabs"
+                            ? "Your initial setup is complete. Jump directly to any section."
+                            : "We will build the storefront one clean step at a time. Your live preview stays above you."}
+                        </p>
+                      </div>
+                      {storefrontSetupMode109 === "wizard" ? (
+                        <b>{Math.round((storefrontSetupStep109 / 11) * 100)}%</b>
+                      ) : (
+                        <b>EDIT</b>
+                      )}
+                    </div>
+
+                    <div
+                      className={
+                        storefrontSetupMode109 === "tabs"
+                          ? designStyles.storefrontSetupTabs109
+                          : designStyles.storefrontSetupSteps109
+                      }
+                    >
+                      {darikStorefrontSetupSteps109.map((item) => {
+                        const active =
+                          storefrontSetupMode109 === "tabs"
+                            ? storefrontSetupTab109 === item.step
+                            : storefrontSetupStep109 === item.step;
+                        const completed =
+                          storefrontSetupMode109 === "wizard" &&
+                          item.step < storefrontSetupStep109;
+
+                        return (
+                          <button
+                            type="button"
+                            key={item.step}
+                            className={`${designStyles.storefrontSetupStepChip109} ${
+                              active
+                                ? designStyles.storefrontSetupStepChipActive109
+                                : ""
+                            } ${
+                              completed
+                                ? designStyles.storefrontSetupStepChipDone109
+                                : ""
+                            }`}
+                            disabled={
+                              storefrontSetupMode109 === "loading" ||
+                              (storefrontSetupMode109 === "wizard" &&
+                                item.step > storefrontSetupStep109)
+                            }
+                            onClick={() => {
+                              setStorefrontSetupNotice109("");
+                              if (storefrontSetupMode109 === "tabs") {
+                                setStorefrontSetupTab109(item.step);
+                              } else if (item.step <= storefrontSetupStep109) {
+                                setStorefrontSetupStep109(item.step);
+                              }
+                            }}
+                          >
+                            <i>{item.step}</i>
+                            <span>
+                              <strong>{item.en}</strong>
+                              <small>{item.ar}</small>
+                            </span>
+                            {item.optional ? <em>Optional</em> : null}
+                          </button>
+                        );
+                      })}
+                    </div>
+
+                    {storefrontSetupNotice109 ? (
+                      <div className={designStyles.storefrontSetupNotice109}>
+                        {storefrontSetupNotice109}
+                      </div>
+                    ) : null}
+                  </section>
+
+                  {storefrontSetupVisibleStep109 === 1 ? (
+                    <section
+                      data-darik-setup-step="1"
+                      className={designStyles.storefrontSetupTheme109}
+                    >
+                      <div>
+                        <span>STEP 1 / الخطوة ١</span>
+                        <h3>Choose your storefront theme / اختر قالب متجرك</h3>
+                        <p>
+                          Theme controls the visual personality only. Your retail
+                          field continues to control product and ordering mechanics.
+                        </p>
+                      </div>
+                      <div className={designStyles.storefrontSetupThemeCurrent109}>
+                        <div>
+                          <small>Current theme / القالب الحالي</small>
+                          <strong>
+                            {selectedThemeOption?.name || "Choose a theme"}
+                          </strong>
+                          <span>
+                            {selectedThemeOption?.vibe ||
+                              "Pick the design that best represents your business."}
+                          </span>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => setThemePickerOpen(true)}
+                        >
+                          Change theme / تغيير القالب
+                        </button>
+                      </div>
+                    </section>
+                  ) : null}
               {!selectedThemeField || themePickerOpen ? (
                 <section className={designStyles.themeFirstStepScreen}>
                   <div className={designStyles.themeFirstStepHeader}>
@@ -2908,7 +3571,10 @@ export default function DarikDirectStorefrontSettingsPage() {
                   <div className={designStyles.liveBuilderEditorPane}>
 
                 <div className={styles.formSection}>
-                  <div className={styles.formSectionHeading}>
+                  <div
+                  data-darik-setup-step="3"
+                  className={storefrontSetupVisibleStep109 === 3 ? styles.formSection : styles.formSection + " " + designStyles.storefrontSetupHidden109}
+                >
                     <div>
                       <span>Identity / الهوية</span>
                       <h3>Store name and link / اسم المتجر والرابط</h3>
@@ -2973,7 +3639,10 @@ export default function DarikDirectStorefrontSettingsPage() {
                 </div>
 
                 <div className={styles.formSection}>
-                  <div className={styles.formSectionHeading}>
+                  <div
+                  data-darik-setup-step="2"
+                  className={storefrontSetupVisibleStep109 === 2 ? styles.formSection : styles.formSection + " " + designStyles.storefrontSetupHidden109}
+                >
                     <div>
                       <span>Branding / الهوية البصرية</span>
                       <h3>Logo and storefront cover / الشعار وصورة الغلاف</h3>
@@ -3064,7 +3733,10 @@ export default function DarikDirectStorefrontSettingsPage() {
                 </div>
 
                 <div className={styles.formSection}>
-                  <div className={styles.formSectionHeading}>
+                  <div
+                  data-darik-setup-step="5"
+                  className={storefrontSetupVisibleStep109 === 5 ? styles.formSection : styles.formSection + " " + designStyles.storefrontSetupHidden109}
+                >
                     <div>
                       <span>Contact / التواصل</span>
                       <h3>How customers reach you / كيف يتواصل العملاء معك</h3>
@@ -3221,7 +3893,10 @@ export default function DarikDirectStorefrontSettingsPage() {
                 </div>
 
                 <div className={styles.formSection}>
-                  <div className={styles.formSectionHeading}>
+                  <div
+                  data-darik-setup-step="6"
+                  className={storefrontSetupVisibleStep109 === 6 ? styles.formSection : styles.formSection + " " + designStyles.storefrontSetupHidden109}
+                >
                     <div>
                       <span>About / نبذة</span>
                       <h3>Tell customers about the business / عرّف العملاء بمتجرك</h3>
@@ -3244,7 +3919,10 @@ export default function DarikDirectStorefrontSettingsPage() {
                 </div>
 
                 <div className={styles.formSection}>
-                  <div className={styles.formSectionHeading}>
+                  <div
+                  data-darik-setup-step="6"
+                  className={storefrontSetupVisibleStep109 === 6 ? styles.formSection : styles.formSection + " " + designStyles.storefrontSetupHidden109}
+                >
                     <div>
                       <span>Business hours / ساعات العمل</span>
                       <h3>When the store is open / متى يكون المتجر مفتوحًا</h3>
@@ -3261,12 +3939,59 @@ export default function DarikDirectStorefrontSettingsPage() {
                         </div>
                         <label>
                           Hours / ساعات العمل
-                          <input
-                            value={setupForm.operatingHours[day] ?? ""}
-                            onChange={(event) =>
-                              updateOperatingHour(day, event.target.value)
+                          <div className={designStyles.businessHourSelectors109}>
+                          <select
+                            aria-label={`${label} opening time`}
+                            value={
+                              parseDarikOperatingHours109(
+                                setupForm.operatingHours[day] ?? ""
+                              ).open
                             }
-                          />
+                            onChange={(event) =>
+                              updateOperatingHourDropdown109(
+                                day,
+                                "open",
+                                event.target.value
+                              )
+                            }
+                          >
+                            <option value="">Open time / وقت الفتح</option>
+                            <option value="Closed">Closed / مغلق</option>
+                            {darikStorefrontTimeOptions109.map((time) => (
+                              <option value={time} key={`${day}-open-${time}`}>
+                                {time}
+                              </option>
+                            ))}
+                          </select>
+
+                          <select
+                            aria-label={`${label} closing time`}
+                            value={
+                              parseDarikOperatingHours109(
+                                setupForm.operatingHours[day] ?? ""
+                              ).close
+                            }
+                            disabled={
+                              parseDarikOperatingHours109(
+                                setupForm.operatingHours[day] ?? ""
+                              ).closed
+                            }
+                            onChange={(event) =>
+                              updateOperatingHourDropdown109(
+                                day,
+                                "close",
+                                event.target.value
+                              )
+                            }
+                          >
+                            <option value="">Close time / وقت الإغلاق</option>
+                            {darikStorefrontTimeOptions109.map((time) => (
+                              <option value={time} key={`${day}-close-${time}`}>
+                                {time}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
                         </label>
                       </div>
                     ))}
@@ -3274,7 +3999,10 @@ export default function DarikDirectStorefrontSettingsPage() {
                 </div>
 
                 <div className={styles.formSection}>
-                  <div className={styles.formSectionHeading}>
+                  <div
+                  data-darik-setup-step="7"
+                  className={storefrontSetupVisibleStep109 === 7 ? styles.formSection : styles.formSection + " " + designStyles.storefrontSetupHidden109}
+                >
                     <div>
                       <span>Custom links / روابط إضافية</span>
                       <h3>Add any links you want / أضف الروابط التي تريدها</h3>
@@ -3342,7 +4070,10 @@ export default function DarikDirectStorefrontSettingsPage() {
                 </div>
 
                 <div className={styles.formSection}>
-                  <div className={styles.formSectionHeading}>
+                  <div
+                  data-darik-setup-step="8"
+                  className={storefrontSetupVisibleStep109 === 8 ? styles.formSection : styles.formSection + " " + designStyles.storefrontSetupHidden109}
+                >
                     <div>
                       <span>Custom store information / معلومات إضافية عن المتجر</span>
                       <h3>Add anything else customers should know / أضف أي معلومات أخرى يحتاجها العملاء</h3>
@@ -3410,7 +4141,10 @@ export default function DarikDirectStorefrontSettingsPage() {
                 </div>
 
                 <div className={styles.formSection}>
-                  <div className={styles.formSectionHeading}>
+                  <div
+                  data-darik-setup-step="9"
+                  className={storefrontSetupVisibleStep109 === 9 ? styles.formSection : styles.formSection + " " + designStyles.storefrontSetupHidden109}
+                >
                     <div>
                       <span>Delivery / التوصيل</span>
                       <h3>Ordering and delivery settings / إعدادات الطلب والتوصيل</h3>
@@ -3520,99 +4254,89 @@ export default function DarikDirectStorefrontSettingsPage() {
                     </button>
                   </div>
 
-                  <div className={styles.onlinePaymentSettings}>
-                    <div className={styles.paymentSettingsHeading}>
+
+                  <div className={designStyles.deliveryZones109}>
+                    <div className={designStyles.deliveryZonesHeading109}>
                       <div>
-                        <span>Online payment methods / طرق الدفع الإلكترونية</span>
-                        <h4>What can customers use? / ما طرق الدفع المتاحة للعملاء؟</h4>
-                      </div>
-                      <p>Check one or both / اختر طريقة أو الطريقتين. Cash remains enabled by default / الدفع النقدي مفعّل افتراضيًا.</p>
-                    </div>
-
-                    <div className={styles.paymentCheckboxGrid}>
-                      <label
-                        className={
-                          setupForm.acceptCash
-                            ? styles.activePaymentCheckbox
-                            : ""
-                        }
-                      >
-                        <input
-                          type="checkbox"
-                          checked={setupForm.acceptCash}
-                          onChange={(event) =>
-                            updateSetupField("acceptCash", event.target.checked)
-                          }
-                        />
-                        <span>
-                          <strong>Accept cash / قبول الدفع نقدًا</strong>
-                          <small>
-                            {setupForm.fulfillmentMode === "pickup"
-                              ? "Customer pays when collecting the order / يدفع العميل عند استلام الطلب من المتجر."
-                              : "Customer pays the store or driver on delivery / يدفع العميل للمتجر أو السائق عند التوصيل."}
-                          </small>
-                        </span>
-                      </label>
-
-                      <label
-                        className={
-                          setupForm.acceptCliq
-                            ? styles.activePaymentCheckbox
-                            : ""
-                        }
-                      >
-                        <input
-                          type="checkbox"
-                          checked={setupForm.acceptCliq}
-                          onChange={(event) =>
-                            updateSetupField("acceptCliq", event.target.checked)
-                          }
-                        />
-                        <span>
-                          <strong>Accept CliQ / قبول الدفع عبر كليك</strong>
-                          <small>Customer transfers the total before submitting / يحوّل العميل المبلغ قبل إرسال الطلب.</small>
-                        </span>
-                      </label>
-                    </div>
-
-                    {setupForm.acceptCliq ? (
-                      <div className={styles.cliqSettingsPanel}>
-                        <div className={styles.formGrid}>
-                          <label>
-                            CliQ account holder or business name / اسم صاحب حساب كليك أو اسم المنشأة
-                            <input
-                              value={setupForm.cliqAccountName}
-                              onChange={(event) =>
-                                updateSetupField(
-                                  "cliqAccountName",
-                                  event.target.value
-                                )
-                              }
-                              placeholder="Al Salam Market"
-                            />
-                          </label>
-
-                          <label>
-                            CliQ alias or registered mobile number / اسم كليك المستعار أو رقم الهاتف المسجل
-                            <input
-                              value={setupForm.cliqIdentifier}
-                              onChange={(event) =>
-                                updateSetupField(
-                                  "cliqIdentifier",
-                                  event.target.value
-                                )
-                              }
-                              placeholder="Store alias or 07XXXXXXXX"
-                            />
-                          </label>
-                        </div>
+                        <span>DELIVERY ZONES / مناطق التوصيل</span>
+                        <h4>Set your own distance and price rules</h4>
                         <p>
-                          Customers see these details only when they select CliQ
-                          / تظهر هذه البيانات للعملاء فقط عند اختيار كليك.
+                          Zones are cumulative. The first matching distance wins.
+                          Add as many zones as your store needs.
                         </p>
                       </div>
-                    ) : null}
+                      <button type="button" onClick={addDeliveryZone109}>
+                        + Add delivery zone / إضافة منطقة
+                      </button>
+                    </div>
+
+                    {deliveryZones109.length === 0 ? (
+                      <div className={designStyles.deliveryZonesEmpty109}>
+                        <strong>No delivery zones yet / لا توجد مناطق توصيل بعد</strong>
+                        <span>
+                          Example: up to 1 km free, up to 5 km for 2 JOD,
+                          then add another zone for a wider area.
+                        </span>
+                      </div>
+                    ) : (
+                      <div className={designStyles.deliveryZoneList109}>
+                        {deliveryZones109.map((zone, index) => (
+                          <article
+                            className={designStyles.deliveryZoneCard109}
+                            key={zone.id}
+                          >
+                            <div className={designStyles.deliveryZoneNumber109}>
+                              <span>ZONE</span>
+                              <strong>{index + 1}</strong>
+                            </div>
+
+                            <label>
+                              <span>Up to / حتى</span>
+                              <div>
+                                <input
+                                  type="number"
+                                  min="0.1"
+                                  step="0.1"
+                                  value={zone.maxKm}
+                                  onChange={(event) =>
+                                    updateDeliveryZone109(
+                                      zone.id,
+                                      "maxKm",
+                                      event.target.value
+                                    )
+                                  }
+                                />
+                                <b>km</b>
+                              </div>
+                            </label>
+
+
+
+                            <button
+                              type="button"
+                              className={designStyles.deliveryZoneRemove109}
+                              onClick={() => removeDeliveryZone109(zone.id)}
+                            >
+                              Remove / حذف
+                            </button>
+                          </article>
+                        ))}
+                      </div>
+                    )}
+
+                    <div className={designStyles.deliveryZonesStatus109}>
+                      <span>
+                        {deliveryZonesSaveState109 === "saving"
+                          ? "Saving zones... / جارٍ الحفظ..."
+                          : deliveryZonesSaveState109 === "saved"
+                            ? "Delivery zones saved / تم حفظ مناطق التوصيل"
+                            : deliveryZonesSaveState109 === "error"
+                              ? "Could not save zones / تعذر حفظ المناطق"
+                              : "Changes save automatically / يتم الحفظ تلقائياً"}
+                      </span>
+                    </div>
                   </div>
+
 
                   <div className={styles.formGrid}>
                     {setupForm.fulfillmentMode === "delivery" ? (
@@ -3630,21 +4354,6 @@ export default function DarikDirectStorefrontSettingsPage() {
                           />
                         </label>
 
-                        <label>
-                          Delivery radius (km) / نطاق التوصيل (كم)
-                          <input
-                            type="number"
-                            min="0.1"
-                            step="0.1"
-                            value={setupForm.deliveryRadiusKm}
-                            onChange={(event) =>
-                              updateSetupField(
-                                "deliveryRadiusKm",
-                                event.target.value
-                              )
-                            }
-                          />
-                        </label>
 
                         <label>
                           Estimated delivery (minutes) / مدة التوصيل المتوقعة (دقيقة)
@@ -3690,21 +4399,11 @@ export default function DarikDirectStorefrontSettingsPage() {
                   </div>
                 </div>
 
-                                <div className={`${styles.formSection} ${designStyles.fieldLockedStudio} ${designStyles.themeCompactSection}`}>
-                  <div className={designStyles.themeCompactBar}>
-                    <div>
-                      <span>YOUR STOREFRONT THEME / قالب واجهة متجرك</span>
-                      <strong>{selectedThemeOption?.name || "Darik Theme"}</strong>
-                      <small>You can change this at any time.</small>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => setThemePickerOpen(true)}
-                    >
-                      Change theme / تغيير القالب
-                    </button>
-                  </div>
-                  <section className={designStyles.arabicIdentity106}>
+                                                <div className={designStyles.storefrontSetupDesignGroup109}>
+<section
+                  data-darik-setup-step="3"
+                  className={storefrontSetupVisibleStep109 === 3 ? designStyles.arabicIdentity106 : designStyles.arabicIdentity106 + " " + designStyles.storefrontSetupHidden109}
+                >
                     <div className={designStyles.arabicIdentity106Header}>
                       <div>
                         <span>ARABIC STOREFRONT IDENTITY / هوية المتجر بالعربية</span>
@@ -3743,7 +4442,10 @@ export default function DarikDirectStorefrontSettingsPage() {
                     </div>
                   </section>
 
-                  <section className={designStyles.typographyStudio}>
+                  <section
+                  data-darik-setup-step="4"
+                  className={storefrontSetupVisibleStep109 === 4 ? designStyles.typographyStudio : designStyles.typographyStudio + " " + designStyles.storefrontSetupHidden109}
+                >
                     <div className={designStyles.typographyStudioHeader}>
                       <div>
                         <span>TYPOGRAPHY STUDIO / استوديو الخطوط</span>
@@ -3895,7 +4597,121 @@ export default function DarikDirectStorefrontSettingsPage() {
                     </div>
                   </section>
 
-                  <div className={designStyles.functionControls}>
+                                  <section
+                  data-darik-setup-step="10"
+                  className={`${designStyles.storefrontSetupSynthetic109} ${
+                    storefrontSetupVisibleStep109 === 10
+                      ? ""
+                      : designStyles.storefrontSetupHidden109
+                  }`}
+                >
+                  <div className={designStyles.storefrontSetupSyntheticHeading109}>
+                    <span>PAYMENT METHODS / طرق الدفع</span>
+                    <h3>Choose how customers can pay / اختر طرق الدفع</h3>
+                    <p>
+                      Keep payment choices separate from delivery so retailers can
+                      understand exactly what customers will see at checkout.
+                    </p>
+                  </div>
+<div className={styles.onlinePaymentSettings}>
+                    <div className={styles.paymentSettingsHeading}>
+                      <div>
+                        <span>Online payment methods / طرق الدفع الإلكترونية</span>
+                        <h4>What can customers use? / ما طرق الدفع المتاحة للعملاء؟</h4>
+                      </div>
+                      <p>Check one or both / اختر طريقة أو الطريقتين. Cash remains enabled by default / الدفع النقدي مفعّل افتراضيًا.</p>
+                    </div>
+
+                    <div className={styles.paymentCheckboxGrid}>
+                      <label
+                        className={
+                          setupForm.acceptCash
+                            ? styles.activePaymentCheckbox
+                            : ""
+                        }
+                      >
+                        <input
+                          type="checkbox"
+                          checked={setupForm.acceptCash}
+                          onChange={(event) =>
+                            updateSetupField("acceptCash", event.target.checked)
+                          }
+                        />
+                        <span>
+                          <strong>Accept cash / قبول الدفع نقدًا</strong>
+                          <small>
+                            {setupForm.fulfillmentMode === "pickup"
+                              ? "Customer pays when collecting the order / يدفع العميل عند استلام الطلب من المتجر."
+                              : "Customer pays the store or driver on delivery / يدفع العميل للمتجر أو السائق عند التوصيل."}
+                          </small>
+                        </span>
+                      </label>
+
+                      <label
+                        className={
+                          setupForm.acceptCliq
+                            ? styles.activePaymentCheckbox
+                            : ""
+                        }
+                      >
+                        <input
+                          type="checkbox"
+                          checked={setupForm.acceptCliq}
+                          onChange={(event) =>
+                            updateSetupField("acceptCliq", event.target.checked)
+                          }
+                        />
+                        <span>
+                          <strong>Accept CliQ / قبول الدفع عبر كليك</strong>
+                          <small>Customer transfers the total before submitting / يحوّل العميل المبلغ قبل إرسال الطلب.</small>
+                        </span>
+                      </label>
+                    </div>
+
+                    {setupForm.acceptCliq ? (
+                      <div className={styles.cliqSettingsPanel}>
+                        <div className={styles.formGrid}>
+                          <label>
+                            CliQ account holder or business name / اسم صاحب حساب كليك أو اسم المنشأة
+                            <input
+                              value={setupForm.cliqAccountName}
+                              onChange={(event) =>
+                                updateSetupField(
+                                  "cliqAccountName",
+                                  event.target.value
+                                )
+                              }
+                              placeholder="Al Salam Market"
+                            />
+                          </label>
+
+                          <label>
+                            CliQ alias or registered mobile number / اسم كليك المستعار أو رقم الهاتف المسجل
+                            <input
+                              value={setupForm.cliqIdentifier}
+                              onChange={(event) =>
+                                updateSetupField(
+                                  "cliqIdentifier",
+                                  event.target.value
+                                )
+                              }
+                              placeholder="Store alias or 07XXXXXXXX"
+                            />
+                          </label>
+                        </div>
+                        <p>
+                          Customers see these details only when they select CliQ
+                          / تظهر هذه البيانات للعملاء فقط عند اختيار كليك.
+                        </p>
+                      </div>
+                    ) : null}
+                  </div>
+                </section>
+
+<div
+                    data-darik-setup-step="11"
+                    className={storefrontSetupVisibleStep109 === 11 ? designStyles.functionControls : designStyles.functionControls + " " + designStyles.storefrontSetupHidden109}
+                  >
                     <div>
                       <span>Store functions / وظائف المتجر</span>
                       <h4>Store features stay connected to your retail field / وظائف المتجر تبقى مرتبطة بنشاطك</h4>
@@ -3925,7 +4741,58 @@ export default function DarikDirectStorefrontSettingsPage() {
                     </div>
                   </div>
                 </div>
-                <div className={styles.formSaveBar} ref={saveBarRef}>
+                                {storefrontSetupMode109 === "wizard" ? (
+                  <div className={designStyles.storefrontSetupWizardActions109}>
+                    <button
+                      type="button"
+                      className={designStyles.storefrontSetupBack109}
+                      onClick={goToPreviousStorefrontSetupStep109}
+                      disabled={
+                        storefrontSetupStep109 <= 2 || storefrontSetupBusy109
+                      }
+                    >
+                      Back / رجوع
+                    </button>
+
+                    <div>
+                      <small>
+                        {storefrontSetupStep109 === 7 ||
+                        storefrontSetupStep109 === 8
+                          ? "Optional step / خطوة اختيارية"
+                          : "Your progress is saved as you go / يتم حفظ تقدمك تلقائياً"}
+                      </small>
+
+                      {storefrontSetupStep109 < 11 ? (
+                        <button
+                          type="button"
+                          className={designStyles.storefrontSetupNext109}
+                          onClick={() => void goToNextStorefrontSetupStep109()}
+                          disabled={storefrontSetupBusy109}
+                        >
+                          {storefrontSetupStep109 === 7 ||
+                          storefrontSetupStep109 === 8
+                            ? "Continue / متابعة"
+                            : "Next step / الخطوة التالية"}
+                        </button>
+                      ) : (
+                        <button
+                          type="button"
+                          className={designStyles.storefrontSetupFinish109}
+                          onClick={() => void finishStorefrontSetup109()}
+                          disabled={storefrontSetupBusy109}
+                        >
+                          {storefrontSetupBusy109
+                            ? "Finishing setup... / جارٍ الإكمال..."
+                            : "Finish storefront setup / إنهاء إعداد المتجر"}
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                ) : null}
+
+<div
+                  className={storefrontSetupMode109 === "wizard" ? styles.formSaveBar + " " + designStyles.storefrontSetupSaveBarHidden109 : styles.formSaveBar}
+                >
                   <div
                     className={`${styles.draftStatus} ${
                       formDirty ? styles.draftStatusUnsaved : ""

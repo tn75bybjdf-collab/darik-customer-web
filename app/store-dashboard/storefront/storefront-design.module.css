@@ -2048,3 +2048,654 @@
     font-size: 0.63rem;
   }
 }
+
+/* DARIK_FIRST_TIME_STOREFRONT_WIZARD_109
+   First setup = guided 11-step flow.
+   Completed setup = clean horizontal edit tabs.
+*/
+
+.storefrontSetupDesignGroup109 {
+  display: contents;
+}
+
+.storefrontSetupHidden109 {
+  display: none !important;
+}
+
+.storefrontSetupController109 {
+  display: grid;
+  gap: 14px;
+  margin: 0 0 18px;
+  padding: 18px;
+  border: 1px solid rgba(15, 23, 42, 0.085);
+  border-radius: 22px;
+  background:
+    radial-gradient(circle at 92% 0%, rgba(50, 111, 255, 0.12), transparent 18rem),
+    linear-gradient(180deg, #ffffff 0%, #f7fafc 100%);
+  box-shadow: 0 18px 44px rgba(15, 23, 42, 0.065);
+}
+
+.storefrontSetupControllerTop109 {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 18px;
+}
+
+.storefrontSetupControllerTop109 > div {
+  min-width: 0;
+}
+
+.storefrontSetupControllerTop109 span {
+  color: #557187;
+  font-size: 0.66rem;
+  font-weight: 950;
+  letter-spacing: 0.085em;
+}
+
+.storefrontSetupControllerTop109 h3 {
+  margin: 5px 0 5px;
+  color: #101923;
+  font-size: clamp(1.18rem, 2vw, 1.55rem);
+  line-height: 1.08;
+  letter-spacing: -0.035em;
+}
+
+.storefrontSetupControllerTop109 p {
+  max-width: 760px;
+  margin: 0;
+  color: #718496;
+  font-size: 0.76rem;
+  font-weight: 650;
+  line-height: 1.5;
+}
+
+.storefrontSetupControllerTop109 > b {
+  flex: 0 0 auto;
+  display: inline-flex;
+  min-width: 48px;
+  min-height: 32px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  background: #101923;
+  color: #fff;
+  font-size: 0.68rem;
+  font-weight: 950;
+}
+
+.storefrontSetupSteps109,
+.storefrontSetupTabs109 {
+  display: flex;
+  width: 100%;
+  gap: 8px;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  padding: 2px 0 7px;
+  scrollbar-width: thin;
+  scroll-snap-type: x proximity;
+}
+
+.storefrontSetupStepChip109 {
+  flex: 0 0 auto;
+  display: grid;
+  grid-template-columns: auto auto;
+  align-items: center;
+  gap: 8px;
+  min-width: 132px;
+  min-height: 54px;
+  padding: 7px 10px;
+  border: 1px solid rgba(15, 23, 42, 0.09);
+  border-radius: 14px;
+  background: #fff;
+  color: #43586b;
+  text-align: left;
+  scroll-snap-align: start;
+  cursor: pointer;
+}
+
+.storefrontSetupStepChip109:disabled {
+  opacity: 0.48;
+  cursor: not-allowed;
+}
+
+.storefrontSetupStepChip109 > i {
+  display: inline-flex;
+  width: 28px;
+  height: 28px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9px;
+  background: #eef3f7;
+  color: #607589;
+  font-size: 0.69rem;
+  font-style: normal;
+  font-weight: 950;
+}
+
+.storefrontSetupStepChip109 > span {
+  display: grid;
+  min-width: 0;
+  gap: 1px;
+}
+
+.storefrontSetupStepChip109 strong {
+  overflow: hidden;
+  color: inherit;
+  font-size: 0.71rem;
+  font-weight: 950;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.storefrontSetupStepChip109 small {
+  overflow: hidden;
+  color: #8292a0;
+  font-size: 0.62rem;
+  font-weight: 750;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.storefrontSetupStepChip109 em {
+  grid-column: 1 / -1;
+  color: #8796a3;
+  font-size: 0.54rem;
+  font-style: normal;
+  font-weight: 900;
+  letter-spacing: 0.04em;
+}
+
+.storefrontSetupStepChipActive109 {
+  border-color: rgba(37, 99, 235, 0.38);
+  background: linear-gradient(145deg, #101923, #172d45);
+  color: #fff;
+  box-shadow: 0 10px 25px rgba(15, 35, 58, 0.16);
+}
+
+.storefrontSetupStepChipActive109 > i {
+  background: #2f66ff;
+  color: #fff;
+}
+
+.storefrontSetupStepChipActive109 small,
+.storefrontSetupStepChipActive109 em {
+  color: #bfd1e0;
+}
+
+.storefrontSetupStepChipDone109 {
+  border-color: rgba(16, 185, 129, 0.18);
+}
+
+.storefrontSetupStepChipDone109 > i {
+  background: #ddf8ed;
+  color: #147a56;
+}
+
+.storefrontSetupNotice109 {
+  padding: 10px 12px;
+  border: 1px solid rgba(217, 119, 6, 0.18);
+  border-radius: 12px;
+  background: #fff8e8;
+  color: #80500a;
+  font-size: 0.7rem;
+  font-weight: 800;
+  line-height: 1.4;
+}
+
+.storefrontSetupTheme109,
+.storefrontSetupSynthetic109 {
+  display: grid;
+  gap: 16px;
+  margin-bottom: 18px;
+  padding: 20px;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  border-radius: 22px;
+  background: #fff;
+  box-shadow: 0 14px 34px rgba(15, 23, 42, 0.05);
+}
+
+.storefrontSetupTheme109 > div:first-child > span,
+.storefrontSetupSyntheticHeading109 > span {
+  color: #3674a6;
+  font-size: 0.66rem;
+  font-weight: 950;
+  letter-spacing: 0.08em;
+}
+
+.storefrontSetupTheme109 h3,
+.storefrontSetupSyntheticHeading109 h3 {
+  margin: 5px 0 4px;
+  color: #101923;
+  font-size: 1.28rem;
+  letter-spacing: -0.035em;
+}
+
+.storefrontSetupTheme109 p,
+.storefrontSetupSyntheticHeading109 p {
+  max-width: 760px;
+  margin: 0;
+  color: #748697;
+  font-size: 0.75rem;
+  font-weight: 650;
+  line-height: 1.5;
+}
+
+.storefrontSetupThemeCurrent109 {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 14px;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  border-radius: 16px;
+  background: #f7fafc;
+}
+
+.storefrontSetupThemeCurrent109 > div {
+  display: grid;
+  gap: 2px;
+}
+
+.storefrontSetupThemeCurrent109 small {
+  color: #75899a;
+  font-size: 0.62rem;
+  font-weight: 850;
+}
+
+.storefrontSetupThemeCurrent109 strong {
+  color: #152535;
+  font-size: 1rem;
+  font-weight: 950;
+}
+
+.storefrontSetupThemeCurrent109 span {
+  color: #788b9c;
+  font-size: 0.7rem;
+  font-weight: 650;
+}
+
+.storefrontSetupThemeCurrent109 button,
+.deliveryZonesHeading109 button {
+  flex: 0 0 auto;
+  min-height: 42px;
+  padding: 0 14px;
+  border: 0;
+  border-radius: 12px;
+  background: #101923;
+  color: #fff;
+  font-size: 0.7rem;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.businessHourSelectors109 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 7px;
+  margin-top: 6px;
+}
+
+.businessHourSelectors109 select {
+  width: 100%;
+  min-width: 0;
+  min-height: 42px;
+  padding: 0 9px;
+  border: 1px solid rgba(15, 23, 42, 0.12);
+  border-radius: 10px;
+  background: #fff;
+  color: #162535;
+  font-size: 0.7rem;
+  font-weight: 800;
+  outline: none;
+}
+
+.businessHourSelectors109 select:disabled {
+  background: #f2f4f6;
+  color: #9aa6b1;
+  cursor: not-allowed;
+}
+
+.deliveryZones109 {
+  display: grid;
+  gap: 12px;
+  margin: 16px 0;
+  padding: 16px;
+  border: 1px solid rgba(31, 112, 173, 0.14);
+  border-radius: 18px;
+  background:
+    radial-gradient(circle at 100% 0%, rgba(47, 102, 255, 0.09), transparent 15rem),
+    #f8fbfd;
+}
+
+.deliveryZonesHeading109 {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.deliveryZonesHeading109 > div {
+  min-width: 0;
+}
+
+.deliveryZonesHeading109 span {
+  color: #2d76a8;
+  font-size: 0.62rem;
+  font-weight: 950;
+  letter-spacing: 0.07em;
+}
+
+.deliveryZonesHeading109 h4 {
+  margin: 4px 0;
+  color: #142333;
+  font-size: 1rem;
+}
+
+.deliveryZonesHeading109 p {
+  max-width: 650px;
+  margin: 0;
+  color: #708395;
+  font-size: 0.7rem;
+  font-weight: 650;
+  line-height: 1.45;
+}
+
+.deliveryZonesEmpty109 {
+  display: grid;
+  gap: 3px;
+  padding: 16px;
+  border: 1px dashed rgba(15, 23, 42, 0.16);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.74);
+  text-align: center;
+}
+
+.deliveryZonesEmpty109 strong {
+  color: #23384b;
+  font-size: 0.78rem;
+}
+
+.deliveryZonesEmpty109 span {
+  color: #7b8d9d;
+  font-size: 0.68rem;
+  line-height: 1.45;
+}
+
+.deliveryZoneList109 {
+  display: grid;
+  gap: 9px;
+}
+
+.deliveryZoneCard109 {
+  display: grid;
+  grid-template-columns: auto repeat(3, minmax(120px, 1fr)) auto;
+  gap: 10px;
+  align-items: end;
+  padding: 11px;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  border-radius: 14px;
+  background: #fff;
+}
+
+.deliveryZoneNumber109 {
+  display: grid;
+  align-self: center;
+  min-width: 44px;
+  text-align: center;
+}
+
+.deliveryZoneNumber109 span {
+  color: #8292a0;
+  font-size: 0.5rem;
+  font-weight: 950;
+  letter-spacing: 0.08em;
+}
+
+.deliveryZoneNumber109 strong {
+  color: #132537;
+  font-size: 1.15rem;
+  font-weight: 950;
+}
+
+.deliveryZoneCard109 label {
+  display: grid;
+  gap: 5px;
+}
+
+.deliveryZoneCard109 label > span {
+  color: #627789;
+  font-size: 0.6rem;
+  font-weight: 900;
+}
+
+.deliveryZoneCard109 label > div {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  overflow: hidden;
+  border: 1px solid rgba(15, 23, 42, 0.11);
+  border-radius: 10px;
+  background: #fff;
+}
+
+.deliveryZoneCard109 input {
+  width: 100%;
+  min-width: 0;
+  min-height: 40px;
+  padding: 0 9px;
+  border: 0;
+  background: transparent;
+  color: #152535;
+  font-size: 0.76rem;
+  font-weight: 850;
+  outline: none;
+}
+
+.deliveryZoneCard109 label b {
+  flex: 0 0 auto;
+  padding: 0 9px;
+  color: #8594a0;
+  font-size: 0.58rem;
+}
+
+.deliveryZoneRemove109 {
+  min-height: 40px;
+  padding: 0 10px;
+  border: 1px solid rgba(190, 24, 93, 0.13);
+  border-radius: 10px;
+  background: #fff6f8;
+  color: #9d2448;
+  font-size: 0.62rem;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.deliveryZonesStatus109 {
+  display: flex;
+  justify-content: flex-end;
+  color: #758899;
+  font-size: 0.62rem;
+  font-weight: 800;
+}
+
+.storefrontSetupSyntheticHeading109 {
+  display: grid;
+  gap: 2px;
+  margin-bottom: 2px;
+}
+
+.storefrontSetupWizardActions109 {
+  position: sticky;
+  bottom: 12px;
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 18px;
+  padding: 11px;
+  border: 1px solid rgba(15, 23, 42, 0.1);
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.94);
+  box-shadow: 0 14px 36px rgba(15, 23, 42, 0.14);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+
+.storefrontSetupWizardActions109 > div {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.storefrontSetupWizardActions109 small {
+  color: #758899;
+  font-size: 0.62rem;
+  font-weight: 750;
+}
+
+.storefrontSetupBack109,
+.storefrontSetupNext109,
+.storefrontSetupFinish109 {
+  min-height: 44px;
+  padding: 0 15px;
+  border-radius: 12px;
+  font-size: 0.72rem;
+  font-weight: 950;
+  cursor: pointer;
+}
+
+.storefrontSetupBack109 {
+  border: 1px solid rgba(15, 23, 42, 0.11);
+  background: #fff;
+  color: #40566a;
+}
+
+.storefrontSetupNext109,
+.storefrontSetupFinish109 {
+  border: 0;
+  background: linear-gradient(135deg, #101923, #2f66ff);
+  color: #fff;
+  box-shadow: 0 9px 22px rgba(47, 102, 255, 0.2);
+}
+
+.storefrontSetupFinish109 {
+  background: linear-gradient(135deg, #0a694b, #16a36e);
+  box-shadow: 0 9px 22px rgba(16, 163, 110, 0.2);
+}
+
+.storefrontSetupBack109:disabled,
+.storefrontSetupNext109:disabled,
+.storefrontSetupFinish109:disabled {
+  opacity: 0.48;
+  cursor: not-allowed;
+}
+
+.storefrontSetupSaveBarHidden109 {
+  display: none !important;
+}
+
+@media (max-width: 850px) {
+  .deliveryZoneCard109 {
+    grid-template-columns: auto 1fr 1fr;
+  }
+
+  .deliveryZoneCard109 label:last-of-type {
+    grid-column: 2 / 4;
+  }
+
+  .deliveryZoneRemove109 {
+    grid-column: 2 / 4;
+  }
+}
+
+@media (max-width: 620px) {
+  .storefrontSetupController109 {
+    margin-bottom: 12px;
+    padding: 13px 10px;
+    border-radius: 16px;
+  }
+
+  .storefrontSetupControllerTop109 {
+    gap: 10px;
+  }
+
+  .storefrontSetupControllerTop109 p {
+    font-size: 0.69rem;
+  }
+
+  .storefrontSetupStepChip109 {
+    min-width: 116px;
+    min-height: 50px;
+    padding: 6px 8px;
+    border-radius: 12px;
+  }
+
+  .storefrontSetupTheme109,
+  .storefrontSetupSynthetic109 {
+    padding: 14px 11px;
+    border-radius: 17px;
+  }
+
+  .storefrontSetupThemeCurrent109,
+  .deliveryZonesHeading109 {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .storefrontSetupThemeCurrent109 button,
+  .deliveryZonesHeading109 button {
+    width: 100%;
+  }
+
+  .businessHourSelectors109 {
+    grid-template-columns: 1fr;
+  }
+
+  .deliveryZones109 {
+    padding: 12px 9px;
+    border-radius: 15px;
+  }
+
+  .deliveryZoneCard109 {
+    grid-template-columns: 42px 1fr;
+    align-items: end;
+  }
+
+  .deliveryZoneCard109 label,
+  .deliveryZoneCard109 label:last-of-type,
+  .deliveryZoneRemove109 {
+    grid-column: 2;
+  }
+
+  .deliveryZoneNumber109 {
+    grid-row: 1 / 5;
+    align-self: stretch;
+    align-content: center;
+    border-right: 1px solid rgba(15, 23, 42, 0.07);
+  }
+
+  .storefrontSetupWizardActions109 {
+    bottom: 8px;
+    align-items: stretch;
+    flex-direction: column;
+    padding: 9px;
+  }
+
+  .storefrontSetupWizardActions109 > div {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 6px;
+  }
+
+  .storefrontSetupWizardActions109 small {
+    text-align: center;
+  }
+
+  .storefrontSetupBack109,
+  .storefrontSetupNext109,
+  .storefrontSetupFinish109 {
+    width: 100%;
+  }
+}
