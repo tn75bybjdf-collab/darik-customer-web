@@ -978,6 +978,7 @@ const darikStorefrontTimeOptions109 = Array.from(
   }
 );
 
+// DARIK_BUSINESS_HOURS_TIME_SELECTION_FIX_110
 function parseDarikOperatingHours109(rawValue: string | null | undefined) {
   const raw = String(rawValue ?? "").trim();
 
@@ -989,6 +990,26 @@ function parseDarikOperatingHours109(rawValue: string | null | undefined) {
     return { open: "Closed", close: "", closed: true };
   }
 
+  const normalizeTime109 = (value: string) =>
+    value.toUpperCase().replace(/\s+/g, " ").trim();
+
+  /*
+    While the retailer is choosing business hours, the first dropdown saves
+    an opening time before the closing time exists. That partial value is
+    intentional and must remain visible on the next render.
+  */
+  const singleTimeMatch = raw.match(
+    /^(\d{1,2}:\d{2}\s*(?:AM|PM))$/i
+  );
+
+  if (singleTimeMatch) {
+    return {
+      open: normalizeTime109(singleTimeMatch[1]),
+      close: "",
+      closed: false,
+    };
+  }
+
   const match = raw.match(
     /(\d{1,2}:\d{2}\s*(?:AM|PM))\s*(?:-|–|—)\s*(\d{1,2}:\d{2}\s*(?:AM|PM))/i
   );
@@ -998,8 +1019,8 @@ function parseDarikOperatingHours109(rawValue: string | null | undefined) {
   }
 
   return {
-    open: match[1].toUpperCase().replace(/\s+/g, " "),
-    close: match[2].toUpperCase().replace(/\s+/g, " "),
+    open: normalizeTime109(match[1]),
+    close: normalizeTime109(match[2]),
     closed: false,
   };
 }
