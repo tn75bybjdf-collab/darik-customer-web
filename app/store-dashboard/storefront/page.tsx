@@ -947,6 +947,70 @@ type DarikDeliveryZone109 = {
   minimumOrderJod: string;
 };
 
+// DARIK_CONFIRMED_DELIVERY_LOCATION_PASSWORD_LOCK_112
+type DarikDeliveryLocation112 = {
+  address: string;
+  latitude: number;
+  longitude: number;
+  placeId: string;
+  source: "gps" | "google_search";
+  confirmedAt: string;
+};
+
+type DarikGooglePlacePrediction112 = {
+  place_id: string;
+  description: string;
+  structured_formatting?: {
+    main_text?: string;
+    secondary_text?: string;
+  };
+};
+
+function normalizeDarikDeliveryLocation112(
+  value: unknown
+): DarikDeliveryLocation112 | null {
+  const row =
+    value && typeof value === "object"
+      ? (value as Record<string, unknown>)
+      : {};
+  const address = String(row.address ?? "").trim();
+  const latitude = Number(row.latitude);
+  const longitude = Number(row.longitude);
+
+  if (
+    !address ||
+    !Number.isFinite(latitude) ||
+    latitude < -90 ||
+    latitude > 90 ||
+    !Number.isFinite(longitude) ||
+    longitude < -180 ||
+    longitude > 180
+  ) {
+    return null;
+  }
+
+  return {
+    address,
+    latitude,
+    longitude,
+    placeId: String(row.place_id ?? "").trim(),
+    source:
+      String(row.source ?? "").toLowerCase() === "gps"
+        ? "gps"
+        : "google_search",
+    confirmedAt: String(row.confirmed_at ?? "").trim(),
+  };
+}
+
+function darikDeliveryLocationMapUrl112(
+  location: DarikDeliveryLocation112
+) {
+  const point = `${location.latitude},${location.longitude}`;
+  return `https://www.google.com/maps?q=${encodeURIComponent(
+    point
+  )}&z=17&output=embed`;
+}
+
 const darikStorefrontSetupSteps109: Array<{
   step: DarikStorefrontSetupStep109;
   en: string;
@@ -1397,6 +1461,43 @@ export default function DarikDirectStorefrontSettingsPage() {
   >("idle");
   const storefrontSetupLoadedId109 = useRef("");
   const deliveryZonesSaveTimer109 = useRef<number | null>(null);
+  const [deliveryLocation112, setDeliveryLocation112] =
+    useState<DarikDeliveryLocation112 | null>(null);
+  const [deliveryLocationCandidate112, setDeliveryLocationCandidate112] =
+    useState<DarikDeliveryLocation112 | null>(null);
+  const [deliveryLocationUnlocked112, setDeliveryLocationUnlocked112] =
+    useState(false);
+  const [deliveryLocationLocating112, setDeliveryLocationLocating112] =
+    useState(false);
+  const [deliveryLocationSearch112, setDeliveryLocationSearch112] =
+    useState("");
+  const [
+    deliveryLocationPredictions112,
+    setDeliveryLocationPredictions112,
+  ] = useState<DarikGooglePlacePrediction112[]>([]);
+  const [deliveryLocationSearching112, setDeliveryLocationSearching112] =
+    useState(false);
+  const [deliveryLocationSaving112, setDeliveryLocationSaving112] =
+    useState(false);
+  const [deliveryLocationError112, setDeliveryLocationError112] =
+    useState("");
+  const [deliveryLocationUnlockOpen112, setDeliveryLocationUnlockOpen112] =
+    useState(false);
+  const [
+    deliveryLocationUnlockPassword112,
+    setDeliveryLocationUnlockPassword112,
+  ] = useState("");
+  const [deliveryLocationUnlockBusy112, setDeliveryLocationUnlockBusy112] =
+    useState(false);
+  const [
+    deliveryLocationUnlockError112,
+    setDeliveryLocationUnlockError112,
+  ] = useState("");
+
+  const deliveryLocationLocked112 =
+    Boolean(deliveryLocation112) && !deliveryLocationUnlocked112;
+  const deliveryLocationMap112 =
+    deliveryLocationCandidate112 ?? deliveryLocation112;
 
   const storefrontSetupVisibleStep109: DarikStorefrontSetupStep109 | 0 =
     storefrontSetupMode109 === "tabs"
@@ -1529,6 +1630,18 @@ export default function DarikDirectStorefrontSettingsPage() {
       setDeliveryZones109(
         normalizeDarikDeliveryZones109(payload.delivery_zones)
       );
+
+      const savedDeliveryLocation112 =
+        normalizeDarikDeliveryLocation112(payload.delivery_location);
+      setDeliveryLocation112(savedDeliveryLocation112);
+      setDeliveryLocationCandidate112(savedDeliveryLocation112);
+      setDeliveryLocationUnlocked112(false);
+      setDeliveryLocationSearch112(
+        savedDeliveryLocation112?.address ?? ""
+      );
+      setDeliveryLocationPredictions112([]);
+      setDeliveryLocationError112("");
+
       setDeliveryZonesLoaded109(true);
 
       if (payload.setup_completed === true) {
@@ -1557,6 +1670,369 @@ export default function DarikDirectStorefrontSettingsPage() {
     storefrontSetupMode109,
     storefrontSetupStep109,
   ]);
+
+  useEffect(() => {
+    if (deliveryLocationLocked112) {
+      setDeliveryLocationPredictions112([]);
+      return;
+    }
+
+    const query = deliveryLocationSearch112.trim();
+
+    if (query.length < 3) {
+      setDeliveryLocationPredictions112([]);
+      return;
+    }
+
+    const timer = window.setTimeout(() => {
+      void searchDeliveryLocationPlaces112(query);
+    }, 420);
+
+    return () => window.clearTimeout(timer);
+  }, [deliveryLocationSearch112, deliveryLocationLocked112]);
+
+  async function searchDeliveryLocationPlaces112(query: string) {
+    const cleanQuery = query.trim();
+    if (cleanQuery.length < 3 || deliveryLocationLocked112) return;
+
+    setDeliveryLocationSearching112(true);
+    setDeliveryLocationError112("");
+
+    try {
+      const params = new URLSearchParams({
+        input: cleanQuery,
+        language: "en",
+      });
+      const response = await fetch(
+        `/api/google-places/autocomplete?${params.toString()}`,
+        { cache: "no-store" }
+      );
+      const json = await response.json();
+
+      if (json.status !== "OK" && json.status !== "ZERO_RESULTS") {
+        throw new Error(
+          json.error_message ||
+            `Google Places error: ${String(json.status || "UNKNOWN")}`
+        );
+      }
+
+      const predictions: DarikGooglePlacePrediction112[] =
+        Array.isArray(json.predictions)
+          ? json.predictions
+              .slice(0, 6)
+              .map((item: unknown) => {
+                const row =
+                  item && typeof item === "object"
+                    ? (item as Record<string, unknown>)
+                    : {};
+                const structured =
+                  row.structured_formatting &&
+                  typeof row.structured_formatting === "object"
+                    ? (row.structured_formatting as Record<string, unknown>)
+                    : {};
+
+                return {
+                  place_id: String(row.place_id ?? ""),
+                  description: String(row.description ?? ""),
+                  structured_formatting: {
+                    main_text: String(structured.main_text ?? ""),
+                    secondary_text: String(structured.secondary_text ?? ""),
+                  },
+                };
+              })
+              .filter((item) => item.place_id && item.description)
+          : [];
+
+      setDeliveryLocationPredictions112(predictions);
+
+      if (!predictions.length) {
+        setDeliveryLocationError112(
+          "No matching locations found. / لم يتم العثور على موقع مطابق."
+        );
+      }
+    } catch (caught) {
+      setDeliveryLocationPredictions112([]);
+      setDeliveryLocationError112(
+        caught instanceof Error
+          ? caught.message
+          : "Could not search Google Maps."
+      );
+    } finally {
+      setDeliveryLocationSearching112(false);
+    }
+  }
+
+  async function chooseDeliveryGooglePlace112(
+    prediction: DarikGooglePlacePrediction112
+  ) {
+    if (deliveryLocationLocked112) return;
+
+    setDeliveryLocationSearching112(true);
+    setDeliveryLocationError112("");
+
+    try {
+      const params = new URLSearchParams({
+        place_id: prediction.place_id,
+        language: "en",
+      });
+      const response = await fetch(
+        `/api/google-places/details?${params.toString()}`,
+        { cache: "no-store" }
+      );
+      const json = await response.json();
+      const point = json.result?.geometry?.location;
+
+      if (json.status !== "OK" || !point) {
+        throw new Error(
+          json.error_message || "Google did not return this location."
+        );
+      }
+
+      const latitude = Number(point.lat);
+      const longitude = Number(point.lng);
+
+      if (!Number.isFinite(latitude) || !Number.isFinite(longitude)) {
+        throw new Error("Google did not return valid GPS coordinates.");
+      }
+
+      const placeName = String(
+        json.result?.name ||
+          prediction.structured_formatting?.main_text ||
+          ""
+      ).trim();
+      const formattedAddress = String(
+        json.result?.formatted_address ||
+          prediction.description ||
+          ""
+      ).trim();
+      const address =
+        placeName &&
+        formattedAddress &&
+        !formattedAddress.toLowerCase().includes(placeName.toLowerCase())
+          ? `${placeName} | ${formattedAddress}`
+          : formattedAddress ||
+            placeName ||
+            `${latitude.toFixed(6)}, ${longitude.toFixed(6)}`;
+
+      const candidate: DarikDeliveryLocation112 = {
+        address,
+        latitude,
+        longitude,
+        placeId: prediction.place_id,
+        source: "google_search",
+        confirmedAt: "",
+      };
+
+      setDeliveryLocationCandidate112(candidate);
+      setDeliveryLocationSearch112(address);
+      setDeliveryLocationPredictions112([]);
+    } catch (caught) {
+      setDeliveryLocationError112(
+        caught instanceof Error
+          ? caught.message
+          : "Could not select this Google location."
+      );
+    } finally {
+      setDeliveryLocationSearching112(false);
+    }
+  }
+
+  function getMyDeliveryLocation112() {
+    if (deliveryLocationLocked112 || deliveryLocationLocating112) return;
+
+    if (!navigator.geolocation) {
+      setDeliveryLocationError112(
+        "This browser does not support location access. Use Google search instead."
+      );
+      return;
+    }
+
+    setDeliveryLocationLocating112(true);
+    setDeliveryLocationError112("");
+    setDeliveryLocationPredictions112([]);
+
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        const latitude = position.coords.latitude;
+        const longitude = position.coords.longitude;
+        let address = `${latitude.toFixed(6)}, ${longitude.toFixed(6)}`;
+        let placeId = "";
+
+        try {
+          const params = new URLSearchParams({
+            lat: String(latitude),
+            lng: String(longitude),
+            language: "en",
+          });
+          const response = await fetch(
+            `/api/google-places/geocode?${params.toString()}`,
+            { cache: "no-store" }
+          );
+          const json = await response.json();
+          const first = Array.isArray(json.results) ? json.results[0] : null;
+          address = String(first?.formatted_address || address).trim();
+          placeId = String(first?.place_id || "").trim();
+        } catch {
+          // Coordinate fallback remains valid.
+        }
+
+        const candidate: DarikDeliveryLocation112 = {
+          address,
+          latitude,
+          longitude,
+          placeId,
+          source: "gps",
+          confirmedAt: "",
+        };
+
+        setDeliveryLocationCandidate112(candidate);
+        setDeliveryLocationSearch112(address);
+        setDeliveryLocationLocating112(false);
+      },
+      (geoError) => {
+        setDeliveryLocationLocating112(false);
+        setDeliveryLocationError112(
+          geoError.message ||
+            "Could not get your current location. Try Google search."
+        );
+      },
+      { enableHighAccuracy: true, timeout: 20000, maximumAge: 0 }
+    );
+  }
+
+  async function resolveStorefrontIdForLocation112() {
+    if (storefront?.id) return storefront.id;
+    if (!selectedStore?.retailer_id) return null;
+
+    const lookup = await supabase
+      .from("retailer_storefronts")
+      .select("id")
+      .eq("retailer_id", selectedStore.retailer_id)
+      .limit(1)
+      .maybeSingle();
+
+    if (lookup.error) throw lookup.error;
+    return String(lookup.data?.id ?? "") || null;
+  }
+
+  async function confirmDeliveryLocation112() {
+    if (!deliveryLocationCandidate112 || deliveryLocationSaving112) return;
+
+    setDeliveryLocationSaving112(true);
+    setDeliveryLocationError112("");
+
+    try {
+      const storefrontId = await resolveStorefrontIdForLocation112();
+
+      if (!storefrontId) {
+        throw new Error(
+          "Your storefront is still being created. Wait a moment and try again."
+        );
+      }
+
+      const candidate = deliveryLocationCandidate112;
+      const result = await supabase.rpc(
+        "darik_direct_set_delivery_location",
+        {
+          p_storefront_id: storefrontId,
+          p_address: candidate.address,
+          p_latitude: candidate.latitude,
+          p_longitude: candidate.longitude,
+          p_place_id: candidate.placeId || null,
+          p_source: candidate.source,
+        }
+      );
+
+      if (result.error) throw result.error;
+
+      const payload =
+        result.data && typeof result.data === "object"
+          ? (result.data as Record<string, unknown>)
+          : {};
+      const saved =
+        normalizeDarikDeliveryLocation112(payload.delivery_location) ?? {
+          ...candidate,
+          confirmedAt: new Date().toISOString(),
+        };
+
+      setDeliveryLocation112(saved);
+      setDeliveryLocationCandidate112(saved);
+      setDeliveryLocationUnlocked112(false);
+      setDeliveryLocationPredictions112([]);
+      setDeliveryLocationSearch112(saved.address);
+      updateSetupField("addressText", saved.address);
+      setMessage(
+        "Store location confirmed and locked. / تم تأكيد موقع المتجر وقفله."
+      );
+    } catch (caught) {
+      setDeliveryLocationError112(
+        caught instanceof Error
+          ? caught.message
+          : "Could not confirm this store location."
+      );
+    } finally {
+      setDeliveryLocationSaving112(false);
+    }
+  }
+
+  function openDeliveryLocationUnlock112() {
+    if (!deliveryLocation112) return;
+    setDeliveryLocationUnlockPassword112("");
+    setDeliveryLocationUnlockError112("");
+    setDeliveryLocationUnlockOpen112(true);
+  }
+
+  async function verifyDeliveryLocationUnlock112() {
+    const password = deliveryLocationUnlockPassword112;
+
+    if (!password) {
+      setDeliveryLocationUnlockError112(
+        "Enter your Darik login password. / أدخل كلمة مرور تسجيل الدخول."
+      );
+      return;
+    }
+
+    setDeliveryLocationUnlockBusy112(true);
+    setDeliveryLocationUnlockError112("");
+
+    try {
+      const userResult = await supabase.auth.getUser();
+      if (userResult.error) throw userResult.error;
+
+      const email = String(userResult.data.user?.email ?? "").trim();
+      if (!email) {
+        throw new Error("Your signed-in account has no email address.");
+      }
+
+      const verifyResult = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+
+      if (verifyResult.error) {
+        throw new Error(
+          "Incorrect password. Location remains locked. / كلمة المرور غير صحيحة. الموقع ما زال مقفلاً."
+        );
+      }
+
+      setDeliveryLocationUnlocked112(true);
+      setDeliveryLocationCandidate112(deliveryLocation112);
+      setDeliveryLocationSearch112(deliveryLocation112?.address ?? "");
+      setDeliveryLocationUnlockPassword112("");
+      setDeliveryLocationUnlockOpen112(false);
+      setMessage(
+        "Location unlocked. Choose and confirm the replacement pin. / تم فتح الموقع. اختر الموقع الجديد ثم أكده."
+      );
+    } catch (caught) {
+      setDeliveryLocationUnlockError112(
+        caught instanceof Error
+          ? caught.message
+          : "Could not verify your password."
+      );
+    } finally {
+      setDeliveryLocationUnlockBusy112(false);
+    }
+  }
 
   function serializeDeliveryZones109() {
     const normalized = deliveryZones109
@@ -1760,6 +2236,8 @@ export default function DarikDirectStorefrontSettingsPage() {
       );
     }
     if (step === 9) {
+      if (!deliveryLocation112) return false;
+
       const fulfillmentMode = String(
         (setupForm as StorefrontForm & { fulfillmentMode?: string })
           .fulfillmentMode ?? "delivery"
@@ -1803,7 +2281,7 @@ export default function DarikDirectStorefrontSettingsPage() {
       return "Add at least one customer contact method. / أضف وسيلة تواصل واحدة على الأقل.";
     }
     if (step === 9) {
-      return "Add at least one valid delivery zone when delivery is enabled. / أضف منطقة توصيل صالحة واحدة على الأقل.";
+      return "Confirm the exact store location first. If delivery is enabled, also add at least one valid delivery zone. / أكد موقع المتجر أولاً، وإذا كان التوصيل مفعلاً أضف منطقة توصيل صالحة.";
     }
     if (step === 10) {
       return "Choose at least one payment method for online orders. / اختر طريقة دفع واحدة على الأقل للطلبات الإلكترونية.";
@@ -3941,7 +4419,7 @@ export default function DarikDirectStorefrontSettingsPage() {
                       <div className={designStyles.exactWizardHeading109V5}>
                         <span>STEP 5 / الخطوة ٥</span>
                         <h3>Contact information / معلومات التواصل</h3>
-                        <p>Only contact and public location information belong here.</p>
+                        <p>Only customer contact information belongs here. The physical store location is confirmed under Delivery.</p>
                       </div>
                       <div className={designStyles.exactWizardGrid109V5}>
                         <label><span>Store phone / هاتف المتجر</span><input type="tel" value={setupForm.phone} onChange={(event) => updateSetupField("phone", event.target.value)} /></label>
@@ -3950,10 +4428,6 @@ export default function DarikDirectStorefrontSettingsPage() {
                         <label><span>Website / الموقع الإلكتروني</span><input type="url" value={setupForm.websiteUrl} onChange={(event) => updateSetupField("websiteUrl", event.target.value)} /></label>
                         <label><span>Facebook / فيسبوك</span><input type="url" value={setupForm.facebookUrl} onChange={(event) => updateSetupField("facebookUrl", event.target.value)} /></label>
                         <label><span>Instagram / إنستغرام</span><input type="url" value={setupForm.instagramUrl} onChange={(event) => updateSetupField("instagramUrl", event.target.value)} /></label>
-                        <label className={designStyles.exactWizardWide109V5}>
-                          <span>Public store address / عنوان المتجر</span>
-                          <input value={setupForm.addressText} onChange={(event) => updateSetupField("addressText", event.target.value)} />
-                        </label>
                       </div>
                     </section>
                   ) : null}
@@ -4074,6 +4548,238 @@ export default function DarikDirectStorefrontSettingsPage() {
                         <h3>Delivery / التوصيل</h3>
                         <p>All delivery configuration belongs here, including unlimited distance zones.</p>
                       </div>
+
+                      <section className={designStyles.deliveryLocationCard112}>
+                        <div className={designStyles.deliveryLocationHead112}>
+                          <div>
+                            <small>DELIVERY ORIGIN / نقطة انطلاق التوصيل</small>
+                            <strong>Store location / موقع المتجر</strong>
+                            <span>
+                              Delivery zones are measured from this confirmed pin.
+                              For best GPS accuracy, use your phone while at the store.
+                            </span>
+                          </div>
+                          <b
+                            className={
+                              deliveryLocationLocked112
+                                ? designStyles.deliveryLocationLockedBadge112
+                                : deliveryLocation112
+                                  ? designStyles.deliveryLocationUnlockedBadge112
+                                  : designStyles.deliveryLocationRequiredBadge112
+                            }
+                          >
+                            {deliveryLocationLocked112
+                              ? "Locked / مقفل"
+                              : deliveryLocation112
+                                ? "Unlocked / مفتوح"
+                                : "Required / مطلوب"}
+                          </b>
+                        </div>
+
+                        {!deliveryLocationLocked112 ? (
+                          <div className={designStyles.deliveryLocationChooser112}>
+                            <button
+                              type="button"
+                              className={designStyles.deliveryLocationGps112}
+                              onClick={getMyDeliveryLocation112}
+                              disabled={
+                                deliveryLocationLocating112 ||
+                                deliveryLocationSearching112 ||
+                                deliveryLocationSaving112
+                              }
+                            >
+                              {deliveryLocationLocating112
+                                ? "Getting location... / جارٍ تحديد الموقع..."
+                                : "Get my location / تحديد موقعي"}
+                            </button>
+
+                            <span className={designStyles.deliveryLocationOr112}>
+                              OR / أو
+                            </span>
+
+                            <div className={designStyles.deliveryLocationSearch112}>
+                              <label>
+                                <span>Search Google / البحث في Google</span>
+                                <input
+                                  value={deliveryLocationSearch112}
+                                  onChange={(event) =>
+                                    setDeliveryLocationSearch112(
+                                      event.target.value
+                                    )
+                                  }
+                                  placeholder="Store name, street or landmark"
+                                  autoComplete="off"
+                                />
+                              </label>
+
+                              {deliveryLocationPredictions112.length > 0 ? (
+                                <div className={designStyles.deliveryLocationResults112}>
+                                  {deliveryLocationPredictions112.map(
+                                    (prediction) => (
+                                      <button
+                                        type="button"
+                                        key={prediction.place_id}
+                                        onClick={() =>
+                                          void chooseDeliveryGooglePlace112(
+                                            prediction
+                                          )
+                                        }
+                                      >
+                                        <strong>
+                                          {prediction.structured_formatting?.main_text ||
+                                            prediction.description}
+                                        </strong>
+                                        <span>
+                                          {prediction.structured_formatting?.secondary_text ||
+                                            prediction.description}
+                                        </span>
+                                      </button>
+                                    )
+                                  )}
+                                </div>
+                              ) : null}
+                            </div>
+                          </div>
+                        ) : null}
+
+                        {deliveryLocationError112 ? (
+                          <div className={designStyles.deliveryLocationError112}>
+                            {deliveryLocationError112}
+                          </div>
+                        ) : null}
+
+                        {deliveryLocationMap112 ? (
+                          <div className={designStyles.deliveryLocationMapCard112}>
+                            <iframe
+                              title="Store location map"
+                              src={darikDeliveryLocationMapUrl112(
+                                deliveryLocationMap112
+                              )}
+                              loading="lazy"
+                              referrerPolicy="no-referrer-when-downgrade"
+                            />
+
+                            <div className={designStyles.deliveryLocationMapFoot112}>
+                              <div>
+                                <small>
+                                  {deliveryLocationLocked112
+                                    ? "CONFIRMED / مؤكد"
+                                    : "CONFIRM THIS PIN / أكد هذا الموقع"}
+                                </small>
+                                <strong>{deliveryLocationMap112.address}</strong>
+                                <span>
+                                  {deliveryLocationMap112.latitude.toFixed(6)},
+                                  {" "}
+                                  {deliveryLocationMap112.longitude.toFixed(6)}
+                                </span>
+                              </div>
+
+                              {deliveryLocationLocked112 ? (
+                                <button
+                                  type="button"
+                                  className={designStyles.deliveryLocationUnlock112}
+                                  onClick={openDeliveryLocationUnlock112}
+                                >
+                                  Unlock location / فتح الموقع
+                                </button>
+                              ) : (
+                                <button
+                                  type="button"
+                                  className={designStyles.deliveryLocationConfirm112}
+                                  onClick={() =>
+                                    void confirmDeliveryLocation112()
+                                  }
+                                  disabled={deliveryLocationSaving112}
+                                >
+                                  {deliveryLocationSaving112
+                                    ? "Confirming... / جارٍ التأكيد..."
+                                    : "Confirm this location / تأكيد هذا الموقع"}
+                                </button>
+                              )}
+                            </div>
+                          </div>
+                        ) : (
+                          <div className={designStyles.deliveryLocationEmpty112}>
+                            <strong>Choose the exact store location</strong>
+                            <span>
+                              Use GPS or Google search. A map appears here before
+                              the location can be confirmed.
+                            </span>
+                          </div>
+                        )}
+
+                        {deliveryLocationUnlockOpen112 ? (
+                          <div
+                            className={designStyles.deliveryLocationPasswordOverlay112}
+                            role="dialog"
+                            aria-modal="true"
+                          >
+                            <div className={designStyles.deliveryLocationPasswordCard112}>
+                              <div>
+                                <small>SECURITY CHECK / تحقق أمني</small>
+                                <strong>
+                                  Unlock store location / فتح موقع المتجر
+                                </strong>
+                                <p>
+                                  Enter the password you use to log into Darik.
+                                </p>
+                              </div>
+
+                              <label>
+                                <span>Login password / كلمة مرور الدخول</span>
+                                <input
+                                  type="password"
+                                  value={deliveryLocationUnlockPassword112}
+                                  onChange={(event) =>
+                                    setDeliveryLocationUnlockPassword112(
+                                      event.target.value
+                                    )
+                                  }
+                                  onKeyDown={(event) => {
+                                    if (event.key === "Enter") {
+                                      event.preventDefault();
+                                      void verifyDeliveryLocationUnlock112();
+                                    }
+                                  }}
+                                  autoComplete="current-password"
+                                  autoFocus
+                                />
+                              </label>
+
+                              {deliveryLocationUnlockError112 ? (
+                                <div className={designStyles.deliveryLocationPasswordError112}>
+                                  {deliveryLocationUnlockError112}
+                                </div>
+                              ) : null}
+
+                              <div className={designStyles.deliveryLocationPasswordActions112}>
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    setDeliveryLocationUnlockPassword112("");
+                                    setDeliveryLocationUnlockError112("");
+                                    setDeliveryLocationUnlockOpen112(false);
+                                  }}
+                                  disabled={deliveryLocationUnlockBusy112}
+                                >
+                                  Cancel / إلغاء
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() =>
+                                    void verifyDeliveryLocationUnlock112()
+                                  }
+                                  disabled={deliveryLocationUnlockBusy112}
+                                >
+                                  {deliveryLocationUnlockBusy112
+                                    ? "Verifying... / جارٍ التحقق..."
+                                    : "Verify & unlock / تحقق وافتح"}
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+                        ) : null}
+                      </section>
 
                       <div className={designStyles.exactWizardOrderModes109V5}>
                         <button type="button" className={setupForm.orderSubmissionMode === "phone" ? designStyles.exactWizardSelected109V5 : ""} onClick={() => updateSetupField("orderSubmissionMode", "phone")}><strong>Phone / WhatsApp</strong><span>هاتف / واتساب</span></button>
