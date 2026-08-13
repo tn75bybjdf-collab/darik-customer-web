@@ -1174,6 +1174,25 @@ function darikStoreHoursState115(
 }
 
 export default function DarikDirectStorefrontPage() {
+  // DARIK_REAL_BUSINESS_HOURS_NEXT_DAY_DELIVERY_115_V3_HOOK_ORDER_FIX
+  const [storeClock115, setStoreClock115] = useState(0);
+
+  useEffect(() => {
+    const updateStoreClock115 = () => {
+      setStoreClock115(Date.now());
+    };
+
+    updateStoreClock115();
+
+    const timer = window.setInterval(
+      updateStoreClock115,
+      30_000
+    );
+
+    return () => window.clearInterval(timer);
+  }, []);
+
+
   useDarikTypographyFontLibrary105V5();
   const params = useParams<{ slug: string | string[] }>();
   const slug = normalizeParam(params?.slug);
@@ -2346,23 +2365,6 @@ export default function DarikDirectStorefrontPage() {
     (orderSubmissionMode === "online" || orderSubmissionMode === "both") &&
     onlinePaymentAvailable;
   const effectiveAcceptingOrders = showOrdering && storefront.is_accepting_orders;
-  const [storeClock115, setStoreClock115] = useState(0);
-
-  useEffect(() => {
-    const updateStoreClock115 = () => {
-      setStoreClock115(Date.now());
-    };
-
-    updateStoreClock115();
-
-    const timer = window.setInterval(
-      updateStoreClock115,
-      30_000
-    );
-
-    return () => window.clearInterval(timer);
-  }, []);
-
   const storeHoursState115 = darikStoreHoursState115(
     (
       storefront as unknown as {
