@@ -612,6 +612,7 @@ function lockedRetailFieldDesign(
   };
 }
 type StorefrontTypographyKey =
+  | "page"
   | "display_name"
   | "display_name_ar"
   | "tagline"
@@ -701,6 +702,7 @@ type StorefrontTypographyState = Record<
 >;
 
 const storefrontTypographyKeys: StorefrontTypographyKey[] = [
+  "page",
   "display_name",
   "display_name_ar",
   "tagline",
@@ -871,8 +873,45 @@ function useDarikTypographyFontLibrary105V5() {
   }, []);
 }
 
+// DARIK_PAGE_WIDE_TYPOGRAPHY_106
+const darikGlobalTypographyCss106 = Object.entries(
+  storefrontTypographyFontFamilies
+)
+  .map(
+    ([fontKey, fontFamily]) => `
+[data-darik-page-font="${fontKey}"] :is(
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6,
+  p,
+  span,
+  strong,
+  small,
+  a,
+  button,
+  label,
+  input,
+  textarea,
+  select,
+  option,
+  li
+) {
+  font-family: ${fontFamily} !important;
+}
+
+[data-darik-page-font] [data-darik-font-override="${fontKey}"] {
+  font-family: ${fontFamily} !important;
+}
+`
+  )
+  .join("\n");
+
 function storefrontTypographyDefaultState(): StorefrontTypographyState {
   return {
+    page: { font: "theme", size: 0 },
     display_name: { font: "theme", size: 0 },
     display_name_ar: { font: "theme", size: 0 },
     tagline: { font: "theme", size: 0 },
@@ -2338,11 +2377,13 @@ export default function DarikDirectStorefrontPage() {
       data-hero={heroLayout}
       data-business={effectiveBusinessType}
       data-theme-field={effectiveThemeField}
+      data-darik-page-font={effectiveStorefrontTypography.page.font}
       data-field-preview={previewRetailField ? "yes" : "no"}
       data-mechanics-preview={previewMechanicsField ? "yes" : "no"}
       data-category-count={String(visibleCategories.length)}
       data-direct-purchase={hasDirectPurchaseProducts ? "yes" : "no"}
     >
+      <style>{darikGlobalTypographyCss106}</style>
       <ProductDetailExperience
         open={Boolean(activeProduct)}
         product={activeProduct}
@@ -2484,7 +2525,12 @@ export default function DarikDirectStorefrontPage() {
               {isAutoParts ? "Auto parts / \u0642\u0637\u0639 \u063a\u064a\u0627\u0631" : isGroceryStore ? "Hypermarket / \u0647\u0627\u064a\u0628\u0631\u0645\u0627\u0631\u0643\u062a" : "Official store / \u0627\u0644\u0645\u062a\u062c\u0631 \u0627\u0644\u0631\u0633\u0645\u064a"}
             </div>
             <h1
-              style={storefrontTypographyInlineStyle(
+              data-darik-font-override={
+                effectiveStorefrontTypography.display_name.font !== "theme"
+                  ? effectiveStorefrontTypography.display_name.font
+                  : undefined
+              }
+style={storefrontTypographyInlineStyle(
                 effectiveStorefrontTypography,
                 "display_name"
               )}
@@ -2495,7 +2541,12 @@ export default function DarikDirectStorefrontPage() {
               <p
                 className={styles.arabicName}
                 dir="rtl"
-                style={storefrontTypographyInlineStyle(
+                data-darik-font-override={
+                effectiveStorefrontTypography.display_name_ar.font !== "theme"
+                  ? effectiveStorefrontTypography.display_name_ar.font
+                  : undefined
+              }
+style={storefrontTypographyInlineStyle(
                   effectiveStorefrontTypography,
                   "display_name_ar"
                 )}
@@ -2505,7 +2556,12 @@ export default function DarikDirectStorefrontPage() {
             ) : null}
             <p
               className={styles.tagline}
-              style={storefrontTypographyInlineStyle(
+              data-darik-font-override={
+                effectiveStorefrontTypography.tagline.font !== "theme"
+                  ? effectiveStorefrontTypography.tagline.font
+                  : undefined
+              }
+style={storefrontTypographyInlineStyle(
                 effectiveStorefrontTypography,
                 "tagline"
               )}
@@ -2516,7 +2572,12 @@ export default function DarikDirectStorefrontPage() {
               <p
                 className={styles.arabicTagline}
                 dir="rtl"
-                style={storefrontTypographyInlineStyle(
+                data-darik-font-override={
+                effectiveStorefrontTypography.tagline_ar.font !== "theme"
+                  ? effectiveStorefrontTypography.tagline_ar.font
+                  : undefined
+              }
+style={storefrontTypographyInlineStyle(
                   effectiveStorefrontTypography,
                   "tagline_ar"
                 )}

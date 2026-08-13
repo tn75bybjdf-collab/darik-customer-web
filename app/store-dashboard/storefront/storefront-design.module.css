@@ -1670,3 +1670,205 @@
 }
 
 /* DARIK_TYPOGRAPHY_FONT_LIBRARY_105_V5 - 70 curated font choices */
+
+/* DARIK_PAGE_WIDE_TYPOGRAPHY_106 */
+
+.arabicIdentity106 {
+  display: grid;
+  gap: 14px;
+  padding: 18px;
+  border: 1px solid rgba(15, 23, 42, 0.09);
+  border-radius: 20px;
+  background:
+    radial-gradient(circle at 90% 0%, rgba(99, 200, 255, 0.12), transparent 15rem),
+    linear-gradient(180deg, #ffffff, #f8fafc);
+  box-shadow: 0 12px 30px rgba(15, 23, 42, 0.05);
+}
+
+.arabicIdentity106Header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 18px;
+}
+
+.arabicIdentity106Header > div {
+  min-width: 0;
+}
+
+.arabicIdentity106Header span {
+  color: #587086;
+  font-size: 0.65rem;
+  font-weight: 950;
+  letter-spacing: 0.07em;
+}
+
+.arabicIdentity106Header h3 {
+  margin: 5px 0 0;
+  color: #101923;
+  font-size: 1.25rem;
+  letter-spacing: -0.03em;
+}
+
+.arabicIdentity106Header p {
+  max-width: 430px;
+  margin: 0;
+  color: #718496;
+  font-size: 0.74rem;
+  font-weight: 650;
+  line-height: 1.5;
+}
+
+.arabicIdentity106Grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 11px;
+}
+
+.arabicIdentity106Grid label {
+  display: grid;
+  gap: 6px;
+}
+
+.arabicIdentity106Grid label > span {
+  color: #52687b;
+  font-size: 0.7rem;
+  font-weight: 900;
+}
+
+.arabicIdentity106Grid input {
+  width: 100%;
+  min-height: 44px;
+  padding: 0 12px;
+  border: 1px solid rgba(15, 23, 42, 0.12);
+  border-radius: 11px;
+  background: #ffffff;
+  color: #142230;
+  font: inherit;
+  font-weight: 750;
+  outline: none;
+}
+
+.arabicIdentity106Grid input:focus {
+  border-color: rgba(45, 153, 219, 0.58);
+  box-shadow: 0 0 0 3px rgba(45, 153, 219, 0.1);
+}
+
+.typographyPageFont106 {
+  display: grid;
+  grid-template-columns: minmax(0, 1.35fr) minmax(210px, 0.85fr) auto;
+  gap: 12px;
+  align-items: end;
+  padding: 14px;
+  border: 1px solid rgba(41, 118, 171, 0.15);
+  border-radius: 16px;
+  background:
+    linear-gradient(135deg, rgba(233, 247, 255, 0.95), rgba(249, 252, 255, 0.98));
+}
+
+.typographyPageFont106Copy {
+  display: grid;
+  gap: 4px;
+}
+
+.typographyPageFont106Copy > span {
+  color: #2677a8;
+  font-size: 0.62rem;
+  font-weight: 950;
+  letter-spacing: 0.07em;
+}
+
+.typographyPageFont106Copy h4 {
+  margin: 0;
+  color: #132331;
+  font-size: 0.92rem;
+  line-height: 1.2;
+}
+
+.typographyPageFont106Copy p {
+  max-width: 620px;
+  margin: 0;
+  color: #6f8293;
+  font-size: 0.68rem;
+  font-weight: 650;
+  line-height: 1.45;
+}
+
+.typographyPageFont106Control {
+  display: grid;
+  gap: 6px;
+}
+
+.typographyPageFont106Control > span {
+  color: #587086;
+  font-size: 0.62rem;
+  font-weight: 950;
+}
+
+.typographyPageFont106Control select {
+  width: 100%;
+  min-height: 42px;
+  padding: 0 11px;
+  border: 1px solid rgba(15, 23, 42, 0.12);
+  border-radius: 11px;
+  background: #ffffff;
+  color: #142230;
+  font-size: 0.76rem;
+  font-weight: 850;
+  outline: none;
+}
+
+.typographyPageFont106Reset {
+  min-height: 42px;
+  padding: 0 12px;
+  border: 1px solid rgba(15, 23, 42, 0.12);
+  border-radius: 11px;
+  background: #ffffff;
+  color: #42576a;
+  font-size: 0.67rem;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.typographyPageFont106Reset:hover {
+  background: #eef5f9;
+}
+
+@media (max-width: 860px) {
+  .typographyPageFont106 {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .typographyPageFont106Copy {
+    grid-column: 1 / -1;
+  }
+
+  .typographyPageFont106Reset {
+    width: 100%;
+  }
+}
+
+@media (max-width: 620px) {
+  .arabicIdentity106 {
+    padding: 13px 10px;
+    border-radius: 16px;
+  }
+
+  .arabicIdentity106Header {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .arabicIdentity106Grid,
+  .typographyPageFont106 {
+    grid-template-columns: 1fr;
+  }
+
+  .typographyPageFont106Copy {
+    grid-column: auto;
+  }
+
+  .typographyPageFont106Reset {
+    width: 100%;
+  }
+}

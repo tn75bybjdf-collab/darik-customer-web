@@ -473,6 +473,7 @@ function storefrontDraftKey(retailerId: string) {
 }
 
 type StorefrontTypographyKey =
+  | "page"
   | "display_name"
   | "display_name_ar"
   | "tagline"
@@ -562,6 +563,7 @@ type StorefrontTypographyState = Record<
 >;
 
 const storefrontTypographyKeys: StorefrontTypographyKey[] = [
+  "page",
   "display_name",
   "display_name_ar",
   "tagline",
@@ -867,6 +869,7 @@ function useDarikTypographyFontLibrary105V5() {
 
 function storefrontTypographyDefaultState(): StorefrontTypographyState {
   return {
+    page: { font: "theme", size: 0 },
     display_name: { font: "theme", size: 0 },
     display_name_ar: { font: "theme", size: 0 },
     tagline: { font: "theme", size: 0 },
@@ -3695,6 +3698,45 @@ export default function DarikDirectStorefrontSettingsPage() {
                       Change theme / تغيير القالب
                     </button>
                   </div>
+                  <section className={designStyles.arabicIdentity106}>
+                    <div className={designStyles.arabicIdentity106Header}>
+                      <div>
+                        <span>ARABIC STOREFRONT IDENTITY / هوية المتجر بالعربية</span>
+                        <h3>Arabic customer-facing text / النص العربي للعملاء</h3>
+                      </div>
+                      <p>
+                        Add the Arabic version of the store name and tagline. These update
+                        the live storefront preview while you type.
+                      </p>
+                    </div>
+
+                    <div className={designStyles.arabicIdentity106Grid}>
+                      <label>
+                        <span>Customer-facing name in Arabic / اسم المتجر بالعربية</span>
+                        <input
+                          dir="rtl"
+                          value={setupForm.displayNameAr}
+                          onChange={(event) =>
+                            updateSetupField("displayNameAr", event.target.value)
+                          }
+                          placeholder="اسم المتجر"
+                        />
+                      </label>
+
+                      <label>
+                        <span>Store tagline in Arabic / شعار المتجر بالعربية</span>
+                        <input
+                          dir="rtl"
+                          value={setupForm.taglineAr}
+                          onChange={(event) =>
+                            updateSetupField("taglineAr", event.target.value)
+                          }
+                          placeholder="اكتب شعار المتجر بالعربية"
+                        />
+                      </label>
+                    </div>
+                  </section>
+
                   <section className={designStyles.typographyStudio}>
                     <div className={designStyles.typographyStudioHeader}>
                       <div>
@@ -3714,6 +3756,54 @@ export default function DarikDirectStorefrontSettingsPage() {
                               ? "Saved"
                               : "Live preview"}
                       </small>
+                    </div>
+
+                    <div className={designStyles.typographyPageFont106}>
+                      <div className={designStyles.typographyPageFont106Copy}>
+                        <span>ENTIRE STOREFRONT FONT / خط المتجر بالكامل</span>
+                        <h4>Choose the base font for the whole customer-facing page</h4>
+                        <p>
+                          Products, categories, buttons, headings and body text follow this
+                          font. The individual controls below can override only the text bar
+                          you choose without changing the rest of the storefront.
+                        </p>
+                      </div>
+
+                      <label className={designStyles.typographyPageFont106Control}>
+                        <span>Entire storefront font / خط المتجر بالكامل</span>
+                        <select
+                          aria-label="Entire storefront font"
+                          value={storefrontTypographyDraft.page.font}
+                          onChange={(event) =>
+                            updateStorefrontTypography("page", {
+                              font: isStorefrontTypographyFontKey(event.target.value)
+                                ? event.target.value
+                                : "theme",
+                              size: 0,
+                            })
+                          }
+                        >
+                          {storefrontTypographyFontGroups.map((group) => (
+                            <optgroup key={group.label} label={group.label}>
+                              {group.options.map((option) => (
+                                <option key={option.key} value={option.key}>
+                                  {option.key === "theme"
+                                    ? "Theme default"
+                                    : option.label}
+                                </option>
+                              ))}
+                            </optgroup>
+                          ))}
+                        </select>
+                      </label>
+
+                      <button
+                        type="button"
+                        className={designStyles.typographyPageFont106Reset}
+                        onClick={() => resetStorefrontTypography("page")}
+                      >
+                        Reset whole page to theme font
+                      </button>
                     </div>
 
                     <div className={designStyles.typographyStudioGrid}>
@@ -3793,8 +3883,8 @@ export default function DarikDirectStorefrontSettingsPage() {
                     <div className={designStyles.typographyStudioFoot}>
                       <strong>Theme default</strong>
                       <span>
-                        restores only that text bar to the typography originally designed
-                        for the selected Darik storefront theme.
+                        makes that individual text bar follow the Entire storefront font.
+                        If the whole page is set to Theme default, it follows the selected Darik theme.
                       </span>
                     </div>
                   </section>
