@@ -478,8 +478,67 @@ type StorefrontTypographyKey =
   | "tagline"
   | "tagline_ar";
 
+// DARIK_TYPOGRAPHY_FONT_LIBRARY_105_V5
 type StorefrontTypographyFontKey =
   | "theme"
+  | "playfair"
+  | "cormorant"
+  | "dm_serif"
+  | "bodoni_moda"
+  | "prata"
+  | "cinzel"
+  | "marcellus"
+  | "libre_baskerville"
+  | "lora"
+  | "eb_garamond"
+  | "fraunces"
+  | "spectral"
+  | "crimson_pro"
+  | "yeseva"
+  | "abril"
+  | "inter"
+  | "manrope"
+  | "montserrat"
+  | "poppins"
+  | "raleway"
+  | "outfit"
+  | "plus_jakarta"
+  | "urbanist"
+  | "space_grotesk"
+  | "work_sans"
+  | "nunito_sans"
+  | "roboto"
+  | "quicksand"
+  | "josefin"
+  | "sora"
+  | "oswald"
+  | "bebas"
+  | "anton"
+  | "barlow_condensed"
+  | "archivo_black"
+  | "league_spartan"
+  | "dancing_script"
+  | "great_vibes"
+  | "allura"
+  | "sacramento"
+  | "parisienne"
+  | "caveat"
+  | "pacifico"
+  | "cairo"
+  | "tajawal"
+  | "almarai"
+  | "changa"
+  | "el_messiri"
+  | "amiri"
+  | "noto_kufi_ar"
+  | "noto_naskh_ar"
+  | "ibm_plex_sans_ar"
+  | "reem_kufi"
+  | "aref_ruqaa"
+  | "lateef"
+  | "scheherazade_new"
+  | "markazi_text"
+  | "lemonada"
   | "segoe"
   | "arial"
   | "verdana"
@@ -509,23 +568,117 @@ const storefrontTypographyKeys: StorefrontTypographyKey[] = [
   "tagline_ar",
 ];
 
-const storefrontTypographyFontOptions: Array<{
-  key: StorefrontTypographyFontKey;
-  label: string;
-}> = [
-  { key: "theme", label: "Theme default" },
-  { key: "segoe", label: "Segoe UI" },
-  { key: "arial", label: "Arial" },
-  { key: "verdana", label: "Verdana" },
-  { key: "tahoma", label: "Tahoma" },
-  { key: "trebuchet", label: "Trebuchet MS" },
-  { key: "georgia", label: "Georgia" },
-  { key: "times", label: "Times New Roman" },
-  { key: "palatino", label: "Palatino" },
-  { key: "garamond", label: "Garamond" },
-  { key: "courier", label: "Courier New" },
-  { key: "impact", label: "Impact" },
+const storefrontTypographyFontGroups = [
+  {
+    label: 'Theme',
+    options: [
+      { key: "theme" as StorefrontTypographyFontKey, label: 'Theme default' },
+    ],
+  },
+  {
+    label: 'Elegant & Luxury',
+    options: [
+      { key: "playfair" as StorefrontTypographyFontKey, label: 'Playfair Display' },
+      { key: "cormorant" as StorefrontTypographyFontKey, label: 'Cormorant Garamond' },
+      { key: "dm_serif" as StorefrontTypographyFontKey, label: 'DM Serif Display' },
+      { key: "bodoni_moda" as StorefrontTypographyFontKey, label: 'Bodoni Moda' },
+      { key: "prata" as StorefrontTypographyFontKey, label: 'Prata' },
+      { key: "cinzel" as StorefrontTypographyFontKey, label: 'Cinzel' },
+      { key: "marcellus" as StorefrontTypographyFontKey, label: 'Marcellus' },
+      { key: "libre_baskerville" as StorefrontTypographyFontKey, label: 'Libre Baskerville' },
+      { key: "lora" as StorefrontTypographyFontKey, label: 'Lora' },
+      { key: "eb_garamond" as StorefrontTypographyFontKey, label: 'EB Garamond' },
+      { key: "fraunces" as StorefrontTypographyFontKey, label: 'Fraunces' },
+      { key: "spectral" as StorefrontTypographyFontKey, label: 'Spectral' },
+      { key: "crimson_pro" as StorefrontTypographyFontKey, label: 'Crimson Pro' },
+      { key: "yeseva" as StorefrontTypographyFontKey, label: 'Yeseva One' },
+      { key: "abril" as StorefrontTypographyFontKey, label: 'Abril Fatface' },
+    ],
+  },
+  {
+    label: 'Modern & Clean',
+    options: [
+      { key: "inter" as StorefrontTypographyFontKey, label: 'Inter' },
+      { key: "manrope" as StorefrontTypographyFontKey, label: 'Manrope' },
+      { key: "montserrat" as StorefrontTypographyFontKey, label: 'Montserrat' },
+      { key: "poppins" as StorefrontTypographyFontKey, label: 'Poppins' },
+      { key: "raleway" as StorefrontTypographyFontKey, label: 'Raleway' },
+      { key: "outfit" as StorefrontTypographyFontKey, label: 'Outfit' },
+      { key: "plus_jakarta" as StorefrontTypographyFontKey, label: 'Plus Jakarta Sans' },
+      { key: "urbanist" as StorefrontTypographyFontKey, label: 'Urbanist' },
+      { key: "space_grotesk" as StorefrontTypographyFontKey, label: 'Space Grotesk' },
+      { key: "work_sans" as StorefrontTypographyFontKey, label: 'Work Sans' },
+      { key: "nunito_sans" as StorefrontTypographyFontKey, label: 'Nunito Sans' },
+      { key: "roboto" as StorefrontTypographyFontKey, label: 'Roboto' },
+      { key: "quicksand" as StorefrontTypographyFontKey, label: 'Quicksand' },
+      { key: "josefin" as StorefrontTypographyFontKey, label: 'Josefin Sans' },
+      { key: "sora" as StorefrontTypographyFontKey, label: 'Sora' },
+    ],
+  },
+  {
+    label: 'Bold & Editorial',
+    options: [
+      { key: "oswald" as StorefrontTypographyFontKey, label: 'Oswald' },
+      { key: "bebas" as StorefrontTypographyFontKey, label: 'Bebas Neue' },
+      { key: "anton" as StorefrontTypographyFontKey, label: 'Anton' },
+      { key: "barlow_condensed" as StorefrontTypographyFontKey, label: 'Barlow Condensed' },
+      { key: "archivo_black" as StorefrontTypographyFontKey, label: 'Archivo Black' },
+      { key: "league_spartan" as StorefrontTypographyFontKey, label: 'League Spartan' },
+    ],
+  },
+  {
+    label: 'Handwritten & Script',
+    options: [
+      { key: "dancing_script" as StorefrontTypographyFontKey, label: 'Dancing Script' },
+      { key: "great_vibes" as StorefrontTypographyFontKey, label: 'Great Vibes' },
+      { key: "allura" as StorefrontTypographyFontKey, label: 'Allura' },
+      { key: "sacramento" as StorefrontTypographyFontKey, label: 'Sacramento' },
+      { key: "parisienne" as StorefrontTypographyFontKey, label: 'Parisienne' },
+      { key: "caveat" as StorefrontTypographyFontKey, label: 'Caveat' },
+      { key: "pacifico" as StorefrontTypographyFontKey, label: 'Pacifico' },
+    ],
+  },
+  {
+    label: 'Arabic & Bilingual',
+    options: [
+      { key: "cairo" as StorefrontTypographyFontKey, label: 'Cairo' },
+      { key: "tajawal" as StorefrontTypographyFontKey, label: 'Tajawal' },
+      { key: "almarai" as StorefrontTypographyFontKey, label: 'Almarai' },
+      { key: "changa" as StorefrontTypographyFontKey, label: 'Changa' },
+      { key: "el_messiri" as StorefrontTypographyFontKey, label: 'El Messiri' },
+      { key: "amiri" as StorefrontTypographyFontKey, label: 'Amiri' },
+      { key: "noto_kufi_ar" as StorefrontTypographyFontKey, label: 'Noto Kufi Arabic' },
+      { key: "noto_naskh_ar" as StorefrontTypographyFontKey, label: 'Noto Naskh Arabic' },
+      { key: "ibm_plex_sans_ar" as StorefrontTypographyFontKey, label: 'IBM Plex Sans Arabic' },
+      { key: "reem_kufi" as StorefrontTypographyFontKey, label: 'Reem Kufi' },
+      { key: "aref_ruqaa" as StorefrontTypographyFontKey, label: 'Aref Ruqaa' },
+      { key: "lateef" as StorefrontTypographyFontKey, label: 'Lateef' },
+      { key: "scheherazade_new" as StorefrontTypographyFontKey, label: 'Scheherazade New' },
+      { key: "markazi_text" as StorefrontTypographyFontKey, label: 'Markazi Text' },
+      { key: "lemonada" as StorefrontTypographyFontKey, label: 'Lemonada' },
+    ],
+  },
+  {
+    label: 'Classic & System',
+    options: [
+      { key: "segoe" as StorefrontTypographyFontKey, label: 'Segoe UI' },
+      { key: "arial" as StorefrontTypographyFontKey, label: 'Arial' },
+      { key: "verdana" as StorefrontTypographyFontKey, label: 'Verdana' },
+      { key: "tahoma" as StorefrontTypographyFontKey, label: 'Tahoma' },
+      { key: "trebuchet" as StorefrontTypographyFontKey, label: 'Trebuchet MS' },
+      { key: "georgia" as StorefrontTypographyFontKey, label: 'Georgia' },
+      { key: "times" as StorefrontTypographyFontKey, label: 'Times New Roman' },
+      { key: "palatino" as StorefrontTypographyFontKey, label: 'Palatino' },
+      { key: "garamond" as StorefrontTypographyFontKey, label: 'Garamond' },
+      { key: "courier" as StorefrontTypographyFontKey, label: 'Courier New' },
+      { key: "impact" as StorefrontTypographyFontKey, label: 'Impact' },
+    ],
+  },
 ];
+
+const storefrontTypographyFontOptions = storefrontTypographyFontGroups.flatMap(
+  (group) => group.options
+);
 
 const storefrontTypographySizeOptions = [
   0,
@@ -552,18 +705,165 @@ const storefrontTypographyFontFamilies: Record<
   Exclude<StorefrontTypographyFontKey, "theme">,
   string
 > = {
+  playfair: '"Playfair Display", Georgia, "Times New Roman", serif',
+  cormorant: '"Cormorant Garamond", Georgia, "Times New Roman", serif',
+  dm_serif: '"DM Serif Display", Georgia, "Times New Roman", serif',
+  bodoni_moda: '"Bodoni Moda", Georgia, "Times New Roman", serif',
+  prata: '"Prata", Georgia, "Times New Roman", serif',
+  cinzel: '"Cinzel", Georgia, "Times New Roman", serif',
+  marcellus: '"Marcellus", Georgia, "Times New Roman", serif',
+  libre_baskerville: '"Libre Baskerville", Georgia, "Times New Roman", serif',
+  lora: '"Lora", Georgia, "Times New Roman", serif',
+  eb_garamond: '"EB Garamond", Georgia, "Times New Roman", serif',
+  fraunces: '"Fraunces", Georgia, "Times New Roman", serif',
+  spectral: '"Spectral", Georgia, "Times New Roman", serif',
+  crimson_pro: '"Crimson Pro", Georgia, "Times New Roman", serif',
+  yeseva: '"Yeseva One", Georgia, "Times New Roman", serif',
+  abril: '"Abril Fatface", Georgia, "Times New Roman", serif',
+  inter: '"Inter", "Segoe UI", Arial, sans-serif',
+  manrope: '"Manrope", "Segoe UI", Arial, sans-serif',
+  montserrat: '"Montserrat", "Segoe UI", Arial, sans-serif',
+  poppins: '"Poppins", "Segoe UI", Arial, sans-serif',
+  raleway: '"Raleway", "Segoe UI", Arial, sans-serif',
+  outfit: '"Outfit", "Segoe UI", Arial, sans-serif',
+  plus_jakarta: '"Plus Jakarta Sans", "Segoe UI", Arial, sans-serif',
+  urbanist: '"Urbanist", "Segoe UI", Arial, sans-serif',
+  space_grotesk: '"Space Grotesk", "Segoe UI", Arial, sans-serif',
+  work_sans: '"Work Sans", "Segoe UI", Arial, sans-serif',
+  nunito_sans: '"Nunito Sans", "Segoe UI", Arial, sans-serif',
+  roboto: '"Roboto", "Segoe UI", Arial, sans-serif',
+  quicksand: '"Quicksand", "Segoe UI", Arial, sans-serif',
+  josefin: '"Josefin Sans", "Segoe UI", Arial, sans-serif',
+  sora: '"Sora", "Segoe UI", Arial, sans-serif',
+  oswald: '"Oswald", "Segoe UI", Arial, sans-serif',
+  bebas: '"Bebas Neue", "Segoe UI", Arial, sans-serif',
+  anton: '"Anton", "Segoe UI", Arial, sans-serif',
+  barlow_condensed: '"Barlow Condensed", "Segoe UI", Arial, sans-serif',
+  archivo_black: '"Archivo Black", "Segoe UI", Arial, sans-serif',
+  league_spartan: '"League Spartan", "Segoe UI", Arial, sans-serif',
+  dancing_script: '"Dancing Script", "Segoe Script", cursive',
+  great_vibes: '"Great Vibes", "Segoe Script", cursive',
+  allura: '"Allura", "Segoe Script", cursive',
+  sacramento: '"Sacramento", "Segoe Script", cursive',
+  parisienne: '"Parisienne", "Segoe Script", cursive',
+  caveat: '"Caveat", "Segoe Script", cursive',
+  pacifico: '"Pacifico", "Segoe Script", cursive',
+  cairo: '"Cairo", Tahoma, Arial, sans-serif',
+  tajawal: '"Tajawal", Tahoma, Arial, sans-serif',
+  almarai: '"Almarai", Tahoma, Arial, sans-serif',
+  changa: '"Changa", Tahoma, Arial, sans-serif',
+  el_messiri: '"El Messiri", Tahoma, Arial, sans-serif',
+  amiri: '"Amiri", "Times New Roman", Tahoma, serif',
+  noto_kufi_ar: '"Noto Kufi Arabic", Tahoma, Arial, sans-serif',
+  noto_naskh_ar: '"Noto Naskh Arabic", "Times New Roman", Tahoma, serif',
+  ibm_plex_sans_ar: '"IBM Plex Sans Arabic", Tahoma, Arial, sans-serif',
+  reem_kufi: '"Reem Kufi", Tahoma, Arial, sans-serif',
+  aref_ruqaa: '"Aref Ruqaa", "Times New Roman", Tahoma, serif',
+  lateef: '"Lateef", "Times New Roman", Tahoma, serif',
+  scheherazade_new: '"Scheherazade New", "Times New Roman", Tahoma, serif',
+  markazi_text: '"Markazi Text", "Times New Roman", Tahoma, serif',
+  lemonada: '"Lemonada", Tahoma, Arial, sans-serif',
   segoe: '"Segoe UI", Tahoma, Arial, sans-serif',
   arial: 'Arial, "Segoe UI", Tahoma, sans-serif',
   verdana: 'Verdana, "Segoe UI", Tahoma, sans-serif',
   tahoma: 'Tahoma, "Segoe UI", Arial, sans-serif',
   trebuchet: '"Trebuchet MS", "Segoe UI", Tahoma, sans-serif',
-  georgia: 'Georgia, "Times New Roman", "Segoe UI", serif',
-  times: '"Times New Roman", Times, "Segoe UI", serif',
+  georgia: 'Georgia, "Times New Roman", serif',
+  times: '"Times New Roman", Times, serif',
   palatino: '"Palatino Linotype", Palatino, "Times New Roman", serif',
   garamond: 'Garamond, Georgia, "Times New Roman", serif',
-  courier: '"Courier New", Courier, "Segoe UI", monospace',
+  courier: '"Courier New", Courier, monospace',
   impact: 'Impact, Haettenschweiler, "Arial Narrow Bold", sans-serif',
 };
+
+const storefrontTypographyFontKeys: StorefrontTypographyFontKey[] = [
+  "theme",
+  "playfair",
+  "cormorant",
+  "dm_serif",
+  "bodoni_moda",
+  "prata",
+  "cinzel",
+  "marcellus",
+  "libre_baskerville",
+  "lora",
+  "eb_garamond",
+  "fraunces",
+  "spectral",
+  "crimson_pro",
+  "yeseva",
+  "abril",
+  "inter",
+  "manrope",
+  "montserrat",
+  "poppins",
+  "raleway",
+  "outfit",
+  "plus_jakarta",
+  "urbanist",
+  "space_grotesk",
+  "work_sans",
+  "nunito_sans",
+  "roboto",
+  "quicksand",
+  "josefin",
+  "sora",
+  "oswald",
+  "bebas",
+  "anton",
+  "barlow_condensed",
+  "archivo_black",
+  "league_spartan",
+  "dancing_script",
+  "great_vibes",
+  "allura",
+  "sacramento",
+  "parisienne",
+  "caveat",
+  "pacifico",
+  "cairo",
+  "tajawal",
+  "almarai",
+  "changa",
+  "el_messiri",
+  "amiri",
+  "noto_kufi_ar",
+  "noto_naskh_ar",
+  "ibm_plex_sans_ar",
+  "reem_kufi",
+  "aref_ruqaa",
+  "lateef",
+  "scheherazade_new",
+  "markazi_text",
+  "lemonada",
+  "segoe",
+  "arial",
+  "verdana",
+  "tahoma",
+  "trebuchet",
+  "georgia",
+  "times",
+  "palatino",
+  "garamond",
+  "courier",
+  "impact"
+];
+
+const DARIK_TYPOGRAPHY_FONT_STYLESHEET_105_V5 =
+  'https://fonts.googleapis.com/css2?family=Playfair+Display&family=Cormorant+Garamond&family=DM+Serif+Display&family=Bodoni+Moda&family=Prata&family=Cinzel&family=Marcellus&family=Libre+Baskerville&family=Lora&family=EB+Garamond&family=Fraunces&family=Spectral&family=Crimson+Pro&family=Yeseva+One&family=Abril+Fatface&family=Inter&family=Manrope&family=Montserrat&family=Poppins&family=Raleway&family=Outfit&family=Plus+Jakarta+Sans&family=Urbanist&family=Space+Grotesk&family=Work+Sans&family=Nunito+Sans&family=Roboto&family=Quicksand&family=Josefin+Sans&family=Sora&family=Oswald&family=Bebas+Neue&family=Anton&family=Barlow+Condensed&family=Archivo+Black&family=League+Spartan&family=Dancing+Script&family=Great+Vibes&family=Allura&family=Sacramento&family=Parisienne&family=Caveat&family=Pacifico&family=Cairo&family=Tajawal&family=Almarai&family=Changa&family=El+Messiri&family=Amiri&family=Noto+Kufi+Arabic&family=Noto+Naskh+Arabic&family=IBM+Plex+Sans+Arabic&family=Reem+Kufi&family=Aref+Ruqaa&family=Lateef&family=Scheherazade+New&family=Markazi+Text&family=Lemonada&display=swap';
+
+function useDarikTypographyFontLibrary105V5() {
+  useEffect(() => {
+    const linkId = "darik-typography-font-library-105-v5";
+    if (document.getElementById(linkId)) return;
+
+    const link = document.createElement("link");
+    link.id = linkId;
+    link.rel = "stylesheet";
+    link.href = DARIK_TYPOGRAPHY_FONT_STYLESHEET_105_V5;
+    document.head.appendChild(link);
+  }, []);
+}
 
 function storefrontTypographyDefaultState(): StorefrontTypographyState {
   return {
@@ -634,6 +934,7 @@ function storefrontTypographyPreviewStyle(
 }
 
 export default function DarikDirectStorefrontSettingsPage() {
+  useDarikTypographyFontLibrary105V5();
   const [session, setSession] = useState<Session | null>(null);
   const [authReady, setAuthReady] = useState(false);
   const [context, setContext] = useState<ContextResult | null>(null);
@@ -3445,10 +3746,14 @@ export default function DarikDirectStorefrontSettingsPage() {
                                     })
                                   }
                                 >
-                                  {storefrontTypographyFontOptions.map((option) => (
-                                    <option key={option.key} value={option.key}>
-                                      {option.label}
-                                    </option>
+                                  {storefrontTypographyFontGroups.map((group) => (
+                                    <optgroup key={group.label} label={group.label}>
+                                      {group.options.map((option) => (
+                                        <option key={option.key} value={option.key}>
+                                          {option.label}
+                                        </option>
+                                      ))}
+                                    </optgroup>
                                   ))}
                                 </select>
                               </label>

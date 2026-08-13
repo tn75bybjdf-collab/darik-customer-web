@@ -617,8 +617,67 @@ type StorefrontTypographyKey =
   | "tagline"
   | "tagline_ar";
 
+// DARIK_TYPOGRAPHY_FONT_LIBRARY_105_V5
 type StorefrontTypographyFontKey =
   | "theme"
+  | "playfair"
+  | "cormorant"
+  | "dm_serif"
+  | "bodoni_moda"
+  | "prata"
+  | "cinzel"
+  | "marcellus"
+  | "libre_baskerville"
+  | "lora"
+  | "eb_garamond"
+  | "fraunces"
+  | "spectral"
+  | "crimson_pro"
+  | "yeseva"
+  | "abril"
+  | "inter"
+  | "manrope"
+  | "montserrat"
+  | "poppins"
+  | "raleway"
+  | "outfit"
+  | "plus_jakarta"
+  | "urbanist"
+  | "space_grotesk"
+  | "work_sans"
+  | "nunito_sans"
+  | "roboto"
+  | "quicksand"
+  | "josefin"
+  | "sora"
+  | "oswald"
+  | "bebas"
+  | "anton"
+  | "barlow_condensed"
+  | "archivo_black"
+  | "league_spartan"
+  | "dancing_script"
+  | "great_vibes"
+  | "allura"
+  | "sacramento"
+  | "parisienne"
+  | "caveat"
+  | "pacifico"
+  | "cairo"
+  | "tajawal"
+  | "almarai"
+  | "changa"
+  | "el_messiri"
+  | "amiri"
+  | "noto_kufi_ar"
+  | "noto_naskh_ar"
+  | "ibm_plex_sans_ar"
+  | "reem_kufi"
+  | "aref_ruqaa"
+  | "lateef"
+  | "scheherazade_new"
+  | "markazi_text"
+  | "lemonada"
   | "segoe"
   | "arial"
   | "verdana"
@@ -652,18 +711,165 @@ const storefrontTypographyFontFamilies: Record<
   Exclude<StorefrontTypographyFontKey, "theme">,
   string
 > = {
+  playfair: '"Playfair Display", Georgia, "Times New Roman", serif',
+  cormorant: '"Cormorant Garamond", Georgia, "Times New Roman", serif',
+  dm_serif: '"DM Serif Display", Georgia, "Times New Roman", serif',
+  bodoni_moda: '"Bodoni Moda", Georgia, "Times New Roman", serif',
+  prata: '"Prata", Georgia, "Times New Roman", serif',
+  cinzel: '"Cinzel", Georgia, "Times New Roman", serif',
+  marcellus: '"Marcellus", Georgia, "Times New Roman", serif',
+  libre_baskerville: '"Libre Baskerville", Georgia, "Times New Roman", serif',
+  lora: '"Lora", Georgia, "Times New Roman", serif',
+  eb_garamond: '"EB Garamond", Georgia, "Times New Roman", serif',
+  fraunces: '"Fraunces", Georgia, "Times New Roman", serif',
+  spectral: '"Spectral", Georgia, "Times New Roman", serif',
+  crimson_pro: '"Crimson Pro", Georgia, "Times New Roman", serif',
+  yeseva: '"Yeseva One", Georgia, "Times New Roman", serif',
+  abril: '"Abril Fatface", Georgia, "Times New Roman", serif',
+  inter: '"Inter", "Segoe UI", Arial, sans-serif',
+  manrope: '"Manrope", "Segoe UI", Arial, sans-serif',
+  montserrat: '"Montserrat", "Segoe UI", Arial, sans-serif',
+  poppins: '"Poppins", "Segoe UI", Arial, sans-serif',
+  raleway: '"Raleway", "Segoe UI", Arial, sans-serif',
+  outfit: '"Outfit", "Segoe UI", Arial, sans-serif',
+  plus_jakarta: '"Plus Jakarta Sans", "Segoe UI", Arial, sans-serif',
+  urbanist: '"Urbanist", "Segoe UI", Arial, sans-serif',
+  space_grotesk: '"Space Grotesk", "Segoe UI", Arial, sans-serif',
+  work_sans: '"Work Sans", "Segoe UI", Arial, sans-serif',
+  nunito_sans: '"Nunito Sans", "Segoe UI", Arial, sans-serif',
+  roboto: '"Roboto", "Segoe UI", Arial, sans-serif',
+  quicksand: '"Quicksand", "Segoe UI", Arial, sans-serif',
+  josefin: '"Josefin Sans", "Segoe UI", Arial, sans-serif',
+  sora: '"Sora", "Segoe UI", Arial, sans-serif',
+  oswald: '"Oswald", "Segoe UI", Arial, sans-serif',
+  bebas: '"Bebas Neue", "Segoe UI", Arial, sans-serif',
+  anton: '"Anton", "Segoe UI", Arial, sans-serif',
+  barlow_condensed: '"Barlow Condensed", "Segoe UI", Arial, sans-serif',
+  archivo_black: '"Archivo Black", "Segoe UI", Arial, sans-serif',
+  league_spartan: '"League Spartan", "Segoe UI", Arial, sans-serif',
+  dancing_script: '"Dancing Script", "Segoe Script", cursive',
+  great_vibes: '"Great Vibes", "Segoe Script", cursive',
+  allura: '"Allura", "Segoe Script", cursive',
+  sacramento: '"Sacramento", "Segoe Script", cursive',
+  parisienne: '"Parisienne", "Segoe Script", cursive',
+  caveat: '"Caveat", "Segoe Script", cursive',
+  pacifico: '"Pacifico", "Segoe Script", cursive',
+  cairo: '"Cairo", Tahoma, Arial, sans-serif',
+  tajawal: '"Tajawal", Tahoma, Arial, sans-serif',
+  almarai: '"Almarai", Tahoma, Arial, sans-serif',
+  changa: '"Changa", Tahoma, Arial, sans-serif',
+  el_messiri: '"El Messiri", Tahoma, Arial, sans-serif',
+  amiri: '"Amiri", "Times New Roman", Tahoma, serif',
+  noto_kufi_ar: '"Noto Kufi Arabic", Tahoma, Arial, sans-serif',
+  noto_naskh_ar: '"Noto Naskh Arabic", "Times New Roman", Tahoma, serif',
+  ibm_plex_sans_ar: '"IBM Plex Sans Arabic", Tahoma, Arial, sans-serif',
+  reem_kufi: '"Reem Kufi", Tahoma, Arial, sans-serif',
+  aref_ruqaa: '"Aref Ruqaa", "Times New Roman", Tahoma, serif',
+  lateef: '"Lateef", "Times New Roman", Tahoma, serif',
+  scheherazade_new: '"Scheherazade New", "Times New Roman", Tahoma, serif',
+  markazi_text: '"Markazi Text", "Times New Roman", Tahoma, serif',
+  lemonada: '"Lemonada", Tahoma, Arial, sans-serif',
   segoe: '"Segoe UI", Tahoma, Arial, sans-serif',
   arial: 'Arial, "Segoe UI", Tahoma, sans-serif',
   verdana: 'Verdana, "Segoe UI", Tahoma, sans-serif',
   tahoma: 'Tahoma, "Segoe UI", Arial, sans-serif',
   trebuchet: '"Trebuchet MS", "Segoe UI", Tahoma, sans-serif',
-  georgia: 'Georgia, "Times New Roman", "Segoe UI", serif',
-  times: '"Times New Roman", Times, "Segoe UI", serif',
+  georgia: 'Georgia, "Times New Roman", serif',
+  times: '"Times New Roman", Times, serif',
   palatino: '"Palatino Linotype", Palatino, "Times New Roman", serif',
   garamond: 'Garamond, Georgia, "Times New Roman", serif',
-  courier: '"Courier New", Courier, "Segoe UI", monospace',
+  courier: '"Courier New", Courier, monospace',
   impact: 'Impact, Haettenschweiler, "Arial Narrow Bold", sans-serif',
 };
+
+const storefrontTypographyFontKeys: StorefrontTypographyFontKey[] = [
+  "theme",
+  "playfair",
+  "cormorant",
+  "dm_serif",
+  "bodoni_moda",
+  "prata",
+  "cinzel",
+  "marcellus",
+  "libre_baskerville",
+  "lora",
+  "eb_garamond",
+  "fraunces",
+  "spectral",
+  "crimson_pro",
+  "yeseva",
+  "abril",
+  "inter",
+  "manrope",
+  "montserrat",
+  "poppins",
+  "raleway",
+  "outfit",
+  "plus_jakarta",
+  "urbanist",
+  "space_grotesk",
+  "work_sans",
+  "nunito_sans",
+  "roboto",
+  "quicksand",
+  "josefin",
+  "sora",
+  "oswald",
+  "bebas",
+  "anton",
+  "barlow_condensed",
+  "archivo_black",
+  "league_spartan",
+  "dancing_script",
+  "great_vibes",
+  "allura",
+  "sacramento",
+  "parisienne",
+  "caveat",
+  "pacifico",
+  "cairo",
+  "tajawal",
+  "almarai",
+  "changa",
+  "el_messiri",
+  "amiri",
+  "noto_kufi_ar",
+  "noto_naskh_ar",
+  "ibm_plex_sans_ar",
+  "reem_kufi",
+  "aref_ruqaa",
+  "lateef",
+  "scheherazade_new",
+  "markazi_text",
+  "lemonada",
+  "segoe",
+  "arial",
+  "verdana",
+  "tahoma",
+  "trebuchet",
+  "georgia",
+  "times",
+  "palatino",
+  "garamond",
+  "courier",
+  "impact"
+];
+
+const DARIK_TYPOGRAPHY_FONT_STYLESHEET_105_V5 =
+  'https://fonts.googleapis.com/css2?family=Playfair+Display&family=Cormorant+Garamond&family=DM+Serif+Display&family=Bodoni+Moda&family=Prata&family=Cinzel&family=Marcellus&family=Libre+Baskerville&family=Lora&family=EB+Garamond&family=Fraunces&family=Spectral&family=Crimson+Pro&family=Yeseva+One&family=Abril+Fatface&family=Inter&family=Manrope&family=Montserrat&family=Poppins&family=Raleway&family=Outfit&family=Plus+Jakarta+Sans&family=Urbanist&family=Space+Grotesk&family=Work+Sans&family=Nunito+Sans&family=Roboto&family=Quicksand&family=Josefin+Sans&family=Sora&family=Oswald&family=Bebas+Neue&family=Anton&family=Barlow+Condensed&family=Archivo+Black&family=League+Spartan&family=Dancing+Script&family=Great+Vibes&family=Allura&family=Sacramento&family=Parisienne&family=Caveat&family=Pacifico&family=Cairo&family=Tajawal&family=Almarai&family=Changa&family=El+Messiri&family=Amiri&family=Noto+Kufi+Arabic&family=Noto+Naskh+Arabic&family=IBM+Plex+Sans+Arabic&family=Reem+Kufi&family=Aref+Ruqaa&family=Lateef&family=Scheherazade+New&family=Markazi+Text&family=Lemonada&display=swap';
+
+function useDarikTypographyFontLibrary105V5() {
+  useEffect(() => {
+    const linkId = "darik-typography-font-library-105-v5";
+    if (document.getElementById(linkId)) return;
+
+    const link = document.createElement("link");
+    link.id = linkId;
+    link.rel = "stylesheet";
+    link.href = DARIK_TYPOGRAPHY_FONT_STYLESHEET_105_V5;
+    document.head.appendChild(link);
+  }, []);
+}
 
 function storefrontTypographyDefaultState(): StorefrontTypographyState {
   return {
@@ -677,20 +883,8 @@ function storefrontTypographyDefaultState(): StorefrontTypographyState {
 function isStorefrontTypographyFontKey(
   value: unknown
 ): value is StorefrontTypographyFontKey {
-  return [
-    "theme",
-    "segoe",
-    "arial",
-    "verdana",
-    "tahoma",
-    "trebuchet",
-    "georgia",
-    "times",
-    "palatino",
-    "garamond",
-    "courier",
-    "impact",
-  ].includes(String(value || ""));
+  const candidate = String(value || "");
+  return storefrontTypographyFontKeys.some((fontKey) => fontKey === candidate);
 }
 
 function normalizeStorefrontTypography(
@@ -745,6 +939,7 @@ function storefrontTypographyInlineStyle(
 }
 
 export default function DarikDirectStorefrontPage() {
+  useDarikTypographyFontLibrary105V5();
   const params = useParams<{ slug: string | string[] }>();
   const slug = normalizeParam(params?.slug);
   const [previewRetailField, setPreviewRetailField] = useState("");
