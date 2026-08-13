@@ -977,6 +977,202 @@ function storefrontTypographyInlineStyle(
   return style;
 }
 
+// DARIK_REAL_BUSINESS_HOURS_NEXT_DAY_DELIVERY_115
+type DarikStoreHoursPhase115 =
+  | "unknown"
+  | "open"
+  | "before_open"
+  | "after_close"
+  | "closed_day";
+
+type DarikStoreHoursState115 = {
+  hasHours: boolean;
+  isOpen: boolean;
+  phase: DarikStoreHoursPhase115;
+  openLabel: string;
+};
+
+function darikParseStoreTime115(value: string) {
+  const match = value
+    .trim()
+    .match(/^(\d{1,2})(?::(\d{2}))?\s*(A\.?M\.?|P\.?M\.?)$/i);
+
+  if (!match) return null;
+
+  let hour = Number(match[1]);
+  const minute = Number(match[2] ?? "0");
+  const meridiem = match[3].replace(/\./g, "").toUpperCase();
+
+  if (
+    !Number.isInteger(hour) ||
+    !Number.isInteger(minute) ||
+    hour < 1 ||
+    hour > 12 ||
+    minute < 0 ||
+    minute > 59
+  ) {
+    return null;
+  }
+
+  if (hour === 12) hour = 0;
+  if (meridiem === "PM") hour += 12;
+
+  return hour * 60 + minute;
+}
+
+function darikStoreHoursState115(
+  operatingHoursValue: unknown,
+  timestamp: number
+): DarikStoreHoursState115 {
+  if (!timestamp) {
+    return {
+      hasHours: false,
+      isOpen: false,
+      phase: "unknown",
+      openLabel: "",
+    };
+  }
+
+  let operatingHours = operatingHoursValue;
+
+  if (typeof operatingHoursValue === "string") {
+    try {
+      operatingHours = JSON.parse(operatingHoursValue);
+    } catch {
+      operatingHours = null;
+    }
+  }
+
+  if (
+    !operatingHours ||
+    typeof operatingHours !== "object" ||
+    Array.isArray(operatingHours)
+  ) {
+    return {
+      hasHours: false,
+      isOpen: false,
+      phase: "unknown",
+      openLabel: "",
+    };
+  }
+
+  const parts = new Intl.DateTimeFormat("en-US", {
+    timeZone: "Asia/Amman",
+    weekday: "long",
+    hour: "2-digit",
+    minute: "2-digit",
+    hourCycle: "h23",
+  }).formatToParts(new Date(timestamp));
+
+  const weekday = String(
+    parts.find((part) => part.type === "weekday")?.value ?? ""
+  )
+    .trim()
+    .toLowerCase();
+
+  const hour = Number(
+    parts.find((part) => part.type === "hour")?.value ?? "0"
+  );
+  const minute = Number(
+    parts.find((part) => part.type === "minute")?.value ?? "0"
+  );
+
+  const rows = operatingHours as Record<string, unknown>;
+  const matchingEntry = Object.entries(rows).find(
+    ([key]) => key.trim().toLowerCase() === weekday
+  );
+  const raw = String(matchingEntry?.[1] ?? "").trim();
+
+  if (!raw) {
+    return {
+      hasHours: false,
+      isOpen: false,
+      phase: "unknown",
+      openLabel: "",
+    };
+  }
+
+  if (
+    raw.toLowerCase() === "closed" ||
+    raw.includes("مغلق")
+  ) {
+    return {
+      hasHours: true,
+      isOpen: false,
+      phase: "closed_day",
+      openLabel: "",
+    };
+  }
+
+  const timeMatches = Array.from(
+    raw.matchAll(
+      /(\d{1,2}(?::\d{2})?\s*(?:A\.?M\.?|P\.?M\.?))/gi
+    )
+  ).map((match) => match[1].trim());
+
+  if (timeMatches.length < 2) {
+    return {
+      hasHours: false,
+      isOpen: false,
+      phase: "unknown",
+      openLabel: "",
+    };
+  }
+
+  const openMinutes = darikParseStoreTime115(timeMatches[0]);
+  const closeMinutes = darikParseStoreTime115(timeMatches[1]);
+
+  if (openMinutes === null || closeMinutes === null) {
+    return {
+      hasHours: false,
+      isOpen: false,
+      phase: "unknown",
+      openLabel: "",
+    };
+  }
+
+  const nowMinutes = hour * 60 + minute;
+
+  // Same-day hours, e.g. 9:30 AM - 6:00 PM.
+  if (closeMinutes > openMinutes) {
+    if (nowMinutes < openMinutes) {
+      return {
+        hasHours: true,
+        isOpen: false,
+        phase: "before_open",
+        openLabel: timeMatches[0],
+      };
+    }
+
+    if (nowMinutes >= closeMinutes) {
+      return {
+        hasHours: true,
+        isOpen: false,
+        phase: "after_close",
+        openLabel: timeMatches[0],
+      };
+    }
+
+    return {
+      hasHours: true,
+      isOpen: true,
+      phase: "open",
+      openLabel: timeMatches[0],
+    };
+  }
+
+  // Overnight hours, e.g. 8:00 PM - 2:00 AM.
+  const overnightOpen =
+    nowMinutes >= openMinutes || nowMinutes < closeMinutes;
+
+  return {
+    hasHours: true,
+    isOpen: overnightOpen,
+    phase: overnightOpen ? "open" : "before_open",
+    openLabel: timeMatches[0],
+  };
+}
+
 export default function DarikDirectStorefrontPage() {
   useDarikTypographyFontLibrary105V5();
   const params = useParams<{ slug: string | string[] }>();
@@ -2150,6 +2346,36 @@ export default function DarikDirectStorefrontPage() {
     (orderSubmissionMode === "online" || orderSubmissionMode === "both") &&
     onlinePaymentAvailable;
   const effectiveAcceptingOrders = showOrdering && storefront.is_accepting_orders;
+  const [storeClock115, setStoreClock115] = useState(0);
+
+  useEffect(() => {
+    const updateStoreClock115 = () => {
+      setStoreClock115(Date.now());
+    };
+
+    updateStoreClock115();
+
+    const timer = window.setInterval(
+      updateStoreClock115,
+      30_000
+    );
+
+    return () => window.clearInterval(timer);
+  }, []);
+
+  const storeHoursState115 = darikStoreHoursState115(
+    (
+      storefront as unknown as {
+        operating_hours?: unknown;
+      }
+    ).operating_hours,
+    storeClock115
+  );
+
+  const storeIsOpenNow115 =
+    !storeClock115 || !storeHoursState115.hasHours
+      ? effectiveAcceptingOrders
+      : storeHoursState115.isOpen;
 
   const selectedCategory = visibleCategories.find(
     (category) => category.id === selectedCategoryId
@@ -2422,7 +2648,7 @@ export default function DarikDirectStorefrontPage() {
       ) : null}
       <div className={styles.announcementBar}>
         <span>
-          <i className={effectiveAcceptingOrders ? styles.liveDot : styles.pausedDot} />
+          <i className={effectiveAcceptingOrders && storeIsOpenNow115 ? styles.liveDot : styles.pausedDot} />
           {!showOrdering
             ? "Catalog open / \u0627\u0644\u0643\u062a\u0627\u0644\u0648\u062c \u0645\u062a\u0627\u062d"
             : effectiveAcceptingOrders
@@ -2493,9 +2719,15 @@ export default function DarikDirectStorefrontPage() {
           {isAutoParts || isGroceryStore ? (
             <div className={styles.heroExperienceRail}>
               <span className={styles.heroLiveStatus}>
-                <i className={effectiveAcceptingOrders ? styles.liveDot : styles.pausedDot} />
+                <i className={effectiveAcceptingOrders && storeIsOpenNow115 ? styles.liveDot : styles.pausedDot} />
                 {effectiveAcceptingOrders
-                  ? "Open now / \u0645\u0641\u062a\u0648\u062d \u0627\u0644\u0622\u0646"
+                  ? storeIsOpenNow115
+                    ? "Open now / مفتوح الآن"
+                    : storeHoursState115.phase === "before_open"
+                      ? `Opens today at ${storeHoursState115.openLabel} / يفتح اليوم الساعة ${storeHoursState115.openLabel}`
+                      : pickupOnly
+                        ? "Closed now / مغلق الآن"
+                        : "Next-day delivery / توصيل في اليوم التالي"
                   : isAutoParts
                     ? "Browse catalog / \u062a\u0635\u0641\u062d \u0627\u0644\u0643\u062a\u0627\u0644\u0648\u062c"
                     : "Fresh groceries / \u0645\u0646\u062a\u062c\u0627\u062a \u0637\u0627\u0632\u062c\u0629"}
@@ -2604,7 +2836,7 @@ style={storefrontTypographyInlineStyle(
         <aside className={styles.orderSnapshot}>
           <div className={styles.snapshotStatus}>
             <span>
-              <i className={effectiveAcceptingOrders ? styles.liveDot : styles.pausedDot} />
+              <i className={effectiveAcceptingOrders && storeIsOpenNow115 ? styles.liveDot : styles.pausedDot} />
               {showOrdering ? "Order status" : "Website mode"}
             </span>
             <strong>
