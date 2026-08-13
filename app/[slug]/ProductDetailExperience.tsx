@@ -401,6 +401,63 @@ export default function ProductDetailExperience({
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
   const [videoUrl, setVideoUrl] = useState("");
   const [shareState, setShareState] = useState("");
+  // DARIK_STICKY_PICKUP_AND_ADD_TO_BAG_FEEDBACK_119
+  const [addedQuantity119, setAddedQuantity119] =
+    useState<number | null>(null);
+  const addFeedbackTimer119 =
+    useRef<number | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (addFeedbackTimer119.current !== null) {
+        window.clearTimeout(
+          addFeedbackTimer119.current
+        );
+      }
+    };
+  }, []);
+
+  useEffect(() => {
+    /*
+      Switching products should never show the previous item's confirmation.
+    */
+    setAddedQuantity119(null);
+
+    if (addFeedbackTimer119.current !== null) {
+      window.clearTimeout(
+        addFeedbackTimer119.current
+      );
+      addFeedbackTimer119.current = null;
+    }
+  }, [product?.id]);
+
+  function handleAddToCart119() {
+    /*
+      The short lock is deliberate: mobile taps can easily fire repeatedly
+      when there is no visible response. One tap = one unit.
+    */
+    if (addedQuantity119 !== null) {
+      return;
+    }
+
+    const nextQuantity =
+      Math.max(0, Number(inCart) || 0) + 1;
+
+    onAddToCart();
+    setAddedQuantity119(nextQuantity);
+
+    if (addFeedbackTimer119.current !== null) {
+      window.clearTimeout(
+        addFeedbackTimer119.current
+      );
+    }
+
+    addFeedbackTimer119.current =
+      window.setTimeout(() => {
+        setAddedQuantity119(null);
+        addFeedbackTimer119.current = null;
+      }, 1100);
+  }
 
   useEffect(() => {
     if (!open) return;
@@ -845,17 +902,56 @@ export default function ProductDetailExperience({
               ) : showOrdering ? (
                 <div className={styles.purchaseRow}>
                   <div className={styles.purchaseMeta}>
-                    {inCart > 0 ? <strong>{inCart} in your bag</strong> : <strong>Ready when you are</strong>}
+                    {addedQuantity119 !== null ? (
+                      <strong className={styles.addedMeta119}>
+                        ✓ Added • {addedQuantity119} in your bag
+                      </strong>
+                    ) : inCart > 0 ? (
+                      <strong>{inCart} in your bag</strong>
+                    ) : (
+                      <strong>Ready when you are</strong>
+                    )}
                     <small>{acceptingOrders ? "Store is accepting orders" : "Ordering is paused"}</small>
                   </div>
                   <button
                     type="button"
-                    className={styles.primaryAction}
-                    onClick={onAddToCart}
-                    disabled={!acceptingOrders || !available}
+                    className={`${styles.primaryAction} ${
+                      addedQuantity119 !== null
+                        ? styles.addedToBag119
+                        : ""
+                    }`}
+                    onClick={handleAddToCart119}
+                    disabled={
+                      !acceptingOrders ||
+                      !available ||
+                      addedQuantity119 !== null
+                    }
+                    aria-live="polite"
                   >
-                    <BagIcon />
-                    <span>{available ? "Add to bag" : "Out of stock"}</span>
+                    {addedQuantity119 !== null ? (
+                      <>
+                        <span
+                          className={
+                            styles.addedCheck119
+                          }
+                          aria-hidden="true"
+                        >
+                          ✓
+                        </span>
+                        <span>
+                          Added to bag • {addedQuantity119}
+                        </span>
+                      </>
+                    ) : (
+                      <>
+                        <BagIcon />
+                        <span>
+                          {available
+                            ? "Add to bag"
+                            : "Out of stock"}
+                        </span>
+                      </>
+                    )}
                   </button>
                 </div>
               ) : (

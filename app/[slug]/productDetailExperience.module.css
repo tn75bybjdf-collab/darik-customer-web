@@ -3673,3 +3673,39 @@
     transform: rotate(360deg);
   }
 }
+
+/* DARIK_STICKY_PICKUP_AND_ADD_TO_BAG_FEEDBACK_119 */
+.addedToBag119,
+.addedToBag119:disabled {
+  opacity: 1;
+  color: #ffffff;
+  background: #16814d;
+  box-shadow: 0 10px 24px rgba(22, 129, 77, 0.24);
+  cursor: default;
+  transform: none;
+}
+
+.addedCheck119 {
+  display: inline-grid;
+  width: 20px;
+  height: 20px;
+  place-items: center;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.18);
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 1000;
+  line-height: 1;
+}
+
+.addedMeta119 {
+  color: #16814d !important;
+}
+
+@media (max-width: 600px) {
+  .addedToBag119,
+  .addedToBag119:disabled {
+    min-height: 50px;
+    font-size: 13px;
+  }
+}

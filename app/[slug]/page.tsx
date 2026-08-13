@@ -2344,24 +2344,46 @@ export default function DarikDirectStorefrontPage() {
   const [pickupBrowse118, setPickupBrowse118] =
     useState(false);
 
+  // DARIK_STICKY_PICKUP_AND_ADD_TO_BAG_FEEDBACK_119
   useEffect(() => {
-    if (
-      !pickupBrowse118 ||
-      checkoutForm.fulfillmentMethod !== "delivery"
-    ) {
+    if (!pickupBrowse118) {
       return;
     }
 
-    setPickupBrowse118(false);
-    setCustomerLocation117(null);
-    setDeliveryMatch117(null);
-    setLocationGateError117("");
-    setLocationPredictions117([]);
-    setLocationSearch117("");
-    setLocationGateOpen117(true);
+    /*
+      Pickup browsing is an explicit customer choice for this store visit.
+      Product-detail/cart code must not silently flip them back to delivery.
+      Only switchPickupBrowseToDelivery118() is allowed to leave pickup mode.
+    */
+    setLocationGateOpen117(false);
+
+    if (
+      checkoutForm.fulfillmentMethod !== "pickup" ||
+      checkoutForm.latitude !== null ||
+      checkoutForm.longitude !== null
+    ) {
+      setCheckoutForm((current) => {
+        if (
+          current.fulfillmentMethod === "pickup" &&
+          current.latitude === null &&
+          current.longitude === null
+        ) {
+          return current;
+        }
+
+        return {
+          ...current,
+          fulfillmentMethod: "pickup",
+          latitude: null,
+          longitude: null,
+        };
+      });
+    }
   }, [
     pickupBrowse118,
     checkoutForm.fulfillmentMethod,
+    checkoutForm.latitude,
+    checkoutForm.longitude,
   ]);
 
   function browseStoreForPickup118() {
