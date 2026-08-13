@@ -2271,6 +2271,10 @@ export default function DarikDirectStorefrontSettingsPage() {
                     )}
                   </div>
                 </section>
+                  <div
+                    className={designStyles.liveBuilderPreviewSpacer}
+                    aria-hidden="true"
+                  />
                   <div className={designStyles.liveBuilderEditorPane}>
 
                 <div className={styles.formSection}>

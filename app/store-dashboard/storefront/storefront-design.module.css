@@ -1293,3 +1293,91 @@
     width: 100%;
   }
 }
+
+/* DARIK_FIXED_FULL_WIDTH_LIVE_PREVIEW_104
+   The builder preview owns the top half of the browser viewport.
+   The editor scrolls normally below it.
+*/
+
+.liveBuilderPreviewShell {
+  position: fixed;
+  top: 0;
+  right: 0;
+  left: 0;
+  z-index: 1000;
+  width: 100vw;
+  height: 50vh;
+  height: 50dvh;
+  min-width: 100vw;
+  min-height: 0;
+  max-width: none;
+  max-height: none;
+  margin: 0;
+  border-width: 0 0 1px;
+  border-radius: 0 0 24px 24px;
+  box-shadow:
+    0 22px 52px rgba(15, 23, 42, 0.24),
+    0 3px 10px rgba(15, 23, 42, 0.12);
+  overscroll-behavior: contain;
+}
+
+.liveBuilderPreviewBar {
+  width: 100%;
+  border-radius: 0;
+}
+
+.liveBuilderPreviewViewport {
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+}
+
+.liveBuilderPreviewViewport iframe {
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+}
+
+.liveBuilderPreviewSpacer {
+  display: block;
+  width: 100%;
+  height: calc(50vh + 20px);
+  height: calc(50dvh + 20px);
+  pointer-events: none;
+}
+
+@media (max-width: 900px) {
+  .liveBuilderPreviewShell {
+    top: 0;
+    width: 100vw;
+    height: 50vh;
+    height: 50dvh;
+    min-height: 0;
+    max-height: none;
+    margin: 0;
+    border-radius: 0 0 20px 20px;
+  }
+
+  .liveBuilderPreviewSpacer {
+    height: calc(50vh + 14px);
+    height: calc(50dvh + 14px);
+  }
+}
+
+@media (max-width: 600px) {
+  .liveBuilderPreviewShell {
+    top: 0;
+    width: 100vw;
+    height: 50vh;
+    height: 50dvh;
+    min-height: 0;
+    max-height: none;
+    margin: 0;
+    border-radius: 0 0 17px 17px;
+  }
+
+  .liveBuilderPreviewSpacer {
+    height: calc(50vh + 10px);
+    height: calc(50dvh + 10px);
+  }
+}
