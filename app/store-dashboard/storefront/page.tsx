@@ -1123,6 +1123,9 @@ export default function DarikDirectStorefrontSettingsPage() {
   const liveBuilderPreviewRef = useRef<HTMLIFrameElement | null>(null);
   // DARIK_PREVIEW_CONTROLS_CLEANUP_107
   const [liveBuilderPreviewOpen, setLiveBuilderPreviewOpen] = useState(true);
+  // DARIK_DASHBOARD_FULLSCREEN_PREVIEW_STEP_SCROLL_FIX_111
+  const [liveBuilderPreviewExpanded111, setLiveBuilderPreviewExpanded111] = useState(false);
+  const storefrontSetupLastVisibleStep111 = useRef<number>(0);
   // DARIK_INDEPENDENT_STOREFRONT_TYPOGRAPHY_105
   const [storefrontTypographyDraft, setStorefrontTypographyDraft] =
     useState<StorefrontTypographyState>(() => storefrontTypographyDefaultState());
@@ -1401,6 +1404,88 @@ export default function DarikDirectStorefrontSettingsPage() {
       : storefrontSetupMode109 === "wizard"
         ? storefrontSetupStep109
         : 0;
+
+
+  useEffect(() => {
+    if (!liveBuilderPreviewExpanded111) return;
+
+    const previousHtmlOverflow = document.documentElement.style.overflow;
+    const previousBodyOverflow = document.body.style.overflow;
+
+    document.documentElement.style.overflow = "hidden";
+    document.body.style.overflow = "hidden";
+
+    const handlePreviewEscape111 = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setLiveBuilderPreviewExpanded111(false);
+      }
+    };
+
+    window.addEventListener("keydown", handlePreviewEscape111);
+
+    return () => {
+      window.removeEventListener("keydown", handlePreviewEscape111);
+      document.documentElement.style.overflow = previousHtmlOverflow;
+      document.body.style.overflow = previousBodyOverflow;
+    };
+  }, [liveBuilderPreviewExpanded111]);
+
+  useEffect(() => {
+    const step = storefrontSetupVisibleStep109;
+
+    if (!step) return;
+
+    const previousStep = storefrontSetupLastVisibleStep111.current;
+
+    /*
+      Do not move the page on the first render. After that, every actual
+      wizard/tab change is aligned immediately below the fixed preview.
+    */
+    if (previousStep === 0) {
+      storefrontSetupLastVisibleStep111.current = step;
+      return;
+    }
+
+    if (previousStep === step) return;
+
+    storefrontSetupLastVisibleStep111.current = step;
+
+    let secondFrame = 0;
+
+    const firstFrame = window.requestAnimationFrame(() => {
+      secondFrame = window.requestAnimationFrame(() => {
+        const panel = document.querySelector<HTMLElement>(
+          `[data-darik-exact-step="${step}"]`
+        );
+
+        if (!panel) return;
+
+        const fixedPreviewOffset =
+          liveBuilderPreviewOpen && !liveBuilderPreviewExpanded111
+            ? Math.round(window.innerHeight * 0.5)
+            : 0;
+
+        const panelTop =
+          window.scrollY + panel.getBoundingClientRect().top;
+
+        window.scrollTo({
+          top: Math.max(0, panelTop - fixedPreviewOffset - 14),
+          behavior: "auto",
+        });
+      });
+    });
+
+    return () => {
+      window.cancelAnimationFrame(firstFrame);
+      if (secondFrame) {
+        window.cancelAnimationFrame(secondFrame);
+      }
+    };
+  }, [
+    storefrontSetupVisibleStep109,
+    liveBuilderPreviewOpen,
+    liveBuilderPreviewExpanded111,
+  ]);
 
   useEffect(() => {
     if (!storefront?.id) {
@@ -3482,6 +3567,10 @@ export default function DarikDirectStorefrontSettingsPage() {
                       ? designStyles.liveBuilderPreviewShellClosed107
                       : ""
                   }`}
+
+                  data-darik-preview-expanded={
+                    liveBuilderPreviewExpanded111 ? "true" : "false"
+                  }
                 >
                   <div className={designStyles.liveBuilderPreviewBar}>
                     <div className={designStyles.liveBuilderPreviewIdentity}>
@@ -3501,22 +3590,24 @@ export default function DarikDirectStorefrontSettingsPage() {
                       >
                         Change theme / تغيير القالب
                       </button>
-                      <button
+                                            <button
                         type="button"
-                        onClick={() => {
-                          const frame = liveBuilderPreviewRef.current;
-                          if (frame?.requestFullscreen) {
-                            void frame.requestFullscreen();
-                          }
-                        }}
+                        onClick={() =>
+                          setLiveBuilderPreviewExpanded111((current) => !current)
+                        }
                         disabled={!storefront}
                       >
-                        Full screen / ملء الشاشة
+                        {liveBuilderPreviewExpanded111
+                          ? "Half screen / نصف الشاشة"
+                          : "Full screen / ملء الشاشة"}
                       </button>
                       <button
                         type="button"
                         className={designStyles.liveBuilderClosePreview107}
-                        onClick={() => setLiveBuilderPreviewOpen(false)}
+                        onClick={() => {
+                          setLiveBuilderPreviewExpanded111(false);
+                          setLiveBuilderPreviewOpen(false);
+                        }}
                       >
                         Close preview / إغلاق المعاينة
                       </button>

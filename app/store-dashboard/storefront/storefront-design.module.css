@@ -2732,3 +2732,67 @@
 .exactWizardPayments109V5>label,.exactWizardFeatures109V5>label{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:84px;padding:13px;border:1px solid rgba(15,23,42,.08);border-radius:15px;background:#fff}.exactWizardPayments109V5>label>span,.exactWizardFeatures109V5>label>span{display:grid;gap:2px}.exactWizardPayments109V5 strong,.exactWizardFeatures109V5 strong{color:#172535;font-size:.78rem}.exactWizardFeatures109V5 b{color:#536b7d;font-size:.67rem}.exactWizardPayments109V5 small,.exactWizardFeatures109V5 small{color:#74889a;font-size:.63rem;line-height:1.4}.exactWizardPayments109V5 input,.exactWizardFeatures109V5 input{width:21px;height:21px}
 @media(max-width:800px){.exactWizardPanel109V5{padding:15px 11px;border-radius:18px}.exactWizardTheme109V5,.exactWizardGlobalFont109V5,.exactWizardAssetGrid109V5,.exactWizardGrid109V5,.exactWizardAbout109V5,.exactWizardFontGrid109V5,.exactWizardPayments109V5,.exactWizardFeatures109V5,.exactWizardOrderModes109V5{grid-template-columns:1fr}.exactWizardAssetCard109V5{grid-template-columns:1fr}.exactWizardHeadingRow109V5,.exactWizardZonesHead109V5{flex-direction:column}.exactWizardHeadingRow109V5>button,.exactWizardZonesHead109V5>button{width:100%}.exactWizardFontCard109V5{grid-template-columns:1fr 1fr}.exactWizardFontCard109V5>div,.exactWizardFontCard109V5>button{grid-column:1/-1}.exactWizardHours109V5>article{grid-template-columns:1fr 1fr}.exactWizardHours109V5>article>strong{grid-column:1/-1}.exactWizardRows109V5>article{grid-template-columns:1fr}.exactWizardZoneList109V5>article{grid-template-columns:1fr 1fr}.exactWizardZoneNumber109V5{grid-column:1/-1;min-height:54px}.exactWizardZoneList109V5>article>label:nth-of-type(3),.exactWizardZoneList109V5>article>button{grid-column:1/-1}}
 @media(max-width:440px){.exactWizardFontCard109V5,.exactWizardHours109V5>article,.exactWizardZoneList109V5>article{grid-template-columns:1fr}.exactWizardFontCard109V5>div,.exactWizardFontCard109V5>button,.exactWizardHours109V5>article>strong,.exactWizardZoneNumber109V5,.exactWizardZoneList109V5>article>label:nth-of-type(3),.exactWizardZoneList109V5>article>button{grid-column:auto}.exactWizardSlug109V5{grid-template-columns:1fr}.exactWizardSlug109V5 b{min-height:38px}}
+
+/* DARIK_DASHBOARD_FULLSCREEN_PREVIEW_STEP_SCROLL_FIX_111
+   Full screen remains INSIDE the Darik dashboard.
+   Parent preview controls remain active at all times.
+*/
+
+.liveBuilderPreviewShell[data-darik-preview-expanded="true"] {
+  position: fixed !important;
+  inset: 0 !important;
+  z-index: 2400 !important;
+  display: flex !important;
+  width: 100vw !important;
+  min-width: 100vw !important;
+  max-width: none !important;
+  height: 100vh !important;
+  height: 100dvh !important;
+  min-height: 100vh !important;
+  min-height: 100dvh !important;
+  max-height: none !important;
+  flex-direction: column !important;
+  margin: 0 !important;
+  overflow: hidden !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+}
+
+.liveBuilderPreviewShell[data-darik-preview-expanded="true"] .liveBuilderPreviewBar {
+  position: relative;
+  z-index: 2;
+  flex: 0 0 auto;
+  width: 100%;
+  border-radius: 0;
+}
+
+.liveBuilderPreviewShell[data-darik-preview-expanded="true"] .liveBuilderPreviewViewport {
+  flex: 1 1 auto !important;
+  width: 100% !important;
+  height: auto !important;
+  min-height: 0 !important;
+  overflow: hidden !important;
+}
+
+.liveBuilderPreviewShell[data-darik-preview-expanded="true"] .liveBuilderPreviewViewport iframe {
+  display: block;
+  width: 100% !important;
+  height: 100% !important;
+  min-height: 0 !important;
+}
+
+.liveBuilderPreviewShell[data-darik-preview-expanded="true"] .liveBuilderPreviewActions {
+  position: relative;
+  z-index: 3;
+}
+
+@media (max-width: 700px) {
+  .liveBuilderPreviewShell[data-darik-preview-expanded="true"] {
+    height: 100vh !important;
+    height: 100dvh !important;
+    min-height: 100vh !important;
+    min-height: 100dvh !important;
+    border-radius: 0 !important;
+  }
+}
