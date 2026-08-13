@@ -525,3 +525,365 @@
     flex-direction: column;
   }
 }
+
+/* DARIK_RETAILER_THEME_GALLERY_102 */
+
+.themeGalleryIntro {
+  display: grid;
+  gap: 14px;
+  margin-bottom: 18px;
+  padding: 22px;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  border-radius: 24px;
+  background:
+    radial-gradient(circle at 92% 8%, rgba(99, 200, 255, 0.16), transparent 15rem),
+    linear-gradient(145deg, #ffffff 0%, #f7fbff 58%, #f2f7fb 100%);
+  box-shadow: 0 18px 42px rgba(15, 23, 42, 0.06);
+}
+
+.themeGalleryHeading {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.themeGalleryHeading > div {
+  min-width: 0;
+}
+
+.themeGalleryHeading > div > span {
+  display: block;
+  margin-bottom: 3px;
+  color: #527087;
+  font-size: 0.74rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.themeGalleryHeading h3 {
+  margin: 0;
+  color: #101923;
+  font-size: clamp(1.45rem, 2.4vw, 2rem);
+  line-height: 1.02;
+  letter-spacing: -0.035em;
+}
+
+.themeStepBadge {
+  flex: 0 0 auto;
+  display: inline-flex;
+  min-height: 40px;
+  align-items: center;
+  justify-content: center;
+  padding: 0 14px;
+  border-radius: 999px;
+  background: #101923;
+  color: #ffffff;
+  font-size: 0.72rem;
+  font-weight: 950;
+  letter-spacing: 0.1em;
+}
+
+.themeGalleryLead {
+  max-width: 820px;
+  margin: 0;
+  color: #607589;
+  font-size: 0.94rem;
+  line-height: 1.6;
+}
+
+.themeGalleryLead strong {
+  color: #172535;
+}
+
+.themeGalleryGrid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.themeCard {
+  display: grid;
+  gap: 12px;
+  min-width: 0;
+  padding: 11px;
+  overflow: hidden;
+  border: 1px solid rgba(15, 23, 42, 0.09);
+  border-radius: 20px;
+  background: #ffffff;
+  color: #17202b;
+  text-align: left;
+  box-shadow: 0 10px 26px rgba(15, 23, 42, 0.045);
+  cursor: pointer;
+  transition:
+    transform 160ms ease,
+    box-shadow 160ms ease,
+    border-color 160ms ease;
+}
+
+.themeCard:hover:not(:disabled) {
+  transform: translateY(-2px);
+  border-color: rgba(37, 99, 235, 0.22);
+  box-shadow: 0 18px 34px rgba(15, 23, 42, 0.09);
+}
+
+.themeCard:disabled {
+  cursor: wait;
+}
+
+.themeCardSelected {
+  border-color: #63c8ff;
+  box-shadow:
+    0 0 0 3px rgba(99, 200, 255, 0.14),
+    0 18px 36px rgba(15, 23, 42, 0.09);
+}
+
+.themeMiniBrowser {
+  height: 112px;
+  overflow: hidden;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  border-radius: 14px;
+}
+
+.themeMiniTopbar {
+  display: flex;
+  height: 22px;
+  align-items: center;
+  gap: 5px;
+  padding: 0 7px;
+  background: rgba(255, 255, 255, 0.86);
+}
+
+.themeMiniTopbar i {
+  width: 7px;
+  height: 7px;
+  border-radius: 999px;
+}
+
+.themeMiniTopbar span {
+  display: block;
+  width: 28px;
+  height: 4px;
+  border-radius: 999px;
+  opacity: 0.62;
+}
+
+.themeMiniTopbar span:last-child {
+  width: 17px;
+  margin-left: auto;
+}
+
+.themeMiniHero {
+  display: grid;
+  align-content: end;
+  gap: 5px;
+  height: 55px;
+  padding: 9px;
+}
+
+.themeMiniHero span,
+.themeMiniHero strong {
+  display: block;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.78);
+}
+
+.themeMiniHero span {
+  width: 38px;
+  height: 4px;
+}
+
+.themeMiniHero strong {
+  width: 72px;
+  height: 7px;
+}
+
+.themeMiniCatalog {
+  display: flex;
+  gap: 6px;
+  padding: 7px 8px;
+}
+
+.themeMiniCatalog i {
+  width: 22px;
+  height: 22px;
+  border: 2px solid;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.82);
+}
+
+.themeCardTop {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.themeCardTop > div {
+  min-width: 0;
+}
+
+.themeCardName {
+  display: block;
+  margin-bottom: 3px;
+  color: #101923;
+  font-size: 0.98rem;
+  font-weight: 950;
+  letter-spacing: -0.02em;
+}
+
+.themeCardVibe {
+  display: block;
+  overflow: hidden;
+  color: #778796;
+  font-size: 0.68rem;
+  font-weight: 750;
+  line-height: 1.35;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.themeSelectedPill {
+  flex: 0 0 auto;
+  padding: 5px 7px;
+  border-radius: 999px;
+  background: #eaf8ff;
+  color: #0b6b99;
+  font-size: 0.62rem;
+  font-weight: 950;
+}
+
+.themeSwatches {
+  display: flex;
+  gap: 6px;
+}
+
+.themeSwatches i {
+  display: block;
+  width: 24px;
+  height: 7px;
+  border: 1px solid rgba(15, 23, 42, 0.06);
+  border-radius: 999px;
+}
+
+.themeGalleryFooter {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  margin-top: 18px;
+  padding: 16px 18px;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  border-radius: 18px;
+  background: #f8fbfd;
+}
+
+.themeGalleryFooter > div {
+  display: grid;
+  gap: 3px;
+}
+
+.themeGalleryFooter strong {
+  color: #172535;
+  font-size: 0.86rem;
+}
+
+.themeGalleryFooter span {
+  max-width: 700px;
+  color: #738596;
+  font-size: 0.74rem;
+  line-height: 1.45;
+}
+
+.themePreviewButton {
+  flex: 0 0 auto;
+  min-height: 44px;
+  padding: 0 15px;
+  border: 0;
+  border-radius: 13px;
+  background: #101923;
+  color: #ffffff;
+  font-size: 0.78rem;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.themePreviewButton:disabled {
+  opacity: 0.42;
+  cursor: not-allowed;
+}
+
+@media (max-width: 1100px) {
+  .themeGalleryGrid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 800px) {
+  .themeGalleryGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .themeGalleryFooter {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .themePreviewButton {
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .themeGalleryIntro {
+    padding: 17px;
+    border-radius: 20px;
+  }
+
+  .themeGalleryHeading {
+    align-items: flex-start;
+  }
+
+  .themeStepBadge {
+    min-height: 34px;
+    padding: 0 10px;
+    font-size: 0.64rem;
+  }
+
+  .themeGalleryGrid {
+    grid-template-columns: 1fr 1fr;
+    gap: 9px;
+  }
+
+  .themeCard {
+    gap: 9px;
+    padding: 8px;
+    border-radius: 16px;
+  }
+
+  .themeMiniBrowser {
+    height: 92px;
+    border-radius: 11px;
+  }
+
+  .themeMiniHero {
+    height: 42px;
+  }
+
+  .themeCardTop {
+    display: block;
+  }
+
+  .themeSelectedPill {
+    display: inline-flex;
+    margin-top: 6px;
+  }
+
+  .themeCardName {
+    font-size: 0.88rem;
+  }
+
+  .themeCardVibe {
+    font-size: 0.61rem;
+  }
+}

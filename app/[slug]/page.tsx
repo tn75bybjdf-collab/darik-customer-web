@@ -622,6 +622,32 @@ export default function DarikDirectStorefrontPage() {
     setPreviewRetailField(field || "");
   }, []);
 
+  // DARIK_RETAILER_THEME_GALLERY_102
+  const [savedThemeField, setSavedThemeField] = useState("");
+
+  useEffect(() => {
+    if (!slug) {
+      setSavedThemeField("");
+      return;
+    }
+
+    let cancelled = false;
+
+    void (async () => {
+      const result = await supabase.rpc("darik_direct_public_theme_field", {
+        p_slug: slug,
+      });
+
+      if (cancelled || result.error) return;
+
+      setSavedThemeField(String(result.data ?? "").trim().toLowerCase());
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [slug]);
+
   const [previewMechanicsField, setPreviewMechanicsField] = useState("");
   useEffect(() => {
     setPreviewMechanicsField(readMechanicsLabField());
@@ -900,6 +926,7 @@ export default function DarikDirectStorefrontPage() {
     .toLowerCase();
   const effectiveThemeField = String(
     previewRetailField ||
+    savedThemeField ||
     actualBusinessType ||
     "retail"
   )

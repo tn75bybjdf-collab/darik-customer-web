@@ -120,39 +120,40 @@ const themeOptions: Array<{
 ];
 
 
-const retailFieldTestOptions = [
-  ["supermarket", "Supermarket / Hypermarket", "سوبرماركت / هايبرماركت"],
-  ["restaurant", "Restaurant", "مطعم"],
-  ["bakery", "Bakery / Sweets", "مخبز / حلويات"],
-  ["cafe", "Café", "مقهى / كوفي شوب"],
-  ["smoke_shop", "Smoke Shop", "محل دخان وتبغ"],
-  ["butcher", "Butcher", "ملحمة"],
-  ["produce", "Fruit and vegetable store", "خضار وفواكه"],
-  ["clothing", "Clothing", "ملابس"],
-  ["shoes", "Shoes", "أحذية"],
-  ["jewelry", "Jewelry", "مجوهرات"],
-  ["cosmetics", "Cosmetics / Beauty", "مستحضرات تجميل / عناية"],
-  ["perfume", "Perfume", "عطور"],
-  ["electronics", "Electronics", "إلكترونيات"],
-  ["computers", "Computers", "كمبيوتر"],
-  ["mobile_phones", "Mobile phones & accessories", "هواتف وإكسسوارات"],
-  ["furniture", "Furniture", "أثاث"],
-  ["home_appliances", "Home appliances", "أجهزة منزلية"],
-  ["home_decor", "Home décor", "ديكور منزلي"],
-  ["auto_parts", "Auto parts", "قطع سيارات"],
-  ["tires", "Tires & car accessories", "إطارات وإكسسوارات سيارات"],
-  ["hardware", "Hardware store", "عدد وأدوات"],
-  ["building_materials", "Building materials", "مواد بناء"],
-  ["electrical_supplies", "Electrical supplies", "مواد كهربائية"],
-  ["plumbing", "Plumbing supplies", "مواد صحية وسباكة"],
-  ["tools", "Tools & equipment", "أدوات ومعدات"],
-  ["pharmacy", "Pharmacy", "صيدلية"],
-  ["pet_supplies", "Pet supplies", "مستلزمات حيوانات أليفة"],
-  ["flowers", "Flowers", "زهور"],
-  ["gifts", "Gifts", "هدايا"],
-  ["toys", "Toys", "ألعاب"],
-  ["books_stationery", "Books & stationery", "كتب وقرطاسية"],
-  ["sports", "Sports equipment", "معدات رياضية"],
+// DARIK_RETAILER_THEME_GALLERY_102
+const storefrontThemeOptions = [
+  { key: 'supermarket', name: 'Verde Market', vibe: 'Fresh / Refined / Welcoming', palette: ['#12372A', '#16A34A', '#F7FAF7'] },
+  { key: 'restaurant', name: 'Ember', vibe: 'Warm / Bold / Dining', palette: ['#431407', '#EA580C', '#FFF9F3'] },
+  { key: 'bakery', name: 'Patisserie', vibe: 'Elegant / Crafted / Inviting', palette: ['#2A1720', '#B83262', '#F8F0E2'] },
+  { key: 'cafe', name: 'Roast & Oak', vibe: 'Rich / Modern / Cozy', palette: ['#211713', '#5F7A61', '#F3ECE4'] },
+  { key: 'smoke_shop', name: 'Noir Brass', vibe: 'Dark / Premium / Distinctive', palette: ['#111315', '#B68A45', '#F3EFE8'] },
+  { key: 'butcher', name: 'Heritage', vibe: 'Traditional / Confident / Crafted', palette: ['#721C24', '#2D2B2A', '#F8F3EB'] },
+  { key: 'produce', name: 'Harvest', vibe: 'Fresh / Lively / Natural', palette: ['#228B45', '#F2B436', '#FBFFF7'] },
+  { key: 'clothing', name: 'Editorial', vibe: 'Clean / Fashion-forward / Refined', palette: ['#111318', '#3157D8', '#F7F5F1'] },
+  { key: 'shoes', name: 'Velocity', vibe: 'Energetic / Modern / Athletic', palette: ['#15171C', '#2457FF', '#F3F0E8'] },
+  { key: 'jewelry', name: 'Aurelia', vibe: 'Refined / Elegant / Luxurious', palette: ['#17151C', '#C8A96B', '#F7F1E7'] },
+  { key: 'cosmetics', name: 'Blush Studio', vibe: 'Soft / Modern / Beauty-led', palette: ['#5C3348', '#C17891', '#FCF9F8'] },
+  { key: 'perfume', name: 'Velvet', vibe: 'Dark / Luxurious / Atmospheric', palette: ['#151113', '#C6A66A', '#50172A'] },
+  { key: 'electronics', name: 'Pulse', vibe: 'Clean / Modern / Technical', palette: ['#0C1320', '#2563EB', '#F7FAFC'] },
+  { key: 'computers', name: 'Core', vibe: 'Precise / Professional / Powerful', palette: ['#101318', '#635BFF', '#62D98B'] },
+  { key: 'mobile_phones', name: 'Titanium', vibe: 'Sleek / Polished / Flagship', palette: ['#14161A', '#6D5DFC', '#F5F6F8'] },
+  { key: 'furniture', name: 'Haven', vibe: 'Warm / Calm / Considered', palette: ['#6B4935', '#7D8B72', '#F5F0E8'] },
+  { key: 'home_appliances', name: 'Lumin', vibe: 'Bright / Polished / Practical', palette: ['#21313C', '#27B9C6', '#F3F7FA'] },
+  { key: 'home_decor', name: 'Terracotta', vibe: 'Artistic / Warm / Curated', palette: ['#3C312A', '#BE7652', '#F3ECE3'] },
+  { key: 'auto_parts', name: 'Redline', vibe: 'Bold / Performance / Industrial', palette: ['#0F1216', '#E24F34', '#F6912D'] },
+  { key: 'tires', name: 'Apex', vibe: 'Sharp / Energetic / Automotive', palette: ['#0D1012', '#B6FF3B', '#20262A'] },
+  { key: 'hardware', name: 'Craft', vibe: 'Practical / Warm / Dependable', palette: ['#26352D', '#315F4D', '#D79D4A'] },
+  { key: 'building_materials', name: 'Foundry', vibe: 'Architectural / Rugged / Grounded', palette: ['#2F3234', '#A65335', '#C9A773'] },
+  { key: 'electrical_supplies', name: 'Voltage', vibe: 'Electric / Technical / Bold', palette: ['#171525', '#FFD43B', '#8E7DFF'] },
+  { key: 'plumbing', name: 'Aquaform', vibe: 'Clean / Fresh / Professional', palette: ['#153A43', '#167A8B', '#B87333'] },
+  { key: 'tools', name: 'Forge', vibe: 'Rugged / Industrial / Powerful', palette: ['#20221D', '#F29934', '#A7B36E'] },
+  { key: 'pharmacy', name: 'Clarity', vibe: 'Clean / Trusted / Clinical', palette: ['#16324A', '#2867C7', '#55B9A8'] },
+  { key: 'pet_supplies', name: 'Companion', vibe: 'Friendly / Warm / Approachable', palette: ['#4A3327', '#3F7FA6', '#C78155'] },
+  { key: 'flowers', name: 'Botanica', vibe: 'Natural / Elegant / Romantic', palette: ['#203C32', '#A85068', '#58765C'] },
+  { key: 'gifts', name: 'Celebration', vibe: 'Polished / Joyful / Expressive', palette: ['#3A264A', '#7447B9', '#E06F72'] },
+  { key: 'toys', name: 'Playhouse', vibe: 'Bright / Fun / Energetic', palette: ['#17354A', '#F5C542', '#E84F5F'] },
+  { key: 'books_stationery', name: 'Manuscript', vibe: 'Literary / Thoughtful / Classic', palette: ['#25364A', '#8A3D4D', '#E5DAC7'] },
+  { key: 'sports', name: 'Momentum', vibe: 'Athletic / Focused / Dynamic', palette: ['#0B2A32', '#28D493', '#F1CF62'] },
 ] as const;function normalizeSectionOrder(value: unknown): StorefrontSection[] {
   const allowed: StorefrontSection[] = ["categories", "catalog", "story"];
   const input = Array.isArray(value) ? value : [];
@@ -493,8 +494,10 @@ export default function DarikDirectStorefrontSettingsPage() {
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
   const [previewOpen, setPreviewOpen] = useState(false);
-  const [testRetailField, setTestRetailField] = useState("auto_parts");
-  const [fieldLabCopied, setFieldLabCopied] = useState(false);
+  const [selectedThemeField, setSelectedThemeField] = useState("");
+  const [themeSaveState, setThemeSaveState] = useState<
+    "idle" | "loading" | "saving" | "saved" | "error"
+  >("idle");
   const [slugState, setSlugState] = useState<"idle" | "checking" | "available" | "taken">("idle");
 
   const [email, setEmail] = useState("");
@@ -1701,37 +1704,80 @@ export default function DarikDirectStorefrontSettingsPage() {
     setSaving(false);
   }
 
-  function getFieldLabPreviewPath() {
-    if (!storefront) return "";
-    return `/${storefront.slug}?previewField=${encodeURIComponent(
-      testRetailField
-    )}&fieldLab=1`;
-  }
-
-  function openFieldLabPreview() {
-    const path = getFieldLabPreviewPath();
-    if (!path) {
-      setError("Create the storefront before opening the field tester.");
+  useEffect(() => {
+    if (!storefront?.slug) {
+      setSelectedThemeField("");
+      setThemeSaveState("idle");
       return;
     }
+
+    let cancelled = false;
+
+    void (async () => {
+      setThemeSaveState("loading");
+      const result = await supabase.rpc("darik_direct_public_theme_field", {
+        p_slug: storefront.slug,
+      });
+
+      if (cancelled) return;
+
+      if (result.error) {
+        setThemeSaveState("error");
+        return;
+      }
+
+      setSelectedThemeField(String(result.data ?? "").trim().toLowerCase());
+      setThemeSaveState("idle");
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [storefront?.id, storefront?.slug]);
+
+  async function chooseStorefrontTheme(themeField: string) {
+    if (!storefront) {
+      setError("Create the storefront before choosing a theme.");
+      return;
+    }
+
+    if (themeSaveState === "saving" || themeField === selectedThemeField) {
+      return;
+    }
+
+    const previousTheme = selectedThemeField;
+    setSelectedThemeField(themeField);
+    setThemeSaveState("saving");
+    setError("");
+
+    const result = await supabase.rpc("darik_direct_set_storefront_theme", {
+      p_storefront_id: storefront.id,
+      p_theme_field: themeField,
+    });
+
+    if (result.error) {
+      setSelectedThemeField(previousTheme);
+      setThemeSaveState("error");
+      setError(result.error.message || "Could not save the storefront theme.");
+      return;
+    }
+
+    setThemeSaveState("saved");
+    window.setTimeout(() => {
+      setThemeSaveState((current) => (current === "saved" ? "idle" : current));
+    }, 1800);
+  }
+
+  function previewSelectedTheme() {
+    if (!storefront || !selectedThemeField) return;
+
+    const path = `/${storefront.slug}?previewField=${encodeURIComponent(
+      selectedThemeField
+    )}&fieldLab=1`;
+
     window.open(path, "_blank", "noopener,noreferrer");
   }
 
-  async function copyFieldLabPreviewLink() {
-    const path = getFieldLabPreviewPath();
-    if (!path) {
-      setError("Create the storefront before copying a field preview link.");
-      return;
-    }
-    const absoluteUrl = `${window.location.origin}${path}`;
-    try {
-      await navigator.clipboard.writeText(absoluteUrl);
-      setFieldLabCopied(true);
-      window.setTimeout(() => setFieldLabCopied(false), 1800);
-    } catch {
-      setError(`Copy this preview link: ${absoluteUrl}`);
-    }
-  }
   if (!authReady) {
     return (
       <main className={styles.centerPage}>
@@ -2689,93 +2735,121 @@ export default function DarikDirectStorefrontSettingsPage() {
                 </div>
 
                 <div className={`${styles.formSection} ${designStyles.fieldLockedStudio}`}>
-                  <div className={styles.formSectionHeading}>
-                    <div>
-                      <span>Store design / تصميم المتجر</span>
-                      <h3>Designed by retail field / التصميم حسب النشاط</h3>
-                    </div>
-                    <p>
-                      Darik now assigns the storefront experience automatically from the retail field.
-                      Store owners no longer select themes, layouts, card styles, corners, or page colors.
-                      / يحدد داريك تصميم واجهة المتجر تلقائياً حسب نوع النشاط، ولم يعد صاحب المتجر يختار القالب أو شكل الصفحة.
-                    </p>
-                  </div>
-
-                  <div className={designStyles.lockedDesignNotice}>
-                    <span>LOCKED BY DARIK / تصميم ثابت من داريك</span>
-                    <strong>
-                      One professional storefront system for each retail field
-                      / نظام واجهة احترافي مخصص لكل نشاط
-                    </strong>
-                    <p>
-                      The retailer still controls the logo, cover image, store information,
-                      products, availability, ordering, phone, and WhatsApp. Darik controls
-                      the visual system and shopping architecture.
-                    </p>
-                  </div>
-
-                  <div className={designStyles.fieldLab}>
-                    <div className={designStyles.fieldLabHeading}>
+                  <div className={designStyles.themeGalleryIntro}>
+                    <div className={designStyles.themeGalleryHeading}>
+                      <span className={designStyles.themeStepBadge}>STEP 1</span>
                       <div>
-                        <span>DARIK FIELD LAB / مختبر أنشطة داريك</span>
-                        <h4>Test any retail field on this store / اختبر أي نشاط على هذا المتجر</h4>
+                        <span>Storefront Themes / قوالب واجهة المتجر</span>
+                        <h3>Choose your look / اختر تصميم متجرك</h3>
                       </div>
-                      <b>TESTING ONLY</b>
                     </div>
-
-                    <p>
-                      This preview switch does not change the store's real retail field and does not write
-                      anything to Supabase. It only adds a temporary previewField parameter to the public URL.
+                    <p className={designStyles.themeGalleryLead}>
+                      Choose the storefront style that best represents your business.
+                      <strong> You can change this at any time.</strong>
+                      {" / اختر التصميم الذي يمثل متجرك بأفضل شكل. يمكنك تغيير هذا القالب في أي وقت."}
                     </p>
+                  </div>
 
-                    <div className={designStyles.fieldLabControls}>
-                      <label>
-                        Test retail field / نشاط الاختبار
-                        <select
-                          value={testRetailField}
-                          onChange={(event) => {
-                            setTestRetailField(event.target.value);
-                            setFieldLabCopied(false);
-                          }}
-                        >
-                          {retailFieldTestOptions.map(([value, label, labelAr]) => (
-                            <option value={value} key={value}>
-                              {label} / {labelAr}
-                            </option>
-                          ))}
-                        </select>
-                      </label>
+                  <div className={designStyles.themeGalleryGrid}>
+                    {storefrontThemeOptions.map((theme) => {
+                      const selected = selectedThemeField === theme.key;
 
-                      <div className={designStyles.fieldLabActions}>
+                      return (
                         <button
                           type="button"
-                          onClick={openFieldLabPreview}
-                          disabled={!storefront}
+                          className={`${designStyles.themeCard} ${
+                            selected ? designStyles.themeCardSelected : ""
+                          }`}
+                          key={theme.key}
+                          aria-pressed={selected}
+                          disabled={themeSaveState === "saving"}
+                          onClick={() => void chooseStorefrontTheme(theme.key)}
                         >
-                          Open field preview / فتح المعاينة
+                          <div
+                            className={designStyles.themeMiniBrowser}
+                            style={{ background: theme.palette[2] }}
+                          >
+                            <div className={designStyles.themeMiniTopbar}>
+                              <i style={{ background: theme.palette[0] }} />
+                              <span style={{ background: theme.palette[0] }} />
+                              <span style={{ background: theme.palette[1] }} />
+                            </div>
+                            <div
+                              className={designStyles.themeMiniHero}
+                              style={{
+                                background: `linear-gradient(135deg, ${theme.palette[0]}, ${theme.palette[1]})`,
+                              }}
+                            >
+                              <span />
+                              <strong />
+                            </div>
+                            <div className={designStyles.themeMiniCatalog}>
+                              <i style={{ borderColor: theme.palette[1] }} />
+                              <i style={{ borderColor: theme.palette[1] }} />
+                              <i style={{ borderColor: theme.palette[1] }} />
+                            </div>
+                          </div>
+
+                          <div className={designStyles.themeCardTop}>
+                            <div>
+                              <strong className={designStyles.themeCardName}>
+                                {theme.name}
+                              </strong>
+                              <small className={designStyles.themeCardVibe}>
+                                {theme.vibe}
+                              </small>
+                            </div>
+                            {selected ? (
+                              <span className={designStyles.themeSelectedPill}>
+                                Selected / مختار
+                              </span>
+                            ) : null}
+                          </div>
+
+                          <div className={designStyles.themeSwatches} aria-hidden="true">
+                            {theme.palette.map((color) => (
+                              <i key={color} style={{ background: color }} />
+                            ))}
+                          </div>
                         </button>
-                        <button
-                          type="button"
-                          onClick={copyFieldLabPreviewLink}
-                          disabled={!storefront}
-                        >
-                          {fieldLabCopied
-                            ? "Copied / تم النسخ"
-                            : "Copy test link / نسخ رابط الاختبار"}
-                        </button>
-                      </div>
+                      );
+                    })}
+                  </div>
+
+                  <div className={designStyles.themeGalleryFooter}>
+                    <div>
+                      <strong>
+                        {themeSaveState === "loading"
+                          ? "Loading your current theme..."
+                          : themeSaveState === "saving"
+                            ? "Saving theme..."
+                            : themeSaveState === "saved"
+                              ? "Theme saved."
+                              : themeSaveState === "error"
+                                ? "Theme could not be saved."
+                                : selectedThemeField
+                                  ? "Your selected theme is live."
+                                  : "Choose a theme to personalize your storefront."}
+                      </strong>
+                      <span>
+                        Theme choice changes the storefront appearance only. Your retail field
+                        continues to control store features and product mechanics.
+                      </span>
                     </div>
-
-                    <small>
-                      Auto Parts is the first locked Darik retail-field design. We will now use this tester
-                      to build and approve every other signup field one by one.
-                    </small>
+                    <button
+                      type="button"
+                      className={designStyles.themePreviewButton}
+                      onClick={previewSelectedTheme}
+                      disabled={!storefront || !selectedThemeField}
+                    >
+                      Preview selected theme / معاينة القالب
+                    </button>
                   </div>
 
                   <div className={designStyles.functionControls}>
                     <div>
                       <span>Store functions / وظائف المتجر</span>
-                      <h4>Retailers control function, not theme / صاحب المتجر يتحكم بالوظائف وليس التصميم</h4>
+                      <h4>Store features stay connected to your retail field / وظائف المتجر تبقى مرتبطة بنشاطك</h4>
                     </div>
                     <div className={designStyles.toggleGrid}>
                       {[
