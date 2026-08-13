@@ -611,6 +611,139 @@ function lockedRetailFieldDesign(
     backgroundColor: "#F8FAFC",
   };
 }
+type StorefrontTypographyKey =
+  | "display_name"
+  | "display_name_ar"
+  | "tagline"
+  | "tagline_ar";
+
+type StorefrontTypographyFontKey =
+  | "theme"
+  | "segoe"
+  | "arial"
+  | "verdana"
+  | "tahoma"
+  | "trebuchet"
+  | "georgia"
+  | "times"
+  | "palatino"
+  | "garamond"
+  | "courier"
+  | "impact";
+
+type StorefrontTypographySetting = {
+  font: StorefrontTypographyFontKey;
+  size: number;
+};
+
+type StorefrontTypographyState = Record<
+  StorefrontTypographyKey,
+  StorefrontTypographySetting
+>;
+
+const storefrontTypographyKeys: StorefrontTypographyKey[] = [
+  "display_name",
+  "display_name_ar",
+  "tagline",
+  "tagline_ar",
+];
+
+const storefrontTypographyFontFamilies: Record<
+  Exclude<StorefrontTypographyFontKey, "theme">,
+  string
+> = {
+  segoe: '"Segoe UI", Tahoma, Arial, sans-serif',
+  arial: 'Arial, "Segoe UI", Tahoma, sans-serif',
+  verdana: 'Verdana, "Segoe UI", Tahoma, sans-serif',
+  tahoma: 'Tahoma, "Segoe UI", Arial, sans-serif',
+  trebuchet: '"Trebuchet MS", "Segoe UI", Tahoma, sans-serif',
+  georgia: 'Georgia, "Times New Roman", "Segoe UI", serif',
+  times: '"Times New Roman", Times, "Segoe UI", serif',
+  palatino: '"Palatino Linotype", Palatino, "Times New Roman", serif',
+  garamond: 'Garamond, Georgia, "Times New Roman", serif',
+  courier: '"Courier New", Courier, "Segoe UI", monospace',
+  impact: 'Impact, Haettenschweiler, "Arial Narrow Bold", sans-serif',
+};
+
+function storefrontTypographyDefaultState(): StorefrontTypographyState {
+  return {
+    display_name: { font: "theme", size: 0 },
+    display_name_ar: { font: "theme", size: 0 },
+    tagline: { font: "theme", size: 0 },
+    tagline_ar: { font: "theme", size: 0 },
+  };
+}
+
+function isStorefrontTypographyFontKey(
+  value: unknown
+): value is StorefrontTypographyFontKey {
+  return [
+    "theme",
+    "segoe",
+    "arial",
+    "verdana",
+    "tahoma",
+    "trebuchet",
+    "georgia",
+    "times",
+    "palatino",
+    "garamond",
+    "courier",
+    "impact",
+  ].includes(String(value || ""));
+}
+
+function normalizeStorefrontTypography(
+  value: unknown
+): StorefrontTypographyState {
+  const raw =
+    value && typeof value === "object" && !Array.isArray(value)
+      ? (value as Record<string, unknown>)
+      : {};
+
+  const next = storefrontTypographyDefaultState();
+
+  for (const key of storefrontTypographyKeys) {
+    const rawSetting =
+      raw[key] && typeof raw[key] === "object" && !Array.isArray(raw[key])
+        ? (raw[key] as Record<string, unknown>)
+        : {};
+
+    const font = isStorefrontTypographyFontKey(rawSetting.font)
+      ? rawSetting.font
+      : "theme";
+
+    const numericSize = Number(rawSetting.size ?? 0);
+    const size =
+      Number.isInteger(numericSize) &&
+      (numericSize === 0 || (numericSize >= 10 && numericSize <= 96))
+        ? numericSize
+        : 0;
+
+    next[key] = { font, size };
+  }
+
+  return next;
+}
+
+function storefrontTypographyInlineStyle(
+  typography: StorefrontTypographyState,
+  key: StorefrontTypographyKey
+) {
+  const setting = typography[key];
+  const style: { fontFamily?: string; fontSize?: string } = {};
+
+  if (setting.font !== "theme") {
+    style.fontFamily = storefrontTypographyFontFamilies[setting.font];
+  }
+
+  if (setting.size > 0) {
+    style.fontSize = `${setting.size}px`;
+  }
+
+  return style;
+}
+
 export default function DarikDirectStorefrontPage() {
   const params = useParams<{ slug: string | string[] }>();
   const slug = normalizeParam(params?.slug);
@@ -624,6 +757,35 @@ export default function DarikDirectStorefrontPage() {
 
   // DARIK_RETAILER_THEME_GALLERY_102
   const [savedThemeField, setSavedThemeField] = useState("");
+
+  // DARIK_INDEPENDENT_STOREFRONT_TYPOGRAPHY_105
+  const [savedStorefrontTypography, setSavedStorefrontTypography] =
+    useState<StorefrontTypographyState>(() => storefrontTypographyDefaultState());
+
+  useEffect(() => {
+    if (!slug) {
+      setSavedStorefrontTypography(storefrontTypographyDefaultState());
+      return;
+    }
+
+    let cancelled = false;
+
+    void (async () => {
+      const result = await supabase.rpc("darik_direct_public_typography", {
+        p_slug: slug,
+      });
+
+      if (cancelled || result.error) return;
+
+      setSavedStorefrontTypography(
+        normalizeStorefrontTypography(result.data)
+      );
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [slug]);
 
   useEffect(() => {
     if (!slug) {
@@ -922,6 +1084,7 @@ export default function DarikDirectStorefrontPage() {
       "display_name_ar",
       "tagline",
       "tagline_ar",
+      "direct_typography",
       "logo_url",
       "hero_image_url",
       "business_phone",
@@ -1578,6 +1741,12 @@ export default function DarikDirectStorefrontPage() {
     );
   }
 
+  const effectiveStorefrontTypography =
+    normalizeStorefrontTypography(
+      (storefront as unknown as { direct_typography?: unknown }).direct_typography ??
+        savedStorefrontTypography
+    );
+
   const fieldDesign = lockedRetailFieldDesign(effectiveThemeField);
   const themeStyle = {
     "--store-primary": fieldDesign.primaryColor,
@@ -2119,17 +2288,44 @@ export default function DarikDirectStorefrontPage() {
               <Icon name="store" size={15} />
               {isAutoParts ? "Auto parts / \u0642\u0637\u0639 \u063a\u064a\u0627\u0631" : isGroceryStore ? "Hypermarket / \u0647\u0627\u064a\u0628\u0631\u0645\u0627\u0631\u0643\u062a" : "Official store / \u0627\u0644\u0645\u062a\u062c\u0631 \u0627\u0644\u0631\u0633\u0645\u064a"}
             </div>
-            <h1>{storefront.display_name}</h1>
+            <h1
+              style={storefrontTypographyInlineStyle(
+                effectiveStorefrontTypography,
+                "display_name"
+              )}
+            >
+              {storefront.display_name}
+            </h1>
             {storefront.display_name_ar ? (
-              <p className={styles.arabicName} dir="rtl">
+              <p
+                className={styles.arabicName}
+                dir="rtl"
+                style={storefrontTypographyInlineStyle(
+                  effectiveStorefrontTypography,
+                  "display_name_ar"
+                )}
+              >
                 {storefront.display_name_ar}
               </p>
             ) : null}
-            <p className={styles.tagline}>
+            <p
+              className={styles.tagline}
+              style={storefrontTypographyInlineStyle(
+                effectiveStorefrontTypography,
+                "tagline"
+              )}
+            >
               {storefront.tagline || (pickupOnly ? "Browse online and collect from this local store." : isGroceryStore ? "Fresh groceries and daily essentials from your neighborhood market." : "Everything you need, delivered from a local store.")}
             </p>
             {storefront.tagline_ar ? (
-              <p className={styles.arabicTagline} dir="rtl">
+              <p
+                className={styles.arabicTagline}
+                dir="rtl"
+                style={storefrontTypographyInlineStyle(
+                  effectiveStorefrontTypography,
+                  "tagline_ar"
+                )}
+              >
                 {storefront.tagline_ar}
               </p>
             ) : null}

@@ -472,6 +472,167 @@ function storefrontDraftKey(retailerId: string) {
   return `darik-direct-storefront-draft:${retailerId}`;
 }
 
+type StorefrontTypographyKey =
+  | "display_name"
+  | "display_name_ar"
+  | "tagline"
+  | "tagline_ar";
+
+type StorefrontTypographyFontKey =
+  | "theme"
+  | "segoe"
+  | "arial"
+  | "verdana"
+  | "tahoma"
+  | "trebuchet"
+  | "georgia"
+  | "times"
+  | "palatino"
+  | "garamond"
+  | "courier"
+  | "impact";
+
+type StorefrontTypographySetting = {
+  font: StorefrontTypographyFontKey;
+  size: number;
+};
+
+type StorefrontTypographyState = Record<
+  StorefrontTypographyKey,
+  StorefrontTypographySetting
+>;
+
+const storefrontTypographyKeys: StorefrontTypographyKey[] = [
+  "display_name",
+  "display_name_ar",
+  "tagline",
+  "tagline_ar",
+];
+
+const storefrontTypographyFontOptions: Array<{
+  key: StorefrontTypographyFontKey;
+  label: string;
+}> = [
+  { key: "theme", label: "Theme default" },
+  { key: "segoe", label: "Segoe UI" },
+  { key: "arial", label: "Arial" },
+  { key: "verdana", label: "Verdana" },
+  { key: "tahoma", label: "Tahoma" },
+  { key: "trebuchet", label: "Trebuchet MS" },
+  { key: "georgia", label: "Georgia" },
+  { key: "times", label: "Times New Roman" },
+  { key: "palatino", label: "Palatino" },
+  { key: "garamond", label: "Garamond" },
+  { key: "courier", label: "Courier New" },
+  { key: "impact", label: "Impact" },
+];
+
+const storefrontTypographySizeOptions = [
+  0,
+  12,
+  14,
+  16,
+  18,
+  20,
+  22,
+  24,
+  28,
+  32,
+  36,
+  42,
+  48,
+  56,
+  64,
+  72,
+  80,
+  96,
+];
+
+const storefrontTypographyFontFamilies: Record<
+  Exclude<StorefrontTypographyFontKey, "theme">,
+  string
+> = {
+  segoe: '"Segoe UI", Tahoma, Arial, sans-serif',
+  arial: 'Arial, "Segoe UI", Tahoma, sans-serif',
+  verdana: 'Verdana, "Segoe UI", Tahoma, sans-serif',
+  tahoma: 'Tahoma, "Segoe UI", Arial, sans-serif',
+  trebuchet: '"Trebuchet MS", "Segoe UI", Tahoma, sans-serif',
+  georgia: 'Georgia, "Times New Roman", "Segoe UI", serif',
+  times: '"Times New Roman", Times, "Segoe UI", serif',
+  palatino: '"Palatino Linotype", Palatino, "Times New Roman", serif',
+  garamond: 'Garamond, Georgia, "Times New Roman", serif',
+  courier: '"Courier New", Courier, "Segoe UI", monospace',
+  impact: 'Impact, Haettenschweiler, "Arial Narrow Bold", sans-serif',
+};
+
+function storefrontTypographyDefaultState(): StorefrontTypographyState {
+  return {
+    display_name: { font: "theme", size: 0 },
+    display_name_ar: { font: "theme", size: 0 },
+    tagline: { font: "theme", size: 0 },
+    tagline_ar: { font: "theme", size: 0 },
+  };
+}
+
+function isStorefrontTypographyFontKey(
+  value: unknown
+): value is StorefrontTypographyFontKey {
+  return storefrontTypographyFontOptions.some(
+    (option) => option.key === String(value || "")
+  );
+}
+
+function normalizeStorefrontTypography(
+  value: unknown
+): StorefrontTypographyState {
+  const raw =
+    value && typeof value === "object" && !Array.isArray(value)
+      ? (value as Record<string, unknown>)
+      : {};
+
+  const next = storefrontTypographyDefaultState();
+
+  for (const key of storefrontTypographyKeys) {
+    const rawSetting =
+      raw[key] && typeof raw[key] === "object" && !Array.isArray(raw[key])
+        ? (raw[key] as Record<string, unknown>)
+        : {};
+
+    const font = isStorefrontTypographyFontKey(rawSetting.font)
+      ? rawSetting.font
+      : "theme";
+
+    const numericSize = Number(rawSetting.size ?? 0);
+    const size =
+      Number.isInteger(numericSize) &&
+      (numericSize === 0 || (numericSize >= 10 && numericSize <= 96))
+        ? numericSize
+        : 0;
+
+    next[key] = { font, size };
+  }
+
+  return next;
+}
+
+function storefrontTypographyPreviewStyle(
+  typography: StorefrontTypographyState,
+  key: StorefrontTypographyKey
+) {
+  const setting = typography[key];
+  const style: { fontFamily?: string; fontSize?: string } = {};
+
+  if (setting.font !== "theme") {
+    style.fontFamily = storefrontTypographyFontFamilies[setting.font];
+  }
+
+  if (setting.size > 0) {
+    style.fontSize = `${setting.size}px`;
+  }
+
+  return style;
+}
+
 export default function DarikDirectStorefrontSettingsPage() {
   const [session, setSession] = useState<Session | null>(null);
   const [authReady, setAuthReady] = useState(false);
@@ -543,6 +704,37 @@ export default function DarikDirectStorefrontSettingsPage() {
 
   const [themePickerOpen, setThemePickerOpen] = useState(false);
   const liveBuilderPreviewRef = useRef<HTMLIFrameElement | null>(null);
+  // DARIK_INDEPENDENT_STOREFRONT_TYPOGRAPHY_105
+  const [storefrontTypographyDraft, setStorefrontTypographyDraft] =
+    useState<StorefrontTypographyState>(() => storefrontTypographyDefaultState());
+  const [typographyDirty, setTypographyDirty] = useState(false);
+  const [typographySaveState, setTypographySaveState] = useState<
+    "idle" | "loading" | "waiting" | "saving" | "saved" | "error"
+  >("idle");
+  const typographyDirtyRef = useRef(false);
+
+  function updateStorefrontTypography(
+    key: StorefrontTypographyKey,
+    patch: Partial<StorefrontTypographySetting>
+  ) {
+    setStorefrontTypographyDraft((current) => ({
+      ...current,
+      [key]: {
+        ...current[key],
+        ...patch,
+      },
+    }));
+    typographyDirtyRef.current = true;
+    setTypographyDirty(true);
+    setTypographySaveState("waiting");
+  }
+
+  function resetStorefrontTypography(key: StorefrontTypographyKey) {
+    updateStorefrontTypography(key, { font: "theme", size: 0 });
+  }
+
+
+
 
   const selectedThemeOption =
     storefrontThemeOptions.find((theme) => theme.key === selectedThemeField) ?? null;
@@ -567,6 +759,7 @@ export default function DarikDirectStorefrontSettingsPage() {
       display_name_ar: liveBuilderDraftValue("displayNameAr", "display_name_ar"),
       tagline: liveBuilderDraftValue("tagline"),
       tagline_ar: liveBuilderDraftValue("taglineAr", "tagline_ar"),
+      direct_typography: storefrontTypographyDraft,
       logo_url: liveBuilderDraftValue("logoUrl", "logo_url"),
       hero_image_url: liveBuilderDraftValue("heroImageUrl", "hero_image_url"),
       business_phone: liveBuilderDraftValue("phone", "businessPhone", "business_phone"),
@@ -621,7 +814,7 @@ export default function DarikDirectStorefrontSettingsPage() {
     });
 
     return () => window.cancelAnimationFrame(animation);
-  }, [setupForm, selectedThemeField, storefront?.slug]);
+  }, [setupForm, storefrontTypographyDraft, selectedThemeField, storefront?.slug]);
 
   useEffect(() => {
     function handleBuilderReady(event: MessageEvent) {
@@ -632,7 +825,7 @@ export default function DarikDirectStorefrontSettingsPage() {
 
     window.addEventListener("message", handleBuilderReady);
     return () => window.removeEventListener("message", handleBuilderReady);
-  }, [setupForm, selectedThemeField, storefront?.slug]);
+  }, [setupForm, storefrontTypographyDraft, selectedThemeField, storefront?.slug]);
 
   const [formDirty, setFormDirty] = useState(false);
   const [draftSavedAt, setDraftSavedAt] = useState<string | null>(null);
@@ -648,6 +841,121 @@ export default function DarikDirectStorefrontSettingsPage() {
       ) ?? null,
     [context, selectedRetailerId]
   );
+
+
+  useEffect(() => {
+    const retailerId = selectedStore?.retailer_id;
+    if (!retailerId) return;
+
+    const pendingKey = `darik-pending-typography-${retailerId}`;
+    const pendingRaw = window.localStorage.getItem(pendingKey);
+
+    if (pendingRaw) {
+      try {
+        const pending = normalizeStorefrontTypography(JSON.parse(pendingRaw));
+        setStorefrontTypographyDraft(pending);
+        typographyDirtyRef.current = true;
+        setTypographyDirty(true);
+        setTypographySaveState(storefront?.id ? "waiting" : "idle");
+        return;
+      } catch {
+        window.localStorage.removeItem(pendingKey);
+      }
+    }
+
+    if (!storefront?.slug) {
+      typographyDirtyRef.current = false;
+      setTypographyDirty(false);
+      setStorefrontTypographyDraft(storefrontTypographyDefaultState());
+      setTypographySaveState("idle");
+      return;
+    }
+
+    let cancelled = false;
+    setTypographySaveState("loading");
+
+    void (async () => {
+      const result = await supabase.rpc("darik_direct_public_typography", {
+        p_slug: storefront.slug,
+      });
+
+      if (cancelled || typographyDirtyRef.current) return;
+
+      if (result.error) {
+        setTypographySaveState("error");
+        return;
+      }
+
+      setStorefrontTypographyDraft(
+        normalizeStorefrontTypography(result.data)
+      );
+      setTypographySaveState("idle");
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [
+    selectedStore?.retailer_id,
+    storefront?.id,
+    storefront?.slug,
+  ]);
+
+  useEffect(() => {
+    const retailerId = selectedStore?.retailer_id;
+
+    if (!typographyDirty || !retailerId) return;
+
+    const pendingKey = `darik-pending-typography-${retailerId}`;
+    window.localStorage.setItem(
+      pendingKey,
+      JSON.stringify(storefrontTypographyDraft)
+    );
+
+    if (!storefront?.id) {
+      setTypographySaveState("idle");
+      return;
+    }
+
+    setTypographySaveState("waiting");
+
+    const timer = window.setTimeout(() => {
+      setTypographySaveState("saving");
+
+      void (async () => {
+        const result = await supabase.rpc(
+          "darik_direct_set_storefront_typography",
+          {
+            p_storefront_id: storefront.id,
+            p_typography: storefrontTypographyDraft,
+          }
+        );
+
+        if (result.error) {
+          setTypographySaveState("error");
+          return;
+        }
+
+        typographyDirtyRef.current = false;
+        setTypographyDirty(false);
+        window.localStorage.removeItem(pendingKey);
+        setTypographySaveState("saved");
+
+        window.setTimeout(() => {
+          setTypographySaveState((current) =>
+            current === "saved" ? "idle" : current
+          );
+        }, 1600);
+      })();
+    }, 650);
+
+    return () => window.clearTimeout(timer);
+  }, [
+    selectedStore?.retailer_id,
+    storefront?.id,
+    storefrontTypographyDraft,
+    typographyDirty,
+  ]);
 
   const authUserId = session?.user.id ?? null;
 
@@ -2251,8 +2559,20 @@ export default function DarikDirectStorefrontSettingsPage() {
                           }}
                         >
                           <span>LIVE DRAFT</span>
-                          <strong>{liveBuilderDraftText("displayName") || "Your Store"}</strong>
-                          <p>
+                          <strong
+                            style={storefrontTypographyPreviewStyle(
+                              storefrontTypographyDraft,
+                              "display_name"
+                            )}
+                          >
+                            {liveBuilderDraftText("displayName") || "Your Store"}
+                          </strong>
+                          <p
+                            style={storefrontTypographyPreviewStyle(
+                              storefrontTypographyDraft,
+                              "tagline"
+                            )}
+                          >
                             {liveBuilderDraftText("tagline") ||
                               "Your storefront will come alive here as you enter your information."}
                           </p>
@@ -3074,7 +3394,107 @@ export default function DarikDirectStorefrontSettingsPage() {
                       Change theme / تغيير القالب
                     </button>
                   </div>
-<div className={designStyles.functionControls}>
+                  <section className={designStyles.typographyStudio}>
+                    <div className={designStyles.typographyStudioHeader}>
+                      <div>
+                        <span>TYPOGRAPHY STUDIO / استوديو الخطوط</span>
+                        <h3>Style every text bar independently</h3>
+                        <p>
+                          Give each customer-facing identity element its own font and size.
+                          Changing one never changes the others.
+                        </p>
+                      </div>
+                      <small>
+                        {typographySaveState === "saving"
+                          ? "Saving..."
+                          : typographySaveState === "error"
+                            ? "Save needs attention"
+                            : typographySaveState === "saved"
+                              ? "Saved"
+                              : "Live preview"}
+                      </small>
+                    </div>
+
+                    <div className={designStyles.typographyStudioGrid}>
+                      {([
+                        ["display_name", "Customer-facing name", "اسم المتجر للعملاء"],
+                        ["display_name_ar", "Arabic customer-facing name", "اسم المتجر بالعربية"],
+                        ["tagline", "Store tagline", "شعار المتجر"],
+                        ["tagline_ar", "Arabic store tagline", "شعار المتجر بالعربية"],
+                      ] as Array<[StorefrontTypographyKey, string, string]>).map(
+                        ([key, label, arabicLabel]) => {
+                          const current = storefrontTypographyDraft[key];
+
+                          return (
+                            <article className={designStyles.typographyStudioRow} key={key}>
+                              <div className={designStyles.typographyStudioIdentity}>
+                                <span>{label}</span>
+                                <small dir="rtl">{arabicLabel}</small>
+                              </div>
+
+                              <label className={designStyles.typographyStudioControl}>
+                                <span>Font / الخط</span>
+                                <select
+                                  aria-label={`${label} font`}
+                                  value={current.font}
+                                  onChange={(event) =>
+                                    updateStorefrontTypography(key, {
+                                      font: isStorefrontTypographyFontKey(event.target.value)
+                                        ? event.target.value
+                                        : "theme",
+                                    })
+                                  }
+                                >
+                                  {storefrontTypographyFontOptions.map((option) => (
+                                    <option key={option.key} value={option.key}>
+                                      {option.label}
+                                    </option>
+                                  ))}
+                                </select>
+                              </label>
+
+                              <label className={designStyles.typographyStudioControl}>
+                                <span>Size / الحجم</span>
+                                <select
+                                  aria-label={`${label} size`}
+                                  value={String(current.size)}
+                                  onChange={(event) =>
+                                    updateStorefrontTypography(key, {
+                                      size: Number(event.target.value),
+                                    })
+                                  }
+                                >
+                                  {storefrontTypographySizeOptions.map((size) => (
+                                    <option key={size} value={size}>
+                                      {size === 0 ? "Theme size" : `${size}px`}
+                                    </option>
+                                  ))}
+                                </select>
+                              </label>
+
+                              <button
+                                type="button"
+                                className={designStyles.typographyStudioReset}
+                                onClick={() => resetStorefrontTypography(key)}
+                              >
+                                Reset
+                              </button>
+                            </article>
+                          );
+                        }
+                      )}
+                    </div>
+
+                    <div className={designStyles.typographyStudioFoot}>
+                      <strong>Theme default</strong>
+                      <span>
+                        restores only that text bar to the typography originally designed
+                        for the selected Darik storefront theme.
+                      </span>
+                    </div>
+                  </section>
+
+                  <div className={designStyles.functionControls}>
                     <div>
                       <span>Store functions / وظائف المتجر</span>
                       <h4>Store features stay connected to your retail field / وظائف المتجر تبقى مرتبطة بنشاطك</h4>
