@@ -56,7 +56,6 @@ const businessTypes = [
   ["toys", "Toys — ألعاب"],
   ["books_stationery", "Books and stationery — كتب وقرطاسية"],
   ["sports", "Sports equipment — معدات رياضية"],
-  ["other", "Other — أخرى"],
 ] as const;
 
 function autoSlugFromName(value: string) {

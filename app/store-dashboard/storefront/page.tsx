@@ -153,7 +153,6 @@ const retailFieldTestOptions = [
   ["toys", "Toys", "ألعاب"],
   ["books_stationery", "Books & stationery", "كتب وقرطاسية"],
   ["sports", "Sports equipment", "معدات رياضية"],
-  ["other", "Other", "أخرى"],
 ] as const;function normalizeSectionOrder(value: unknown): StorefrontSection[] {
   const allowed: StorefrontSection[] = ["categories", "catalog", "story"];
   const input = Array.isArray(value) ? value : [];
