@@ -2235,6 +2235,7 @@ export default function DarikDirectStorefrontSettingsPage() {
           setupForm.publicEmail.trim()
       );
     }
+    // DARIK_PICKUP_ONLY_DELIVERY_TAB_114
     if (step === 9) {
       if (!deliveryLocation112) return false;
 
@@ -2246,15 +2247,14 @@ export default function DarikDirectStorefrontSettingsPage() {
         (setupForm as StorefrontForm & { showOrdering?: boolean }).showOrdering
       );
 
-      if (
-        orderingEnabled &&
-        fulfillmentMode !== "pickup" &&
-        deliveryZones109.length === 0
-      ) {
-        return false;
+      if (!orderingEnabled || fulfillmentMode === "pickup") {
+        return true;
       }
 
-      return serializeDeliveryZones109() !== null;
+      return (
+        deliveryZones109.length > 0 &&
+        serializeDeliveryZones109() !== null
+      );
     }
     if (step === 10) {
       const orderMode = String(setupForm.orderSubmissionMode ?? "phone");
@@ -2297,7 +2297,10 @@ export default function DarikDirectStorefrontSettingsPage() {
       return;
     }
 
-    if (step === 9) {
+    if (
+      step === 9 &&
+      setupForm.fulfillmentMode !== "pickup"
+    ) {
       const zonesSaved = await saveDeliveryZones109(true);
       if (!zonesSaved) return;
     }
@@ -2347,22 +2350,24 @@ export default function DarikDirectStorefrontSettingsPage() {
         );
       }
 
-      const zonesPayload = serializeDeliveryZones109();
+      if (setupForm.fulfillmentMode !== "pickup") {
+        const zonesPayload = serializeDeliveryZones109();
 
-      if (!zonesPayload) {
-        throw new Error("Check your delivery-zone values before finishing.");
-      }
-
-      const zonesResult = await supabase.rpc(
-        "darik_direct_set_delivery_zones",
-        {
-          p_storefront_id: storefrontId,
-          p_zones: zonesPayload,
+        if (!zonesPayload) {
+          throw new Error("Check your delivery-zone values before finishing.");
         }
-      );
 
-      if (zonesResult.error) {
-        throw zonesResult.error;
+        const zonesResult = await supabase.rpc(
+          "darik_direct_set_delivery_zones",
+          {
+            p_storefront_id: storefrontId,
+            p_zones: zonesPayload,
+          }
+        );
+
+        if (zonesResult.error) {
+          throw zonesResult.error;
+        }
       }
 
       const completeResult = await supabase.rpc(
@@ -3163,14 +3168,6 @@ export default function DarikDirectStorefrontSettingsPage() {
       return;
     }
 
-    if (
-      setupForm.showOrdering &&
-      setupForm.fulfillmentMode === "delivery" &&
-      (!setupForm.deliveryRadiusKm || Number(setupForm.deliveryRadiusKm) <= 0)
-    ) {
-      showSaveError("Enter a delivery radius, or choose Local pickup only / أدخل نطاق التوصيل أو اختر الاستلام المحلي فقط.");
-      return;
-    }
 
     const onlineOrderingSelected =
       setupForm.showOrdering &&
@@ -3424,12 +3421,6 @@ export default function DarikDirectStorefrontSettingsPage() {
         (setupForm.orderSubmissionMode !== "phone" &&
           setupForm.orderSubmissionMode !== "both") ||
         Boolean(setupForm.phone.trim() || setupForm.whatsapp.trim())) &&
-      (!setupForm.showOrdering ||
-        setupForm.fulfillmentMode !== "delivery" ||
-        Boolean(
-          setupForm.deliveryRadiusKm &&
-            Number(setupForm.deliveryRadiusKm) > 0
-        )) &&
       (!onlineOrderingSelected ||
         setupForm.acceptCash ||
         setupForm.acceptCliq) &&
@@ -4546,7 +4537,7 @@ export default function DarikDirectStorefrontSettingsPage() {
                       <div className={designStyles.exactWizardHeading109V5}>
                         <span>STEP 9 / الخطوة ٩</span>
                         <h3>Delivery / التوصيل</h3>
-                        <p>All delivery configuration belongs here, including unlimited distance zones.</p>
+                        <p>Confirm the store location first, then choose delivery or pickup only. Delivery settings appear only when delivery is enabled.</p>
                       </div>
 
                       <section className={designStyles.deliveryLocationCard112}>
@@ -4781,7 +4772,54 @@ export default function DarikDirectStorefrontSettingsPage() {
                         ) : null}
                       </section>
 
-                      <div className={designStyles.exactWizardOrderModes109V5}>
+                                            <section className={designStyles.pickupOnlyChoice114}>
+                        <div className={designStyles.pickupOnlyChoiceCopy114}>
+                          <small>FULFILLMENT / طريقة الاستلام</small>
+                          <strong>Pickup only? / استلام من المتجر فقط؟</strong>
+                          <span>
+                            Choose Yes only when customers must collect from your
+                            confirmed store location. Choose No when you deliver.
+                          </span>
+                        </div>
+
+                        <div className={designStyles.pickupOnlyChoiceActions114}>
+                          <button
+                            type="button"
+                            aria-pressed={setupForm.fulfillmentMode !== "pickup"}
+                            className={
+                              setupForm.fulfillmentMode !== "pickup"
+                                ? designStyles.pickupOnlyChoiceSelected114
+                                : ""
+                            }
+                            onClick={() =>
+                              updateSetupField("fulfillmentMode", "delivery")
+                            }
+                          >
+                            <b>No / لا</b>
+                            <span>Delivery enabled / يوجد توصيل</span>
+                          </button>
+
+                          <button
+                            type="button"
+                            aria-pressed={setupForm.fulfillmentMode === "pickup"}
+                            className={
+                              setupForm.fulfillmentMode === "pickup"
+                                ? designStyles.pickupOnlyChoiceSelected114
+                                : ""
+                            }
+                            onClick={() =>
+                              updateSetupField("fulfillmentMode", "pickup")
+                            }
+                          >
+                            <b>Yes / نعم</b>
+                            <span>Pickup only / استلام فقط</span>
+                          </button>
+                        </div>
+                      </section>
+
+                      {setupForm.fulfillmentMode === "delivery" ? (
+                        <>
+<div className={designStyles.exactWizardOrderModes109V5}>
                         <button type="button" className={setupForm.orderSubmissionMode === "phone" ? designStyles.exactWizardSelected109V5 : ""} onClick={() => updateSetupField("orderSubmissionMode", "phone")}><strong>Phone / WhatsApp</strong><span>هاتف / واتساب</span></button>
                         <button type="button" className={setupForm.orderSubmissionMode === "online" ? designStyles.exactWizardSelected109V5 : ""} onClick={() => updateSetupField("orderSubmissionMode", "online")}><strong>Online orders</strong><span>طلبات إلكترونية</span></button>
                         <button type="button" className={setupForm.orderSubmissionMode === "both" ? designStyles.exactWizardSelected109V5 : ""} onClick={() => updateSetupField("orderSubmissionMode", "both")}><strong>Phone + online</strong><span>هاتف + إلكتروني</span></button>
@@ -4828,6 +4866,8 @@ export default function DarikDirectStorefrontSettingsPage() {
                           {deliveryZonesSaveState109 === "saving" ? "Saving... / جارٍ الحفظ..." : deliveryZonesSaveState109 === "saved" ? "Zones saved / تم الحفظ" : deliveryZonesSaveState109 === "error" ? "Could not save / تعذر الحفظ" : "Zones save automatically / حفظ تلقائي"}
                         </small>
                       </div>
+                        </>
+                      ) : null}
                     </section>
                   ) : null}
 
