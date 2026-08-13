@@ -2374,6 +2374,7 @@ export default function DarikDirectStorefrontPage() {
     storeClock115
   );
 
+  // DARIK_CLOSED_STATUS_NEXT_DAY_DELIVERY_PLACEMENT_116
   const storeIsOpenNow115 =
     !storeClock115 || !storeHoursState115.hasHours
       ? effectiveAcceptingOrders
@@ -2727,9 +2728,7 @@ export default function DarikDirectStorefrontPage() {
                     ? "Open now / مفتوح الآن"
                     : storeHoursState115.phase === "before_open"
                       ? `Opens today at ${storeHoursState115.openLabel} / يفتح اليوم الساعة ${storeHoursState115.openLabel}`
-                      : pickupOnly
-                        ? "Closed now / مغلق الآن"
-                        : "Next-day delivery / توصيل في اليوم التالي"
+                      : "Closed now / مغلق الآن"
                   : isAutoParts
                     ? "Browse catalog / \u062a\u0635\u0641\u062d \u0627\u0644\u0643\u062a\u0627\u0644\u0648\u062c"
                     : "Fresh groceries / \u0645\u0646\u062a\u062c\u0627\u062a \u0637\u0627\u0632\u062c\u0629"}
@@ -2842,8 +2841,12 @@ style={storefrontTypographyInlineStyle(
               {showOrdering ? "Order status" : "Website mode"}
             </span>
             <strong>
-              {!showOrdering ? "Showcase only" : effectiveAcceptingOrders ? "Open now" : "Orders paused"}
-            </strong>
+              {effectiveAcceptingOrders
+                ? storeIsOpenNow115
+                  ? "Open now"
+                  : "Closed now"
+                : "Orders paused"}
+</strong>
           </div>
 
           <div className={styles.snapshotGrid}>
@@ -2853,12 +2856,16 @@ style={storefrontTypographyInlineStyle(
                   <Icon name="clock" size={20} />
                   <span>{pickupOnly ? "Pickup method" : "Estimated delivery"}</span>
                   <strong>
-                    {pickupOnly
-                      ? "Collect from store"
-                      : storefront.estimated_delivery_minutes
-                        ? `${storefront.estimated_delivery_minutes} min`
-                        : "Store estimate"}
-                  </strong>
+                {pickupOnly
+                  ? "Collect from store"
+                  : !storeIsOpenNow115 && effectiveAcceptingOrders
+                    ? storeHoursState115.phase === "before_open"
+                      ? `Delivery after ${storeHoursState115.openLabel}`
+                      : "Next-day delivery"
+                    : storefront.estimated_delivery_minutes
+                      ? `${storefront.estimated_delivery_minutes} min`
+                      : "Store estimate"}
+</strong>
                 </div>
                 <div>
                   <Icon name={pickupOnly ? "store" : "truck"} size={20} />
