@@ -2059,6 +2059,7 @@ export default function DarikDirectStorefrontPage() {
 
       setCustomerLocation117(location);
       setDeliveryMatch117(match);
+      setPickupBrowse118(false);
       setLocationGateOpen117(false);
       setLocationGateError117("");
       setLocationPredictions117([]);
@@ -2339,6 +2340,64 @@ export default function DarikDirectStorefrontPage() {
       setLocationSearchBusy117(false);
     }
   }
+  // DARIK_BROWSE_STORE_FOR_PICKUP_118
+  const [pickupBrowse118, setPickupBrowse118] =
+    useState(false);
+
+  useEffect(() => {
+    if (
+      !pickupBrowse118 ||
+      checkoutForm.fulfillmentMethod !== "delivery"
+    ) {
+      return;
+    }
+
+    setPickupBrowse118(false);
+    setCustomerLocation117(null);
+    setDeliveryMatch117(null);
+    setLocationGateError117("");
+    setLocationPredictions117([]);
+    setLocationSearch117("");
+    setLocationGateOpen117(true);
+  }, [
+    pickupBrowse118,
+    checkoutForm.fulfillmentMethod,
+  ]);
+
+  function browseStoreForPickup118() {
+    setPickupBrowse118(true);
+    setCustomerLocation117(null);
+    setDeliveryMatch117(null);
+    setLocationGateError117("");
+    setLocationPredictions117([]);
+    setLocationSearch117("");
+    setLocationGateOpen117(false);
+
+    setCheckoutForm((current) => ({
+      ...current,
+      fulfillmentMethod: "pickup",
+      latitude: null,
+      longitude: null,
+    }));
+  }
+
+  function switchPickupBrowseToDelivery118() {
+    setPickupBrowse118(false);
+    setCustomerLocation117(null);
+    setDeliveryMatch117(null);
+    setLocationGateError117("");
+    setLocationPredictions117([]);
+    setLocationSearch117("");
+    setLocationGateOpen117(true);
+
+    setCheckoutForm((current) => ({
+      ...current,
+      fulfillmentMethod: "delivery",
+      latitude: null,
+      longitude: null,
+    }));
+  }
+
   const deliveryEnabled = storefront?.delivery_enabled !== false;
   const pickupEnabled = storefront?.pickup_enabled === true;
   const pickupOnly = Boolean(storefront && !deliveryEnabled && pickupEnabled);
@@ -3289,7 +3348,34 @@ export default function DarikDirectStorefrontPage() {
               </div>
             ) : null}
 
-            <small
+                        <div
+              className={
+                styles.customerLocationPickupBreak118
+              }
+            >
+              <span>OR PICKUP / أو الاستلام</span>
+            </div>
+
+            <button
+              type="button"
+              className={
+                styles.customerLocationPickupBrowse118
+              }
+              onClick={browseStoreForPickup118}
+              disabled={
+                locationGateBusy117 ||
+                locationSearchBusy117
+              }
+            >
+              <strong>
+                Browse store for pickup / تصفح المتجر للاستلام
+              </strong>
+              <span>
+                No delivery location needed. Browse, add items, and collect from the store.
+              </span>
+            </button>
+
+<small
               className={
                 styles.customerLocationPrivacy117
               }
@@ -3298,6 +3384,29 @@ export default function DarikDirectStorefrontPage() {
               location • one-time marketplace handoff
             </small>
           </section>
+        </div>
+      ) : null}
+
+      {pickupBrowse118 ? (
+        <div
+          className={styles.pickupBrowseTab118}
+          role="status"
+        >
+          <div>
+            <strong>
+              Browse store for pickup / تصفح المتجر للاستلام
+            </strong>
+            <span>
+              Pickup mode • no delivery location required
+            </span>
+          </div>
+
+          <button
+            type="button"
+            onClick={switchPickupBrowseToDelivery118}
+          >
+            Check delivery / تحقق من التوصيل
+          </button>
         </div>
       ) : null}
       <style>{darikGlobalTypographyCss106}</style>
@@ -3542,10 +3651,9 @@ style={storefrontTypographyInlineStyle(
               <>
                 <div>
                   <Icon name="clock" size={20} />
-                  <span>{pickupOnly ? "Pickup method" : "Estimated delivery"}</span>
+                  <span>{(pickupOnly || selectedPickup) ? "Pickup method" : "Estimated delivery"}</span>
                   <strong>
-                {pickupOnly
-                  ? "Collect from store"
+                {(pickupOnly || selectedPickup) ? "Collect from store"
                   : !storeIsOpenNow115 && effectiveAcceptingOrders
                     ? storeHoursState115.phase === "before_open"
                       ? `Delivery after ${storeHoursState115.openLabel}`
@@ -3557,8 +3665,8 @@ style={storefrontTypographyInlineStyle(
                 </div>
                 <div>
                   <Icon name={pickupOnly ? "store" : "truck"} size={20} />
-                  <span>{pickupOnly ? "Pickup fee" : "Delivery fee"}</span>
-                  <strong>{pickupOnly ? "Free" : money(matchedDeliveryFee117)}</strong>
+                  <span>{(pickupOnly || selectedPickup) ? "Pickup fee" : "Delivery fee"}</span>
+                  <strong>{(pickupOnly || selectedPickup) ? "Free" : money(matchedDeliveryFee117)}</strong>
                 </div>
                 <div>
                   <Icon name="bag" size={20} />
@@ -4119,8 +4227,7 @@ style={storefrontTypographyInlineStyle(
             <span>
               {!showOrdering
                 ? "Showcase website"
-                : pickupOnly
-                  ? "Collect from store"
+                : (pickupOnly || selectedPickup) ? "Collect from store"
                   : "Order method"}
             </span>
           </article>

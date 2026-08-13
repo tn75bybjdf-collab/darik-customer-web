@@ -3241,7 +3241,7 @@ export default function DarikDirectStorefrontSettingsPage() {
         backgroundColor: setupForm.backgroundColor,
       },
       delivery_enabled: setupForm.fulfillmentMode === "delivery",
-      pickup_enabled: setupForm.fulfillmentMode === "pickup",
+      pickup_enabled: true,
       delivery_fee:
         setupForm.fulfillmentMode === "delivery"
           ? Number(setupForm.deliveryFee || 0)
@@ -3354,7 +3354,7 @@ export default function DarikDirectStorefrontSettingsPage() {
         ? setupForm.cliqIdentifier.trim()
         : null,
       delivery_enabled: setupForm.fulfillmentMode === "delivery",
-      pickup_enabled: setupForm.fulfillmentMode === "pickup",
+      pickup_enabled: true,
     };
 
     setStorefront(savedStorefront);
@@ -4775,6 +4775,7 @@ export default function DarikDirectStorefrontSettingsPage() {
                                             <section className={designStyles.pickupOnlyChoice114}>
                         <div className={designStyles.pickupOnlyChoiceCopy114}>
                           <small>FULFILLMENT / طريقة الاستلام</small>
+                        {/* DARIK_BROWSE_STORE_FOR_PICKUP_118 */}
                           <strong>Pickup only? / استلام من المتجر فقط؟</strong>
                           <span>
                             Choose Yes only when customers must collect from your
@@ -4796,7 +4797,7 @@ export default function DarikDirectStorefrontSettingsPage() {
                             }
                           >
                             <b>No / لا</b>
-                            <span>Delivery enabled / يوجد توصيل</span>
+                            <span>Delivery + pickup / توصيل + استلام</span>
                           </button>
 
                           <button

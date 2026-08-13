@@ -20652,3 +20652,111 @@
     font-size:1.16rem;
   }
 }
+
+/* DARIK_BROWSE_STORE_FOR_PICKUP_118 */
+.customerLocationPickupBreak118{
+  display:grid;
+  grid-template-columns:1fr auto 1fr;
+  align-items:center;
+  gap:10px;
+  margin-top:2px;
+  color:#8a9aa6;
+  font-size:.62rem;
+  font-weight:900;
+}
+.customerLocationPickupBreak118::before,
+.customerLocationPickupBreak118::after{
+  content:"";
+  height:1px;
+  background:rgba(15,23,42,.1);
+}
+.customerLocationPickupBrowse118{
+  display:grid;
+  gap:4px;
+  width:100%;
+  min-height:58px;
+  padding:11px 14px;
+  border:1px solid rgba(15,23,42,.12);
+  border-radius:14px;
+  background:#fff;
+  color:#172535;
+  text-align:left;
+  cursor:pointer;
+  transition:
+    transform .15s ease,
+    border-color .15s ease,
+    box-shadow .15s ease;
+}
+.customerLocationPickupBrowse118:hover{
+  transform:translateY(-1px);
+  border-color:rgba(37,120,80,.34);
+  box-shadow:0 10px 24px rgba(15,23,42,.08);
+}
+.customerLocationPickupBrowse118 strong{
+  color:#176a43;
+  font-size:.76rem;
+  font-weight:950;
+}
+.customerLocationPickupBrowse118 span{
+  color:#738795;
+  font-size:.64rem;
+  font-weight:750;
+  line-height:1.4;
+}
+.pickupBrowseTab118{
+  position:sticky;
+  top:10px;
+  z-index:110;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  width:min(calc(100% - 24px),1180px);
+  margin:10px auto 0;
+  padding:10px 12px;
+  border:1px solid rgba(27,122,75,.18);
+  border-radius:15px;
+  background:rgba(240,251,245,.96);
+  box-shadow:0 10px 28px rgba(15,23,42,.08);
+  backdrop-filter:blur(10px);
+}
+.pickupBrowseTab118>div{
+  display:grid;
+  gap:2px;
+  min-width:0;
+}
+.pickupBrowseTab118 strong{
+  color:#176a43;
+  font-size:.71rem;
+  font-weight:950;
+}
+.pickupBrowseTab118 span{
+  color:#617c6e;
+  font-size:.61rem;
+  font-weight:750;
+}
+.pickupBrowseTab118 button{
+  flex:0 0 auto;
+  min-height:38px;
+  padding:0 12px;
+  border:1px solid rgba(23,106,67,.2);
+  border-radius:10px;
+  background:#fff;
+  color:#176a43;
+  font:inherit;
+  font-size:.64rem;
+  font-weight:950;
+  cursor:pointer;
+}
+@media(max-width:600px){
+  .pickupBrowseTab118{
+    position:sticky;
+    top:6px;
+    align-items:stretch;
+    flex-direction:column;
+    width:calc(100% - 16px);
+  }
+  .pickupBrowseTab118 button{
+    width:100%;
+  }
+}
