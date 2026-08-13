@@ -20475,3 +20475,180 @@
     display: none !important;
   }
 }
+
+/* DARIK_FRESH_CUSTOMER_LOCATION_ONE_TIME_HANDOFF_117 */
+.customerLocationGate117{
+  position:fixed;
+  inset:0;
+  z-index:5000;
+  display:grid;
+  place-items:center;
+  padding:20px;
+  background:rgba(5,10,16,.72);
+  backdrop-filter:blur(12px);
+}
+.customerLocationCard117{
+  width:min(100%,520px);
+  display:grid;
+  gap:14px;
+  padding:24px;
+  border:1px solid rgba(255,255,255,.12);
+  border-radius:24px;
+  background:#fff;
+  color:#14212d;
+  box-shadow:0 30px 90px rgba(0,0,0,.35);
+}
+.customerLocationBrand117{
+  display:grid;
+  gap:7px;
+}
+.customerLocationBrand117>span{
+  color:#16814d;
+  font-size:.66rem;
+  font-weight:950;
+  letter-spacing:.09em;
+}
+.customerLocationBrand117>strong{
+  font-size:1.35rem;
+  line-height:1.14;
+}
+.customerLocationBrand117>p{
+  margin:0;
+  color:#667b8c;
+  font-size:.76rem;
+  line-height:1.55;
+}
+.customerLocationGps117{
+  min-height:50px;
+  padding:0 16px;
+  border:0;
+  border-radius:14px;
+  background:#111b24;
+  color:#fff;
+  font:inherit;
+  font-size:.75rem;
+  font-weight:950;
+  cursor:pointer;
+}
+.customerLocationGps117:disabled,
+.customerLocationSearch117 button:disabled{
+  opacity:.55;
+  cursor:wait;
+}
+.customerLocationDivider117{
+  display:grid;
+  grid-template-columns:1fr auto 1fr;
+  align-items:center;
+  gap:10px;
+  color:#8798a5;
+  font-size:.62rem;
+  font-weight:900;
+}
+.customerLocationDivider117::before,
+.customerLocationDivider117::after{
+  content:"";
+  height:1px;
+  background:rgba(15,23,42,.1);
+}
+.customerLocationSearch117{
+  position:relative;
+  display:grid;
+  gap:7px;
+}
+.customerLocationSearch117 label{
+  display:grid;
+  gap:6px;
+}
+.customerLocationSearch117 label>span{
+  color:#526979;
+  font-size:.68rem;
+  font-weight:900;
+}
+.customerLocationSearch117 label>div{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) auto;
+  gap:7px;
+}
+.customerLocationSearch117 input{
+  min-width:0;
+  min-height:48px;
+  padding:0 12px;
+  border:1px solid rgba(15,23,42,.13);
+  border-radius:12px;
+  background:#fff;
+  color:#14212d;
+  font:inherit;
+  font-size:.75rem;
+}
+.customerLocationSearch117 label button{
+  min-height:48px;
+  padding:0 15px;
+  border:0;
+  border-radius:12px;
+  background:#eaf6ef;
+  color:#176a43;
+  font:inherit;
+  font-size:.7rem;
+  font-weight:950;
+}
+.customerLocationResults117{
+  display:grid;
+  overflow:hidden;
+  border:1px solid rgba(15,23,42,.1);
+  border-radius:14px;
+  background:#fff;
+  box-shadow:0 14px 34px rgba(15,23,42,.12);
+}
+.customerLocationResults117>button{
+  display:grid;
+  gap:2px;
+  padding:11px 12px;
+  border:0;
+  border-bottom:1px solid rgba(15,23,42,.06);
+  background:#fff;
+  color:#182a38;
+  text-align:left;
+  cursor:pointer;
+}
+.customerLocationResults117>button:last-child{
+  border-bottom:0;
+}
+.customerLocationResults117 strong{
+  font-size:.72rem;
+}
+.customerLocationResults117 span{
+  overflow:hidden;
+  color:#7b8d9a;
+  font-size:.63rem;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+.customerLocationError117{
+  padding:10px 12px;
+  border:1px solid rgba(173,54,54,.14);
+  border-radius:12px;
+  background:#fff4f4;
+  color:#9a3535;
+  font-size:.69rem;
+  font-weight:850;
+  line-height:1.45;
+}
+.customerLocationPrivacy117{
+  color:#8b9aa5;
+  font-size:.61rem;
+  font-weight:800;
+  text-align:center;
+}
+@media(max-width:600px){
+  .customerLocationGate117{
+    align-items:end;
+    padding:10px;
+  }
+  .customerLocationCard117{
+    padding:19px 14px 16px;
+    border-radius:22px;
+  }
+  .customerLocationBrand117>strong{
+    font-size:1.16rem;
+  }
+}

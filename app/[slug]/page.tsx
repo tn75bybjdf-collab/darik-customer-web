@@ -1173,6 +1173,88 @@ function darikStoreHoursState115(
   };
 }
 
+// DARIK_FRESH_CUSTOMER_LOCATION_ONE_TIME_HANDOFF_117
+type DarikCustomerLocation117 = {
+  latitude: number;
+  longitude: number;
+  label: string;
+  source: "gps" | "google_search" | "marketplace";
+};
+
+type DarikNearbyStoreMatch117 = {
+  slug?: string | null;
+  delivery_fee?: number | string | null;
+  minimum_order?: number | string | null;
+  delivery_radius_km?: number | string | null;
+  distance_km?: number | string | null;
+};
+
+type DarikGooglePrediction117 = {
+  place_id: string;
+  description: string;
+  structured_formatting?: {
+    main_text?: string;
+    secondary_text?: string;
+  };
+};
+
+const DARIK_MARKETPLACE_LOCATION_HANDOFF_KEY_117 =
+  "darik_marketplace_location_handoff_117";
+
+function normalizeDarikCustomerLocation117(
+  value: unknown
+): DarikCustomerLocation117 | null {
+  if (!value || typeof value !== "object") return null;
+
+  const row = value as Record<string, unknown>;
+  const latitude = Number(row.latitude);
+  const longitude = Number(row.longitude);
+  const label = String(row.label ?? "").trim();
+
+  if (
+    !Number.isFinite(latitude) ||
+    latitude < -90 ||
+    latitude > 90 ||
+    !Number.isFinite(longitude) ||
+    longitude < -180 ||
+    longitude > 180
+  ) {
+    return null;
+  }
+
+  const sourceRaw = String(row.source ?? "").trim();
+
+  return {
+    latitude,
+    longitude,
+    label:
+      label ||
+      `${latitude.toFixed(6)}, ${longitude.toFixed(6)}`,
+    source:
+      sourceRaw === "gps"
+        ? "gps"
+        : sourceRaw === "marketplace"
+          ? "marketplace"
+          : "google_search",
+  };
+}
+
+function darikMarketplaceReferrerIsRoot117() {
+  if (typeof window === "undefined") return false;
+  if (!document.referrer) return false;
+
+  try {
+    const referrer = new URL(document.referrer);
+
+    return (
+      referrer.origin === window.location.origin &&
+      referrer.pathname === "/"
+    );
+  } catch {
+    return false;
+  }
+}
+
 export default function DarikDirectStorefrontPage() {
   // DARIK_REAL_BUSINESS_HOURS_NEXT_DAY_DELIVERY_115_V3_HOOK_ORDER_FIX
   const [storeClock115, setStoreClock115] = useState(0);
@@ -1822,14 +1904,461 @@ export default function DarikDirectStorefrontPage() {
     );
   }, [products]);
 
+
+
+  const [customerLocation117, setCustomerLocation117] =
+    useState<DarikCustomerLocation117 | null>(null);
+  const [deliveryMatch117, setDeliveryMatch117] =
+    useState<DarikNearbyStoreMatch117 | null>(null);
+  const [locationGateOpen117, setLocationGateOpen117] =
+    useState(false);
+  const [locationGateBusy117, setLocationGateBusy117] =
+    useState(false);
+  const [locationGateError117, setLocationGateError117] =
+    useState("");
+  const [locationSearch117, setLocationSearch117] =
+    useState("");
+  const [locationPredictions117, setLocationPredictions117] =
+    useState<DarikGooglePrediction117[]>([]);
+  const [locationSearchBusy117, setLocationSearchBusy117] =
+    useState(false);
+
+  useEffect(() => {
+    if (!storefront || !slug) return;
+
+    const storeDeliveryEnabled117 =
+      storefront.delivery_enabled !== false;
+    const storePickupEnabled117 =
+      storefront.pickup_enabled === true;
+
+    if (!storeDeliveryEnabled117) {
+      setLocationGateOpen117(false);
+      setCustomerLocation117(null);
+      setDeliveryMatch117(null);
+
+      try {
+        window.sessionStorage.removeItem(
+          DARIK_MARKETPLACE_LOCATION_HANDOFF_KEY_117
+        );
+      } catch {
+        // No persistent location is required for pickup-only stores.
+      }
+
+      return;
+    }
+
+    let marketplaceLocation117:
+      | DarikCustomerLocation117
+      | null = null;
+
+    try {
+      const raw = window.sessionStorage.getItem(
+        DARIK_MARKETPLACE_LOCATION_HANDOFF_KEY_117
+      );
+
+      window.sessionStorage.removeItem(
+        DARIK_MARKETPLACE_LOCATION_HANDOFF_KEY_117
+      );
+
+      if (
+        raw &&
+        darikMarketplaceReferrerIsRoot117()
+      ) {
+        const parsed = JSON.parse(raw) as
+          Record<string, unknown>;
+
+        const capturedAt = Number(
+          parsed.capturedAt ?? 0
+        );
+
+        const stillFresh =
+          Number.isFinite(capturedAt) &&
+          capturedAt > 0 &&
+          Date.now() - capturedAt <
+            60 * 60 * 1000;
+
+        if (stillFresh) {
+          marketplaceLocation117 =
+            normalizeDarikCustomerLocation117({
+              ...parsed,
+              source: "marketplace",
+            });
+        }
+      }
+    } catch {
+      marketplaceLocation117 = null;
+    }
+
+    if (marketplaceLocation117) {
+      void applyCustomerLocation117(
+        marketplaceLocation117,
+        true
+      );
+      return;
+    }
+
+    setCustomerLocation117(null);
+    setDeliveryMatch117(null);
+    setLocationGateError117("");
+    setLocationPredictions117([]);
+    setLocationSearch117("");
+    setLocationGateOpen117(true);
+
+    void storePickupEnabled117;
+  }, [
+    storefront?.id,
+    storefront?.delivery_enabled,
+    storefront?.pickup_enabled,
+    slug,
+  ]);
+
+  async function applyCustomerLocation117(
+    location: DarikCustomerLocation117,
+    fromMarketplace: boolean
+  ) {
+    if (!slug) return false;
+
+    setLocationGateBusy117(true);
+    setLocationGateError117("");
+
+    try {
+      const result = await supabase.rpc(
+        "darik_direct_nearby_storefronts",
+        {
+          p_latitude: location.latitude,
+          p_longitude: location.longitude,
+          p_limit: 200,
+        }
+      );
+
+      if (result.error) throw result.error;
+
+      const rows = Array.isArray(result.data)
+        ? (result.data as DarikNearbyStoreMatch117[])
+        : [];
+
+      const match =
+        rows.find(
+          (row) =>
+            String(row.slug ?? "")
+              .trim()
+              .toLowerCase() ===
+            slug.trim().toLowerCase()
+        ) ?? null;
+
+      if (!match) {
+        setCustomerLocation117(location);
+        setDeliveryMatch117(null);
+        setLocationGateOpen117(true);
+        setLocationGateError117(
+          "This location is outside this store's delivery zones. Choose another location. / هذا الموقع خارج مناطق توصيل المتجر. اختر موقعاً آخر."
+        );
+
+        return false;
+      }
+
+      setCustomerLocation117(location);
+      setDeliveryMatch117(match);
+      setLocationGateOpen117(false);
+      setLocationGateError117("");
+      setLocationPredictions117([]);
+      setLocationSearch117(location.label);
+
+      setCheckoutForm((current) => ({
+        ...current,
+        fulfillmentMethod: "delivery",
+        latitude: location.latitude,
+        longitude: location.longitude,
+      }));
+
+      return true;
+    } catch (caught) {
+      setLocationGateError117(
+        caught instanceof Error
+          ? caught.message
+          : "Could not calculate delivery for this location."
+      );
+
+      if (fromMarketplace) {
+        setLocationGateOpen117(true);
+      }
+
+      return false;
+    } finally {
+      setLocationGateBusy117(false);
+    }
+  }
+
+  function useFreshCurrentLocation117() {
+    if (locationGateBusy117) return;
+
+    if (!navigator.geolocation) {
+      setLocationGateError117(
+        "Location access is not available in this browser. Search Google instead."
+      );
+      return;
+    }
+
+    setLocationGateBusy117(true);
+    setLocationGateError117("");
+    setLocationPredictions117([]);
+
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        const latitude = position.coords.latitude;
+        const longitude = position.coords.longitude;
+
+        let label =
+          `${latitude.toFixed(6)}, ${longitude.toFixed(6)}`;
+
+        try {
+          const params = new URLSearchParams({
+            lat: String(latitude),
+            lng: String(longitude),
+            language: "en",
+          });
+
+          const response = await fetch(
+            `/api/google-places/geocode?${params.toString()}`,
+            { cache: "no-store" }
+          );
+
+          const json = await response.json();
+          const first =
+            Array.isArray(json.results)
+              ? json.results[0]
+              : null;
+
+          label = String(
+            first?.formatted_address || label
+          ).trim();
+        } catch {
+          // GPS coordinates remain authoritative.
+        }
+
+        setLocationGateBusy117(false);
+
+        await applyCustomerLocation117(
+          {
+            latitude,
+            longitude,
+            label,
+            source: "gps",
+          },
+          false
+        );
+      },
+      (error) => {
+        setLocationGateBusy117(false);
+        setLocationGateError117(
+          error.message ||
+            "Could not get your current location."
+        );
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 20_000,
+        maximumAge: 0,
+      }
+    );
+  }
+
+  async function searchCustomerLocation117() {
+    const query = locationSearch117.trim();
+
+    if (query.length < 3) {
+      setLocationGateError117(
+        "Type at least 3 characters to search Google Maps."
+      );
+      return;
+    }
+
+    setLocationSearchBusy117(true);
+    setLocationGateError117("");
+
+    try {
+      const params = new URLSearchParams({
+        input: query,
+        language: "en",
+      });
+
+      const response = await fetch(
+        `/api/google-places/autocomplete?${params.toString()}`,
+        { cache: "no-store" }
+      );
+
+      const json = await response.json();
+
+      if (
+        json.status !== "OK" &&
+        json.status !== "ZERO_RESULTS"
+      ) {
+        throw new Error(
+          json.error_message ||
+            "Google Maps search failed."
+        );
+      }
+
+      const predictions =
+        Array.isArray(json.predictions)
+          ? json.predictions
+              .slice(0, 6)
+              .map((item: unknown) => {
+                const row =
+                  item &&
+                  typeof item === "object"
+                    ? (item as Record<
+                        string,
+                        unknown
+                      >)
+                    : {};
+
+                const structured =
+                  row.structured_formatting &&
+                  typeof row.structured_formatting ===
+                    "object"
+                    ? (row.structured_formatting as Record<
+                        string,
+                        unknown
+                      >)
+                    : {};
+
+                return {
+                  place_id: String(
+                    row.place_id ?? ""
+                  ),
+                  description: String(
+                    row.description ?? ""
+                  ),
+                  structured_formatting: {
+                    main_text: String(
+                      structured.main_text ?? ""
+                    ),
+                    secondary_text: String(
+                      structured.secondary_text ?? ""
+                    ),
+                  },
+                };
+              })
+              .filter(
+                (
+                  prediction: DarikGooglePrediction117
+                ) =>
+                  prediction.place_id &&
+                  prediction.description
+              )
+          : [];
+
+      setLocationPredictions117(predictions);
+
+      if (!predictions.length) {
+        setLocationGateError117(
+          "No matching Google Maps locations found."
+        );
+      }
+    } catch (caught) {
+      setLocationPredictions117([]);
+      setLocationGateError117(
+        caught instanceof Error
+          ? caught.message
+          : "Google Maps search failed."
+      );
+    } finally {
+      setLocationSearchBusy117(false);
+    }
+  }
+
+  async function chooseCustomerPlace117(
+    prediction: DarikGooglePrediction117
+  ) {
+    setLocationSearchBusy117(true);
+    setLocationGateError117("");
+
+    try {
+      const params = new URLSearchParams({
+        place_id: prediction.place_id,
+        language: "en",
+      });
+
+      const response = await fetch(
+        `/api/google-places/details?${params.toString()}`,
+        { cache: "no-store" }
+      );
+
+      const json = await response.json();
+      const point =
+        json.result?.geometry?.location;
+
+      if (
+        json.status !== "OK" ||
+        !point
+      ) {
+        throw new Error(
+          json.error_message ||
+            "Google Maps did not return this location."
+        );
+      }
+
+      const latitude = Number(point.lat);
+      const longitude = Number(point.lng);
+
+      if (
+        !Number.isFinite(latitude) ||
+        !Number.isFinite(longitude)
+      ) {
+        throw new Error(
+          "Google Maps returned invalid coordinates."
+        );
+      }
+
+      const label = String(
+        json.result?.formatted_address ||
+          prediction.description ||
+          `${latitude.toFixed(6)}, ${longitude.toFixed(6)}`
+      ).trim();
+
+      setLocationSearch117(label);
+      setLocationPredictions117([]);
+
+      await applyCustomerLocation117(
+        {
+          latitude,
+          longitude,
+          label,
+          source: "google_search",
+        },
+        false
+      );
+    } catch (caught) {
+      setLocationGateError117(
+        caught instanceof Error
+          ? caught.message
+          : "Could not use this Google Maps location."
+      );
+    } finally {
+      setLocationSearchBusy117(false);
+    }
+  }
   const deliveryEnabled = storefront?.delivery_enabled !== false;
   const pickupEnabled = storefront?.pickup_enabled === true;
   const pickupOnly = Boolean(storefront && !deliveryEnabled && pickupEnabled);
   const selectedPickup = checkoutForm.fulfillmentMethod === "pickup";
+  const matchedDeliveryFee117 = Number(
+    deliveryMatch117?.delivery_fee ??
+      storefront?.delivery_fee ??
+      0
+  );
+  const matchedMinimumOrder117 = Number(
+    deliveryMatch117?.minimum_order ??
+      storefront?.minimum_order ??
+      0
+  );
   const deliveryFee =
-    deliveryEnabled && !selectedPickup ? Number(storefront?.delivery_fee ?? 0) : 0;
+    deliveryEnabled && !selectedPickup
+      ? matchedDeliveryFee117
+      : 0;
   const orderTotal = cartSubtotal + deliveryFee;
-  const minimumOrder = Number(storefront?.minimum_order ?? 0);
+  const minimumOrder = matchedMinimumOrder117;
   const minimumReached = cartSubtotal >= minimumOrder;
   const activeProduct = useMemo(
     () => products.find((product) => product.id === activeProductId) ?? null,
@@ -1944,7 +2473,7 @@ export default function DarikDirectStorefrontPage() {
       {
         enableHighAccuracy: true,
         timeout: 15000,
-        maximumAge: 60000,
+        maximumAge: 0,
       }
     );
   }
@@ -2612,6 +3141,165 @@ export default function DarikDirectStorefrontPage() {
       data-category-count={String(visibleCategories.length)}
       data-direct-purchase={hasDirectPurchaseProducts ? "yes" : "no"}
     >
+      {locationGateOpen117 &&
+      deliveryEnabled &&
+      !pickupOnly ? (
+        <div
+          className={styles.customerLocationGate117}
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="darik-location-title-117"
+        >
+          <section
+            className={styles.customerLocationCard117}
+          >
+            <div
+              className={
+                styles.customerLocationBrand117
+              }
+            >
+              <span>DARIK DELIVERY / توصيل داريك</span>
+              <strong
+                id="darik-location-title-117"
+              >
+                Where should we deliver? / وين التوصيل؟
+              </strong>
+              <p>
+                We use your fresh location only to
+                calculate this store&apos;s delivery
+                zone, fee, and minimum order. Darik
+                does not save this location for your
+                next visit.
+              </p>
+            </div>
+
+            <button
+              type="button"
+              className={
+                styles.customerLocationGps117
+              }
+              onClick={useFreshCurrentLocation117}
+              disabled={
+                locationGateBusy117 ||
+                locationSearchBusy117
+              }
+            >
+              {locationGateBusy117
+                ? "Getting fresh location... / جارٍ تحديد الموقع..."
+                : "Use my current location / استخدم موقعي الحالي"}
+            </button>
+
+            <div
+              className={
+                styles.customerLocationDivider117
+              }
+            >
+              <span>OR / أو</span>
+            </div>
+
+            <div
+              className={
+                styles.customerLocationSearch117
+              }
+            >
+              <label>
+                <span>
+                  Search Google Maps / البحث في Google
+                  Maps
+                </span>
+
+                <div>
+                  <input
+                    value={locationSearch117}
+                    onChange={(event) =>
+                      setLocationSearch117(
+                        event.target.value
+                      )
+                    }
+                    onKeyDown={(event) => {
+                      if (event.key === "Enter") {
+                        event.preventDefault();
+                        void searchCustomerLocation117();
+                      }
+                    }}
+                    placeholder="Store, street, building or landmark"
+                    autoComplete="off"
+                  />
+
+                  <button
+                    type="button"
+                    onClick={() =>
+                      void searchCustomerLocation117()
+                    }
+                    disabled={
+                      locationSearchBusy117 ||
+                      locationGateBusy117
+                    }
+                  >
+                    {locationSearchBusy117
+                      ? "Searching..."
+                      : "Search"}
+                  </button>
+                </div>
+              </label>
+
+              {locationPredictions117.length > 0 ? (
+                <div
+                  className={
+                    styles.customerLocationResults117
+                  }
+                >
+                  {locationPredictions117.map(
+                    (prediction) => (
+                      <button
+                        type="button"
+                        key={prediction.place_id}
+                        onClick={() =>
+                          void chooseCustomerPlace117(
+                            prediction
+                          )
+                        }
+                      >
+                        <strong>
+                          {prediction
+                            .structured_formatting
+                            ?.main_text ||
+                            prediction.description}
+                        </strong>
+                        <span>
+                          {prediction
+                            .structured_formatting
+                            ?.secondary_text ||
+                            prediction.description}
+                        </span>
+                      </button>
+                    )
+                  )}
+                </div>
+              ) : null}
+            </div>
+
+            {locationGateError117 ? (
+              <div
+                className={
+                  styles.customerLocationError117
+                }
+              >
+                {locationGateError117}
+              </div>
+            ) : null}
+
+            <small
+              className={
+                styles.customerLocationPrivacy117
+              }
+            >
+              Fresh each visit • no saved Darik
+              location • one-time marketplace handoff
+            </small>
+          </section>
+        </div>
+      ) : null}
       <style>{darikGlobalTypographyCss106}</style>
       <ProductDetailExperience
         open={Boolean(activeProduct)}
@@ -2870,7 +3558,7 @@ style={storefrontTypographyInlineStyle(
                 <div>
                   <Icon name={pickupOnly ? "store" : "truck"} size={20} />
                   <span>{pickupOnly ? "Pickup fee" : "Delivery fee"}</span>
-                  <strong>{pickupOnly ? "Free" : money(storefront.delivery_fee)}</strong>
+                  <strong>{pickupOnly ? "Free" : money(matchedDeliveryFee117)}</strong>
                 </div>
                 <div>
                   <Icon name="bag" size={20} />

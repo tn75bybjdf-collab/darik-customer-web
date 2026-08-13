@@ -90,6 +90,8 @@ type IconName =
   | "fashion";
 
 const STORAGE_LOCATION_KEY = "darik_delivery_location_v1";
+// DARIK_FRESH_CUSTOMER_LOCATION_ONE_TIME_HANDOFF_117
+const DARIK_MARKETPLACE_LOCATION_HANDOFF_KEY_117 = "darik_marketplace_location_handoff_117";
 const STORAGE_LANGUAGE_KEY = "darik_marketplace_language_v1";
 
 const categoryGroups: Array<{
@@ -550,7 +552,11 @@ export default function DarikDiscoveryHome() {
         : "en";
     setLanguage(nextLanguage);
 
-    const storedLocation = window.localStorage.getItem(STORAGE_LOCATION_KEY);
+    window.localStorage.removeItem(STORAGE_LOCATION_KEY);
+    window.sessionStorage.removeItem(
+      DARIK_MARKETPLACE_LOCATION_HANDOFF_KEY_117
+    );
+    const storedLocation = null;
     if (!storedLocation) {
       setLocationReady(true);
       return;
@@ -567,6 +573,27 @@ export default function DarikDiscoveryHome() {
     } finally {
       setLocationReady(true);
     }
+  }, []);
+
+  useEffect(() => {
+    const freshMarketplaceOnBack117 = (
+      event: PageTransitionEvent
+    ) => {
+      if (event.persisted) {
+        window.location.reload();
+      }
+    };
+
+    window.addEventListener(
+      "pageshow",
+      freshMarketplaceOnBack117
+    );
+
+    return () =>
+      window.removeEventListener(
+        "pageshow",
+        freshMarketplaceOnBack117
+      );
   }, []);
 
   useEffect(() => {
@@ -602,7 +629,14 @@ export default function DarikDiscoveryHome() {
   }
 
   function saveLocation(nextLocation: CustomerLocation) {
-    window.localStorage.setItem(STORAGE_LOCATION_KEY, JSON.stringify(nextLocation));
+    window.localStorage.removeItem(STORAGE_LOCATION_KEY);
+    window.sessionStorage.setItem(
+      DARIK_MARKETPLACE_LOCATION_HANDOFF_KEY_117,
+      JSON.stringify({
+        ...nextLocation,
+        capturedAt: Date.now(),
+      })
+    );
     setLocation(nextLocation);
     setLocationDialogOpen(false);
     setLocationError("");
@@ -642,7 +676,7 @@ export default function DarikDiscoveryHome() {
         setLocationError(t.browserDenied);
         setLocating(false);
       },
-      { enableHighAccuracy: true, timeout: 20000, maximumAge: 300000 },
+      { enableHighAccuracy: true, timeout: 20000, maximumAge: 0 },
     );
   }
 
