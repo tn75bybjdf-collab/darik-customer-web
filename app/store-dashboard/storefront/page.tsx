@@ -2561,19 +2561,14 @@ export default function DarikDirectStorefrontSettingsPage() {
           (storefrontResult.data as StorefrontSettings | null) ?? null;
         setStorefront(loadedStorefront);
 
+        // DARIK_ARABIC_STOREFRONT_TEXT_PERSISTENCE_125
         const databaseForm: StorefrontForm = loadedStorefront
           ? {
               slug: loadedStorefront.slug,
-              displayName:
-                loadedStorefront.display_name ||
-                loadedStorefront.display_name_ar ||
-                "",
-              displayNameAr: "",
-              tagline:
-                loadedStorefront.tagline ||
-                loadedStorefront.tagline_ar ||
-                "",
-              taglineAr: "",
+              displayName: loadedStorefront.display_name || "",
+              displayNameAr: loadedStorefront.display_name_ar || "",
+              tagline: loadedStorefront.tagline || "",
+              taglineAr: loadedStorefront.tagline_ar || "",
               logoUrl: loadedStorefront.logo_url ?? "",
               heroImageUrl: loadedStorefront.hero_image_url ?? "",
               phone: loadedStorefront.business_phone ?? "",
@@ -2706,14 +2701,16 @@ export default function DarikDirectStorefrontSettingsPage() {
                   ...draftForm,
                   displayName:
                     draftForm.displayName?.trim() ||
-                    draftForm.displayNameAr?.trim() ||
                     databaseForm.displayName,
-                  displayNameAr: "",
+                  displayNameAr:
+                    draftForm.displayNameAr?.trim() ||
+                    databaseForm.displayNameAr,
                   tagline:
                     draftForm.tagline?.trim() ||
+                    databaseForm.tagline,
+                  taglineAr:
                     draftForm.taglineAr?.trim() ||
-                    "",
-                  taglineAr: "",
+                    databaseForm.taglineAr,
                   addressText:
                     draftForm.addressText?.trim() ||
                     draftForm.addressTextAr?.trim() ||
@@ -3200,9 +3197,9 @@ export default function DarikDirectStorefrontSettingsPage() {
       retailer_id: selectedStore.retailer_id,
       slug,
       display_name: displayName,
-      display_name_ar: null,
+      display_name_ar: setupForm.displayNameAr.trim() || null,
       tagline: setupForm.tagline.trim() || null,
-      tagline_ar: null,
+      tagline_ar: setupForm.taglineAr.trim() || null,
       logo_url: setupForm.logoUrl.trim() || null,
       hero_image_url: setupForm.heroImageUrl.trim() || null,
       business_phone: setupForm.phone.trim() || null,
