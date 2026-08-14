@@ -92,6 +92,9 @@ type IconName =
 const STORAGE_LOCATION_KEY = "darik_delivery_location_v1";
 // DARIK_FRESH_CUSTOMER_LOCATION_ONE_TIME_HANDOFF_117
 const DARIK_MARKETPLACE_LOCATION_HANDOFF_KEY_117 = "darik_marketplace_location_handoff_117";
+// DARIK_SESSION_LOCATION_AND_PREVIEW_BYPASS_120
+const DARIK_CUSTOMER_LOCATION_SESSION_KEY_120 =
+  "darik_customer_location_session_120";
 const STORAGE_LANGUAGE_KEY = "darik_marketplace_language_v1";
 
 const categoryGroups: Array<{
@@ -553,10 +556,9 @@ export default function DarikDiscoveryHome() {
     setLanguage(nextLanguage);
 
     window.localStorage.removeItem(STORAGE_LOCATION_KEY);
-    window.sessionStorage.removeItem(
-      DARIK_MARKETPLACE_LOCATION_HANDOFF_KEY_117
+    const storedLocation = window.sessionStorage.getItem(
+      DARIK_CUSTOMER_LOCATION_SESSION_KEY_120
     );
-    const storedLocation = null;
     if (!storedLocation) {
       setLocationReady(true);
       return;
@@ -632,6 +634,13 @@ export default function DarikDiscoveryHome() {
     window.localStorage.removeItem(STORAGE_LOCATION_KEY);
     window.sessionStorage.setItem(
       DARIK_MARKETPLACE_LOCATION_HANDOFF_KEY_117,
+      JSON.stringify({
+        ...nextLocation,
+        capturedAt: Date.now(),
+      })
+    );
+    window.sessionStorage.setItem(
+      DARIK_CUSTOMER_LOCATION_SESSION_KEY_120,
       JSON.stringify({
         ...nextLocation,
         capturedAt: Date.now(),

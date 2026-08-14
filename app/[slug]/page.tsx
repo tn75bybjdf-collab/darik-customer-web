@@ -1201,6 +1201,67 @@ type DarikGooglePrediction117 = {
 const DARIK_MARKETPLACE_LOCATION_HANDOFF_KEY_117 =
   "darik_marketplace_location_handoff_117";
 
+// DARIK_SESSION_LOCATION_AND_PREVIEW_BYPASS_120
+const DARIK_CUSTOMER_LOCATION_SESSION_KEY_120 =
+  "darik_customer_location_session_120";
+const DARIK_PICKUP_BROWSE_SESSION_PREFIX_120 =
+  "darik_pickup_browse_session_120:";
+
+function readDarikCustomerLocationSession120():
+  | DarikCustomerLocation117
+  | null {
+  if (typeof window === "undefined") return null;
+
+  try {
+    const raw = window.sessionStorage.getItem(
+      DARIK_CUSTOMER_LOCATION_SESSION_KEY_120
+    );
+
+    if (!raw) return null;
+
+    return normalizeDarikCustomerLocation117(
+      JSON.parse(raw)
+    );
+  } catch {
+    return null;
+  }
+}
+
+function writeDarikCustomerLocationSession120(
+  location: DarikCustomerLocation117
+) {
+  if (typeof window === "undefined") return;
+
+  try {
+    window.sessionStorage.setItem(
+      DARIK_CUSTOMER_LOCATION_SESSION_KEY_120,
+      JSON.stringify({
+        ...location,
+        capturedAt: Date.now(),
+      })
+    );
+  } catch {
+    // Session storage can be unavailable in restrictive browser modes.
+  }
+}
+
+function darikPickupBrowseSessionKey120(slug: string) {
+  return (
+    DARIK_PICKUP_BROWSE_SESSION_PREFIX_120 +
+    slug.trim().toLowerCase()
+  );
+}
+
+function darikIsBuilderPreview120() {
+  if (typeof window === "undefined") return false;
+
+  return (
+    new URLSearchParams(window.location.search).get(
+      "builderPreview"
+    ) === "1"
+  );
+}
+
 function normalizeDarikCustomerLocation117(
   value: unknown
 ): DarikCustomerLocation117 | null {
@@ -1926,10 +1987,20 @@ export default function DarikDirectStorefrontPage() {
   useEffect(() => {
     if (!storefront || !slug) return;
 
+    /*
+      Retailer builder preview is not a customer visit. Never block setup or
+      preview rendering behind a customer delivery-location question.
+    */
+    if (darikIsBuilderPreview120()) {
+      setLocationGateOpen117(false);
+      setLocationGateBusy117(false);
+      setLocationGateError117("");
+      setLocationPredictions117([]);
+      return;
+    }
+
     const storeDeliveryEnabled117 =
       storefront.delivery_enabled !== false;
-    const storePickupEnabled117 =
-      storefront.pickup_enabled === true;
 
     if (!storeDeliveryEnabled117) {
       setLocationGateOpen117(false);
@@ -1941,12 +2012,51 @@ export default function DarikDirectStorefrontPage() {
           DARIK_MARKETPLACE_LOCATION_HANDOFF_KEY_117
         );
       } catch {
-        // No persistent location is required for pickup-only stores.
+        // No delivery location is required for pickup-only stores.
       }
 
       return;
     }
 
+    /*
+      If this customer explicitly chose pickup browsing for this store during
+      the current tab/session, a full storefront navigation must honor it.
+    */
+    try {
+      const pickupForThisStore120 =
+        window.sessionStorage.getItem(
+          darikPickupBrowseSessionKey120(slug)
+        ) === "1";
+
+      if (pickupForThisStore120) {
+        browseStoreForPickup118();
+        return;
+      }
+    } catch {
+      // Fall through to the normal session-location path.
+    }
+
+    /*
+      Main path: reuse the customer's location for this browser tab/session.
+      No GPS/browser permission request is repeated on product navigation,
+      storefront reloads, or a return from the marketplace.
+    */
+    const sessionLocation120 =
+      readDarikCustomerLocationSession120();
+
+    if (sessionLocation120) {
+      void applyCustomerLocation117(
+        sessionLocation120,
+        true
+      );
+      return;
+    }
+
+    /*
+      Compatibility path for a marketplace page that was already open before
+      FRONTEND 120 deployed. Consume FRONTEND 117's old one-time handoff once,
+      then promote it to the new session-only location.
+    */
     let marketplaceLocation117:
       | DarikCustomerLocation117
       | null = null;
@@ -1990,6 +2100,9 @@ export default function DarikDirectStorefrontPage() {
     }
 
     if (marketplaceLocation117) {
+      writeDarikCustomerLocationSession120(
+        marketplaceLocation117
+      );
       void applyCustomerLocation117(
         marketplaceLocation117,
         true
@@ -2003,8 +2116,6 @@ export default function DarikDirectStorefrontPage() {
     setLocationPredictions117([]);
     setLocationSearch117("");
     setLocationGateOpen117(true);
-
-    void storePickupEnabled117;
   }, [
     storefront?.id,
     storefront?.delivery_enabled,
@@ -2017,6 +2128,16 @@ export default function DarikDirectStorefrontPage() {
     fromMarketplace: boolean
   ) {
     if (!slug) return false;
+
+    writeDarikCustomerLocationSession120(location);
+
+    try {
+      window.sessionStorage.removeItem(
+        darikPickupBrowseSessionKey120(slug)
+      );
+    } catch {
+      // Session pickup override is best-effort only.
+    }
 
     setLocationGateBusy117(true);
     setLocationGateError117("");
@@ -2387,6 +2508,17 @@ export default function DarikDirectStorefrontPage() {
   ]);
 
   function browseStoreForPickup118() {
+    try {
+      if (slug) {
+        window.sessionStorage.setItem(
+          darikPickupBrowseSessionKey120(slug),
+          "1"
+        );
+      }
+    } catch {
+      // Pickup browsing still works even if session storage is unavailable.
+    }
+
     setPickupBrowse118(true);
     setCustomerLocation117(null);
     setDeliveryMatch117(null);
@@ -2404,6 +2536,29 @@ export default function DarikDirectStorefrontPage() {
   }
 
   function switchPickupBrowseToDelivery118() {
+    try {
+      if (slug) {
+        window.sessionStorage.removeItem(
+          darikPickupBrowseSessionKey120(slug)
+        );
+      }
+    } catch {
+      // Continue with delivery selection.
+    }
+
+    const existingSessionLocation120 =
+      readDarikCustomerLocationSession120();
+
+    if (existingSessionLocation120) {
+      setPickupBrowse118(false);
+      setLocationGateOpen117(false);
+      void applyCustomerLocation117(
+        existingSessionLocation120,
+        true
+      );
+      return;
+    }
+
     setPickupBrowse118(false);
     setCustomerLocation117(null);
     setDeliveryMatch117(null);
@@ -3402,8 +3557,7 @@ export default function DarikDirectStorefrontPage() {
                 styles.customerLocationPrivacy117
               }
             >
-              Fresh each visit • no saved Darik
-              location • one-time marketplace handoff
+              Session only • cleared when this browser tab/session ends • never saved permanently
             </small>
           </section>
         </div>
