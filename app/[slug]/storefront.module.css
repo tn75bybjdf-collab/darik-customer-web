@@ -20760,3 +20760,324 @@
     width:100%;
   }
 }
+
+/* DARIK_DARIK_ACCOUNT_OR_GUEST_CHECKOUT_121 */
+.darikCheckoutIdentity121 {
+  margin: 0 0 18px;
+  padding: 18px;
+  border: 1px solid rgba(17, 24, 39, 0.11);
+  border-radius: 22px;
+  background: linear-gradient(145deg, #ffffff 0%, #fbfbf8 100%);
+  box-shadow: 0 16px 38px rgba(17, 24, 39, 0.07);
+}
+
+.darikCheckoutIdentityHeader121 {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.darikCheckoutIdentityHeader121 > div {
+  min-width: 0;
+  display: grid;
+  gap: 4px;
+}
+
+.darikCheckoutIdentityHeader121 span {
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #6b7280;
+}
+
+.darikCheckoutIdentityHeader121 strong {
+  color: #111827;
+  font-size: 20px;
+  line-height: 1.15;
+}
+
+.darikAccountBadge121,
+.darikGuestBadge121 {
+  flex: 0 0 auto;
+  border-radius: 999px;
+  padding: 7px 10px;
+  font-size: 10px !important;
+  letter-spacing: 0.08em !important;
+}
+
+.darikAccountBadge121 {
+  background: #111827;
+  color: #ffd23f !important;
+}
+
+.darikGuestBadge121 {
+  background: #f1f5f9;
+  color: #475569 !important;
+}
+
+.darikCheckoutIdentityCopy121 {
+  margin: 10px 0 0;
+  color: #667085;
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+.darikAccountChoiceActions121 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.darikAccountChoiceActions121 button,
+.darikAccountFormActions121 button,
+.darikAccountSignedActions121 button,
+.darikAccountGuestState121 button {
+  min-height: 44px;
+  border-radius: 14px;
+  border: 1px solid #d0d5dd;
+  padding: 10px 14px;
+  background: #ffffff;
+  color: #111827;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.darikAccountChoiceActions121 button:disabled,
+.darikAccountFormActions121 button:disabled,
+.darikAccountSignedActions121 button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.darikAccountPrimary121 {
+  border-color: #111827 !important;
+  background: #111827 !important;
+  color: #ffd23f !important;
+}
+
+.darikAccountSecondary121 {
+  border-color: #111827 !important;
+  color: #111827 !important;
+}
+
+.darikAccountGuest121 {
+  grid-column: 1 / -1;
+  background: #f8fafc !important;
+  color: #475569 !important;
+}
+
+.darikAccountSigned121,
+.darikAccountGuestState121 {
+  display: flex;
+  align-items: stretch;
+  justify-content: space-between;
+  gap: 14px;
+  margin-top: 16px;
+  padding: 14px;
+  border-radius: 16px;
+  background: #f8fafc;
+  border: 1px solid #e5e7eb;
+}
+
+.darikAccountSigned121 > div:first-child,
+.darikAccountGuestState121 > div:first-child {
+  min-width: 0;
+  display: grid;
+  gap: 3px;
+}
+
+.darikAccountSigned121 small,
+.darikAccountGuestState121 span,
+.darikAccountSignedActions121 span {
+  color: #667085;
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.darikAccountSigned121 strong,
+.darikAccountGuestState121 strong {
+  color: #111827;
+  font-size: 15px;
+}
+
+.darikAccountSigned121 > div:first-child > span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: #475467;
+  font-size: 12px;
+}
+
+.darikAccountSignedActions121 {
+  flex: 0 1 270px;
+  display: grid;
+  align-content: center;
+  gap: 8px;
+}
+
+.darikAccountSignedActions121 button {
+  min-height: 38px;
+  padding: 8px 10px;
+  font-size: 11px;
+}
+
+.darikAccountGuestState121 button {
+  align-self: center;
+  min-height: 38px;
+  font-size: 11px;
+}
+
+.darikAccountForm121 {
+  display: grid;
+  gap: 12px;
+  margin-top: 16px;
+  padding: 15px;
+  border: 1px solid #e5e7eb;
+  border-radius: 17px;
+  background: #ffffff;
+}
+
+.darikAccountFormHeading121 {
+  display: grid;
+  gap: 3px;
+}
+
+.darikAccountFormHeading121 strong {
+  color: #111827;
+  font-size: 15px;
+}
+
+.darikAccountFormHeading121 span,
+.darikAccountSessionNotice121 {
+  color: #667085;
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.darikAccountSessionNotice121 {
+  margin: 0;
+  padding: 10px 11px;
+  border-radius: 12px;
+  background: #fff7d6;
+  color: #6b5600;
+  border: 1px solid #f6df7b;
+  font-weight: 800;
+}
+
+.darikAccountFormGrid121 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.darikAccountForm121 label,
+.darikAccountFormGrid121 label {
+  display: grid;
+  gap: 6px;
+  color: #344054;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.darikAccountForm121 input,
+.darikAccountFormGrid121 input,
+.darikAccountCode121 input {
+  width: 100%;
+  min-height: 44px;
+  border: 1px solid #d0d5dd;
+  border-radius: 13px;
+  padding: 10px 12px;
+  background: #ffffff;
+  color: #101828;
+  font: inherit;
+  outline: none;
+}
+
+.darikAccountForm121 input:focus,
+.darikAccountFormGrid121 input:focus,
+.darikAccountCode121 input:focus {
+  border-color: #111827;
+  box-shadow: 0 0 0 3px rgba(255, 210, 63, 0.28);
+}
+
+.darikAccountFormActions121 {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.darikAccountFormActions121 button {
+  flex: 1 1 150px;
+}
+
+.darikAccountCode121 {
+  display: grid;
+  gap: 7px;
+  padding: 13px;
+  border-radius: 14px;
+  background: #f8fafc;
+  border: 1px solid #e5e7eb;
+}
+
+.darikAccountCode121 span {
+  color: #667085;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.darikAccountCode121 strong {
+  color: #111827;
+  font-size: 13px;
+}
+
+.darikAccountStatus121 {
+  margin: 12px 0 0;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: #fff9df;
+  border: 1px solid #f3df86;
+  color: #665200;
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1.45;
+}
+
+@media (max-width: 700px) {
+  .darikCheckoutIdentity121 {
+    padding: 15px;
+    border-radius: 18px;
+  }
+
+  .darikCheckoutIdentityHeader121 strong {
+    font-size: 18px;
+  }
+
+  .darikAccountChoiceActions121,
+  .darikAccountFormGrid121 {
+    grid-template-columns: 1fr;
+  }
+
+  .darikAccountGuest121 {
+    grid-column: auto;
+  }
+
+  .darikAccountSigned121,
+  .darikAccountGuestState121 {
+    flex-direction: column;
+  }
+
+  .darikAccountSignedActions121 {
+    flex-basis: auto;
+  }
+
+  .darikAccountFormActions121 {
+    flex-direction: column;
+  }
+
+  .darikAccountFormActions121 button {
+    width: 100%;
+    flex-basis: auto;
+  }
+}

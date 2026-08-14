@@ -2575,6 +2575,532 @@ export default function DarikDirectStorefrontPage() {
     }));
   }
 
+
+
+  // DARIK_DARIK_ACCOUNT_OR_GUEST_CHECKOUT_121
+  type DarikCheckoutIdentity121 = "choice" | "guest" | "login" | "signup" | "account";
+  type DarikSignupStep121 = "details" | "email_code" | "phone_code";
+  type DarikCustomerProfile121 = {
+    id: string;
+    auth_user_id?: string | null;
+    email?: string | null;
+    full_name?: string | null;
+    phone?: string | null;
+  };
+
+  const [darikCheckoutIdentity121, setDarikCheckoutIdentity121] =
+    useState<DarikCheckoutIdentity121>("choice");
+  const [darikCustomerUser121, setDarikCustomerUser121] = useState<any>(null);
+  const [darikCustomerProfile121, setDarikCustomerProfile121] =
+    useState<DarikCustomerProfile121 | null>(null);
+  const [darikNonCustomerSession121, setDarikNonCustomerSession121] =
+    useState(false);
+  const [darikAuthBusy121, setDarikAuthBusy121] = useState(false);
+  const [darikAuthMessage121, setDarikAuthMessage121] = useState("");
+
+  const [darikLoginEmail121, setDarikLoginEmail121] = useState("");
+  const [darikLoginPassword121, setDarikLoginPassword121] = useState("");
+
+  const [darikSignupName121, setDarikSignupName121] = useState("");
+  const [darikSignupPhone121, setDarikSignupPhone121] = useState("");
+  const [darikSignupEmail121, setDarikSignupEmail121] = useState("");
+  const [darikSignupPassword121, setDarikSignupPassword121] = useState("");
+  const [darikSignupPasswordConfirm121, setDarikSignupPasswordConfirm121] =
+    useState("");
+  const [darikSignupEmailCode121, setDarikSignupEmailCode121] = useState("");
+  const [darikSignupPhoneCode121, setDarikSignupPhoneCode121] = useState("");
+  const [darikSignupStep121, setDarikSignupStep121] =
+    useState<DarikSignupStep121>("details");
+  const [darikPendingPhoneSession121, setDarikPendingPhoneSession121] =
+    useState<any>(null);
+
+  function normalizeDarikCustomerPhone121(rawPhone: string) {
+    const digits = String(rawPhone ?? "").replace(/\D/g, "");
+    if (!digits) return "";
+    if (digits.startsWith("962")) return "+" + digits;
+    if (digits.startsWith("0") && digits.length >= 9) {
+      return "+962" + digits.slice(1);
+    }
+    if (digits.length === 9 && digits.startsWith("7")) {
+      return "+962" + digits;
+    }
+    if (String(rawPhone ?? "").trim().startsWith("+")) {
+      return String(rawPhone ?? "").trim();
+    }
+    return "+" + digits;
+  }
+
+  function validateStrongDarikCustomerPassword121(password: string) {
+    return (
+      password.length >= 8 &&
+      /[A-Za-z]/.test(password) &&
+      /[A-Z]/.test(password) &&
+      /\d/.test(password) &&
+      /[^A-Za-z0-9]/.test(password)
+    );
+  }
+
+  function prefillCheckoutFromDarikCustomer121(
+    profile: DarikCustomerProfile121,
+    fallbackName = "",
+    fallbackPhone = ""
+  ) {
+    setCheckoutForm((current) => ({
+      ...current,
+      customerName:
+        current.customerName.trim() ||
+        String(profile.full_name ?? fallbackName ?? "").trim(),
+      customerPhone:
+        current.customerPhone.trim() ||
+        String(profile.phone ?? fallbackPhone ?? "").trim(),
+    }));
+  }
+
+  async function readDarikCustomerProfile121(user: any) {
+    if (!user?.id) return null;
+
+    const result = await supabase
+      .from("customers")
+      .select("id,auth_user_id,email,full_name,phone")
+      .eq("auth_user_id", user.id)
+      .maybeSingle();
+
+    if (result.error) {
+      setDarikAuthMessage121(result.error.message);
+      return null;
+    }
+
+    return (result.data as DarikCustomerProfile121 | null) ?? null;
+  }
+
+  async function ensureDarikCustomerProfile121(
+    user: any,
+    fallbackName = "",
+    fallbackPhone = ""
+  ) {
+    const existing = await readDarikCustomerProfile121(user);
+    if (existing?.id) {
+      setDarikCustomerProfile121(existing);
+      setDarikNonCustomerSession121(false);
+      setDarikCheckoutIdentity121("account");
+      prefillCheckoutFromDarikCustomer121(existing, fallbackName, fallbackPhone);
+      return existing;
+    }
+
+    const phone = normalizeDarikCustomerPhone121(
+      fallbackPhone || String(user?.user_metadata?.phone ?? "")
+    );
+    const name = String(
+      fallbackName || user?.user_metadata?.full_name || user?.email || ""
+    ).trim();
+
+    if (!phone) {
+      setDarikAuthMessage121(
+        "This Darik login does not have a customer phone profile yet. You can continue as guest or finish customer signup."
+      );
+      return null;
+    }
+
+    const rpcResult = await supabase.rpc("customer_ensure_profile_v1", {
+      p_email: String(user?.email ?? "").trim().toLowerCase(),
+      p_full_name: name,
+      p_phone: phone,
+    });
+
+    if (rpcResult.error || !rpcResult.data) {
+      setDarikAuthMessage121(
+        rpcResult.error?.message || "Could not finish the Darik customer profile."
+      );
+      return null;
+    }
+
+    const rpcRow = Array.isArray(rpcResult.data)
+      ? rpcResult.data[0]
+      : rpcResult.data;
+    const profile = ((rpcRow as any)?.profile ?? rpcRow) as DarikCustomerProfile121;
+
+    if (!profile?.id) {
+      setDarikAuthMessage121("Darik customer profile was not returned.");
+      return null;
+    }
+
+    setDarikCustomerProfile121(profile);
+    setDarikNonCustomerSession121(false);
+    setDarikCheckoutIdentity121("account");
+    prefillCheckoutFromDarikCustomer121(profile, name, phone);
+    return profile;
+  }
+
+  async function inspectDarikSession121(user: any) {
+    setDarikCustomerUser121(user ?? null);
+
+    if (!user?.id) {
+      setDarikCustomerProfile121(null);
+      setDarikNonCustomerSession121(false);
+      setDarikCheckoutIdentity121((current) =>
+        current === "guest" || current === "login" || current === "signup"
+          ? current
+          : "choice"
+      );
+      return;
+    }
+
+    const profile = await readDarikCustomerProfile121(user);
+    if (profile?.id) {
+      setDarikCustomerProfile121(profile);
+      setDarikNonCustomerSession121(false);
+      setDarikCheckoutIdentity121("account");
+      prefillCheckoutFromDarikCustomer121(profile);
+      return;
+    }
+
+    // Retailer/staff sessions can exist on the same getdarik.com origin.
+    // Do not silently turn those users into customer accounts.
+    setDarikCustomerProfile121(null);
+    setDarikNonCustomerSession121(true);
+    setDarikCheckoutIdentity121((current) =>
+      current === "guest" || current === "login" || current === "signup"
+        ? current
+        : "choice"
+    );
+  }
+
+  useEffect(() => {
+    if (darikIsBuilderPreview120()) return;
+
+    let active = true;
+
+    void supabase.auth.getSession().then(({ data }) => {
+      if (!active) return;
+      void inspectDarikSession121(data.session?.user ?? null);
+    });
+
+    const { data: authListener } = supabase.auth.onAuthStateChange(
+      (_event, session) => {
+        if (!active) return;
+        window.setTimeout(() => {
+          if (active) void inspectDarikSession121(session?.user ?? null);
+        }, 0);
+      }
+    );
+
+    return () => {
+      active = false;
+      authListener.subscription.unsubscribe();
+    };
+  }, []);
+
+  async function clearNonCustomerAuthBeforeCustomerAction121() {
+    if (darikCustomerUser121 && !darikCustomerProfile121) {
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
+      setDarikCustomerUser121(null);
+      setDarikNonCustomerSession121(false);
+    }
+  }
+
+  async function chooseDarikGuestCheckout121() {
+    setDarikAuthMessage121("");
+
+    if (darikCustomerProfile121) {
+      const { error } = await supabase.auth.signOut();
+      if (error) {
+        setDarikAuthMessage121(error.message);
+        return;
+      }
+      setDarikCustomerUser121(null);
+      setDarikCustomerProfile121(null);
+    }
+
+    setDarikCheckoutIdentity121("guest");
+  }
+
+  async function signInDarikCustomer121() {
+    const email = darikLoginEmail121.trim().toLowerCase();
+    if (!email || darikLoginPassword121.length < 6) {
+      setDarikAuthMessage121("Enter your Darik account email and password.");
+      return;
+    }
+
+    setDarikAuthBusy121(true);
+    setDarikAuthMessage121("");
+
+    try {
+      await clearNonCustomerAuthBeforeCustomerAction121();
+
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password: darikLoginPassword121,
+      });
+
+      if (error || !data.user) {
+        throw error ?? new Error("Could not sign in to this Darik account.");
+      }
+
+      setDarikCustomerUser121(data.user);
+      const profile = await ensureDarikCustomerProfile121(
+        data.user,
+        String(data.user.user_metadata?.full_name ?? ""),
+        String(data.user.user_metadata?.phone ?? "")
+      );
+
+      if (!profile?.id) {
+        throw new Error(
+          "This login is valid, but Darik could not load the customer profile. You can continue as guest."
+        );
+      }
+
+      setDarikLoginPassword121("");
+      setDarikAuthMessage121(
+        "Signed in. This Darik account works across every Darik-powered store."
+      );
+    } catch (error) {
+      setDarikAuthMessage121(
+        error instanceof Error ? error.message : "Darik sign-in failed."
+      );
+    } finally {
+      setDarikAuthBusy121(false);
+    }
+  }
+
+  function validateDarikSignup121() {
+    const name = darikSignupName121.trim();
+    const phone = normalizeDarikCustomerPhone121(darikSignupPhone121);
+    const email = darikSignupEmail121.trim().toLowerCase();
+
+    if (name.length < 2 || phone.length < 8 || !email || !darikSignupPassword121) {
+      setDarikAuthMessage121("Enter your name, phone, email, and password.");
+      return null;
+    }
+
+    if (!email.includes("@") || !email.includes(".")) {
+      setDarikAuthMessage121("Enter a valid email address.");
+      return null;
+    }
+
+    if (!validateStrongDarikCustomerPassword121(darikSignupPassword121)) {
+      setDarikAuthMessage121(
+        "Password must be at least 8 characters with a capital letter, number, and special character."
+      );
+      return null;
+    }
+
+    if (darikSignupPassword121 !== darikSignupPasswordConfirm121) {
+      setDarikAuthMessage121("Passwords do not match.");
+      return null;
+    }
+
+    return { name, phone, email };
+  }
+
+  async function startDarikCustomerSignup121() {
+    const details = validateDarikSignup121();
+    if (!details) return;
+
+    setDarikAuthBusy121(true);
+    setDarikAuthMessage121("");
+
+    try {
+      await clearNonCustomerAuthBeforeCustomerAction121();
+
+      const availability = await supabase.rpc("customer_can_signup_v37", {
+        p_email: details.email,
+        p_phone: details.phone,
+      });
+
+      if (availability.error) throw availability.error;
+
+      const availabilityRow = Array.isArray(availability.data)
+        ? availability.data[0]
+        : availability.data;
+
+      if ((availabilityRow as any)?.allowed === false) {
+        throw new Error(
+          String(
+            (availabilityRow as any)?.reason ||
+              "This email or phone number is already registered."
+          )
+        );
+      }
+
+      const { data, error } = await supabase.auth.signUp({
+        email: details.email,
+        password: darikSignupPassword121,
+        options: {
+          data: {
+            full_name: details.name,
+            phone: details.phone,
+          },
+        },
+      });
+
+      if (error || !data.user) {
+        throw error ?? new Error("Could not create the Darik account.");
+      }
+
+      if (data.session?.user) {
+        setDarikPendingPhoneSession121(data.session);
+        setDarikCustomerUser121(data.session.user);
+
+        const phoneResult = await supabase.auth.updateUser({ phone: details.phone });
+        if (phoneResult.error) throw phoneResult.error;
+
+        setDarikSignupStep121("phone_code");
+        setDarikAuthMessage121(
+          "Email is ready. Enter the SMS code sent to your phone to finish your Darik account."
+        );
+        return;
+      }
+
+      setDarikSignupStep121("email_code");
+      setDarikAuthMessage121(
+        "We sent a confirmation code to your email. Enter it below, then Darik will confirm your phone."
+      );
+    } catch (error) {
+      setDarikAuthMessage121(
+        error instanceof Error ? error.message : "Darik signup failed."
+      );
+    } finally {
+      setDarikAuthBusy121(false);
+    }
+  }
+
+  async function confirmDarikSignupEmail121() {
+    const details = validateDarikSignup121();
+    if (!details) return;
+    const token = darikSignupEmailCode121.trim();
+
+    if (token.length < 4) {
+      setDarikAuthMessage121("Enter the confirmation code sent to your email.");
+      return;
+    }
+
+    setDarikAuthBusy121(true);
+    setDarikAuthMessage121("");
+
+    try {
+      let verifyResult = await supabase.auth.verifyOtp({
+        email: details.email,
+        token,
+        type: "signup",
+      });
+
+      if (verifyResult.error || !verifyResult.data.session?.user) {
+        verifyResult = await supabase.auth.verifyOtp({
+          email: details.email,
+          token,
+          type: "email" as any,
+        });
+      }
+
+      if (verifyResult.error || !verifyResult.data.session?.user) {
+        throw (
+          verifyResult.error ?? new Error("Could not confirm this email code.")
+        );
+      }
+
+      const session = verifyResult.data.session;
+      setDarikPendingPhoneSession121(session);
+      setDarikCustomerUser121(session.user);
+
+      const phoneResult = await supabase.auth.updateUser({ phone: details.phone });
+      if (phoneResult.error) throw phoneResult.error;
+
+      setDarikSignupStep121("phone_code");
+      setDarikAuthMessage121(
+        "Email confirmed. Enter the SMS code sent to your phone to finish the account."
+      );
+    } catch (error) {
+      setDarikAuthMessage121(
+        error instanceof Error ? error.message : "Email confirmation failed."
+      );
+    } finally {
+      setDarikAuthBusy121(false);
+    }
+  }
+
+  async function confirmDarikSignupPhone121() {
+    const details = validateDarikSignup121();
+    if (!details) return;
+    const token = darikSignupPhoneCode121.trim();
+
+    if (token.length < 4) {
+      setDarikAuthMessage121("Enter the SMS code sent to your phone.");
+      return;
+    }
+
+    setDarikAuthBusy121(true);
+    setDarikAuthMessage121("");
+
+    try {
+      const verifyResult = await supabase.auth.verifyOtp({
+        phone: details.phone,
+        token,
+        type: "phone_change" as any,
+      });
+
+      if (verifyResult.error) throw verifyResult.error;
+
+      const activeSession =
+        verifyResult.data.session ?? darikPendingPhoneSession121;
+      const activeUser = verifyResult.data.user ?? activeSession?.user;
+
+      if (!activeUser) {
+        throw new Error(
+          "Phone was confirmed, but Darik could not finish the account session. Sign in with your email and password."
+        );
+      }
+
+      setDarikCustomerUser121(activeUser);
+      const profile = await ensureDarikCustomerProfile121(
+        activeUser,
+        details.name,
+        details.phone
+      );
+
+      if (!profile?.id) {
+        throw new Error("Darik could not finish the customer profile.");
+      }
+
+      setDarikSignupPassword121("");
+      setDarikSignupPasswordConfirm121("");
+      setDarikSignupEmailCode121("");
+      setDarikSignupPhoneCode121("");
+      setDarikSignupStep121("details");
+      setDarikPendingPhoneSession121(null);
+      setDarikAuthMessage121(
+        "Darik account created. You are signed in across Darik storefronts."
+      );
+    } catch (error) {
+      setDarikAuthMessage121(
+        error instanceof Error ? error.message : "Phone confirmation failed."
+      );
+    } finally {
+      setDarikAuthBusy121(false);
+    }
+  }
+
+  async function signOutDarikCustomer121() {
+    setDarikAuthBusy121(true);
+    setDarikAuthMessage121("");
+
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
+      setDarikCustomerUser121(null);
+      setDarikCustomerProfile121(null);
+      setDarikNonCustomerSession121(false);
+      setDarikCheckoutIdentity121("guest");
+      setDarikAuthMessage121("Signed out. Continuing as guest.");
+    } catch (error) {
+      setDarikAuthMessage121(
+        error instanceof Error ? error.message : "Could not sign out."
+      );
+    } finally {
+      setDarikAuthBusy121(false);
+    }
+  }
+
   const deliveryEnabled = storefront?.delivery_enabled !== false;
   const pickupEnabled = storefront?.pickup_enabled === true;
   const pickupOnly = Boolean(storefront && !deliveryEnabled && pickupEnabled);
@@ -4830,6 +5356,330 @@ style={storefrontTypographyInlineStyle(
                   minimumReached &&
                   storefront.is_accepting_orders ? (
                     <div className={styles.onlineCheckoutForm}>
+              {!darikIsBuilderPreview120() ? (
+                <section className={styles.darikCheckoutIdentity121}>
+                  <div className={styles.darikCheckoutIdentityHeader121}>
+                    <div>
+                      <span>حساب داريك / Darik account</span>
+                      <strong>One account. Every Darik store.</strong>
+                    </div>
+                    {darikCustomerProfile121 ? (
+                      <span className={styles.darikAccountBadge121}>SIGNED IN</span>
+                    ) : darikCheckoutIdentity121 === "guest" ? (
+                      <span className={styles.darikGuestBadge121}>GUEST</span>
+                    ) : null}
+                  </div>
+
+                  <p className={styles.darikCheckoutIdentityCopy121}>
+                    Create one Darik customer account and use the same login on any
+                    Darik-powered retailer storefront. Or place this order as a guest.
+                  </p>
+
+                  {darikCustomerProfile121 ? (
+                    <div className={styles.darikAccountSigned121}>
+                      <div>
+                        <small>Signed in as / مسجل الدخول</small>
+                        <strong>
+                          {darikCustomerProfile121.full_name ||
+                            darikCustomerUser121?.email ||
+                            "Darik customer"}
+                        </strong>
+                        <span>{darikCustomerUser121?.email || ""}</span>
+                      </div>
+                      <div className={styles.darikAccountSignedActions121}>
+                        <span>
+                          This order will be saved to your Darik account / سيتم حفظ الطلب
+                          في حساب داريك
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => void signOutDarikCustomer121()}
+                          disabled={darikAuthBusy121}
+                        >
+                          Sign out & use guest / تسجيل الخروج والمتابعة كضيف
+                        </button>
+                      </div>
+                    </div>
+                  ) : darikCheckoutIdentity121 === "choice" ? (
+                    <div className={styles.darikAccountChoiceActions121}>
+                      <button
+                        type="button"
+                        className={styles.darikAccountPrimary121}
+                        onClick={() => {
+                          setDarikAuthMessage121("");
+                          setDarikCheckoutIdentity121("login");
+                        }}
+                      >
+                        Sign in / تسجيل الدخول
+                      </button>
+                      <button
+                        type="button"
+                        className={styles.darikAccountSecondary121}
+                        onClick={() => {
+                          setDarikAuthMessage121("");
+                          setDarikSignupStep121("details");
+                          setDarikCheckoutIdentity121("signup");
+                        }}
+                      >
+                        Create Darik account / إنشاء حساب داريك
+                      </button>
+                      <button
+                        type="button"
+                        className={styles.darikAccountGuest121}
+                        onClick={() => void chooseDarikGuestCheckout121()}
+                      >
+                        Continue as guest / المتابعة كضيف
+                      </button>
+                    </div>
+                  ) : darikCheckoutIdentity121 === "guest" ? (
+                    <div className={styles.darikAccountGuestState121}>
+                      <div>
+                        <strong>Guest checkout / طلب كضيف</strong>
+                        <span>
+                          No Darik account required. This order will use the name and
+                          phone entered below.
+                        </span>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setDarikAuthMessage121("");
+                          setDarikCheckoutIdentity121("choice");
+                        }}
+                      >
+                        Use a Darik account instead
+                      </button>
+                    </div>
+                  ) : darikCheckoutIdentity121 === "login" ? (
+                    <div className={styles.darikAccountForm121}>
+                      <div className={styles.darikAccountFormHeading121}>
+                        <strong>Sign in to Darik / تسجيل الدخول إلى داريك</strong>
+                        <span>Your login works across Darik-powered stores.</span>
+                      </div>
+                      {darikNonCustomerSession121 ? (
+                        <p className={styles.darikAccountSessionNotice121}>
+                          Another Darik staff/retailer session is active in this browser.
+                          Signing in here will switch this browser to your customer account.
+                        </p>
+                      ) : null}
+                      <label>
+                        Email / البريد الإلكتروني
+                        <input
+                          type="email"
+                          value={darikLoginEmail121}
+                          onChange={(event) => setDarikLoginEmail121(event.target.value)}
+                          placeholder="you@example.com"
+                          autoComplete="email"
+                        />
+                      </label>
+                      <label>
+                        Password / كلمة المرور
+                        <input
+                          type="password"
+                          value={darikLoginPassword121}
+                          onChange={(event) => setDarikLoginPassword121(event.target.value)}
+                          placeholder="Your Darik password"
+                          autoComplete="current-password"
+                        />
+                      </label>
+                      <div className={styles.darikAccountFormActions121}>
+                        <button
+                          type="button"
+                          className={styles.darikAccountPrimary121}
+                          onClick={() => void signInDarikCustomer121()}
+                          disabled={darikAuthBusy121}
+                        >
+                          {darikAuthBusy121 ? "Signing in..." : "Sign in / تسجيل الدخول"}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setDarikCheckoutIdentity121("choice")}
+                          disabled={darikAuthBusy121}
+                        >
+                          Back
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => void chooseDarikGuestCheckout121()}
+                          disabled={darikAuthBusy121}
+                        >
+                          Continue as guest
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className={styles.darikAccountForm121}>
+                      <div className={styles.darikAccountFormHeading121}>
+                        <strong>Create your Darik account / أنشئ حساب داريك</strong>
+                        <span>
+                          Use this same email and password later at any Darik store.
+                        </span>
+                      </div>
+
+                      {darikSignupStep121 === "details" ? (
+                        <div className={styles.darikAccountFormGrid121}>
+                          <label>
+                            Full name / الاسم الكامل
+                            <input
+                              value={darikSignupName121}
+                              onChange={(event) =>
+                                setDarikSignupName121(event.target.value)
+                              }
+                              placeholder="Your full name"
+                              autoComplete="name"
+                            />
+                          </label>
+                          <label>
+                            Phone / رقم الهاتف
+                            <input
+                              type="tel"
+                              value={darikSignupPhone121}
+                              onChange={(event) =>
+                                setDarikSignupPhone121(event.target.value)
+                              }
+                              placeholder="07XXXXXXXX"
+                              autoComplete="tel"
+                            />
+                          </label>
+                          <label>
+                            Email / البريد الإلكتروني
+                            <input
+                              type="email"
+                              value={darikSignupEmail121}
+                              onChange={(event) =>
+                                setDarikSignupEmail121(event.target.value)
+                              }
+                              placeholder="you@example.com"
+                              autoComplete="email"
+                            />
+                          </label>
+                          <label>
+                            Password / كلمة المرور
+                            <input
+                              type="password"
+                              value={darikSignupPassword121}
+                              onChange={(event) =>
+                                setDarikSignupPassword121(event.target.value)
+                              }
+                              placeholder="8+ chars, capital, number, special"
+                              autoComplete="new-password"
+                            />
+                          </label>
+                          <label>
+                            Confirm password / تأكيد كلمة المرور
+                            <input
+                              type="password"
+                              value={darikSignupPasswordConfirm121}
+                              onChange={(event) =>
+                                setDarikSignupPasswordConfirm121(event.target.value)
+                              }
+                              placeholder="Repeat password"
+                              autoComplete="new-password"
+                            />
+                          </label>
+                        </div>
+                      ) : null}
+
+                      {darikSignupStep121 === "email_code" ? (
+                        <div className={styles.darikAccountCode121}>
+                          <span>Email confirmation / تأكيد البريد</span>
+                          <strong>{darikSignupEmail121.trim().toLowerCase()}</strong>
+                          <input
+                            inputMode="numeric"
+                            value={darikSignupEmailCode121}
+                            onChange={(event) =>
+                              setDarikSignupEmailCode121(event.target.value)
+                            }
+                            placeholder="Email code"
+                            autoComplete="one-time-code"
+                          />
+                        </div>
+                      ) : null}
+
+                      {darikSignupStep121 === "phone_code" ? (
+                        <div className={styles.darikAccountCode121}>
+                          <span>Phone confirmation / تأكيد الهاتف</span>
+                          <strong>
+                            {normalizeDarikCustomerPhone121(darikSignupPhone121)}
+                          </strong>
+                          <input
+                            inputMode="numeric"
+                            value={darikSignupPhoneCode121}
+                            onChange={(event) =>
+                              setDarikSignupPhoneCode121(event.target.value)
+                            }
+                            placeholder="SMS code"
+                            autoComplete="one-time-code"
+                          />
+                        </div>
+                      ) : null}
+
+                      <div className={styles.darikAccountFormActions121}>
+                        {darikSignupStep121 === "details" ? (
+                          <button
+                            type="button"
+                            className={styles.darikAccountPrimary121}
+                            onClick={() => void startDarikCustomerSignup121()}
+                            disabled={darikAuthBusy121}
+                          >
+                            {darikAuthBusy121
+                              ? "Creating..."
+                              : "Create Darik account / إنشاء الحساب"}
+                          </button>
+                        ) : darikSignupStep121 === "email_code" ? (
+                          <button
+                            type="button"
+                            className={styles.darikAccountPrimary121}
+                            onClick={() => void confirmDarikSignupEmail121()}
+                            disabled={darikAuthBusy121}
+                          >
+                            {darikAuthBusy121
+                              ? "Confirming..."
+                              : "Confirm email & send SMS"}
+                          </button>
+                        ) : (
+                          <button
+                            type="button"
+                            className={styles.darikAccountPrimary121}
+                            onClick={() => void confirmDarikSignupPhone121()}
+                            disabled={darikAuthBusy121}
+                          >
+                            {darikAuthBusy121
+                              ? "Confirming..."
+                              : "Confirm phone & finish account"}
+                          </button>
+                        )}
+
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setDarikAuthMessage121("");
+                            setDarikSignupStep121("details");
+                            setDarikCheckoutIdentity121("choice");
+                          }}
+                          disabled={darikAuthBusy121}
+                        >
+                          Back
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => void chooseDarikGuestCheckout121()}
+                          disabled={darikAuthBusy121}
+                        >
+                          Continue as guest
+                        </button>
+                      </div>
+                    </div>
+                  )}
+
+                  {darikAuthMessage121 ? (
+                    <p className={styles.darikAccountStatus121} role="status">
+                      {darikAuthMessage121}
+                    </p>
+                  ) : null}
+                </section>
+              ) : null}
+
                       <div className={styles.onlineCheckoutHeading}>
                         <div>
                           <span>Online order</span>
