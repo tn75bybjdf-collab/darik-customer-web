@@ -11,7 +11,7 @@
 
 // DARIK_AUTOPARTS_FITMENT_FILTERS_033
 
-import { useEffect, useMemo, useState } from "react";
+import { useRef, useEffect, useMemo, useState } from "react";
 import type { CSSProperties } from "react";
 import { useParams } from "next/navigation";
 import { supabase } from "@/lib/supabaseBrowser";
@@ -2196,9 +2196,7 @@ export default function DarikDirectStorefrontPage() {
       return true;
     } catch (caught) {
       setLocationGateError117(
-        caught instanceof Error
-          ? caught.message
-          : "Could not calculate delivery for this location."
+        darikCheckoutErrorMessage122(caught)
       );
 
       if (fromMarketplace) {
@@ -3101,6 +3099,618 @@ export default function DarikDirectStorefrontPage() {
     }
   }
 
+
+
+  // DARIK_CHECKOUT_GOOGLE_MAP_PIN_AND_ORDER_ERRORS_122
+  const [checkoutLocationDraft122, setCheckoutLocationDraft122] =
+    useState<DarikCustomerLocation117 | null>(null);
+  const [checkoutLocationQuery122, setCheckoutLocationQuery122] =
+    useState("");
+  const [checkoutLocationPredictions122, setCheckoutLocationPredictions122] =
+    useState<DarikGooglePrediction117[]>([]);
+  const [checkoutLocationSearchBusy122, setCheckoutLocationSearchBusy122] =
+    useState(false);
+  const [checkoutLocationBusy122, setCheckoutLocationBusy122] =
+    useState(false);
+  const [checkoutLocationError122, setCheckoutLocationError122] =
+    useState("");
+  const [checkoutLocationConfirmed122, setCheckoutLocationConfirmed122] =
+    useState(false);
+  const [checkoutMapDragOffset122, setCheckoutMapDragOffset122] =
+    useState({ x: 0, y: 0 });
+  const checkoutMapDragRef122 = useRef<{
+    pointerId: number;
+    left: number;
+    top: number;
+    width: number;
+    height: number;
+  } | null>(null);
+
+  function darikCheckoutErrorMessage122(caught: unknown) {
+    if (
+      caught instanceof Error &&
+      String(caught.message ?? "").trim()
+    ) {
+      return caught.message.trim();
+    }
+
+    if (caught && typeof caught === "object") {
+      const row = caught as Record<string, unknown>;
+      const message = String(row.message ?? "").trim();
+      const details = String(row.details ?? "").trim();
+      const hint = String(row.hint ?? "").trim();
+      const code = String(row.code ?? "").trim();
+
+      const useful = [message, details, hint].filter(
+        (value) => value && value !== "null"
+      );
+
+      if (useful.length) {
+        return useful.join(" ");
+      }
+
+      if (code) {
+        return `Order error ${code}.`;
+      }
+    }
+
+    const text = String(caught ?? "").trim();
+
+    if (text && text !== "[object Object]") {
+      return text;
+    }
+
+    return "The order could not be submitted.";
+  }
+
+  function stageCheckoutLocation122(
+    location: DarikCustomerLocation117
+  ) {
+    setCheckoutLocationDraft122(location);
+    setCheckoutLocationQuery122(location.label);
+    setCheckoutLocationPredictions122([]);
+    setCheckoutLocationError122("");
+    setCheckoutLocationConfirmed122(false);
+    setCheckoutMapDragOffset122({ x: 0, y: 0 });
+
+    setCheckoutForm((current) =>
+      current.fulfillmentMethod === "delivery"
+        ? {
+            ...current,
+            latitude: null,
+            longitude: null,
+          }
+        : current
+    );
+  }
+
+  useEffect(() => {
+    if (!customerLocation117) return;
+
+    setCheckoutLocationDraft122(customerLocation117);
+    setCheckoutLocationQuery122(customerLocation117.label);
+
+    const sameLatitude =
+      checkoutForm.latitude !== null &&
+      Math.abs(
+        Number(checkoutForm.latitude) -
+          customerLocation117.latitude
+      ) < 0.0000001;
+    const sameLongitude =
+      checkoutForm.longitude !== null &&
+      Math.abs(
+        Number(checkoutForm.longitude) -
+          customerLocation117.longitude
+      ) < 0.0000001;
+
+    setCheckoutLocationConfirmed122(
+      sameLatitude && sameLongitude && Boolean(deliveryMatch117)
+    );
+  }, [
+    customerLocation117?.latitude,
+    customerLocation117?.longitude,
+    customerLocation117?.label,
+    customerLocation117?.source,
+    deliveryMatch117?.slug,
+  ]);
+
+  async function reverseGeocodeCheckoutLocation122(
+    latitude: number,
+    longitude: number,
+    fallbackLabel: string
+  ) {
+    try {
+      const params = new URLSearchParams({
+        lat: String(latitude),
+        lng: String(longitude),
+        language: "en",
+      });
+
+      const response = await fetch(
+        `/api/google-places/geocode?${params.toString()}`,
+        { cache: "no-store" }
+      );
+      const json = await response.json();
+      const first =
+        Array.isArray(json.results) && json.results.length
+          ? json.results[0]
+          : null;
+
+      return String(
+        first?.formatted_address || fallbackLabel
+      ).trim();
+    } catch {
+      return fallbackLabel;
+    }
+  }
+
+  function useCheckoutCurrentLocation122() {
+    if (checkoutLocationBusy122) return;
+
+    if (!navigator.geolocation) {
+      setCheckoutLocationError122(
+        "Location access is not available in this browser. Search Google instead. / خدمة الموقع غير متاحة. ابحث في جوجل."
+      );
+      return;
+    }
+
+    setCheckoutLocationBusy122(true);
+    setCheckoutLocationError122("");
+    setCheckoutLocationPredictions122([]);
+
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        const latitude = position.coords.latitude;
+        const longitude = position.coords.longitude;
+        const fallback =
+          `${latitude.toFixed(6)}, ${longitude.toFixed(6)}`;
+        const label = await reverseGeocodeCheckoutLocation122(
+          latitude,
+          longitude,
+          fallback
+        );
+
+        stageCheckoutLocation122({
+          latitude,
+          longitude,
+          label,
+          source: "gps",
+        });
+
+        setCheckoutLocationBusy122(false);
+      },
+      (error) => {
+        setCheckoutLocationBusy122(false);
+        setCheckoutLocationError122(
+          error.message ||
+            "Could not get your current location. / تعذر تحديد موقعك الحالي."
+        );
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 20_000,
+        maximumAge: 0,
+      }
+    );
+  }
+
+  async function searchCheckoutLocation122() {
+    const query = checkoutLocationQuery122.trim();
+
+    if (query.length < 3) {
+      setCheckoutLocationError122(
+        "Type at least 3 characters to search Google Maps. / اكتب 3 أحرف على الأقل للبحث."
+      );
+      return;
+    }
+
+    setCheckoutLocationSearchBusy122(true);
+    setCheckoutLocationError122("");
+
+    try {
+      const params = new URLSearchParams({
+        input: query,
+        language: "en",
+      });
+
+      const response = await fetch(
+        `/api/google-places/autocomplete?${params.toString()}`,
+        { cache: "no-store" }
+      );
+      const json = await response.json();
+
+      if (
+        json.status !== "OK" &&
+        json.status !== "ZERO_RESULTS"
+      ) {
+        throw new Error(
+          json.error_message || "Google Maps search failed."
+        );
+      }
+
+      const predictions: DarikGooglePrediction117[] =
+        Array.isArray(json.predictions)
+          ? json.predictions
+              .slice(0, 6)
+              .map((item: unknown) => {
+                const row =
+                  item && typeof item === "object"
+                    ? (item as Record<string, unknown>)
+                    : {};
+                const structured =
+                  row.structured_formatting &&
+                  typeof row.structured_formatting === "object"
+                    ? (row.structured_formatting as Record<
+                        string,
+                        unknown
+                      >)
+                    : {};
+
+                return {
+                  place_id: String(row.place_id ?? ""),
+                  description: String(row.description ?? ""),
+                  structured_formatting: {
+                    main_text: String(
+                      structured.main_text ?? ""
+                    ),
+                    secondary_text: String(
+                      structured.secondary_text ?? ""
+                    ),
+                  },
+                };
+              })
+              .filter(
+                (prediction: DarikGooglePrediction117) =>
+                  Boolean(
+                    prediction.place_id &&
+                      prediction.description
+                  )
+              )
+          : [];
+
+      setCheckoutLocationPredictions122(predictions);
+
+      if (!predictions.length) {
+        setCheckoutLocationError122(
+          "No matching Google Maps locations found. / لم يتم العثور على موقع مطابق."
+        );
+      }
+    } catch (caught) {
+      setCheckoutLocationPredictions122([]);
+      setCheckoutLocationError122(
+        darikCheckoutErrorMessage122(caught)
+      );
+    } finally {
+      setCheckoutLocationSearchBusy122(false);
+    }
+  }
+
+  async function chooseCheckoutPlace122(
+    prediction: DarikGooglePrediction117
+  ) {
+    setCheckoutLocationSearchBusy122(true);
+    setCheckoutLocationError122("");
+
+    try {
+      const params = new URLSearchParams({
+        place_id: prediction.place_id,
+        language: "en",
+      });
+
+      const response = await fetch(
+        `/api/google-places/details?${params.toString()}`,
+        { cache: "no-store" }
+      );
+      const json = await response.json();
+      const point = json.result?.geometry?.location;
+
+      if (json.status !== "OK" || !point) {
+        throw new Error(
+          json.error_message ||
+            "Google Maps did not return this location."
+        );
+      }
+
+      const latitude = Number(point.lat);
+      const longitude = Number(point.lng);
+
+      if (
+        !Number.isFinite(latitude) ||
+        !Number.isFinite(longitude)
+      ) {
+        throw new Error(
+          "Google Maps returned invalid coordinates."
+        );
+      }
+
+      const label = String(
+        json.result?.formatted_address ||
+          prediction.description ||
+          `${latitude.toFixed(6)}, ${longitude.toFixed(6)}`
+      ).trim();
+
+      stageCheckoutLocation122({
+        latitude,
+        longitude,
+        label,
+        source: "google_search",
+      });
+    } catch (caught) {
+      setCheckoutLocationError122(
+        darikCheckoutErrorMessage122(caught)
+      );
+    } finally {
+      setCheckoutLocationSearchBusy122(false);
+    }
+  }
+
+  function darikCheckoutMapUrl122(
+    location: DarikCustomerLocation117
+  ) {
+    const point =
+      `${location.latitude},${location.longitude}`;
+
+    return (
+      "https://www.google.com/maps?q=" +
+      encodeURIComponent(point) +
+      "&z=17&output=embed"
+    );
+  }
+
+  function shiftCheckoutLocationByPixels122(
+    location: DarikCustomerLocation117,
+    dx: number,
+    dy: number
+  ): DarikCustomerLocation117 {
+    const zoom = 17;
+    const worldSize = 256 * Math.pow(2, zoom);
+    const safeLatitude = Math.max(
+      -85.05112878,
+      Math.min(85.05112878, location.latitude)
+    );
+    const latitudeRadians =
+      (safeLatitude * Math.PI) / 180;
+    const sinLatitude = Math.sin(latitudeRadians);
+
+    const worldX =
+      ((location.longitude + 180) / 360) * worldSize;
+    const worldY =
+      (0.5 -
+        Math.log(
+          (1 + sinLatitude) / (1 - sinLatitude)
+        ) /
+          (4 * Math.PI)) *
+      worldSize;
+
+    const nextX = worldX + dx;
+    const nextY = worldY + dy;
+    const longitude =
+      (nextX / worldSize) * 360 - 180;
+    const mercatorN =
+      Math.PI - (2 * Math.PI * nextY) / worldSize;
+    const latitude =
+      (180 / Math.PI) *
+      Math.atan(Math.sinh(mercatorN));
+
+    return {
+      latitude: Math.max(-90, Math.min(90, latitude)),
+      longitude:
+        ((longitude + 540) % 360) - 180,
+      label:
+        `${latitude.toFixed(6)}, ${longitude.toFixed(6)}`,
+      source: "google_search",
+    };
+  }
+
+  function checkoutMapPointerOffset122(
+    event: any
+  ) {
+    const drag = checkoutMapDragRef122.current;
+    if (!drag) return { x: 0, y: 0 };
+
+    const centerX = drag.left + drag.width / 2;
+    const centerY = drag.top + drag.height / 2;
+    const halfWidth = Math.max(1, drag.width / 2 - 8);
+    const halfHeight = Math.max(1, drag.height / 2 - 8);
+
+    return {
+      x: Math.max(
+        -halfWidth,
+        Math.min(
+          halfWidth,
+          Number(event.clientX) - centerX
+        )
+      ),
+      y: Math.max(
+        -halfHeight,
+        Math.min(
+          halfHeight,
+          Number(event.clientY) - centerY
+        )
+      ),
+    };
+  }
+
+  function startCheckoutMapPinMove122(event: any) {
+    if (!checkoutLocationDraft122) return;
+
+    const rect =
+      event.currentTarget.getBoundingClientRect();
+
+    checkoutMapDragRef122.current = {
+      pointerId: event.pointerId,
+      left: rect.left,
+      top: rect.top,
+      width: rect.width,
+      height: rect.height,
+    };
+
+    try {
+      event.currentTarget.setPointerCapture(
+        event.pointerId
+      );
+    } catch {
+      // Pointer capture is best effort.
+    }
+
+    setCheckoutMapDragOffset122(
+      checkoutMapPointerOffset122(event)
+    );
+  }
+
+  function moveCheckoutMapPin122(event: any) {
+    const drag = checkoutMapDragRef122.current;
+    if (!drag || drag.pointerId !== event.pointerId) {
+      return;
+    }
+
+    setCheckoutMapDragOffset122(
+      checkoutMapPointerOffset122(event)
+    );
+  }
+
+  async function finishCheckoutMapPinMove122(
+    event: any
+  ) {
+    const drag = checkoutMapDragRef122.current;
+
+    if (
+      !drag ||
+      drag.pointerId !== event.pointerId ||
+      !checkoutLocationDraft122
+    ) {
+      return;
+    }
+
+    const offset = checkoutMapPointerOffset122(event);
+    const previous = checkoutLocationDraft122;
+
+    checkoutMapDragRef122.current = null;
+    setCheckoutMapDragOffset122({ x: 0, y: 0 });
+
+    try {
+      event.currentTarget.releasePointerCapture(
+        event.pointerId
+      );
+    } catch {
+      // Nothing to release.
+    }
+
+    const moved = shiftCheckoutLocationByPixels122(
+      previous,
+      offset.x,
+      offset.y
+    );
+    const fallback =
+      `${moved.latitude.toFixed(6)}, ${moved.longitude.toFixed(6)}`;
+    const label = await reverseGeocodeCheckoutLocation122(
+      moved.latitude,
+      moved.longitude,
+      fallback
+    );
+
+    stageCheckoutLocation122({
+      ...moved,
+      label,
+      source: "google_search",
+    });
+  }
+
+  function cancelCheckoutMapPinMove122() {
+    checkoutMapDragRef122.current = null;
+    setCheckoutMapDragOffset122({ x: 0, y: 0 });
+  }
+
+  async function confirmCheckoutLocation122() {
+    const location = checkoutLocationDraft122;
+
+    if (!location || !slug) {
+      setCheckoutLocationError122(
+        "Choose a delivery location first. / اختر موقع التوصيل أولاً."
+      );
+      return;
+    }
+
+    setCheckoutLocationBusy122(true);
+    setCheckoutLocationError122("");
+
+    try {
+      const result = await supabase.rpc(
+        "darik_direct_nearby_storefronts",
+        {
+          p_latitude: location.latitude,
+          p_longitude: location.longitude,
+          p_limit: 200,
+        }
+      );
+
+      if (result.error) {
+        throw result.error;
+      }
+
+      const rows = Array.isArray(result.data)
+        ? (result.data as DarikNearbyStoreMatch117[])
+        : [];
+      const match =
+        rows.find(
+          (row) =>
+            String(row.slug ?? "")
+              .trim()
+              .toLowerCase() ===
+            slug.trim().toLowerCase()
+        ) ?? null;
+
+      if (!match) {
+        setDeliveryMatch117(null);
+        setCheckoutLocationConfirmed122(false);
+        setCheckoutForm((current) => ({
+          ...current,
+          fulfillmentMethod: "delivery",
+          latitude: null,
+          longitude: null,
+        }));
+        setCheckoutLocationError122(
+          "This pin is outside this store's delivery zones. Move the pin or search another location. / هذا الموقع خارج مناطق توصيل المتجر. حرّك العلامة أو اختر موقعاً آخر."
+        );
+        return;
+      }
+
+      writeDarikCustomerLocationSession120(location);
+
+      try {
+        window.sessionStorage.removeItem(
+          darikPickupBrowseSessionKey120(slug)
+        );
+      } catch {
+        // Session pickup override is best effort only.
+      }
+
+      setPickupBrowse118(false);
+      setCustomerLocation117(location);
+      setDeliveryMatch117(match);
+      setLocationGateOpen117(false);
+      setLocationGateBusy117(false);
+      setLocationGateError117("");
+      setLocationPredictions117([]);
+      setLocationSearch117(location.label);
+      setCheckoutForm((current) => ({
+        ...current,
+        fulfillmentMethod: "delivery",
+        latitude: location.latitude,
+        longitude: location.longitude,
+      }));
+      setCheckoutLocationConfirmed122(true);
+      setCheckoutLocationError122("");
+    } catch (caught) {
+      setCheckoutLocationConfirmed122(false);
+      setCheckoutLocationError122(
+        darikCheckoutErrorMessage122(caught)
+      );
+    } finally {
+      setCheckoutLocationBusy122(false);
+    }
+  }
+
   const deliveryEnabled = storefront?.delivery_enabled !== false;
   const pickupEnabled = storefront?.pickup_enabled === true;
   const pickupOnly = Boolean(storefront && !deliveryEnabled && pickupEnabled);
@@ -3415,7 +4025,7 @@ export default function DarikDirectStorefrontPage() {
       }));
     } catch (error) {
       setCheckoutError(
-        error instanceof Error ? error.message : "The order could not be submitted."
+        darikCheckoutErrorMessage122(error)
       );
     } finally {
       setPlacingOrder(false);
@@ -5865,31 +6475,218 @@ style={storefrontTypographyInlineStyle(
                         </div>
                       ) : (
                         <>
-                          <div className={styles.exactLocationBlock}>
-                            <div>
-                              <strong>Exact delivery location</strong>
-                              <small>Required for every delivery order</small>
-                            </div>
+                          <div className={styles.darikCheckoutLocation122}>
+                    <div className={styles.darikCheckoutLocationHeading122}>
+                      <div>
+                        <strong>
+                          Delivery location / موقع التوصيل
+                        </strong>
+                        <small>
+                          Use your location or search Google, then confirm the pin.
+                          / استخدم موقعك أو ابحث في جوجل ثم أكد العلامة.
+                        </small>
+                      </div>
+                      {checkoutLocationConfirmed122 ? (
+                        <span className={styles.darikCheckoutLocationConfirmed122}>
+                          Confirmed / مؤكد
+                        </span>
+                      ) : null}
+                    </div>
+
+                    <div className={styles.darikCheckoutLocationActions122}>
+                      <button
+                        type="button"
+                        className={styles.darikCheckoutGps122}
+                        onClick={useCheckoutCurrentLocation122}
+                        disabled={
+                          checkoutLocationBusy122 ||
+                          checkoutLocationSearchBusy122
+                        }
+                      >
+                        {checkoutLocationBusy122
+                          ? "Locating… / جاري تحديد الموقع…"
+                          : "Use current location / استخدم موقعي الحالي"}
+                      </button>
+
+                      <div className={styles.darikCheckoutSearchRow122}>
+                        <input
+                          value={checkoutLocationQuery122}
+                          onChange={(event) =>
+                            setCheckoutLocationQuery122(
+                              event.target.value
+                            )
+                          }
+                          onKeyDown={(event) => {
+                            if (event.key === "Enter") {
+                              event.preventDefault();
+                              void searchCheckoutLocation122();
+                            }
+                          }}
+                          placeholder="Search Google Maps / ابحث في خرائط جوجل"
+                          aria-label="Search Google Maps for delivery location"
+                        />
+                        <button
+                          type="button"
+                          onClick={() =>
+                            void searchCheckoutLocation122()
+                          }
+                          disabled={
+                            checkoutLocationSearchBusy122 ||
+                            checkoutLocationBusy122
+                          }
+                        >
+                          {checkoutLocationSearchBusy122
+                            ? "Searching…"
+                            : "Search / بحث"}
+                        </button>
+                      </div>
+                    </div>
+
+                    {checkoutLocationPredictions122.length ? (
+                      <div className={styles.darikCheckoutPredictions122}>
+                        {checkoutLocationPredictions122.map(
+                          (prediction) => (
                             <button
                               type="button"
-                              className={`${styles.locationButton} ${
-                                checkoutForm.latitude != null &&
-                                checkoutForm.longitude != null
-                                  ? styles.locationCaptured
-                                  : ""
-                              }`}
-                              onClick={captureExactLocation}
-                              disabled={locatingCustomer}
+                              key={prediction.place_id}
+                              onClick={() =>
+                                void chooseCheckoutPlace122(
+                                  prediction
+                                )
+                              }
                             >
-                              <Icon name="location" size={18} />
-                              {locatingCustomer
-                                ? "Capturing location…"
-                                : checkoutForm.latitude != null &&
-                                    checkoutForm.longitude != null
-                                  ? "Exact location captured"
-                                  : "Use my exact location"}
+                              <strong>
+                                {prediction.structured_formatting
+                                  ?.main_text ||
+                                  prediction.description}
+                              </strong>
+                              <span>
+                                {prediction.structured_formatting
+                                  ?.secondary_text ||
+                                  prediction.description}
+                              </span>
                             </button>
+                          )
+                        )}
+                      </div>
+                    ) : null}
+
+                    {checkoutLocationDraft122 ? (
+                      <div className={styles.darikCheckoutMapSection122}>
+                        <div
+                          className={styles.darikCheckoutMap122}
+                          onPointerDown={startCheckoutMapPinMove122}
+                          onPointerMove={moveCheckoutMapPin122}
+                          onPointerUp={(event) =>
+                            void finishCheckoutMapPinMove122(
+                              event
+                            )
+                          }
+                          onPointerCancel={
+                            cancelCheckoutMapPinMove122
+                          }
+                          role="application"
+                          aria-label="Google map delivery pin. Tap or drag to adjust the delivery location."
+                        >
+                          <iframe
+                            key={`${checkoutLocationDraft122.latitude.toFixed(
+                              6
+                            )}:${checkoutLocationDraft122.longitude.toFixed(
+                              6
+                            )}`}
+                            src={darikCheckoutMapUrl122(
+                              checkoutLocationDraft122
+                            )}
+                            title="Delivery location Google Map"
+                            loading="lazy"
+                            referrerPolicy="no-referrer-when-downgrade"
+                          />
+                          <div
+                            className={styles.darikCheckoutMapPin122}
+                            style={{
+                              transform: `translate(calc(-50% + ${checkoutMapDragOffset122.x}px), calc(-100% + ${checkoutMapDragOffset122.y}px))`,
+                            }}
+                            aria-hidden="true"
+                          >
+                            <span />
                           </div>
+                          <div
+                            className={styles.darikCheckoutMapCrosshair122}
+                            aria-hidden="true"
+                          />
+                        </div>
+
+                        <p className={styles.darikCheckoutMapHelp122}>
+                          Tap the exact spot or drag the pin to correct it.
+                          / اضغط على المكان الصحيح أو حرّك العلامة لتعديل الموقع.
+                        </p>
+
+                        <div className={styles.darikCheckoutLocationSummary122}>
+                          <strong>
+                            {checkoutLocationDraft122.label}
+                          </strong>
+                          <span>
+                            {checkoutLocationDraft122.latitude.toFixed(
+                              6
+                            )}
+                            ,{" "}
+                            {checkoutLocationDraft122.longitude.toFixed(
+                              6
+                            )}
+                          </span>
+                          {checkoutLocationConfirmed122 &&
+                          deliveryMatch117 ? (
+                            <small>
+                              Delivery fee / رسوم التوصيل:{" "}
+                              {money(
+                                Number(
+                                  deliveryMatch117.delivery_fee ?? 0
+                                )
+                              )}
+                              {" · "}
+                              Minimum / الحد الأدنى:{" "}
+                              {money(
+                                Number(
+                                  deliveryMatch117.minimum_order ?? 0
+                                )
+                              )}
+                            </small>
+                          ) : null}
+                        </div>
+
+                        <button
+                          type="button"
+                          className={
+                            checkoutLocationConfirmed122
+                              ? styles.darikCheckoutConfirmLocationDone122
+                              : styles.darikCheckoutConfirmLocation122
+                          }
+                          onClick={() =>
+                            void confirmCheckoutLocation122()
+                          }
+                          disabled={checkoutLocationBusy122}
+                        >
+                          {checkoutLocationBusy122
+                            ? "Checking delivery zone… / جاري التحقق…"
+                            : checkoutLocationConfirmed122
+                              ? "Location confirmed ✓ / تم تأكيد الموقع ✓"
+                              : "Confirm delivery location / تأكيد موقع التوصيل"}
+                        </button>
+                      </div>
+                    ) : (
+                      <p className={styles.darikCheckoutLocationEmpty122}>
+                        Choose current location or search Google Maps to set
+                        the delivery pin. / اختر موقعك الحالي أو ابحث في خرائط
+                        جوجل لتحديد موقع التوصيل.
+                      </p>
+                    )}
+
+                    {checkoutLocationError122 ? (
+                      <p className={styles.darikCheckoutLocationError122}>
+                        {checkoutLocationError122}
+                      </p>
+                    ) : null}
+                  </div>
 
                           <div className={styles.addressDetailsGrid}>
                             <label>

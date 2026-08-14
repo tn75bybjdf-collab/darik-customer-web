@@ -21081,3 +21081,324 @@
     flex-basis: auto;
   }
 }
+
+/* DARIK_CHECKOUT_GOOGLE_MAP_PIN_AND_ORDER_ERRORS_122 */
+.darikCheckoutLocation122 {
+  display: grid;
+  gap: 14px;
+  padding: 16px;
+  border: 1px solid rgba(15, 23, 42, 0.12);
+  border-radius: 22px;
+  background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+}
+
+.darikCheckoutLocationHeading122 {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.darikCheckoutLocationHeading122 > div {
+  display: grid;
+  gap: 4px;
+}
+
+.darikCheckoutLocationHeading122 strong {
+  color: #0f172a;
+  font-size: 15px;
+  font-weight: 900;
+}
+
+.darikCheckoutLocationHeading122 small {
+  color: #64748b;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.5;
+}
+
+.darikCheckoutLocationConfirmed122 {
+  flex: 0 0 auto;
+  padding: 6px 9px;
+  border-radius: 999px;
+  background: #dcfce7;
+  color: #166534;
+  font-size: 11px;
+  font-weight: 900;
+}
+
+.darikCheckoutLocationActions122 {
+  display: grid;
+  gap: 10px;
+}
+
+.darikCheckoutGps122 {
+  min-height: 46px;
+  border: 0;
+  border-radius: 15px;
+  background: #111827;
+  color: #ffffff;
+  padding: 11px 14px;
+  font-size: 13px;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.darikCheckoutGps122:disabled {
+  cursor: wait;
+  opacity: 0.62;
+}
+
+.darikCheckoutSearchRow122 {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 8px;
+}
+
+.darikCheckoutSearchRow122 input {
+  min-width: 0;
+  width: 100%;
+  min-height: 46px;
+  border: 1px solid #cbd5e1;
+  border-radius: 15px;
+  background: #ffffff;
+  color: #0f172a;
+  padding: 10px 13px;
+  outline: none;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.darikCheckoutSearchRow122 input:focus {
+  border-color: #0f172a;
+  box-shadow: 0 0 0 3px rgba(15, 23, 42, 0.08);
+}
+
+.darikCheckoutSearchRow122 button {
+  min-height: 46px;
+  border: 0;
+  border-radius: 15px;
+  background: #facc15;
+  color: #111827;
+  padding: 10px 14px;
+  font-size: 12px;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.darikCheckoutSearchRow122 button:disabled {
+  cursor: wait;
+  opacity: 0.62;
+}
+
+.darikCheckoutPredictions122 {
+  display: grid;
+  gap: 7px;
+  padding: 6px;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  background: #ffffff;
+}
+
+.darikCheckoutPredictions122 button {
+  display: grid;
+  gap: 2px;
+  width: 100%;
+  border: 0;
+  border-radius: 12px;
+  background: transparent;
+  padding: 10px 11px;
+  text-align: left;
+  cursor: pointer;
+}
+
+.darikCheckoutPredictions122 button:hover {
+  background: #f8fafc;
+}
+
+.darikCheckoutPredictions122 strong {
+  color: #0f172a;
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.darikCheckoutPredictions122 span {
+  color: #64748b;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.darikCheckoutMapSection122 {
+  display: grid;
+  gap: 9px;
+}
+
+.darikCheckoutMap122 {
+  position: relative;
+  width: 100%;
+  height: 245px;
+  overflow: hidden;
+  border: 1px solid #cbd5e1;
+  border-radius: 20px;
+  background: #e2e8f0;
+  cursor: crosshair;
+  touch-action: none;
+  user-select: none;
+}
+
+.darikCheckoutMap122 iframe {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border: 0;
+  pointer-events: none;
+}
+
+.darikCheckoutMapPin122 {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  z-index: 3;
+  width: 34px;
+  height: 34px;
+  border: 4px solid #ffffff;
+  border-radius: 50% 50% 50% 0;
+  background: #dc2626;
+  box-shadow: 0 8px 18px rgba(15, 23, 42, 0.28);
+  pointer-events: none;
+  transform-origin: center bottom;
+  rotate: -45deg;
+}
+
+.darikCheckoutMapPin122 span {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  background: #ffffff;
+  transform: translate(-50%, -50%);
+}
+
+.darikCheckoutMapCrosshair122 {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  z-index: 2;
+  width: 8px;
+  height: 8px;
+  border: 2px solid rgba(15, 23, 42, 0.45);
+  border-radius: 999px;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+
+.darikCheckoutMapHelp122 {
+  margin: 0;
+  color: #475569;
+  font-size: 11px;
+  font-weight: 800;
+  line-height: 1.45;
+  text-align: center;
+}
+
+.darikCheckoutLocationSummary122 {
+  display: grid;
+  gap: 3px;
+  padding: 11px 12px;
+  border-radius: 14px;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+}
+
+.darikCheckoutLocationSummary122 strong {
+  color: #0f172a;
+  font-size: 12px;
+  font-weight: 900;
+  line-height: 1.4;
+}
+
+.darikCheckoutLocationSummary122 span,
+.darikCheckoutLocationSummary122 small {
+  color: #64748b;
+  font-size: 10px;
+  font-weight: 750;
+  line-height: 1.4;
+}
+
+.darikCheckoutConfirmLocation122,
+.darikCheckoutConfirmLocationDone122 {
+  width: 100%;
+  min-height: 48px;
+  border: 0;
+  border-radius: 15px;
+  padding: 11px 14px;
+  font-size: 13px;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.darikCheckoutConfirmLocation122 {
+  background: #111827;
+  color: #ffffff;
+}
+
+.darikCheckoutConfirmLocationDone122 {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.darikCheckoutConfirmLocation122:disabled,
+.darikCheckoutConfirmLocationDone122:disabled {
+  cursor: wait;
+  opacity: 0.62;
+}
+
+.darikCheckoutLocationEmpty122,
+.darikCheckoutLocationError122 {
+  margin: 0;
+  border-radius: 13px;
+  padding: 10px 11px;
+  font-size: 11px;
+  font-weight: 800;
+  line-height: 1.45;
+}
+
+.darikCheckoutLocationEmpty122 {
+  background: #f1f5f9;
+  color: #475569;
+}
+
+.darikCheckoutLocationError122 {
+  background: #fef2f2;
+  color: #b91c1c;
+}
+
+@media (max-width: 600px) {
+  .darikCheckoutLocation122 {
+    padding: 13px;
+    border-radius: 18px;
+  }
+
+  .darikCheckoutLocationHeading122 {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .darikCheckoutLocationConfirmed122 {
+    align-self: flex-start;
+  }
+
+  .darikCheckoutSearchRow122 {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .darikCheckoutSearchRow122 button {
+    width: 100%;
+  }
+
+  .darikCheckoutMap122 {
+    height: 220px;
+  }
+}
