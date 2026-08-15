@@ -1,5 +1,7 @@
 "use client";
 
+// DARIK_FRONTEND_132_HOME_FREE_RETAILER_ACCOUNT_CTA
+
 // DARIK_ROOT_LINKS_027
 
 // DARIK_DISCOVERY_HOME_026
@@ -270,7 +272,7 @@ const copy = {
     retailerEyebrow: "BUILT FOR JORDANIAN RETAILERS",
     retailerTitle: "Your store. Your products. Your customers.",
     retailerBody: "Create a branded storefront, define your delivery range, receive orders, and get discovered automatically by nearby customers.",
-    startFree: "Create your free store",
+    startFree: "Create free retailer account",
     openDashboard: "Open retailer dashboard",
     plansTitle: "Simple plans for serious local businesses",
     plansBody: "Build privately for free. Activate the public storefront after your CliQ payment is reviewed by Darik.",
@@ -352,7 +354,7 @@ const copy = {
     retailerEyebrow: "مصمم للتجار في الأردن",
     retailerTitle: "متجرك. منتجاتك. زبائنك.",
     retailerBody: "أنشئ واجهة باسم متجرك، حدد نطاق التوصيل، استقبل الطلبات واظهر تلقائياً للزبائن القريبين.",
-    startFree: "أنشئ متجرك مجاناً",
+    startFree: "أنشئ حساب تاجر مجاناً",
     openDashboard: "افتح لوحة التاجر",
     plansTitle: "خطط واضحة للأعمال المحلية الجادة",
     plansBody: "ابنِ متجرك بشكل خاص مجاناً، ثم فعّله للعامة بعد مراجعة دفعة CliQ من داريك.",
