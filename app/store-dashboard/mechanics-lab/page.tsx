@@ -1,5 +1,7 @@
 "use client";
 
+// DARIK_EYEGLASSES_RETAIL_FIELD_MECHANICS_135
+
 // DARIK_SHOE_CATEGORY_SIZE_GROUPS_053
 
 // DARIK_RETAIL_FIELDS_SMOKE_SHOP_050
@@ -57,6 +59,13 @@ function mechanicsSummary(field: string) {
       "Smoke Shop category system",
       "Sold per item or by weight",
       "Age / ID verification — next mechanic",
+    ];
+  }
+  if (field === "eyeglasses") {
+    return [
+      "Optical-store departments for frames, sunglasses, lenses, care, and accessories",
+      "Brand -> optional model/style hierarchy with retailer-added custom brands",
+      "Single or multiple frame colors plus dimensions, fit, material, and lens features",
     ];
   }
   return [

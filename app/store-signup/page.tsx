@@ -1,5 +1,7 @@
 "use client";
 
+// DARIK_EYEGLASSES_RETAIL_FIELD_MECHANICS_135
+
 // DARIK_RETAIL_FIELDS_SMOKE_SHOP_050
 
 // DARIK_CUSTOM_STORE_LINKS_035
@@ -34,6 +36,7 @@ const businessTypes = [
   ["clothing", "Clothing — ملابس"],
   ["shoes", "Shoes — أحذية"],
   ["jewelry", "Jewelry — مجوهرات"],
+  ["eyeglasses", "Eyeglasses / Optical store — نظارات / محل بصريات"],
   ["cosmetics", "Cosmetics / Beauty — مستحضرات تجميل / عناية"],
   ["perfume", "Perfume — عطور"],
   ["electronics", "Electronics — إلكترونيات"],

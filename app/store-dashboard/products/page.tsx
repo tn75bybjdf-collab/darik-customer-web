@@ -24,6 +24,7 @@
 // DARIK_CAMERA_FIRST_FRAME_READY_072
 // DARIK_REUSED_LIVE_CAMERA_PREVIEW_073
 // DARIK_ALL_FIELDS_GUIDED_ADD_PRODUCT_WIZARD_074
+// DARIK_EYEGLASSES_RETAIL_FIELD_MECHANICS_135
 // DARIK_PHOTO_UPLOAD_DECODE_LOADING_076
 // DARIK_PHOTO_PRELOAD_READY_STATE_077
 // DARIK_DUAL_SIZE_PRODUCT_PHOTOS_078
@@ -2844,6 +2845,12 @@ type MobileCategoryNode = {
   is_system: boolean;
 };
 
+type EyewearColorOption = {
+  name: string;
+  nameAr: string;
+  hex: string;
+};
+
 type DirectProduct = {
   id: string;
   retailer_id: string;
@@ -2886,6 +2893,24 @@ type DirectProduct = {
   direct_shoe_sizes: Array<{ eu?: string; us?: string | null }> | null;
   direct_shoe_us_sizes_enabled: boolean;
   direct_size_options: Array<{ label?: string }> | null;
+  direct_eyewear_multiple_colors: boolean;
+  direct_eyewear_colors: Array<{ name?: string; name_ar?: string | null; hex?: string | null }> | null;
+  direct_eyewear_model_code: string | null;
+  direct_eyewear_audience: string | null;
+  direct_eyewear_frame_shape: string | null;
+  direct_eyewear_frame_material: string | null;
+  direct_eyewear_rim_type: string | null;
+  direct_eyewear_fit: string | null;
+  direct_eyewear_lens_width_mm: number | string | null;
+  direct_eyewear_bridge_width_mm: number | string | null;
+  direct_eyewear_temple_length_mm: number | string | null;
+  direct_eyewear_lens_height_mm: number | string | null;
+  direct_eyewear_lens_color: string | null;
+  direct_eyewear_polarized: boolean;
+  direct_eyewear_uv_protection: boolean;
+  direct_eyewear_blue_light: boolean;
+  direct_eyewear_photochromic: boolean;
+  direct_eyewear_prescription_ready: boolean;
   direct_product_status: "draft" | "published" | "paused" | "archived";
   direct_updated_at: string | null;
   created_at: string;
@@ -2909,6 +2934,24 @@ type ProductForm = {
   shoeSizes: ShoeSizeOption[];
   shoeUsSizesEnabled: boolean;
   sizeOptions: string[];
+  eyewearMultipleColors: boolean;
+  eyewearColors: EyewearColorOption[];
+  eyewearModelCode: string;
+  eyewearAudience: string;
+  eyewearFrameShape: string;
+  eyewearFrameMaterial: string;
+  eyewearRimType: string;
+  eyewearFit: string;
+  eyewearLensWidthMm: string;
+  eyewearBridgeWidthMm: string;
+  eyewearTempleLengthMm: string;
+  eyewearLensHeightMm: string;
+  eyewearLensColor: string;
+  eyewearPolarized: boolean;
+  eyewearUvProtection: boolean;
+  eyewearBlueLight: boolean;
+  eyewearPhotochromic: boolean;
+  eyewearPrescriptionReady: boolean;
   trackInventory: boolean;
   quantity: string;
   photoUrl: string;
@@ -2937,6 +2980,24 @@ const emptyForm: ProductForm = {
   shoeSizes: [],
   shoeUsSizesEnabled: false,
   sizeOptions: [],
+  eyewearMultipleColors: false,
+  eyewearColors: [{ name: "", nameAr: "", hex: "#111111" }],
+  eyewearModelCode: "",
+  eyewearAudience: "unisex",
+  eyewearFrameShape: "",
+  eyewearFrameMaterial: "",
+  eyewearRimType: "",
+  eyewearFit: "universal",
+  eyewearLensWidthMm: "",
+  eyewearBridgeWidthMm: "",
+  eyewearTempleLengthMm: "",
+  eyewearLensHeightMm: "",
+  eyewearLensColor: "",
+  eyewearPolarized: false,
+  eyewearUvProtection: false,
+  eyewearBlueLight: false,
+  eyewearPhotochromic: false,
+  eyewearPrescriptionReady: false,
   trackInventory: false,
   quantity: "0",
   photoUrl: "",
@@ -3409,6 +3470,24 @@ export default function DarikDirectProductsPage() {
             "direct_shoe_sizes",
             "direct_shoe_us_sizes_enabled",
             "direct_size_options",
+            "direct_eyewear_multiple_colors",
+            "direct_eyewear_colors",
+            "direct_eyewear_model_code",
+            "direct_eyewear_audience",
+            "direct_eyewear_frame_shape",
+            "direct_eyewear_frame_material",
+            "direct_eyewear_rim_type",
+            "direct_eyewear_fit",
+            "direct_eyewear_lens_width_mm",
+            "direct_eyewear_bridge_width_mm",
+            "direct_eyewear_temple_length_mm",
+            "direct_eyewear_lens_height_mm",
+            "direct_eyewear_lens_color",
+            "direct_eyewear_polarized",
+            "direct_eyewear_uv_protection",
+            "direct_eyewear_blue_light",
+            "direct_eyewear_photochromic",
+            "direct_eyewear_prescription_ready",
             "direct_product_status",
             "direct_updated_at",
             "created_at",
@@ -3484,7 +3563,7 @@ export default function DarikDirectProductsPage() {
       // Mechanics Lab changes only the effective frontend field. The actual
       // retailer can still be Auto Parts (or another field), so its database
       // correctly has no Mobile Phones system nodes. Preview uses local nodes.
-      if (mechanicsTestField === "mobile_phones") {
+      if (["mobile_phones", "eyeglasses"].includes(mechanicsTestField)) {
         if (!cancelled) {
           setMobileCategoryNodes([]);
           setMobileCategoryNodesError("");
@@ -3631,6 +3710,79 @@ export default function DarikDirectProductsPage() {
     setForm((current) => ({ ...current, [key]: value }));
   }
 
+  function setEyewearColorMode(multiple: boolean) {
+    setForm((current) => {
+      const existing = current.eyewearColors.length > 0
+        ? current.eyewearColors
+        : [{ name: "", nameAr: "", hex: "#111111" }];
+      const colors = multiple
+        ? existing.length >= 2
+          ? existing
+          : [...existing, { name: "", nameAr: "", hex: "#8B5E3C" }]
+        : [existing[0]];
+      return {
+        ...current,
+        eyewearMultipleColors: multiple,
+        eyewearColors: colors,
+      };
+    });
+    setShoeWizardErrors((current) => {
+      if (!current.eyewear) return current;
+      const next = { ...current };
+      delete next.eyewear;
+      return next;
+    });
+  }
+
+  function updateEyewearColor(
+    index: number,
+    key: keyof EyewearColorOption,
+    value: string
+  ) {
+    setForm((current) => ({
+      ...current,
+      eyewearColors: current.eyewearColors.map((color, colorIndex) =>
+        colorIndex === index ? { ...color, [key]: value } : color
+      ),
+    }));
+    setShoeWizardErrors((current) => {
+      if (!current.eyewear) return current;
+      const next = { ...current };
+      delete next.eyewear;
+      return next;
+    });
+  }
+
+  function addEyewearColor() {
+    setForm((current) => ({
+      ...current,
+      eyewearMultipleColors: true,
+      eyewearColors: [
+        ...current.eyewearColors,
+        { name: "", nameAr: "", hex: "#111111" },
+      ],
+    }));
+  }
+
+  function removeEyewearColor(index: number) {
+    setForm((current) => {
+      const next = current.eyewearColors.filter((_, colorIndex) => colorIndex !== index);
+      return {
+        ...current,
+        eyewearColors:
+          next.length > 0 ? next : [{ name: "", nameAr: "", hex: "#111111" }],
+        eyewearMultipleColors: next.length > 1,
+      };
+    });
+  }
+
+  function optionalEyewearNumber(value: string) {
+    const clean = value.trim();
+    if (!clean) return null;
+    const parsed = Number(clean);
+    return Number.isFinite(parsed) ? parsed : Number.NaN;
+  }
+
   function mechanicsCategoryValueForSavedId(categoryId: string | null) {
     if (!mechanicsTestField || !categoryId) return categoryId || "";
     const savedCategory = categoryById.get(categoryId);
@@ -3659,6 +3811,14 @@ export default function DarikDirectProductsPage() {
       categories.find((category) => category.id === selectedValue)?.name || ""
     );
   })();
+
+  const isEyeglassesMechanics = effectiveBusinessType === "eyeglasses";
+  const eyewearCategoryKey = normalizedCategoryKey(selectedProductCategoryName);
+  const eyewearProductMechanicsActive =
+    isEyeglassesMechanics &&
+    /(prescription|frame|sunglass|blue light|reading|kids eyewear|sports eyewear|safety|protective eyewear)/.test(
+      eyewearCategoryKey
+    );
 
   const footwearSizeGroup =
     effectiveBusinessType === "shoes"
@@ -4051,11 +4211,56 @@ export default function DarikDirectProductsPage() {
         }
       }
 
-      if (isMobilePhoneMechanics) {
-        if (mobileSubcategoryOptions.length > 0 && !mobileSubcategoryId) {
-          errors.mobile =
-            "Please select a subcategory / يرجى اختيار التصنيف الفرعي";
+      if (eyewearProductMechanicsActive) {
+        const colors = form.eyewearColors.map((color) => ({
+          name: color.name.trim(),
+          hex: color.hex.trim(),
+        }));
+        const expectedMinimum = form.eyewearMultipleColors ? 2 : 1;
+        if (
+          colors.length < expectedMinimum ||
+          colors.some((color) => !color.name)
+        ) {
+          errors.eyewear = form.eyewearMultipleColors
+            ? "Add at least two named frame colors / أضف لونين مسميين على الأقل للإطار"
+            : "Enter the frame color / أدخل لون الإطار";
         } else if (
+          new Set(colors.map((color) => color.name.toLowerCase())).size !== colors.length
+        ) {
+          errors.eyewear =
+            "The same frame color cannot be added twice / لا يمكن إضافة لون الإطار نفسه مرتين";
+        } else if (
+          colors.some((color) => color.hex && !/^#[0-9a-fA-F]{6}$/.test(color.hex))
+        ) {
+          errors.eyewear =
+            "Use a valid #RRGGBB color code / استخدم رمز لون صحيح بصيغة #RRGGBB";
+        } else {
+          const measurements = [
+            form.eyewearLensWidthMm,
+            form.eyewearBridgeWidthMm,
+            form.eyewearTempleLengthMm,
+            form.eyewearLensHeightMm,
+          ]
+            .filter((value) => value.trim())
+            .map((value) => Number(value));
+          if (
+            measurements.some(
+              (value) => !Number.isFinite(value) || value <= 0 || value > 250
+            )
+          ) {
+            errors.eyewear =
+              "Frame measurements must be between 0 and 250 mm / يجب أن تكون قياسات الإطار بين 0 و250 مم";
+          }
+        }
+      }
+
+      if (isHierarchyMechanics) {
+        if (mobileSubcategoryOptions.length > 0 && !mobileSubcategoryId) {
+          errors.mobile = isEyeglassesMechanics
+            ? "Please select a brand / يرجى اختيار العلامة التجارية"
+            : "Please select a subcategory / يرجى اختيار التصنيف الفرعي";
+        } else if (
+          isMobilePhoneMechanics &&
           mobileSubsubcategoryOptions.length > 0 &&
           !mobileSubsubcategoryId
         ) {
@@ -4163,18 +4368,23 @@ export default function DarikDirectProductsPage() {
   }
 
   const isMobilePhoneMechanics = effectiveBusinessType === "mobile_phones";
+  const isHierarchyMechanics = isMobilePhoneMechanics || isEyeglassesMechanics;
   const mobileMechanicsPreviewActive =
     mechanicsTestField === "mobile_phones" && isMobilePhoneMechanics;
+  const eyeglassesMechanicsPreviewActive =
+    mechanicsTestField === "eyeglasses" && isEyeglassesMechanics;
+  const hierarchyMechanicsPreviewActive =
+    mobileMechanicsPreviewActive || eyeglassesMechanicsPreviewActive;
 
   const mobileMechanicsPreviewCategory = useMemo(
     () =>
-      mobileMechanicsPreviewActive
+      hierarchyMechanicsPreviewActive
         ? mechanicsPresetCategories.find(
             (category) => category.value === form.directCategoryId
           ) ?? null
         : null,
     [
-      mobileMechanicsPreviewActive,
+      hierarchyMechanicsPreviewActive,
       mechanicsPresetCategories,
       form.directCategoryId,
     ]
@@ -4462,17 +4672,79 @@ export default function DarikDirectProductsPage() {
     return nodes;
   }
 
+  function buildEyeglassesPreviewNodes(
+    categoryId: string,
+    categoryName: string,
+    categoryNameAr: string
+  ): MobileCategoryNode[] {
+    if (!categoryId) return [];
+
+    const key = normalizedCategoryKey(`${categoryName} ${categoryNameAr}`);
+    const retailerId = selectedRetailerId || "mechanics-preview";
+    const nodes: MobileCategoryNode[] = [];
+
+    function addBrand(
+      name: string,
+      nameAr: string,
+      slug: string,
+      sortOrder: number
+    ) {
+      nodes.push({
+        id: `preview-eyewear:${categoryId}:${slug}`,
+        retailer_id: retailerId,
+        category_id: categoryId,
+        parent_node_id: null,
+        depth: 1,
+        name,
+        name_ar: nameAr,
+        slug,
+        sort_order: sortOrder,
+        node_status: "active",
+        is_system: true,
+      });
+    }
+
+    if (/(prescription|frame|sunglass|blue light|reading)/.test(key)) {
+      [
+        ["Ray-Ban", "راي بان", "ray-ban"],
+        ["Oakley", "أوكلي", "oakley"],
+        ["Gucci", "غوتشي", "gucci"],
+        ["Prada", "برادا", "prada"],
+        ["Versace", "فيرساتشي", "versace"],
+        ["Tom Ford", "توم فورد", "tom-ford"],
+        ["Persol", "بيرسول", "persol"],
+        ["Carrera", "كاريرا", "carrera"],
+        ["Vogue Eyewear", "فوغ آي وير", "vogue-eyewear"],
+        ["Oliver Peoples", "أوليفر بيبولز", "oliver-peoples"],
+      ].forEach(([name, nameAr, slug], index) =>
+        addBrand(name, nameAr, slug, 100 + index * 100)
+      );
+    } else if (/(sports eyewear|sport glass)/.test(key)) {
+      addBrand("Oakley", "أوكلي", "oakley", 100);
+      addBrand("Ray-Ban", "راي بان", "ray-ban", 200);
+    }
+
+    return nodes;
+  }
+
   const mobilePreviewPresetNodes = useMemo(
     () =>
-      mobileMechanicsPreviewActive && form.directCategoryId
-        ? buildMobilePhonePreviewNodes(
-            form.directCategoryId,
-            mobileMechanicsPreviewCategory?.name || "",
-            mobileMechanicsPreviewCategory?.nameAr || ""
-          )
+      hierarchyMechanicsPreviewActive && form.directCategoryId
+        ? isEyeglassesMechanics
+          ? buildEyeglassesPreviewNodes(
+              form.directCategoryId,
+              mobileMechanicsPreviewCategory?.name || "",
+              mobileMechanicsPreviewCategory?.nameAr || ""
+            )
+          : buildMobilePhonePreviewNodes(
+              form.directCategoryId,
+              mobileMechanicsPreviewCategory?.name || "",
+              mobileMechanicsPreviewCategory?.nameAr || ""
+            )
         : [],
     [
-      mobileMechanicsPreviewActive,
+      hierarchyMechanicsPreviewActive,
+      isEyeglassesMechanics,
       form.directCategoryId,
       mobileMechanicsPreviewCategory?.name,
       mobileMechanicsPreviewCategory?.nameAr,
@@ -4482,11 +4754,11 @@ export default function DarikDirectProductsPage() {
 
   const mobileEffectiveCategoryNodes = useMemo(
     () =>
-      mobileMechanicsPreviewActive
+      hierarchyMechanicsPreviewActive
         ? [...mobilePreviewPresetNodes, ...mobilePreviewCustomNodes]
         : mobileCategoryNodes,
     [
-      mobileMechanicsPreviewActive,
+      hierarchyMechanicsPreviewActive,
       mobilePreviewPresetNodes,
       mobilePreviewCustomNodes,
       mobileCategoryNodes,
@@ -4563,10 +4835,10 @@ export default function DarikDirectProductsPage() {
   ].filter(Boolean).join(" → ");
 
   useEffect(() => {
-    if (!mobileMechanicsPreviewActive && mobilePreviewCustomNodes.length > 0) {
+    if (!hierarchyMechanicsPreviewActive && mobilePreviewCustomNodes.length > 0) {
       setMobilePreviewCustomNodes([]);
     }
-  }, [mobileMechanicsPreviewActive, mobilePreviewCustomNodes.length]);
+  }, [hierarchyMechanicsPreviewActive, mobilePreviewCustomNodes.length]);
 
   useEffect(() => {
     if (!mobileSubcategoryId) {
@@ -4607,6 +4879,12 @@ export default function DarikDirectProductsPage() {
 
   function selectMobileSubcategory(value: string) {
     setMobileSubcategoryId(value);
+    if (isEyeglassesMechanics && value) {
+      const brand = mobileEffectiveCategoryNodes.find(
+        (node) => node.id === value && Number(node.depth) === 1
+      );
+      if (brand?.name) updateForm("brandName", brand.name);
+    }
     setMobileSubsubcategoryId("");
     setMobileAddDetailOpen(false);
     setMobileCustomDetailName("");
@@ -4644,7 +4922,7 @@ export default function DarikDirectProductsPage() {
     setError("");
     setMessage("");
 
-    if (mobileMechanicsPreviewActive) {
+    if (hierarchyMechanicsPreviewActive) {
       const slugBase = name
         .toLowerCase()
         .replace(/[^a-z0-9]+/g, "-")
@@ -5545,6 +5823,34 @@ export default function DarikDirectProductsPage() {
             .map((size) => String(size?.label ?? "").trim())
             .filter(Boolean)
         : [],
+      eyewearMultipleColors: Boolean(product.direct_eyewear_multiple_colors),
+      eyewearColors:
+        Array.isArray(product.direct_eyewear_colors) &&
+        product.direct_eyewear_colors.length > 0
+          ? product.direct_eyewear_colors.map((color) => ({
+              name: String(color?.name ?? ""),
+              nameAr: String(color?.name_ar ?? ""),
+              hex: /^#[0-9a-fA-F]{6}$/.test(String(color?.hex ?? ""))
+                ? String(color?.hex)
+                : "#111111",
+            }))
+          : [{ name: "", nameAr: "", hex: "#111111" }],
+      eyewearModelCode: product.direct_eyewear_model_code || "",
+      eyewearAudience: product.direct_eyewear_audience || "unisex",
+      eyewearFrameShape: product.direct_eyewear_frame_shape || "",
+      eyewearFrameMaterial: product.direct_eyewear_frame_material || "",
+      eyewearRimType: product.direct_eyewear_rim_type || "",
+      eyewearFit: product.direct_eyewear_fit || "universal",
+      eyewearLensWidthMm: String(product.direct_eyewear_lens_width_mm ?? ""),
+      eyewearBridgeWidthMm: String(product.direct_eyewear_bridge_width_mm ?? ""),
+      eyewearTempleLengthMm: String(product.direct_eyewear_temple_length_mm ?? ""),
+      eyewearLensHeightMm: String(product.direct_eyewear_lens_height_mm ?? ""),
+      eyewearLensColor: product.direct_eyewear_lens_color || "",
+      eyewearPolarized: Boolean(product.direct_eyewear_polarized),
+      eyewearUvProtection: Boolean(product.direct_eyewear_uv_protection),
+      eyewearBlueLight: Boolean(product.direct_eyewear_blue_light),
+      eyewearPhotochromic: Boolean(product.direct_eyewear_photochromic),
+      eyewearPrescriptionReady: Boolean(product.direct_eyewear_prescription_ready),
       trackInventory: Boolean(product.direct_inventory_tracking_enabled),
       quantity: String(product.quantity_in_stock ?? 0),
       photoUrl: product.direct_photo_url || "",
@@ -6062,18 +6368,72 @@ export default function DarikDirectProductsPage() {
       }
     }
 
-    if (isMobilePhoneMechanics) {
+    if (eyewearProductMechanicsActive) {
+      const colors = form.eyewearColors.map((color) => ({
+        name: color.name.trim(),
+        nameAr: color.nameAr.trim(),
+        hex: color.hex.trim(),
+      }));
+      if (form.eyewearMultipleColors ? colors.length < 2 : colors.length !== 1) {
+        setError(
+          form.eyewearMultipleColors
+            ? "Add at least two frame colors / أضف لونين على الأقل للإطار."
+            : "Add exactly one frame color / أضف لونًا واحدًا للإطار."
+        );
+        return;
+      }
+      if (colors.some((color) => !color.name)) {
+        setError("Every frame color needs a name / كل لون إطار يحتاج اسمًا.");
+        return;
+      }
+      if (
+        new Set(colors.map((color) => color.name.toLowerCase())).size !== colors.length
+      ) {
+        setError("Frame colors cannot be duplicated / لا يمكن تكرار ألوان الإطار.");
+        return;
+      }
+      if (colors.some((color) => color.hex && !/^#[0-9a-fA-F]{6}$/.test(color.hex))) {
+        setError("Use valid #RRGGBB color values / استخدم رموز ألوان صحيحة بصيغة #RRGGBB.");
+        return;
+      }
+      const measurements = [
+        form.eyewearLensWidthMm,
+        form.eyewearBridgeWidthMm,
+        form.eyewearTempleLengthMm,
+        form.eyewearLensHeightMm,
+      ]
+        .filter((value) => value.trim())
+        .map((value) => Number(value));
+      if (
+        measurements.some(
+          (value) => !Number.isFinite(value) || value <= 0 || value > 250
+        )
+      ) {
+        setError("Frame measurements must be between 0 and 250 mm / يجب أن تكون قياسات الإطار بين 0 و250 مم.");
+        return;
+      }
+    }
+
+    if (isHierarchyMechanics) {
       if (!form.directCategoryId) {
         setError("Select a store category / اختر فئة المتجر.");
         return;
       }
 
       if (mobileSubcategoryOptions.length > 0 && !mobileSubcategoryId) {
-        setError("Select a subcategory / اختر التصنيف الفرعي.");
+        setError(
+          isEyeglassesMechanics
+            ? "Select a brand / اختر العلامة التجارية."
+            : "Select a subcategory / اختر التصنيف الفرعي."
+        );
         return;
       }
 
-      if (mobileSubsubcategoryOptions.length > 0 && !mobileSubsubcategoryId) {
+      if (
+        isMobilePhoneMechanics &&
+        mobileSubsubcategoryOptions.length > 0 &&
+        !mobileSubsubcategoryId
+      ) {
         setError("Select the model/detail / اختر الموديل أو التفصيل.");
         return;
       }
@@ -6266,7 +6626,7 @@ export default function DarikDirectProductsPage() {
       return;
     }
 
-    if (isMobilePhoneMechanics && !mobileMechanicsPreviewActive) {
+    if (isHierarchyMechanics && !hierarchyMechanicsPreviewActive) {
       const categoryPathResult = await supabase.rpc(
         "darik_direct_set_product_category_path_v1",
         {
@@ -6280,7 +6640,75 @@ export default function DarikDirectProductsPage() {
       if (categoryPathResult.error) {
         setSaving(false);
         setError(
-          `The product was saved, but its mobile category path failed. / تم حفظ المنتج، لكن تعذر حفظ التصنيف التفصيلي للهاتف. ${categoryPathResult.error.message}`
+          `The product was saved, but its category path failed. / تم حفظ المنتج، لكن تعذر حفظ التصنيف التفصيلي. ${categoryPathResult.error.message}`
+        );
+        await loadCatalog();
+        return;
+      }
+    }
+
+    if (isEyeglassesMechanics) {
+      const colorsForSave = eyewearProductMechanicsActive
+        ? form.eyewearColors.map((color) => ({
+            name: color.name.trim(),
+            name_ar: color.nameAr.trim() || null,
+            hex: color.hex.trim() || null,
+          }))
+        : [];
+
+      const eyewearResult = await supabase.rpc(
+        "darik_direct_set_product_eyewear_mechanics_v1",
+        {
+          p_product_id: savedProductId,
+          p_multiple_colors:
+            eyewearProductMechanicsActive && form.eyewearMultipleColors,
+          p_colors: colorsForSave,
+          p_model_code: eyewearProductMechanicsActive
+            ? form.eyewearModelCode.trim() || null
+            : null,
+          p_audience: eyewearProductMechanicsActive
+            ? form.eyewearAudience || null
+            : null,
+          p_frame_shape: eyewearProductMechanicsActive
+            ? form.eyewearFrameShape || null
+            : null,
+          p_frame_material: eyewearProductMechanicsActive
+            ? form.eyewearFrameMaterial || null
+            : null,
+          p_rim_type: eyewearProductMechanicsActive
+            ? form.eyewearRimType || null
+            : null,
+          p_fit: eyewearProductMechanicsActive
+            ? form.eyewearFit || null
+            : null,
+          p_lens_width_mm: eyewearProductMechanicsActive
+            ? optionalEyewearNumber(form.eyewearLensWidthMm)
+            : null,
+          p_bridge_width_mm: eyewearProductMechanicsActive
+            ? optionalEyewearNumber(form.eyewearBridgeWidthMm)
+            : null,
+          p_temple_length_mm: eyewearProductMechanicsActive
+            ? optionalEyewearNumber(form.eyewearTempleLengthMm)
+            : null,
+          p_lens_height_mm: eyewearProductMechanicsActive
+            ? optionalEyewearNumber(form.eyewearLensHeightMm)
+            : null,
+          p_lens_color: eyewearProductMechanicsActive
+            ? form.eyewearLensColor.trim() || null
+            : null,
+          p_polarized: eyewearProductMechanicsActive && form.eyewearPolarized,
+          p_uv_protection: eyewearProductMechanicsActive && form.eyewearUvProtection,
+          p_blue_light: eyewearProductMechanicsActive && form.eyewearBlueLight,
+          p_photochromic: eyewearProductMechanicsActive && form.eyewearPhotochromic,
+          p_prescription_ready:
+            eyewearProductMechanicsActive && form.eyewearPrescriptionReady,
+        }
+      );
+
+      if (eyewearResult.error) {
+        setSaving(false);
+        setError(
+          `The product was saved, but its eyewear mechanics failed. / تم حفظ المنتج، لكن تعذر حفظ خصائص النظارات. ${eyewearResult.error.message}`
         );
         await loadCatalog();
         return;
@@ -7160,11 +7588,15 @@ export default function DarikDirectProductsPage() {
 
 
 
-                        {isMobilePhoneMechanics && form.directCategoryId ? (
+                        {isHierarchyMechanics && form.directCategoryId ? (
                                             <section className={styles.mobileHierarchyPanel}>
                                               <div className={styles.mobileHierarchyHeading}>
                                                 <div>
-                                                  <strong>Product fit / التصنيف التفصيلي</strong>
+                                                  <strong>
+                            {isEyeglassesMechanics
+                              ? "Brand & model / العلامة والموديل"
+                              : "Product fit / التصنيف التفصيلي"}
+                          </strong>
                                                   <span>
                                                     Pick only what matters. Darik keeps this to two child levels so the catalog stays easy to use. /
                                                     اختر التفاصيل المهمة فقط. دارك يحصرها بمستويين حتى يبقى الكتالوج بسيطًا.
@@ -7192,8 +7624,12 @@ export default function DarikDirectProductsPage() {
                                                       {mobileCategoryNodesError && !mobileMechanicsPreviewActive
                                                         ? "Could not load subcategories / تعذر تحميل التصنيفات الفرعية"
                                                         : mobileSubcategoryOptions.length > 0
-                                                          ? "Select subcategory / اختر التصنيف الفرعي"
-                                                          : "No preset subcategories / لا توجد تصنيفات جاهزة"}
+                                                          ? isEyeglassesMechanics
+                                                            ? "Select brand / اختر العلامة التجارية"
+                                                            : "Select subcategory / اختر التصنيف الفرعي"
+                                                          : isEyeglassesMechanics
+                                                            ? "No preset brands / لا توجد علامات جاهزة"
+                                                            : "No preset subcategories / لا توجد تصنيفات جاهزة"}
                                                     </option>
                                                     {mobileSubcategoryOptions.map((node) => (
                                                       <option key={node.id} value={node.id}>
@@ -7209,17 +7645,22 @@ export default function DarikDirectProductsPage() {
                                                   onClick={() => setMobileAddSubcategoryOpen((current) => !current)}
                                                   disabled={mobileNodeSaving}
                                                 >
-                                                  + Add subcategory / إضافة تصنيف فرعي
+                                                  {isEyeglassesMechanics
+                                                    ? "+ Add brand / إضافة علامة تجارية"
+                                                    : "+ Add subcategory / إضافة تصنيف فرعي"}
                                                 </button>
 
                                                 {mobileAddSubcategoryOpen ? (
                                                   <div className={styles.mobileHierarchyCustomBox}>
                                                     <label>
-                                                      <BilingualLabel en="New subcategory (English)" ar="التصنيف الفرعي الجديد بالإنجليزي" />
+                                                      <BilingualLabel
+                                                        en={isEyeglassesMechanics ? "New brand (English)" : "New subcategory (English)"}
+                                                        ar={isEyeglassesMechanics ? "العلامة التجارية الجديدة بالإنجليزي" : "التصنيف الفرعي الجديد بالإنجليزي"}
+                                                      />
                                                       <input
                                                         value={mobileCustomSubcategoryName}
                                                         onChange={(event) => setMobileCustomSubcategoryName(event.target.value)}
-                                                        placeholder="Example: Google Pixel"
+                                                        placeholder={isEyeglassesMechanics ? "Example: Gucci" : "Example: Google Pixel"}
                                                       />
                                                     </label>
                                                     <label>
@@ -7255,15 +7696,19 @@ export default function DarikDirectProductsPage() {
                                                     {mobileSubsubcategoryOptions.length > 0 ? (
                                                       <label>
                                                         <BilingualLabel
-                                                          en="Model / detail"
-                                                          ar="الموديل / التفصيل"
+                                                          en={isEyeglassesMechanics ? "Model / style" : "Model / detail"}
+                                                          ar={isEyeglassesMechanics ? "الموديل / التصميم" : "الموديل / التفصيل"}
                                                         />
                                                         <select
                                                           value={mobileSubsubcategoryId}
                                                           onChange={(event) => setMobileSubsubcategoryId(event.target.value)}
                                                           disabled={mobileNodeSaving}
                                                         >
-                                                          <option value="">Select model/detail / اختر الموديل أو التفصيل</option>
+                                                          <option value="">
+                                                            {isEyeglassesMechanics
+                                                              ? "Select model/style / اختر الموديل أو التصميم"
+                                                              : "Select model/detail / اختر الموديل أو التفصيل"}
+                                                          </option>
                                                           {mobileSubsubcategoryOptions.map((node) => (
                                                             <option key={node.id} value={node.id}>
                                                               {node.name}{node.name_ar ? " / " + node.name_ar : ""}
@@ -7284,17 +7729,22 @@ export default function DarikDirectProductsPage() {
                                                       onClick={() => setMobileAddDetailOpen((current) => !current)}
                                                       disabled={mobileNodeSaving}
                                                     >
-                                                      + Add model / detail / إضافة موديل أو تفصيل
+                                                      {isEyeglassesMechanics
+                                                        ? "+ Add model / style / إضافة موديل أو تصميم"
+                                                        : "+ Add model / detail / إضافة موديل أو تفصيل"}
                                                     </button>
 
                                                     {mobileAddDetailOpen ? (
                                                       <div className={styles.mobileHierarchyCustomBox}>
                                                         <label>
-                                                          <BilingualLabel en="New model/detail (English)" ar="الموديل أو التفصيل الجديد بالإنجليزي" />
+                                                          <BilingualLabel
+                                                            en={isEyeglassesMechanics ? "New model/style (English)" : "New model/detail (English)"}
+                                                            ar={isEyeglassesMechanics ? "الموديل أو التصميم الجديد بالإنجليزي" : "الموديل أو التفصيل الجديد بالإنجليزي"}
+                                                          />
                                                           <input
                                                             value={mobileCustomDetailName}
                                                             onChange={(event) => setMobileCustomDetailName(event.target.value)}
-                                                            placeholder="Example: iPhone 15 Plus"
+                                                            placeholder={isEyeglassesMechanics ? "Example: Wayfarer" : "Example: iPhone 15 Plus"}
                                                           />
                                                         </label>
                                                         <label>
@@ -7864,6 +8314,189 @@ export default function DarikDirectProductsPage() {
                             </span>
                           </div>
                         )}
+
+                        {eyewearProductMechanicsActive ? (
+                          <section className={styles.eyewearMechanicsPanel}>
+                            <div className={styles.eyewearMechanicsHeading}>
+                              <div>
+                                <strong>Eyewear options / خيارات النظارات</strong>
+                                <span>
+                                  Choose one color or multiple colors for this exact frame/model, then add useful frame and lens details. /
+                                  اختر لونًا واحدًا أو عدة ألوان لهذا الإطار/الموديل ثم أضف تفاصيل الإطار والعدسة.
+                                </span>
+                              </div>
+                              <div className={styles.eyewearColorModeButtons}>
+                                <button
+                                  type="button"
+                                  className={!form.eyewearMultipleColors ? styles.eyewearColorModeActive : ""}
+                                  onClick={() => setEyewearColorMode(false)}
+                                >
+                                  One color / لون واحد
+                                </button>
+                                <button
+                                  type="button"
+                                  className={form.eyewearMultipleColors ? styles.eyewearColorModeActive : ""}
+                                  onClick={() => setEyewearColorMode(true)}
+                                >
+                                  Multiple colors / عدة ألوان
+                                </button>
+                              </div>
+                            </div>
+
+                            <div className={styles.eyewearColorRows}>
+                              {form.eyewearColors.map((color, index) => (
+                                <div className={styles.eyewearColorRow} key={`eyewear-color-${index}`}>
+                                  <label>
+                                    <BilingualLabel en={`Color ${index + 1}`} ar={`اللون ${index + 1}`} />
+                                    <input
+                                      value={color.name}
+                                      onChange={(event) => updateEyewearColor(index, "name", event.target.value)}
+                                      placeholder="Black / Tortoise / Gold"
+                                    />
+                                  </label>
+                                  <label>
+                                    <BilingualLabel en="Arabic color (optional)" ar="اسم اللون بالعربي (اختياري)" />
+                                    <input
+                                      dir="rtl"
+                                      value={color.nameAr}
+                                      onChange={(event) => updateEyewearColor(index, "nameAr", event.target.value)}
+                                    />
+                                  </label>
+                                  <label className={styles.eyewearColorPickerLabel}>
+                                    <BilingualLabel en="Color swatch" ar="عينة اللون" />
+                                    <div className={styles.eyewearColorPickerRow}>
+                                      <input
+                                        type="color"
+                                        value={/^#[0-9a-fA-F]{6}$/.test(color.hex) ? color.hex : "#111111"}
+                                        onChange={(event) => updateEyewearColor(index, "hex", event.target.value.toUpperCase())}
+                                      />
+                                      <input
+                                        value={color.hex}
+                                        onChange={(event) => updateEyewearColor(index, "hex", event.target.value.toUpperCase())}
+                                        placeholder="#111111"
+                                      />
+                                    </div>
+                                  </label>
+                                  {form.eyewearMultipleColors && form.eyewearColors.length > 2 ? (
+                                    <button
+                                      type="button"
+                                      className={styles.eyewearRemoveColorButton}
+                                      onClick={() => removeEyewearColor(index)}
+                                    >
+                                      Remove / حذف
+                                    </button>
+                                  ) : null}
+                                </div>
+                              ))}
+                            </div>
+
+                            {form.eyewearMultipleColors ? (
+                              <button type="button" className={styles.eyewearAddColorButton} onClick={addEyewearColor}>
+                                + Add another color / إضافة لون آخر
+                              </button>
+                            ) : null}
+
+                            <div className={styles.eyewearSpecGrid}>
+                              <label>
+                                <BilingualLabel en="Model / style code (optional)" ar="رمز الموديل / الستايل (اختياري)" />
+                                <input value={form.eyewearModelCode} onChange={(event) => updateForm("eyewearModelCode", event.target.value)} placeholder="RB2140" />
+                              </label>
+                              <label>
+                                <BilingualLabel en="Audience" ar="الفئة" />
+                                <select value={form.eyewearAudience} onChange={(event) => updateForm("eyewearAudience", event.target.value)}>
+                                  <option value="unisex">Unisex / للجنسين</option>
+                                  <option value="men">Men / رجالي</option>
+                                  <option value="women">Women / نسائي</option>
+                                  <option value="kids">Kids / أطفال</option>
+                                </select>
+                              </label>
+                              <label>
+                                <BilingualLabel en="Frame shape" ar="شكل الإطار" />
+                                <select value={form.eyewearFrameShape} onChange={(event) => updateForm("eyewearFrameShape", event.target.value)}>
+                                  <option value="">Not specified / غير محدد</option>
+                                  <option value="aviator">Aviator / أفياتور</option>
+                                  <option value="wayfarer">Wayfarer / وايفيرر</option>
+                                  <option value="round">Round / دائري</option>
+                                  <option value="rectangle">Rectangle / مستطيل</option>
+                                  <option value="square">Square / مربع</option>
+                                  <option value="cat-eye">Cat-eye / عين القطة</option>
+                                  <option value="oval">Oval / بيضاوي</option>
+                                  <option value="browline">Browline / براولاين</option>
+                                  <option value="geometric">Geometric / هندسي</option>
+                                  <option value="rimless">Rimless shape / بدون إطار</option>
+                                  <option value="other">Other / أخرى</option>
+                                </select>
+                              </label>
+                              <label>
+                                <BilingualLabel en="Frame material" ar="مادة الإطار" />
+                                <select value={form.eyewearFrameMaterial} onChange={(event) => updateForm("eyewearFrameMaterial", event.target.value)}>
+                                  <option value="">Not specified / غير محدد</option>
+                                  <option value="acetate">Acetate / أسيتات</option>
+                                  <option value="metal">Metal / معدن</option>
+                                  <option value="titanium">Titanium / تيتانيوم</option>
+                                  <option value="stainless-steel">Stainless steel / ستانلس ستيل</option>
+                                  <option value="tr90">TR90</option>
+                                  <option value="plastic">Plastic / بلاستيك</option>
+                                  <option value="mixed">Mixed / مختلط</option>
+                                  <option value="other">Other / أخرى</option>
+                                </select>
+                              </label>
+                              <label>
+                                <BilingualLabel en="Rim type" ar="نوع الإطار" />
+                                <select value={form.eyewearRimType} onChange={(event) => updateForm("eyewearRimType", event.target.value)}>
+                                  <option value="">Not specified / غير محدد</option>
+                                  <option value="full-rim">Full rim / إطار كامل</option>
+                                  <option value="semi-rimless">Semi-rimless / نصف إطار</option>
+                                  <option value="rimless">Rimless / بدون إطار</option>
+                                  <option value="other">Other / أخرى</option>
+                                </select>
+                              </label>
+                              <label>
+                                <BilingualLabel en="Fit" ar="المقاس العام" />
+                                <select value={form.eyewearFit} onChange={(event) => updateForm("eyewearFit", event.target.value)}>
+                                  <option value="narrow">Narrow / ضيق</option>
+                                  <option value="medium">Medium / متوسط</option>
+                                  <option value="wide">Wide / عريض</option>
+                                  <option value="universal">Universal / عام</option>
+                                </select>
+                              </label>
+                              <label>
+                                <BilingualLabel en="Lens color (optional)" ar="لون العدسة (اختياري)" />
+                                <input value={form.eyewearLensColor} onChange={(event) => updateForm("eyewearLensColor", event.target.value)} placeholder="Green / Brown / Clear" />
+                              </label>
+                            </div>
+
+                            <div className={styles.eyewearMeasurementGrid}>
+                              <label><BilingualLabel en="Lens width (mm)" ar="عرض العدسة (مم)" /><input inputMode="decimal" value={form.eyewearLensWidthMm} onChange={(event) => updateForm("eyewearLensWidthMm", event.target.value)} placeholder="52" /></label>
+                              <label><BilingualLabel en="Bridge (mm)" ar="عرض الجسر (مم)" /><input inputMode="decimal" value={form.eyewearBridgeWidthMm} onChange={(event) => updateForm("eyewearBridgeWidthMm", event.target.value)} placeholder="18" /></label>
+                              <label><BilingualLabel en="Temple length (mm)" ar="طول الذراع (مم)" /><input inputMode="decimal" value={form.eyewearTempleLengthMm} onChange={(event) => updateForm("eyewearTempleLengthMm", event.target.value)} placeholder="145" /></label>
+                              <label><BilingualLabel en="Lens height (mm)" ar="ارتفاع العدسة (مم)" /><input inputMode="decimal" value={form.eyewearLensHeightMm} onChange={(event) => updateForm("eyewearLensHeightMm", event.target.value)} placeholder="42" /></label>
+                            </div>
+
+                            <div className={styles.eyewearFeatureGrid}>
+                              {[
+                                ["eyewearPolarized", "Polarized / مستقطبة"],
+                                ["eyewearUvProtection", "UV protection / حماية UV"],
+                                ["eyewearBlueLight", "Blue-light filter / فلتر الضوء الأزرق"],
+                                ["eyewearPhotochromic", "Photochromic / فوتوكروميك"],
+                                ["eyewearPrescriptionReady", "Prescription-ready / قابل لتركيب عدسات طبية"],
+                              ].map(([key, label]) => (
+                                <label className={styles.eyewearFeatureToggle} key={key}>
+                                  <input
+                                    type="checkbox"
+                                    checked={Boolean(form[key as keyof ProductForm])}
+                                    onChange={(event) => updateForm(key as keyof ProductForm, event.target.checked as never)}
+                                  />
+                                  <span>{label}</span>
+                                </label>
+                              ))}
+                            </div>
+
+                            {shoeWizardErrors.eyewear ? (
+                              <p className={styles.shoeWizardFieldError}>{shoeWizardErrors.eyewear}</p>
+                            ) : null}
+                          </section>
+                        ) : null}
 
                         {supportsWeightSelling ? (
                                           <section className={styles.weightMechanicPanel}>
@@ -8672,7 +9305,7 @@ export default function DarikDirectProductsPage() {
                                   : "Not required / غير مطلوب"}
                             </strong>
                           </div>
-                          {isMobilePhoneMechanics && mobileCategoryPath ? (
+                          {isHierarchyMechanics && mobileCategoryPath ? (
                             <div>
                               <span>Product fit / التصنيف التفصيلي</span>
                               <strong>{mobileCategoryPath}</strong>
@@ -8697,6 +9330,18 @@ export default function DarikDirectProductsPage() {
                                 ]
                                   .filter(Boolean)
                                   .join(" ") || "Universal / عام"}
+                              </strong>
+                            </div>
+                          ) : null}
+
+                          {eyewearProductMechanicsActive ? (
+                            <div>
+                              <span>Frame colors / ألوان الإطار</span>
+                              <strong>
+                                {form.eyewearColors
+                                  .map((color) => color.name.trim())
+                                  .filter(Boolean)
+                                  .join(", ") || "Not entered / غير مدخل"}
                               </strong>
                             </div>
                           ) : null}
@@ -8860,11 +9505,15 @@ export default function DarikDirectProductsPage() {
                     </a>
                   </label>
 
-                  {isMobilePhoneMechanics && form.directCategoryId ? (
+                  {isHierarchyMechanics && form.directCategoryId ? (
                     <section className={styles.mobileHierarchyPanel}>
                       <div className={styles.mobileHierarchyHeading}>
                         <div>
-                          <strong>Product fit / التصنيف التفصيلي</strong>
+                          <strong>
+                            {isEyeglassesMechanics
+                              ? "Brand & model / العلامة والموديل"
+                              : "Product fit / التصنيف التفصيلي"}
+                          </strong>
                           <span>
                             Pick only what matters. Darik keeps this to two child levels so the catalog stays easy to use. /
                             اختر التفاصيل المهمة فقط. دارك يحصرها بمستويين حتى يبقى الكتالوج بسيطًا.
@@ -9557,6 +10206,189 @@ export default function DarikDirectProductsPage() {
                     </div>
                   </section>
                 ) : null}
+                {eyewearProductMechanicsActive ? (
+                  <section className={styles.eyewearMechanicsPanel}>
+                    <div className={styles.eyewearMechanicsHeading}>
+                      <div>
+                        <strong>Eyewear options / خيارات النظارات</strong>
+                        <span>
+                          Choose one color or multiple colors for this exact frame/model, then add useful frame and lens details. /
+                          اختر لونًا واحدًا أو عدة ألوان لهذا الإطار/الموديل ثم أضف تفاصيل الإطار والعدسة.
+                        </span>
+                      </div>
+                      <div className={styles.eyewearColorModeButtons}>
+                        <button
+                          type="button"
+                          className={!form.eyewearMultipleColors ? styles.eyewearColorModeActive : ""}
+                          onClick={() => setEyewearColorMode(false)}
+                        >
+                          One color / لون واحد
+                        </button>
+                        <button
+                          type="button"
+                          className={form.eyewearMultipleColors ? styles.eyewearColorModeActive : ""}
+                          onClick={() => setEyewearColorMode(true)}
+                        >
+                          Multiple colors / عدة ألوان
+                        </button>
+                      </div>
+                    </div>
+
+                    <div className={styles.eyewearColorRows}>
+                      {form.eyewearColors.map((color, index) => (
+                        <div className={styles.eyewearColorRow} key={`eyewear-color-${index}`}>
+                          <label>
+                            <BilingualLabel en={`Color ${index + 1}`} ar={`اللون ${index + 1}`} />
+                            <input
+                              value={color.name}
+                              onChange={(event) => updateEyewearColor(index, "name", event.target.value)}
+                              placeholder="Black / Tortoise / Gold"
+                            />
+                          </label>
+                          <label>
+                            <BilingualLabel en="Arabic color (optional)" ar="اسم اللون بالعربي (اختياري)" />
+                            <input
+                              dir="rtl"
+                              value={color.nameAr}
+                              onChange={(event) => updateEyewearColor(index, "nameAr", event.target.value)}
+                            />
+                          </label>
+                          <label className={styles.eyewearColorPickerLabel}>
+                            <BilingualLabel en="Color swatch" ar="عينة اللون" />
+                            <div className={styles.eyewearColorPickerRow}>
+                              <input
+                                type="color"
+                                value={/^#[0-9a-fA-F]{6}$/.test(color.hex) ? color.hex : "#111111"}
+                                onChange={(event) => updateEyewearColor(index, "hex", event.target.value.toUpperCase())}
+                              />
+                              <input
+                                value={color.hex}
+                                onChange={(event) => updateEyewearColor(index, "hex", event.target.value.toUpperCase())}
+                                placeholder="#111111"
+                              />
+                            </div>
+                          </label>
+                          {form.eyewearMultipleColors && form.eyewearColors.length > 2 ? (
+                            <button
+                              type="button"
+                              className={styles.eyewearRemoveColorButton}
+                              onClick={() => removeEyewearColor(index)}
+                            >
+                              Remove / حذف
+                            </button>
+                          ) : null}
+                        </div>
+                      ))}
+                    </div>
+
+                    {form.eyewearMultipleColors ? (
+                      <button type="button" className={styles.eyewearAddColorButton} onClick={addEyewearColor}>
+                        + Add another color / إضافة لون آخر
+                      </button>
+                    ) : null}
+
+                    <div className={styles.eyewearSpecGrid}>
+                      <label>
+                        <BilingualLabel en="Model / style code (optional)" ar="رمز الموديل / الستايل (اختياري)" />
+                        <input value={form.eyewearModelCode} onChange={(event) => updateForm("eyewearModelCode", event.target.value)} placeholder="RB2140" />
+                      </label>
+                      <label>
+                        <BilingualLabel en="Audience" ar="الفئة" />
+                        <select value={form.eyewearAudience} onChange={(event) => updateForm("eyewearAudience", event.target.value)}>
+                          <option value="unisex">Unisex / للجنسين</option>
+                          <option value="men">Men / رجالي</option>
+                          <option value="women">Women / نسائي</option>
+                          <option value="kids">Kids / أطفال</option>
+                        </select>
+                      </label>
+                      <label>
+                        <BilingualLabel en="Frame shape" ar="شكل الإطار" />
+                        <select value={form.eyewearFrameShape} onChange={(event) => updateForm("eyewearFrameShape", event.target.value)}>
+                          <option value="">Not specified / غير محدد</option>
+                          <option value="aviator">Aviator / أفياتور</option>
+                          <option value="wayfarer">Wayfarer / وايفيرر</option>
+                          <option value="round">Round / دائري</option>
+                          <option value="rectangle">Rectangle / مستطيل</option>
+                          <option value="square">Square / مربع</option>
+                          <option value="cat-eye">Cat-eye / عين القطة</option>
+                          <option value="oval">Oval / بيضاوي</option>
+                          <option value="browline">Browline / براولاين</option>
+                          <option value="geometric">Geometric / هندسي</option>
+                          <option value="rimless">Rimless shape / بدون إطار</option>
+                          <option value="other">Other / أخرى</option>
+                        </select>
+                      </label>
+                      <label>
+                        <BilingualLabel en="Frame material" ar="مادة الإطار" />
+                        <select value={form.eyewearFrameMaterial} onChange={(event) => updateForm("eyewearFrameMaterial", event.target.value)}>
+                          <option value="">Not specified / غير محدد</option>
+                          <option value="acetate">Acetate / أسيتات</option>
+                          <option value="metal">Metal / معدن</option>
+                          <option value="titanium">Titanium / تيتانيوم</option>
+                          <option value="stainless-steel">Stainless steel / ستانلس ستيل</option>
+                          <option value="tr90">TR90</option>
+                          <option value="plastic">Plastic / بلاستيك</option>
+                          <option value="mixed">Mixed / مختلط</option>
+                          <option value="other">Other / أخرى</option>
+                        </select>
+                      </label>
+                      <label>
+                        <BilingualLabel en="Rim type" ar="نوع الإطار" />
+                        <select value={form.eyewearRimType} onChange={(event) => updateForm("eyewearRimType", event.target.value)}>
+                          <option value="">Not specified / غير محدد</option>
+                          <option value="full-rim">Full rim / إطار كامل</option>
+                          <option value="semi-rimless">Semi-rimless / نصف إطار</option>
+                          <option value="rimless">Rimless / بدون إطار</option>
+                          <option value="other">Other / أخرى</option>
+                        </select>
+                      </label>
+                      <label>
+                        <BilingualLabel en="Fit" ar="المقاس العام" />
+                        <select value={form.eyewearFit} onChange={(event) => updateForm("eyewearFit", event.target.value)}>
+                          <option value="narrow">Narrow / ضيق</option>
+                          <option value="medium">Medium / متوسط</option>
+                          <option value="wide">Wide / عريض</option>
+                          <option value="universal">Universal / عام</option>
+                        </select>
+                      </label>
+                      <label>
+                        <BilingualLabel en="Lens color (optional)" ar="لون العدسة (اختياري)" />
+                        <input value={form.eyewearLensColor} onChange={(event) => updateForm("eyewearLensColor", event.target.value)} placeholder="Green / Brown / Clear" />
+                      </label>
+                    </div>
+
+                    <div className={styles.eyewearMeasurementGrid}>
+                      <label><BilingualLabel en="Lens width (mm)" ar="عرض العدسة (مم)" /><input inputMode="decimal" value={form.eyewearLensWidthMm} onChange={(event) => updateForm("eyewearLensWidthMm", event.target.value)} placeholder="52" /></label>
+                      <label><BilingualLabel en="Bridge (mm)" ar="عرض الجسر (مم)" /><input inputMode="decimal" value={form.eyewearBridgeWidthMm} onChange={(event) => updateForm("eyewearBridgeWidthMm", event.target.value)} placeholder="18" /></label>
+                      <label><BilingualLabel en="Temple length (mm)" ar="طول الذراع (مم)" /><input inputMode="decimal" value={form.eyewearTempleLengthMm} onChange={(event) => updateForm("eyewearTempleLengthMm", event.target.value)} placeholder="145" /></label>
+                      <label><BilingualLabel en="Lens height (mm)" ar="ارتفاع العدسة (مم)" /><input inputMode="decimal" value={form.eyewearLensHeightMm} onChange={(event) => updateForm("eyewearLensHeightMm", event.target.value)} placeholder="42" /></label>
+                    </div>
+
+                    <div className={styles.eyewearFeatureGrid}>
+                      {[
+                        ["eyewearPolarized", "Polarized / مستقطبة"],
+                        ["eyewearUvProtection", "UV protection / حماية UV"],
+                        ["eyewearBlueLight", "Blue-light filter / فلتر الضوء الأزرق"],
+                        ["eyewearPhotochromic", "Photochromic / فوتوكروميك"],
+                        ["eyewearPrescriptionReady", "Prescription-ready / قابل لتركيب عدسات طبية"],
+                      ].map(([key, label]) => (
+                        <label className={styles.eyewearFeatureToggle} key={key}>
+                          <input
+                            type="checkbox"
+                            checked={Boolean(form[key as keyof ProductForm])}
+                            onChange={(event) => updateForm(key as keyof ProductForm, event.target.checked as never)}
+                          />
+                          <span>{label}</span>
+                        </label>
+                      ))}
+                    </div>
+
+                    {shoeWizardErrors.eyewear ? (
+                      <p className={styles.shoeWizardFieldError}>{shoeWizardErrors.eyewear}</p>
+                    ) : null}
+                  </section>
+                ) : null}
+
                 {supportsWeightSelling ? (
                   <section className={styles.weightMechanicPanel}>
                     <label className={styles.weightMechanicToggle}>

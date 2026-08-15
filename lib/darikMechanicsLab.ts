@@ -1,5 +1,7 @@
 "use client";
 
+// DARIK_EYEGLASSES_RETAIL_FIELD_MECHANICS_135
+
 // DARIK_RETAIL_FIELDS_SMOKE_SHOP_050
 
 export const DARIK_MECHANICS_LAB_STORAGE_KEY = "darik:mechanics-lab:field";
@@ -15,6 +17,7 @@ export const darikMechanicsFieldOptions = [
   { value: "clothing", label: "Clothing", labelAr: "ملابس" },
   { value: "shoes", label: "Shoes", labelAr: "أحذية" },
   { value: "jewelry", label: "Jewelry", labelAr: "مجوهرات" },
+  { value: "eyeglasses", label: "Eyeglasses / Optical Store", labelAr: "نظارات / محل بصريات" },
   { value: "cosmetics", label: "Cosmetics / Beauty", labelAr: "مستحضرات تجميل / عناية" },
   { value: "perfume", label: "Perfume", labelAr: "عطور" },
   { value: "electronics", label: "Electronics", labelAr: "إلكترونيات" },

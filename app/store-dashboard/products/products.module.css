@@ -3168,3 +3168,215 @@
     transform: rotate(360deg);
   }
 }
+/* DARIK_EYEGLASSES_RETAIL_FIELD_MECHANICS_135 */
+.eyewearMechanicsPanel {
+  display: grid;
+  gap: 18px;
+  padding: 20px;
+  border: 1px solid #dbe2ea;
+  border-radius: 22px;
+  background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+}
+
+.eyewearMechanicsHeading {
+  display: grid;
+  gap: 5px;
+}
+
+.eyewearMechanicsHeading strong {
+  color: #111827;
+  font-size: 16px;
+  font-weight: 950;
+}
+
+.eyewearMechanicsHeading span {
+  color: #64748b;
+  font-size: 12px;
+  font-weight: 750;
+  line-height: 1.5;
+}
+
+.eyewearColorModeButtons {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.eyewearColorModeButtons button {
+  min-height: 46px;
+  border: 1px solid #cbd5e1;
+  border-radius: 14px;
+  background: #ffffff;
+  color: #334155;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.eyewearColorModeButtons button.eyewearColorModeActive {
+  border-color: #111827;
+  background: #111827;
+  color: #ffffff;
+}
+
+.eyewearColorRows {
+  display: grid;
+  gap: 12px;
+}
+
+.eyewearColorRow {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(180px, .7fr) auto;
+  gap: 10px;
+  align-items: end;
+  padding: 12px;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  background: #ffffff;
+}
+
+.eyewearColorRow label,
+.eyewearColorPickerLabel,
+.eyewearSpecGrid label,
+.eyewearMeasurementGrid label {
+  display: grid;
+  gap: 6px;
+  color: #475569;
+  font-size: 11px;
+  font-weight: 900;
+}
+
+.eyewearColorRow input,
+.eyewearSpecGrid input,
+.eyewearSpecGrid select,
+.eyewearMeasurementGrid input {
+  width: 100%;
+  min-height: 44px;
+  border: 1px solid #cbd5e1;
+  border-radius: 12px;
+  background: #ffffff;
+  color: #111827;
+  padding: 9px 10px;
+  font: inherit;
+  font-size: 13px;
+  outline: none;
+}
+
+.eyewearColorRow input:focus,
+.eyewearSpecGrid input:focus,
+.eyewearSpecGrid select:focus,
+.eyewearMeasurementGrid input:focus {
+  border-color: #111827;
+  box-shadow: 0 0 0 3px rgba(15, 23, 42, .08);
+}
+
+.eyewearColorPickerRow {
+  display: grid;
+  grid-template-columns: 48px minmax(0, 1fr);
+  gap: 8px;
+  align-items: center;
+}
+
+.eyewearColorPickerRow input[type="color"] {
+  width: 48px;
+  min-width: 48px;
+  height: 44px;
+  min-height: 44px;
+  padding: 3px;
+  cursor: pointer;
+}
+
+.eyewearRemoveColorButton,
+.eyewearAddColorButton {
+  min-height: 44px;
+  border-radius: 12px;
+  padding: 9px 12px;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.eyewearRemoveColorButton {
+  border: 1px solid #fecaca;
+  background: #fff1f2;
+  color: #b42318;
+}
+
+.eyewearAddColorButton {
+  justify-self: start;
+  border: 1px solid #bfdbfe;
+  background: #eff6ff;
+  color: #1d4ed8;
+}
+
+.eyewearSpecGrid,
+.eyewearMeasurementGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.eyewearMeasurementGrid {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.eyewearFeatureGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.eyewearFeatureToggle {
+  min-height: 48px;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 10px 12px;
+  border: 1px solid #dbe2ea;
+  border-radius: 14px;
+  background: #ffffff;
+  color: #334155;
+  font-size: 12px;
+  font-weight: 850;
+  cursor: pointer;
+}
+
+.eyewearFeatureToggle input {
+  width: 18px;
+  height: 18px;
+  accent-color: #111827;
+}
+
+@media (max-width: 900px) {
+  .eyewearColorRow {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .eyewearMeasurementGrid,
+  .eyewearFeatureGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 720px) {
+  .eyewearMechanicsPanel {
+    gap: 14px;
+    padding: 14px;
+    border-radius: 18px;
+  }
+
+  .eyewearColorModeButtons,
+  .eyewearColorRow,
+  .eyewearSpecGrid,
+  .eyewearMeasurementGrid,
+  .eyewearFeatureGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .eyewearRemoveColorButton,
+  .eyewearAddColorButton {
+    width: 100%;
+  }
+}

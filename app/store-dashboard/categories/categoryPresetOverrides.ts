@@ -1,3 +1,4 @@
+// DARIK_EYEGLASSES_RETAIL_FIELD_MECHANICS_135
 // DARIK_RETAIL_FIELDS_SMOKE_SHOP_050
 // DARIK_SHOE_CATEGORY_SIZE_GROUPS_053
 // DARIK_SHOE_STORE_CATEGORIES_055
@@ -53,6 +54,21 @@ const SHOES_CATEGORIES = [
   ["Other Accessories", "إكسسوارات أخرى"],
 ] as const;
 
+const EYEGLASSES_CATEGORIES = [
+  ["Prescription Frames", "إطارات طبية"],
+  ["Sunglasses", "نظارات شمسية"],
+  ["Blue-Light Glasses", "نظارات حماية من الضوء الأزرق"],
+  ["Reading Glasses", "نظارات قراءة"],
+  ["Kids' Eyewear", "نظارات أطفال"],
+  ["Sports Eyewear", "نظارات رياضية"],
+  ["Safety & Protective Eyewear", "نظارات حماية"],
+  ["Contact Lenses", "عدسات لاصقة"],
+  ["Contact Lens Care", "العناية بالعدسات"],
+  ["Eyeglass Lenses", "عدسات النظارات"],
+  ["Eyewear Accessories", "إكسسوارات النظارات"],
+  ["Cases & Cleaning", "حافظات وتنظيف"],
+] as const;
+
 function categoryEnglishName(value: unknown) {
   if (typeof value === "string") return value.trim();
 
@@ -87,6 +103,14 @@ export function getBusinessCategoryPreset(
       label: "Shoes",
       labelAr: "أحذية",
       categories: SHOES_CATEGORIES.map(([name, nameAr]) => [name, nameAr]),
+    } as unknown as BusinessPreset;
+  }
+
+  if (normalized === "eyeglasses") {
+    return {
+      label: "Eyeglasses / Optical Store",
+      labelAr: "نظارات / محل بصريات",
+      categories: EYEGLASSES_CATEGORIES.map(([name, nameAr]) => [name, nameAr]),
     } as unknown as BusinessPreset;
   }
 

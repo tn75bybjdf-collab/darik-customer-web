@@ -1,6 +1,8 @@
 "use client";
 
 // DARIK_MOBILE_DASHBOARD_LOGOUT_035
+// DARIK_FRONTEND_OVERVIEW_EDITABLE_RETAIL_FIELD_134
+// DARIK_EYEGLASSES_RETAIL_FIELD_MECHANICS_135
 
 import {
   CSSProperties,
@@ -20,6 +22,7 @@ import styles from "./dashboard.module.css";
 type StoreContext = {
   retailer_id: string;
   business_name: string;
+  business_type: string | null;
   retailer_number: string | null;
   retailer_status: string | null;
   account_restricted: boolean;
@@ -103,6 +106,192 @@ const orderStatusLabels: Record<string, string> = {
   cancelled: "Cancelled / ملغي",
 };
 
+
+const RETAIL_FIELD_OPTIONS_134 = [
+  {
+    "value": "supermarket",
+    "label": "Supermarket / Hypermarket",
+    "labelAr": "\u0633\u0648\u0628\u0631\u0645\u0627\u0631\u0643\u062a / \u0647\u0627\u064a\u0628\u0631\u0645\u0627\u0631\u0643\u062a"
+  },
+  {
+    "value": "restaurant",
+    "label": "Restaurant",
+    "labelAr": "\u0645\u0637\u0639\u0645"
+  },
+  {
+    "value": "bakery",
+    "label": "Bakery / Sweets",
+    "labelAr": "\u0645\u062e\u0628\u0632 / \u062d\u0644\u0648\u064a\u0627\u062a"
+  },
+  {
+    "value": "cafe",
+    "label": "Caf\u00e9",
+    "labelAr": "\u0645\u0642\u0647\u0649 / \u0643\u0648\u0641\u064a \u0634\u0648\u0628"
+  },
+  {
+    "value": "smoke_shop",
+    "label": "Smoke Shop",
+    "labelAr": "\u0645\u062d\u0644 \u062f\u062e\u0627\u0646 \u0648\u062a\u0628\u063a"
+  },
+  {
+    "value": "butcher",
+    "label": "Butcher",
+    "labelAr": "\u0645\u0644\u062d\u0645\u0629"
+  },
+  {
+    "value": "produce",
+    "label": "Fruit and vegetable store",
+    "labelAr": "\u062e\u0636\u0627\u0631 \u0648\u0641\u0648\u0627\u0643\u0647"
+  },
+  {
+    "value": "clothing",
+    "label": "Clothing",
+    "labelAr": "\u0645\u0644\u0627\u0628\u0633"
+  },
+  {
+    "value": "shoes",
+    "label": "Shoes",
+    "labelAr": "\u0623\u062d\u0630\u064a\u0629"
+  },
+  {
+    "value": "jewelry",
+    "label": "Jewelry",
+    "labelAr": "\u0645\u062c\u0648\u0647\u0631\u0627\u062a"
+  },
+  {
+    "value": "eyeglasses",
+    "label": "Eyeglasses / Optical Store",
+    "labelAr": "\u0646\u0638\u0627\u0631\u0627\u062a / \u0645\u062d\u0644 \u0628\u0635\u0631\u064a\u0627\u062a"
+  },
+  {
+    "value": "cosmetics",
+    "label": "Cosmetics / Beauty",
+    "labelAr": "\u0645\u0633\u062a\u062d\u0636\u0631\u0627\u062a \u062a\u062c\u0645\u064a\u0644 / \u0639\u0646\u0627\u064a\u0629"
+  },
+  {
+    "value": "perfume",
+    "label": "Perfume",
+    "labelAr": "\u0639\u0637\u0648\u0631"
+  },
+  {
+    "value": "electronics",
+    "label": "Electronics",
+    "labelAr": "\u0625\u0644\u0643\u062a\u0631\u0648\u0646\u064a\u0627\u062a"
+  },
+  {
+    "value": "computers",
+    "label": "Computers",
+    "labelAr": "\u0643\u0645\u0628\u064a\u0648\u062a\u0631"
+  },
+  {
+    "value": "mobile_phones",
+    "label": "Mobile phones & accessories",
+    "labelAr": "\u0647\u0648\u0627\u062a\u0641 \u0648\u0625\u0643\u0633\u0633\u0648\u0627\u0631\u0627\u062a"
+  },
+  {
+    "value": "furniture",
+    "label": "Furniture",
+    "labelAr": "\u0623\u062b\u0627\u062b"
+  },
+  {
+    "value": "home_appliances",
+    "label": "Home appliances",
+    "labelAr": "\u0623\u062c\u0647\u0632\u0629 \u0645\u0646\u0632\u0644\u064a\u0629"
+  },
+  {
+    "value": "home_decor",
+    "label": "Home d\u00e9cor",
+    "labelAr": "\u062f\u064a\u0643\u0648\u0631 \u0645\u0646\u0632\u0644\u064a"
+  },
+  {
+    "value": "auto_parts",
+    "label": "Auto parts",
+    "labelAr": "\u0642\u0637\u0639 \u0633\u064a\u0627\u0631\u0627\u062a"
+  },
+  {
+    "value": "tires",
+    "label": "Tires & car accessories",
+    "labelAr": "\u0625\u0637\u0627\u0631\u0627\u062a \u0648\u0625\u0643\u0633\u0633\u0648\u0627\u0631\u0627\u062a \u0633\u064a\u0627\u0631\u0627\u062a"
+  },
+  {
+    "value": "hardware",
+    "label": "Hardware store",
+    "labelAr": "\u0639\u062f\u062f \u0648\u0623\u062f\u0648\u0627\u062a"
+  },
+  {
+    "value": "building_materials",
+    "label": "Building materials",
+    "labelAr": "\u0645\u0648\u0627\u062f \u0628\u0646\u0627\u0621"
+  },
+  {
+    "value": "electrical_supplies",
+    "label": "Electrical supplies",
+    "labelAr": "\u0645\u0648\u0627\u062f \u0643\u0647\u0631\u0628\u0627\u0626\u064a\u0629"
+  },
+  {
+    "value": "plumbing",
+    "label": "Plumbing supplies",
+    "labelAr": "\u0645\u0648\u0627\u062f \u0635\u062d\u064a\u0629 \u0648\u0633\u0628\u0627\u0643\u0629"
+  },
+  {
+    "value": "tools",
+    "label": "Tools & equipment",
+    "labelAr": "\u0623\u062f\u0648\u0627\u062a \u0648\u0645\u0639\u062f\u0627\u062a"
+  },
+  {
+    "value": "pharmacy",
+    "label": "Pharmacy",
+    "labelAr": "\u0635\u064a\u062f\u0644\u064a\u0629"
+  },
+  {
+    "value": "pet_supplies",
+    "label": "Pet supplies",
+    "labelAr": "\u0645\u0633\u062a\u0644\u0632\u0645\u0627\u062a \u062d\u064a\u0648\u0627\u0646\u0627\u062a \u0623\u0644\u064a\u0641\u0629"
+  },
+  {
+    "value": "flowers",
+    "label": "Flowers",
+    "labelAr": "\u0632\u0647\u0648\u0631"
+  },
+  {
+    "value": "gifts",
+    "label": "Gifts",
+    "labelAr": "\u0647\u062f\u0627\u064a\u0627"
+  },
+  {
+    "value": "toys",
+    "label": "Toys",
+    "labelAr": "\u0623\u0644\u0639\u0627\u0628"
+  },
+  {
+    "value": "books_stationery",
+    "label": "Books & stationery",
+    "labelAr": "\u0643\u062a\u0628 \u0648\u0642\u0631\u0637\u0627\u0633\u064a\u0629"
+  },
+  {
+    "value": "sports",
+    "label": "Sports equipment",
+    "labelAr": "\u0645\u0639\u062f\u0627\u062a \u0631\u064a\u0627\u0636\u064a\u0629"
+  },
+  {
+    "value": "other",
+    "label": "Other",
+    "labelAr": "\u0623\u062e\u0631\u0649"
+  }
+] as const;
+
+function retailFieldLabel134(value: string | null | undefined) {
+  const clean = String(value ?? "").trim().toLowerCase();
+  const option = RETAIL_FIELD_OPTIONS_134.find((item) => item.value === clean);
+  if (option) return `${option.label} / ${option.labelAr}`;
+  return clean
+    ? clean
+        .split("_")
+        .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(" ")
+    : "Not selected";
+}
+
 function money(value: number | string | null | undefined) {
   const amount = Number(value ?? 0);
   return `${Number.isFinite(amount) ? amount.toFixed(2) : "0.00"} JOD`;
@@ -146,6 +335,82 @@ function orderStatusLabel(value: string) {
 }
 
 export default function DarikDirectOverviewPage() {
+  const [retailFieldDrafts134, setRetailFieldDrafts134] = useState<Record<string, string>>({});
+  const [retailFieldOtherDrafts134, setRetailFieldOtherDrafts134] = useState<Record<string, string>>({});
+  const [retailFieldSaving134, setRetailFieldSaving134] = useState(false);
+
+  async function saveRetailField134() {
+    if (!selectedStore) return;
+
+    if (selectedStore.role !== "owner") {
+      setError("Only the store owner can change the retail field.");
+      return;
+    }
+
+    const retailerId = selectedStore.retailer_id;
+    const currentField = String(selectedStore.business_type ?? "").trim().toLowerCase();
+    const nextField = String(
+      retailFieldDrafts134[retailerId] ?? currentField ?? "supermarket"
+    )
+      .trim()
+      .toLowerCase();
+    const nextOther = String(retailFieldOtherDrafts134[retailerId] ?? "").trim();
+
+    if (!RETAIL_FIELD_OPTIONS_134.some((option) => option.value === nextField)) {
+      setError("Choose a valid Darik retail field.");
+      return;
+    }
+
+    if (nextField === "other" && (nextOther.length < 2 || nextOther.length > 80)) {
+      setError("Describe the retail field using 2 to 80 characters.");
+      return;
+    }
+
+    const currentLabel = retailFieldLabel134(currentField);
+    const nextLabel = retailFieldLabel134(nextField);
+
+    if (
+      !window.confirm(
+        `Change retail field from "${currentLabel}" to "${nextLabel}"?\n\nThis changes the store's product/category mechanics. Existing products and categories will be preserved. The visual storefront theme is separate and will not be changed.`
+      )
+    ) {
+      return;
+    }
+
+    setRetailFieldSaving134(true);
+    setError("");
+    setMessage("");
+
+    const result = await supabase.rpc("darik_direct_change_my_retail_field_v1", {
+      p_retailer_id: retailerId,
+      p_business_type: nextField,
+      p_business_type_other: nextField === "other" ? nextOther : null,
+    });
+
+    if (result.error) {
+      setError(result.error.message);
+      setRetailFieldSaving134(false);
+      return;
+    }
+
+    const categoriesAdded = Number(result.data?.categories_added ?? 0);
+    setMessage(
+      `Retail field changed to ${nextLabel}.${
+        categoriesAdded > 0
+          ? ` Darik added ${categoriesAdded} missing standard categor${categoriesAdded === 1 ? "y" : "ies"}.`
+          : ""
+      }`
+    );
+
+    setRetailFieldDrafts134((current) => ({
+      ...current,
+      [retailerId]: nextField,
+    }));
+
+    setRetailFieldSaving134(false);
+  }
+
+
   const [session, setSession] = useState<Session | null>(null);
   const [authReady, setAuthReady] = useState(false);
   const [context, setContext] = useState<ContextResult | null>(null);
@@ -683,7 +948,110 @@ export default function DarikDirectOverviewPage() {
               </article>
             </section>
 
-            <section className={styles.commandMainGrid}>
+
+          <section className={styles.retailFieldOverviewCard}>
+            <div className={styles.retailFieldOverviewHeader}>
+              <div>
+                <span className={styles.retailFieldOverviewEyebrow}>
+                  RETAIL FIELD / نوع النشاط
+                </span>
+                <h3>What kind of store is this?</h3>
+                <p>
+                  This controls Darik mechanics such as categories, sizing, fitment,
+                  and product behavior. Your visual storefront theme is separate.
+                </p>
+              </div>
+              <span className={styles.retailFieldCurrentBadge}>
+                Current: {retailFieldLabel134(
+                  retailFieldDrafts134[selectedStore.retailer_id] ??
+                    selectedStore.business_type
+                )}
+              </span>
+            </div>
+
+            {selectedStore.role === "owner" ? (
+              <div className={styles.retailFieldOverviewControls}>
+                <label>
+                  Retail field / نوع النشاط
+                  <select
+                    value={
+                      retailFieldDrafts134[selectedStore.retailer_id] ??
+                      selectedStore.business_type ??
+                      "supermarket"
+                    }
+                    onChange={(event) =>
+                      setRetailFieldDrafts134((current) => ({
+                        ...current,
+                        [selectedStore.retailer_id]: event.target.value,
+                      }))
+                    }
+                    disabled={retailFieldSaving134}
+                  >
+                    {!RETAIL_FIELD_OPTIONS_134.some(
+                      (option) => option.value === selectedStore.business_type
+                    ) && selectedStore.business_type ? (
+                      <option value={selectedStore.business_type}>
+                        Current legacy field: {retailFieldLabel134(selectedStore.business_type)}
+                      </option>
+                    ) : null}
+                    {RETAIL_FIELD_OPTIONS_134.map((option) => (
+                      <option value={option.value} key={option.value}>
+                        {option.label} / {option.labelAr}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+
+                {(retailFieldDrafts134[selectedStore.retailer_id] ??
+                  selectedStore.business_type) === "other" ? (
+                  <label>
+                    Describe your retail field / اكتب نوع النشاط
+                    <input
+                      type="text"
+                      maxLength={80}
+                      value={
+                        retailFieldOtherDrafts134[selectedStore.retailer_id] ?? ""
+                      }
+                      onChange={(event) =>
+                        setRetailFieldOtherDrafts134((current) => ({
+                          ...current,
+                          [selectedStore.retailer_id]: event.target.value,
+                        }))
+                      }
+                      placeholder="Example: Specialty medical equipment"
+                      disabled={retailFieldSaving134}
+                    />
+                  </label>
+                ) : null}
+
+                <div className={styles.retailFieldOverviewActionRow}>
+                  <div className={styles.retailFieldOverviewWarning}>
+                    <strong>Changing this changes store mechanics.</strong>
+                    <span>
+                      Existing products/categories stay intact. Missing defaults for
+                      the new field are added automatically.
+                    </span>
+                  </div>
+                  <button
+                    type="button"
+                    className={styles.retailFieldOverviewSave}
+                    onClick={() => void saveRetailField134()}
+                    disabled={retailFieldSaving134}
+                  >
+                    {retailFieldSaving134
+                      ? "Saving retail field..."
+                      : "Save retail field / حفظ نوع النشاط"}
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div className={styles.retailFieldOverviewOwnerOnly}>
+                Only the store owner can change the retail field.
+              </div>
+            )}
+          </section>
+
+          <section className={styles.commandMainGrid}>
               <article className={styles.commandReadinessPanel}>
                 <div className={styles.commandPanelHeader}>
                   <div>
