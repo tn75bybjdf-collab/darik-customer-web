@@ -431,3 +431,30 @@
   color: #ffffff !important;
   border-color: #0b5f54 !important;
 }
+
+/* DARIK_FRONTEND_131_PRICING_PRIMARY_BUTTON_CONTRAST */
+.primaryButton,
+.primaryButton:visited {
+  background: #0f7b6c !important;
+  background-color: #0f7b6c !important;
+  color: #ffffff !important;
+  border-color: #0f7b6c !important;
+  text-shadow: none !important;
+  -webkit-text-fill-color: #ffffff !important;
+}
+
+.primaryButton *,
+.primaryButton:visited * {
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+}
+
+.primaryButton:hover,
+.primaryButton:focus-visible,
+.primaryButton:active {
+  background: #0b5f54 !important;
+  background-color: #0b5f54 !important;
+  color: #ffffff !important;
+  border-color: #0b5f54 !important;
+  -webkit-text-fill-color: #ffffff !important;
+}
