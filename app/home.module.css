@@ -901,3 +901,20 @@
 .orderStatusShowcase span {
   background: #facc15;
 }
+
+/* DARIK_FRONTEND_130_BUTTON_CONTRAST_FIX - main page CTA contrast */
+.sell,
+.sell:visited {
+  background: #0f7b6c !important;
+  color: #ffffff !important;
+  border-color: #0f7b6c !important;
+  text-shadow: none !important;
+}
+
+.sell:hover,
+.sell:focus-visible,
+.sell:active {
+  background: #0b5f54 !important;
+  color: #ffffff !important;
+  border-color: #0b5f54 !important;
+}
