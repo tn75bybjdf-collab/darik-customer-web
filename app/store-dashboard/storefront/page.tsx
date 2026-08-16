@@ -1,5 +1,7 @@
 "use client";
 
+// DARIK_ACTUAL_STORE_SECRET_PREVIEW_141
+
 // DARIK_THEME_STEP_GALLERY_STABLE_AUTO_PREVIEW_138
 
 // DARIK_USERNAME_SIGNUP_FORCED_ONBOARDING_136
@@ -1193,6 +1195,16 @@ export default function DarikDirectStorefrontSettingsPage() {
   const [liveBuilderPreviewOpen, setLiveBuilderPreviewOpen] = useState(true);
   // DARIK_THEME_STEP_GALLERY_STABLE_AUTO_PREVIEW_138: iframe theme changes only after a completed theme save.
   const [liveBuilderPreviewTheme138, setLiveBuilderPreviewTheme138] = useState("");
+  const [actualStorePreviewSecret141, setActualStorePreviewSecret141] =
+    useState("");
+
+  useEffect(() => {
+    const bytes141 = new Uint8Array(32);
+    window.crypto.getRandomValues(bytes141);
+    setActualStorePreviewSecret141(
+      Array.from(bytes141, (value) => value.toString(16).padStart(2, "0")).join("")
+    );
+  }, []);
   // DARIK_DASHBOARD_FULLSCREEN_PREVIEW_STEP_SCROLL_FIX_111
   const [liveBuilderPreviewExpanded111, setLiveBuilderPreviewExpanded111] = useState(false);
   const storefrontSetupLastVisibleStep111 = useRef<number>(0);
@@ -4120,13 +4132,15 @@ export default function DarikDirectStorefrontSettingsPage() {
                   </div>
 
                   <div className={designStyles.liveBuilderPreviewViewport}>
-                    {storefront && liveBuilderPreviewTheme138 ? (
+                    {storefront && liveBuilderPreviewTheme138 && actualStorePreviewSecret141 ? (
                       <iframe
                         ref={liveBuilderPreviewRef}
                         title="Live Darik storefront preview"
                         src={`/${storefront.slug}?previewField=${encodeURIComponent(
                           liveBuilderPreviewTheme138
-                        )}&fieldLab=1&builderPreview=1`}
+                        )}&fieldLab=1&builderPreview=1&ownerPreviewSecret=${encodeURIComponent(
+                          actualStorePreviewSecret141
+                        )}`}
                         onLoad={pushLiveBuilderDraft}
                       />
                     ) : (

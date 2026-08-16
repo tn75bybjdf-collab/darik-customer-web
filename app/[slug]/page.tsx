@@ -1,6 +1,7 @@
 "use client";
 
-// DARIK_PRIVATE_OWNER_STOREFRONT_PREVIEW_140
+// DARIK_ACTUAL_STORE_SECRET_PREVIEW_141
+
 
 // DARIK_FURNITURE_OPTIONAL_ITEM_VIDEO_068
 // DARIK_HOME_APPLIANCES_SHORT_ITEM_VIDEO_071
@@ -1581,48 +1582,62 @@ export default function DarikDirectStorefrontPage() {
       setLoading(true);
       setLoadError("");
 
-      const builderPreviewRequested140 =
-        new URLSearchParams(window.location.search).get("builderPreview") === "1";
+      const previewParams141 = new URLSearchParams(window.location.search);
+      const previewSecret141 = previewParams141.get("ownerPreviewSecret") ?? "";
+      const actualStorePreview141 =
+        previewParams141.get("builderPreview") === "1" && previewSecret141.length >= 32;
 
-      if (builderPreviewRequested140) {
-        const { data: previewSessionData140 } = await supabase.auth.getSession();
-        const previewAccessToken140 = previewSessionData140.session?.access_token ?? "";
+      if (actualStorePreview141) {
+        const { data: previewSessionData141 } = await supabase.auth.getSession();
+        const previewAccessToken141 = previewSessionData141.session?.access_token ?? "";
 
-        if (previewAccessToken140) {
+        if (previewAccessToken141) {
           try {
-            const previewResponse140 = await fetch(
-              `/api/retailer-storefront-preview?slug=${encodeURIComponent(slug)}`,
+            const previewResponse141 = await fetch(
+              `/api/retailer-storefront-live-preview?slug=${encodeURIComponent(slug)}`,
               {
                 method: "GET",
                 cache: "no-store",
                 headers: {
-                  Authorization: `Bearer ${previewAccessToken140}`,
+                  Authorization: `Bearer ${previewAccessToken141}`,
+                  "X-Darik-Preview-Secret": previewSecret141,
                 },
               }
             );
 
-            if (previewResponse140.ok) {
-              const previewPayload140 = (await previewResponse140.json()) as {
-                ok?: boolean;
-                storefront?: Storefront | null;
-                products?: Product[];
-                categories?: Category[];
-              };
+            const previewPayload141 = (await previewResponse141.json().catch(() => ({}))) as {
+              ok?: boolean;
+              error?: string;
+              storefront?: Storefront | null;
+              products?: Product[];
+              categories?: Category[];
+            };
 
-              if (cancelled) return;
+            if (cancelled) return;
 
-              if (previewPayload140.ok && previewPayload140.storefront) {
-                setPublicStatus(null);
-                setStorefront(previewPayload140.storefront);
-                setProducts(previewPayload140.products ?? []);
-                setCategories(previewPayload140.categories ?? []);
-                setLoading(false);
-                return;
-              }
+            if (previewResponse141.ok && previewPayload141.ok && previewPayload141.storefront) {
+              setPublicStatus(null);
+              setStorefront(previewPayload141.storefront);
+              setProducts(previewPayload141.products ?? []);
+              setCategories(previewPayload141.categories ?? []);
+              setLoading(false);
+              return;
             }
-          } catch (previewError140) {
-            console.warn("Darik private builder preview failed; using public gate.", previewError140);
+
+            console.warn(
+              "Darik private actual-store preview was unavailable; using the normal public storefront gate.",
+              previewPayload141.error || previewResponse141.status
+            );
+          } catch (previewError141) {
+            console.warn(
+              "Darik private actual-store preview failed; using the normal public storefront gate.",
+              previewError141
+            );
           }
+        } else {
+          console.warn(
+            "Darik private actual-store preview has no retailer session; using the normal public storefront gate."
+          );
         }
       }
       const storefrontResult = await supabase
@@ -3949,6 +3964,14 @@ export default function DarikDirectStorefrontPage() {
   }
 
   async function placeOnlineOrder() {
+    const previewOrderSecret141 =
+      new URLSearchParams(window.location.search).get("ownerPreviewSecret") ?? "";
+    if (previewOrderSecret141.length >= 32) {
+      setCheckoutError(
+        "Private preview only — this checkout cannot submit a real order."
+      );
+      return;
+    }
     if (!storefront || placingOrder) return;
 
     const customerName = checkoutForm.customerName.trim();
