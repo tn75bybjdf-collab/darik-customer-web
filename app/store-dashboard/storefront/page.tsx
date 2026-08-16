@@ -1576,22 +1576,32 @@ export default function DarikDirectStorefrontSettingsPage() {
   }, [storefrontContentPositioning145, storefront?.id]);
 
   // DARIK_DASHBOARD_ONLY_DRAG_PROOF_150A
+  // DARIK_LIVE_IFRAME_BINDING_FIX_150B
   // Dashboard-only drag proof.
   // No DB writes and no app/[slug] edits.
   useEffect(() => {
     if (!liveBuilderPreviewOpen) return;
 
-    const iframe150A = liveBuilderPreviewRef.current;
-
-    if (!iframe150A) return;
-
+    let iframe150A: HTMLIFrameElement | null = null;
+    let boundIframe150B: HTMLIFrameElement | null = null;
     let detachPreview150A = () => {};
 
     function attachPreview150A() {
       detachPreview150A();
 
-      const document150A = iframe150A.contentDocument;
-      const window150A = iframe150A.contentWindow;
+      const activeIframe150B = iframe150A;
+      if (!activeIframe150B) return;
+
+      let document150A: Document | null = null;
+      let window150A: Window | null = null;
+
+      try {
+        document150A = activeIframe150B.contentDocument;
+        window150A = activeIframe150B.contentWindow;
+      } catch {
+        document150A = null;
+        window150A = null;
+      }
 
       if (!document150A || !window150A) return;
 
@@ -2038,20 +2048,65 @@ export default function DarikDirectStorefrontSettingsPage() {
       };
     }
 
-    iframe150A.addEventListener(
-      "load",
-      attachPreview150A
-    );
+    function bindLivePreview150B() {
+      const nextIframe150B = liveBuilderPreviewRef.current;
 
-    attachPreview150A();
+      if (!nextIframe150B) {
+        if (boundIframe150B) {
+          boundIframe150B.removeEventListener(
+            "load",
+            attachPreview150A
+          );
+          detachPreview150A();
+          boundIframe150B = null;
+          iframe150A = null;
+        }
+        return;
+      }
 
-    return () => {
-      iframe150A.removeEventListener(
+      if (nextIframe150B === boundIframe150B) {
+        return;
+      }
+
+      if (boundIframe150B) {
+        boundIframe150B.removeEventListener(
+          "load",
+          attachPreview150A
+        );
+        detachPreview150A();
+      }
+
+      iframe150A = nextIframe150B;
+      boundIframe150B = nextIframe150B;
+
+      nextIframe150B.addEventListener(
         "load",
         attachPreview150A
       );
 
+      attachPreview150A();
+    }
+
+    bindLivePreview150B();
+
+    const livePreviewRetry150B = window.setInterval(
+      bindLivePreview150B,
+      180
+    );
+
+    return () => {
+      window.clearInterval(livePreviewRetry150B);
+
+      if (boundIframe150B) {
+        boundIframe150B.removeEventListener(
+          "load",
+          attachPreview150A
+        );
+      }
+
       detachPreview150A();
+      boundIframe150B = null;
+      iframe150A = null;
     };
   }, [liveBuilderPreviewOpen, storefront?.id]);
 
