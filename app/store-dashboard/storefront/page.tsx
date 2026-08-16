@@ -1581,6 +1581,7 @@ export default function DarikDirectStorefrontSettingsPage() {
   // DARIK_PERSISTENT_DRAG_LOGO_BOX_150D
   // DARIK_NO_FLASH_THEME_STABLE_POSITIONS_150E_V2
   // DARIK_DOM_STABILITY_POSITION_REAPPLY_150E_V3
+  // DARIK_PINCH_RESIZE_LIGHTER_DRAG_151
   // Dashboard-only drag proof.
   // No DB writes and no app/[slug] edits.
   useEffect(() => {
@@ -1593,6 +1594,7 @@ export default function DarikDirectStorefrontSettingsPage() {
     type DarikPoint150D = {
       x: number;
       y: number;
+      scale?: number;
       label?: string;
     };
 
@@ -1612,6 +1614,21 @@ export default function DarikDirectStorefrontSettingsPage() {
         -1200,
         Math.min(1200, Math.round(n150D))
       );
+    }
+
+    function clampScale151(value151: unknown) {
+      const numeric151 = Number(value151);
+
+      if (!Number.isFinite(numeric151)) {
+        return 1;
+      }
+
+      return Math.round(
+        Math.max(
+          0.5,
+          Math.min(2, numeric151)
+        ) * 1000
+      ) / 1000;
     }
 
     function safeLocator150D(value150D: unknown) {
@@ -1675,9 +1692,25 @@ export default function DarikDirectStorefrontSettingsPage() {
               ? point150D.label.trim().slice(0, 140)
               : undefined;
 
+          const hasScale151 =
+            Object.prototype.hasOwnProperty.call(
+              point150D,
+              "scale"
+            );
+
+          const scale151 =
+            hasScale151
+              ? clampScale151(
+                  point150D.scale
+                )
+              : undefined;
+
           result150D[device150D][locator150D] = {
             x: clamp150D(point150D.x),
             y: clamp150D(point150D.y),
+            ...(scale151 !== undefined
+              ? { scale: scale151 }
+              : {}),
             ...(label150D ? { label: label150D } : {}),
           };
 
@@ -2199,6 +2232,9 @@ export default function DarikDirectStorefrontSettingsPage() {
       const originalTranslate150A =
         new Map<Element, string>();
 
+      const originalScale151 =
+        new Map<Element, string>();
+
       let domObserver150EV3:
         | MutationObserver
         | null = null;
@@ -2447,6 +2483,33 @@ export default function DarikDirectStorefrontSettingsPage() {
             "important"
           );
 
+          if (
+            point150D.scale !== undefined
+          ) {
+            if (
+              !originalScale151.has(
+                target150D
+              )
+            ) {
+              originalScale151.set(
+                target150D,
+                style150D.getPropertyValue(
+                  "scale"
+                )
+              );
+            }
+
+            style150D.setProperty(
+              "scale",
+              String(
+                clampScale151(
+                  point150D.scale
+                )
+              ),
+              "important"
+            );
+          }
+
           target150D.setAttribute(
             "data-darik-persisted150d",
             "true"
@@ -2527,6 +2590,13 @@ export default function DarikDirectStorefrontSettingsPage() {
         | null = null;
 
       let dragging150A = false;
+
+      let pinching151 = false;
+      let pinchTarget151: Element | null = null;
+      let pinchStartDistance151 = 0;
+      let pinchBaseScale151 = 1;
+      let pinchCurrentScale151 = 1;
+
       let holdTimer150A = 0;
       let blockClickTarget150A: Element | null = null;
       let blockClickUntil150A = 0;
@@ -2557,6 +2627,14 @@ export default function DarikDirectStorefrontSettingsPage() {
           cursor: grabbing !important;
           user-select: none !important;
           -webkit-user-select: none !important;
+        }
+
+        [data-darik-pinching151="true"] {
+          outline: 2px solid rgba(2, 132, 199, .95) !important;
+          outline-offset: 4px !important;
+          user-select: none !important;
+          -webkit-user-select: none !important;
+          touch-action: none !important;
         }
       `;
 
@@ -2744,7 +2822,13 @@ export default function DarikDirectStorefrontSettingsPage() {
       function preventActiveDragScroll150C(
         event150C: Event
       ) {
-        if (!dragging150A) return;
+        if (
+          !dragging150A &&
+          !pinching151
+        ) {
+          return;
+        }
+
         event150C.preventDefault();
       }
 
@@ -2887,6 +2971,37 @@ export default function DarikDirectStorefrontSettingsPage() {
 
         originalTranslate150A.clear();
 
+        for (const [
+          target151,
+          originalScaleValue151,
+        ] of originalScale151.entries()) {
+          const style151 =
+            (target151 as HTMLElement).style;
+
+          if (originalScaleValue151) {
+            style151.setProperty(
+              "scale",
+              originalScaleValue151
+            );
+          } else {
+            style151.removeProperty(
+              "scale"
+            );
+          }
+
+          target151.removeAttribute(
+            "data-darik-pinching151"
+          );
+        }
+
+        originalScale151.clear();
+
+        pinching151 = false;
+        pinchTarget151 = null;
+        pinchStartDistance151 = 0;
+        pinchBaseScale151 = 1;
+        pinchCurrentScale151 = 1;
+
         savedLayout150D = defaultLayout150D();
 
         document150A
@@ -2945,6 +3060,377 @@ export default function DarikDirectStorefrontSettingsPage() {
       installResetButton150C();
       scheduleStableApply150EV3(180);
 
+      function parseScale151(
+        value151: string
+      ) {
+        const normalized151 = String(
+          value151 || ""
+        ).trim();
+
+        if (
+          !normalized151 ||
+          normalized151 === "none"
+        ) {
+          return 1;
+        }
+
+        const numeric151 = Number(
+          normalized151
+            .split(" ")[0]
+        );
+
+        return clampScale151(
+          Number.isFinite(numeric151)
+            ? numeric151
+            : 1
+        );
+      }
+
+      function pinchDistance151(
+        first151: Touch,
+        second151: Touch
+      ) {
+        return Math.hypot(
+          second151.clientX -
+            first151.clientX,
+          second151.clientY -
+            first151.clientY
+        );
+      }
+
+      function sharedPinchTarget151(
+        first151: Element | null,
+        second151: Element | null
+      ) {
+        if (!first151 || !second151) {
+          return null;
+        }
+
+        if (first151 === second151) {
+          return first151;
+        }
+
+        if (first151.contains(second151)) {
+          return first151;
+        }
+
+        if (second151.contains(first151)) {
+          return second151;
+        }
+
+        return null;
+      }
+
+      function saveScale151(
+        target151: Element,
+        scale151: number
+      ) {
+        const root151 =
+          document150A.querySelector(
+            "[data-darik-position-builder145]"
+          );
+
+        if (!root151) return;
+
+        assignSemanticClasses150E(
+          root151
+        );
+
+        const locatorKey151 =
+          locator150D(
+            root151,
+            target151
+          );
+
+        if (!locatorKey151) return;
+
+        const currentDevice151 =
+          device150D(window150A);
+
+        const nextDevice151 = {
+          ...savedLayout150D[
+            currentDevice151
+          ],
+        };
+
+        const computedTranslate151 =
+          parseTranslate150A(
+            window150A.getComputedStyle(
+              target151
+            ).translate
+          );
+
+        const prior151 =
+          nextDevice151[
+            locatorKey151
+          ];
+
+        if (
+          !prior151 &&
+          Object.keys(
+            nextDevice151
+          ).length >= 250
+        ) {
+          const oldest151 =
+            Object.keys(
+              nextDevice151
+            )[0];
+
+          if (oldest151) {
+            delete nextDevice151[
+              oldest151
+            ];
+          }
+        }
+
+        nextDevice151[
+          locatorKey151
+        ] = {
+          x: prior151?.x ??
+            clamp150D(
+              computedTranslate151.x
+            ),
+          y: prior151?.y ??
+            clamp150D(
+              computedTranslate151.y
+            ),
+          scale: clampScale151(
+            scale151
+          ),
+          label:
+            prior151?.label ??
+            label150D(target151),
+        };
+
+        savedLayout150D = {
+          ...savedLayout150D,
+          [currentDevice151]:
+            nextDevice151,
+        };
+
+        target151.setAttribute(
+          "data-darik-persisted150d",
+          "true"
+        );
+
+        void saveLayout150D();
+      }
+
+      function beginPinch151(
+        event151: TouchEvent
+      ) {
+        if (
+          event151.touches.length !== 2
+        ) {
+          return;
+        }
+
+        const firstTouch151 =
+          event151.touches[0];
+
+        const secondTouch151 =
+          event151.touches[1];
+
+        const firstTarget151 =
+          chooseTarget150A(
+            firstTouch151.target
+          );
+
+        const secondTarget151 =
+          chooseTarget150A(
+            secondTouch151.target
+          );
+
+        const target151 =
+          sharedPinchTarget151(
+            firstTarget151,
+            secondTarget151
+          );
+
+        if (!target151) {
+          return;
+        }
+
+        clearHold150A();
+
+        if (dragging150A) {
+          restoreCandidateDecoration150A();
+          dragging150A = false;
+        }
+
+        candidate150A = null;
+
+        if (
+          !originalScale151.has(
+            target151
+          )
+        ) {
+          originalScale151.set(
+            target151,
+            (
+              target151 as HTMLElement
+            ).style.getPropertyValue(
+              "scale"
+            )
+          );
+        }
+
+        pinching151 = true;
+        pinchTarget151 = target151;
+
+        pinchStartDistance151 =
+          Math.max(
+            1,
+            pinchDistance151(
+              firstTouch151,
+              secondTouch151
+            )
+          );
+
+        pinchBaseScale151 =
+          parseScale151(
+            window150A.getComputedStyle(
+              target151
+            ).scale
+          );
+
+        pinchCurrentScale151 =
+          pinchBaseScale151;
+
+        target151.setAttribute(
+          "data-darik-pinching151",
+          "true"
+        );
+
+        lockDragScroll150C();
+
+        event151.preventDefault();
+        event151.stopPropagation();
+      }
+
+      function movePinch151(
+        event151: TouchEvent
+      ) {
+        if (
+          !pinching151 ||
+          !pinchTarget151 ||
+          event151.touches.length < 2
+        ) {
+          return;
+        }
+
+        const distance151 =
+          pinchDistance151(
+            event151.touches[0],
+            event151.touches[1]
+          );
+
+        const ratio151 =
+          distance151 /
+          Math.max(
+            1,
+            pinchStartDistance151
+          );
+
+        pinchCurrentScale151 =
+          clampScale151(
+            pinchBaseScale151 *
+              ratio151
+          );
+
+        (
+          pinchTarget151 as HTMLElement
+        ).style.setProperty(
+          "scale",
+          String(
+            pinchCurrentScale151
+          ),
+          "important"
+        );
+
+        event151.preventDefault();
+        event151.stopPropagation();
+      }
+
+      function finishPinch151(
+        event151: TouchEvent
+      ) {
+        if (!pinching151) return;
+
+        if (
+          event151.touches.length >= 2
+        ) {
+          return;
+        }
+
+        event151.preventDefault();
+        event151.stopPropagation();
+
+        const completed151 =
+          pinchTarget151;
+
+        if (completed151) {
+          saveScale151(
+            completed151,
+            pinchCurrentScale151
+          );
+
+          completed151.removeAttribute(
+            "data-darik-pinching151"
+          );
+
+          blockClickTarget150A =
+            completed151;
+
+          blockClickUntil150A =
+            Date.now() + 500;
+        }
+
+        pinching151 = false;
+        pinchTarget151 = null;
+        pinchStartDistance151 = 0;
+        pinchBaseScale151 = 1;
+        pinchCurrentScale151 = 1;
+
+        candidate150A = null;
+        dragging150A = false;
+
+        unlockDragScroll150C();
+      }
+
+      function cancelPinch151(
+        event151: TouchEvent
+      ) {
+        if (!pinching151) return;
+
+        const completed151 =
+          pinchTarget151;
+
+        if (completed151) {
+          saveScale151(
+            completed151,
+            pinchCurrentScale151
+          );
+
+          completed151.removeAttribute(
+            "data-darik-pinching151"
+          );
+        }
+
+        pinching151 = false;
+        pinchTarget151 = null;
+        pinchStartDistance151 = 0;
+        pinchBaseScale151 = 1;
+        pinchCurrentScale151 = 1;
+
+        candidate150A = null;
+        dragging150A = false;
+
+        unlockDragScroll150C();
+
+        event151.preventDefault();
+      }
+
       function beginDrag150A() {
         if (!candidate150A || dragging150A) return;
 
@@ -2979,6 +3465,12 @@ export default function DarikDirectStorefrontSettingsPage() {
       }
 
       function startCandidate150A(event150A: PointerEvent) {
+        if (
+          pinching151 &&
+          event150A.pointerType === "touch"
+        ) {
+          return;
+        }
         const semanticRoot150E =
           document150A.querySelector(
             "[data-darik-position-builder145]"
@@ -3035,12 +3527,16 @@ export default function DarikDirectStorefrontSettingsPage() {
         if (event150A.pointerType === "touch") {
           holdTimer150A = window150A.setTimeout(
             () => beginDrag150A(),
-            340
+            180
           );
         }
       }
 
       function moveCandidate150A(event150A: PointerEvent) {
+        if (pinching151) {
+          return;
+        }
+
         if (
           !candidate150A ||
           event150A.pointerId !== candidate150A.pointerId
@@ -3058,7 +3554,7 @@ export default function DarikDirectStorefrontSettingsPage() {
           !dragging150A &&
           candidate150A.pointerType === "touch"
         ) {
-          if (distance150A > 9) {
+          if (distance150A > 16) {
             clearHold150A();
             candidate150A = null;
           }
@@ -3066,7 +3562,7 @@ export default function DarikDirectStorefrontSettingsPage() {
           return;
         }
 
-        if (!dragging150A && distance150A >= 5) {
+        if (!dragging150A && distance150A >= 1) {
           beginDrag150A();
         }
 
@@ -3090,6 +3586,10 @@ export default function DarikDirectStorefrontSettingsPage() {
       function finishCandidate150A(
         event150A: PointerEvent
       ) {
+        if (pinching151) {
+          return;
+        }
+
         if (
           !candidate150A ||
           event150A.pointerId !== candidate150A.pointerId
@@ -3156,9 +3656,23 @@ export default function DarikDirectStorefrontSettingsPage() {
               }
             }
 
+            const priorPoint151 =
+              nextDevice150D[
+                locatorKey150D
+              ];
+
             nextDevice150D[locatorKey150D] = {
               x: x150D,
               y: y150D,
+              ...(priorPoint151?.scale !==
+              undefined
+                ? {
+                    scale:
+                      clampScale151(
+                        priorPoint151.scale
+                      ),
+                  }
+                : {}),
               label: label150D(
                 completed150A.target
               ),
@@ -3196,6 +3710,10 @@ export default function DarikDirectStorefrontSettingsPage() {
       function cancelCandidate150A(
         event150A: PointerEvent
       ) {
+        if (pinching151) {
+          return;
+        }
+
         if (
           !candidate150A ||
           event150A.pointerId !== candidate150A.pointerId
@@ -3228,6 +3746,42 @@ export default function DarikDirectStorefrontSettingsPage() {
           event150A.stopImmediatePropagation();
         }
       }
+
+      document150A.addEventListener(
+        "touchstart",
+        beginPinch151,
+        {
+          capture: true,
+          passive: false,
+        }
+      );
+
+      document150A.addEventListener(
+        "touchmove",
+        movePinch151,
+        {
+          capture: true,
+          passive: false,
+        }
+      );
+
+      document150A.addEventListener(
+        "touchend",
+        finishPinch151,
+        {
+          capture: true,
+          passive: false,
+        }
+      );
+
+      document150A.addEventListener(
+        "touchcancel",
+        cancelPinch151,
+        {
+          capture: true,
+          passive: false,
+        }
+      );
 
       document150A.addEventListener(
         "pointerdown",
@@ -3272,6 +3826,30 @@ export default function DarikDirectStorefrontSettingsPage() {
           resetButton150C.remove();
           resetButton150C = null;
         }
+
+        document150A.removeEventListener(
+          "touchstart",
+          beginPinch151,
+          true
+        );
+
+        document150A.removeEventListener(
+          "touchmove",
+          movePinch151,
+          true
+        );
+
+        document150A.removeEventListener(
+          "touchend",
+          finishPinch151,
+          true
+        );
+
+        document150A.removeEventListener(
+          "touchcancel",
+          cancelPinch151,
+          true
+        );
 
         document150A.removeEventListener(
           "pointerdown",
@@ -3328,7 +3906,42 @@ export default function DarikDirectStorefrontSettingsPage() {
           target150A.removeAttribute(
             "data-darik-persisted150d"
           );
+
+          target150A.removeAttribute(
+            "data-darik-pinching151"
+          );
         }
+
+        for (const [
+          target151,
+          originalScaleValue151,
+        ] of originalScale151.entries()) {
+          const style151 =
+            (target151 as HTMLElement).style;
+
+          if (originalScaleValue151) {
+            style151.setProperty(
+              "scale",
+              originalScaleValue151
+            );
+          } else {
+            style151.removeProperty(
+              "scale"
+            );
+          }
+
+          target151.removeAttribute(
+            "data-darik-pinching151"
+          );
+        }
+
+        originalScale151.clear();
+
+        pinching151 = false;
+        pinchTarget151 = null;
+        pinchStartDistance151 = 0;
+        pinchBaseScale151 = 1;
+        pinchCurrentScale151 = 1;
 
         domObserver150EV3?.disconnect();
         domObserver150EV3 = null;
