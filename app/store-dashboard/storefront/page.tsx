@@ -1,5 +1,7 @@
 "use client";
 
+// DARIK_USERNAME_SIGNUP_FORCED_ONBOARDING_136
+
 // DARIK_RETAIL_FIELDS_SMOKE_SHOP_050
 
 // DARIK_PICKUP_ONLY_FULFILLMENT_032
@@ -1657,19 +1659,8 @@ export default function DarikDirectStorefrontSettingsPage() {
     };
   }, [storefront?.id]);
 
-  useEffect(() => {
-    if (
-      storefrontSetupMode109 === "wizard" &&
-      storefrontSetupStep109 === 1 &&
-      selectedThemeField
-    ) {
-      setStorefrontSetupStep109(2);
-    }
-  }, [
-    selectedThemeField,
-    storefrontSetupMode109,
-    storefrontSetupStep109,
-  ]);
+  // DARIK_USERNAME_SIGNUP_FORCED_ONBOARDING_136: keep Theme visible until the retailer explicitly presses Next.
+
 
   useEffect(() => {
     if (deliveryLocationLocked112) {
@@ -2370,6 +2361,31 @@ export default function DarikDirectStorefrontSettingsPage() {
         }
       }
 
+      const onboardingResult136 = await supabase.rpc(
+        "darik_direct_get_my_onboarding_v1"
+      );
+
+      if (onboardingResult136.error) {
+        throw onboardingResult136.error;
+      }
+
+      const onboardingState136 =
+        onboardingResult136.data && typeof onboardingResult136.data === "object"
+          ? (onboardingResult136.data as Record<string, unknown>)
+          : {};
+      const managedUsernameOnboarding136 =
+        onboardingState136.managed_account === true;
+
+      if (managedUsernameOnboarding136) {
+        const finalizeResult136 = await supabase.rpc(
+          "darik_direct_finalize_username_store_setup_v1",
+          { p_storefront_id: storefrontId }
+        );
+
+        if (finalizeResult136.error) {
+          throw finalizeResult136.error;
+        }
+      }
       const completeResult = await supabase.rpc(
         "darik_direct_complete_storefront_setup",
         {
@@ -2379,6 +2395,11 @@ export default function DarikDirectStorefrontSettingsPage() {
 
       if (completeResult.error) {
         throw completeResult.error;
+      }
+
+      if (managedUsernameOnboarding136) {
+        window.location.assign("/store-dashboard/getting-started");
+        return;
       }
 
       setStorefrontSetupMode109("tabs");
@@ -3729,7 +3750,7 @@ export default function DarikDirectStorefrontSettingsPage() {
         </nav>
 
         <div className={styles.sidebarFooter}>
-          <span>{session.user.email}</span>
+          <span>{session.user.user_metadata?.darik_retailer_username ? `@${session.user.user_metadata.darik_retailer_username}` : session.user.email}</span>
           <DashboardLogoutButton />
         </div>
       </aside>

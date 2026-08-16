@@ -1,5 +1,7 @@
 "use client";
 
+// DARIK_USERNAME_SIGNUP_FORCED_ONBOARDING_136
+
 // DARIK_MOBILE_DASHBOARD_LOGOUT_035
 // DARIK_FRONTEND_OVERVIEW_EDITABLE_RETAIL_FIELD_134
 // DARIK_EYEGLASSES_RETAIL_FIELD_MECHANICS_135
@@ -707,8 +709,29 @@ export default function DarikDirectOverviewPage() {
     setError("");
     setMessage("");
 
+    const loginValue136 = email.trim();
+    let loginIdentity136 = loginValue136;
+
+    if (loginValue136 && !loginValue136.includes("@")) {
+      const identityResult136 = await supabase.rpc(
+        "darik_direct_username_login_identity_v1",
+        { p_username: loginValue136.toLowerCase() }
+      );
+
+      if (
+        identityResult136.error ||
+        typeof identityResult136.data !== "string" ||
+        !identityResult136.data
+      ) {
+        setError("Username or password is incorrect. / اسم المستخدم أو كلمة المرور غير صحيحة.");
+        return;
+      }
+
+      loginIdentity136 = identityResult136.data;
+    }
+
     const result = await supabase.auth.signInWithPassword({
-      email: email.trim(),
+      email: loginIdentity136,
       password,
     });
 
@@ -733,16 +756,16 @@ export default function DarikDirectOverviewPage() {
             <span>Darik Direct</span>
             <h1>Store dashboard / لوحة المتجر</h1>
             <p>
-              Sign in using the email connected to your Darik retailer account.
+              Sign in with your username. Older retailer accounts can still use email.
               <br />
-              سجل الدخول بالبريد الإلكتروني المرتبط بحساب متجرك.
+              سجل الدخول باسم المستخدم. الحسابات القديمة يمكنها الاستمرار باستخدام البريد الإلكتروني.
             </p>
           </div>
           <form onSubmit={signIn} className={styles.loginForm}>
             <label>
-              Email / البريد الإلكتروني
+              Username / Email / اسم المستخدم أو البريد الإلكتروني
               <input
-                type="email"
+                type="text"
                 value={email}
                 onChange={(event) => setEmail(event.target.value)}
                 required
@@ -799,7 +822,7 @@ export default function DarikDirectOverviewPage() {
           <a href="/store-dashboard/activation">Go live</a>
         </nav>
         <div className={styles.sidebarFooter}>
-          <span>{session.user.email}</span>
+          <span>{session.user.user_metadata?.darik_retailer_username ? `@${session.user.user_metadata.darik_retailer_username}` : session.user.email}</span>
           <DashboardLogoutButton />
         </div>
       </aside>
