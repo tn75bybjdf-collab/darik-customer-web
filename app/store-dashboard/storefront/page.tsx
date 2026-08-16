@@ -1586,6 +1586,7 @@ export default function DarikDirectStorefrontSettingsPage() {
   // DARIK_LIVE_TYPOGRAPHY_PREVIEW_153
   // DARIK_NONBLOCKING_TYPOGRAPHY_PANEL_153B
   // DARIK_AUTOCLOSE_FONT_TEXT_COLOR_154_V2
+  // DARIK_EDITOR_BLOCK_NATIVE_OBJECT_ACTIONS_155
   // Dashboard-only drag proof.
   // No DB writes and no app/[slug] edits.
   useEffect(() => {
@@ -4596,6 +4597,14 @@ export default function DarikDirectStorefrontSettingsPage() {
           );
 
         if (target152) {
+          // Private-preview editor owns this click. Do not let the
+          // storefront's real button/link action fire while selecting.
+          // This prevents Browse products / Shop / Call / category links
+          // from navigating or scrolling the editor away from the object.
+          event152.preventDefault();
+          event152.stopPropagation();
+          event152.stopImmediatePropagation();
+
           selectTarget152(
             target152
           );
