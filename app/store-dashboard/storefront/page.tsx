@@ -1344,6 +1344,7 @@ export default function DarikDirectStorefrontSettingsPage() {
   }, []);
   // DARIK_DASHBOARD_FULLSCREEN_PREVIEW_STEP_SCROLL_FIX_111
   const [liveBuilderPreviewExpanded111, setLiveBuilderPreviewExpanded111] = useState(false);
+  // DARIK_CHANGE_THEME_EXITS_FULLSCREEN_156
   const storefrontSetupLastVisibleStep111 = useRef<number>(0);
   // DARIK_INDEPENDENT_STOREFRONT_TYPOGRAPHY_105
   const [storefrontTypographyDraft, setStorefrontTypographyDraft] =
@@ -8631,7 +8632,19 @@ await saveStorefront(undefined, "manual");
                     <div className={designStyles.liveBuilderPreviewActions}>
                       <button
                         type="button"
-                        onClick={() => setThemePickerOpen(true)}
+                        onClick={() => {
+                          if (liveBuilderPreviewExpanded111) {
+                            setLiveBuilderPreviewExpanded111(false);
+
+                            window.requestAnimationFrame(() => {
+                              setThemePickerOpen(true);
+                            });
+
+                            return;
+                          }
+
+                          setThemePickerOpen(true);
+                        }}
                       >
                         Change theme / تغيير القالب
                       </button>
