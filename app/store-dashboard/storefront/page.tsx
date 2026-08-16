@@ -1,5 +1,7 @@
 "use client";
 
+// DARIK_THEME_STEP_GALLERY_STABLE_AUTO_PREVIEW_138
+
 // DARIK_USERNAME_SIGNUP_FORCED_ONBOARDING_136
 
 // DARIK_RETAIL_FIELDS_SMOKE_SHOP_050
@@ -1189,6 +1191,8 @@ export default function DarikDirectStorefrontSettingsPage() {
   const liveBuilderPreviewRef = useRef<HTMLIFrameElement | null>(null);
   // DARIK_PREVIEW_CONTROLS_CLEANUP_107
   const [liveBuilderPreviewOpen, setLiveBuilderPreviewOpen] = useState(true);
+  // DARIK_THEME_STEP_GALLERY_STABLE_AUTO_PREVIEW_138: iframe theme changes only after a completed theme save.
+  const [liveBuilderPreviewTheme138, setLiveBuilderPreviewTheme138] = useState("");
   // DARIK_DASHBOARD_FULLSCREEN_PREVIEW_STEP_SCROLL_FIX_111
   const [liveBuilderPreviewExpanded111, setLiveBuilderPreviewExpanded111] = useState(false);
   const storefrontSetupLastVisibleStep111 = useRef<number>(0);
@@ -3578,9 +3582,19 @@ export default function DarikDirectStorefrontSettingsPage() {
     };
   }, [storefront?.id, storefront?.slug]);
 
+  useEffect(() => {
+    if (!selectedThemeField || themeSaveState === "saving") return;
+    setLiveBuilderPreviewTheme138((current) => current || selectedThemeField);
+  }, [selectedThemeField, themeSaveState]);
   async function chooseStorefrontTheme(themeField: string) {
-    if (themeSaveState === "saving" || themeField === selectedThemeField) {
-      if (themeField === selectedThemeField) setThemePickerOpen(false);
+    if (themeSaveState === "saving") {
+      return;
+    }
+
+    if (themeField === selectedThemeField) {
+      setThemePickerOpen(false);
+      setLiveBuilderPreviewTheme138((current) => current || themeField);
+      setLiveBuilderPreviewOpen(true);
       return;
     }
 
@@ -3595,6 +3609,8 @@ export default function DarikDirectStorefrontSettingsPage() {
         );
       }
 
+      setLiveBuilderPreviewTheme138(themeField);
+      setLiveBuilderPreviewOpen(true);
       return;
     }
 
@@ -3615,6 +3631,8 @@ export default function DarikDirectStorefrontSettingsPage() {
       return;
     }
 
+    setLiveBuilderPreviewTheme138(themeField);
+    setLiveBuilderPreviewOpen(true);
     setThemePickerOpen(false);
     if (selectedStore?.retailer_id) {
       window.localStorage.removeItem(`darik-pending-theme-${selectedStore.retailer_id}`);
@@ -4102,12 +4120,12 @@ export default function DarikDirectStorefrontSettingsPage() {
                   </div>
 
                   <div className={designStyles.liveBuilderPreviewViewport}>
-                    {storefront ? (
+                    {storefront && liveBuilderPreviewTheme138 ? (
                       <iframe
                         ref={liveBuilderPreviewRef}
                         title="Live Darik storefront preview"
                         src={`/${storefront.slug}?previewField=${encodeURIComponent(
-                          selectedThemeField
+                          liveBuilderPreviewTheme138
                         )}&fieldLab=1&builderPreview=1`}
                         onLoad={pushLiveBuilderDraft}
                       />
@@ -4176,17 +4194,80 @@ export default function DarikDirectStorefrontSettingsPage() {
                       <div className={designStyles.exactWizardHeading109V5}>
                         <span>STEP 1 / الخطوة ١</span>
                         <h3>Choose a theme / اختر القالب</h3>
-                        <p>Choose the visual style first. You can change it later at any time.</p>
+                        <p>Select the storefront design you want. To change it later, simply select a different theme here.</p>
                       </div>
-                      <div className={designStyles.exactWizardTheme109V5}>
-                        <div>
-                          <small>Current theme / القالب الحالي</small>
-                          <strong>{selectedThemeOption?.name || "Choose a theme"}</strong>
-                          <span>{selectedThemeOption?.vibe || "Choose the look that fits your store."}</span>
-                        </div>
-                        <button type="button" onClick={() => setThemePickerOpen(true)}>
-                          Change theme / تغيير القالب
-                        </button>
+
+                      <div className={designStyles.themeGalleryGrid}>
+                        {storefrontThemeOptions.map((theme) => {
+                          const selected = selectedThemeField === theme.key;
+
+                          return (
+                            <button
+                              type="button"
+                              className={`${designStyles.themeCard} ${
+                                selected ? designStyles.themeCardSelected : ""
+                              }`}
+                              key={theme.key}
+                              aria-pressed={selected}
+                              disabled={themeSaveState === "saving"}
+                              onClick={() => void chooseStorefrontTheme(theme.key)}
+                            >
+                              <div
+                                className={designStyles.themeMiniBrowser}
+                                style={{ background: theme.palette[2] }}
+                              >
+                                <div className={designStyles.themeMiniTopbar}>
+                                  <i style={{ background: theme.palette[0] }} />
+                                  <span style={{ background: theme.palette[0] }} />
+                                  <span style={{ background: theme.palette[1] }} />
+                                </div>
+                                <div
+                                  className={designStyles.themeMiniHero}
+                                  style={{
+                                    background: `linear-gradient(135deg, ${theme.palette[0]}, ${theme.palette[1]})`,
+                                  }}
+                                >
+                                  <span />
+                                  <strong />
+                                </div>
+                                <div className={designStyles.themeMiniCatalog}>
+                                  <i style={{ borderColor: theme.palette[1] }} />
+                                  <i style={{ borderColor: theme.palette[1] }} />
+                                  <i style={{ borderColor: theme.palette[1] }} />
+                                </div>
+                              </div>
+
+                              <div className={designStyles.themeCardTop}>
+                                <div>
+                                  <strong className={designStyles.themeCardName}>
+                                    {theme.name}
+                                  </strong>
+                                  <small className={designStyles.themeCardVibe}>
+                                    {theme.vibe}
+                                  </small>
+                                </div>
+                                {selected ? (
+                                  <span className={designStyles.themeSelectedPill}>
+                                    Selected / مختار
+                                  </span>
+                                ) : null}
+                              </div>
+
+                              <div className={designStyles.themeSwatches} aria-hidden="true">
+                                {theme.palette.map((color) => (
+                                  <i key={color} style={{ background: color }} />
+                                ))}
+                              </div>
+                            </button>
+                          );
+                        })}
+                      </div>
+
+                      <div className={designStyles.themeFirstStepFoot}>
+                        <strong>Theme changes appearance only.</strong>
+                        <span>
+                          Your retail field still controls product mechanics, categories, sizing, fitment, and store functions.
+                        </span>
                       </div>
                     </section>
                   ) : null}
