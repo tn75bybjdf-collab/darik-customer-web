@@ -3056,3 +3056,11 @@
     width: auto;
   }
 }
+
+/* DARIK_DASHBOARD_ONLY_DRAG_PROOF_150A
+   FRONTEND 145 click/arrow panel is intentionally retired.
+   FRONTEND 150A has no editing menu or status card.
+*/
+.previewPositionPanel145 {
+  display: none !important;
+}

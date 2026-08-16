@@ -1483,26 +1483,6 @@ export default function DarikDirectStorefrontSettingsPage() {
     setPreviewPositionSaveState145("idle");
   }, [storefront?.id]);
 
-  useEffect(() => {
-    function handlePreviewPositionSelect145(event: MessageEvent) {
-      if (event.origin !== window.location.origin) return;
-      if (event.data?.type !== "DARIK_PREVIEW_POSITION_SELECT_145") return;
-      if (!isStorefrontPositionKey145(event.data?.key)) return;
-
-      setSelectedPreviewPosition145(event.data.key);
-      setPreviewPositionDevice145(
-        event.data?.viewport === "mobile" ? "mobile" : "desktop"
-      );
-    }
-
-    window.addEventListener("message", handlePreviewPositionSelect145);
-    return () =>
-      window.removeEventListener(
-        "message",
-        handlePreviewPositionSelect145
-      );
-  }, []);
-
   function updatePreviewPosition145(
     key: StorefrontPositionKey145,
     device: StorefrontPositionDevice145,
@@ -1595,47 +1575,485 @@ export default function DarikDirectStorefrontSettingsPage() {
     return () => window.clearTimeout(timer);
   }, [storefrontContentPositioning145, storefront?.id]);
 
+  // DARIK_DASHBOARD_ONLY_DRAG_PROOF_150A
+  // Dashboard-only drag proof.
+  // No DB writes and no app/[slug] edits.
   useEffect(() => {
-    if (!selectedPreviewPosition145) return;
+    if (!liveBuilderPreviewOpen) return;
 
-    function handlePreviewPositionKeyboard145(event: KeyboardEvent) {
-      const target = event.target;
-      if (
-        target instanceof HTMLInputElement ||
-        target instanceof HTMLTextAreaElement ||
-        target instanceof HTMLSelectElement
+    const iframe150A = liveBuilderPreviewRef.current;
+
+    if (!iframe150A) return;
+
+    let detachPreview150A = () => {};
+
+    function attachPreview150A() {
+      detachPreview150A();
+
+      const document150A = iframe150A.contentDocument;
+      const window150A = iframe150A.contentWindow;
+
+      if (!document150A || !window150A) return;
+
+      const originalTranslate150A =
+        new Map<Element, string>();
+
+      let candidate150A:
+        | {
+            target: Element;
+            pointerId: number;
+            pointerType: string;
+            startX: number;
+            startY: number;
+            baseX: number;
+            baseY: number;
+            originalOutline: string;
+            originalOutlineOffset: string;
+            originalCursor: string;
+            originalUserSelect: string;
+            originalTouchAction: string;
+          }
+        | null = null;
+
+      let dragging150A = false;
+      let holdTimer150A = 0;
+      let blockClickTarget150A: Element | null = null;
+      let blockClickUntil150A = 0;
+
+      const old145Neutralizer150A =
+        document150A.createElement("style");
+
+      old145Neutralizer150A.id =
+        "darik-old-145-neutralizer-150a";
+
+      old145Neutralizer150A.textContent = `
+        [data-darik-position-builder145="true"]
+          [class*="builderPositionTarget145"] {
+          cursor: inherit !important;
+          outline: none !important;
+          box-shadow: none !important;
+        }
+
+        [data-darik-position-builder145="true"]
+          [class*="builderPositionSelected145"] {
+          outline: none !important;
+          box-shadow: none !important;
+        }
+
+        [data-darik-dragging150a="true"] {
+          outline: 2px solid rgba(2, 132, 199, .95) !important;
+          outline-offset: 4px !important;
+          cursor: grabbing !important;
+          user-select: none !important;
+          -webkit-user-select: none !important;
+        }
+      `;
+
+      document150A.head?.appendChild(
+        old145Neutralizer150A
+      );
+
+      function clearHold150A() {
+        if (!holdTimer150A) return;
+
+        window150A.clearTimeout(holdTimer150A);
+        holdTimer150A = 0;
+      }
+
+      function parseTranslate150A(value150A: string) {
+        const normalized150A = String(value150A || "").trim();
+
+        if (!normalized150A || normalized150A === "none") {
+          return { x: 0, y: 0 };
+        }
+
+        const values150A =
+          normalized150A.match(/-?[0-9]+(?:\.[0-9]+)?/g) ??
+          [];
+
+        return {
+          x: Number(values150A[0] ?? 0) || 0,
+          y: Number(values150A[1] ?? 0) || 0,
+        };
+      }
+
+      function chooseTarget150A(
+        rawTarget150A: EventTarget | null
       ) {
-        return;
+        const rawElement150A = rawTarget150A as Element | null;
+
+        if (
+          !rawElement150A ||
+          rawElement150A.nodeType !== 1
+        ) {
+          return null;
+        }
+
+        const root150A = document150A.querySelector(
+          "[data-darik-position-builder145]"
+        );
+
+        if (!root150A || !root150A.contains(rawElement150A)) {
+          return null;
+        }
+
+        const semantic150A = rawElement150A.closest(
+          "button, a, img, video, h1, h2, h3, h4, p, li, nav, section, article, header, footer"
+        );
+
+        const chosen150A =
+          semantic150A &&
+          root150A.contains(semantic150A)
+            ? semantic150A
+            : rawElement150A;
+
+        if (chosen150A === root150A) return null;
+
+        const tag150A = chosen150A.tagName.toLowerCase();
+
+        if (
+          tag150A === "html" ||
+          tag150A === "body" ||
+          tag150A === "script" ||
+          tag150A === "style"
+        ) {
+          return null;
+        }
+
+        return chosen150A;
       }
 
-      const step = event.shiftKey ? 8 : 1;
+      function restoreCandidateDecoration150A() {
+        if (!candidate150A) return;
 
-      if (event.key === "ArrowLeft") {
-        event.preventDefault();
-        nudgePreviewPosition145(-step, 0);
-      } else if (event.key === "ArrowRight") {
-        event.preventDefault();
-        nudgePreviewPosition145(step, 0);
-      } else if (event.key === "ArrowUp") {
-        event.preventDefault();
-        nudgePreviewPosition145(0, -step);
-      } else if (event.key === "ArrowDown") {
-        event.preventDefault();
-        nudgePreviewPosition145(0, step);
+        const style150A =
+          (candidate150A.target as HTMLElement).style;
+
+        style150A.outline =
+          candidate150A.originalOutline;
+        style150A.outlineOffset =
+          candidate150A.originalOutlineOffset;
+        style150A.cursor =
+          candidate150A.originalCursor;
+        style150A.userSelect =
+          candidate150A.originalUserSelect;
+        style150A.touchAction =
+          candidate150A.originalTouchAction;
+
+        candidate150A.target.removeAttribute(
+          "data-darik-dragging150a"
+        );
       }
+
+      function beginDrag150A() {
+        if (!candidate150A || dragging150A) return;
+
+        clearHold150A();
+        dragging150A = true;
+
+        const style150A =
+          (candidate150A.target as HTMLElement).style;
+
+        style150A.cursor = "grabbing";
+        style150A.userSelect = "none";
+
+        if (candidate150A.pointerType === "touch") {
+          style150A.touchAction = "none";
+        }
+
+        candidate150A.target.setAttribute(
+          "data-darik-dragging150a",
+          "true"
+        );
+
+        try {
+          candidate150A.target.setPointerCapture(
+            candidate150A.pointerId
+          );
+        } catch {
+          // Best effort.
+        }
+
+        window150A.getSelection()?.removeAllRanges();
+      }
+
+      function startCandidate150A(event150A: PointerEvent) {
+        if (
+          event150A.pointerType === "mouse" &&
+          event150A.button !== 0
+        ) {
+          return;
+        }
+
+        const target150A = chooseTarget150A(
+          event150A.target
+        );
+
+        if (!target150A) return;
+
+        const computed150A = parseTranslate150A(
+          window150A.getComputedStyle(target150A).translate
+        );
+
+        const style150A =
+          (target150A as HTMLElement).style;
+
+        if (!originalTranslate150A.has(target150A)) {
+          originalTranslate150A.set(
+            target150A,
+            style150A.getPropertyValue("translate")
+          );
+        }
+
+        candidate150A = {
+          target: target150A,
+          pointerId: event150A.pointerId,
+          pointerType: event150A.pointerType,
+          startX: event150A.clientX,
+          startY: event150A.clientY,
+          baseX: computed150A.x,
+          baseY: computed150A.y,
+          originalOutline: style150A.outline,
+          originalOutlineOffset: style150A.outlineOffset,
+          originalCursor: style150A.cursor,
+          originalUserSelect: style150A.userSelect,
+          originalTouchAction: style150A.touchAction,
+        };
+
+        if (event150A.pointerType === "touch") {
+          holdTimer150A = window150A.setTimeout(
+            () => beginDrag150A(),
+            340
+          );
+        }
+      }
+
+      function moveCandidate150A(event150A: PointerEvent) {
+        if (
+          !candidate150A ||
+          event150A.pointerId !== candidate150A.pointerId
+        ) {
+          return;
+        }
+
+        const dx150A =
+          event150A.clientX - candidate150A.startX;
+        const dy150A =
+          event150A.clientY - candidate150A.startY;
+        const distance150A = Math.hypot(dx150A, dy150A);
+
+        if (
+          !dragging150A &&
+          candidate150A.pointerType === "touch"
+        ) {
+          if (distance150A > 9) {
+            clearHold150A();
+            candidate150A = null;
+          }
+
+          return;
+        }
+
+        if (!dragging150A && distance150A >= 5) {
+          beginDrag150A();
+        }
+
+        if (!dragging150A || !candidate150A) return;
+
+        event150A.preventDefault();
+        event150A.stopPropagation();
+
+        const x150A =
+          candidate150A.baseX + dx150A;
+        const y150A =
+          candidate150A.baseY + dy150A;
+
+        (candidate150A.target as HTMLElement).style.setProperty(
+          "translate",
+          `${Math.round(x150A)}px ${Math.round(y150A)}px`,
+          "important"
+        );
+      }
+
+      function finishCandidate150A(
+        event150A: PointerEvent
+      ) {
+        if (
+          !candidate150A ||
+          event150A.pointerId !== candidate150A.pointerId
+        ) {
+          return;
+        }
+
+        clearHold150A();
+
+        const completed150A = candidate150A;
+
+        if (!dragging150A) {
+          candidate150A = null;
+          return;
+        }
+
+        event150A.preventDefault();
+        event150A.stopPropagation();
+
+        blockClickTarget150A = completed150A.target;
+        blockClickUntil150A = Date.now() + 500;
+
+        try {
+          completed150A.target.releasePointerCapture(
+            completed150A.pointerId
+          );
+        } catch {
+          // Best effort.
+        }
+
+        restoreCandidateDecoration150A();
+
+        candidate150A = null;
+        dragging150A = false;
+      }
+
+      function cancelCandidate150A(
+        event150A: PointerEvent
+      ) {
+        if (
+          !candidate150A ||
+          event150A.pointerId !== candidate150A.pointerId
+        ) {
+          return;
+        }
+
+        clearHold150A();
+        restoreCandidateDecoration150A();
+        candidate150A = null;
+        dragging150A = false;
+      }
+
+      function suppressPostDragClick150A(
+        event150A: MouseEvent
+      ) {
+        if (Date.now() > blockClickUntil150A) return;
+        if (!blockClickTarget150A) return;
+
+        const clickTarget150A = event150A.target as Node | null;
+
+        if (
+          clickTarget150A &&
+          (clickTarget150A === blockClickTarget150A ||
+            blockClickTarget150A.contains(clickTarget150A))
+        ) {
+          event150A.preventDefault();
+          event150A.stopPropagation();
+          event150A.stopImmediatePropagation();
+        }
+      }
+
+      document150A.addEventListener(
+        "pointerdown",
+        startCandidate150A,
+        true
+      );
+
+      document150A.addEventListener(
+        "pointermove",
+        moveCandidate150A,
+        { capture: true, passive: false }
+      );
+
+      document150A.addEventListener(
+        "pointerup",
+        finishCandidate150A,
+        true
+      );
+
+      document150A.addEventListener(
+        "pointercancel",
+        cancelCandidate150A,
+        true
+      );
+
+      document150A.addEventListener(
+        "click",
+        suppressPostDragClick150A,
+        true
+      );
+
+      detachPreview150A = () => {
+        clearHold150A();
+        restoreCandidateDecoration150A();
+
+        document150A.removeEventListener(
+          "pointerdown",
+          startCandidate150A,
+          true
+        );
+
+        document150A.removeEventListener(
+          "pointermove",
+          moveCandidate150A,
+          true
+        );
+
+        document150A.removeEventListener(
+          "pointerup",
+          finishCandidate150A,
+          true
+        );
+
+        document150A.removeEventListener(
+          "pointercancel",
+          cancelCandidate150A,
+          true
+        );
+
+        document150A.removeEventListener(
+          "click",
+          suppressPostDragClick150A,
+          true
+        );
+
+        old145Neutralizer150A.remove();
+
+        for (const [
+          target150A,
+          original150A,
+        ] of originalTranslate150A.entries()) {
+          const style150A =
+            (target150A as HTMLElement).style;
+
+          if (original150A) {
+            style150A.setProperty(
+              "translate",
+              original150A
+            );
+          } else {
+            style150A.removeProperty("translate");
+          }
+
+          target150A.removeAttribute(
+            "data-darik-dragging150a"
+          );
+        }
+      };
     }
 
-    window.addEventListener("keydown", handlePreviewPositionKeyboard145);
-    return () =>
-      window.removeEventListener(
-        "keydown",
-        handlePreviewPositionKeyboard145
+    iframe150A.addEventListener(
+      "load",
+      attachPreview150A
+    );
+
+    attachPreview150A();
+
+    return () => {
+      iframe150A.removeEventListener(
+        "load",
+        attachPreview150A
       );
-  }, [
-    selectedPreviewPosition145,
-    previewPositionDevice145,
-    storefrontContentPositioning145,
-  ]);
+
+      detachPreview150A();
+    };
+  }, [liveBuilderPreviewOpen, storefront?.id]);
 
   const [formDirty, setFormDirty] = useState(false);
   const [draftSavedAt, setDraftSavedAt] = useState<string | null>(null);
