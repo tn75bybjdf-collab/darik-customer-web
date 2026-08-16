@@ -1577,6 +1577,7 @@ export default function DarikDirectStorefrontSettingsPage() {
 
   // DARIK_DASHBOARD_ONLY_DRAG_PROOF_150A
   // DARIK_LIVE_IFRAME_BINDING_FIX_150B
+  // DARIK_DRAG_SCROLL_LOCK_RESET_HERO_LOCK_150C
   // Dashboard-only drag proof.
   // No DB writes and no app/[slug] edits.
   useEffect(() => {
@@ -1607,6 +1608,17 @@ export default function DarikDirectStorefrontSettingsPage() {
 
       const originalTranslate150A =
         new Map<Element, string>();
+
+      let resetButton150C: HTMLButtonElement | null = null;
+      let scrollLocked150C = false;
+      let iframeRootOverflow150C = "";
+      let iframeBodyOverflow150C = "";
+      let iframeRootTouchAction150C = "";
+      let iframeBodyTouchAction150C = "";
+      let parentRootOverflow150C = "";
+      let parentBodyOverflow150C = "";
+      let parentRootTouchAction150C = "";
+      let parentBodyTouchAction150C = "";
 
       let candidate150A:
         | {
@@ -1707,25 +1719,47 @@ export default function DarikDirectStorefrontSettingsPage() {
           return null;
         }
 
-        const semantic150A = rawElement150A.closest(
-          "button, a, img, video, h1, h2, h3, h4, p, li, nav, section, article, header, footer"
+        // Prefer the actual content item. Structural wrappers, especially the
+        // storefront hero itself, must never become the drag target.
+        const semantic150C = rawElement150A.closest(
+          "button, a, img, picture, video, h1, h2, h3, h4, h5, h6, p, label"
         );
 
         const chosen150A =
-          semantic150A &&
-          root150A.contains(semantic150A)
-            ? semantic150A
+          semantic150C && root150A.contains(semantic150C)
+            ? semantic150C
             : rawElement150A;
 
         if (chosen150A === root150A) return null;
 
         const tag150A = chosen150A.tagName.toLowerCase();
+        const structuralTags150C = new Set([
+          "html",
+          "body",
+          "main",
+          "header",
+          "footer",
+          "nav",
+          "section",
+          "article",
+          "form",
+          "ul",
+          "ol",
+          "script",
+          "style",
+        ]);
 
+        if (structuralTags150C.has(tag150A)) {
+          return null;
+        }
+
+        // Complex DIVs are layout wrappers. This catches div-based hero shells
+        // without blocking the text/logo/buttons inside them.
         if (
-          tag150A === "html" ||
-          tag150A === "body" ||
-          tag150A === "script" ||
-          tag150A === "style"
+          tag150A === "div" &&
+          chosen150A.querySelector(
+            "h1, h2, h3, h4, p, img, picture, video, button, a, nav, section, article, header, footer"
+          )
         ) {
           return null;
         }
@@ -1755,11 +1789,201 @@ export default function DarikDirectStorefrontSettingsPage() {
         );
       }
 
+      function preventActiveDragScroll150C(
+        event150C: Event
+      ) {
+        if (!dragging150A) return;
+        event150C.preventDefault();
+      }
+
+      function lockDragScroll150C() {
+        if (scrollLocked150C) return;
+        scrollLocked150C = true;
+
+        const iframeRoot150C = document150A.documentElement;
+        const iframeBody150C = document150A.body;
+        const parentRoot150C = document.documentElement;
+        const parentBody150C = document.body;
+
+        iframeRootOverflow150C = iframeRoot150C.style.overflow;
+        iframeRootTouchAction150C = iframeRoot150C.style.touchAction;
+        parentRootOverflow150C = parentRoot150C.style.overflow;
+        parentRootTouchAction150C = parentRoot150C.style.touchAction;
+
+        if (iframeBody150C) {
+          iframeBodyOverflow150C = iframeBody150C.style.overflow;
+          iframeBodyTouchAction150C = iframeBody150C.style.touchAction;
+        }
+
+        if (parentBody150C) {
+          parentBodyOverflow150C = parentBody150C.style.overflow;
+          parentBodyTouchAction150C = parentBody150C.style.touchAction;
+        }
+
+        iframeRoot150C.style.overflow = "hidden";
+        iframeRoot150C.style.touchAction = "none";
+        parentRoot150C.style.overflow = "hidden";
+        parentRoot150C.style.touchAction = "none";
+
+        if (iframeBody150C) {
+          iframeBody150C.style.overflow = "hidden";
+          iframeBody150C.style.touchAction = "none";
+        }
+
+        if (parentBody150C) {
+          parentBody150C.style.overflow = "hidden";
+          parentBody150C.style.touchAction = "none";
+        }
+
+        document150A.addEventListener(
+          "wheel",
+          preventActiveDragScroll150C,
+          { capture: true, passive: false }
+        );
+        document150A.addEventListener(
+          "touchmove",
+          preventActiveDragScroll150C,
+          { capture: true, passive: false }
+        );
+        document.addEventListener(
+          "wheel",
+          preventActiveDragScroll150C,
+          { capture: true, passive: false }
+        );
+        document.addEventListener(
+          "touchmove",
+          preventActiveDragScroll150C,
+          { capture: true, passive: false }
+        );
+      }
+
+      function unlockDragScroll150C() {
+        if (!scrollLocked150C) return;
+        scrollLocked150C = false;
+
+        const iframeRoot150C = document150A.documentElement;
+        const iframeBody150C = document150A.body;
+        const parentRoot150C = document.documentElement;
+        const parentBody150C = document.body;
+
+        iframeRoot150C.style.overflow = iframeRootOverflow150C;
+        iframeRoot150C.style.touchAction = iframeRootTouchAction150C;
+        parentRoot150C.style.overflow = parentRootOverflow150C;
+        parentRoot150C.style.touchAction = parentRootTouchAction150C;
+
+        if (iframeBody150C) {
+          iframeBody150C.style.overflow = iframeBodyOverflow150C;
+          iframeBody150C.style.touchAction = iframeBodyTouchAction150C;
+        }
+
+        if (parentBody150C) {
+          parentBody150C.style.overflow = parentBodyOverflow150C;
+          parentBody150C.style.touchAction = parentBodyTouchAction150C;
+        }
+
+        document150A.removeEventListener(
+          "wheel",
+          preventActiveDragScroll150C,
+          true
+        );
+        document150A.removeEventListener(
+          "touchmove",
+          preventActiveDragScroll150C,
+          true
+        );
+        document.removeEventListener(
+          "wheel",
+          preventActiveDragScroll150C,
+          true
+        );
+        document.removeEventListener(
+          "touchmove",
+          preventActiveDragScroll150C,
+          true
+        );
+      }
+
+      function resetProofLayout150C() {
+        clearHold150A();
+        unlockDragScroll150C();
+        restoreCandidateDecoration150A();
+
+        candidate150A = null;
+        dragging150A = false;
+        blockClickTarget150A = null;
+        blockClickUntil150A = 0;
+
+        for (const [
+          target150C,
+          originalTranslate150C,
+        ] of originalTranslate150A.entries()) {
+          const style150C = (target150C as HTMLElement).style;
+
+          if (originalTranslate150C) {
+            style150C.setProperty(
+              "translate",
+              originalTranslate150C
+            );
+          } else {
+            style150C.removeProperty("translate");
+          }
+
+          target150C.removeAttribute(
+            "data-darik-dragging150a"
+          );
+        }
+
+        originalTranslate150A.clear();
+      }
+
+      function installResetButton150C() {
+        resetButton150C?.remove();
+
+        const button150C = document.createElement("button");
+        button150C.type = "button";
+        button150C.textContent = "Reset layout / إعادة الضبط";
+        button150C.setAttribute(
+          "data-darik-reset-layout150c",
+          "true"
+        );
+        button150C.title =
+          "Restore every moved preview element to its original position";
+
+        Object.assign(button150C.style, {
+          position: "fixed",
+          right: "16px",
+          bottom: "16px",
+          zIndex: "4000",
+          border: "1px solid rgba(15,23,42,.18)",
+          borderRadius: "999px",
+          padding: "10px 14px",
+          background: "rgba(255,255,255,.97)",
+          color: "#0f172a",
+          fontSize: "12px",
+          fontWeight: "800",
+          lineHeight: "1",
+          boxShadow: "0 10px 30px rgba(15,23,42,.18)",
+          cursor: "pointer",
+          backdropFilter: "blur(8px)",
+        });
+
+        button150C.addEventListener(
+          "click",
+          resetProofLayout150C
+        );
+
+        document.body.appendChild(button150C);
+        resetButton150C = button150C;
+      }
+
+      installResetButton150C();
+
       function beginDrag150A() {
         if (!candidate150A || dragging150A) return;
 
         clearHold150A();
         dragging150A = true;
+        lockDragScroll150C();
 
         const style150A =
           (candidate150A.target as HTMLElement).style;
@@ -1922,6 +2146,7 @@ export default function DarikDirectStorefrontSettingsPage() {
 
         candidate150A = null;
         dragging150A = false;
+        unlockDragScroll150C();
       }
 
       function cancelCandidate150A(
@@ -1938,6 +2163,7 @@ export default function DarikDirectStorefrontSettingsPage() {
         restoreCandidateDecoration150A();
         candidate150A = null;
         dragging150A = false;
+        unlockDragScroll150C();
       }
 
       function suppressPostDragClick150A(
@@ -1992,6 +2218,16 @@ export default function DarikDirectStorefrontSettingsPage() {
       detachPreview150A = () => {
         clearHold150A();
         restoreCandidateDecoration150A();
+        unlockDragScroll150C();
+
+        if (resetButton150C) {
+          resetButton150C.removeEventListener(
+            "click",
+            resetProofLayout150C
+          );
+          resetButton150C.remove();
+          resetButton150C = null;
+        }
 
         document150A.removeEventListener(
           "pointerdown",
