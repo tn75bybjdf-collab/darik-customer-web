@@ -1127,101 +1127,6 @@ function normalizeDarikDeliveryZones109(value: unknown): DarikDeliveryZone109[] 
 }
 
 // DARIK_CLICK_PREVIEW_POSITIONING_145
-// DARIK_FREEFORM_DRAG_EDITOR_146
-type StorefrontFreeformPoint146 = {
-  x: number;
-  y: number;
-  label?: string;
-};
-
-type StorefrontFreeformDevice146 = Record<
-  string,
-  StorefrontFreeformPoint146
->;
-
-type StorefrontFreeformLayout146 = {
-  desktop: StorefrontFreeformDevice146;
-  mobile: StorefrontFreeformDevice146;
-};
-
-type StorefrontFreeformSelection146 = {
-  locator: string;
-  label: string;
-  device: "desktop" | "mobile";
-};
-
-function clampStorefrontFreeform146(value: unknown) {
-  const numeric = Number(value);
-  if (!Number.isFinite(numeric)) return 0;
-  return Math.max(-1200, Math.min(1200, Math.round(numeric)));
-}
-
-function storefrontDefaultFreeformLayout146(): StorefrontFreeformLayout146 {
-  return {
-    desktop: {},
-    mobile: {},
-  };
-}
-
-function isSafeStorefrontFreeformLocator146(value: unknown) {
-  const locator = String(value ?? "").trim();
-  return (
-    locator.length >= 1 &&
-    locator.length <= 700 &&
-    /^[A-Za-z0-9_#:.() >-]+$/.test(locator)
-  );
-}
-
-function normalizeStorefrontFreeformLayout146(
-  value: unknown
-): StorefrontFreeformLayout146 {
-  const raw =
-    value && typeof value === "object" && !Array.isArray(value)
-      ? (value as Record<string, unknown>)
-      : {};
-
-  const result = storefrontDefaultFreeformLayout146();
-
-  for (const device of ["desktop", "mobile"] as const) {
-    const rawDevice =
-      raw[device] &&
-      typeof raw[device] === "object" &&
-      !Array.isArray(raw[device])
-        ? (raw[device] as Record<string, unknown>)
-        : {};
-
-    let count146 = 0;
-
-    for (const [locator, rawPoint] of Object.entries(rawDevice)) {
-      if (count146 >= 250) break;
-      if (!isSafeStorefrontFreeformLocator146(locator)) continue;
-      if (
-        !rawPoint ||
-        typeof rawPoint !== "object" ||
-        Array.isArray(rawPoint)
-      ) {
-        continue;
-      }
-
-      const point = rawPoint as Record<string, unknown>;
-      const label =
-        typeof point.label === "string"
-          ? point.label.trim().slice(0, 140)
-          : undefined;
-
-      result[device][locator] = {
-        x: clampStorefrontFreeform146(point.x),
-        y: clampStorefrontFreeform146(point.y),
-        ...(label ? { label } : {}),
-      };
-
-      count146 += 1;
-    }
-  }
-
-  return result;
-}
-
 type StorefrontPositionKey145 =
   | "display_name"
   | "display_name_ar"
@@ -1424,29 +1329,8 @@ export default function DarikDirectStorefrontSettingsPage() {
   const positioningDirtyRef145 = useRef(false);
   const positioningRevisionRef145 = useRef(0);
 
-  const [storefrontFreeformLayout146, setStorefrontFreeformLayout146] =
-    useState<StorefrontFreeformLayout146>(() =>
-      storefrontDefaultFreeformLayout146()
-    );
-  const [freeformMoveMode146, setFreeformMoveMode146] = useState(true);
-  const [selectedFreeform146, setSelectedFreeform146] =
-    useState<StorefrontFreeformSelection146 | null>(null);
-  const [freeformTransientPoint146, setFreeformTransientPoint146] =
-    useState<{ x: number; y: number } | null>(null);
-  const [freeformSaveState146, setFreeformSaveState146] =
-    useState<"idle" | "waiting" | "saving" | "saved" | "error">(
-      "idle"
-    );
-  const freeformDirtyRef146 = useRef(false);
-  const freeformRevisionRef146 = useRef(0);
-  const freeformUndoRef146 =
-    useRef<StorefrontFreeformLayout146 | null>(null);
-
-
   // DARIK_PREVIEW_CONTROLS_CLEANUP_107
   const [liveBuilderPreviewOpen, setLiveBuilderPreviewOpen] = useState(true);
-  // DARIK_PRIVATE_PREVIEW_SAFE_FULLSCREEN_147
-  const [liveBuilderPreviewExpanded147, setLiveBuilderPreviewExpanded147] = useState(false);
   // DARIK_THEME_STEP_GALLERY_STABLE_AUTO_PREVIEW_138: iframe theme changes only after a completed theme save.
   const [liveBuilderPreviewTheme138, setLiveBuilderPreviewTheme138] = useState("");
   const [realPrivatePreviewKey143, setRealPrivatePreviewKey143] = useState("");
@@ -1510,119 +1394,6 @@ export default function DarikDirectStorefrontSettingsPage() {
     return typeof value === "string" ? value : "";
   }
 
-
-  useEffect(() => {
-    if (!liveBuilderPreviewExpanded147) return;
-
-    const previousHtmlOverflow147 =
-      document.documentElement.style.overflow;
-    const previousBodyOverflow147 =
-      document.body.style.overflow;
-
-    document.documentElement.style.overflow = "hidden";
-    document.body.style.overflow = "hidden";
-
-    function handlePreviewEscape147(event: KeyboardEvent) {
-      if (event.key === "Escape") {
-        setLiveBuilderPreviewExpanded147(false);
-      }
-    }
-
-    window.addEventListener("keydown", handlePreviewEscape147);
-
-    return () => {
-      window.removeEventListener(
-        "keydown",
-        handlePreviewEscape147
-      );
-      document.documentElement.style.overflow =
-        previousHtmlOverflow147;
-      document.body.style.overflow =
-        previousBodyOverflow147;
-    };
-  }, [liveBuilderPreviewExpanded147]);
-
-  useEffect(() => {
-    if (!liveBuilderPreviewOpen) {
-      setLiveBuilderPreviewExpanded147(false);
-    }
-  }, [liveBuilderPreviewOpen]);
-
-  // DARIK_PARENT_AUTH_HANDOFF_148
-  useEffect(() => {
-    async function handlePrivatePreviewAuthRequest148(
-      event: MessageEvent
-    ) {
-      if (event.origin !== window.location.origin) return;
-      if (
-        event.data?.type !==
-        "DARIK_PRIVATE_PREVIEW_AUTH_REQUEST_148"
-      ) {
-        return;
-      }
-
-      const previewWindow148 =
-        liveBuilderPreviewRef.current?.contentWindow;
-
-      if (!previewWindow148) return;
-      if (event.source !== previewWindow148) return;
-
-      const requestId148 =
-        typeof event.data?.requestId === "string"
-          ? event.data.requestId.trim()
-          : "";
-      const requestedStorefrontId148 =
-        typeof event.data?.storefrontId === "string"
-          ? event.data.storefrontId.trim()
-          : "";
-      const requestedPreviewKey148 =
-        typeof event.data?.previewKey === "string"
-          ? event.data.previewKey.trim()
-          : "";
-
-      if (!requestId148) return;
-      if (!storefront?.id) return;
-      if (requestedStorefrontId148 !== storefront.id) return;
-      if (!realPrivatePreviewKey143) return;
-      if (
-        requestedPreviewKey148 !==
-        realPrivatePreviewKey143
-      ) {
-        return;
-      }
-
-      const { data: sessionData148 } =
-        await supabase.auth.getSession();
-
-      const accessToken148 =
-        sessionData148.session?.access_token ?? "";
-
-      previewWindow148.postMessage(
-        {
-          type: "DARIK_PRIVATE_PREVIEW_AUTH_RESPONSE_148",
-          requestId: requestId148,
-          storefrontId: storefront.id,
-          accessToken: accessToken148,
-        },
-        window.location.origin
-      );
-    }
-
-    window.addEventListener(
-      "message",
-      handlePrivatePreviewAuthRequest148
-    );
-
-    return () =>
-      window.removeEventListener(
-        "message",
-        handlePrivatePreviewAuthRequest148
-      );
-  }, [
-    storefront?.id,
-    realPrivatePreviewKey143,
-  ]);
-
   function getLiveBuilderDraftPayload() {
     return {
       display_name: liveBuilderDraftValue("displayName", "display_name"),
@@ -1631,7 +1402,6 @@ export default function DarikDirectStorefrontSettingsPage() {
       tagline_ar: liveBuilderDraftValue("taglineAr", "tagline_ar"),
       direct_typography: storefrontTypographyDraft,
       direct_content_positioning: storefrontContentPositioning145,
-      direct_freeform_layout: storefrontFreeformLayout146,
       logo_url: liveBuilderDraftValue("logoUrl", "logo_url"),
       hero_image_url: liveBuilderDraftValue("heroImageUrl", "hero_image_url"),
       business_phone: liveBuilderDraftValue("phone", "businessPhone", "business_phone"),
@@ -1697,7 +1467,7 @@ export default function DarikDirectStorefrontSettingsPage() {
 
     window.addEventListener("message", handleBuilderReady);
     return () => window.removeEventListener("message", handleBuilderReady);
-  }, [setupForm, storefrontTypographyDraft, storefrontContentPositioning145, storefrontFreeformLayout146, selectedThemeField, storefront?.slug]);
+  }, [setupForm, storefrontTypographyDraft, storefrontContentPositioning145, selectedThemeField, storefront?.slug]);
 
   useEffect(() => {
     positioningDirtyRef145.current = false;
@@ -1866,224 +1636,6 @@ export default function DarikDirectStorefrontSettingsPage() {
     previewPositionDevice145,
     storefrontContentPositioning145,
   ]);
-
-  useEffect(() => {
-    freeformDirtyRef146.current = false;
-    freeformUndoRef146.current = null;
-    setSelectedFreeform146(null);
-    setFreeformTransientPoint146(null);
-    setStorefrontFreeformLayout146(
-      normalizeStorefrontFreeformLayout146(
-        (
-          storefront as unknown as {
-            direct_freeform_layout?: unknown;
-          } | null
-        )?.direct_freeform_layout
-      )
-    );
-    setFreeformSaveState146("idle");
-  }, [storefront?.id]);
-
-  function postFreeformMoveMode146(enabled = freeformMoveMode146) {
-    liveBuilderPreviewRef.current?.contentWindow?.postMessage(
-      {
-        type: "DARIK_FREEFORM_MOVE_MODE_146",
-        enabled,
-      },
-      window.location.origin
-    );
-  }
-
-  useEffect(() => {
-    if (!liveBuilderPreviewOpen) return;
-
-    const timer = window.setTimeout(
-      () => postFreeformMoveMode146(freeformMoveMode146),
-      80
-    );
-
-    return () => window.clearTimeout(timer);
-  }, [
-    freeformMoveMode146,
-    liveBuilderPreviewOpen,
-    storefront?.id,
-  ]);
-
-  function commitFreeformPoint146(
-    selection: StorefrontFreeformSelection146,
-    x: number,
-    y: number
-  ) {
-    if (!isSafeStorefrontFreeformLocator146(selection.locator)) return;
-
-    freeformDirtyRef146.current = true;
-    freeformRevisionRef146.current += 1;
-    setFreeformSaveState146(storefront?.id ? "waiting" : "idle");
-
-    setStorefrontFreeformLayout146((current) => {
-      freeformUndoRef146.current = current;
-
-      return {
-        ...current,
-        [selection.device]: {
-          ...current[selection.device],
-          [selection.locator]: {
-            x: clampStorefrontFreeform146(x),
-            y: clampStorefrontFreeform146(y),
-            label: selection.label.slice(0, 140),
-          },
-        },
-      };
-    });
-  }
-
-  function resetSelectedFreeform146() {
-    if (!selectedFreeform146) return;
-
-    freeformDirtyRef146.current = true;
-    freeformRevisionRef146.current += 1;
-    setFreeformSaveState146(storefront?.id ? "waiting" : "idle");
-
-    setStorefrontFreeformLayout146((current) => {
-      freeformUndoRef146.current = current;
-      const nextDevice = { ...current[selectedFreeform146.device] };
-      delete nextDevice[selectedFreeform146.locator];
-
-      return {
-        ...current,
-        [selectedFreeform146.device]: nextDevice,
-      };
-    });
-
-    setFreeformTransientPoint146({ x: 0, y: 0 });
-  }
-
-  function resetAllFreeform146() {
-    freeformDirtyRef146.current = true;
-    freeformRevisionRef146.current += 1;
-    setFreeformSaveState146(storefront?.id ? "waiting" : "idle");
-
-    setStorefrontFreeformLayout146((current) => {
-      freeformUndoRef146.current = current;
-      return storefrontDefaultFreeformLayout146();
-    });
-
-    setSelectedFreeform146(null);
-    setFreeformTransientPoint146(null);
-  }
-
-  function undoFreeform146() {
-    const previous = freeformUndoRef146.current;
-    if (!previous) return;
-
-    freeformDirtyRef146.current = true;
-    freeformRevisionRef146.current += 1;
-    setFreeformSaveState146(storefront?.id ? "waiting" : "idle");
-
-    setStorefrontFreeformLayout146((current) => {
-      freeformUndoRef146.current = current;
-      return previous;
-    });
-  }
-
-  useEffect(() => {
-    function handleFreeformMessage146(event: MessageEvent) {
-      if (event.origin !== window.location.origin) return;
-
-      if (event.data?.type === "DARIK_FREEFORM_EDITOR_READY_146") {
-        postFreeformMoveMode146(freeformMoveMode146);
-        return;
-      }
-
-      if (
-        event.data?.type !== "DARIK_FREEFORM_DRAG_START_146" &&
-        event.data?.type !== "DARIK_FREEFORM_DRAG_MOVE_146" &&
-        event.data?.type !== "DARIK_FREEFORM_DRAG_END_146"
-      ) {
-        return;
-      }
-
-      const locator = String(event.data?.locator ?? "").trim();
-      if (!isSafeStorefrontFreeformLocator146(locator)) return;
-
-      const device =
-        event.data?.device === "mobile" ? "mobile" : "desktop";
-
-      const label =
-        String(event.data?.label ?? "Storefront element")
-          .trim()
-          .slice(0, 140) || "Storefront element";
-
-      const selection: StorefrontFreeformSelection146 = {
-        locator,
-        label,
-        device,
-      };
-
-      const x = clampStorefrontFreeform146(event.data?.x);
-      const y = clampStorefrontFreeform146(event.data?.y);
-
-      setSelectedFreeform146(selection);
-      setFreeformTransientPoint146({ x, y });
-
-      if (event.data?.type === "DARIK_FREEFORM_DRAG_END_146") {
-        commitFreeformPoint146(selection, x, y);
-      }
-    }
-
-    window.addEventListener("message", handleFreeformMessage146);
-    return () =>
-      window.removeEventListener(
-        "message",
-        handleFreeformMessage146
-      );
-  }, [freeformMoveMode146, storefront?.id]);
-
-  useEffect(() => {
-    if (!storefront?.id || !freeformDirtyRef146.current) return;
-
-    const revision = freeformRevisionRef146.current;
-    const snapshot = storefrontFreeformLayout146;
-
-    const timer = window.setTimeout(() => {
-      void (async () => {
-        setFreeformSaveState146("saving");
-
-        const result = await supabase
-          .from("retailer_storefronts")
-          .update({
-            direct_freeform_layout: snapshot,
-          })
-          .eq("id", storefront.id)
-          .select("id,direct_freeform_layout")
-          .single();
-
-        if (revision !== freeformRevisionRef146.current) return;
-
-        if (result.error) {
-          setFreeformSaveState146("error");
-          return;
-        }
-
-        freeformDirtyRef146.current = false;
-        setFreeformSaveState146("saved");
-      })();
-    }, 300);
-
-    return () => window.clearTimeout(timer);
-  }, [storefrontFreeformLayout146, storefront?.id]);
-
-  const selectedSavedPoint146 = selectedFreeform146
-    ? storefrontFreeformLayout146[selectedFreeform146.device][
-        selectedFreeform146.locator
-      ] ?? null
-    : null;
-
-  const selectedDisplayPoint146 =
-    freeformTransientPoint146 ??
-    (selectedSavedPoint146
-      ? { x: selectedSavedPoint146.x, y: selectedSavedPoint146.y }
-      : { x: 0, y: 0 });
 
   const [formDirty, setFormDirty] = useState(false);
   const [draftSavedAt, setDraftSavedAt] = useState<string | null>(null);
@@ -4065,7 +3617,6 @@ await saveStorefront(undefined, "manual");
       ),
       operating_hours_ar: {},
       direct_content_positioning: storefrontContentPositioning145,
-      direct_freeform_layout: storefrontFreeformLayout146,
       design_draft: {
         ...designFromForm(setupForm),
         primaryColor: setupForm.primaryColor,
@@ -4886,10 +4437,6 @@ await saveStorefront(undefined, "manual");
                   data-darik-preview-expanded={
                     liveBuilderPreviewExpanded111 ? "true" : "false"
                   }
-
-                  data-darik-preview-expanded147={
-                    liveBuilderPreviewExpanded147 ? "true" : "false"
-                  }
                 >
                   <div className={designStyles.liveBuilderPreviewBar}>
                     <div className={designStyles.liveBuilderPreviewIdentity}>
@@ -4909,16 +4456,14 @@ await saveStorefront(undefined, "manual");
                       >
                         Change theme / تغيير القالب
                       </button>
-                                                                  <button
+                                            <button
                         type="button"
                         onClick={() =>
-                          setLiveBuilderPreviewExpanded147(
-                            (current) => !current
-                          )
+                          setLiveBuilderPreviewExpanded111((current) => !current)
                         }
                         disabled={!storefront}
                       >
-                        {liveBuilderPreviewExpanded147
+                        {liveBuilderPreviewExpanded111
                           ? "Half screen / نصف الشاشة"
                           : "Full screen / ملء الشاشة"}
                       </button>
@@ -5005,175 +4550,6 @@ await saveStorefront(undefined, "manual");
                     aria-hidden="true"
                   />
                   <div className={designStyles.liveBuilderEditorPane}>
-                    {/* DARIK_FREEFORM_DRAG_EDITOR_146 */}
-                    {liveBuilderPreviewOpen ? (
-                      <aside
-                        className={designStyles.freeformDragPanel146}
-                        data-darik-freeform-ignore146="true"
-                      >
-                        <div
-                          className={
-                            designStyles.freeformDragHeader146
-                          }
-                        >
-                          <div>
-                            <span>ARRANGE PAGE / ترتيب الصفحة</span>
-                            <strong>Grab it. Drag it. Drop it.</strong>
-                          </div>
-
-                          <button
-                            type="button"
-                            data-active={
-                              freeformMoveMode146 ? "true" : "false"
-                            }
-                            onClick={() => {
-                              const next = !freeformMoveMode146;
-                              setFreeformMoveMode146(next);
-                              postFreeformMoveMode146(next);
-                            }}
-                          >
-                            {freeformMoveMode146
-                              ? "Move mode ON"
-                              : "Browse preview"}
-                          </button>
-                        </div>
-
-                        <p className={designStyles.freeformDragHelp146}>
-                          {freeformMoveMode146
-                            ? "Grab any visible element inside the real preview and drag it exactly where you want it."
-                            : "Browse mode is active. Buttons, products and scrolling work normally."}
-                        </p>
-
-                        {selectedFreeform146 ? (
-                          <>
-                            <div
-                              className={
-                                designStyles.freeformSelected146
-                              }
-                            >
-                              <span>
-                                {selectedFreeform146.device === "mobile"
-                                  ? "Mobile position"
-                                  : "Desktop position"}
-                              </span>
-                              <strong>{selectedFreeform146.label}</strong>
-                            </div>
-
-                            <div
-                              className={
-                                designStyles.freeformNumbers146
-                              }
-                            >
-                              <label>
-                                <span>X / أفقي</span>
-                                <input
-                                  type="number"
-                                  min={-1200}
-                                  max={1200}
-                                  value={selectedDisplayPoint146.x}
-                                  onChange={(event) => {
-                                    const x = clampStorefrontFreeform146(
-                                      event.target.value
-                                    );
-                                    setFreeformTransientPoint146({
-                                      x,
-                                      y: selectedDisplayPoint146.y,
-                                    });
-                                    commitFreeformPoint146(
-                                      selectedFreeform146,
-                                      x,
-                                      selectedDisplayPoint146.y
-                                    );
-                                  }}
-                                />
-                              </label>
-
-                              <label>
-                                <span>Y / عمودي</span>
-                                <input
-                                  type="number"
-                                  min={-1200}
-                                  max={1200}
-                                  value={selectedDisplayPoint146.y}
-                                  onChange={(event) => {
-                                    const y = clampStorefrontFreeform146(
-                                      event.target.value
-                                    );
-                                    setFreeformTransientPoint146({
-                                      x: selectedDisplayPoint146.x,
-                                      y,
-                                    });
-                                    commitFreeformPoint146(
-                                      selectedFreeform146,
-                                      selectedDisplayPoint146.x,
-                                      y
-                                    );
-                                  }}
-                                />
-                              </label>
-                            </div>
-
-                            <div
-                              className={
-                                designStyles.freeformActions146
-                              }
-                            >
-                              <button
-                                type="button"
-                                onClick={undoFreeform146}
-                                disabled={!freeformUndoRef146.current}
-                              >
-                                Undo
-                              </button>
-                              <button
-                                type="button"
-                                onClick={resetSelectedFreeform146}
-                              >
-                                Reset element
-                              </button>
-                              <button
-                                type="button"
-                                onClick={resetAllFreeform146}
-                              >
-                                Reset all
-                              </button>
-                            </div>
-                          </>
-                        ) : (
-                          <div
-                            className={
-                              designStyles.freeformEmpty146
-                            }
-                          >
-                            <strong>
-                              Nothing selected yet
-                            </strong>
-                            <span>
-                              Turn Move mode ON, then drag literally any
-                              visible element in the preview.
-                            </span>
-                          </div>
-                        )}
-
-                        <div
-                          className={
-                            designStyles.freeformSaveState146
-                          }
-                          data-state={freeformSaveState146}
-                        >
-                          {freeformSaveState146 === "saving"
-                            ? "Saving position..."
-                            : freeformSaveState146 === "waiting"
-                              ? "Position changed..."
-                              : freeformSaveState146 === "error"
-                                ? "Position save failed"
-                                : freeformSaveState146 === "saved"
-                                  ? "Position saved"
-                                  : "Ready"}
-                        </div>
-                      </aside>
-                    ) : null}
-
                     {/* DARIK_CLICK_PREVIEW_POSITIONING_145 */}
                     {liveBuilderPreviewOpen ? (
                       <aside
