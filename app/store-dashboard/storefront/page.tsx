@@ -1580,6 +1580,7 @@ export default function DarikDirectStorefrontSettingsPage() {
   // DARIK_DRAG_SCROLL_LOCK_RESET_HERO_LOCK_150C
   // DARIK_PERSISTENT_DRAG_LOGO_BOX_150D
   // DARIK_NO_FLASH_THEME_STABLE_POSITIONS_150E_V2
+  // DARIK_DOM_STABILITY_POSITION_REAPPLY_150E_V3
   // Dashboard-only drag proof.
   // No DB writes and no app/[slug] edits.
   useEffect(() => {
@@ -2198,36 +2199,157 @@ export default function DarikDirectStorefrontSettingsPage() {
       const originalTranslate150A =
         new Map<Element, string>();
 
-      let applyRetry150E = 0;
+      let domObserver150EV3:
+        | MutationObserver
+        | null = null;
 
-      function applySavedLayout150D() {
-        if (!layoutLoaded150D) return;
+      let stableTimer150EV3 = 0;
+      let rootRetryTimer150EV3 = 0;
+      let revealFallbackTimer150EV3 = 0;
+      let domSettling150EV3 = false;
 
-        const root150D = document150A.querySelector(
-          "[data-darik-position-builder145]"
+      function clearStableTimer150EV3() {
+        if (!stableTimer150EV3) return;
+
+        window150A.clearTimeout(
+          stableTimer150EV3
         );
 
-        if (!root150D) {
-          if (applyRetry150E < 100) {
-            applyRetry150E += 1;
+        stableTimer150EV3 = 0;
+      }
 
-            window150A.setTimeout(
-              applySavedLayout150D,
-              50
-            );
+      function clearRootRetry150EV3() {
+        if (!rootRetryTimer150EV3) return;
 
-            return;
-          }
+        window150A.clearTimeout(
+          rootRetryTimer150EV3
+        );
 
-          activeIframe150B.setAttribute(
-            "data-darik-layout-ready150e",
-            "true"
+        rootRetryTimer150EV3 = 0;
+      }
+
+      function hideUntilStable150EV3() {
+        activeIframe150B.removeAttribute(
+          "data-darik-layout-ready150e"
+        );
+      }
+
+      function ensureDomObserver150EV3(
+        root150EV3: Element
+      ) {
+        if (domObserver150EV3) return;
+
+        domObserver150EV3 =
+          new MutationObserver(
+            (mutations150EV3) => {
+              const structuralChange150EV3 =
+                mutations150EV3.some(
+                  (mutation150EV3) =>
+                    mutation150EV3.type ===
+                      "childList" &&
+                    (
+                      mutation150EV3.addedNodes
+                        .length > 0 ||
+                      mutation150EV3.removedNodes
+                        .length > 0
+                    )
+                );
+
+              if (!structuralChange150EV3) {
+                return;
+              }
+
+              hideUntilStable150EV3();
+              scheduleStableApply150EV3(180);
+            }
           );
+
+        domObserver150EV3.observe(
+          root150EV3,
+          {
+            childList: true,
+            subtree: true,
+          }
+        );
+      }
+
+      function scheduleStableApply150EV3(
+        delay150EV3 = 180
+      ) {
+        hideUntilStable150EV3();
+
+        clearStableTimer150EV3();
+        clearRootRetry150EV3();
+
+        if (!layoutLoaded150D) {
+          return;
+        }
+
+        const root150EV3 =
+          document150A.querySelector(
+            "[data-darik-position-builder145]"
+          );
+
+        if (!root150EV3) {
+          rootRetryTimer150EV3 =
+            window150A.setTimeout(
+              () =>
+                scheduleStableApply150EV3(
+                  80
+                ),
+              80
+            );
 
           return;
         }
 
-        applyRetry150E = 0;
+        ensureDomObserver150EV3(
+          root150EV3
+        );
+
+        domSettling150EV3 = true;
+
+        stableTimer150EV3 =
+          window150A.setTimeout(
+            () => {
+              stableTimer150EV3 = 0;
+
+              window150A.requestAnimationFrame(
+                () => {
+                  window150A.requestAnimationFrame(
+                    () => {
+                      domSettling150EV3 =
+                        false;
+
+                      applySavedLayout150D();
+                    }
+                  );
+                }
+              );
+            },
+            Math.max(
+              80,
+              delay150EV3
+            )
+          );
+      }
+
+      function applySavedLayout150D() {
+        if (!layoutLoaded150D) {
+          return;
+        }
+
+        const root150D =
+          document150A.querySelector(
+            "[data-darik-position-builder145]"
+          );
+
+        if (!root150D) {
+          scheduleStableApply150EV3(80);
+          return;
+        }
+
+        ensureDomObserver150EV3(root150D);
 
         assignSemanticClasses150E(
           root150D
@@ -2250,11 +2372,17 @@ export default function DarikDirectStorefrontSettingsPage() {
         ] of Object.entries(
           nextEntries150E
         )) {
-          if (!safeLocator150D(locatorKey150D)) {
+          if (
+            !safeLocator150D(
+              locatorKey150D
+            )
+          ) {
             continue;
           }
 
-          let target150D: Element | null = null;
+          let target150D:
+            | Element
+            | null = null;
 
           try {
             target150D =
@@ -2265,7 +2393,9 @@ export default function DarikDirectStorefrontSettingsPage() {
             target150D = null;
           }
 
-          if (!target150D) continue;
+          if (!target150D) {
+            continue;
+          }
 
           const semanticSelector150E =
             semanticLocator150E(
@@ -2290,8 +2420,9 @@ export default function DarikDirectStorefrontSettingsPage() {
           }
 
           const style150D =
-            (target150D as HTMLElement)
-              .style;
+            (
+              target150D as HTMLElement
+            ).style;
 
           if (
             !originalTranslate150A.has(
@@ -2332,13 +2463,40 @@ export default function DarikDirectStorefrontSettingsPage() {
           void saveLayout150D();
         }
 
-        activeIframe150B.setAttribute(
-          "data-darik-layout-ready150e",
-          "true"
-        );
+        if (!domSettling150EV3) {
+          activeIframe150B.setAttribute(
+            "data-darik-layout-ready150e",
+            "true"
+          );
+        }
       }
 
-      applySavedNow150D = applySavedLayout150D;
+      applySavedNow150D = () => {
+        scheduleStableApply150EV3(
+          180
+        );
+      };
+
+      revealFallbackTimer150EV3 =
+        window150A.setTimeout(
+          () => {
+            if (
+              !activeIframe150B.hasAttribute(
+                "data-darik-layout-ready150e"
+              )
+            ) {
+              console.warn(
+                "Darik preview DOM-stability wait exceeded 8 seconds; revealing preview as a safety fallback."
+              );
+
+              activeIframe150B.setAttribute(
+                "data-darik-layout-ready150e",
+                "true"
+              );
+            }
+          },
+          8000
+        );
 
       let resetButton150C: HTMLButtonElement | null = null;
       let scrollLocked150C = false;
@@ -2785,7 +2943,7 @@ export default function DarikDirectStorefrontSettingsPage() {
       }
 
       installResetButton150C();
-      applySavedLayout150D();
+      scheduleStableApply150EV3(180);
 
       function beginDrag150A() {
         if (!candidate150A || dragging150A) return;
@@ -3172,6 +3330,21 @@ export default function DarikDirectStorefrontSettingsPage() {
           );
         }
 
+        domObserver150EV3?.disconnect();
+        domObserver150EV3 = null;
+
+        clearStableTimer150EV3();
+        clearRootRetry150EV3();
+
+        if (revealFallbackTimer150EV3) {
+          window150A.clearTimeout(
+            revealFallbackTimer150EV3
+          );
+
+          revealFallbackTimer150EV3 = 0;
+        }
+
+        domSettling150EV3 = false;
         applySavedNow150D = () => {};
       };
     }
