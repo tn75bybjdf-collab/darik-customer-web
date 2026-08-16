@@ -1583,6 +1583,7 @@ export default function DarikDirectStorefrontSettingsPage() {
   // DARIK_DOM_STABILITY_POSITION_REAPPLY_150E_V3
   // DARIK_PINCH_RESIZE_LIGHTER_DRAG_151
   // DARIK_SELECTED_OBJECT_DIRECT_EDITOR_152
+  // DARIK_LIVE_TYPOGRAPHY_PREVIEW_153
   // Dashboard-only drag proof.
   // No DB writes and no app/[slug] edits.
   useEffect(() => {
@@ -2659,6 +2660,8 @@ export default function DarikDirectStorefrontSettingsPage() {
       let selectedTarget152: Element | null = null;
       let selectionToolbar152: HTMLDivElement | null = null;
       let textEditor152: HTMLDivElement | null = null;
+      let textEditorDiscard153: (() => void) | null = null;
+      let textEditorSave153: (() => void) | null = null;
       let toolbarStatusTimer152 = 0;
 
       let inlineTypography152 =
@@ -3217,6 +3220,21 @@ export default function DarikDirectStorefrontSettingsPage() {
       function closeTextEditor152() {
         textEditor152?.remove();
         textEditor152 = null;
+        textEditorDiscard153 = null;
+        textEditorSave153 = null;
+      }
+
+      function discardTextEditorPreview153() {
+        const discard153 =
+          textEditorDiscard153;
+
+        textEditorDiscard153 = null;
+        textEditorSave153 = null;
+
+        discard153?.();
+
+        textEditor152?.remove();
+        textEditor152 = null;
       }
 
       function clearSelection152() {
@@ -3229,7 +3247,7 @@ export default function DarikDirectStorefrontSettingsPage() {
         selectionToolbar152?.remove();
         selectionToolbar152 = null;
 
-        closeTextEditor152();
+        discardTextEditorPreview153();
 
         clearHold150A();
         candidate150A = null;
@@ -3558,6 +3576,9 @@ export default function DarikDirectStorefrontSettingsPage() {
         target152.textContent =
           nextText152;
 
+        textEditorDiscard153 = null;
+        textEditorSave153 = null;
+
         closeTextEditor152();
 
         showToolbarStatus152(
@@ -3582,7 +3603,15 @@ export default function DarikDirectStorefrontSettingsPage() {
           return;
         }
 
-        closeTextEditor152();
+        discardTextEditorPreview153();
+
+        const originalTypography153 =
+          normalizeStorefrontTypography(
+            inlineTypography152
+          );
+
+        const originalText153 =
+          target152.textContent ?? "";
 
         const panel152 =
           document150A.createElement(
@@ -3740,6 +3769,102 @@ export default function DarikDirectStorefrontSettingsPage() {
             currentTypography152.size
           );
 
+        function previewTypography153() {
+          const previewFont153 =
+            String(
+              fontSelect152.value ||
+                "theme"
+            ) as StorefrontTypographyFontKey;
+
+          const rawPreviewSize153 =
+            Number(sizeInput152.value);
+
+          const previewSize153 =
+            rawPreviewSize153 === 0
+              ? 0
+              : Math.max(
+                  10,
+                  Math.min(
+                    96,
+                    Math.round(
+                      Number.isFinite(
+                        rawPreviewSize153
+                      )
+                        ? rawPreviewSize153
+                        : 0
+                    )
+                  )
+                );
+
+          const nextPreview153 =
+            normalizeStorefrontTypography(
+              {
+                ...inlineTypography152,
+                [meta152.typographyKey]: {
+                  font: previewFont153,
+                  size: previewSize153,
+                },
+              }
+            );
+
+          inlineTypography152 =
+            nextPreview153;
+
+          // This state change is PREVIEW ONLY. We intentionally do not
+          // mark typography dirty or call the persistence RPC here.
+          // The existing live-builder bridge pushes the draft to the
+          // actual private storefront iframe immediately.
+          setStorefrontTypographyDraft(
+            nextPreview153
+          );
+
+          target152.textContent =
+            input152.value;
+
+          showToolbarStatus152(
+            "Preview — tap 💾 to save"
+          );
+        }
+
+        textEditorDiscard153 = () => {
+          inlineTypography152 =
+            originalTypography153;
+
+          setStorefrontTypographyDraft(
+            originalTypography153
+          );
+
+          target152.textContent =
+            originalText153;
+
+          scheduleStableApply150EV3(
+            0
+          );
+        };
+
+        textEditorSave153 = () => {
+          void saveInlineText152(
+            input152,
+            fontSelect152,
+            sizeInput152
+          );
+        };
+
+        fontSelect152.addEventListener(
+          "change",
+          previewTypography153
+        );
+
+        sizeInput152.addEventListener(
+          "input",
+          previewTypography153
+        );
+
+        input152.addEventListener(
+          "input",
+          previewTypography153
+        );
+
         for (const control152 of [
           fontSelect152,
           sizeInput152,
@@ -3770,7 +3895,7 @@ export default function DarikDirectStorefrontSettingsPage() {
           );
 
         helper152.textContent =
-          "Font size: 0 = theme default, otherwise 10–96 px.";
+          "Changes preview instantly. Font size: 0 = theme default, otherwise 10–96 px. Tap 💾 on the selected object to save.";
 
         Object.assign(
           helper152.style,
@@ -3805,18 +3930,8 @@ export default function DarikDirectStorefrontSettingsPage() {
         cancel152.textContent =
           "Cancel";
 
-        const save152 =
-          document150A.createElement(
-            "button"
-          );
-
-        save152.type = "button";
-        save152.textContent =
-          "Save changes";
-
         for (const button152 of [
           cancel152,
-          save152,
         ]) {
           Object.assign(
             button152.style,
@@ -3835,31 +3950,13 @@ export default function DarikDirectStorefrontSettingsPage() {
         cancel152.style.background =
           "#fff";
 
-        save152.style.background =
-          "#0f172a";
-
-        save152.style.color =
-          "#fff";
-
         cancel152.addEventListener(
           "click",
-          closeTextEditor152
-        );
-
-        save152.addEventListener(
-          "click",
-          () => {
-            void saveInlineText152(
-              input152,
-              fontSelect152,
-              sizeInput152
-            );
-          }
+          discardTextEditorPreview153
         );
 
         actions152.append(
-          cancel152,
-          save152
+          cancel152
         );
 
         panel152.append(
@@ -4009,19 +4106,12 @@ export default function DarikDirectStorefrontSettingsPage() {
             event152.preventDefault();
             event152.stopPropagation();
 
-            if (textEditor152) {
-              const saveButton152 =
-                textEditor152.querySelector(
-                  "button:last-child"
-                );
-
-              if (
-                saveButton152 &&
-                "click" in saveButton152
-              ) {
-                (saveButton152 as HTMLButtonElement).click();
-                return;
-              }
+            if (
+              textEditor152 &&
+              textEditorSave153
+            ) {
+              textEditorSave153();
+              return;
             }
 
             void saveLayout150D();
@@ -4085,7 +4175,7 @@ export default function DarikDirectStorefrontSettingsPage() {
           "data-darik-selected152"
         );
 
-        closeTextEditor152();
+        discardTextEditorPreview153();
 
         selectedTarget152 =
           target152;
@@ -5206,6 +5296,9 @@ export default function DarikDirectStorefrontSettingsPage() {
         originalDisplay152.clear();
 
         clearSelection152();
+
+        textEditorDiscard153 = null;
+        textEditorSave153 = null;
 
         if (toolbarStatusTimer152) {
           window150A.clearTimeout(
