@@ -1,5 +1,11 @@
 "use client";
 
+// DARIK_INTERNAL_SETUP_SLUG_PRIVACY_142_V3
+function isInternalSetupSlug142(value: unknown) {
+  return /^setup-/i.test(String(value ?? "").trim());
+}
+
+
 // DARIK_ACTUAL_STORE_SECRET_PREVIEW_141
 
 // DARIK_THEME_STEP_GALLERY_STABLE_AUTO_PREVIEW_138
@@ -2332,7 +2338,40 @@ export default function DarikDirectStorefrontSettingsPage() {
     setStorefrontSetupNotice109("");
 
     try {
-      await saveStorefront(undefined, "manual");
+            const permanentStoreSlug142 = cleanSlug(setupForm.slug);
+      if (
+        permanentStoreSlug142.length < 2 ||
+        isInternalSetupSlug142(permanentStoreSlug142)
+      ) {
+        throw new Error(
+          "Choose your real permanent Darik Store Link before finishing setup."
+        );
+      }
+
+await saveStorefront(undefined, "manual");
+
+      const permanentSlugCheck142 = await supabase
+        .from("retailer_storefronts")
+        .select("slug")
+        .eq("retailer_id", selectedStore?.retailer_id ?? "")
+        .limit(1)
+        .maybeSingle();
+
+      if (permanentSlugCheck142.error) {
+        throw permanentSlugCheck142.error;
+      }
+
+      const savedPermanentSlug142 = cleanSlug(
+        String(permanentSlugCheck142.data?.slug ?? "")
+      );
+      if (
+        savedPermanentSlug142 !== permanentStoreSlug142 ||
+        isInternalSetupSlug142(savedPermanentSlug142)
+      ) {
+        throw new Error(
+          "Save your real permanent Darik Store Link before finishing setup."
+        );
+      }
 
       let storefrontId = storefront?.id ?? null;
 
@@ -2601,7 +2640,7 @@ export default function DarikDirectStorefrontSettingsPage() {
         // DARIK_ARABIC_STOREFRONT_TEXT_PERSISTENCE_125
         const databaseForm: StorefrontForm = loadedStorefront
           ? {
-              slug: loadedStorefront.slug,
+              slug: isInternalSetupSlug142(loadedStorefront.slug) ? "" : loadedStorefront.slug,
               displayName: loadedStorefront.display_name || "",
               displayNameAr: loadedStorefront.display_name_ar || "",
               tagline: loadedStorefront.tagline || "",
@@ -2782,7 +2821,10 @@ export default function DarikDirectStorefrontSettingsPage() {
         if (retailerChanged || !setupFormDirtyRef.current) {
           setLocationLocked(Boolean(databaseForm.addressText.trim()));
           setLocatingStore(false);
-          setSetupForm(nextForm);
+          setSetupForm({
+            ...nextForm,
+            slug: isInternalSetupSlug142(nextForm.slug) ? "" : nextForm.slug,
+          });
 
           const draftWasRestored = Boolean(restoredDraftAt);
           setupFormDirtyRef.current = draftWasRestored;
@@ -3161,6 +3203,12 @@ export default function DarikDirectStorefrontSettingsPage() {
     if (!selectedStore) return;
 
     const slug = cleanSlug(setupForm.slug);
+    if (isInternalSetupSlug142(slug)) {
+      showSaveError(
+        "Choose your real permanent Darik store link. setup-* addresses are internal only."
+      );
+      return;
+    }
     const displayName = setupForm.displayName.trim();
 
     if (slug.length < 2) {
@@ -4132,7 +4180,7 @@ export default function DarikDirectStorefrontSettingsPage() {
                   </div>
 
                   <div className={designStyles.liveBuilderPreviewViewport}>
-                    {storefront && liveBuilderPreviewTheme138 && actualStorePreviewSecret141 ? (
+                    {storefront && liveBuilderPreviewTheme138 && !isInternalSetupSlug142(storefront.slug)  && actualStorePreviewSecret141 ? (
                       <iframe
                         ref={liveBuilderPreviewRef}
                         title="Live Darik storefront preview"
