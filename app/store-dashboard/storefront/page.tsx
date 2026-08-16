@@ -1445,6 +1445,8 @@ export default function DarikDirectStorefrontSettingsPage() {
 
   // DARIK_PREVIEW_CONTROLS_CLEANUP_107
   const [liveBuilderPreviewOpen, setLiveBuilderPreviewOpen] = useState(true);
+  // DARIK_PRIVATE_PREVIEW_SAFE_FULLSCREEN_147
+  const [liveBuilderPreviewExpanded147, setLiveBuilderPreviewExpanded147] = useState(false);
   // DARIK_THEME_STEP_GALLERY_STABLE_AUTO_PREVIEW_138: iframe theme changes only after a completed theme save.
   const [liveBuilderPreviewTheme138, setLiveBuilderPreviewTheme138] = useState("");
   const [realPrivatePreviewKey143, setRealPrivatePreviewKey143] = useState("");
@@ -1507,6 +1509,44 @@ export default function DarikDirectStorefrontSettingsPage() {
     const value = liveBuilderDraftValue(...keys);
     return typeof value === "string" ? value : "";
   }
+
+
+  useEffect(() => {
+    if (!liveBuilderPreviewExpanded147) return;
+
+    const previousHtmlOverflow147 =
+      document.documentElement.style.overflow;
+    const previousBodyOverflow147 =
+      document.body.style.overflow;
+
+    document.documentElement.style.overflow = "hidden";
+    document.body.style.overflow = "hidden";
+
+    function handlePreviewEscape147(event: KeyboardEvent) {
+      if (event.key === "Escape") {
+        setLiveBuilderPreviewExpanded147(false);
+      }
+    }
+
+    window.addEventListener("keydown", handlePreviewEscape147);
+
+    return () => {
+      window.removeEventListener(
+        "keydown",
+        handlePreviewEscape147
+      );
+      document.documentElement.style.overflow =
+        previousHtmlOverflow147;
+      document.body.style.overflow =
+        previousBodyOverflow147;
+    };
+  }, [liveBuilderPreviewExpanded147]);
+
+  useEffect(() => {
+    if (!liveBuilderPreviewOpen) {
+      setLiveBuilderPreviewExpanded147(false);
+    }
+  }, [liveBuilderPreviewOpen]);
 
   function getLiveBuilderDraftPayload() {
     return {
@@ -4771,6 +4811,10 @@ await saveStorefront(undefined, "manual");
                   data-darik-preview-expanded={
                     liveBuilderPreviewExpanded111 ? "true" : "false"
                   }
+
+                  data-darik-preview-expanded147={
+                    liveBuilderPreviewExpanded147 ? "true" : "false"
+                  }
                 >
                   <div className={designStyles.liveBuilderPreviewBar}>
                     <div className={designStyles.liveBuilderPreviewIdentity}>
@@ -4790,14 +4834,16 @@ await saveStorefront(undefined, "manual");
                       >
                         Change theme / تغيير القالب
                       </button>
-                                            <button
+                                                                  <button
                         type="button"
                         onClick={() =>
-                          setLiveBuilderPreviewExpanded111((current) => !current)
+                          setLiveBuilderPreviewExpanded147(
+                            (current) => !current
+                          )
                         }
                         disabled={!storefront}
                       >
-                        {liveBuilderPreviewExpanded111
+                        {liveBuilderPreviewExpanded147
                           ? "Half screen / نصف الشاشة"
                           : "Full screen / ملء الشاشة"}
                       </button>

@@ -3269,3 +3269,75 @@
     border-radius: 15px;
   }
 }
+
+/* DARIK_PRIVATE_PREVIEW_SAFE_FULLSCREEN_147
+   Full screen expands the dashboard preview shell.
+   The private preview iframe is NEVER navigated, replaced, opened, or reloaded.
+*/
+.liveBuilderPreviewShell[data-darik-preview-expanded147="true"] {
+  position: fixed !important;
+  inset: 0 !important;
+  z-index: 2500 !important;
+  display: flex !important;
+  width: 100vw !important;
+  min-width: 100vw !important;
+  max-width: none !important;
+  height: 100vh !important;
+  height: 100dvh !important;
+  min-height: 100vh !important;
+  min-height: 100dvh !important;
+  max-height: none !important;
+  flex-direction: column !important;
+  margin: 0 !important;
+  overflow: hidden !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+}
+
+.liveBuilderPreviewShell[data-darik-preview-expanded147="true"]
+  .liveBuilderPreviewBar {
+  position: relative !important;
+  z-index: 2 !important;
+  flex: 0 0 auto !important;
+  width: 100% !important;
+  border-radius: 0 !important;
+}
+
+.liveBuilderPreviewShell[data-darik-preview-expanded147="true"]
+  .liveBuilderPreviewViewport {
+  flex: 1 1 auto !important;
+  width: 100% !important;
+  height: auto !important;
+  min-height: 0 !important;
+  overflow: hidden !important;
+}
+
+.liveBuilderPreviewShell[data-darik-preview-expanded147="true"]
+  .liveBuilderPreviewViewport iframe {
+  display: block !important;
+  width: 100% !important;
+  height: 100% !important;
+  min-height: 0 !important;
+}
+
+.liveBuilderPreviewShell[data-darik-preview-expanded147="true"]
+  .liveBuilderPreviewActions {
+  position: relative !important;
+  z-index: 3 !important;
+}
+
+.freeformDragPanel146 {
+  z-index: 2700 !important;
+}
+
+@media (max-width: 720px) {
+  .liveBuilderPreviewShell[data-darik-preview-expanded147="true"] {
+    width: 100vw !important;
+    height: 100vh !important;
+    height: 100dvh !important;
+    min-height: 100vh !important;
+    min-height: 100dvh !important;
+    border-radius: 0 !important;
+  }
+}
