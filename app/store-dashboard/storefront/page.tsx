@@ -1126,6 +1126,123 @@ function normalizeDarikDeliveryZones109(value: unknown): DarikDeliveryZone109[] 
     .filter((zone) => zone.maxKm.trim() !== "");
 }
 
+// DARIK_CLICK_PREVIEW_POSITIONING_145
+type StorefrontPositionKey145 =
+  | "display_name"
+  | "display_name_ar"
+  | "tagline"
+  | "tagline_ar"
+  | "shop";
+
+type StorefrontPositionDevice145 = "desktop" | "mobile";
+
+type StorefrontPositionPoint145 = {
+  x: number;
+  y: number;
+};
+
+type StorefrontPositionElement145 = {
+  desktop: StorefrontPositionPoint145;
+  mobile: StorefrontPositionPoint145;
+};
+
+type StorefrontContentPositioning145 = Record<
+  StorefrontPositionKey145,
+  StorefrontPositionElement145
+>;
+
+const storefrontPositionKeys145: StorefrontPositionKey145[] = [
+  "display_name",
+  "display_name_ar",
+  "tagline",
+  "tagline_ar",
+  "shop",
+];
+
+const storefrontPositionLabels145: Record<
+  StorefrontPositionKey145,
+  string
+> = {
+  display_name: "Customer-facing store name",
+  display_name_ar: "Arabic store name",
+  tagline: "Store tagline",
+  tagline_ar: "Arabic tagline",
+  shop: "Shop tab",
+};
+
+function clampStorefrontPosition145(value: unknown) {
+  const numeric = Number(value);
+  if (!Number.isFinite(numeric)) return 0;
+  return Math.max(-240, Math.min(240, Math.round(numeric)));
+}
+
+function storefrontDefaultContentPositioning145(): StorefrontContentPositioning145 {
+  return {
+    display_name: {
+      desktop: { x: 0, y: 0 },
+      mobile: { x: 0, y: 0 },
+    },
+    display_name_ar: {
+      desktop: { x: 0, y: 0 },
+      mobile: { x: 0, y: 0 },
+    },
+    tagline: {
+      desktop: { x: 0, y: 0 },
+      mobile: { x: 0, y: 0 },
+    },
+    tagline_ar: {
+      desktop: { x: 0, y: 0 },
+      mobile: { x: 0, y: 0 },
+    },
+    shop: {
+      desktop: { x: 0, y: 0 },
+      mobile: { x: 0, y: 0 },
+    },
+  };
+}
+
+function normalizeStorefrontContentPositioning145(
+  value: unknown
+): StorefrontContentPositioning145 {
+  const raw =
+    value && typeof value === "object" && !Array.isArray(value)
+      ? (value as Record<string, unknown>)
+      : {};
+
+  const next = storefrontDefaultContentPositioning145();
+
+  for (const key of storefrontPositionKeys145) {
+    const rawElement =
+      raw[key] && typeof raw[key] === "object" && !Array.isArray(raw[key])
+        ? (raw[key] as Record<string, unknown>)
+        : {};
+
+    for (const device of ["desktop", "mobile"] as const) {
+      const rawPoint =
+        rawElement[device] &&
+        typeof rawElement[device] === "object" &&
+        !Array.isArray(rawElement[device])
+          ? (rawElement[device] as Record<string, unknown>)
+          : {};
+
+      next[key][device] = {
+        x: clampStorefrontPosition145(rawPoint.x),
+        y: clampStorefrontPosition145(rawPoint.y),
+      };
+    }
+  }
+
+  return next;
+}
+
+function isStorefrontPositionKey145(
+  value: unknown
+): value is StorefrontPositionKey145 {
+  return storefrontPositionKeys145.includes(
+    String(value || "") as StorefrontPositionKey145
+  );
+}
+
 export default function DarikDirectStorefrontSettingsPage() {
   useDarikTypographyFontLibrary105V5();
   const [session, setSession] = useState<Session | null>(null);
@@ -1198,6 +1315,20 @@ export default function DarikDirectStorefrontSettingsPage() {
 
   const [themePickerOpen, setThemePickerOpen] = useState(false);
   const liveBuilderPreviewRef = useRef<HTMLIFrameElement | null>(null);
+
+  const [storefrontContentPositioning145, setStorefrontContentPositioning145] =
+    useState<StorefrontContentPositioning145>(() =>
+      storefrontDefaultContentPositioning145()
+    );
+  const [selectedPreviewPosition145, setSelectedPreviewPosition145] =
+    useState<StorefrontPositionKey145 | null>(null);
+  const [previewPositionDevice145, setPreviewPositionDevice145] =
+    useState<StorefrontPositionDevice145>("desktop");
+  const [previewPositionSaveState145, setPreviewPositionSaveState145] =
+    useState<"idle" | "waiting" | "saving" | "saved" | "error">("idle");
+  const positioningDirtyRef145 = useRef(false);
+  const positioningRevisionRef145 = useRef(0);
+
   // DARIK_PREVIEW_CONTROLS_CLEANUP_107
   const [liveBuilderPreviewOpen, setLiveBuilderPreviewOpen] = useState(true);
   // DARIK_THEME_STEP_GALLERY_STABLE_AUTO_PREVIEW_138: iframe theme changes only after a completed theme save.
@@ -1270,6 +1401,7 @@ export default function DarikDirectStorefrontSettingsPage() {
       tagline: liveBuilderDraftValue("tagline"),
       tagline_ar: liveBuilderDraftValue("taglineAr", "tagline_ar"),
       direct_typography: storefrontTypographyDraft,
+      direct_content_positioning: storefrontContentPositioning145,
       logo_url: liveBuilderDraftValue("logoUrl", "logo_url"),
       hero_image_url: liveBuilderDraftValue("heroImageUrl", "hero_image_url"),
       business_phone: liveBuilderDraftValue("phone", "businessPhone", "business_phone"),
@@ -1335,7 +1467,175 @@ export default function DarikDirectStorefrontSettingsPage() {
 
     window.addEventListener("message", handleBuilderReady);
     return () => window.removeEventListener("message", handleBuilderReady);
-  }, [setupForm, storefrontTypographyDraft, selectedThemeField, storefront?.slug]);
+  }, [setupForm, storefrontTypographyDraft, storefrontContentPositioning145, selectedThemeField, storefront?.slug]);
+
+  useEffect(() => {
+    positioningDirtyRef145.current = false;
+    setStorefrontContentPositioning145(
+      normalizeStorefrontContentPositioning145(
+        (
+          storefront as unknown as {
+            direct_content_positioning?: unknown;
+          } | null
+        )?.direct_content_positioning
+      )
+    );
+    setPreviewPositionSaveState145("idle");
+  }, [storefront?.id]);
+
+  useEffect(() => {
+    function handlePreviewPositionSelect145(event: MessageEvent) {
+      if (event.origin !== window.location.origin) return;
+      if (event.data?.type !== "DARIK_PREVIEW_POSITION_SELECT_145") return;
+      if (!isStorefrontPositionKey145(event.data?.key)) return;
+
+      setSelectedPreviewPosition145(event.data.key);
+      setPreviewPositionDevice145(
+        event.data?.viewport === "mobile" ? "mobile" : "desktop"
+      );
+    }
+
+    window.addEventListener("message", handlePreviewPositionSelect145);
+    return () =>
+      window.removeEventListener(
+        "message",
+        handlePreviewPositionSelect145
+      );
+  }, []);
+
+  function updatePreviewPosition145(
+    key: StorefrontPositionKey145,
+    device: StorefrontPositionDevice145,
+    nextX: number,
+    nextY: number
+  ) {
+    positioningDirtyRef145.current = true;
+    positioningRevisionRef145.current += 1;
+    setPreviewPositionSaveState145(storefront?.id ? "waiting" : "idle");
+
+    setStorefrontContentPositioning145((current) => ({
+      ...current,
+      [key]: {
+        ...current[key],
+        [device]: {
+          x: clampStorefrontPosition145(nextX),
+          y: clampStorefrontPosition145(nextY),
+        },
+      },
+    }));
+  }
+
+  function nudgePreviewPosition145(deltaX: number, deltaY: number) {
+    if (!selectedPreviewPosition145) return;
+
+    const point =
+      storefrontContentPositioning145[selectedPreviewPosition145][
+        previewPositionDevice145
+      ];
+
+    updatePreviewPosition145(
+      selectedPreviewPosition145,
+      previewPositionDevice145,
+      point.x + deltaX,
+      point.y + deltaY
+    );
+  }
+
+  function resetSelectedPreviewPosition145() {
+    if (!selectedPreviewPosition145) return;
+
+    updatePreviewPosition145(
+      selectedPreviewPosition145,
+      previewPositionDevice145,
+      0,
+      0
+    );
+  }
+
+  function resetAllPreviewPositions145() {
+    positioningDirtyRef145.current = true;
+    positioningRevisionRef145.current += 1;
+    setPreviewPositionSaveState145(storefront?.id ? "waiting" : "idle");
+    setStorefrontContentPositioning145(
+      storefrontDefaultContentPositioning145()
+    );
+  }
+
+  useEffect(() => {
+    if (!storefront?.id || !positioningDirtyRef145.current) return;
+
+    const revision = positioningRevisionRef145.current;
+    const snapshot = storefrontContentPositioning145;
+
+    const timer = window.setTimeout(() => {
+      void (async () => {
+        setPreviewPositionSaveState145("saving");
+
+        const result = await supabase
+          .from("retailer_storefronts")
+          .update({
+            direct_content_positioning: snapshot,
+          })
+          .eq("id", storefront.id)
+          .select("id,direct_content_positioning")
+          .single();
+
+        if (revision !== positioningRevisionRef145.current) return;
+
+        if (result.error) {
+          setPreviewPositionSaveState145("error");
+          return;
+        }
+
+        positioningDirtyRef145.current = false;
+        setPreviewPositionSaveState145("saved");
+      })();
+    }, 350);
+
+    return () => window.clearTimeout(timer);
+  }, [storefrontContentPositioning145, storefront?.id]);
+
+  useEffect(() => {
+    if (!selectedPreviewPosition145) return;
+
+    function handlePreviewPositionKeyboard145(event: KeyboardEvent) {
+      const target = event.target;
+      if (
+        target instanceof HTMLInputElement ||
+        target instanceof HTMLTextAreaElement ||
+        target instanceof HTMLSelectElement
+      ) {
+        return;
+      }
+
+      const step = event.shiftKey ? 8 : 1;
+
+      if (event.key === "ArrowLeft") {
+        event.preventDefault();
+        nudgePreviewPosition145(-step, 0);
+      } else if (event.key === "ArrowRight") {
+        event.preventDefault();
+        nudgePreviewPosition145(step, 0);
+      } else if (event.key === "ArrowUp") {
+        event.preventDefault();
+        nudgePreviewPosition145(0, -step);
+      } else if (event.key === "ArrowDown") {
+        event.preventDefault();
+        nudgePreviewPosition145(0, step);
+      }
+    }
+
+    window.addEventListener("keydown", handlePreviewPositionKeyboard145);
+    return () =>
+      window.removeEventListener(
+        "keydown",
+        handlePreviewPositionKeyboard145
+      );
+  }, [
+    selectedPreviewPosition145,
+    previewPositionDevice145,
+    storefrontContentPositioning145,
+  ]);
 
   const [formDirty, setFormDirty] = useState(false);
   const [draftSavedAt, setDraftSavedAt] = useState<string | null>(null);
@@ -3316,6 +3616,7 @@ await saveStorefront(undefined, "manual");
         ])
       ),
       operating_hours_ar: {},
+      direct_content_positioning: storefrontContentPositioning145,
       design_draft: {
         ...designFromForm(setupForm),
         primaryColor: setupForm.primaryColor,
@@ -4249,6 +4550,239 @@ await saveStorefront(undefined, "manual");
                     aria-hidden="true"
                   />
                   <div className={designStyles.liveBuilderEditorPane}>
+                    {/* DARIK_CLICK_PREVIEW_POSITIONING_145 */}
+                    {liveBuilderPreviewOpen ? (
+                      <aside
+                        className={designStyles.previewPositionPanel145}
+                        data-selected={
+                          selectedPreviewPosition145 ? "true" : "false"
+                        }
+                      >
+                        {selectedPreviewPosition145 ? (
+                          <>
+                            <div
+                              className={
+                                designStyles.previewPositionPanelHeader145
+                              }
+                            >
+                              <div>
+                                <span>
+                                  POSITION SELECTED ELEMENT / موضع العنصر
+                                </span>
+                                <strong>
+                                  {
+                                    storefrontPositionLabels145[
+                                      selectedPreviewPosition145
+                                    ]
+                                  }
+                                </strong>
+                              </div>
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  setSelectedPreviewPosition145(null)
+                                }
+                                aria-label="Close positioning controls"
+                              >
+                                Close
+                              </button>
+                            </div>
+
+                            <div
+                              className={
+                                designStyles.previewPositionDeviceTabs145
+                              }
+                            >
+                              <button
+                                type="button"
+                                data-active={
+                                  previewPositionDevice145 === "desktop"
+                                    ? "true"
+                                    : "false"
+                                }
+                                onClick={() =>
+                                  setPreviewPositionDevice145("desktop")
+                                }
+                              >
+                                Desktop
+                              </button>
+                              <button
+                                type="button"
+                                data-active={
+                                  previewPositionDevice145 === "mobile"
+                                    ? "true"
+                                    : "false"
+                                }
+                                onClick={() =>
+                                  setPreviewPositionDevice145("mobile")
+                                }
+                              >
+                                Mobile
+                              </button>
+                            </div>
+
+                            <div
+                              className={
+                                designStyles.previewPositionPad145
+                              }
+                            >
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  nudgePreviewPosition145(0, -2)
+                                }
+                                aria-label="Move up"
+                              >
+                                Up
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  nudgePreviewPosition145(-2, 0)
+                                }
+                                aria-label="Move left"
+                              >
+                                Left
+                              </button>
+                              <button
+                                type="button"
+                                className={
+                                  designStyles.previewPositionReset145
+                                }
+                                onClick={resetSelectedPreviewPosition145}
+                              >
+                                Center
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  nudgePreviewPosition145(2, 0)
+                                }
+                                aria-label="Move right"
+                              >
+                                Right
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  nudgePreviewPosition145(0, 2)
+                                }
+                                aria-label="Move down"
+                              >
+                                Down
+                              </button>
+                            </div>
+
+                            <div
+                              className={
+                                designStyles.previewPositionNumbers145
+                              }
+                            >
+                              <label>
+                                <span>X / أفقي</span>
+                                <input
+                                  type="number"
+                                  min={-240}
+                                  max={240}
+                                  value={
+                                    storefrontContentPositioning145[
+                                      selectedPreviewPosition145
+                                    ][previewPositionDevice145].x
+                                  }
+                                  onChange={(event) => {
+                                    const point =
+                                      storefrontContentPositioning145[
+                                        selectedPreviewPosition145
+                                      ][previewPositionDevice145];
+                                    updatePreviewPosition145(
+                                      selectedPreviewPosition145,
+                                      previewPositionDevice145,
+                                      Number(event.target.value),
+                                      point.y
+                                    );
+                                  }}
+                                />
+                              </label>
+                              <label>
+                                <span>Y / عمودي</span>
+                                <input
+                                  type="number"
+                                  min={-240}
+                                  max={240}
+                                  value={
+                                    storefrontContentPositioning145[
+                                      selectedPreviewPosition145
+                                    ][previewPositionDevice145].y
+                                  }
+                                  onChange={(event) => {
+                                    const point =
+                                      storefrontContentPositioning145[
+                                        selectedPreviewPosition145
+                                      ][previewPositionDevice145];
+                                    updatePreviewPosition145(
+                                      selectedPreviewPosition145,
+                                      previewPositionDevice145,
+                                      point.x,
+                                      Number(event.target.value)
+                                    );
+                                  }}
+                                />
+                              </label>
+                            </div>
+
+                            <div
+                              className={
+                                designStyles.previewPositionPanelFooter145
+                              }
+                            >
+                              <span>
+                                Arrow keys = 1px. Shift + arrow = 8px.
+                              </span>
+                              <strong
+                                data-state={previewPositionSaveState145}
+                              >
+                                {previewPositionSaveState145 === "saving"
+                                  ? "Saving..."
+                                  : previewPositionSaveState145 === "waiting"
+                                    ? "Waiting to save..."
+                                    : previewPositionSaveState145 === "error"
+                                      ? "Save failed"
+                                      : previewPositionSaveState145 === "saved"
+                                        ? "Saved"
+                                        : storefront?.id
+                                          ? "Ready"
+                                          : "Saves when storefront exists"}
+                              </strong>
+                            </div>
+
+                            <button
+                              type="button"
+                              className={
+                                designStyles.previewPositionResetAll145
+                              }
+                              onClick={resetAllPreviewPositions145}
+                            >
+                              Reset all positions to theme defaults
+                            </button>
+                          </>
+                        ) : (
+                          <div
+                            className={
+                              designStyles.previewPositionHint145
+                            }
+                          >
+                            <strong>
+                              Click text inside the preview to position it
+                            </strong>
+                            <span>
+                              Store name, Arabic name, tagline, Arabic
+                              tagline, or Shop tab.
+                            </span>
+                          </div>
+                        )}
+                      </aside>
+                    ) : null}
+
 
 {/* DARIK_EXACT_STOREFRONT_WIZARD_109_V6 */}
                 <div className={designStyles.exactWizardStage109V5}>

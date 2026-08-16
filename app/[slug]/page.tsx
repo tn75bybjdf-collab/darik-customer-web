@@ -913,6 +913,116 @@ const darikGlobalTypographyCss106 = Object.entries(
   )
   .join("\n");
 
+// DARIK_CLICK_PREVIEW_POSITIONING_145
+type StorefrontPositionKey145 =
+  | "display_name"
+  | "display_name_ar"
+  | "tagline"
+  | "tagline_ar"
+  | "shop";
+
+type StorefrontPositionPoint145 = {
+  x: number;
+  y: number;
+};
+
+type StorefrontPositionDevice145 = {
+  desktop: StorefrontPositionPoint145;
+  mobile: StorefrontPositionPoint145;
+};
+
+type StorefrontContentPositioning145 = Record<
+  StorefrontPositionKey145,
+  StorefrontPositionDevice145
+>;
+
+const storefrontPositionKeys145: StorefrontPositionKey145[] = [
+  "display_name",
+  "display_name_ar",
+  "tagline",
+  "tagline_ar",
+  "shop",
+];
+
+function clampStorefrontPosition145(value: unknown) {
+  const numeric = Number(value);
+  if (!Number.isFinite(numeric)) return 0;
+  return Math.max(-240, Math.min(240, Math.round(numeric)));
+}
+
+function storefrontDefaultContentPositioning145(): StorefrontContentPositioning145 {
+  return {
+    display_name: {
+      desktop: { x: 0, y: 0 },
+      mobile: { x: 0, y: 0 },
+    },
+    display_name_ar: {
+      desktop: { x: 0, y: 0 },
+      mobile: { x: 0, y: 0 },
+    },
+    tagline: {
+      desktop: { x: 0, y: 0 },
+      mobile: { x: 0, y: 0 },
+    },
+    tagline_ar: {
+      desktop: { x: 0, y: 0 },
+      mobile: { x: 0, y: 0 },
+    },
+    shop: {
+      desktop: { x: 0, y: 0 },
+      mobile: { x: 0, y: 0 },
+    },
+  };
+}
+
+function normalizeStorefrontContentPositioning145(
+  value: unknown
+): StorefrontContentPositioning145 {
+  const raw =
+    value && typeof value === "object" && !Array.isArray(value)
+      ? (value as Record<string, unknown>)
+      : {};
+
+  const next = storefrontDefaultContentPositioning145();
+
+  for (const key of storefrontPositionKeys145) {
+    const rawElement =
+      raw[key] && typeof raw[key] === "object" && !Array.isArray(raw[key])
+        ? (raw[key] as Record<string, unknown>)
+        : {};
+
+    for (const device of ["desktop", "mobile"] as const) {
+      const rawPoint =
+        rawElement[device] &&
+        typeof rawElement[device] === "object" &&
+        !Array.isArray(rawElement[device])
+          ? (rawElement[device] as Record<string, unknown>)
+          : {};
+
+      next[key][device] = {
+        x: clampStorefrontPosition145(rawPoint.x),
+        y: clampStorefrontPosition145(rawPoint.y),
+      };
+    }
+  }
+
+  return next;
+}
+
+function storefrontPositionStyle145(
+  positioning: StorefrontContentPositioning145,
+  key: StorefrontPositionKey145
+) {
+  const position = positioning[key];
+
+  return {
+    "--darik-position-desktop-x-145": `${position.desktop.x}px`,
+    "--darik-position-desktop-y-145": `${position.desktop.y}px`,
+    "--darik-position-mobile-x-145": `${position.mobile.x}px`,
+    "--darik-position-mobile-y-145": `${position.mobile.y}px`,
+  } as any;
+}
+
 function storefrontTypographyDefaultState(): StorefrontTypographyState {
   return {
     page: { font: "theme", size: 0 },
@@ -1383,6 +1493,50 @@ export default function DarikDirectStorefrontPage() {
     };
   }, [slug]);
 
+  const [savedContentPositioning145, setSavedContentPositioning145] =
+    useState<StorefrontContentPositioning145>(() =>
+      storefrontDefaultContentPositioning145()
+    );
+
+  const [builderSelectedPosition145, setBuilderSelectedPosition145] =
+    useState<StorefrontPositionKey145 | null>(null);
+
+  const [isBuilderPositionPreview145, setIsBuilderPositionPreview145] =
+    useState(false);
+
+  useEffect(() => {
+    setIsBuilderPositionPreview145(darikIsBuilderPreview120());
+  }, []);
+
+  useEffect(() => {
+    if (!slug) {
+      setSavedContentPositioning145(
+        storefrontDefaultContentPositioning145()
+      );
+      return;
+    }
+
+    let cancelled = false;
+
+    void (async () => {
+      const result = await supabase.rpc(
+        "darik_direct_public_content_positioning_v1",
+        { p_slug: slug }
+      );
+
+      if (cancelled || result.error) return;
+
+      setSavedContentPositioning145(
+        normalizeStorefrontContentPositioning145(result.data)
+      );
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [slug]);
+
+
   useEffect(() => {
     if (!slug) {
       setSavedThemeField("");
@@ -1775,6 +1929,7 @@ export default function DarikDirectStorefrontPage() {
       "tagline",
       "tagline_ar",
       "direct_typography",
+      "direct_content_positioning",
       "logo_url",
       "hero_image_url",
       "business_phone",
@@ -4218,6 +4373,35 @@ export default function DarikDirectStorefrontPage() {
       }`
     : "";
 
+  const effectiveContentPositioning145 =
+    normalizeStorefrontContentPositioning145(
+      (
+        storefront as unknown as {
+          direct_content_positioning?: unknown;
+        }
+      ).direct_content_positioning ?? savedContentPositioning145
+    );
+
+  function selectBuilderPositionTarget145(
+    event: { preventDefault: () => void; stopPropagation: () => void },
+    key: StorefrontPositionKey145
+  ) {
+    if (!isBuilderPositionPreview145) return;
+
+    event.preventDefault();
+    event.stopPropagation();
+    setBuilderSelectedPosition145(key);
+
+    window.parent.postMessage(
+      {
+        type: "DARIK_PREVIEW_POSITION_SELECT_145",
+        key,
+        viewport: window.innerWidth <= 720 ? "mobile" : "desktop",
+      },
+      window.location.origin
+    );
+  }
+
   const fieldDesign = lockedRetailFieldDesign(effectiveThemeField);
   const themeStyle = {
     "--store-primary": fieldDesign.primaryColor,
@@ -4629,6 +4813,7 @@ export default function DarikDirectStorefrontPage() {
       data-business={effectiveBusinessType}
       data-theme-field={effectiveThemeField}
       data-darik-page-font={effectiveStorefrontTypography.page.font}
+      data-darik-position-builder145={isBuilderPositionPreview145 ? "true" : "false"}
       data-field-preview={previewRetailField ? "yes" : "no"}
       data-mechanics-preview={previewMechanicsField ? "yes" : "no"}
       data-category-count={String(visibleCategories.length)}
@@ -4910,7 +5095,27 @@ export default function DarikDirectStorefrontPage() {
         </a>
 
         <nav className={styles.headerActions}>
-          <button onClick={jumpToCatalog}>
+          <button
+            className={[
+              styles.builderPositionTarget145,
+              builderSelectedPosition145 === "shop"
+                ? styles.builderPositionSelected145
+                : "",
+            ]
+              .filter(Boolean)
+              .join(" ")}
+            style={storefrontPositionStyle145(
+              effectiveContentPositioning145,
+              "shop"
+            )}
+            onClick={(event) => {
+              if (isBuilderPositionPreview145) {
+                selectBuilderPositionTarget145(event, "shop");
+                return;
+              }
+              jumpToCatalog();
+            }}
+          >
             <Icon name="search" size={18} />
             <span>Shop</span>
           </button>
@@ -4988,63 +5193,100 @@ export default function DarikDirectStorefrontPage() {
               <Icon name="store" size={15} />
               {isAutoParts ? "Auto parts / \u0642\u0637\u0639 \u063a\u064a\u0627\u0631" : isGroceryStore ? "Hypermarket / \u0647\u0627\u064a\u0628\u0631\u0645\u0627\u0631\u0643\u062a" : "Official store / \u0627\u0644\u0645\u062a\u062c\u0631 \u0627\u0644\u0631\u0633\u0645\u064a"}
             </div>
-            <h1 id="darik-customer-facing-store-name-144"
+            <h1
+              onClick={(event) =>
+                selectBuilderPositionTarget145(event, "display_name")
+              }
+              className={[styles.builderPositionTarget145, builderSelectedPosition145 === "display_name" ? styles.builderPositionSelected145 : ""].filter(Boolean).join(" ")} id="darik-customer-facing-store-name-144"
               data-darik-font-override={
                 effectiveStorefrontTypography.display_name.font !== "theme"
                   ? effectiveStorefrontTypography.display_name.font
                   : undefined
               }
-style={storefrontTypographyInlineStyle(
-                effectiveStorefrontTypography,
-                "display_name"
-              )}
+style={{
+                ...storefrontTypographyInlineStyle(
+                  effectiveStorefrontTypography,
+                  "display_name"
+                ),
+                ...storefrontPositionStyle145(
+                  effectiveContentPositioning145,
+                  "display_name"
+                ),
+              }}
             >
               {storefront.display_name}
             </h1>
             {storefront.display_name_ar ? (
               <p
-                className={styles.arabicName}
+              onClick={(event) =>
+                selectBuilderPositionTarget145(event, "display_name_ar")
+              }
+                className={[styles.arabicName, styles.builderPositionTarget145, builderSelectedPosition145 === "display_name_ar" ? styles.builderPositionSelected145 : ""].filter(Boolean).join(" ")}
                 dir="rtl"
                 data-darik-font-override={
                 effectiveStorefrontTypography.display_name_ar.font !== "theme"
                   ? effectiveStorefrontTypography.display_name_ar.font
                   : undefined
               }
-style={storefrontTypographyInlineStyle(
+style={{
+                ...storefrontTypographyInlineStyle(
                   effectiveStorefrontTypography,
                   "display_name_ar"
-                )}
+                ),
+                ...storefrontPositionStyle145(
+                  effectiveContentPositioning145,
+                  "display_name_ar"
+                ),
+              }}
               >
                 {storefront.display_name_ar}
               </p>
             ) : null}
             <p
-              className={styles.tagline}
+              onClick={(event) =>
+                selectBuilderPositionTarget145(event, "tagline")
+              }
+              className={[styles.tagline, styles.builderPositionTarget145, builderSelectedPosition145 === "tagline" ? styles.builderPositionSelected145 : ""].filter(Boolean).join(" ")}
               data-darik-font-override={
                 effectiveStorefrontTypography.tagline.font !== "theme"
                   ? effectiveStorefrontTypography.tagline.font
                   : undefined
               }
-style={storefrontTypographyInlineStyle(
-                effectiveStorefrontTypography,
-                "tagline"
-              )}
+style={{
+                ...storefrontTypographyInlineStyle(
+                  effectiveStorefrontTypography,
+                  "tagline"
+                ),
+                ...storefrontPositionStyle145(
+                  effectiveContentPositioning145,
+                  "tagline"
+                ),
+              }}
             >
               {storefront.tagline || (pickupOnly ? "Browse online and collect from this local store." : isGroceryStore ? "Fresh groceries and daily essentials from your neighborhood market." : "Everything you need, delivered from a local store.")}
             </p>
             {storefront.tagline_ar ? (
               <p
-                className={styles.arabicTagline}
+              onClick={(event) =>
+                selectBuilderPositionTarget145(event, "tagline_ar")
+              }
+                className={[styles.arabicTagline, styles.builderPositionTarget145, builderSelectedPosition145 === "tagline_ar" ? styles.builderPositionSelected145 : ""].filter(Boolean).join(" ")}
                 dir="rtl"
                 data-darik-font-override={
                 effectiveStorefrontTypography.tagline_ar.font !== "theme"
                   ? effectiveStorefrontTypography.tagline_ar.font
                   : undefined
               }
-style={storefrontTypographyInlineStyle(
+style={{
+                ...storefrontTypographyInlineStyle(
                   effectiveStorefrontTypography,
                   "tagline_ar"
-                )}
+                ),
+                ...storefrontPositionStyle145(
+                  effectiveContentPositioning145,
+                  "tagline_ar"
+                ),
+              }}
               >
                 {storefront.tagline_ar}
               </p>
