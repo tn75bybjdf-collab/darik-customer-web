@@ -1578,6 +1578,7 @@ export default function DarikDirectStorefrontSettingsPage() {
   // DARIK_DASHBOARD_ONLY_DRAG_PROOF_150A
   // DARIK_LIVE_IFRAME_BINDING_FIX_150B
   // DARIK_DRAG_SCROLL_LOCK_RESET_HERO_LOCK_150C
+  // DARIK_PERSISTENT_DRAG_LOGO_BOX_150D
   // Dashboard-only drag proof.
   // No DB writes and no app/[slug] edits.
   useEffect(() => {
@@ -1586,6 +1587,287 @@ export default function DarikDirectStorefrontSettingsPage() {
     let iframe150A: HTMLIFrameElement | null = null;
     let boundIframe150B: HTMLIFrameElement | null = null;
     let detachPreview150A = () => {};
+
+    type DarikPoint150D = {
+      x: number;
+      y: number;
+      label?: string;
+    };
+
+    type DarikLayout150D = {
+      desktop: Record<string, DarikPoint150D>;
+      mobile: Record<string, DarikPoint150D>;
+    };
+
+    function defaultLayout150D(): DarikLayout150D {
+      return { desktop: {}, mobile: {} };
+    }
+
+    function clamp150D(value150D: unknown) {
+      const n150D = Number(value150D);
+      if (!Number.isFinite(n150D)) return 0;
+      return Math.max(
+        -1200,
+        Math.min(1200, Math.round(n150D))
+      );
+    }
+
+    function safeLocator150D(value150D: unknown) {
+      const locator150D = String(value150D ?? "").trim();
+
+      return (
+        locator150D.length >= 1 &&
+        locator150D.length <= 700 &&
+        /^[A-Za-z0-9_#:.() >-]+$/.test(locator150D)
+      );
+    }
+
+    function normalizeLayout150D(
+      value150D: unknown
+    ): DarikLayout150D {
+      const raw150D =
+        value150D &&
+        typeof value150D === "object" &&
+        !Array.isArray(value150D)
+          ? (value150D as Record<string, unknown>)
+          : {};
+
+      const result150D = defaultLayout150D();
+
+      for (const device150D of [
+        "desktop",
+        "mobile",
+      ] as const) {
+        const rawDevice150D =
+          raw150D[device150D] &&
+          typeof raw150D[device150D] === "object" &&
+          !Array.isArray(raw150D[device150D])
+            ? (raw150D[device150D] as Record<
+                string,
+                unknown
+              >)
+            : {};
+
+        let accepted150D = 0;
+
+        for (const [
+          locator150D,
+          rawPoint150D,
+        ] of Object.entries(rawDevice150D)) {
+          if (accepted150D >= 250) break;
+          if (!safeLocator150D(locator150D)) continue;
+
+          if (
+            !rawPoint150D ||
+            typeof rawPoint150D !== "object" ||
+            Array.isArray(rawPoint150D)
+          ) {
+            continue;
+          }
+
+          const point150D =
+            rawPoint150D as Record<string, unknown>;
+
+          const label150D =
+            typeof point150D.label === "string"
+              ? point150D.label.trim().slice(0, 140)
+              : undefined;
+
+          result150D[device150D][locator150D] = {
+            x: clamp150D(point150D.x),
+            y: clamp150D(point150D.y),
+            ...(label150D ? { label: label150D } : {}),
+          };
+
+          accepted150D += 1;
+        }
+      }
+
+      return result150D;
+    }
+
+    function locator150D(
+      root150D: Element,
+      target150D: Element
+    ) {
+      if (target150D === root150D) return "";
+
+      const id150D =
+        target150D.getAttribute("id")?.trim() ?? "";
+
+      if (/^[A-Za-z][A-Za-z0-9_-]{0,100}$/.test(id150D)) {
+        const idLocator150D = `#${id150D}`;
+
+        try {
+          if (
+            root150D.querySelectorAll(idLocator150D).length ===
+            1
+          ) {
+            return idLocator150D;
+          }
+        } catch {
+          // Fall through.
+        }
+      }
+
+      const parts150D: string[] = [];
+      let current150D: Element | null = target150D;
+      let depth150D = 0;
+
+      while (
+        current150D &&
+        current150D !== root150D &&
+        depth150D < 18
+      ) {
+        const parent150D = current150D.parentElement;
+        if (!parent150D) return "";
+
+        const tag150D =
+          current150D.tagName.toLowerCase();
+
+        const sameTag150D = Array.from(
+          parent150D.children
+        ).filter(
+          (child150D: Element) =>
+            child150D.tagName === current150D?.tagName
+        );
+
+        const index150D =
+          sameTag150D.indexOf(current150D);
+
+        if (index150D < 0) return "";
+
+        parts150D.unshift(
+          `${tag150D}:nth-of-type(${index150D + 1})`
+        );
+
+        current150D = parent150D;
+        depth150D += 1;
+      }
+
+      if (
+        current150D !== root150D ||
+        parts150D.length === 0
+      ) {
+        return "";
+      }
+
+      const result150D = parts150D.join(" > ");
+
+      return safeLocator150D(result150D)
+        ? result150D
+        : "";
+    }
+
+    function label150D(target150D: Element) {
+      const identity150D = [
+        target150D.getAttribute("id") ?? "",
+        target150D.getAttribute("class") ?? "",
+      ]
+        .join(" ")
+        .toLowerCase();
+
+      if (
+        identity150D.includes("logo") ||
+        identity150D.includes("brand")
+      ) {
+        return "Store logo box";
+      }
+
+      const text150D = (target150D.textContent ?? "")
+        .replace(/\s+/g, " ")
+        .trim()
+        .slice(0, 90);
+
+      return (
+        text150D
+          ? `${target150D.tagName.toLowerCase()} · ${text150D}`
+          : target150D.tagName.toLowerCase()
+      ).slice(0, 140);
+    }
+
+    function device150D(
+      previewWindow150D?: Window | null
+    ): "desktop" | "mobile" {
+      const width150D =
+        previewWindow150D?.innerWidth ??
+        liveBuilderPreviewRef.current?.contentWindow
+          ?.innerWidth ??
+        window.innerWidth;
+
+      return width150D <= 720
+        ? "mobile"
+        : "desktop";
+    }
+
+    let savedLayout150D: DarikLayout150D =
+      defaultLayout150D();
+
+    let layoutLoaded150D = false;
+    let applySavedNow150D = () => {};
+    let saveSequence150D = 0;
+
+    async function saveLayout150D() {
+      if (!storefront?.id) return;
+
+      const sequence150D = ++saveSequence150D;
+      const snapshot150D =
+        normalizeLayout150D(savedLayout150D);
+
+      const result150D = await supabase
+        .from("retailer_storefronts")
+        .update({
+          direct_freeform_layout: snapshot150D,
+        })
+        .eq("id", storefront.id);
+
+      if (
+        sequence150D !== saveSequence150D ||
+        !result150D.error
+      ) {
+        return;
+      }
+
+      console.error(
+        "Darik position save failed:",
+        result150D.error.message
+      );
+
+      window.alert(
+        "Darik could not save that position. Please move the item again."
+      );
+    }
+
+    void (async () => {
+      if (!storefront?.id) {
+        layoutLoaded150D = true;
+        applySavedNow150D();
+        return;
+      }
+
+      const result150D = await supabase
+        .from("retailer_storefronts")
+        .select("direct_freeform_layout")
+        .eq("id", storefront.id)
+        .maybeSingle();
+
+      if (result150D.error) {
+        console.error(
+          "Darik saved-position load failed:",
+          result150D.error.message
+        );
+
+        layoutLoaded150D = true;
+        return;
+      }
+
+      savedLayout150D = normalizeLayout150D(
+        result150D.data?.direct_freeform_layout
+      );
+
+      layoutLoaded150D = true;
+      applySavedNow150D();
+    })();
 
     function attachPreview150A() {
       detachPreview150A();
@@ -1608,6 +1890,66 @@ export default function DarikDirectStorefrontSettingsPage() {
 
       const originalTranslate150A =
         new Map<Element, string>();
+
+      function applySavedLayout150D() {
+        if (!layoutLoaded150D) return;
+
+        const root150D = document150A.querySelector(
+          "[data-darik-position-builder145]"
+        );
+
+        if (!root150D) return;
+
+        const currentDevice150D =
+          device150D(window150A);
+
+        for (const [
+          locatorKey150D,
+          point150D,
+        ] of Object.entries(
+          savedLayout150D[currentDevice150D]
+        )) {
+          if (!safeLocator150D(locatorKey150D)) {
+            continue;
+          }
+
+          let target150D: Element | null = null;
+
+          try {
+            target150D =
+              root150D.querySelector(locatorKey150D);
+          } catch {
+            target150D = null;
+          }
+
+          if (!target150D) continue;
+
+          const style150D =
+            (target150D as HTMLElement).style;
+
+          if (!originalTranslate150A.has(target150D)) {
+            originalTranslate150A.set(
+              target150D,
+              style150D.getPropertyValue("translate")
+            );
+          }
+
+          style150D.setProperty(
+            "translate",
+            `${clamp150D(point150D.x)}px ${clamp150D(
+              point150D.y
+            )}px`,
+            "important"
+          );
+
+          target150D.setAttribute(
+            "data-darik-persisted150d",
+            "true"
+          );
+        }
+      }
+
+      applySavedNow150D = applySavedLayout150D;
 
       let resetButton150C: HTMLButtonElement | null = null;
       let scrollLocked150C = false;
@@ -1717,6 +2059,69 @@ export default function DarikDirectStorefrontSettingsPage() {
 
         if (!root150A || !root150A.contains(rawElement150A)) {
           return null;
+        }
+
+        // When grabbing a logo image, move its small branded wrapper.
+        const logoVisual150D = rawElement150A.closest(
+          "img, picture, svg"
+        );
+
+        if (logoVisual150D) {
+          let logoBox150D: Element | null =
+            logoVisual150D.parentElement;
+
+          let logoDepth150D = 0;
+
+          while (
+            logoBox150D &&
+            logoBox150D !== root150A &&
+            logoDepth150D < 4
+          ) {
+            const tag150D =
+              logoBox150D.tagName.toLowerCase();
+
+            const identity150D = [
+              logoBox150D.getAttribute("id") ?? "",
+              logoBox150D.getAttribute("class") ?? "",
+              logoBox150D.getAttribute("aria-label") ?? "",
+            ]
+              .join(" ")
+              .toLowerCase();
+
+            const rect150D =
+              logoBox150D.getBoundingClientRect();
+
+            const structural150D = [
+              "main",
+              "header",
+              "footer",
+              "nav",
+              "section",
+              "article",
+            ].includes(tag150D);
+
+            const branded150D =
+              identity150D.includes("logo") ||
+              identity150D.includes("brand");
+
+            const smallWrapper150D =
+              rect150D.width > 0 &&
+              rect150D.height > 0 &&
+              rect150D.width <= 420 &&
+              rect150D.height <= 280 &&
+              logoBox150D.children.length <= 5;
+
+            if (
+              !structural150D &&
+              (branded150D || smallWrapper150D)
+            ) {
+              return logoBox150D;
+            }
+
+            logoBox150D =
+              logoBox150D.parentElement;
+            logoDepth150D += 1;
+          }
         }
 
         // Prefer the actual content item. Structural wrappers, especially the
@@ -1934,6 +2339,20 @@ export default function DarikDirectStorefrontSettingsPage() {
         }
 
         originalTranslate150A.clear();
+
+        savedLayout150D = defaultLayout150D();
+
+        document150A
+          .querySelectorAll(
+            '[data-darik-persisted150d="true"]'
+          )
+          .forEach((target150D) => {
+            target150D.removeAttribute(
+              "data-darik-persisted150d"
+            );
+          });
+
+        void saveLayout150D();
       }
 
       function installResetButton150C() {
@@ -1977,6 +2396,7 @@ export default function DarikDirectStorefrontSettingsPage() {
       }
 
       installResetButton150C();
+      applySavedLayout150D();
 
       function beginDrag150A() {
         if (!candidate150A || dragging150A) return;
@@ -2134,6 +2554,72 @@ export default function DarikDirectStorefrontSettingsPage() {
         blockClickTarget150A = completed150A.target;
         blockClickUntil150A = Date.now() + 500;
 
+        const root150D = document150A.querySelector(
+          "[data-darik-position-builder145]"
+        );
+
+        if (root150D) {
+          const locatorKey150D = locator150D(
+            root150D,
+            completed150A.target
+          );
+
+          if (locatorKey150D) {
+            const dx150D =
+              event150A.clientX - completed150A.startX;
+
+            const dy150D =
+              event150A.clientY - completed150A.startY;
+
+            const x150D = clamp150D(
+              completed150A.baseX + dx150D
+            );
+
+            const y150D = clamp150D(
+              completed150A.baseY + dy150D
+            );
+
+            const currentDevice150D =
+              device150D(window150A);
+
+            const nextDevice150D = {
+              ...savedLayout150D[currentDevice150D],
+            };
+
+            if (
+              !nextDevice150D[locatorKey150D] &&
+              Object.keys(nextDevice150D).length >= 250
+            ) {
+              const oldest150D =
+                Object.keys(nextDevice150D)[0];
+
+              if (oldest150D) {
+                delete nextDevice150D[oldest150D];
+              }
+            }
+
+            nextDevice150D[locatorKey150D] = {
+              x: x150D,
+              y: y150D,
+              label: label150D(
+                completed150A.target
+              ),
+            };
+
+            savedLayout150D = {
+              ...savedLayout150D,
+              [currentDevice150D]: nextDevice150D,
+            };
+
+            completed150A.target.setAttribute(
+              "data-darik-persisted150d",
+              "true"
+            );
+
+            void saveLayout150D();
+          }
+        }
+
         try {
           completed150A.target.releasePointerCapture(
             completed150A.pointerId
@@ -2280,7 +2766,13 @@ export default function DarikDirectStorefrontSettingsPage() {
           target150A.removeAttribute(
             "data-darik-dragging150a"
           );
+
+          target150A.removeAttribute(
+            "data-darik-persisted150d"
+          );
         }
+
+        applySavedNow150D = () => {};
       };
     }
 
