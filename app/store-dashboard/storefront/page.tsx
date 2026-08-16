@@ -1582,6 +1582,7 @@ export default function DarikDirectStorefrontSettingsPage() {
   // DARIK_NO_FLASH_THEME_STABLE_POSITIONS_150E_V2
   // DARIK_DOM_STABILITY_POSITION_REAPPLY_150E_V3
   // DARIK_PINCH_RESIZE_LIGHTER_DRAG_151
+  // DARIK_SELECTED_OBJECT_DIRECT_EDITOR_152
   // Dashboard-only drag proof.
   // No DB writes and no app/[slug] edits.
   useEffect(() => {
@@ -1595,6 +1596,7 @@ export default function DarikDirectStorefrontSettingsPage() {
       x: number;
       y: number;
       scale?: number;
+      hidden?: boolean;
       label?: string;
     };
 
@@ -1705,11 +1707,20 @@ export default function DarikDirectStorefrontSettingsPage() {
                 )
               : undefined;
 
+          const hidden152 =
+            typeof point150D.hidden ===
+              "boolean"
+              ? point150D.hidden
+              : undefined;
+
           result150D[device150D][locator150D] = {
             x: clamp150D(point150D.x),
             y: clamp150D(point150D.y),
             ...(scale151 !== undefined
               ? { scale: scale151 }
+              : {}),
+            ...(hidden152 !== undefined
+              ? { hidden: hidden152 }
               : {}),
             ...(label150D ? { label: label150D } : {}),
           };
@@ -2235,6 +2246,9 @@ export default function DarikDirectStorefrontSettingsPage() {
       const originalScale151 =
         new Map<Element, string>();
 
+      const originalDisplay152 =
+        new Map<Element, string>();
+
       let domObserver150EV3:
         | MutationObserver
         | null = null;
@@ -2484,6 +2498,47 @@ export default function DarikDirectStorefrontSettingsPage() {
           );
 
           if (
+            point150D.hidden !== undefined
+          ) {
+            if (
+              !originalDisplay152.has(
+                target150D
+              )
+            ) {
+              originalDisplay152.set(
+                target150D,
+                style150D.getPropertyValue(
+                  "display"
+                )
+              );
+            }
+
+            if (point150D.hidden) {
+              style150D.setProperty(
+                "display",
+                "none",
+                "important"
+              );
+            } else {
+              const originalDisplayValue152 =
+                originalDisplay152.get(
+                  target150D
+                ) ?? "";
+
+              if (originalDisplayValue152) {
+                style150D.setProperty(
+                  "display",
+                  originalDisplayValue152
+                );
+              } else {
+                style150D.removeProperty(
+                  "display"
+                );
+              }
+            }
+          }
+
+          if (
             point150D.scale !== undefined
           ) {
             if (
@@ -2601,6 +2656,16 @@ export default function DarikDirectStorefrontSettingsPage() {
       let blockClickTarget150A: Element | null = null;
       let blockClickUntil150A = 0;
 
+      let selectedTarget152: Element | null = null;
+      let selectionToolbar152: HTMLDivElement | null = null;
+      let textEditor152: HTMLDivElement | null = null;
+      let toolbarStatusTimer152 = 0;
+
+      let inlineTypography152 =
+        normalizeStorefrontTypography(
+          storefrontTypographyDraft
+        );
+
       const old145Neutralizer150A =
         document150A.createElement("style");
 
@@ -2635,6 +2700,12 @@ export default function DarikDirectStorefrontSettingsPage() {
           user-select: none !important;
           -webkit-user-select: none !important;
           touch-action: none !important;
+        }
+
+        [data-darik-selected152="true"] {
+          outline: 3px solid rgba(37, 99, 235, .98) !important;
+          outline-offset: 5px !important;
+          box-shadow: 0 0 0 2px rgba(255,255,255,.9) !important;
         }
       `;
 
@@ -2939,7 +3010,1134 @@ export default function DarikDirectStorefrontSettingsPage() {
         );
       }
 
+      function isEditorChrome152(
+        eventTarget152: EventTarget | null
+      ) {
+        const element152 =
+          eventTarget152 &&
+          typeof (eventTarget152 as Node).nodeType === "number"
+            ? (eventTarget152 as Element)
+            : null;
+
+        return Boolean(
+          element152?.closest(
+            '[data-darik-selection-toolbar152="true"], [data-darik-text-editor152="true"], [data-darik-reset-layout150c="true"]'
+          )
+        );
+      }
+
+      function editableTextMeta152(
+        target152: Element | null
+      ):
+        | {
+            formField:
+              | "displayName"
+              | "displayNameAr"
+              | "tagline"
+              | "taglineAr";
+            dbField:
+              | "display_name"
+              | "display_name_ar"
+              | "tagline"
+              | "tagline_ar";
+            typographyKey:
+              | "display_name"
+              | "display_name_ar"
+              | "tagline"
+              | "tagline_ar";
+            label: string;
+            required: boolean;
+          }
+        | null {
+        if (!target152) return null;
+
+        const classIdentity152 = (
+          target152.getAttribute(
+            "class"
+          ) ?? ""
+        ).toLowerCase();
+
+        if (
+          target152.classList.contains(
+            "darikSemanticDisplayNameAr150E"
+          ) ||
+          classIdentity152.includes(
+            "arabicname"
+          )
+        ) {
+          return {
+            formField: "displayNameAr",
+            dbField: "display_name_ar",
+            typographyKey:
+              "display_name_ar",
+            label: "Arabic store name",
+            required: false,
+          };
+        }
+
+        if (
+          target152.classList.contains(
+            "darikSemanticTaglineAr150E"
+          ) ||
+          classIdentity152.includes(
+            "arabictagline"
+          )
+        ) {
+          return {
+            formField: "taglineAr",
+            dbField: "tagline_ar",
+            typographyKey: "tagline_ar",
+            label: "Arabic tagline",
+            required: false,
+          };
+        }
+
+        if (
+          target152.classList.contains(
+            "darikSemanticDisplayName150E"
+          )
+        ) {
+          return {
+            formField: "displayName",
+            dbField: "display_name",
+            typographyKey: "display_name",
+            label: "Store name",
+            required: true,
+          };
+        }
+
+        if (
+          target152.classList.contains(
+            "darikSemanticTagline150E"
+          )
+        ) {
+          return {
+            formField: "tagline",
+            dbField: "tagline",
+            typographyKey: "tagline",
+            label: "Tagline",
+            required: false,
+          };
+        }
+
+        return null;
+      }
+
+      function positionSelectionUi152() {
+        if (
+          !selectedTarget152 ||
+          !selectionToolbar152
+        ) {
+          return;
+        }
+
+        const rect152 =
+          selectedTarget152.getBoundingClientRect();
+
+        const toolbarWidth152 =
+          Math.max(
+            180,
+            selectionToolbar152.offsetWidth ||
+              180
+          );
+
+        const maxLeft152 =
+          Math.max(
+            8,
+            window150A.innerWidth -
+              toolbarWidth152 -
+              8
+          );
+
+        const left152 =
+          Math.max(
+            8,
+            Math.min(
+              maxLeft152,
+              rect152.left +
+                rect152.width / 2 -
+                toolbarWidth152 / 2
+            )
+          );
+
+        const preferredTop152 =
+          rect152.top - 54;
+
+        const top152 =
+          preferredTop152 >= 8
+            ? preferredTop152
+            : Math.min(
+                window150A.innerHeight - 54,
+                rect152.bottom + 10
+              );
+
+        selectionToolbar152.style.left =
+          `${Math.round(left152)}px`;
+
+        selectionToolbar152.style.top =
+          `${Math.round(
+            Math.max(8, top152)
+          )}px`;
+      }
+
+      function showToolbarStatus152(
+        text152: string
+      ) {
+        if (!selectionToolbar152) {
+          return;
+        }
+
+        const status152 =
+          selectionToolbar152.querySelector(
+            '[data-darik-toolbar-status152="true"]'
+          );
+
+        if (!status152) {
+          return;
+        }
+
+        (status152 as HTMLElement).textContent = text152;
+
+        if (toolbarStatusTimer152) {
+          window150A.clearTimeout(
+            toolbarStatusTimer152
+          );
+        }
+
+        toolbarStatusTimer152 =
+          window150A.setTimeout(
+            () => {
+              (status152 as HTMLElement).textContent = "";
+              toolbarStatusTimer152 = 0;
+            },
+            1500
+          );
+      }
+
+      function closeTextEditor152() {
+        textEditor152?.remove();
+        textEditor152 = null;
+      }
+
+      function clearSelection152() {
+        selectedTarget152?.removeAttribute(
+          "data-darik-selected152"
+        );
+
+        selectedTarget152 = null;
+
+        selectionToolbar152?.remove();
+        selectionToolbar152 = null;
+
+        closeTextEditor152();
+
+        clearHold150A();
+        candidate150A = null;
+        dragging150A = false;
+        pinching151 = false;
+        pinchTarget151 = null;
+
+        unlockDragScroll150C();
+      }
+
+      function currentPointForTarget152(
+        target152: Element
+      ) {
+        const root152 =
+          document150A.querySelector(
+            "[data-darik-position-builder145]"
+          );
+
+        if (!root152) return null;
+
+        assignSemanticClasses150E(
+          root152
+        );
+
+        const locatorKey152 =
+          locator150D(
+            root152,
+            target152
+          );
+
+        if (!locatorKey152) {
+          return null;
+        }
+
+        const currentDevice152 =
+          device150D(window150A);
+
+        const existing152 =
+          savedLayout150D[
+            currentDevice152
+          ][locatorKey152];
+
+        const computedTranslate152 =
+          parseTranslate150A(
+            window150A.getComputedStyle(
+              target152
+            ).translate
+          );
+
+        const computedScale152 =
+          parseScale151(
+            window150A.getComputedStyle(
+              target152
+            ).scale
+          );
+
+        return {
+          root152,
+          locatorKey152,
+          currentDevice152,
+          point152: {
+            x:
+              existing152?.x ??
+              clamp150D(
+                computedTranslate152.x
+              ),
+            y:
+              existing152?.y ??
+              clamp150D(
+                computedTranslate152.y
+              ),
+            scale:
+              existing152?.scale ??
+              clampScale151(
+                computedScale152
+              ),
+            hidden:
+              existing152?.hidden ??
+              false,
+            label:
+              existing152?.label ??
+              label150D(target152),
+          },
+        };
+      }
+
+      function saveSelectedPatch152(
+        target152: Element,
+        patch152: Partial<
+          DarikPoint150D
+        >
+      ) {
+        const resolved152 =
+          currentPointForTarget152(
+            target152
+          );
+
+        if (!resolved152) {
+          return false;
+        }
+
+        const nextDevice152 = {
+          ...savedLayout150D[
+            resolved152.currentDevice152
+          ],
+        };
+
+        nextDevice152[
+          resolved152.locatorKey152
+        ] = {
+          ...resolved152.point152,
+          ...patch152,
+          x: clamp150D(
+            patch152.x ??
+              resolved152.point152.x
+          ),
+          y: clamp150D(
+            patch152.y ??
+              resolved152.point152.y
+          ),
+          scale: clampScale151(
+            patch152.scale ??
+              resolved152.point152.scale
+          ),
+        };
+
+        savedLayout150D = {
+          ...savedLayout150D,
+          [resolved152.currentDevice152]:
+            nextDevice152,
+        };
+
+        target152.setAttribute(
+          "data-darik-persisted150d",
+          "true"
+        );
+
+        void saveLayout150D();
+
+        return true;
+      }
+
+      function hideSelected152() {
+        if (!selectedTarget152) {
+          return;
+        }
+
+        const target152 =
+          selectedTarget152;
+
+        if (
+          !originalDisplay152.has(
+            target152
+          )
+        ) {
+          originalDisplay152.set(
+            target152,
+            (
+              target152 as HTMLElement
+            ).style.getPropertyValue(
+              "display"
+            )
+          );
+        }
+
+        if (
+          !saveSelectedPatch152(
+            target152,
+            { hidden: true }
+          )
+        ) {
+          showToolbarStatus152(
+            "Could not hide"
+          );
+          return;
+        }
+
+        (
+          target152 as HTMLElement
+        ).style.setProperty(
+          "display",
+          "none",
+          "important"
+        );
+
+        clearSelection152();
+      }
+
+      async function saveInlineText152(
+        input152: HTMLInputElement,
+        fontSelect152: HTMLSelectElement,
+        sizeInput152: HTMLInputElement
+      ) {
+        const target152 =
+          selectedTarget152;
+
+        const meta152 =
+          editableTextMeta152(
+            target152
+          );
+
+        if (
+          !target152 ||
+          !meta152 ||
+          !storefront?.id
+        ) {
+          return;
+        }
+
+        const nextText152 =
+          input152.value.trim();
+
+        if (
+          meta152.required &&
+          !nextText152
+        ) {
+          window.alert(
+            "The store name cannot be blank. Use Trash if you want to hide it visually."
+          );
+          return;
+        }
+
+        const fontKey152 =
+          String(
+            fontSelect152.value ||
+              "theme"
+          ) as StorefrontTypographyFontKey;
+
+        const rawSize152 =
+          Number(sizeInput152.value);
+
+        const size152 =
+          rawSize152 === 0
+            ? 0
+            : Math.max(
+                10,
+                Math.min(
+                  96,
+                  Math.round(
+                    Number.isFinite(
+                      rawSize152
+                    )
+                      ? rawSize152
+                      : 0
+                  )
+                )
+              );
+
+        const nextTypography152 =
+          normalizeStorefrontTypography(
+            {
+              ...inlineTypography152,
+              [meta152.typographyKey]: {
+                font: fontKey152,
+                size: size152,
+              },
+            }
+          );
+
+        showToolbarStatus152(
+          "Saving..."
+        );
+
+        const textResult152 =
+          await supabase
+            .from(
+              "retailer_storefronts"
+            )
+            .update({
+              [meta152.dbField]:
+                nextText152 || null,
+            })
+            .eq(
+              "id",
+              storefront.id
+            );
+
+        if (textResult152.error) {
+          window.alert(
+            textResult152.error.message
+          );
+
+          showToolbarStatus152(
+            "Save failed"
+          );
+          return;
+        }
+
+        const typographyResult152 =
+          await supabase.rpc(
+            "darik_direct_set_storefront_typography",
+            {
+              p_storefront_id:
+                storefront.id,
+              p_typography:
+                nextTypography152,
+            }
+          );
+
+        if (
+          typographyResult152.error
+        ) {
+          window.alert(
+            typographyResult152.error.message
+          );
+
+          showToolbarStatus152(
+            "Font save failed"
+          );
+          return;
+        }
+
+        inlineTypography152 =
+          nextTypography152;
+
+        setSetupForm((current152) => ({
+          ...current152,
+          [meta152.formField]:
+            nextText152,
+        }));
+
+        setStorefrontTypographyDraft(
+          nextTypography152
+        );
+
+        target152.textContent =
+          nextText152;
+
+        closeTextEditor152();
+
+        showToolbarStatus152(
+          "Saved ✓"
+        );
+
+        scheduleStableApply150EV3(
+          180
+        );
+      }
+
+      function openTextEditor152() {
+        const target152 =
+          selectedTarget152;
+
+        const meta152 =
+          editableTextMeta152(
+            target152
+          );
+
+        if (!target152 || !meta152) {
+          return;
+        }
+
+        closeTextEditor152();
+
+        const panel152 =
+          document150A.createElement(
+            "div"
+          );
+
+        panel152.setAttribute(
+          "data-darik-text-editor152",
+          "true"
+        );
+
+        Object.assign(
+          panel152.style,
+          {
+            position: "fixed",
+            left: "50%",
+            top: "76px",
+            transform:
+              "translateX(-50%)",
+            width:
+              "min(420px, calc(100vw - 24px))",
+            zIndex: "6900",
+            background:
+              "rgba(255,255,255,.99)",
+            border:
+              "1px solid rgba(15,23,42,.18)",
+            borderRadius: "18px",
+            padding: "14px",
+            boxShadow:
+              "0 18px 50px rgba(15,23,42,.24)",
+            color: "#0f172a",
+            fontFamily:
+              "system-ui, -apple-system, sans-serif",
+          }
+        );
+
+        const heading152 =
+          document150A.createElement(
+            "div"
+          );
+
+        heading152.textContent =
+          `Edit ${meta152.label}`;
+
+        Object.assign(
+          heading152.style,
+          {
+            fontSize: "13px",
+            fontWeight: "900",
+            marginBottom: "10px",
+          }
+        );
+
+        const input152 =
+          document150A.createElement(
+            "input"
+          );
+
+        input152.type = "text";
+        input152.value =
+          target152.textContent?.trim() ??
+          "";
+
+        Object.assign(
+          input152.style,
+          {
+            width: "100%",
+            boxSizing: "border-box",
+            border:
+              "1px solid rgba(15,23,42,.18)",
+            borderRadius: "12px",
+            padding: "10px 12px",
+            marginBottom: "10px",
+            fontSize: "15px",
+          }
+        );
+
+        const fontRow152 =
+          document150A.createElement(
+            "div"
+          );
+
+        Object.assign(
+          fontRow152.style,
+          {
+            display: "grid",
+            gridTemplateColumns:
+              "minmax(0,1fr) 100px",
+            gap: "8px",
+            marginBottom: "10px",
+          }
+        );
+
+        const fontSelect152 =
+          document150A.createElement(
+            "select"
+          );
+
+        const currentTypography152 =
+          inlineTypography152[
+            meta152.typographyKey
+          ];
+
+        for (
+          const group152 of
+          storefrontTypographyFontGroups
+        ) {
+          const optgroup152 =
+            document150A.createElement(
+              "optgroup"
+            );
+
+          optgroup152.label =
+            group152.label;
+
+          for (
+            const option152 of
+            group152.options
+          ) {
+            const optionElement152 =
+              document150A.createElement(
+                "option"
+              );
+
+            optionElement152.value =
+              option152.key;
+
+            optionElement152.textContent =
+              option152.label;
+
+            optgroup152.appendChild(
+              optionElement152
+            );
+          }
+
+          fontSelect152.appendChild(
+            optgroup152
+          );
+        }
+
+        fontSelect152.value =
+          currentTypography152.font;
+
+        const sizeInput152 =
+          document150A.createElement(
+            "input"
+          );
+
+        sizeInput152.type = "number";
+        sizeInput152.min = "0";
+        sizeInput152.max = "96";
+        sizeInput152.step = "1";
+        sizeInput152.value =
+          String(
+            currentTypography152.size
+          );
+
+        for (const control152 of [
+          fontSelect152,
+          sizeInput152,
+        ]) {
+          Object.assign(
+            control152.style,
+            {
+              width: "100%",
+              boxSizing:
+                "border-box",
+              border:
+                "1px solid rgba(15,23,42,.18)",
+              borderRadius: "12px",
+              padding: "10px",
+              background: "#fff",
+            }
+          );
+        }
+
+        fontRow152.append(
+          fontSelect152,
+          sizeInput152
+        );
+
+        const helper152 =
+          document150A.createElement(
+            "div"
+          );
+
+        helper152.textContent =
+          "Font size: 0 = theme default, otherwise 10–96 px.";
+
+        Object.assign(
+          helper152.style,
+          {
+            fontSize: "11px",
+            color: "#64748b",
+            marginBottom: "12px",
+          }
+        );
+
+        const actions152 =
+          document150A.createElement(
+            "div"
+          );
+
+        Object.assign(
+          actions152.style,
+          {
+            display: "flex",
+            gap: "8px",
+            justifyContent:
+              "flex-end",
+          }
+        );
+
+        const cancel152 =
+          document150A.createElement(
+            "button"
+          );
+
+        cancel152.type = "button";
+        cancel152.textContent =
+          "Cancel";
+
+        const save152 =
+          document150A.createElement(
+            "button"
+          );
+
+        save152.type = "button";
+        save152.textContent =
+          "Save changes";
+
+        for (const button152 of [
+          cancel152,
+          save152,
+        ]) {
+          Object.assign(
+            button152.style,
+            {
+              border:
+                "1px solid rgba(15,23,42,.16)",
+              borderRadius: "999px",
+              padding: "9px 13px",
+              fontSize: "12px",
+              fontWeight: "850",
+              cursor: "pointer",
+            }
+          );
+        }
+
+        cancel152.style.background =
+          "#fff";
+
+        save152.style.background =
+          "#0f172a";
+
+        save152.style.color =
+          "#fff";
+
+        cancel152.addEventListener(
+          "click",
+          closeTextEditor152
+        );
+
+        save152.addEventListener(
+          "click",
+          () => {
+            void saveInlineText152(
+              input152,
+              fontSelect152,
+              sizeInput152
+            );
+          }
+        );
+
+        actions152.append(
+          cancel152,
+          save152
+        );
+
+        panel152.append(
+          heading152,
+          input152,
+          fontRow152,
+          helper152,
+          actions152
+        );
+
+        document150A.body.appendChild(
+          panel152
+        );
+
+        textEditor152 = panel152;
+
+        input152.focus();
+        input152.select();
+      }
+
+      function installSelectionToolbar152() {
+        selectionToolbar152?.remove();
+        selectionToolbar152 = null;
+
+        if (!selectedTarget152) {
+          return;
+        }
+
+        const toolbar152 =
+          document150A.createElement(
+            "div"
+          );
+
+        toolbar152.setAttribute(
+          "data-darik-selection-toolbar152",
+          "true"
+        );
+
+        Object.assign(
+          toolbar152.style,
+          {
+            position: "fixed",
+            zIndex: "6800",
+            display: "flex",
+            alignItems: "center",
+            gap: "6px",
+            padding: "6px 8px",
+            background:
+              "rgba(15,23,42,.96)",
+            borderRadius: "14px",
+            boxShadow:
+              "0 12px 35px rgba(15,23,42,.28)",
+            color: "#fff",
+            fontFamily:
+              "system-ui, -apple-system, sans-serif",
+            whiteSpace: "nowrap",
+          }
+        );
+
+        const makeIcon152 = (
+          icon152: string,
+          title152: string
+        ) => {
+          const button152 =
+            document150A.createElement(
+              "button"
+            );
+
+          button152.type = "button";
+          button152.textContent =
+            icon152;
+          button152.title = title152;
+
+          Object.assign(
+            button152.style,
+            {
+              width: "34px",
+              height: "34px",
+              border: "0",
+              borderRadius: "10px",
+              background:
+                "rgba(255,255,255,.12)",
+              color: "#fff",
+              fontSize: "17px",
+              cursor: "pointer",
+              display: "grid",
+              placeItems: "center",
+              padding: "0",
+            }
+          );
+
+          return button152;
+        };
+
+        const trash152 =
+          makeIcon152(
+            "🗑️",
+            "Hide this storefront element"
+          );
+
+        const save152 =
+          makeIcon152(
+            "💾",
+            "Save position and size"
+          );
+
+        const edit152 =
+          makeIcon152(
+            "✏️",
+            "Edit text and font"
+          );
+
+        const status152 =
+          document150A.createElement(
+            "span"
+          );
+
+        status152.setAttribute(
+          "data-darik-toolbar-status152",
+          "true"
+        );
+
+        Object.assign(
+          status152.style,
+          {
+            minWidth: "0",
+            fontSize: "11px",
+            fontWeight: "800",
+            color:
+              "rgba(255,255,255,.88)",
+            paddingInline: "2px",
+          }
+        );
+
+        trash152.addEventListener(
+          "click",
+          (event152) => {
+            event152.preventDefault();
+            event152.stopPropagation();
+            hideSelected152();
+          }
+        );
+
+        save152.addEventListener(
+          "click",
+          (event152) => {
+            event152.preventDefault();
+            event152.stopPropagation();
+
+            if (textEditor152) {
+              const saveButton152 =
+                textEditor152.querySelector(
+                  "button:last-child"
+                );
+
+              if (
+                saveButton152 &&
+                "click" in saveButton152
+              ) {
+                (saveButton152 as HTMLButtonElement).click();
+                return;
+              }
+            }
+
+            void saveLayout150D();
+
+            showToolbarStatus152(
+              "Saved ✓"
+            );
+          }
+        );
+
+        edit152.addEventListener(
+          "click",
+          (event152) => {
+            event152.preventDefault();
+            event152.stopPropagation();
+            openTextEditor152();
+          }
+        );
+
+        toolbar152.append(
+          trash152,
+          save152
+        );
+
+        if (
+          editableTextMeta152(
+            selectedTarget152
+          )
+        ) {
+          toolbar152.append(
+            edit152
+          );
+        }
+
+        toolbar152.append(
+          status152
+        );
+
+        document150A.body.appendChild(
+          toolbar152
+        );
+
+        selectionToolbar152 =
+          toolbar152;
+
+        positionSelectionUi152();
+      }
+
+      function selectTarget152(
+        target152: Element
+      ) {
+        if (
+          target152 ===
+          selectedTarget152
+        ) {
+          positionSelectionUi152();
+          return;
+        }
+
+        selectedTarget152?.removeAttribute(
+          "data-darik-selected152"
+        );
+
+        closeTextEditor152();
+
+        selectedTarget152 =
+          target152;
+
+        // Selection itself is explicit edit mode. Lock scrolling until
+        // the retailer taps empty space / clears the selection.
+        lockDragScroll150C();
+
+        target152.setAttribute(
+          "data-darik-selected152",
+          "true"
+        );
+
+        installSelectionToolbar152();
+      }
+
+      function handleSelectionClick152(
+        event152: MouseEvent
+      ) {
+        if (
+          Date.now() <
+            blockClickUntil150A &&
+          blockClickTarget150A
+        ) {
+          return;
+        }
+
+        if (
+          isEditorChrome152(
+            event152.target
+          )
+        ) {
+          return;
+        }
+
+        const target152 =
+          chooseTarget150A(
+            event152.target
+          );
+
+        if (target152) {
+          selectTarget152(
+            target152
+          );
+        } else {
+          clearSelection152();
+        }
+      }
+
       function resetProofLayout150C() {
+        clearSelection152();
+
         clearHold150A();
         unlockDragScroll150C();
         restoreCandidateDecoration150A();
@@ -2996,6 +4194,27 @@ export default function DarikDirectStorefrontSettingsPage() {
 
         originalScale151.clear();
 
+        for (const [
+          target152,
+          originalDisplayValue152,
+        ] of originalDisplay152.entries()) {
+          const style152 =
+            (target152 as HTMLElement).style;
+
+          if (originalDisplayValue152) {
+            style152.setProperty(
+              "display",
+              originalDisplayValue152
+            );
+          } else {
+            style152.removeProperty(
+              "display"
+            );
+          }
+        }
+
+        originalDisplay152.clear();
+
         pinching151 = false;
         pinchTarget151 = null;
         pinchStartDistance151 = 0;
@@ -3028,11 +4247,12 @@ export default function DarikDirectStorefrontSettingsPage() {
           "true"
         );
         button150C.title =
-          "Restore every moved preview element to its original position";
+          "Restore moved, resized, or hidden preview elements to their defaults";
 
         Object.assign(button150C.style, {
           position: "fixed",
-          right: "16px",
+          left: "16px",
+          right: "auto",
           bottom: "16px",
           zIndex: "4000",
           border: "1px solid rgba(15,23,42,.18)",
@@ -3197,6 +4417,13 @@ export default function DarikDirectStorefrontSettingsPage() {
           scale: clampScale151(
             scale151
           ),
+          ...(prior151?.hidden !==
+          undefined
+            ? {
+                hidden:
+                  prior151.hidden,
+              }
+            : {}),
           label:
             prior151?.label ??
             label150D(target151),
@@ -3231,25 +4458,20 @@ export default function DarikDirectStorefrontSettingsPage() {
         const secondTouch151 =
           event151.touches[1];
 
-        const firstTarget151 =
-          chooseTarget150A(
+        if (
+          !selectedTarget152 ||
+          isEditorChrome152(
             firstTouch151.target
-          );
-
-        const secondTarget151 =
-          chooseTarget150A(
+          ) ||
+          isEditorChrome152(
             secondTouch151.target
-          );
-
-        const target151 =
-          sharedPinchTarget151(
-            firstTarget151,
-            secondTarget151
-          );
-
-        if (!target151) {
+          )
+        ) {
           return;
         }
+
+        const target151 =
+          selectedTarget152;
 
         clearHold150A();
 
@@ -3347,6 +4569,8 @@ export default function DarikDirectStorefrontSettingsPage() {
           ),
           "important"
         );
+
+        positionSelectionUi152();
 
         event151.preventDefault();
         event151.stopPropagation();
@@ -3489,11 +4713,17 @@ export default function DarikDirectStorefrontSettingsPage() {
           return;
         }
 
-        const target150A = chooseTarget150A(
-          event150A.target
-        );
+        if (
+          !selectedTarget152 ||
+          isEditorChrome152(
+            event150A.target
+          )
+        ) {
+          return;
+        }
 
-        if (!target150A) return;
+        const target150A =
+          selectedTarget152;
 
         const computed150A = parseTranslate150A(
           window150A.getComputedStyle(target150A).translate
@@ -3524,12 +4754,8 @@ export default function DarikDirectStorefrontSettingsPage() {
           originalTouchAction: style150A.touchAction,
         };
 
-        if (event150A.pointerType === "touch") {
-          holdTimer150A = window150A.setTimeout(
-            () => beginDrag150A(),
-            180
-          );
-        }
+        // Selected-object mode: one finger can move the selected
+        // element from anywhere in the preview without a hold delay.
       }
 
       function moveCandidate150A(event150A: PointerEvent) {
@@ -3552,14 +4778,10 @@ export default function DarikDirectStorefrontSettingsPage() {
 
         if (
           !dragging150A &&
-          candidate150A.pointerType === "touch"
+          candidate150A.pointerType === "touch" &&
+          distance150A >= 1
         ) {
-          if (distance150A > 16) {
-            clearHold150A();
-            candidate150A = null;
-          }
-
-          return;
+          beginDrag150A();
         }
 
         if (!dragging150A && distance150A >= 1) {
@@ -3581,6 +4803,8 @@ export default function DarikDirectStorefrontSettingsPage() {
           `${Math.round(x150A)}px ${Math.round(y150A)}px`,
           "important"
         );
+
+        positionSelectionUi152();
       }
 
       function finishCandidate150A(
@@ -3673,6 +4897,13 @@ export default function DarikDirectStorefrontSettingsPage() {
                       ),
                   }
                 : {}),
+              ...(priorPoint151?.hidden !==
+              undefined
+                ? {
+                    hidden:
+                      priorPoint151.hidden,
+                  }
+                : {}),
               label: label150D(
                 completed150A.target
               ),
@@ -3746,6 +4977,12 @@ export default function DarikDirectStorefrontSettingsPage() {
           event150A.stopImmediatePropagation();
         }
       }
+
+      document150A.addEventListener(
+        "click",
+        handleSelectionClick152,
+        true
+      );
 
       document150A.addEventListener(
         "touchstart",
@@ -3826,6 +5063,12 @@ export default function DarikDirectStorefrontSettingsPage() {
           resetButton150C.remove();
           resetButton150C = null;
         }
+
+        document150A.removeEventListener(
+          "click",
+          handleSelectionClick152,
+          true
+        );
 
         document150A.removeEventListener(
           "touchstart",
@@ -3936,6 +5179,41 @@ export default function DarikDirectStorefrontSettingsPage() {
         }
 
         originalScale151.clear();
+
+        for (const [
+          target152,
+          originalDisplayValue152,
+        ] of originalDisplay152.entries()) {
+          const style152 =
+            (target152 as HTMLElement).style;
+
+          if (originalDisplayValue152) {
+            style152.setProperty(
+              "display",
+              originalDisplayValue152
+            );
+          } else {
+            style152.removeProperty(
+              "display"
+            );
+          }
+
+          target152.removeAttribute(
+            "data-darik-selected152"
+          );
+        }
+
+        originalDisplay152.clear();
+
+        clearSelection152();
+
+        if (toolbarStatusTimer152) {
+          window150A.clearTimeout(
+            toolbarStatusTimer152
+          );
+
+          toolbarStatusTimer152 = 0;
+        }
 
         pinching151 = false;
         pinchTarget151 = null;
