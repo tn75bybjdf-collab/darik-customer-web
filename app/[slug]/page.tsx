@@ -1,5 +1,7 @@
 "use client";
 
+// DARIK_PRIVATE_OWNER_STOREFRONT_PREVIEW_140
+
 // DARIK_FURNITURE_OPTIONAL_ITEM_VIDEO_068
 // DARIK_HOME_APPLIANCES_SHORT_ITEM_VIDEO_071
 // DARIK_DUAL_SIZE_PRODUCT_PHOTOS_078
@@ -1579,6 +1581,50 @@ export default function DarikDirectStorefrontPage() {
       setLoading(true);
       setLoadError("");
 
+      const builderPreviewRequested140 =
+        new URLSearchParams(window.location.search).get("builderPreview") === "1";
+
+      if (builderPreviewRequested140) {
+        const { data: previewSessionData140 } = await supabase.auth.getSession();
+        const previewAccessToken140 = previewSessionData140.session?.access_token ?? "";
+
+        if (previewAccessToken140) {
+          try {
+            const previewResponse140 = await fetch(
+              `/api/retailer-storefront-preview?slug=${encodeURIComponent(slug)}`,
+              {
+                method: "GET",
+                cache: "no-store",
+                headers: {
+                  Authorization: `Bearer ${previewAccessToken140}`,
+                },
+              }
+            );
+
+            if (previewResponse140.ok) {
+              const previewPayload140 = (await previewResponse140.json()) as {
+                ok?: boolean;
+                storefront?: Storefront | null;
+                products?: Product[];
+                categories?: Category[];
+              };
+
+              if (cancelled) return;
+
+              if (previewPayload140.ok && previewPayload140.storefront) {
+                setPublicStatus(null);
+                setStorefront(previewPayload140.storefront);
+                setProducts(previewPayload140.products ?? []);
+                setCategories(previewPayload140.categories ?? []);
+                setLoading(false);
+                return;
+              }
+            }
+          } catch (previewError140) {
+            console.warn("Darik private builder preview failed; using public gate.", previewError140);
+          }
+        }
+      }
       const storefrontResult = await supabase
         .from("public_retailer_storefronts")
         .select("*")
