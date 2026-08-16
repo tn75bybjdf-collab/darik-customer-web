@@ -1,12 +1,13 @@
 "use client";
 
+// DARIK_REAL_PRIVATE_PREVIEW_ALIAS_143
+
 // DARIK_INTERNAL_SETUP_SLUG_PRIVACY_142_V3
 function isInternalSetupSlug142(value: unknown) {
   return /^setup-/i.test(String(value ?? "").trim());
 }
 
 
-// DARIK_ACTUAL_STORE_SECRET_PREVIEW_141
 
 // DARIK_THEME_STEP_GALLERY_STABLE_AUTO_PREVIEW_138
 
@@ -1201,14 +1202,13 @@ export default function DarikDirectStorefrontSettingsPage() {
   const [liveBuilderPreviewOpen, setLiveBuilderPreviewOpen] = useState(true);
   // DARIK_THEME_STEP_GALLERY_STABLE_AUTO_PREVIEW_138: iframe theme changes only after a completed theme save.
   const [liveBuilderPreviewTheme138, setLiveBuilderPreviewTheme138] = useState("");
-  const [actualStorePreviewSecret141, setActualStorePreviewSecret141] =
-    useState("");
+  const [realPrivatePreviewKey143, setRealPrivatePreviewKey143] = useState("");
 
   useEffect(() => {
-    const bytes141 = new Uint8Array(32);
-    window.crypto.getRandomValues(bytes141);
-    setActualStorePreviewSecret141(
-      Array.from(bytes141, (value) => value.toString(16).padStart(2, "0")).join("")
+    const bytes143 = new Uint8Array(32);
+    window.crypto.getRandomValues(bytes143);
+    setRealPrivatePreviewKey143(
+      Array.from(bytes143, (value) => value.toString(16).padStart(2, "0")).join("")
     );
   }, []);
   // DARIK_DASHBOARD_FULLSCREEN_PREVIEW_STEP_SCROLL_FIX_111
@@ -4180,14 +4180,16 @@ await saveStorefront(undefined, "manual");
                   </div>
 
                   <div className={designStyles.liveBuilderPreviewViewport}>
-                    {storefront && liveBuilderPreviewTheme138 && !isInternalSetupSlug142(storefront.slug)  && actualStorePreviewSecret141 ? (
+                    {storefront && liveBuilderPreviewTheme138 && realPrivatePreviewKey143 ? (
                       <iframe
                         ref={liveBuilderPreviewRef}
                         title="Live Darik storefront preview"
-                        src={`/${storefront.slug}?previewField=${encodeURIComponent(
+                        src={`/_darik-private-store-preview?storefrontId=${encodeURIComponent(
+                          storefront.id
+                        )}&previewField=${encodeURIComponent(
                           liveBuilderPreviewTheme138
-                        )}&fieldLab=1&builderPreview=1&ownerPreviewSecret=${encodeURIComponent(
-                          actualStorePreviewSecret141
+                        )}&fieldLab=1&builderPreview=1&previewKey=${encodeURIComponent(
+                          realPrivatePreviewKey143
                         )}`}
                         onLoad={pushLiveBuilderDraft}
                       />
@@ -4232,8 +4234,7 @@ await saveStorefront(undefined, "manual");
                           <i />
                         </div>
                         <small>
-                          The real scrollable storefront preview will connect automatically as soon
-                          as Darik creates your draft storefront.
+                          Opening your real private storefront preview...
                         </small>
                       </div>
                     )}

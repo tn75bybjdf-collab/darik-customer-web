@@ -1,6 +1,7 @@
 "use client";
 
-// DARIK_ACTUAL_STORE_SECRET_PREVIEW_141
+// DARIK_REAL_PRIVATE_PREVIEW_ALIAS_143
+
 
 
 // DARIK_FURNITURE_OPTIONAL_ITEM_VIDEO_068
@@ -1582,30 +1583,60 @@ export default function DarikDirectStorefrontPage() {
       setLoading(true);
       setLoadError("");
 
-      const previewParams141 = new URLSearchParams(window.location.search);
-      const previewSecret141 = previewParams141.get("ownerPreviewSecret") ?? "";
-      const actualStorePreview141 =
-        previewParams141.get("builderPreview") === "1" && previewSecret141.length >= 32;
+      const privatePreviewParams143 = new URLSearchParams(window.location.search);
+      const privateAliasPreview143 =
+        slug === "_darik-private-store-preview" &&
+        privatePreviewParams143.get("builderPreview") === "1";
 
-      if (actualStorePreview141) {
-        const { data: previewSessionData141 } = await supabase.auth.getSession();
-        const previewAccessToken141 = previewSessionData141.session?.access_token ?? "";
+      if (privateAliasPreview143) {
+        const privateStorefrontId143 =
+          privatePreviewParams143.get("storefrontId") ?? "";
+        const privatePreviewKey143 =
+          privatePreviewParams143.get("previewKey") ?? "";
 
-        if (previewAccessToken141) {
-          try {
-            const previewResponse141 = await fetch(
-              `/api/retailer-storefront-live-preview?slug=${encodeURIComponent(slug)}`,
-              {
-                method: "GET",
-                cache: "no-store",
-                headers: {
-                  Authorization: `Bearer ${previewAccessToken141}`,
-                  "X-Darik-Preview-Secret": previewSecret141,
-                },
-              }
-            );
+        const privatePreviewRequestValid143 =
+          /^[0-9a-f-]{36}$/i.test(privateStorefrontId143) &&
+          privatePreviewKey143.length >= 32;
 
-            const previewPayload141 = (await previewResponse141.json().catch(() => ({}))) as {
+        if (!privatePreviewRequestValid143) {
+          setPublicStatus(null);
+          setStorefront(null);
+          setProducts([]);
+          setCategories([]);
+          setLoading(false);
+          return;
+        }
+
+        const { data: privateSessionData143 } = await supabase.auth.getSession();
+        const privateAccessToken143 =
+          privateSessionData143.session?.access_token ?? "";
+
+        if (!privateAccessToken143) {
+          setPublicStatus(null);
+          setStorefront(null);
+          setProducts([]);
+          setCategories([]);
+          setLoading(false);
+          return;
+        }
+
+        try {
+          const privateResponse143 = await fetch(
+            `/api/retailer-storefront-preview-143?storefrontId=${encodeURIComponent(
+              privateStorefrontId143
+            )}`,
+            {
+              method: "GET",
+              cache: "no-store",
+              headers: {
+                Authorization: `Bearer ${privateAccessToken143}`,
+                "X-Darik-Preview-Key": privatePreviewKey143,
+              },
+            }
+          );
+
+          const privatePayload143 =
+            (await privateResponse143.json().catch(() => ({}))) as {
               ok?: boolean;
               error?: string;
               storefront?: Storefront | null;
@@ -1613,32 +1644,38 @@ export default function DarikDirectStorefrontPage() {
               categories?: Category[];
             };
 
-            if (cancelled) return;
+          if (cancelled) return;
 
-            if (previewResponse141.ok && previewPayload141.ok && previewPayload141.storefront) {
-              setPublicStatus(null);
-              setStorefront(previewPayload141.storefront);
-              setProducts(previewPayload141.products ?? []);
-              setCategories(previewPayload141.categories ?? []);
-              setLoading(false);
-              return;
-            }
-
-            console.warn(
-              "Darik private actual-store preview was unavailable; using the normal public storefront gate.",
-              previewPayload141.error || previewResponse141.status
-            );
-          } catch (previewError141) {
-            console.warn(
-              "Darik private actual-store preview failed; using the normal public storefront gate.",
-              previewError141
-            );
+          if (
+            privateResponse143.ok &&
+            privatePayload143.ok &&
+            privatePayload143.storefront
+          ) {
+            setPublicStatus(null);
+            setStorefront(privatePayload143.storefront);
+            setProducts(privatePayload143.products ?? []);
+            setCategories(privatePayload143.categories ?? []);
+            setLoading(false);
+            return;
           }
-        } else {
+
           console.warn(
-            "Darik private actual-store preview has no retailer session; using the normal public storefront gate."
+            "Darik real private storefront preview 143 was rejected.",
+            privatePayload143.error || privateResponse143.status
+          );
+        } catch (privatePreviewError143) {
+          console.warn(
+            "Darik real private storefront preview 143 failed.",
+            privatePreviewError143
           );
         }
+
+        setPublicStatus(null);
+        setStorefront(null);
+        setProducts([]);
+        setCategories([]);
+        setLoading(false);
+        return;
       }
       const storefrontResult = await supabase
         .from("public_retailer_storefronts")
@@ -3964,11 +4001,9 @@ export default function DarikDirectStorefrontPage() {
   }
 
   async function placeOnlineOrder() {
-    const previewOrderSecret141 =
-      new URLSearchParams(window.location.search).get("ownerPreviewSecret") ?? "";
-    if (previewOrderSecret141.length >= 32) {
+    if (window.location.pathname === "/_darik-private-store-preview") {
       setCheckoutError(
-        "Private preview only — this checkout cannot submit a real order."
+        "Private storefront preview only - checkout cannot submit a real order."
       );
       return;
     }
