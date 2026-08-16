@@ -914,6 +914,168 @@ const darikGlobalTypographyCss106 = Object.entries(
   .join("\n");
 
 // DARIK_CLICK_PREVIEW_POSITIONING_145
+// DARIK_FREEFORM_DRAG_EDITOR_146
+type StorefrontFreeformPoint146 = {
+  x: number;
+  y: number;
+  label?: string;
+};
+
+type StorefrontFreeformDevice146 = Record<
+  string,
+  StorefrontFreeformPoint146
+>;
+
+type StorefrontFreeformLayout146 = {
+  desktop: StorefrontFreeformDevice146;
+  mobile: StorefrontFreeformDevice146;
+};
+
+function clampStorefrontFreeform146(value: unknown) {
+  const numeric = Number(value);
+  if (!Number.isFinite(numeric)) return 0;
+  return Math.max(-1200, Math.min(1200, Math.round(numeric)));
+}
+
+function storefrontDefaultFreeformLayout146(): StorefrontFreeformLayout146 {
+  return {
+    desktop: {},
+    mobile: {},
+  };
+}
+
+function isSafeStorefrontFreeformLocator146(value: unknown) {
+  const locator = String(value ?? "").trim();
+  return (
+    locator.length >= 1 &&
+    locator.length <= 700 &&
+    /^[A-Za-z0-9_#:.() >-]+$/.test(locator)
+  );
+}
+
+function normalizeStorefrontFreeformLayout146(
+  value: unknown
+): StorefrontFreeformLayout146 {
+  const raw =
+    value && typeof value === "object" && !Array.isArray(value)
+      ? (value as Record<string, unknown>)
+      : {};
+
+  const result = storefrontDefaultFreeformLayout146();
+
+  for (const device of ["desktop", "mobile"] as const) {
+    const rawDevice =
+      raw[device] &&
+      typeof raw[device] === "object" &&
+      !Array.isArray(raw[device])
+        ? (raw[device] as Record<string, unknown>)
+        : {};
+
+    let count146 = 0;
+
+    for (const [locator, rawPoint] of Object.entries(rawDevice)) {
+      if (count146 >= 250) break;
+      if (!isSafeStorefrontFreeformLocator146(locator)) continue;
+      if (
+        !rawPoint ||
+        typeof rawPoint !== "object" ||
+        Array.isArray(rawPoint)
+      ) {
+        continue;
+      }
+
+      const point = rawPoint as Record<string, unknown>;
+      const label =
+        typeof point.label === "string"
+          ? point.label.trim().slice(0, 140)
+          : undefined;
+
+      result[device][locator] = {
+        x: clampStorefrontFreeform146(point.x),
+        y: clampStorefrontFreeform146(point.y),
+        ...(label ? { label } : {}),
+      };
+
+      count146 += 1;
+    }
+  }
+
+  return result;
+}
+
+function storefrontFreeformElementLabel146(element: Element) {
+  const tag = element.tagName.toLowerCase();
+  const aria = element.getAttribute("aria-label")?.trim();
+  const title = element.getAttribute("title")?.trim();
+  const text = (element.textContent ?? "")
+    .replace(/\s+/g, " ")
+    .trim()
+    .slice(0, 72);
+
+  const detail = aria || title || text;
+  return detail ? `${tag} · ${detail}`.slice(0, 140) : tag;
+}
+
+function storefrontFreeformLocator146(
+  root: Element,
+  target: Element
+) {
+  if (target === root) return "";
+
+  const id = target.getAttribute("id")?.trim() ?? "";
+  if (/^[A-Za-z][A-Za-z0-9_-]{0,100}$/.test(id)) {
+    const locator = `#${id}`;
+    try {
+      if (root.querySelectorAll(locator).length === 1) {
+        return locator;
+      }
+    } catch {
+      // Fall through to structural locator.
+    }
+  }
+
+  const segments: string[] = [];
+  let current: Element | null = target;
+  let depth = 0;
+
+  while (current && current !== root && depth < 18) {
+    const parent = current.parentElement;
+    if (!parent) return "";
+
+    const tag = current.tagName.toLowerCase();
+    const sameTag = Array.from(parent.children).filter(
+      (child) => child.tagName === current?.tagName
+    );
+    const index = sameTag.indexOf(current);
+
+    if (index < 0) return "";
+
+    segments.unshift(`${tag}:nth-of-type(${index + 1})`);
+
+    current = parent;
+    depth += 1;
+  }
+
+  if (current !== root || segments.length === 0) return "";
+
+  const locator = segments.join(" > ");
+  return isSafeStorefrontFreeformLocator146(locator) ? locator : "";
+}
+
+function storefrontFreeformTranslate146(value: string) {
+  const normalized = String(value || "").trim();
+
+  if (!normalized || normalized === "none") {
+    return { x: 0, y: 0 };
+  }
+
+  const matches = normalized.match(/-?[0-9.]+/g) ?? [];
+  return {
+    x: clampStorefrontFreeform146(matches[0] ?? 0),
+    y: clampStorefrontFreeform146(matches[1] ?? 0),
+  };
+}
+
 type StorefrontPositionKey145 =
   | "display_name"
   | "display_name_ar"
@@ -1930,6 +2092,7 @@ export default function DarikDirectStorefrontPage() {
       "tagline_ar",
       "direct_typography",
       "direct_content_positioning",
+      "direct_freeform_layout",
       "logo_url",
       "hero_image_url",
       "business_phone",
@@ -4373,6 +4536,458 @@ export default function DarikDirectStorefrontPage() {
       }`
     : "";
 
+  const [savedFreeformLayout146, setSavedFreeformLayout146] =
+    useState<StorefrontFreeformLayout146>(() =>
+      storefrontDefaultFreeformLayout146()
+    );
+
+  const [freeformMoveMode146, setFreeformMoveMode146] = useState(false);
+
+  useEffect(() => {
+    if (!isBuilderPositionPreview145) {
+      setFreeformMoveMode146(false);
+      return;
+    }
+
+    setFreeformMoveMode146(true);
+  }, [isBuilderPositionPreview145]);
+
+  useEffect(() => {
+    if (!slug) {
+      setSavedFreeformLayout146(storefrontDefaultFreeformLayout146());
+      return;
+    }
+
+    let cancelled = false;
+
+    void (async () => {
+      const result = await supabase.rpc(
+        "darik_direct_public_freeform_layout_v1",
+        { p_slug: slug }
+      );
+
+      if (cancelled || result.error) return;
+
+      setSavedFreeformLayout146(
+        normalizeStorefrontFreeformLayout146(result.data)
+      );
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [slug]);
+
+  const storefrontFreeformRaw146 = (
+    storefront as unknown as {
+      direct_freeform_layout?: unknown;
+    }
+  ).direct_freeform_layout;
+
+  const effectiveFreeformLayout146 = useMemo(
+    () =>
+      normalizeStorefrontFreeformLayout146(
+        storefrontFreeformRaw146 ?? savedFreeformLayout146
+      ),
+    [storefrontFreeformRaw146, savedFreeformLayout146]
+  );
+
+  useEffect(() => {
+    function handleFreeformModeMessage146(event: MessageEvent) {
+      if (event.origin !== window.location.origin) return;
+      if (event.data?.type !== "DARIK_FREEFORM_MOVE_MODE_146") return;
+      if (!isBuilderPositionPreview145) return;
+
+      setFreeformMoveMode146(Boolean(event.data?.enabled));
+    }
+
+    window.addEventListener("message", handleFreeformModeMessage146);
+
+    if (isBuilderPositionPreview145) {
+      window.parent.postMessage(
+        { type: "DARIK_FREEFORM_EDITOR_READY_146" },
+        window.location.origin
+      );
+    }
+
+    return () =>
+      window.removeEventListener(
+        "message",
+        handleFreeformModeMessage146
+      );
+  }, [isBuilderPositionPreview145]);
+
+  useEffect(() => {
+    const root = document.querySelector(
+      '[data-darik-freeform-root146="true"]'
+    );
+
+    if (!(root instanceof HTMLElement)) return;
+
+    let applyFrame146 = 0;
+
+    function clearAppliedFreeform146() {
+      root
+        .querySelectorAll('[data-darik-freeform-applied146="true"]')
+        .forEach((element) => {
+          if (
+            element instanceof HTMLElement ||
+            element instanceof SVGElement
+          ) {
+            element.style.removeProperty("translate");
+            element.removeAttribute("data-darik-freeform-applied146");
+          }
+        });
+    }
+
+    function applyFreeform146() {
+      window.cancelAnimationFrame(applyFrame146);
+
+      applyFrame146 = window.requestAnimationFrame(() => {
+        clearAppliedFreeform146();
+
+        const device =
+          window.innerWidth <= 720 ? "mobile" : "desktop";
+
+        const entries = effectiveFreeformLayout146[device];
+
+        for (const [locator, point] of Object.entries(entries)) {
+          if (!isSafeStorefrontFreeformLocator146(locator)) continue;
+
+          let element: Element | null = null;
+
+          try {
+            element = root.querySelector(locator);
+          } catch {
+            element = null;
+          }
+
+          if (
+            !element ||
+            !(
+              element instanceof HTMLElement ||
+              element instanceof SVGElement
+            )
+          ) {
+            continue;
+          }
+
+          element.style.setProperty(
+            "translate",
+            `${clampStorefrontFreeform146(point.x)}px ${clampStorefrontFreeform146(point.y)}px`,
+            "important"
+          );
+          element.setAttribute(
+            "data-darik-freeform-applied146",
+            "true"
+          );
+        }
+      });
+    }
+
+    applyFreeform146();
+
+    const observer = new MutationObserver(() => applyFreeform146());
+    observer.observe(root, {
+      childList: true,
+      subtree: true,
+    });
+
+    window.addEventListener("resize", applyFreeform146);
+
+    return () => {
+      observer.disconnect();
+      window.removeEventListener("resize", applyFreeform146);
+      window.cancelAnimationFrame(applyFrame146);
+    };
+  }, [effectiveFreeformLayout146]);
+
+  useEffect(() => {
+    const root = document.querySelector(
+      '[data-darik-freeform-root146="true"]'
+    );
+
+    if (!(root instanceof HTMLElement)) return;
+    if (!isBuilderPositionPreview145 || !freeformMoveMode146) {
+      root
+        .querySelectorAll(
+          '[data-darik-freeform-hover146="true"], [data-darik-freeform-dragging146="true"]'
+        )
+        .forEach((element) => {
+          element.removeAttribute("data-darik-freeform-hover146");
+          element.removeAttribute("data-darik-freeform-dragging146");
+        });
+      return;
+    }
+
+    type DragState146 = {
+      target: HTMLElement | SVGElement;
+      locator: string;
+      label: string;
+      device: "desktop" | "mobile";
+      pointerId: number;
+      startClientX: number;
+      startClientY: number;
+      baseX: number;
+      baseY: number;
+      x: number;
+      y: number;
+    };
+
+    let drag146: DragState146 | null = null;
+    let hover146: Element | null = null;
+
+    function clearHover146() {
+      if (hover146) {
+        hover146.removeAttribute("data-darik-freeform-hover146");
+      }
+      hover146 = null;
+    }
+
+    function clearSelected146() {
+      root
+        .querySelectorAll('[data-darik-freeform-selected146="true"]')
+        .forEach((element) =>
+          element.removeAttribute("data-darik-freeform-selected146")
+        );
+    }
+
+    function targetFromEvent146(event: Event) {
+      const rawTarget = event.target;
+
+      if (!(rawTarget instanceof Element)) return null;
+      if (!root.contains(rawTarget)) return null;
+      if (rawTarget === root) return null;
+
+      const tag = rawTarget.tagName.toLowerCase();
+      if (
+        tag === "html" ||
+        tag === "body" ||
+        tag === "script" ||
+        tag === "style"
+      ) {
+        return null;
+      }
+
+      if (
+        rawTarget.closest(
+          '[data-darik-freeform-ignore146="true"]'
+        )
+      ) {
+        return null;
+      }
+
+      if (
+        !(
+          rawTarget instanceof HTMLElement ||
+          rawTarget instanceof SVGElement
+        )
+      ) {
+        return null;
+      }
+
+      return rawTarget;
+    }
+
+    function handlePointerOver146(event: PointerEvent) {
+      if (drag146) return;
+
+      const target = targetFromEvent146(event);
+      clearHover146();
+
+      if (!target) return;
+
+      hover146 = target;
+      target.setAttribute("data-darik-freeform-hover146", "true");
+    }
+
+    function handlePointerDown146(event: PointerEvent) {
+      if (event.pointerType === "mouse" && event.button !== 0) return;
+
+      const target = targetFromEvent146(event);
+      if (!target) return;
+
+      const locator = storefrontFreeformLocator146(root, target);
+      if (!locator) return;
+
+      event.preventDefault();
+      event.stopPropagation();
+
+      clearHover146();
+      clearSelected146();
+
+      target.setAttribute("data-darik-freeform-selected146", "true");
+      target.setAttribute("data-darik-freeform-dragging146", "true");
+
+      const device =
+        window.innerWidth <= 720 ? "mobile" : "desktop";
+
+      const saved = effectiveFreeformLayout146[device][locator];
+      const computed = storefrontFreeformTranslate146(
+        window.getComputedStyle(target).translate
+      );
+
+      const baseX = saved?.x ?? computed.x;
+      const baseY = saved?.y ?? computed.y;
+      const label =
+        saved?.label || storefrontFreeformElementLabel146(target);
+
+      drag146 = {
+        target,
+        locator,
+        label,
+        device,
+        pointerId: event.pointerId,
+        startClientX: event.clientX,
+        startClientY: event.clientY,
+        baseX,
+        baseY,
+        x: baseX,
+        y: baseY,
+      };
+
+      try {
+        target.setPointerCapture(event.pointerId);
+      } catch {
+        // Pointer capture is best effort.
+      }
+
+      window.parent.postMessage(
+        {
+          type: "DARIK_FREEFORM_DRAG_START_146",
+          locator,
+          label,
+          device,
+          x: baseX,
+          y: baseY,
+        },
+        window.location.origin
+      );
+    }
+
+    function handlePointerMove146(event: PointerEvent) {
+      if (!drag146 || event.pointerId !== drag146.pointerId) return;
+
+      event.preventDefault();
+      event.stopPropagation();
+
+      const x = clampStorefrontFreeform146(
+        drag146.baseX + event.clientX - drag146.startClientX
+      );
+      const y = clampStorefrontFreeform146(
+        drag146.baseY + event.clientY - drag146.startClientY
+      );
+
+      drag146.x = x;
+      drag146.y = y;
+
+      drag146.target.style.setProperty(
+        "translate",
+        `${x}px ${y}px`,
+        "important"
+      );
+      drag146.target.setAttribute(
+        "data-darik-freeform-applied146",
+        "true"
+      );
+
+      window.parent.postMessage(
+        {
+          type: "DARIK_FREEFORM_DRAG_MOVE_146",
+          locator: drag146.locator,
+          label: drag146.label,
+          device: drag146.device,
+          x,
+          y,
+        },
+        window.location.origin
+      );
+    }
+
+    function finishDrag146(event: PointerEvent) {
+      if (!drag146 || event.pointerId !== drag146.pointerId) return;
+
+      event.preventDefault();
+      event.stopPropagation();
+
+      const completed = drag146;
+      completed.target.removeAttribute(
+        "data-darik-freeform-dragging146"
+      );
+
+      try {
+        completed.target.releasePointerCapture(event.pointerId);
+      } catch {
+        // Best effort.
+      }
+
+      drag146 = null;
+
+      window.parent.postMessage(
+        {
+          type: "DARIK_FREEFORM_DRAG_END_146",
+          locator: completed.locator,
+          label: completed.label,
+          device: completed.device,
+          x: completed.x,
+          y: completed.y,
+        },
+        window.location.origin
+      );
+    }
+
+    function cancelDrag146(event: PointerEvent) {
+      if (!drag146 || event.pointerId !== drag146.pointerId) return;
+
+      const cancelled = drag146;
+
+      cancelled.target.style.setProperty(
+        "translate",
+        `${cancelled.baseX}px ${cancelled.baseY}px`,
+        "important"
+      );
+      cancelled.target.removeAttribute(
+        "data-darik-freeform-dragging146"
+      );
+
+      drag146 = null;
+    }
+
+    function blockClick146(event: MouseEvent) {
+      event.preventDefault();
+      event.stopPropagation();
+      event.stopImmediatePropagation();
+    }
+
+    function blockNativeDrag146(event: DragEvent) {
+      event.preventDefault();
+      event.stopPropagation();
+    }
+
+    root.addEventListener("pointerover", handlePointerOver146, true);
+    root.addEventListener("pointerdown", handlePointerDown146, true);
+    root.addEventListener("pointermove", handlePointerMove146, true);
+    root.addEventListener("pointerup", finishDrag146, true);
+    root.addEventListener("pointercancel", cancelDrag146, true);
+    root.addEventListener("click", blockClick146, true);
+    root.addEventListener("dragstart", blockNativeDrag146, true);
+
+    return () => {
+      root.removeEventListener("pointerover", handlePointerOver146, true);
+      root.removeEventListener("pointerdown", handlePointerDown146, true);
+      root.removeEventListener("pointermove", handlePointerMove146, true);
+      root.removeEventListener("pointerup", finishDrag146, true);
+      root.removeEventListener("pointercancel", cancelDrag146, true);
+      root.removeEventListener("click", blockClick146, true);
+      root.removeEventListener("dragstart", blockNativeDrag146, true);
+      clearHover146();
+    };
+  }, [
+    effectiveFreeformLayout146,
+    freeformMoveMode146,
+    isBuilderPositionPreview145,
+  ]);
+
   const effectiveContentPositioning145 =
     normalizeStorefrontContentPositioning145(
       (
@@ -4814,6 +5429,8 @@ export default function DarikDirectStorefrontPage() {
       data-theme-field={effectiveThemeField}
       data-darik-page-font={effectiveStorefrontTypography.page.font}
       data-darik-position-builder145={isBuilderPositionPreview145 ? "true" : "false"}
+      data-darik-freeform-root146="true"
+      data-darik-freeform-mode146={freeformMoveMode146 ? "true" : "false"}
       data-field-preview={previewRetailField ? "yes" : "no"}
       data-mechanics-preview={previewMechanicsField ? "yes" : "no"}
       data-category-count={String(visibleCategories.length)}

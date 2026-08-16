@@ -3056,3 +3056,216 @@
     width: auto;
   }
 }
+
+/* DARIK_FREEFORM_DRAG_EDITOR_146 */
+
+/* FRONTEND 146 supersedes the old arrow/nudge panel. */
+.previewPositionPanel145 {
+  display: none !important;
+}
+
+.freeformDragPanel146 {
+  position: fixed;
+  top: 64px;
+  right: 16px;
+  z-index: 1300;
+  width: min(350px, calc(100vw - 32px));
+  padding: 13px;
+  border: 1px solid rgba(15, 23, 42, 0.13);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.97);
+  color: #0f172a;
+  box-shadow:
+    0 22px 50px rgba(15, 23, 42, 0.22),
+    0 3px 12px rgba(15, 23, 42, 0.08);
+  backdrop-filter: blur(18px);
+}
+
+.freeformDragHeader146 {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.freeformDragHeader146 > div {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+
+.freeformDragHeader146 span {
+  color: #0284c7;
+  font-size: 0.58rem;
+  font-weight: 950;
+  letter-spacing: 0.07em;
+}
+
+.freeformDragHeader146 strong {
+  font-size: 0.92rem;
+  line-height: 1.2;
+}
+
+.freeformDragHeader146 > button {
+  flex: 0 0 auto;
+  min-height: 34px;
+  border: 1px solid rgba(15, 23, 42, 0.11);
+  border-radius: 999px;
+  padding: 0 11px;
+  background: #f1f5f9;
+  color: #475569;
+  font: inherit;
+  font-size: 0.66rem;
+  font-weight: 950;
+  cursor: pointer;
+}
+
+.freeformDragHeader146 > button[data-active="true"] {
+  border-color: rgba(2, 132, 199, 0.24);
+  background: #0284c7;
+  color: #ffffff;
+}
+
+.freeformDragHelp146 {
+  margin: 9px 0 0;
+  color: #64748b;
+  font-size: 0.68rem;
+  line-height: 1.45;
+}
+
+.freeformSelected146 {
+  display: grid;
+  gap: 3px;
+  margin-top: 10px;
+  padding: 9px 10px;
+  border-radius: 12px;
+  background: #f0f9ff;
+}
+
+.freeformSelected146 span {
+  color: #0284c7;
+  font-size: 0.6rem;
+  font-weight: 900;
+}
+
+.freeformSelected146 strong {
+  overflow: hidden;
+  font-size: 0.75rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.freeformNumbers146 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.freeformNumbers146 label {
+  display: grid;
+  gap: 4px;
+}
+
+.freeformNumbers146 span {
+  color: #64748b;
+  font-size: 0.61rem;
+  font-weight: 900;
+}
+
+.freeformNumbers146 input {
+  width: 100%;
+  min-height: 36px;
+  border: 1px solid rgba(15, 23, 42, 0.12);
+  border-radius: 10px;
+  padding: 0 9px;
+  background: #ffffff;
+  color: #0f172a;
+  font: inherit;
+  font-size: 0.76rem;
+  font-weight: 850;
+  outline: none;
+}
+
+.freeformNumbers146 input:focus {
+  border-color: rgba(2, 132, 199, 0.68);
+  box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.11);
+}
+
+.freeformActions146 {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+  margin-top: 9px;
+}
+
+.freeformActions146 button {
+  min-height: 34px;
+  border: 1px solid rgba(15, 23, 42, 0.11);
+  border-radius: 10px;
+  background: #ffffff;
+  color: #0f172a;
+  font: inherit;
+  font-size: 0.64rem;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.freeformActions146 button:last-child {
+  border-color: rgba(185, 28, 28, 0.14);
+  color: #b91c1c;
+}
+
+.freeformActions146 button:disabled {
+  cursor: not-allowed;
+  opacity: 0.42;
+}
+
+.freeformEmpty146 {
+  display: grid;
+  gap: 3px;
+  margin-top: 10px;
+  padding: 10px;
+  border: 1px dashed rgba(2, 132, 199, 0.24);
+  border-radius: 12px;
+  background: #f8fafc;
+}
+
+.freeformEmpty146 strong {
+  font-size: 0.73rem;
+}
+
+.freeformEmpty146 span {
+  color: #64748b;
+  font-size: 0.64rem;
+  line-height: 1.4;
+}
+
+.freeformSaveState146 {
+  margin-top: 9px;
+  color: #64748b;
+  font-size: 0.61rem;
+  font-weight: 900;
+  text-align: right;
+}
+
+.freeformSaveState146[data-state="saved"] {
+  color: #15803d;
+}
+
+.freeformSaveState146[data-state="error"] {
+  color: #b91c1c;
+}
+
+@media (max-width: 720px) {
+  .freeformDragPanel146 {
+    top: auto;
+    right: 10px;
+    bottom: calc(50dvh + 10px);
+    left: 10px;
+    width: auto;
+    max-height: 44vh;
+    overflow: auto;
+    border-radius: 15px;
+  }
+}

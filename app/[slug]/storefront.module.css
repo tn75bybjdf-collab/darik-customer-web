@@ -21444,3 +21444,49 @@
       var(--darik-position-mobile-y-145);
   }
 }
+
+/* DARIK_FREEFORM_DRAG_EDITOR_146 */
+.page[data-darik-freeform-mode146="true"] {
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.page[data-darik-freeform-mode146="true"] * {
+  cursor: grab !important;
+}
+
+.page[data-darik-freeform-mode146="true"]
+  .builderPositionTarget145 {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+.page[data-darik-freeform-mode146="true"]
+  [data-darik-freeform-hover146="true"] {
+  outline: 1px dashed rgba(14, 165, 233, 0.92) !important;
+  outline-offset: 4px !important;
+  box-shadow: 0 0 0 5px rgba(14, 165, 233, 0.08) !important;
+}
+
+.page[data-darik-freeform-mode146="true"]
+  [data-darik-freeform-selected146="true"] {
+  outline: 2px solid rgba(14, 165, 233, 1) !important;
+  outline-offset: 5px !important;
+  box-shadow: 0 0 0 7px rgba(14, 165, 233, 0.13) !important;
+}
+
+.page[data-darik-freeform-mode146="true"]
+  [data-darik-freeform-dragging146="true"] {
+  cursor: grabbing !important;
+  outline-color: rgba(2, 132, 199, 1) !important;
+  box-shadow:
+    0 0 0 7px rgba(14, 165, 233, 0.16),
+    0 16px 34px rgba(15, 23, 42, 0.16) !important;
+  z-index: 2147483000 !important;
+}
+
+@media (pointer: coarse) {
+  .page[data-darik-freeform-mode146="true"] * {
+    touch-action: none !important;
+  }
+}
