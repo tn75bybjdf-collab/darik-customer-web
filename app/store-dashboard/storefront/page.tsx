@@ -1548,6 +1548,81 @@ export default function DarikDirectStorefrontSettingsPage() {
     }
   }, [liveBuilderPreviewOpen]);
 
+  // DARIK_PARENT_AUTH_HANDOFF_148
+  useEffect(() => {
+    async function handlePrivatePreviewAuthRequest148(
+      event: MessageEvent
+    ) {
+      if (event.origin !== window.location.origin) return;
+      if (
+        event.data?.type !==
+        "DARIK_PRIVATE_PREVIEW_AUTH_REQUEST_148"
+      ) {
+        return;
+      }
+
+      const previewWindow148 =
+        liveBuilderPreviewRef.current?.contentWindow;
+
+      if (!previewWindow148) return;
+      if (event.source !== previewWindow148) return;
+
+      const requestId148 =
+        typeof event.data?.requestId === "string"
+          ? event.data.requestId.trim()
+          : "";
+      const requestedStorefrontId148 =
+        typeof event.data?.storefrontId === "string"
+          ? event.data.storefrontId.trim()
+          : "";
+      const requestedPreviewKey148 =
+        typeof event.data?.previewKey === "string"
+          ? event.data.previewKey.trim()
+          : "";
+
+      if (!requestId148) return;
+      if (!storefront?.id) return;
+      if (requestedStorefrontId148 !== storefront.id) return;
+      if (!realPrivatePreviewKey143) return;
+      if (
+        requestedPreviewKey148 !==
+        realPrivatePreviewKey143
+      ) {
+        return;
+      }
+
+      const { data: sessionData148 } =
+        await supabase.auth.getSession();
+
+      const accessToken148 =
+        sessionData148.session?.access_token ?? "";
+
+      previewWindow148.postMessage(
+        {
+          type: "DARIK_PRIVATE_PREVIEW_AUTH_RESPONSE_148",
+          requestId: requestId148,
+          storefrontId: storefront.id,
+          accessToken: accessToken148,
+        },
+        window.location.origin
+      );
+    }
+
+    window.addEventListener(
+      "message",
+      handlePrivatePreviewAuthRequest148
+    );
+
+    return () =>
+      window.removeEventListener(
+        "message",
+        handlePrivatePreviewAuthRequest148
+      );
+  }, [
+    storefront?.id,
+    realPrivatePreviewKey143,
+  ]);
+
   function getLiveBuilderDraftPayload() {
     return {
       display_name: liveBuilderDraftValue("displayName", "display_name"),

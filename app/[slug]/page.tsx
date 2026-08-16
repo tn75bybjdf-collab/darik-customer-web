@@ -937,6 +937,78 @@ function clampStorefrontFreeform146(value: unknown) {
   return Math.max(-1200, Math.min(1200, Math.round(numeric)));
 }
 
+// DARIK_PARENT_AUTH_HANDOFF_148
+async function requestPrivatePreviewParentToken148(
+  storefrontId: string,
+  previewKey: string
+) {
+  if (typeof window === "undefined") return "";
+  if (window.parent === window) return "";
+  if (!storefrontId || !previewKey) return "";
+
+  const requestId148 =
+    typeof window.crypto?.randomUUID === "function"
+      ? window.crypto.randomUUID()
+      : `darik-preview-${Date.now()}-${Math.random()
+          .toString(36)
+          .slice(2)}`;
+
+  return await new Promise<string>((resolve) => {
+    let finished148 = false;
+
+    function finish148(token = "") {
+      if (finished148) return;
+      finished148 = true;
+      window.removeEventListener(
+        "message",
+        handleParentToken148
+      );
+      window.clearTimeout(timeout148);
+      resolve(token);
+    }
+
+    function handleParentToken148(event: MessageEvent) {
+      if (event.origin !== window.location.origin) return;
+      if (event.source !== window.parent) return;
+      if (
+        event.data?.type !==
+        "DARIK_PRIVATE_PREVIEW_AUTH_RESPONSE_148"
+      ) {
+        return;
+      }
+      if (event.data?.requestId !== requestId148) return;
+      if (event.data?.storefrontId !== storefrontId) return;
+
+      const accessToken148 =
+        typeof event.data?.accessToken === "string"
+          ? event.data.accessToken.trim()
+          : "";
+
+      finish148(accessToken148);
+    }
+
+    const timeout148 = window.setTimeout(
+      () => finish148(""),
+      1800
+    );
+
+    window.addEventListener(
+      "message",
+      handleParentToken148
+    );
+
+    window.parent.postMessage(
+      {
+        type: "DARIK_PRIVATE_PREVIEW_AUTH_REQUEST_148",
+        requestId: requestId148,
+        storefrontId,
+        previewKey,
+      },
+      window.location.origin
+    );
+  });
+}
+
 function storefrontDefaultFreeformLayout146(): StorefrontFreeformLayout146 {
   return {
     desktop: {},
@@ -1923,11 +1995,21 @@ export default function DarikDirectStorefrontPage() {
           return;
         }
 
-        const { data: privateSessionData143 } = await supabase.auth.getSession();
-        const privateAccessToken143 =
-          privateSessionData143.session?.access_token ?? "";
+        const parentAccessToken148 =
+  await requestPrivatePreviewParentToken148(
+    privateStorefrontId143,
+    privatePreviewKey143
+  );
 
-        if (!privateAccessToken143) {
+const { data: privateSessionData143 } =
+  await supabase.auth.getSession();
+
+const privateAccessToken143 =
+  parentAccessToken148 ||
+  privateSessionData143.session?.access_token ||
+  "";
+
+if (!privateAccessToken143) {
           setPublicStatus(null);
           setStorefront(null);
           setProducts([]);
