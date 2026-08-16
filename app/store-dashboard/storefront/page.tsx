@@ -1585,6 +1585,7 @@ export default function DarikDirectStorefrontSettingsPage() {
   // DARIK_SELECTED_OBJECT_DIRECT_EDITOR_152
   // DARIK_LIVE_TYPOGRAPHY_PREVIEW_153
   // DARIK_NONBLOCKING_TYPOGRAPHY_PANEL_153B
+  // DARIK_AUTOCLOSE_FONT_TEXT_COLOR_154_V2
   // Dashboard-only drag proof.
   // No DB writes and no app/[slug] edits.
   useEffect(() => {
@@ -2407,6 +2408,10 @@ export default function DarikDirectStorefrontSettingsPage() {
           root150D
         );
 
+        applyTextColors154(
+          root150D
+        );
+
         const currentDevice150D =
           device150D(window150A);
 
@@ -2669,6 +2674,149 @@ export default function DarikDirectStorefrontSettingsPage() {
         normalizeStorefrontTypography(
           storefrontTypographyDraft
         );
+
+      // FRONTEND 154 V2: scoped inside attachPreview150A so
+      // inlineTypography152 is in lexical scope.
+      function normalizeTextColor154(
+      value154: unknown
+    ) {
+      const color154 =
+        String(value154 ?? "")
+          .trim()
+          .toUpperCase();
+
+      return /^#[0-9A-F]{6}$/.test(
+        color154
+      )
+        ? color154
+        : "";
+    }
+
+    function typographyColor154(
+      key154:
+        | "display_name"
+        | "display_name_ar"
+        | "tagline"
+        | "tagline_ar"
+    ) {
+      const inlineSetting154 =
+        (
+          inlineTypography152[
+            key154
+          ] as {
+            color?: unknown;
+          }
+        );
+
+      const inlineColor154 =
+        normalizeTextColor154(
+          inlineSetting154?.color
+        );
+
+      if (inlineColor154) {
+        return inlineColor154;
+      }
+
+      const rawStorefront154 =
+        storefront as unknown as {
+          direct_typography?: Record<
+            string,
+            {
+              color?: unknown;
+            }
+          > | null;
+        };
+
+      return normalizeTextColor154(
+        rawStorefront154
+          ?.direct_typography
+          ?.[key154]
+          ?.color
+      );
+    }
+
+    function withTypographyColor154<
+      T extends Record<string, unknown>
+    >(
+      typography154: T,
+      key154:
+        | "display_name"
+        | "display_name_ar"
+        | "tagline"
+        | "tagline_ar",
+      color154: string
+    ) {
+      if (!color154) {
+        return typography154;
+      }
+
+      const current154 =
+        (
+          typography154[
+            key154
+          ] ?? {}
+        ) as Record<string, unknown>;
+
+      return {
+        ...typography154,
+        [key154]: {
+          ...current154,
+          color: color154,
+        },
+      };
+    }
+
+    function applyTextColors154(
+      root154: Element
+    ) {
+      const mappings154 = [
+        [
+          "display_name",
+          ".darikSemanticDisplayName150E",
+        ],
+        [
+          "display_name_ar",
+          ".darikSemanticDisplayNameAr150E",
+        ],
+        [
+          "tagline",
+          ".darikSemanticTagline150E",
+        ],
+        [
+          "tagline_ar",
+          ".darikSemanticTaglineAr150E",
+        ],
+      ] as const;
+
+      for (const [
+        key154,
+        selector154,
+      ] of mappings154) {
+        const target154 =
+          root154.querySelector(
+            selector154
+          );
+
+        if (!target154) continue;
+
+        const color154 =
+          typographyColor154(key154);
+
+        const style154 =
+          (
+            target154 as HTMLElement
+          ).style;
+
+        if (color154) {
+          style154.setProperty(
+            "color",
+            color154,
+            "important"
+          );
+        }
+      }
+    }
+
 
       const old145Neutralizer150A =
         document150A.createElement("style");
@@ -3225,6 +3373,15 @@ export default function DarikDirectStorefrontSettingsPage() {
         textEditorSave153 = null;
       }
 
+      function hideTextEditorPanel154() {
+        // Remove only the visible panel. Keep the DOM node + callbacks
+        // in memory so the existing floppy can save the pending preview,
+        // and Edit can reopen the same pending controls.
+        textEditor152?.remove();
+
+        positionSelectionUi152();
+      }
+
       function discardTextEditorPreview153() {
         const discard153 =
           textEditorDiscard153;
@@ -3440,7 +3597,8 @@ export default function DarikDirectStorefrontSettingsPage() {
       async function saveInlineText152(
         input152: HTMLInputElement,
         fontSelect152: HTMLSelectElement,
-        sizeInput152: HTMLInputElement
+        sizeInput152: HTMLInputElement,
+        colorInput154: HTMLInputElement
       ) {
         const target152 =
           selectedTarget152;
@@ -3497,7 +3655,21 @@ export default function DarikDirectStorefrontSettingsPage() {
                 )
               );
 
-        const nextTypography152 =
+        const existingColor154 =
+          typographyColor154(
+            meta152.typographyKey
+          );
+
+        const chosenColor154 =
+          colorInput154.dataset
+            .darikColorTouched154 ===
+          "true"
+            ? normalizeTextColor154(
+                colorInput154.value
+              )
+            : existingColor154;
+
+        const normalizedTypography154 =
           normalizeStorefrontTypography(
             {
               ...inlineTypography152,
@@ -3506,6 +3678,13 @@ export default function DarikDirectStorefrontSettingsPage() {
                 size: size152,
               },
             }
+          );
+
+        const nextTypography152 =
+          withTypographyColor154(
+            normalizedTypography154,
+            meta152.typographyKey,
+            chosenColor154
           );
 
         showToolbarStatus152(
@@ -3604,15 +3783,57 @@ export default function DarikDirectStorefrontSettingsPage() {
           return;
         }
 
+        if (
+          textEditor152 &&
+          !textEditor152.isConnected &&
+          textEditorSave153
+        ) {
+          document150A.body.appendChild(
+            textEditor152
+          );
+
+          positionSelectionUi152();
+
+          const reopenInput154 =
+            textEditor152.querySelector(
+              'input[type="text"]'
+            );
+
+          if (
+            reopenInput154 instanceof
+              HTMLInputElement
+          ) {
+            reopenInput154.focus();
+          }
+
+          return;
+        }
+
         discardTextEditorPreview153();
 
         const originalTypography153 =
-          normalizeStorefrontTypography(
-            inlineTypography152
+          withTypographyColor154(
+            normalizeStorefrontTypography(
+              inlineTypography152
+            ),
+            meta152.typographyKey,
+            typographyColor154(
+              meta152.typographyKey
+            )
           );
 
         const originalText153 =
           target152.textContent ?? "";
+
+        const originalInlineColor154 =
+          (target152 as HTMLElement).style.getPropertyValue(
+            "color"
+          );
+
+        const originalInlineColorPriority154 =
+          (target152 as HTMLElement).style.getPropertyPriority(
+            "color"
+          );
 
         const targetRect153B =
           target152.getBoundingClientRect();
@@ -3720,7 +3941,7 @@ export default function DarikDirectStorefrontSettingsPage() {
           {
             display: "grid",
             gridTemplateColumns:
-              "minmax(0,1fr) 100px",
+              "minmax(0,1fr) 78px 48px",
             gap: "7px",
             marginBottom: "7px",
           }
@@ -3790,6 +4011,45 @@ export default function DarikDirectStorefrontSettingsPage() {
             currentTypography152.size
           );
 
+        const colorInput154 =
+          document150A.createElement(
+            "input"
+          );
+
+        colorInput154.type =
+          "color";
+
+        colorInput154.title =
+          "Text color";
+
+        const savedColor154 =
+          typographyColor154(
+            meta152.typographyKey
+          );
+
+        colorInput154.value =
+          savedColor154 ||
+          "#111827";
+
+        colorInput154.dataset
+          .darikColorTouched154 =
+          "false";
+
+        Object.assign(
+          colorInput154.style,
+          {
+            width: "48px",
+            height: "40px",
+            boxSizing: "border-box",
+            border:
+              "1px solid rgba(15,23,42,.18)",
+            borderRadius: "12px",
+            padding: "3px",
+            background: "#fff",
+            cursor: "pointer",
+          }
+        );
+
         function previewTypography153() {
           const previewFont153 =
             String(
@@ -3817,7 +4077,18 @@ export default function DarikDirectStorefrontSettingsPage() {
                   )
                 );
 
-          const nextPreview153 =
+          const previewColor154 =
+            colorInput154.dataset
+              .darikColorTouched154 ===
+            "true"
+              ? normalizeTextColor154(
+                  colorInput154.value
+                )
+              : typographyColor154(
+                  meta152.typographyKey
+                );
+
+          const normalizedPreview154 =
             normalizeStorefrontTypography(
               {
                 ...inlineTypography152,
@@ -3826,6 +4097,13 @@ export default function DarikDirectStorefrontSettingsPage() {
                   size: previewSize153,
                 },
               }
+            );
+
+          const nextPreview153 =
+            withTypographyColor154(
+              normalizedPreview154,
+              meta152.typographyKey,
+              previewColor154
             );
 
           inlineTypography152 =
@@ -3841,6 +4119,32 @@ export default function DarikDirectStorefrontSettingsPage() {
 
           target152.textContent =
             input152.value;
+
+          if (previewColor154) {
+            (
+              target152 as HTMLElement
+            ).style.setProperty(
+              "color",
+              previewColor154,
+              "important"
+            );
+          }
+
+          const root154 =
+            document150A.querySelector(
+              "[data-darik-position-builder145]"
+            );
+
+          if (root154) {
+            window150A.setTimeout(
+              () => {
+                applyTextColors154(
+                  root154
+                );
+              },
+              0
+            );
+          }
 
           showToolbarStatus152(
             "Preview — tap 💾 to save"
@@ -3858,6 +4162,21 @@ export default function DarikDirectStorefrontSettingsPage() {
           target152.textContent =
             originalText153;
 
+          const targetStyle154 =
+            (target152 as HTMLElement).style;
+
+          if (originalInlineColor154) {
+            targetStyle154.setProperty(
+              "color",
+              originalInlineColor154,
+              originalInlineColorPriority154
+            );
+          } else {
+            targetStyle154.removeProperty(
+              "color"
+            );
+          }
+
           scheduleStableApply150EV3(
             0
           );
@@ -3867,13 +4186,48 @@ export default function DarikDirectStorefrontSettingsPage() {
           void saveInlineText152(
             input152,
             fontSelect152,
-            sizeInput152
+            sizeInput152,
+            colorInput154
           );
         };
 
         fontSelect152.addEventListener(
           "change",
-          previewTypography153
+          () => {
+            previewTypography153();
+
+            window150A.setTimeout(
+              hideTextEditorPanel154,
+              0
+            );
+          }
+        );
+
+        colorInput154.addEventListener(
+          "input",
+          () => {
+            colorInput154.dataset
+              .darikColorTouched154 =
+              "true";
+
+            previewTypography153();
+          }
+        );
+
+        colorInput154.addEventListener(
+          "change",
+          () => {
+            colorInput154.dataset
+              .darikColorTouched154 =
+              "true";
+
+            previewTypography153();
+
+            window150A.setTimeout(
+              hideTextEditorPanel154,
+              0
+            );
+          }
         );
 
         sizeInput152.addEventListener(
@@ -3907,7 +4261,8 @@ export default function DarikDirectStorefrontSettingsPage() {
 
         fontRow152.append(
           fontSelect152,
-          sizeInput152
+          sizeInput152,
+          colorInput154
         );
 
         const helper152 =
@@ -3916,7 +4271,7 @@ export default function DarikDirectStorefrontSettingsPage() {
           );
 
         helper152.textContent =
-          "Live preview — try fonts freely. Tap the visible 💾 on the selected object only when you want to save.";
+          "Pick a font or color and this box closes automatically. Tap ✏️ to reopen. The visible 💾 saves what you are seeing.";
 
         Object.assign(
           helper152.style,
@@ -4132,7 +4487,6 @@ export default function DarikDirectStorefrontSettingsPage() {
             event152.stopPropagation();
 
             if (
-              textEditor152 &&
               textEditorSave153
             ) {
               textEditorSave153();
