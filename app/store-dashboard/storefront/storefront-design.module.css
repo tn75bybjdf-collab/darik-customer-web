@@ -3056,3 +3056,12 @@
     width: auto;
   }
 }
+
+/* DARIK_INVISIBLE_DIRECT_DRAG_EDITOR_149
+   Direct drag has no editor mode, no status card, and no replacement panel.
+   FRONTEND 145's old click/nudge controls remain in source only as fallback
+   code but are intentionally invisible.
+*/
+.previewPositionPanel145 {
+  display: none !important;
+}

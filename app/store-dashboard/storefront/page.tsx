@@ -1127,6 +1127,187 @@ function normalizeDarikDeliveryZones109(value: unknown): DarikDeliveryZone109[] 
 }
 
 // DARIK_CLICK_PREVIEW_POSITIONING_145
+// DARIK_INVISIBLE_DIRECT_DRAG_EDITOR_149
+type StorefrontFreeformPoint149 = {
+  x: number;
+  y: number;
+  label?: string;
+};
+
+type StorefrontFreeformDevice149 = Record<
+  string,
+  StorefrontFreeformPoint149
+>;
+
+type StorefrontFreeformLayout149 = {
+  desktop: StorefrontFreeformDevice149;
+  mobile: StorefrontFreeformDevice149;
+};
+
+function clampStorefrontFreeform149(value: unknown) {
+  const numeric = Number(value);
+  if (!Number.isFinite(numeric)) return 0;
+  return Math.max(-1200, Math.min(1200, Math.round(numeric)));
+}
+
+function storefrontDefaultFreeformLayout149(): StorefrontFreeformLayout149 {
+  return {
+    desktop: {},
+    mobile: {},
+  };
+}
+
+function isSafeStorefrontFreeformLocator149(value: unknown) {
+  const locator = String(value ?? "").trim();
+
+  return (
+    locator.length >= 1 &&
+    locator.length <= 700 &&
+    /^[A-Za-z0-9_#:.() >-]+$/.test(locator)
+  );
+}
+
+function normalizeStorefrontFreeformLayout149(
+  value: unknown
+): StorefrontFreeformLayout149 {
+  const raw =
+    value && typeof value === "object" && !Array.isArray(value)
+      ? (value as Record<string, unknown>)
+      : {};
+
+  const result = storefrontDefaultFreeformLayout149();
+
+  for (const device of ["desktop", "mobile"] as const) {
+    const rawDevice =
+      raw[device] &&
+      typeof raw[device] === "object" &&
+      !Array.isArray(raw[device])
+        ? (raw[device] as Record<string, unknown>)
+        : {};
+
+    let accepted149 = 0;
+
+    for (const [locator, rawPoint] of Object.entries(rawDevice)) {
+      if (accepted149 >= 250) break;
+      if (!isSafeStorefrontFreeformLocator149(locator)) continue;
+      if (
+        !rawPoint ||
+        typeof rawPoint !== "object" ||
+        Array.isArray(rawPoint)
+      ) {
+        continue;
+      }
+
+      const point = rawPoint as Record<string, unknown>;
+      const label =
+        typeof point.label === "string"
+          ? point.label.trim().slice(0, 140)
+          : undefined;
+
+      result[device][locator] = {
+        x: clampStorefrontFreeform149(point.x),
+        y: clampStorefrontFreeform149(point.y),
+        ...(label ? { label } : {}),
+      };
+
+      accepted149 += 1;
+    }
+  }
+
+  return result;
+}
+
+function storefrontFreeformLabel149(target149: Element) {
+  const tag149 = target149.tagName.toLowerCase();
+  const text149 = (target149.textContent ?? "")
+    .replace(/\s+/g, " ")
+    .trim()
+    .slice(0, 90);
+
+  return (text149 ? `${tag149} · ${text149}` : tag149).slice(
+    0,
+    140
+  );
+}
+
+function storefrontFreeformLocator149(
+  root149: Element,
+  target149: Element
+) {
+  if (target149 === root149) return "";
+
+  const id149 = target149.getAttribute("id")?.trim() ?? "";
+
+  if (/^[A-Za-z][A-Za-z0-9_-]{0,100}$/.test(id149)) {
+    const byId149 = `#${id149}`;
+
+    try {
+      if (root149.querySelectorAll(byId149).length === 1) {
+        return byId149;
+      }
+    } catch {
+      // Fall through to structural path.
+    }
+  }
+
+  const segments149: string[] = [];
+  let current149: Element | null = target149;
+  let depth149 = 0;
+
+  while (
+    current149 &&
+    current149 !== root149 &&
+    depth149 < 18
+  ) {
+    const parent149: Element | null =
+      current149.parentElement;
+
+    if (!parent149) return "";
+
+    const tag149 = current149.tagName.toLowerCase();
+    const sameTag149 = Array.from(parent149.children).filter(
+      (child149: Element) =>
+        child149.tagName === current149?.tagName
+    );
+    const index149 = sameTag149.indexOf(current149);
+
+    if (index149 < 0) return "";
+
+    segments149.unshift(
+      `${tag149}:nth-of-type(${index149 + 1})`
+    );
+
+    current149 = parent149;
+    depth149 += 1;
+  }
+
+  if (current149 !== root149 || segments149.length === 0) {
+    return "";
+  }
+
+  const locator149 = segments149.join(" > ");
+
+  return isSafeStorefrontFreeformLocator149(locator149)
+    ? locator149
+    : "";
+}
+
+function storefrontComputedTranslate149(value149: string) {
+  const normalized149 = String(value149 || "").trim();
+
+  if (!normalized149 || normalized149 === "none") {
+    return { x: 0, y: 0 };
+  }
+
+  const numbers149 =
+    normalized149.match(/-?[0-9]+(?:\.[0-9]+)?/g) ?? [];
+
+  return {
+    x: clampStorefrontFreeform149(numbers149[0] ?? 0),
+    y: clampStorefrontFreeform149(numbers149[1] ?? 0),
+  };
+}
+
 type StorefrontPositionKey145 =
   | "display_name"
   | "display_name_ar"
@@ -1328,6 +1509,18 @@ export default function DarikDirectStorefrontSettingsPage() {
     useState<"idle" | "waiting" | "saving" | "saved" | "error">("idle");
   const positioningDirtyRef145 = useRef(false);
   const positioningRevisionRef145 = useRef(0);
+
+  const [storefrontFreeformLayout149, setStorefrontFreeformLayout149] =
+    useState<StorefrontFreeformLayout149>(() =>
+      storefrontDefaultFreeformLayout149()
+    );
+  const storefrontFreeformLayoutRef149 =
+    useRef<StorefrontFreeformLayout149>(
+      storefrontDefaultFreeformLayout149()
+    );
+  const freeformDirtyRef149 = useRef(false);
+  const freeformRevisionRef149 = useRef(0);
+
 
   // DARIK_PREVIEW_CONTROLS_CLEANUP_107
   const [liveBuilderPreviewOpen, setLiveBuilderPreviewOpen] = useState(true);
@@ -1636,6 +1829,616 @@ export default function DarikDirectStorefrontSettingsPage() {
     previewPositionDevice145,
     storefrontContentPositioning145,
   ]);
+
+  useEffect(() => {
+    const next149 = normalizeStorefrontFreeformLayout149(
+      (
+        storefront as unknown as {
+          direct_freeform_layout?: unknown;
+        } | null
+      )?.direct_freeform_layout
+    );
+
+    freeformDirtyRef149.current = false;
+    storefrontFreeformLayoutRef149.current = next149;
+    setStorefrontFreeformLayout149(next149);
+  }, [storefront?.id]);
+
+  function commitStorefrontFreeform149(
+    device149: "desktop" | "mobile",
+    locator149: string,
+    x149: number,
+    y149: number,
+    label149: string
+  ) {
+    if (!isSafeStorefrontFreeformLocator149(locator149)) return;
+
+    const current149 = storefrontFreeformLayoutRef149.current;
+    const currentDevice149 = {
+      ...current149[device149],
+    };
+
+    if (
+      !currentDevice149[locator149] &&
+      Object.keys(currentDevice149).length >= 250
+    ) {
+      const oldest149 = Object.keys(currentDevice149)[0];
+      if (oldest149) delete currentDevice149[oldest149];
+    }
+
+    currentDevice149[locator149] = {
+      x: clampStorefrontFreeform149(x149),
+      y: clampStorefrontFreeform149(y149),
+      label: label149.slice(0, 140),
+    };
+
+    const next149: StorefrontFreeformLayout149 = {
+      ...current149,
+      [device149]: currentDevice149,
+    };
+
+    storefrontFreeformLayoutRef149.current = next149;
+    freeformDirtyRef149.current = true;
+    freeformRevisionRef149.current += 1;
+    setStorefrontFreeformLayout149(next149);
+  }
+
+  useEffect(() => {
+    if (!storefront?.id || !freeformDirtyRef149.current) return;
+
+    const revision149 = freeformRevisionRef149.current;
+    const snapshot149 = storefrontFreeformLayout149;
+
+    const timer149 = window.setTimeout(() => {
+      void (async () => {
+        const result149 = await supabase
+          .from("retailer_storefronts")
+          .update({
+            direct_freeform_layout: snapshot149,
+          })
+          .eq("id", storefront.id);
+
+        if (revision149 !== freeformRevisionRef149.current) {
+          return;
+        }
+
+        if (result149.error) {
+          console.error(
+            "Darik direct drag 149 position save failed:",
+            result149.error.message
+          );
+          return;
+        }
+
+        freeformDirtyRef149.current = false;
+      })();
+    }, 260);
+
+    return () => window.clearTimeout(timer149);
+  }, [storefrontFreeformLayout149, storefront?.id]);
+
+  useEffect(() => {
+    if (!liveBuilderPreviewOpen) return;
+
+    const iframe149 = liveBuilderPreviewRef.current;
+    if (!iframe149) return;
+
+    let detachDocument149 = () => {};
+
+    function attachDirectDrag149() {
+      detachDocument149();
+
+      const document149 = iframe149.contentDocument;
+      const window149 = iframe149.contentWindow;
+
+      if (!document149 || !window149) return;
+
+      let candidate149:
+        | {
+            target: Element;
+            locator: string;
+            label: string;
+            pointerId: number;
+            pointerType: string;
+            startX: number;
+            startY: number;
+            baseX: number;
+            baseY: number;
+            device: "desktop" | "mobile";
+            originalOutline: string;
+            originalOutlineOffset: string;
+            originalCursor: string;
+            originalUserSelect: string;
+            originalTouchAction: string;
+          }
+        | null = null;
+
+      let dragging149 = false;
+      let longPressTimer149 = 0;
+      let suppressClickUntil149 = 0;
+      let suppressClickTarget149: Element | null = null;
+
+      function root149() {
+        return document149.querySelector(
+          "[data-darik-position-builder145]"
+        );
+      }
+
+      function frameDevice149(): "desktop" | "mobile" {
+        return window149.innerWidth <= 720
+          ? "mobile"
+          : "desktop";
+      }
+
+      function applySavedLayout149() {
+        const rootElement149 = root149();
+        if (!rootElement149) return;
+
+        rootElement149
+          .querySelectorAll(
+            '[data-darik-parent-freeform149="true"]'
+          )
+          .forEach((element149) => {
+            const style149 = (element149 as HTMLElement).style;
+            style149.removeProperty("translate");
+            element149.removeAttribute(
+              "data-darik-parent-freeform149"
+            );
+          });
+
+        const device149 = frameDevice149();
+        const layout149 =
+          storefrontFreeformLayoutRef149.current[device149];
+
+        for (const [locator149, point149] of Object.entries(
+          layout149
+        )) {
+          if (!isSafeStorefrontFreeformLocator149(locator149)) {
+            continue;
+          }
+
+          let target149: Element | null = null;
+
+          try {
+            target149 = rootElement149.querySelector(locator149);
+          } catch {
+            target149 = null;
+          }
+
+          if (!target149) continue;
+
+          const style149 = (target149 as HTMLElement).style;
+
+          style149.setProperty(
+            "translate",
+            `${clampStorefrontFreeform149(
+              point149.x
+            )}px ${clampStorefrontFreeform149(point149.y)}px`,
+            "important"
+          );
+
+          target149.setAttribute(
+            "data-darik-parent-freeform149",
+            "true"
+          );
+        }
+      }
+
+      function meaningfulTarget149(
+        raw149: EventTarget | null
+      ): Element | null {
+        const target149 = raw149 as Element | null;
+
+        if (!target149 || target149.nodeType !== 1) return null;
+
+        const rootElement149 = root149();
+        if (!rootElement149) return null;
+        if (!rootElement149.contains(target149)) return null;
+        if (target149 === rootElement149) return null;
+
+        const tag149 = target149.tagName.toLowerCase();
+
+        if (
+          tag149 === "html" ||
+          tag149 === "body" ||
+          tag149 === "script" ||
+          tag149 === "style"
+        ) {
+          return null;
+        }
+
+        const interactive149 = target149.closest(
+          "button, a, input, textarea, select, label"
+        );
+
+        if (
+          interactive149 &&
+          rootElement149.contains(interactive149)
+        ) {
+          return interactive149;
+        }
+
+        const svg149 = target149.closest("svg");
+
+        if (svg149 && rootElement149.contains(svg149)) {
+          return svg149;
+        }
+
+        return target149;
+      }
+
+      function clearLongPress149() {
+        if (longPressTimer149) {
+          window149.clearTimeout(longPressTimer149);
+          longPressTimer149 = 0;
+        }
+      }
+
+      function restoreDragDecoration149() {
+        if (!candidate149) return;
+
+        const style149 =
+          (candidate149.target as HTMLElement).style;
+
+        style149.outline = candidate149.originalOutline;
+        style149.outlineOffset =
+          candidate149.originalOutlineOffset;
+        style149.cursor = candidate149.originalCursor;
+        style149.userSelect =
+          candidate149.originalUserSelect;
+        style149.touchAction =
+          candidate149.originalTouchAction;
+      }
+
+      function beginDrag149() {
+        if (!candidate149 || dragging149) return;
+
+        dragging149 = true;
+        clearLongPress149();
+
+        const style149 =
+          (candidate149.target as HTMLElement).style;
+
+        style149.outline = "2px solid rgba(2,132,199,.95)";
+        style149.outlineOffset = "4px";
+        style149.cursor = "grabbing";
+        style149.userSelect = "none";
+
+        if (candidate149.pointerType === "touch") {
+          style149.touchAction = "none";
+        }
+
+        try {
+          candidate149.target.setPointerCapture(
+            candidate149.pointerId
+          );
+        } catch {
+          // Pointer capture is best effort.
+        }
+
+        window149.getSelection()?.removeAllRanges();
+      }
+
+      function startCandidate149(event149: PointerEvent) {
+        if (
+          event149.pointerType === "mouse" &&
+          event149.button !== 0
+        ) {
+          return;
+        }
+
+        const target149 = meaningfulTarget149(event149.target);
+        const rootElement149 = root149();
+
+        if (!target149 || !rootElement149) return;
+
+        const locator149 = storefrontFreeformLocator149(
+          rootElement149,
+          target149
+        );
+
+        if (!locator149) return;
+
+        const device149 = frameDevice149();
+        const saved149 =
+          storefrontFreeformLayoutRef149.current[device149][
+            locator149
+          ];
+
+        const computed149 = storefrontComputedTranslate149(
+          window149.getComputedStyle(target149).translate
+        );
+
+        const style149 = (target149 as HTMLElement).style;
+
+        candidate149 = {
+          target: target149,
+          locator: locator149,
+          label:
+            saved149?.label ||
+            storefrontFreeformLabel149(target149),
+          pointerId: event149.pointerId,
+          pointerType: event149.pointerType,
+          startX: event149.clientX,
+          startY: event149.clientY,
+          baseX: saved149?.x ?? computed149.x,
+          baseY: saved149?.y ?? computed149.y,
+          device: device149,
+          originalOutline: style149.outline,
+          originalOutlineOffset: style149.outlineOffset,
+          originalCursor: style149.cursor,
+          originalUserSelect: style149.userSelect,
+          originalTouchAction: style149.touchAction,
+        };
+
+        if (event149.pointerType === "touch") {
+          longPressTimer149 = window149.setTimeout(
+            () => beginDrag149(),
+            340
+          );
+        }
+      }
+
+      function moveCandidate149(event149: PointerEvent) {
+        if (
+          !candidate149 ||
+          event149.pointerId !== candidate149.pointerId
+        ) {
+          return;
+        }
+
+        const dx149 = event149.clientX - candidate149.startX;
+        const dy149 = event149.clientY - candidate149.startY;
+        const distance149 = Math.hypot(dx149, dy149);
+
+        if (
+          !dragging149 &&
+          candidate149.pointerType === "touch"
+        ) {
+          if (distance149 > 9) {
+            clearLongPress149();
+            candidate149 = null;
+          }
+          return;
+        }
+
+        if (!dragging149 && distance149 >= 5) {
+          beginDrag149();
+        }
+
+        if (!dragging149 || !candidate149) return;
+
+        event149.preventDefault();
+        event149.stopPropagation();
+
+        const x149 = clampStorefrontFreeform149(
+          candidate149.baseX + dx149
+        );
+        const y149 = clampStorefrontFreeform149(
+          candidate149.baseY + dy149
+        );
+
+        const style149 =
+          (candidate149.target as HTMLElement).style;
+
+        style149.setProperty(
+          "translate",
+          `${x149}px ${y149}px`,
+          "important"
+        );
+
+        candidate149.target.setAttribute(
+          "data-darik-parent-freeform149",
+          "true"
+        );
+      }
+
+      function finishCandidate149(event149: PointerEvent) {
+        if (
+          !candidate149 ||
+          event149.pointerId !== candidate149.pointerId
+        ) {
+          return;
+        }
+
+        clearLongPress149();
+
+        const completed149 = candidate149;
+
+        if (!dragging149) {
+          candidate149 = null;
+          return;
+        }
+
+        event149.preventDefault();
+        event149.stopPropagation();
+
+        const dx149 = event149.clientX - completed149.startX;
+        const dy149 = event149.clientY - completed149.startY;
+
+        const x149 = clampStorefrontFreeform149(
+          completed149.baseX + dx149
+        );
+        const y149 = clampStorefrontFreeform149(
+          completed149.baseY + dy149
+        );
+
+        suppressClickTarget149 = completed149.target;
+        suppressClickUntil149 = Date.now() + 500;
+
+        try {
+          completed149.target.releasePointerCapture(
+            completed149.pointerId
+          );
+        } catch {
+          // Best effort.
+        }
+
+        commitStorefrontFreeform149(
+          completed149.device,
+          completed149.locator,
+          x149,
+          y149,
+          completed149.label
+        );
+
+        restoreDragDecoration149();
+        candidate149 = null;
+        dragging149 = false;
+      }
+
+      function cancelCandidate149(event149: PointerEvent) {
+        if (
+          !candidate149 ||
+          event149.pointerId !== candidate149.pointerId
+        ) {
+          return;
+        }
+
+        clearLongPress149();
+        restoreDragDecoration149();
+
+        if (dragging149) {
+          applySavedLayout149();
+        }
+
+        candidate149 = null;
+        dragging149 = false;
+      }
+
+      function suppressPostDragClick149(event149: MouseEvent) {
+        if (Date.now() > suppressClickUntil149) return;
+        if (!suppressClickTarget149) return;
+
+        const clickTarget149 = event149.target as Node | null;
+
+        if (
+          clickTarget149 &&
+          (clickTarget149 === suppressClickTarget149 ||
+            suppressClickTarget149.contains(clickTarget149))
+        ) {
+          event149.preventDefault();
+          event149.stopPropagation();
+          event149.stopImmediatePropagation();
+        }
+      }
+
+      function preventNativeDrag149(event149: DragEvent) {
+        if (!candidate149 && !dragging149) return;
+
+        event149.preventDefault();
+      }
+
+      function preventContextMenuWhileDragging149(
+        event149: MouseEvent
+      ) {
+        if (!dragging149) return;
+
+        event149.preventDefault();
+        event149.stopPropagation();
+      }
+
+      document149.addEventListener(
+        "pointerdown",
+        startCandidate149,
+        true
+      );
+      document149.addEventListener(
+        "pointermove",
+        moveCandidate149,
+        { capture: true, passive: false }
+      );
+      document149.addEventListener(
+        "pointerup",
+        finishCandidate149,
+        true
+      );
+      document149.addEventListener(
+        "pointercancel",
+        cancelCandidate149,
+        true
+      );
+      document149.addEventListener(
+        "click",
+        suppressPostDragClick149,
+        true
+      );
+      document149.addEventListener(
+        "dragstart",
+        preventNativeDrag149,
+        true
+      );
+      document149.addEventListener(
+        "contextmenu",
+        preventContextMenuWhileDragging149,
+        true
+      );
+
+      window149.addEventListener(
+        "resize",
+        applySavedLayout149
+      );
+
+      applySavedLayout149();
+
+      detachDocument149 = () => {
+        clearLongPress149();
+        restoreDragDecoration149();
+
+        document149.removeEventListener(
+          "pointerdown",
+          startCandidate149,
+          true
+        );
+        document149.removeEventListener(
+          "pointermove",
+          moveCandidate149,
+          true
+        );
+        document149.removeEventListener(
+          "pointerup",
+          finishCandidate149,
+          true
+        );
+        document149.removeEventListener(
+          "pointercancel",
+          cancelCandidate149,
+          true
+        );
+        document149.removeEventListener(
+          "click",
+          suppressPostDragClick149,
+          true
+        );
+        document149.removeEventListener(
+          "dragstart",
+          preventNativeDrag149,
+          true
+        );
+        document149.removeEventListener(
+          "contextmenu",
+          preventContextMenuWhileDragging149,
+          true
+        );
+
+        window149.removeEventListener(
+          "resize",
+          applySavedLayout149
+        );
+      };
+    }
+
+    iframe149.addEventListener("load", attachDirectDrag149);
+    attachDirectDrag149();
+
+    return () => {
+      iframe149.removeEventListener(
+        "load",
+        attachDirectDrag149
+      );
+      detachDocument149();
+    };
+  }, [liveBuilderPreviewOpen, storefront?.id]);
 
   const [formDirty, setFormDirty] = useState(false);
   const [draftSavedAt, setDraftSavedAt] = useState<string | null>(null);

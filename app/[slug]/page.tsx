@@ -914,6 +914,99 @@ const darikGlobalTypographyCss106 = Object.entries(
   .join("\n");
 
 // DARIK_CLICK_PREVIEW_POSITIONING_145
+// DARIK_INVISIBLE_DIRECT_DRAG_EDITOR_149
+// Passive layout transport only.
+// Drag/edit behavior lives ONLY in the retailer dashboard parent.
+
+type StorefrontFreeformPoint149 = {
+  x: number;
+  y: number;
+  label?: string;
+};
+
+type StorefrontFreeformDevice149 = Record<
+  string,
+  StorefrontFreeformPoint149
+>;
+
+type StorefrontFreeformLayout149 = {
+  desktop: StorefrontFreeformDevice149;
+  mobile: StorefrontFreeformDevice149;
+};
+
+function clampStorefrontFreeform149(value: unknown) {
+  const numeric = Number(value);
+  if (!Number.isFinite(numeric)) return 0;
+  return Math.max(-1200, Math.min(1200, Math.round(numeric)));
+}
+
+function storefrontDefaultFreeformLayout149(): StorefrontFreeformLayout149 {
+  return {
+    desktop: {},
+    mobile: {},
+  };
+}
+
+function isSafeStorefrontFreeformLocator149(value: unknown) {
+  const locator = String(value ?? "").trim();
+
+  return (
+    locator.length >= 1 &&
+    locator.length <= 700 &&
+    /^[A-Za-z0-9_#:.() >-]+$/.test(locator)
+  );
+}
+
+function normalizeStorefrontFreeformLayout149(
+  value: unknown
+): StorefrontFreeformLayout149 {
+  const raw =
+    value && typeof value === "object" && !Array.isArray(value)
+      ? (value as Record<string, unknown>)
+      : {};
+
+  const result = storefrontDefaultFreeformLayout149();
+
+  for (const device of ["desktop", "mobile"] as const) {
+    const rawDevice =
+      raw[device] &&
+      typeof raw[device] === "object" &&
+      !Array.isArray(raw[device])
+        ? (raw[device] as Record<string, unknown>)
+        : {};
+
+    let accepted149 = 0;
+
+    for (const [locator, rawPoint] of Object.entries(rawDevice)) {
+      if (accepted149 >= 250) break;
+      if (!isSafeStorefrontFreeformLocator149(locator)) continue;
+      if (
+        !rawPoint ||
+        typeof rawPoint !== "object" ||
+        Array.isArray(rawPoint)
+      ) {
+        continue;
+      }
+
+      const point = rawPoint as Record<string, unknown>;
+      const label =
+        typeof point.label === "string"
+          ? point.label.trim().slice(0, 140)
+          : undefined;
+
+      result[device][locator] = {
+        x: clampStorefrontFreeform149(point.x),
+        y: clampStorefrontFreeform149(point.y),
+        ...(label ? { label } : {}),
+      };
+
+      accepted149 += 1;
+    }
+  }
+
+  return result;
+}
+
 type StorefrontPositionKey145 =
   | "display_name"
   | "display_name_ar"
@@ -4373,6 +4466,142 @@ export default function DarikDirectStorefrontPage() {
       }`
     : "";
 
+  const [savedFreeformLayout149, setSavedFreeformLayout149] =
+    useState<StorefrontFreeformLayout149>(() =>
+      storefrontDefaultFreeformLayout149()
+    );
+
+  useEffect(() => {
+    if (!slug || slug === "_darik-private-store-preview") {
+      setSavedFreeformLayout149(storefrontDefaultFreeformLayout149());
+      return;
+    }
+
+    let cancelled149 = false;
+
+    void (async () => {
+      const result149 = await supabase.rpc(
+        "darik_direct_public_freeform_layout_v1",
+        { p_slug: slug }
+      );
+
+      if (cancelled149) return;
+
+      if (result149.error) {
+        console.warn(
+          "Darik passive freeform layout 149 could not load:",
+          result149.error.message
+        );
+        return;
+      }
+
+      setSavedFreeformLayout149(
+        normalizeStorefrontFreeformLayout149(result149.data)
+      );
+    })();
+
+    return () => {
+      cancelled149 = true;
+    };
+  }, [slug]);
+
+  const storefrontFreeformRaw149 = (
+    storefront as unknown as {
+      direct_freeform_layout?: unknown;
+    } | null
+  )?.direct_freeform_layout;
+
+  const effectiveFreeformLayout149 = useMemo(
+    () =>
+      normalizeStorefrontFreeformLayout149(
+        storefrontFreeformRaw149 ?? savedFreeformLayout149
+      ),
+    [storefrontFreeformRaw149, savedFreeformLayout149]
+  );
+
+  useEffect(() => {
+    const root149 = document.querySelector(
+      "[data-darik-position-builder145]"
+    );
+
+    if (!root149) return;
+
+    let frame149 = 0;
+
+    function clearApplied149() {
+      root149
+        .querySelectorAll('[data-darik-freeform-applied149="true"]')
+        .forEach((element149) => {
+          if (!(element149 instanceof HTMLElement)) return;
+
+          element149.style.removeProperty("translate");
+          element149.removeAttribute(
+            "data-darik-freeform-applied149"
+          );
+        });
+    }
+
+    function apply149() {
+      window.cancelAnimationFrame(frame149);
+
+      frame149 = window.requestAnimationFrame(() => {
+        clearApplied149();
+
+        const device149 =
+          window.innerWidth <= 720 ? "mobile" : "desktop";
+
+        for (const [locator149, point149] of Object.entries(
+          effectiveFreeformLayout149[device149]
+        )) {
+          if (!isSafeStorefrontFreeformLocator149(locator149)) {
+            continue;
+          }
+
+          let target149: Element | null = null;
+
+          try {
+            target149 = root149.querySelector(locator149);
+          } catch {
+            target149 = null;
+          }
+
+          if (!(target149 instanceof HTMLElement)) continue;
+
+          target149.style.setProperty(
+            "translate",
+            `${clampStorefrontFreeform149(
+              point149.x
+            )}px ${clampStorefrontFreeform149(point149.y)}px`,
+            "important"
+          );
+
+          target149.setAttribute(
+            "data-darik-freeform-applied149",
+            "true"
+          );
+        }
+      });
+    }
+
+    apply149();
+
+    const observer149 = new MutationObserver(() => apply149());
+
+    observer149.observe(root149, {
+      childList: true,
+      subtree: true,
+    });
+
+    window.addEventListener("resize", apply149);
+
+    return () => {
+      observer149.disconnect();
+      window.removeEventListener("resize", apply149);
+      window.cancelAnimationFrame(frame149);
+      clearApplied149();
+    };
+  }, [effectiveFreeformLayout149, storefront?.id]);
+
   const effectiveContentPositioning145 =
     normalizeStorefrontContentPositioning145(
       (
@@ -5108,13 +5337,7 @@ export default function DarikDirectStorefrontPage() {
               effectiveContentPositioning145,
               "shop"
             )}
-            onClick={(event) => {
-              if (isBuilderPositionPreview145) {
-                selectBuilderPositionTarget145(event, "shop");
-                return;
-              }
-              jumpToCatalog();
-            }}
+            onClick={jumpToCatalog}
           >
             <Icon name="search" size={18} />
             <span>Shop</span>
