@@ -1584,6 +1584,7 @@ export default function DarikDirectStorefrontSettingsPage() {
   // DARIK_PINCH_RESIZE_LIGHTER_DRAG_151
   // DARIK_SELECTED_OBJECT_DIRECT_EDITOR_152
   // DARIK_LIVE_TYPOGRAPHY_PREVIEW_153
+  // DARIK_NONBLOCKING_TYPOGRAPHY_PANEL_153B
   // Dashboard-only drag proof.
   // No DB writes and no app/[slug] edits.
   useEffect(() => {
@@ -3613,6 +3614,13 @@ export default function DarikDirectStorefrontSettingsPage() {
         const originalText153 =
           target152.textContent ?? "";
 
+        const targetRect153B =
+          target152.getBoundingClientRect();
+
+        const dockPanelBottom153B =
+          targetRect153B.top <
+          window150A.innerHeight * 0.55;
+
         const panel152 =
           document150A.createElement(
             "div"
@@ -3628,20 +3636,33 @@ export default function DarikDirectStorefrontSettingsPage() {
           {
             position: "fixed",
             left: "50%",
-            top: "76px",
+            top:
+              dockPanelBottom153B
+                ? "auto"
+                : "64px",
+            bottom:
+              dockPanelBottom153B
+                ? "86px"
+                : "auto",
             transform:
               "translateX(-50%)",
             width:
-              "min(420px, calc(100vw - 24px))",
-            zIndex: "6900",
+              "min(350px, calc(100vw - 20px))",
+            maxHeight: "38vh",
+            overflowY: "auto",
+            zIndex: "6400",
             background:
-              "rgba(255,255,255,.99)",
+              "rgba(255,255,255,.97)",
+            backdropFilter:
+              "blur(12px)",
+            WebkitBackdropFilter:
+              "blur(12px)",
             border:
-              "1px solid rgba(15,23,42,.18)",
-            borderRadius: "18px",
-            padding: "14px",
+              "1px solid rgba(15,23,42,.16)",
+            borderRadius: "16px",
+            padding: "10px",
             boxShadow:
-              "0 18px 50px rgba(15,23,42,.24)",
+              "0 14px 38px rgba(15,23,42,.22)",
             color: "#0f172a",
             fontFamily:
               "system-ui, -apple-system, sans-serif",
@@ -3659,9 +3680,9 @@ export default function DarikDirectStorefrontSettingsPage() {
         Object.assign(
           heading152.style,
           {
-            fontSize: "13px",
+            fontSize: "12px",
             fontWeight: "900",
-            marginBottom: "10px",
+            marginBottom: "7px",
           }
         );
 
@@ -3682,10 +3703,10 @@ export default function DarikDirectStorefrontSettingsPage() {
             boxSizing: "border-box",
             border:
               "1px solid rgba(15,23,42,.18)",
-            borderRadius: "12px",
-            padding: "10px 12px",
-            marginBottom: "10px",
-            fontSize: "15px",
+            borderRadius: "10px",
+            padding: "8px 10px",
+            marginBottom: "7px",
+            fontSize: "14px",
           }
         );
 
@@ -3700,8 +3721,8 @@ export default function DarikDirectStorefrontSettingsPage() {
             display: "grid",
             gridTemplateColumns:
               "minmax(0,1fr) 100px",
-            gap: "8px",
-            marginBottom: "10px",
+            gap: "7px",
+            marginBottom: "7px",
           }
         );
 
@@ -3895,14 +3916,15 @@ export default function DarikDirectStorefrontSettingsPage() {
           );
 
         helper152.textContent =
-          "Changes preview instantly. Font size: 0 = theme default, otherwise 10–96 px. Tap 💾 on the selected object to save.";
+          "Live preview — try fonts freely. Tap the visible 💾 on the selected object only when you want to save.";
 
         Object.assign(
           helper152.style,
           {
-            fontSize: "11px",
+            fontSize: "10px",
+            lineHeight: "1.35",
             color: "#64748b",
-            marginBottom: "12px",
+            marginBottom: "7px",
           }
         );
 
@@ -3939,8 +3961,8 @@ export default function DarikDirectStorefrontSettingsPage() {
               border:
                 "1px solid rgba(15,23,42,.16)",
               borderRadius: "999px",
-              padding: "9px 13px",
-              fontSize: "12px",
+              padding: "7px 11px",
+              fontSize: "11px",
               fontWeight: "850",
               cursor: "pointer",
             }
@@ -3973,6 +3995,9 @@ export default function DarikDirectStorefrontSettingsPage() {
 
         textEditor152 = panel152;
 
+        // Keep the selected-object toolbar visible and above this panel.
+        positionSelectionUi152();
+
         input152.focus();
         input152.select();
       }
@@ -3999,7 +4024,7 @@ export default function DarikDirectStorefrontSettingsPage() {
           toolbar152.style,
           {
             position: "fixed",
-            zIndex: "6800",
+            zIndex: "7200",
             display: "flex",
             alignItems: "center",
             gap: "6px",
