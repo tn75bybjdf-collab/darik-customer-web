@@ -3064,3 +3064,15 @@
 .previewPositionPanel145 {
   display: none !important;
 }
+
+/* DARIK_NO_FLASH_THEME_STABLE_POSITIONS_150E_V2
+   Local CSS-module class makes these selectors pure for Next.js/Turbopack.
+   The class is attached only to the real live Darik storefront preview iframe.
+*/
+.privatePreviewGate150EV2 {
+  visibility: hidden;
+}
+
+.privatePreviewGate150EV2[data-darik-layout-ready150e="true"] {
+  visibility: visible;
+}

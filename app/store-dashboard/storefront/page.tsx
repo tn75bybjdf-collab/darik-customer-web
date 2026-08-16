@@ -1579,6 +1579,7 @@ export default function DarikDirectStorefrontSettingsPage() {
   // DARIK_LIVE_IFRAME_BINDING_FIX_150B
   // DARIK_DRAG_SCROLL_LOCK_RESET_HERO_LOCK_150C
   // DARIK_PERSISTENT_DRAG_LOGO_BOX_150D
+  // DARIK_NO_FLASH_THEME_STABLE_POSITIONS_150E_V2
   // Dashboard-only drag proof.
   // No DB writes and no app/[slug] edits.
   useEffect(() => {
@@ -1686,11 +1687,308 @@ export default function DarikDirectStorefrontSettingsPage() {
       return result150D;
     }
 
+    function hashSemantic150E(value150E: string) {
+      let hash150E = 2166136261;
+
+      for (
+        let index150E = 0;
+        index150E < value150E.length;
+        index150E += 1
+      ) {
+        hash150E ^= value150E.charCodeAt(index150E);
+        hash150E = Math.imul(hash150E, 16777619);
+      }
+
+      return (hash150E >>> 0).toString(36);
+    }
+
+    function movableSignature150E(
+      target150E: Element
+    ) {
+      const tag150E =
+        target150E.tagName.toLowerCase();
+
+      const structural150E = new Set([
+        "html",
+        "body",
+        "main",
+        "header",
+        "footer",
+        "nav",
+        "section",
+        "article",
+        "form",
+        "ul",
+        "ol",
+        "script",
+        "style",
+      ]);
+
+      if (structural150E.has(tag150E)) {
+        return "";
+      }
+
+      if (
+        tag150E === "div" &&
+        target150E.querySelector(
+          "h1, h2, h3, h4, p, img, picture, video, button, a, nav, section, article, header, footer"
+        )
+      ) {
+        return "";
+      }
+
+      const text150E = (
+        target150E.textContent ?? ""
+      )
+        .replace(/\s+/g, " ")
+        .trim()
+        .slice(0, 160);
+
+      const identity150E = [
+        tag150E,
+        text150E,
+        target150E.getAttribute("alt") ?? "",
+        target150E.getAttribute("href") ?? "",
+        target150E.getAttribute("src") ?? "",
+        target150E.getAttribute("title") ?? "",
+      ]
+        .join("|")
+        .toLowerCase();
+
+      if (
+        identity150E.replace(/[|\s]/g, "")
+          .length < 3
+      ) {
+        return "";
+      }
+
+      return identity150E;
+    }
+
+    function assignSemanticClasses150E(
+      root150E: Element
+    ) {
+      const positioned150E = Array.from(
+        root150E.querySelectorAll(
+          '[class*="builderPositionTarget145"]'
+        )
+      );
+
+      for (const target150E of positioned150E) {
+        const tag150E =
+          target150E.tagName.toLowerCase();
+
+        const lowerClass150E = (
+          target150E.getAttribute("class") ?? ""
+        ).toLowerCase();
+
+        if (tag150E === "h1") {
+          target150E.classList.add(
+            "darikSemanticDisplayName150E"
+          );
+          continue;
+        }
+
+        if (tag150E === "button") {
+          target150E.classList.add(
+            "darikSemanticShop150E"
+          );
+          continue;
+        }
+
+        if (
+          lowerClass150E.includes(
+            "arabicname"
+          )
+        ) {
+          target150E.classList.add(
+            "darikSemanticDisplayNameAr150E"
+          );
+          continue;
+        }
+
+        if (
+          lowerClass150E.includes(
+            "arabictagline"
+          )
+        ) {
+          target150E.classList.add(
+            "darikSemanticTaglineAr150E"
+          );
+          continue;
+        }
+
+        if (
+          lowerClass150E.includes("tagline")
+        ) {
+          target150E.classList.add(
+            "darikSemanticTagline150E"
+          );
+        }
+      }
+
+      const logoVisuals150E = Array.from(
+        root150E.querySelectorAll(
+          "img, picture, svg"
+        )
+      );
+
+      for (const visual150E of logoVisuals150E) {
+        const visualIdentity150E = [
+          visual150E.getAttribute("id") ?? "",
+          visual150E.getAttribute("class") ?? "",
+          visual150E.getAttribute("alt") ?? "",
+          visual150E.getAttribute(
+            "aria-label"
+          ) ?? "",
+        ]
+          .join(" ")
+          .toLowerCase();
+
+        if (
+          !visualIdentity150E.includes(
+            "logo"
+          ) &&
+          !visualIdentity150E.includes(
+            "brand"
+          )
+        ) {
+          continue;
+        }
+
+        let box150E: Element | null =
+          visual150E.parentElement;
+
+        let depth150E = 0;
+
+        while (
+          box150E &&
+          box150E !== root150E &&
+          depth150E < 4
+        ) {
+          const tag150E =
+            box150E.tagName.toLowerCase();
+
+          const structural150E = [
+            "main",
+            "header",
+            "footer",
+            "nav",
+            "section",
+            "article",
+          ].includes(tag150E);
+
+          const rect150E =
+            box150E.getBoundingClientRect();
+
+          if (
+            !structural150E &&
+            rect150E.width > 0 &&
+            rect150E.height > 0 &&
+            rect150E.width <= 420 &&
+            rect150E.height <= 280
+          ) {
+            box150E.classList.add(
+              "darikSemanticLogoBox150E"
+            );
+            break;
+          }
+
+          box150E = box150E.parentElement;
+          depth150E += 1;
+        }
+      }
+
+      const eligible150E = Array.from(
+        root150E.querySelectorAll(
+          "button, a, img, picture, video, h1, h2, h3, h4, h5, h6, p, label, span, div"
+        )
+      );
+
+      const signatureMap150E =
+        new Map<string, Element[]>();
+
+      for (const target150E of eligible150E) {
+        const signature150E =
+          movableSignature150E(target150E);
+
+        if (!signature150E) continue;
+
+        const matches150E =
+          signatureMap150E.get(
+            signature150E
+          ) ?? [];
+
+        matches150E.push(target150E);
+
+        signatureMap150E.set(
+          signature150E,
+          matches150E
+        );
+      }
+
+      for (const [
+        signature150E,
+        matches150E,
+      ] of signatureMap150E.entries()) {
+        if (matches150E.length !== 1) {
+          continue;
+        }
+
+        matches150E[0].classList.add(
+          "darikPersist150E" +
+            hashSemantic150E(signature150E)
+        );
+      }
+    }
+
+    function semanticLocator150E(
+      root150E: Element,
+      target150E: Element
+    ) {
+      const className150E = Array.from(
+        target150E.classList
+      ).find(
+        (candidate150E) =>
+          candidate150E.startsWith(
+            "darikSemantic"
+          ) ||
+          candidate150E.startsWith(
+            "darikPersist150E"
+          )
+      );
+
+      if (!className150E) return "";
+
+      const selector150E =
+        "." + className150E;
+
+      try {
+        return root150E.querySelectorAll(
+          selector150E
+        ).length === 1
+          ? selector150E
+          : "";
+      } catch {
+        return "";
+      }
+    }
+
     function locator150D(
       root150D: Element,
       target150D: Element
     ) {
       if (target150D === root150D) return "";
+
+      const semanticSelector150E =
+        semanticLocator150E(
+          root150D,
+          target150D
+        );
+
+      if (semanticSelector150E) {
+        return semanticSelector150E;
+      }
 
       const id150D =
         target150D.getAttribute("id")?.trim() ?? "";
@@ -1803,6 +2101,10 @@ export default function DarikDirectStorefrontSettingsPage() {
     let savedLayout150D: DarikLayout150D =
       defaultLayout150D();
 
+    let iframeSourceObserver150E:
+      | MutationObserver
+      | null = null;
+
     let layoutLoaded150D = false;
     let applySavedNow150D = () => {};
     let saveSequence150D = 0;
@@ -1858,6 +2160,7 @@ export default function DarikDirectStorefrontSettingsPage() {
         );
 
         layoutLoaded150D = true;
+        applySavedNow150D();
         return;
       }
 
@@ -1875,6 +2178,10 @@ export default function DarikDirectStorefrontSettingsPage() {
       const activeIframe150B = iframe150A;
       if (!activeIframe150B) return;
 
+      activeIframe150B.removeAttribute(
+        "data-darik-layout-ready150e"
+      );
+
       let document150A: Document | null = null;
       let window150A: Window | null = null;
 
@@ -1891,6 +2198,8 @@ export default function DarikDirectStorefrontSettingsPage() {
       const originalTranslate150A =
         new Map<Element, string>();
 
+      let applyRetry150E = 0;
+
       function applySavedLayout150D() {
         if (!layoutLoaded150D) return;
 
@@ -1898,16 +2207,48 @@ export default function DarikDirectStorefrontSettingsPage() {
           "[data-darik-position-builder145]"
         );
 
-        if (!root150D) return;
+        if (!root150D) {
+          if (applyRetry150E < 100) {
+            applyRetry150E += 1;
+
+            window150A.setTimeout(
+              applySavedLayout150D,
+              50
+            );
+
+            return;
+          }
+
+          activeIframe150B.setAttribute(
+            "data-darik-layout-ready150e",
+            "true"
+          );
+
+          return;
+        }
+
+        applyRetry150E = 0;
+
+        assignSemanticClasses150E(
+          root150D
+        );
 
         const currentDevice150D =
           device150D(window150A);
+
+        const nextEntries150E = {
+          ...savedLayout150D[
+            currentDevice150D
+          ],
+        };
+
+        let migrated150E = false;
 
         for (const [
           locatorKey150D,
           point150D,
         ] of Object.entries(
-          savedLayout150D[currentDevice150D]
+          nextEntries150E
         )) {
           if (!safeLocator150D(locatorKey150D)) {
             continue;
@@ -1917,26 +2258,59 @@ export default function DarikDirectStorefrontSettingsPage() {
 
           try {
             target150D =
-              root150D.querySelector(locatorKey150D);
+              root150D.querySelector(
+                locatorKey150D
+              );
           } catch {
             target150D = null;
           }
 
           if (!target150D) continue;
 
-          const style150D =
-            (target150D as HTMLElement).style;
+          const semanticSelector150E =
+            semanticLocator150E(
+              root150D,
+              target150D
+            );
 
-          if (!originalTranslate150A.has(target150D)) {
+          if (
+            semanticSelector150E &&
+            semanticSelector150E !==
+              locatorKey150D
+          ) {
+            nextEntries150E[
+              semanticSelector150E
+            ] = point150D;
+
+            delete nextEntries150E[
+              locatorKey150D
+            ];
+
+            migrated150E = true;
+          }
+
+          const style150D =
+            (target150D as HTMLElement)
+              .style;
+
+          if (
+            !originalTranslate150A.has(
+              target150D
+            )
+          ) {
             originalTranslate150A.set(
               target150D,
-              style150D.getPropertyValue("translate")
+              style150D.getPropertyValue(
+                "translate"
+              )
             );
           }
 
           style150D.setProperty(
             "translate",
-            `${clamp150D(point150D.x)}px ${clamp150D(
+            `${clamp150D(
+              point150D.x
+            )}px ${clamp150D(
               point150D.y
             )}px`,
             "important"
@@ -1947,6 +2321,21 @@ export default function DarikDirectStorefrontSettingsPage() {
             "true"
           );
         }
+
+        if (migrated150E) {
+          savedLayout150D = {
+            ...savedLayout150D,
+            [currentDevice150D]:
+              nextEntries150E,
+          };
+
+          void saveLayout150D();
+        }
+
+        activeIframe150B.setAttribute(
+          "data-darik-layout-ready150e",
+          "true"
+        );
       }
 
       applySavedNow150D = applySavedLayout150D;
@@ -2432,6 +2821,17 @@ export default function DarikDirectStorefrontSettingsPage() {
       }
 
       function startCandidate150A(event150A: PointerEvent) {
+        const semanticRoot150E =
+          document150A.querySelector(
+            "[data-darik-position-builder145]"
+          );
+
+        if (semanticRoot150E) {
+          assignSemanticClasses150E(
+            semanticRoot150E
+          );
+        }
+
         if (
           event150A.pointerType === "mouse" &&
           event150A.button !== 0
@@ -2786,6 +3186,10 @@ export default function DarikDirectStorefrontSettingsPage() {
             attachPreview150A
           );
           detachPreview150A();
+
+          iframeSourceObserver150E?.disconnect();
+          iframeSourceObserver150E = null;
+
           boundIframe150B = null;
           iframe150A = null;
         }
@@ -2801,11 +3205,36 @@ export default function DarikDirectStorefrontSettingsPage() {
           "load",
           attachPreview150A
         );
+
         detachPreview150A();
+
+        iframeSourceObserver150E?.disconnect();
+        iframeSourceObserver150E = null;
       }
 
       iframe150A = nextIframe150B;
       boundIframe150B = nextIframe150B;
+
+      nextIframe150B.removeAttribute(
+        "data-darik-layout-ready150e"
+      );
+
+      iframeSourceObserver150E?.disconnect();
+
+      iframeSourceObserver150E =
+        new MutationObserver(() => {
+          nextIframe150B.removeAttribute(
+            "data-darik-layout-ready150e"
+          );
+        });
+
+      iframeSourceObserver150E.observe(
+        nextIframe150B,
+        {
+          attributes: true,
+          attributeFilter: ["src"],
+        }
+      );
 
       nextIframe150B.addEventListener(
         "load",
@@ -2833,6 +3262,10 @@ export default function DarikDirectStorefrontSettingsPage() {
       }
 
       detachPreview150A();
+
+      iframeSourceObserver150E?.disconnect();
+      iframeSourceObserver150E = null;
+
       boundIframe150B = null;
       iframe150A = null;
     };
@@ -5684,6 +6117,7 @@ await saveStorefront(undefined, "manual");
                   <div className={designStyles.liveBuilderPreviewViewport}>
                     {storefront && liveBuilderPreviewTheme138 && realPrivatePreviewKey143 ? (
                       <iframe
+                        className={designStyles.privatePreviewGate150EV2}
                         ref={liveBuilderPreviewRef}
                         title="Live Darik storefront preview"
                         src={`/_darik-private-store-preview?storefrontId=${encodeURIComponent(
