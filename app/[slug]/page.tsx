@@ -4201,6 +4201,23 @@ export default function DarikDirectStorefrontPage() {
         savedStorefrontTypography
     );
 
+  // DARIK_CUSTOMER_FACING_NAME_FONT_PRIORITY_144
+  const customerFacingNameFontKey144 =
+    effectiveStorefrontTypography.display_name.font !== "theme"
+      ? effectiveStorefrontTypography.display_name.font
+      : effectiveStorefrontTypography.page.font;
+
+  const customerFacingNameFontFamily144 =
+    customerFacingNameFontKey144 !== "theme"
+      ? storefrontTypographyFontFamilies[customerFacingNameFontKey144]
+      : "";
+
+  const customerFacingNameCss144 = customerFacingNameFontFamily144
+    ? `#darik-customer-facing-store-name-144 {
+        font-family: ${customerFacingNameFontFamily144} !important;
+      }`
+    : "";
+
   const fieldDesign = lockedRetailFieldDesign(effectiveThemeField);
   const themeStyle = {
     "--store-primary": fieldDesign.primaryColor,
@@ -4826,6 +4843,7 @@ export default function DarikDirectStorefrontPage() {
         </div>
       ) : null}
       <style>{darikGlobalTypographyCss106}</style>
+      <style>{customerFacingNameCss144}</style>
       <ProductDetailExperience
         open={Boolean(activeProduct)}
         product={activeProduct}
@@ -4970,7 +4988,7 @@ export default function DarikDirectStorefrontPage() {
               <Icon name="store" size={15} />
               {isAutoParts ? "Auto parts / \u0642\u0637\u0639 \u063a\u064a\u0627\u0631" : isGroceryStore ? "Hypermarket / \u0647\u0627\u064a\u0628\u0631\u0645\u0627\u0631\u0643\u062a" : "Official store / \u0627\u0644\u0645\u062a\u062c\u0631 \u0627\u0644\u0631\u0633\u0645\u064a"}
             </div>
-            <h1
+            <h1 id="darik-customer-facing-store-name-144"
               data-darik-font-override={
                 effectiveStorefrontTypography.display_name.font !== "theme"
                   ? effectiveStorefrontTypography.display_name.font
