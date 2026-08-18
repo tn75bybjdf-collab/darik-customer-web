@@ -7097,6 +7097,119 @@ export default function DarikDirectStorefrontSettingsPage() {
     };
   }, []);
 
+  // DARIK_POST_SETUP_CUSTOMIZE_EDITOR_160
+  useEffect(() => {
+    const darikWindow160 = window as Window & {
+      __darikPreviousForcedWizardStep160?: number;
+    };
+
+    if (storefrontSetupMode109 !== "wizard") {
+      darikWindow160.__darikPreviousForcedWizardStep160 =
+        storefrontSetupStep109;
+      return;
+    }
+
+    const previousStep160 =
+      darikWindow160.__darikPreviousForcedWizardStep160;
+
+    if (storefrontSetupStep109 === 4) {
+      const destinationStep160 =
+        previousStep160 !== undefined &&
+        previousStep160 >= 5
+          ? 3
+          : 5;
+
+      darikWindow160.__darikPreviousForcedWizardStep160 =
+        destinationStep160;
+      setStorefrontSetupStep109(destinationStep160);
+      return;
+    }
+
+    darikWindow160.__darikPreviousForcedWizardStep160 =
+      storefrontSetupStep109;
+  }, [
+    storefrontSetupMode109,
+    storefrontSetupStep109,
+  ]);
+
+  function setPreviewCustomizeOpen160(
+    open160: boolean,
+    attempt160 = 0
+  ) {
+    const panel160 = document.querySelector<HTMLElement>(
+      '[data-darik-preview-customize160="true"]'
+    );
+
+    if (!panel160) {
+      if (open160 && attempt160 < 18) {
+        window.setTimeout(() => {
+          setPreviewCustomizeOpen160(
+            true,
+            attempt160 + 1
+          );
+        }, 70);
+      }
+      return;
+    }
+
+    panel160.hidden = !open160;
+    panel160.setAttribute(
+      "aria-hidden",
+      open160 ? "false" : "true"
+    );
+  }
+
+  function togglePreviewCustomize160() {
+    const panel160 = document.querySelector<HTMLElement>(
+      '[data-darik-preview-customize160="true"]'
+    );
+
+    if (!panel160) {
+      setPreviewCustomizeOpen160(true);
+      return;
+    }
+
+    setPreviewCustomizeOpen160(
+      Boolean(panel160.hidden)
+    );
+  }
+
+  function selectStoreNameNow160(
+    attempt160 = 0
+  ) {
+    const iframe160 = liveBuilderPreviewRef.current;
+    const document160 = iframe160?.contentDocument;
+    const storeName160 =
+      document160?.querySelector<HTMLElement>(
+        ".darikSemanticDisplayName150E"
+      );
+
+    if (!storeName160) {
+      if (attempt160 < 18) {
+        window.setTimeout(() => {
+          selectStoreNameNow160(
+            attempt160 + 1
+          );
+        }, 100);
+      }
+      return;
+    }
+
+    storeName160.dispatchEvent(
+      new MouseEvent("click", {
+        bubbles: true,
+        cancelable: true,
+        view: iframe160?.contentWindow ?? window,
+      })
+    );
+
+    storeName160.scrollIntoView({
+      behavior: "smooth",
+      block: "center",
+      inline: "center",
+    });
+  }
+
   function serializeDeliveryZones109() {
     const normalized = deliveryZones109
       .map((zone) => {
@@ -7523,6 +7636,10 @@ await saveStorefront(undefined, "manual");
       setStorefrontSetupTab109(1);
       setLiveBuilderPreviewExpanded111(false);
       setLiveBuilderPreviewOpen(true);
+
+      window.setTimeout(() => {
+        setPreviewCustomizeOpen160(true);
+      }, 90);
       setMessage(
         "Storefront setup complete. You can now edit every section from the tabs. / اكتمل إعداد المتجر ويمكنك تعديل أي قسم من التبويبات."
       );
@@ -9288,12 +9405,24 @@ await saveStorefront(undefined, "manual");
                           ? "Half screen / نصف الشاشة"
                           : "Full screen / ملء الشاشة"}
                       </button>
-                      <button
+
+                        <button
+                          type="button"
+                          className={designStyles.previewCustomizeTrigger160}
+                          data-darik-preview-customize-trigger160="true"
+                          onClick={() => {
+                            togglePreviewCustomize160();
+                          }}
+                        >
+                          تخصيص المتجر / Customize Store
+                        </button>
+<button
                         type="button"
                         className={designStyles.liveBuilderClosePreview107}
                         onClick={() => {
                           setLiveBuilderPreviewExpanded111(false);
                           setLiveBuilderPreviewOpen(false);
+                          setPreviewCustomizeOpen160(false);
 
 
                           let continueGettingStarted157 = false;
@@ -9325,7 +9454,118 @@ await saveStorefront(undefined, "manual");
                     </div>
                   </div>
 
-                  <div className={designStyles.liveBuilderPreviewViewport}>
+
+                      <aside
+                        className={designStyles.previewCustomizePanel160}
+                        data-darik-preview-customize160="true"
+                        aria-hidden="true"
+                        aria-label="تخصيص المتجر / Customize Store"
+                        hidden
+                      >
+                        <div className={designStyles.previewCustomizeHeader160}>
+                          <div>
+                            <span className={designStyles.previewCustomizeEyebrow160}>
+                              اكتمل إعداد المتجر / Store setup complete
+                            </span>
+                            <h3>خصّص متجرك / Customize your store</h3>
+                            <p>
+                              هذه الخيارات اختيارية. عدّل الشكل وأنت تشاهد متجرك مباشرة.
+                              <br />
+                              These options are optional. Customize while watching your store live.
+                            </p>
+                          </div>
+
+                          <button
+                            type="button"
+                            className={designStyles.previewCustomizeClose160}
+                            aria-label="Close customization"
+                            onClick={() => {
+                              setPreviewCustomizeOpen160(false);
+                            }}
+                          >
+                            ×
+                          </button>
+                        </div>
+
+                        <div className={designStyles.previewCustomizeGrid160}>
+                          <button
+                            type="button"
+                            className={designStyles.previewCustomizeCard160}
+                            data-darik-customize-fonts160="true"
+                            onClick={() => {
+                              setPreviewCustomizeOpen160(false);
+                              setLiveBuilderPreviewExpanded111(false);
+                              setStorefrontSetupMode109("tabs");
+                              setStorefrontSetupTab109(4);
+
+                              window.setTimeout(() => {
+                                window.scrollTo({
+                                  top: 0,
+                                  behavior: "smooth",
+                                });
+                              }, 60);
+                            }}
+                          >
+                            <strong>الخطوط / Fonts</strong>
+                            <span>
+                              اختر خطوط المتجر وشاهد النتيجة على المعاينة مباشرة.
+                              <br />
+                              Choose store fonts and see the result on Preview.
+                            </span>
+                          </button>
+
+                          <button
+                            type="button"
+                            className={designStyles.previewCustomizeCard160}
+                            data-darik-customize-theme160="true"
+                            onClick={() => {
+                              setPreviewCustomizeOpen160(false);
+                              setLiveBuilderPreviewExpanded111(false);
+                              setThemePickerOpen(true);
+                            }}
+                          >
+                            <strong>القالب / Theme</strong>
+                            <span>
+                              غيّر تصميم المتجر بدون تغيير مجال البيع أو خصائصه.
+                              <br />
+                              Change the design without changing retail-field mechanics.
+                            </span>
+                          </button>
+
+                          <button
+                            type="button"
+                            className={designStyles.previewCustomizeCard160}
+                            data-darik-customize-direct160="true"
+                            onClick={() => {
+                              setPreviewCustomizeOpen160(false);
+                              setLiveBuilderPreviewExpanded111(true);
+
+                              window.setTimeout(() => {
+                                suppressOldPreviewInstructions157(document);
+                                suppressOldPreviewInstructions157(
+                                  liveBuilderPreviewRef.current
+                                    ?.contentDocument
+                                );
+                                selectStoreNameNow160();
+                              }, 120);
+                            }}
+                          >
+                            <strong>تعديل مباشر / Edit on Preview</strong>
+                            <span>
+                              اضغط على النصوص والعناصر، ثم حرّكها أو عدّلها أو احفظها.
+                              <br />
+                              Select real page objects, then edit, move, resize, or save.
+                            </span>
+                          </button>
+                        </div>
+
+                        <div className={designStyles.previewCustomizeTip160}>
+                          <strong>بسيطة:</strong> متجرك جاهز الآن. لا تحتاج لتغيير أي شيء هنا للنشر.
+                          <br />
+                          <strong>Simple:</strong> your store is already set up. Nothing here is required to continue.
+                        </div>
+                      </aside>
+<div className={designStyles.liveBuilderPreviewViewport}>
                     {storefront && liveBuilderPreviewTheme138 && realPrivatePreviewKey143 ? (
                       <iframe
                         className={designStyles.privatePreviewGate150EV2}
