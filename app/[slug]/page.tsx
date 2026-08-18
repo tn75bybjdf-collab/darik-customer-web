@@ -1756,7 +1756,7 @@ function darikDeliveryPromise163(
       ? Math.min(365, numericDays163)
       : 0;
 
-  const cutoffMatch163 = String(rawCutoff163 ?? "17:00").match(
+  const cutoffMatch163 = String(rawCutoff163 ?? "23:59").match(
     /^(\d{1,2}):(\d{2})/
   );
   const cutoffHour163 = Math.min(
@@ -4709,10 +4709,11 @@ export default function DarikDirectStorefrontPage() {
     }
   }
 
+  // DARIK_PREVIEW_LIVE_FRESH_LAYOUT_SOURCE_167
+  // The dedicated public-layout RPC is the freshest source of truth.
+  // Embedded storefront layout remains only a pre-fetch/error fallback.
   const [darikPublicLayout166, setDarikPublicLayout166] =
-    useState<DarikPublicLayout166>(() =>
-      darikDefaultPublicLayout166()
-    );
+    useState<DarikPublicLayout166 | null>(null);
 
   useEffect(() => {
     if (
@@ -4720,11 +4721,12 @@ export default function DarikDirectStorefrontPage() {
       slug === "_darik-private-store-preview" ||
       isBuilderPositionPreview145
     ) {
-      setDarikPublicLayout166(
-        darikDefaultPublicLayout166()
-      );
+      setDarikPublicLayout166(null);
       return;
     }
+
+    // Clear any prior slug result while the fresh RPC resolves.
+    setDarikPublicLayout166(null);
 
     let cancelled166 = false;
 
@@ -4765,8 +4767,8 @@ export default function DarikDirectStorefrontPage() {
   const darikEffectivePublicLayout166 = useMemo(
     () =>
       darikNormalizePublicLayout166(
-        darikStorefrontLayoutRaw166 ??
-          darikPublicLayout166
+        darikPublicLayout166 ??
+          darikStorefrontLayoutRaw166
       ),
     [
       darikStorefrontLayoutRaw166,
@@ -6087,6 +6089,7 @@ style={{
                       );
 
                       // DARIK_DELIVERY_PROMISE_CUTOFF_SOURCE_OF_TRUTH_165
+// DARIK_DELIVERY_DEFAULT_END_OF_DAY_CUTOFF_168
                       // Delivery timing is controlled by the retailer's configured
                       // delivery days + cutoff. Store business hours still control
                       // the Open/Closed UI, but must not silently rewrite Today

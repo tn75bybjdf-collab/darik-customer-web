@@ -78,6 +78,8 @@ type OperatingHours = Record<string, string>;
 type OrderSubmissionMode = "phone" | "online" | "both";
 type FulfillmentMode = "delivery" | "pickup";
 // DARIK_DELIVERY_STAGES_DAYS_CUTOFF_163
+// DARIK_DELIVERY_DEFAULT_END_OF_DAY_CUTOFF_168
+// Untouched timing defaults to 23:59; retailer-selected earlier cutoffs remain supported.
 type DarikDeliverySetupStage163 = "location" | "settings";
 type StorefrontTheme =
   | "modern_market"
@@ -1308,7 +1310,7 @@ export default function DarikDirectStorefrontSettingsPage() {
     deliveryRadiusKm: "",
     estimatedDeliveryMinutes: "",
     estimatedDeliveryDays: "0",
-    deliveryCutoffTime: "17:00",
+    deliveryCutoffTime: "23:59",
     fulfillmentMode: "delivery",
     orderSubmissionMode: "phone",
     acceptCash: true,
@@ -8835,7 +8837,7 @@ await saveStorefront(undefined, "manual");
                   ? "0"
                   : String(loadedStorefront.estimated_delivery_days),
               deliveryCutoffTime: String(
-                loadedStorefront.delivery_cutoff_time ?? "17:00"
+                loadedStorefront.delivery_cutoff_time ?? "23:59"
               ).slice(0, 5),
               fulfillmentMode:
                 loadedStorefront.delivery_enabled === false &&
@@ -8897,7 +8899,7 @@ await saveStorefront(undefined, "manual");
               deliveryRadiusKm: "",
               estimatedDeliveryMinutes: "",
     estimatedDeliveryDays: "0",
-    deliveryCutoffTime: "17:00",
+    deliveryCutoffTime: "23:59",
               fulfillmentMode: "delivery",
               orderSubmissionMode: "phone",
               acceptCash: true,
@@ -9504,8 +9506,8 @@ await saveStorefront(undefined, "manual");
           : 0,
       delivery_cutoff_time:
         setupForm.fulfillmentMode === "delivery"
-          ? setupForm.deliveryCutoffTime || "17:00"
-          : "17:00",
+          ? setupForm.deliveryCutoffTime || "23:59"
+          : "23:59",
     };
 
     const { slug: _payloadSlug, ...existingStorePayload } = payload;
