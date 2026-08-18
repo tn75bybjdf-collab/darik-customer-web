@@ -6531,27 +6531,165 @@ export default function DarikDirectStorefrontSettingsPage() {
   const gettingStartedAfterPreviewKey157 =
     "darik-getting-started-after-preview-157";
 
-  function scrollStorefrontSetupNext157() {
-    window.setTimeout(() => {
-      const nextButton = document.querySelector<HTMLElement>(
-        '[data-darik-wizard-next157="true"]'
-      );
+  // DARIK_ONBOARDING_SCROLL_STABILITY_158
+  function darikElementVisible158(element: HTMLElement | null) {
+    if (!element) return false;
 
-      if (!nextButton) return;
+    const style158 = window.getComputedStyle(element);
+    if (
+      style158.display === "none" ||
+      style158.visibility === "hidden"
+    ) {
+      return false;
+    }
 
-      nextButton.scrollIntoView({
-        behavior: "smooth",
-        block: "center",
-      });
+    const rect158 = element.getBoundingClientRect();
+    return rect158.width > 0 && rect158.height > 0;
+  }
 
-      window.setTimeout(() => {
-        try {
-          nextButton.focus({ preventScroll: true });
-        } catch {
-          nextButton.focus();
+  function darikStableAutoScroll158(
+    resolveTarget158: () => HTMLElement | null
+  ) {
+    if (typeof window === "undefined") return;
+
+    const darikWindow158 = window as Window & {
+      __darikAutoScrollSequence158?: number;
+    };
+
+    const sequence158 =
+      (darikWindow158.__darikAutoScrollSequence158 ?? 0) + 1;
+
+    darikWindow158.__darikAutoScrollSequence158 =
+      sequence158;
+
+    const startedAt158 = window.performance.now();
+    let lastTop158: number | null = null;
+    let stableFrames158 = 0;
+
+    const settle158 = () => {
+      if (
+        darikWindow158.__darikAutoScrollSequence158 !==
+        sequence158
+      ) {
+        return;
+      }
+
+      const target158 = resolveTarget158();
+      const elapsed158 =
+        window.performance.now() - startedAt158;
+
+      if (
+        !target158 ||
+        !darikElementVisible158(target158)
+      ) {
+        if (elapsed158 < 900) {
+          window.requestAnimationFrame(settle158);
         }
-      }, 320);
-    }, 140);
+        return;
+      }
+
+      const top158 =
+        target158.getBoundingClientRect().top +
+        window.scrollY;
+
+      if (
+        lastTop158 !== null &&
+        Math.abs(top158 - lastTop158) < 0.75
+      ) {
+        stableFrames158 += 1;
+      } else {
+        stableFrames158 = 0;
+      }
+
+      lastTop158 = top158;
+
+      const layoutSettled158 =
+        elapsed158 >= 180 &&
+        stableFrames158 >= 4;
+
+      if (layoutSettled158 || elapsed158 >= 900) {
+        target158.scrollIntoView({
+          behavior: "smooth",
+          block: "center",
+        });
+        return;
+      }
+
+      window.requestAnimationFrame(settle158);
+    };
+
+    window.requestAnimationFrame(settle158);
+  }
+
+  function scrollStorefrontSetupNext157() {
+    darikStableAutoScroll158(() =>
+      document.querySelector<HTMLElement>(
+        '[data-darik-wizard-next157="true"]'
+      )
+    );
+  }
+
+  function retailFieldSetupVisible158() {
+    const labels158 = Array.from(
+      document.querySelectorAll<HTMLElement>(
+        [
+          "h1",
+          "h2",
+          "h3",
+          "h4",
+          '[role="heading"]',
+          "legend",
+          "strong",
+          "label",
+          "p",
+        ].join(",")
+      )
+    )
+      .filter((element158) =>
+        darikElementVisible158(element158)
+      )
+      .map((element158) =>
+        (element158.textContent ?? "")
+          .replace(/\s+/g, " ")
+          .trim()
+      )
+      .filter(Boolean)
+      .join(" ");
+
+    return (
+      /retail\s*(?:field|category)/i.test(labels158) ||
+      /مجال\s*(?:المتجر|البيع|التجزئة)/.test(labels158)
+    );
+  }
+
+  function findRetailFieldNext158() {
+    const nextPattern158 =
+      /(?:^|\s)(?:next|continue)(?:\s|$)|التالي|متابعة/i;
+
+    return (
+      Array.from(
+        document.querySelectorAll<HTMLButtonElement>(
+          "button"
+        )
+      ).find((button158) => {
+        if (
+          button158.disabled ||
+          button158.getAttribute("aria-disabled") ===
+            "true" ||
+          !darikElementVisible158(button158)
+        ) {
+          return false;
+        }
+
+        const text158 = (
+          button158.textContent ?? ""
+        )
+          .replace(/\s+/g, " ")
+          .trim();
+
+        return nextPattern158.test(text158);
+      }) ?? null
+    );
   }
 
   function clearStorefrontSetupRequired157() {
@@ -6889,6 +7027,75 @@ export default function DarikDirectStorefrontSettingsPage() {
     storefrontSetupMode109,
     liveBuilderPreviewOpen,
   ]);
+
+  useEffect(() => {
+    const handleRetailFieldSelection158 = (
+      event158: MouseEvent
+    ) => {
+      if (!retailFieldSetupVisible158()) return;
+
+      const clicked158 =
+        event158.target instanceof Element
+          ? event158.target.closest<HTMLElement>(
+              [
+                "button",
+                '[role="button"]',
+                "label",
+                'input[type="radio"]',
+              ].join(",")
+            )
+          : null;
+
+      if (!clicked158) return;
+
+      const clickedText158 = (
+        clicked158.textContent ?? ""
+      )
+        .replace(/\s+/g, " ")
+        .trim();
+
+      if (
+        /(?:^|\s)(?:next|continue|back|previous)(?:\s|$)|التالي|متابعة|رجوع|السابق/i.test(
+          clickedText158
+        )
+      ) {
+        return;
+      }
+
+      window.setTimeout(() => {
+        if (!retailFieldSetupVisible158()) return;
+
+        const next158 = findRetailFieldNext158();
+        if (!next158) return;
+
+        darikStableAutoScroll158(() => {
+          if (
+            next158.isConnected &&
+            darikElementVisible158(next158) &&
+            !next158.disabled
+          ) {
+            return next158;
+          }
+
+          return findRetailFieldNext158();
+        });
+      }, 40);
+    };
+
+    document.addEventListener(
+      "click",
+      handleRetailFieldSelection158,
+      true
+    );
+
+    return () => {
+      document.removeEventListener(
+        "click",
+        handleRetailFieldSelection158,
+        true
+      );
+    };
+  }, []);
 
   function serializeDeliveryZones109() {
     const normalized = deliveryZones109
