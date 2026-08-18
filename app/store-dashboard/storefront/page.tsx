@@ -6527,6 +6527,369 @@ export default function DarikDirectStorefrontSettingsPage() {
     }
   }
 
+  // DARIK_GUIDED_ONBOARDING_PREVIEW_DISCOVERY_157
+  const gettingStartedAfterPreviewKey157 =
+    "darik-getting-started-after-preview-157";
+
+  function scrollStorefrontSetupNext157() {
+    window.setTimeout(() => {
+      const nextButton = document.querySelector<HTMLElement>(
+        '[data-darik-wizard-next157="true"]'
+      );
+
+      if (!nextButton) return;
+
+      nextButton.scrollIntoView({
+        behavior: "smooth",
+        block: "center",
+      });
+
+      window.setTimeout(() => {
+        try {
+          nextButton.focus({ preventScroll: true });
+        } catch {
+          nextButton.focus();
+        }
+      }, 320);
+    }, 140);
+  }
+
+  function clearStorefrontSetupRequired157() {
+    document
+      .querySelectorAll<HTMLElement>(
+        '[data-darik-required-error157="true"]'
+      )
+      .forEach((element) => {
+        element.removeAttribute(
+          "data-darik-required-error157"
+        );
+      });
+  }
+
+  function storefrontSetupFirstMissingTarget157(
+    step: DarikStorefrontSetupStep109
+  ) {
+    if (step === 1) {
+      return selectedThemeField ? "" : "theme";
+    }
+
+    if (step === 2) {
+      if (!setupForm.logoUrl.trim()) return "logo";
+      if (!setupForm.heroImageUrl.trim()) return "hero";
+      return "";
+    }
+
+    if (step === 3) {
+      if (setupForm.slug.trim().length < 2) return "slug";
+      if (setupForm.displayName.trim().length < 2) return "display-name";
+      return "";
+    }
+
+    if (step === 5) {
+      return setupForm.phone.trim() ||
+        setupForm.whatsapp.trim() ||
+        setupForm.publicEmail.trim()
+        ? ""
+        : "contact";
+    }
+
+    if (step === 9) {
+      return storefrontSetupStepReady109(9)
+        ? ""
+        : "delivery-zones";
+    }
+
+    if (step === 10) {
+      return storefrontSetupStepReady109(10)
+        ? ""
+        : "payment-methods";
+    }
+
+    return "";
+  }
+
+  function revealStorefrontSetupMissing157(
+    step: DarikStorefrontSetupStep109
+  ) {
+    clearStorefrontSetupRequired157();
+
+    const targetKey =
+      storefrontSetupFirstMissingTarget157(step);
+
+    if (!targetKey) return;
+
+    const target = document.querySelector<HTMLElement>(
+      `[data-darik-required157="${targetKey}"]`
+    );
+
+    if (!target) return;
+
+    target.setAttribute(
+      "data-darik-required-error157",
+      "true"
+    );
+
+    target.scrollIntoView({
+      behavior: "smooth",
+      block: "center",
+    });
+
+    const firstControl =
+      target.matches("input,select,textarea,button")
+        ? target
+        : target.querySelector<HTMLElement>(
+            "input,select,textarea,button"
+          );
+
+    window.setTimeout(() => {
+      firstControl?.focus();
+    }, 420);
+
+    const clearOnInput157 = () => {
+      target.removeAttribute(
+        "data-darik-required-error157"
+      );
+    };
+
+    target.addEventListener(
+      "input",
+      clearOnInput157,
+      { once: true, capture: true }
+    );
+
+    target.addEventListener(
+      "change",
+      clearOnInput157,
+      { once: true, capture: true }
+    );
+
+    target.addEventListener(
+      "click",
+      (event) => {
+        const clicked =
+          event.target instanceof Element
+            ? event.target.closest("button")
+            : null;
+
+        if (clicked) {
+          clearOnInput157();
+        }
+      },
+      { once: true, capture: true }
+    );
+  }
+
+  function suppressOldPreviewInstructions157(
+    root157: Document | null | undefined
+  ) {
+    if (!root157?.body) return;
+
+    const candidates = Array.from(
+      root157.querySelectorAll<HTMLElement>(
+        [
+          '[role="dialog"]',
+          "aside",
+          "section",
+          "div",
+          "p",
+          '[class*="instruction" i]',
+          '[class*="tutorial" i]',
+          '[class*="guide" i]',
+          '[class*="hint" i]',
+        ].join(",")
+      )
+    );
+
+    const smallestFirst = candidates
+      .filter((element) => {
+        if (
+          element.hasAttribute(
+            "data-darik-selection-toolbar152"
+          ) ||
+          element.hasAttribute(
+            "data-darik-text-editor152"
+          ) ||
+          element.closest(
+            '[data-darik-selection-toolbar152="true"]'
+          )
+        ) {
+          return false;
+        }
+
+        if (element.querySelector("iframe")) {
+          return false;
+        }
+
+        const text = (
+          element.textContent ?? ""
+        )
+          .replace(/\s+/g, " ")
+          .trim();
+
+        if (text.length < 20 || text.length > 900) {
+          return false;
+        }
+
+        const asksToInteract =
+          /\b(click|tap|select)\b/i.test(text);
+
+        const mentionsEditableThing =
+          /\b(text|store name|tagline|logo|element|object)\b/i.test(
+            text
+          );
+
+        const explainsEditor =
+          /\b(edit|drag|move|pinch|resize|position|save)\b/i.test(
+            text
+          );
+
+        return (
+          asksToInteract &&
+          mentionsEditableThing &&
+          explainsEditor
+        );
+      })
+      .sort(
+        (a, b) =>
+          (a.textContent?.length ?? 0) -
+          (b.textContent?.length ?? 0)
+      );
+
+    const candidate = smallestFirst[0];
+    if (!candidate) return;
+
+    const semanticContainer =
+      candidate.closest<HTMLElement>(
+        [
+          '[role="dialog"]',
+          '[class*="instruction" i]',
+          '[class*="tutorial" i]',
+          '[class*="guide" i]',
+          '[class*="hint" i]',
+        ].join(",")
+      ) ?? candidate;
+
+    semanticContainer.setAttribute(
+      "data-darik-old-preview-instructions-hidden157",
+      "true"
+    );
+
+    semanticContainer.style.setProperty(
+      "display",
+      "none",
+      "important"
+    );
+  }
+
+  function selectStoreNameDiscovery157(
+    attempt157 = 0
+  ) {
+    if (!liveBuilderPreviewExpanded111) return;
+
+    const iframe157 = liveBuilderPreviewRef.current;
+
+    suppressOldPreviewInstructions157(document);
+    suppressOldPreviewInstructions157(
+      iframe157?.contentDocument
+    );
+
+    const storefrontId157 =
+      storefront?.id ?? selectedStore?.retailer_id ?? "draft";
+
+    const discoveryKey157 =
+      `darik-preview-store-name-discovery-157-${storefrontId157}`;
+
+    try {
+      if (
+        window.localStorage.getItem(
+          discoveryKey157
+        ) === "done"
+      ) {
+        return;
+      }
+    } catch {
+      // Discovery still works if localStorage is unavailable.
+    }
+
+    const document157 =
+      iframe157?.contentDocument;
+
+    const storeName157 =
+      document157?.querySelector<HTMLElement>(
+        ".darikSemanticDisplayName150E"
+      );
+
+    if (!storeName157) {
+      if (attempt157 < 18) {
+        window.setTimeout(() => {
+          selectStoreNameDiscovery157(
+            attempt157 + 1
+          );
+        }, 120);
+      }
+      return;
+    }
+
+    storeName157.dispatchEvent(
+      new MouseEvent("click", {
+        bubbles: true,
+        cancelable: true,
+        view: iframe157?.contentWindow ?? window,
+      })
+    );
+
+    storeName157.scrollIntoView({
+      behavior: "smooth",
+      block: "center",
+      inline: "center",
+    });
+
+    window.setTimeout(() => {
+      const selected157 =
+        storeName157.getAttribute(
+          "data-darik-selected152"
+        ) === "true";
+
+      const toolbar157 =
+        document157?.querySelector(
+          '[data-darik-selection-toolbar152="true"]'
+        );
+
+      if (selected157 && toolbar157) {
+        try {
+          window.localStorage.setItem(
+            discoveryKey157,
+            "done"
+          );
+        } catch {
+          // No persistence is required for the editor to work.
+        }
+        return;
+      }
+
+      if (attempt157 < 18) {
+        selectStoreNameDiscovery157(
+          attempt157 + 1
+        );
+      }
+    }, 90);
+  }
+
+  useEffect(() => {
+    if (
+      storefrontSetupMode109 !== "wizard" ||
+      !liveBuilderPreviewOpen
+    ) {
+      return;
+    }
+
+    setLiveBuilderPreviewExpanded111(false);
+    setLiveBuilderPreviewOpen(false);
+  }, [
+    storefrontSetupMode109,
+    liveBuilderPreviewOpen,
+  ]);
+
   function serializeDeliveryZones109() {
     const normalized = deliveryZones109
       .map((zone) => {
@@ -6787,15 +7150,21 @@ export default function DarikDirectStorefrontSettingsPage() {
 
     if (!storefrontSetupStepReady109(step)) {
       setStorefrontSetupNotice109(storefrontSetupMissingMessage109(step));
+      revealStorefrontSetupMissing157(step);
       return;
     }
+
+    clearStorefrontSetupRequired157();
 
     if (
       step === 9 &&
       setupForm.fulfillmentMode !== "pickup"
     ) {
       const zonesSaved = await saveDeliveryZones109(true);
-      if (!zonesSaved) return;
+      if (!zonesSaved) {
+        revealStorefrontSetupMissing157(9);
+        return;
+      }
     }
 
     setStorefrontSetupNotice109("");
@@ -6933,12 +7302,20 @@ await saveStorefront(undefined, "manual");
       }
 
       if (managedUsernameOnboarding136) {
-        window.location.assign("/store-dashboard/getting-started");
-        return;
+        try {
+          window.sessionStorage.setItem(
+            gettingStartedAfterPreviewKey157,
+            "1"
+          );
+        } catch {
+          // Preview still opens even if sessionStorage is unavailable.
+        }
       }
 
       setStorefrontSetupMode109("tabs");
       setStorefrontSetupTab109(1);
+      setLiveBuilderPreviewExpanded111(false);
+      setLiveBuilderPreviewOpen(true);
       setMessage(
         "Storefront setup complete. You can now edit every section from the tabs. / اكتمل إعداد المتجر ويمكنك تعديل أي قسم من التبويبات."
       );
@@ -8134,14 +8511,30 @@ await saveStorefront(undefined, "manual");
 
     if (themeField === selectedThemeField) {
       setThemePickerOpen(false);
+
+      if (
+        storefrontSetupMode109 === "wizard" &&
+        storefrontSetupStep109 === 1
+      ) {
+        scrollStorefrontSetupNext157();
+      }
       setLiveBuilderPreviewTheme138((current) => current || themeField);
-      setLiveBuilderPreviewOpen(true);
+      if (storefrontSetupMode109 !== "wizard") {
+        setLiveBuilderPreviewOpen(true);
+      }
       return;
     }
 
     if (!storefront) {
       setSelectedThemeField(themeField);
       setThemePickerOpen(false);
+
+      if (
+        storefrontSetupMode109 === "wizard" &&
+        storefrontSetupStep109 === 1
+      ) {
+        scrollStorefrontSetupNext157();
+      }
 
       if (selectedStore?.retailer_id) {
         window.localStorage.setItem(
@@ -8151,7 +8544,9 @@ await saveStorefront(undefined, "manual");
       }
 
       setLiveBuilderPreviewTheme138(themeField);
-      setLiveBuilderPreviewOpen(true);
+      if (storefrontSetupMode109 !== "wizard") {
+        setLiveBuilderPreviewOpen(true);
+      }
       return;
     }
 
@@ -8173,8 +8568,17 @@ await saveStorefront(undefined, "manual");
     }
 
     setLiveBuilderPreviewTheme138(themeField);
-    setLiveBuilderPreviewOpen(true);
+    if (storefrontSetupMode109 !== "wizard") {
+        setLiveBuilderPreviewOpen(true);
+      }
     setThemePickerOpen(false);
+
+      if (
+        storefrontSetupMode109 === "wizard" &&
+        storefrontSetupStep109 === 1
+      ) {
+        scrollStorefrontSetupNext157();
+      }
     if (selectedStore?.retailer_id) {
       window.localStorage.removeItem(`darik-pending-theme-${selectedStore.retailer_id}`);
     }
@@ -8650,9 +9054,27 @@ await saveStorefront(undefined, "manual");
                       </button>
                                             <button
                         type="button"
-                        onClick={() =>
-                          setLiveBuilderPreviewExpanded111((current) => !current)
-                        }
+                        onClick={() => {
+                          const nextExpanded157 =
+                            !liveBuilderPreviewExpanded111;
+
+                          setLiveBuilderPreviewExpanded111(
+                            nextExpanded157
+                          );
+
+                          if (nextExpanded157) {
+                            window.setTimeout(() => {
+                              suppressOldPreviewInstructions157(
+                                document
+                              );
+                              suppressOldPreviewInstructions157(
+                                liveBuilderPreviewRef.current
+                                  ?.contentDocument
+                              );
+                              selectStoreNameDiscovery157();
+                            }, 100);
+                          }
+                        }}
                         disabled={!storefront}
                       >
                         {liveBuilderPreviewExpanded111
@@ -8665,6 +9087,30 @@ await saveStorefront(undefined, "manual");
                         onClick={() => {
                           setLiveBuilderPreviewExpanded111(false);
                           setLiveBuilderPreviewOpen(false);
+
+
+                          let continueGettingStarted157 = false;
+
+                          try {
+                            continueGettingStarted157 =
+                              window.sessionStorage.getItem(
+                                gettingStartedAfterPreviewKey157
+                              ) === "1";
+
+                            if (continueGettingStarted157) {
+                              window.sessionStorage.removeItem(
+                                gettingStartedAfterPreviewKey157
+                              );
+                            }
+                          } catch {
+                            continueGettingStarted157 = false;
+                          }
+
+                          if (continueGettingStarted157) {
+                            window.location.assign(
+                              "/store-dashboard/getting-started"
+                            );
+                          }
                         }}
                       >
                         Close preview / إغلاق المعاينة
@@ -8987,7 +9433,10 @@ await saveStorefront(undefined, "manual");
                         <p>Select the storefront design you want. To change it later, simply select a different theme here.</p>
                       </div>
 
-                      <div className={designStyles.themeGalleryGrid}>
+                      <div
+                        className={designStyles.themeGalleryGrid}
+                        data-darik-required157="theme"
+                      >
                         {storefrontThemeOptions.map((theme) => {
                           const selected = selectedThemeField === theme.key;
 
@@ -9070,7 +9519,10 @@ await saveStorefront(undefined, "manual");
                         <p>This step contains only your logo and storefront image.</p>
                       </div>
                       <div className={designStyles.exactWizardAssetGrid109V5}>
-                        <article className={designStyles.exactWizardAssetCard109V5}>
+                        <article
+                          className={designStyles.exactWizardAssetCard109V5}
+                          data-darik-required157="logo"
+                        >
                           <div className={designStyles.exactWizardLogo109V5}>
                             {setupForm.logoUrl ? (
                               <img src={setupForm.logoUrl} alt="Store logo preview" />
@@ -9099,7 +9551,10 @@ await saveStorefront(undefined, "manual");
                           </div>
                         </article>
 
-                        <article className={designStyles.exactWizardAssetCard109V5}>
+                        <article
+                          className={designStyles.exactWizardAssetCard109V5}
+                          data-darik-required157="hero"
+                        >
                           <div className={designStyles.exactWizardCover109V5}>
                             {setupForm.heroImageUrl ? (
                               <img src={setupForm.heroImageUrl} alt="Storefront preview" />
@@ -9139,7 +9594,10 @@ await saveStorefront(undefined, "manual");
                         <p>English and Arabic customer-facing identity stay together in this step.</p>
                       </div>
                       <div className={designStyles.exactWizardGrid109V5}>
-                        <label className={designStyles.exactWizardWide109V5}>
+                        <label
+                          className={designStyles.exactWizardWide109V5}
+                          data-darik-required157="slug"
+                        >
                           <span>Permanent store link / رابط المتجر</span>
                           <div className={designStyles.exactWizardSlug109V5}>
                             <b>getdarik.com/store/</b>
@@ -9150,7 +9608,7 @@ await saveStorefront(undefined, "manual");
                             />
                           </div>
                         </label>
-                        <label>
+                        <label data-darik-required157="display-name">
                           <span>Customer-facing name / اسم المتجر للعملاء</span>
                           <input
                             value={setupForm.displayName}
@@ -9301,7 +9759,10 @@ await saveStorefront(undefined, "manual");
                         <h3>Contact information / معلومات التواصل</h3>
                         <p>Only customer contact information belongs here. The physical store location is confirmed under Delivery.</p>
                       </div>
-                      <div className={designStyles.exactWizardGrid109V5}>
+                      <div
+                        className={designStyles.exactWizardGrid109V5}
+                        data-darik-required157="contact"
+                      >
                         <label><span>Store phone / هاتف المتجر</span><input type="tel" value={setupForm.phone} onChange={(event) => updateSetupField("phone", event.target.value)} /></label>
                         <label><span>WhatsApp / واتساب</span><input type="tel" value={setupForm.whatsapp} onChange={(event) => updateSetupField("whatsapp", event.target.value)} /></label>
                         <label><span>Public email / البريد الإلكتروني</span><input type="email" value={setupForm.publicEmail} onChange={(event) => updateSetupField("publicEmail", event.target.value)} /></label>
@@ -9728,7 +10189,10 @@ await saveStorefront(undefined, "manual");
                         </div>
                       </label>
 
-                      <div className={designStyles.exactWizardZones109V5}>
+                      <div
+                        className={designStyles.exactWizardZones109V5}
+                        data-darik-required157="delivery-zones"
+                      >
                         <div className={designStyles.exactWizardZonesHead109V5}>
                           <div>
                             <small>DELIVERY ZONES / مناطق التوصيل</small>
@@ -9768,7 +10232,10 @@ await saveStorefront(undefined, "manual");
                         <h3>Payment methods / طرق الدفع</h3>
                         <p>Payment methods are completely separate from delivery.</p>
                       </div>
-                      <div className={designStyles.exactWizardPayments109V5}>
+                      <div
+                        className={designStyles.exactWizardPayments109V5}
+                        data-darik-required157="payment-methods"
+                      >
                         <label className={setupForm.acceptCash ? designStyles.exactWizardSelected109V5 : ""}>
                           <input type="checkbox" checked={setupForm.acceptCash} onChange={(event) => updateSetupField("acceptCash", event.target.checked)} />
                           <span><strong>Cash / نقداً</strong><small>Pay on collection or delivery.</small></span>
@@ -9841,6 +10308,7 @@ await saveStorefront(undefined, "manual");
                         <button
                           type="button"
                           className={designStyles.storefrontSetupNext109}
+                          data-darik-wizard-next157="true"
                           onClick={() => void goToNextStorefrontSetupStep109()}
                           disabled={storefrontSetupBusy109}
                         >

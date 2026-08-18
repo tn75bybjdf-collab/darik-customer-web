@@ -3076,3 +3076,51 @@
 .privatePreviewGate150EV2[data-darik-layout-ready150e="true"] {
   visibility: visible;
 }
+
+/* DARIK_GUIDED_ONBOARDING_PREVIEW_DISCOVERY_157
+   Missing setup fields are impossible to overlook.
+*/
+.exactWizardPanel109V5 [data-darik-required-error157="true"] {
+  position: relative;
+  z-index: 2;
+  outline: 3px solid #dc2626 !important;
+  outline-offset: 4px;
+  border-color: #dc2626 !important;
+  border-radius: 14px;
+  background-color: rgba(254, 242, 242, 0.96) !important;
+  box-shadow:
+    0 0 0 7px rgba(220, 38, 38, 0.10),
+    0 14px 32px rgba(127, 29, 29, 0.14) !important;
+  animation: darikRequiredPulse157 0.85s ease-out 1;
+}
+
+.exactWizardPanel109V5 [data-darik-required-error157="true"]::before {
+  content: "Required to continue / مطلوب للمتابعة";
+  position: absolute;
+  top: -13px;
+  right: 10px;
+  z-index: 4;
+  padding: 5px 9px;
+  border-radius: 999px;
+  background: #dc2626;
+  color: #fff;
+  font-size: 0.62rem;
+  font-weight: 950;
+  line-height: 1;
+  letter-spacing: 0.01em;
+  box-shadow: 0 5px 14px rgba(127, 29, 29, 0.22);
+}
+
+@keyframes darikRequiredPulse157 {
+  0% {
+    transform: scale(0.985);
+  }
+
+  55% {
+    transform: scale(1.008);
+  }
+
+  100% {
+    transform: scale(1);
+  }
+}
