@@ -2150,16 +2150,14 @@ export default function DarikDirectStorefrontSettingsPage() {
       ).slice(0, 140);
     }
 
+    // DARIK_EDITOR_DEVICE_BUCKET_PARENT_VIEWPORT_170
+    // IMPORTANT: classify the saved layout by the DASHBOARD device,
+    // not by the narrow preview iframe. The iframe can be <720px on a
+    // desktop dashboard, which previously mis-saved desktop edits as mobile.
     function device150D(
-      previewWindow150D?: Window | null
+      _previewWindow150D?: Window | null
     ): "desktop" | "mobile" {
-      const width150D =
-        previewWindow150D?.innerWidth ??
-        liveBuilderPreviewRef.current?.contentWindow
-          ?.innerWidth ??
-        window.innerWidth;
-
-      return width150D <= 720
+      return window.innerWidth <= 720
         ? "mobile"
         : "desktop";
     }
