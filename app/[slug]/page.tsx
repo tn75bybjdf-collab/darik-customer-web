@@ -916,6 +916,354 @@ const darikGlobalTypographyCss106 = Object.entries(
   .join("\n");
 
 // DARIK_CLICK_PREVIEW_POSITIONING_145
+// DARIK_PUBLIC_EDITOR_LAYOUT_PARITY_BRIDGE_166
+// Public storefront PASSIVE renderer for the saved dashboard editor layout.
+// No drag/edit handlers are installed on the customer storefront.
+
+type DarikPublicLayoutPoint166 = {
+  x: number;
+  y: number;
+  scale?: number;
+  hidden?: boolean;
+  label?: string;
+};
+
+type DarikPublicLayoutDevice166 = Record<
+  string,
+  DarikPublicLayoutPoint166
+>;
+
+type DarikPublicLayout166 = {
+  desktop: DarikPublicLayoutDevice166;
+  mobile: DarikPublicLayoutDevice166;
+};
+
+function darikClampLayoutOffset166(value: unknown) {
+  const numeric = Number(value);
+
+  if (!Number.isFinite(numeric)) return 0;
+
+  return Math.max(
+    -1200,
+    Math.min(1200, Math.round(numeric))
+  );
+}
+
+function darikClampLayoutScale166(value: unknown) {
+  const numeric = Number(value);
+
+  if (!Number.isFinite(numeric)) return 1;
+
+  return (
+    Math.round(
+      Math.max(0.5, Math.min(2, numeric)) * 1000
+    ) / 1000
+  );
+}
+
+function darikDefaultPublicLayout166(): DarikPublicLayout166 {
+  return {
+    desktop: {},
+    mobile: {},
+  };
+}
+
+function darikSafeLayoutLocator166(value: unknown) {
+  const locator = String(value ?? "").trim();
+
+  return (
+    locator.length >= 1 &&
+    locator.length <= 700 &&
+    /^[A-Za-z0-9_#:.() >-]+$/.test(locator)
+  );
+}
+
+function darikNormalizePublicLayout166(
+  value: unknown
+): DarikPublicLayout166 {
+  const raw =
+    value &&
+    typeof value === "object" &&
+    !Array.isArray(value)
+      ? (value as Record<string, unknown>)
+      : {};
+
+  const result = darikDefaultPublicLayout166();
+
+  for (const device of ["desktop", "mobile"] as const) {
+    const rawDevice =
+      raw[device] &&
+      typeof raw[device] === "object" &&
+      !Array.isArray(raw[device])
+        ? (raw[device] as Record<string, unknown>)
+        : {};
+
+    let accepted = 0;
+
+    for (const [locator, rawPoint] of Object.entries(
+      rawDevice
+    )) {
+      if (accepted >= 250) break;
+      if (!darikSafeLayoutLocator166(locator)) continue;
+
+      if (
+        !rawPoint ||
+        typeof rawPoint !== "object" ||
+        Array.isArray(rawPoint)
+      ) {
+        continue;
+      }
+
+      const point = rawPoint as Record<string, unknown>;
+
+      const hasScale =
+        Object.prototype.hasOwnProperty.call(
+          point,
+          "scale"
+        );
+
+      const hidden =
+        typeof point.hidden === "boolean"
+          ? point.hidden
+          : undefined;
+
+      const label =
+        typeof point.label === "string"
+          ? point.label.trim().slice(0, 140)
+          : undefined;
+
+      result[device][locator] = {
+        x: darikClampLayoutOffset166(point.x),
+        y: darikClampLayoutOffset166(point.y),
+        ...(hasScale
+          ? {
+              scale:
+                darikClampLayoutScale166(point.scale),
+            }
+          : {}),
+        ...(hidden !== undefined
+          ? { hidden }
+          : {}),
+        ...(label ? { label } : {}),
+      };
+
+      accepted += 1;
+    }
+  }
+
+  return result;
+}
+
+function darikHashSemantic166(value: string) {
+  let hash = 2166136261;
+
+  for (let index = 0; index < value.length; index += 1) {
+    hash ^= value.charCodeAt(index);
+    hash = Math.imul(hash, 16777619);
+  }
+
+  return (hash >>> 0).toString(36);
+}
+
+function darikMovableSignature166(target: Element) {
+  const tag = target.tagName.toLowerCase();
+
+  const structural = new Set([
+    "html",
+    "body",
+    "main",
+    "header",
+    "footer",
+    "nav",
+    "section",
+    "article",
+    "form",
+    "ul",
+    "ol",
+    "script",
+    "style",
+  ]);
+
+  if (structural.has(tag)) return "";
+
+  if (
+    tag === "div" &&
+    target.querySelector(
+      "h1, h2, h3, h4, p, img, picture, video, button, a, nav, section, article, header, footer"
+    )
+  ) {
+    return "";
+  }
+
+  const text = (target.textContent ?? "")
+    .replace(/\s+/g, " ")
+    .trim()
+    .slice(0, 160);
+
+  const identity = [
+    tag,
+    text,
+    target.getAttribute("alt") ?? "",
+    target.getAttribute("href") ?? "",
+    target.getAttribute("src") ?? "",
+    target.getAttribute("title") ?? "",
+  ]
+    .join("|")
+    .toLowerCase();
+
+  if (identity.replace(/[|\s]/g, "").length < 3) {
+    return "";
+  }
+
+  return identity;
+}
+
+function darikAssignPublicSemanticClasses166(
+  root: Element
+) {
+  const positioned = Array.from(
+    root.querySelectorAll(
+      '[class*="builderPositionTarget145"]'
+    )
+  );
+
+  for (const target of positioned) {
+    const tag = target.tagName.toLowerCase();
+
+    const lowerClass = (
+      target.getAttribute("class") ?? ""
+    ).toLowerCase();
+
+    if (tag === "h1") {
+      target.classList.add(
+        "darikSemanticDisplayName150E"
+      );
+      continue;
+    }
+
+    if (tag === "button") {
+      target.classList.add(
+        "darikSemanticShop150E"
+      );
+      continue;
+    }
+
+    if (lowerClass.includes("arabicname")) {
+      target.classList.add(
+        "darikSemanticDisplayNameAr150E"
+      );
+      continue;
+    }
+
+    if (lowerClass.includes("arabictagline")) {
+      target.classList.add(
+        "darikSemanticTaglineAr150E"
+      );
+      continue;
+    }
+
+    if (lowerClass.includes("tagline")) {
+      target.classList.add(
+        "darikSemanticTagline150E"
+      );
+    }
+  }
+
+  const logoVisuals = Array.from(
+    root.querySelectorAll("img, picture, svg")
+  );
+
+  for (const visual of logoVisuals) {
+    const identity = [
+      visual.getAttribute("id") ?? "",
+      visual.getAttribute("class") ?? "",
+      visual.getAttribute("alt") ?? "",
+      visual.getAttribute("aria-label") ?? "",
+    ]
+      .join(" ")
+      .toLowerCase();
+
+    if (
+      !identity.includes("logo") &&
+      !identity.includes("brand")
+    ) {
+      continue;
+    }
+
+    let box: Element | null = visual.parentElement;
+    let depth = 0;
+
+    while (
+      box &&
+      box !== root &&
+      depth < 4
+    ) {
+      const tag = box.tagName.toLowerCase();
+
+      const structural = [
+        "main",
+        "header",
+        "footer",
+        "nav",
+        "section",
+        "article",
+      ].includes(tag);
+
+      const rect = box.getBoundingClientRect();
+
+      if (
+        !structural &&
+        rect.width > 0 &&
+        rect.height > 0 &&
+        rect.width <= 420 &&
+        rect.height <= 280
+      ) {
+        box.classList.add(
+          "darikSemanticLogoBox150E"
+        );
+        break;
+      }
+
+      box = box.parentElement;
+      depth += 1;
+    }
+  }
+
+  const eligible = Array.from(
+    root.querySelectorAll(
+      "button, a, img, picture, video, h1, h2, h3, h4, h5, h6, p, label, span, div"
+    )
+  );
+
+  const signatureMap =
+    new Map<string, Element[]>();
+
+  for (const target of eligible) {
+    const signature =
+      darikMovableSignature166(target);
+
+    if (!signature) continue;
+
+    const matches =
+      signatureMap.get(signature) ?? [];
+
+    matches.push(target);
+    signatureMap.set(signature, matches);
+  }
+
+  for (const [
+    signature,
+    matches,
+  ] of signatureMap.entries()) {
+    if (matches.length !== 1) continue;
+
+    matches[0].classList.add(
+      "darikPersist150E" +
+        darikHashSemantic166(signature)
+    );
+  }
+}
+
 type StorefrontPositionKey145 =
   | "display_name"
   | "display_name_ar"
@@ -4360,6 +4708,329 @@ export default function DarikDirectStorefrontPage() {
       setPlacingOrder(false);
     }
   }
+
+  const [darikPublicLayout166, setDarikPublicLayout166] =
+    useState<DarikPublicLayout166>(() =>
+      darikDefaultPublicLayout166()
+    );
+
+  useEffect(() => {
+    if (
+      !slug ||
+      slug === "_darik-private-store-preview" ||
+      isBuilderPositionPreview145
+    ) {
+      setDarikPublicLayout166(
+        darikDefaultPublicLayout166()
+      );
+      return;
+    }
+
+    let cancelled166 = false;
+
+    void (async () => {
+      const result166 = await supabase.rpc(
+        "darik_direct_public_freeform_layout_v1",
+        { p_slug: slug }
+      );
+
+      if (cancelled166) return;
+
+      if (result166.error) {
+        console.warn(
+          "Darik live storefront layout could not load:",
+          result166.error.message
+        );
+        return;
+      }
+
+      setDarikPublicLayout166(
+        darikNormalizePublicLayout166(
+          result166.data
+        )
+      );
+    })();
+
+    return () => {
+      cancelled166 = true;
+    };
+  }, [slug, isBuilderPositionPreview145]);
+
+  const darikStorefrontLayoutRaw166 = (
+    storefront as unknown as {
+      direct_freeform_layout?: unknown;
+    } | null
+  )?.direct_freeform_layout;
+
+  const darikEffectivePublicLayout166 = useMemo(
+    () =>
+      darikNormalizePublicLayout166(
+        darikStorefrontLayoutRaw166 ??
+          darikPublicLayout166
+      ),
+    [
+      darikStorefrontLayoutRaw166,
+      darikPublicLayout166,
+    ]
+  );
+
+  useEffect(() => {
+    if (
+      isBuilderPositionPreview145 ||
+      slug === "_darik-private-store-preview"
+    ) {
+      return;
+    }
+
+    const root = document.querySelector(
+      "[data-darik-position-builder145]"
+    );
+
+    if (!root) return;
+
+    type Original166 = {
+      translateValue: string;
+      translatePriority: string;
+      scaleValue: string;
+      scalePriority: string;
+      displayValue: string;
+      displayPriority: string;
+    };
+
+    const originals166 =
+      new Map<HTMLElement, Original166>();
+
+    let stableTimer166 = 0;
+    let frameOne166 = 0;
+    let frameTwo166 = 0;
+
+    function restore166() {
+      for (const [
+        target,
+        original,
+      ] of originals166.entries()) {
+        const style = target.style;
+
+        if (original.translateValue) {
+          style.setProperty(
+            "translate",
+            original.translateValue,
+            original.translatePriority
+          );
+        } else {
+          style.removeProperty("translate");
+        }
+
+        if (original.scaleValue) {
+          style.setProperty(
+            "scale",
+            original.scaleValue,
+            original.scalePriority
+          );
+        } else {
+          style.removeProperty("scale");
+        }
+
+        if (original.displayValue) {
+          style.setProperty(
+            "display",
+            original.displayValue,
+            original.displayPriority
+          );
+        } else {
+          style.removeProperty("display");
+        }
+
+        target.removeAttribute(
+          "data-darik-live-layout166"
+        );
+      }
+
+      originals166.clear();
+    }
+
+    function remember166(target: HTMLElement) {
+      if (originals166.has(target)) return;
+
+      originals166.set(target, {
+        translateValue:
+          target.style.getPropertyValue(
+            "translate"
+          ),
+        translatePriority:
+          target.style.getPropertyPriority(
+            "translate"
+          ),
+        scaleValue:
+          target.style.getPropertyValue(
+            "scale"
+          ),
+        scalePriority:
+          target.style.getPropertyPriority(
+            "scale"
+          ),
+        displayValue:
+          target.style.getPropertyValue(
+            "display"
+          ),
+        displayPriority:
+          target.style.getPropertyPriority(
+            "display"
+          ),
+      });
+    }
+
+    function applyNow166() {
+      restore166();
+
+      darikAssignPublicSemanticClasses166(
+        root
+      );
+
+      const device =
+        window.innerWidth <= 720
+          ? "mobile"
+          : "desktop";
+
+      for (const [
+        locator,
+        point,
+      ] of Object.entries(
+        darikEffectivePublicLayout166[device]
+      )) {
+        if (
+          !darikSafeLayoutLocator166(locator)
+        ) {
+          continue;
+        }
+
+        let target: Element | null = null;
+
+        try {
+          target = root.querySelector(locator);
+        } catch {
+          target = null;
+        }
+
+        if (!(target instanceof HTMLElement)) {
+          continue;
+        }
+
+        remember166(target);
+
+        target.style.setProperty(
+          "translate",
+          `${darikClampLayoutOffset166(
+            point.x
+          )}px ${darikClampLayoutOffset166(
+            point.y
+          )}px`,
+          "important"
+        );
+
+        if (point.scale !== undefined) {
+          target.style.setProperty(
+            "scale",
+            String(
+              darikClampLayoutScale166(
+                point.scale
+              )
+            ),
+            "important"
+          );
+        }
+
+        if (point.hidden === true) {
+          target.style.setProperty(
+            "display",
+            "none",
+            "important"
+          );
+        }
+
+        target.setAttribute(
+          "data-darik-live-layout166",
+          "true"
+        );
+      }
+    }
+
+    function schedule166(delay = 120) {
+      window.clearTimeout(stableTimer166);
+      window.cancelAnimationFrame(
+        frameOne166
+      );
+      window.cancelAnimationFrame(
+        frameTwo166
+      );
+
+      stableTimer166 =
+        window.setTimeout(() => {
+          frameOne166 =
+            window.requestAnimationFrame(() => {
+              frameTwo166 =
+                window.requestAnimationFrame(
+                  applyNow166
+                );
+            });
+        }, delay);
+    }
+
+    schedule166(0);
+
+    const observer166 =
+      new MutationObserver(
+        (mutations) => {
+          const structuralChange =
+            mutations.some(
+              (mutation) =>
+                mutation.type === "childList" &&
+                (
+                  mutation.addedNodes.length > 0 ||
+                  mutation.removedNodes.length > 0
+                )
+            );
+
+          if (structuralChange) {
+            schedule166(120);
+          }
+        }
+      );
+
+    observer166.observe(root, {
+      childList: true,
+      subtree: true,
+    });
+
+    const onResize166 = () =>
+      schedule166(40);
+
+    window.addEventListener(
+      "resize",
+      onResize166
+    );
+
+    return () => {
+      observer166.disconnect();
+      window.removeEventListener(
+        "resize",
+        onResize166
+      );
+      window.clearTimeout(stableTimer166);
+      window.cancelAnimationFrame(
+        frameOne166
+      );
+      window.cancelAnimationFrame(
+        frameTwo166
+      );
+      restore166();
+    };
+  }, [
+    darikEffectivePublicLayout166,
+    isBuilderPositionPreview145,
+    slug,
+    storefront?.id,
+  ]);
 
   if (loading) {
     return (
