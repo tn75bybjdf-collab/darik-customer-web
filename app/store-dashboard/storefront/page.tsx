@@ -77,6 +77,8 @@ type OperatingHours = Record<string, string>;
 
 type OrderSubmissionMode = "phone" | "online" | "both";
 type FulfillmentMode = "delivery" | "pickup";
+// DARIK_DELIVERY_STAGES_DAYS_CUTOFF_163
+type DarikDeliverySetupStage163 = "location" | "settings";
 type StorefrontTheme =
   | "modern_market"
   | "boutique"
@@ -252,7 +254,10 @@ type StorefrontForm = {
   deliveryFee: string;
   minimumOrder: string;
   deliveryRadiusKm: string;
+  // Legacy field stays in the form shape for old preview/component compatibility.
   estimatedDeliveryMinutes: string;
+  estimatedDeliveryDays: string;
+  deliveryCutoffTime: string;
   fulfillmentMode: FulfillmentMode;
   orderSubmissionMode: OrderSubmissionMode;
   acceptCash: boolean;
@@ -413,6 +418,8 @@ type StorefrontSettings = {
   delivery_fee: number | string;
   delivery_radius_km: number | string | null;
   estimated_delivery_minutes: number | null;
+  estimated_delivery_days?: number | null;
+  delivery_cutoff_time?: string | null;
   delivery_enabled: boolean | null;
   pickup_enabled: boolean | null;
   order_submission_mode: OrderSubmissionMode;
@@ -1299,7 +1306,9 @@ export default function DarikDirectStorefrontSettingsPage() {
     deliveryFee: "2.00",
     minimumOrder: "0.00",
     deliveryRadiusKm: "",
-    estimatedDeliveryMinutes: "45",
+    estimatedDeliveryMinutes: "",
+    estimatedDeliveryDays: "0",
+    deliveryCutoffTime: "17:00",
     fulfillmentMode: "delivery",
     orderSubmissionMode: "phone",
     acceptCash: true,
@@ -1419,9 +1428,14 @@ export default function DarikDirectStorefrontSettingsPage() {
       minimum_order: liveBuilderDraftValue("minimumOrder", "minimum_order"),
       delivery_fee: liveBuilderDraftValue("deliveryFee", "delivery_fee"),
       delivery_radius_km: liveBuilderDraftValue("deliveryRadiusKm", "delivery_radius_km"),
-      estimated_delivery_minutes: liveBuilderDraftValue(
-        "estimatedDeliveryMinutes",
-        "estimated_delivery_minutes"
+      estimated_delivery_minutes: null,
+      estimated_delivery_days: liveBuilderDraftValue(
+        "estimatedDeliveryDays",
+        "estimated_delivery_days"
+      ),
+      delivery_cutoff_time: liveBuilderDraftValue(
+        "deliveryCutoffTime",
+        "delivery_cutoff_time"
       ),
       show_prices: liveBuilderDraftValue("showPrices", "show_prices"),
       show_ordering: liveBuilderDraftValue("showOrdering", "show_ordering"),
@@ -5963,6 +5977,9 @@ export default function DarikDirectStorefrontSettingsPage() {
   const [deliveryZonesSaveState109, setDeliveryZonesSaveState109] = useState<
     "idle" | "saving" | "saved" | "error"
   >("idle");
+  const [deliverySetupStage163, setDeliverySetupStage163] =
+    useState<DarikDeliverySetupStage163>("location");
+
   const storefrontSetupLoadedId109 = useRef("");
   const deliveryZonesSaveTimer109 = useRef<number | null>(null);
   const [deliveryLocation112, setDeliveryLocation112] =
@@ -6163,6 +6180,22 @@ export default function DarikDirectStorefrontSettingsPage() {
 
   // DARIK_USERNAME_SIGNUP_FORCED_ONBOARDING_136: keep Theme visible until the retailer explicitly presses Next.
 
+
+  useEffect(() => {
+    const visibleStep163 =
+      storefrontSetupMode109 === "wizard"
+        ? storefrontSetupStep109
+        : storefrontSetupTab109;
+
+    if (visibleStep163 !== 9 && deliverySetupStage163 !== "location") {
+      setDeliverySetupStage163("location");
+    }
+  }, [
+    storefrontSetupMode109,
+    storefrontSetupStep109,
+    storefrontSetupTab109,
+    deliverySetupStage163,
+  ]);
 
   useEffect(() => {
     if (deliveryLocationLocked112) {
@@ -8327,6 +8360,18 @@ export default function DarikDirectStorefrontSettingsPage() {
         return true;
       }
 
+      const deliveryDays163 = Number(setupForm.estimatedDeliveryDays);
+      const cutoff163 = String(setupForm.deliveryCutoffTime ?? "").trim();
+
+      if (
+        !Number.isInteger(deliveryDays163) ||
+        deliveryDays163 < 0 ||
+        deliveryDays163 > 365 ||
+        !/^\d{2}:\d{2}$/.test(cutoff163)
+      ) {
+        return false;
+      }
+
       return (
         deliveryZones109.length > 0 &&
         serializeDeliveryZones109() !== null
@@ -8357,7 +8402,13 @@ export default function DarikDirectStorefrontSettingsPage() {
       return "Add at least one customer contact method. / أضف وسيلة تواصل واحدة على الأقل.";
     }
     if (step === 9) {
-      return "Confirm the exact store location first. If delivery is enabled, also add at least one valid delivery zone. / أكد موقع المتجر أولاً، وإذا كان التوصيل مفعلاً أضف منطقة توصيل صالحة.";
+      if (deliverySetupStage163 === "location") {
+        return deliveryLocation112
+          ? "Press Continue to configure delivery. / اضغط متابعة لإعداد التوصيل."
+          : "Confirm the exact store location first. / أكد موقع المتجر أولاً.";
+      }
+
+      return "Choose a valid delivery promise, cutoff time, and at least one valid delivery zone. / اختر موعد توصيل ووقت إغلاق صالحين وأضف منطقة توصيل واحدة على الأقل.";
     }
     if (step === 10) {
       return "Choose at least one payment method for online orders. / اختر طريقة دفع واحدة على الأقل للطلبات الإلكترونية.";
@@ -8367,6 +8418,31 @@ export default function DarikDirectStorefrontSettingsPage() {
 
   async function goToNextStorefrontSetupStep109() {
     const step = storefrontSetupStep109;
+
+    if (step === 9 && deliverySetupStage163 === "location") {
+      if (!deliveryLocation112) {
+        setStorefrontSetupNotice109(
+          "Confirm the exact store location first. / أكد موقع المتجر أولاً."
+        );
+        revealStorefrontSetupMissing157(step);
+        return;
+      }
+
+      setStorefrontSetupNotice109("");
+      setDeliverySetupStage163("settings");
+
+      window.requestAnimationFrame(() => {
+        document
+          .querySelector<HTMLElement>(
+            '[data-darik-delivery-settings163="true"]'
+          )
+          ?.scrollIntoView({
+            behavior: "smooth",
+            block: "start",
+          });
+      });
+      return;
+    }
 
     if (!storefrontSetupStepReady109(step)) {
       setStorefrontSetupNotice109(storefrontSetupMissingMessage109(step));
@@ -8753,10 +8829,14 @@ await saveStorefront(undefined, "manual");
                 loadedStorefront.delivery_radius_km == null
                   ? ""
                   : String(loadedStorefront.delivery_radius_km),
-              estimatedDeliveryMinutes:
-                loadedStorefront.estimated_delivery_minutes == null
-                  ? ""
-                  : String(loadedStorefront.estimated_delivery_minutes),
+              estimatedDeliveryMinutes: "",
+              estimatedDeliveryDays:
+                loadedStorefront.estimated_delivery_days == null
+                  ? "0"
+                  : String(loadedStorefront.estimated_delivery_days),
+              deliveryCutoffTime: String(
+                loadedStorefront.delivery_cutoff_time ?? "17:00"
+              ).slice(0, 5),
               fulfillmentMode:
                 loadedStorefront.delivery_enabled === false &&
                 loadedStorefront.pickup_enabled === true
@@ -8815,7 +8895,9 @@ await saveStorefront(undefined, "manual");
               deliveryFee: "2.00",
               minimumOrder: "0.00",
               deliveryRadiusKm: "",
-              estimatedDeliveryMinutes: "45",
+              estimatedDeliveryMinutes: "",
+    estimatedDeliveryDays: "0",
+    deliveryCutoffTime: "17:00",
               fulfillmentMode: "delivery",
               orderSubmissionMode: "phone",
               acceptCash: true,
@@ -9415,11 +9497,15 @@ await saveStorefront(undefined, "manual");
         setupForm.fulfillmentMode === "delivery" && setupForm.deliveryRadiusKm
           ? Number(setupForm.deliveryRadiusKm)
           : 0.1,
-      estimated_delivery_minutes:
-        setupForm.fulfillmentMode === "delivery" &&
-        setupForm.estimatedDeliveryMinutes
-          ? Number(setupForm.estimatedDeliveryMinutes)
-          : null,
+      estimated_delivery_minutes: null,
+      estimated_delivery_days:
+        setupForm.fulfillmentMode === "delivery"
+          ? Number(setupForm.estimatedDeliveryDays || 0)
+          : 0,
+      delivery_cutoff_time:
+        setupForm.fulfillmentMode === "delivery"
+          ? setupForm.deliveryCutoffTime || "17:00"
+          : "17:00",
     };
 
     const { slug: _payloadSlug, ...existingStorePayload } = payload;
@@ -11245,10 +11331,14 @@ await saveStorefront(undefined, "manual");
                       <div className={designStyles.exactWizardHeading109V5}>
                         <span>STEP 9 / الخطوة ٩</span>
                         <h3>Delivery / التوصيل</h3>
-                        <p>Confirm the store location first, then choose delivery or pickup only. Delivery settings appear only when delivery is enabled.</p>
+                        <p>{deliverySetupStage163 === "location"
+                          ? "Confirm your store location first. Nothing else is shown until you continue."
+                          : "Choose fulfillment, delivery promise, cutoff time, and delivery zones."}</p>
                       </div>
 
-                      <section className={designStyles.deliveryLocationCard112}>
+                      {deliverySetupStage163 === "location" ? (
+                        <>
+<section className={designStyles.deliveryLocationCard112}>
                         <div className={designStyles.deliveryLocationHead112}>
                           <div>
                             <small>DELIVERY ORIGIN / نقطة انطلاق التوصيل</small>
@@ -11479,6 +11569,62 @@ await saveStorefront(undefined, "manual");
                           </div>
                         ) : null}
                       </section>
+                          <div className={designStyles.deliveryLocationContinue163}>
+                            <button
+                              type="button"
+                              disabled={!deliveryLocation112}
+                              onClick={() => {
+                                if (!deliveryLocation112) {
+                                  setStorefrontSetupNotice109(
+                                    "Confirm the exact store location first. / أكد موقع المتجر أولاً."
+                                  );
+                                  return;
+                                }
+
+                                setStorefrontSetupNotice109("");
+                                setDeliverySetupStage163("settings");
+
+                                window.requestAnimationFrame(() => {
+                                  document
+                                    .querySelector<HTMLElement>(
+                                      '[data-darik-delivery-settings163="true"]'
+                                    )
+                                    ?.scrollIntoView({
+                                      behavior: "smooth",
+                                      block: "start",
+                                    });
+                                });
+                              }}
+                            >
+                              Continue / متابعة
+                            </button>
+                          </div>
+                        </>
+                      ) : (
+                        <>
+                          <div
+                            className={designStyles.deliverySettingsIntro163}
+                            data-darik-delivery-settings163="true"
+                          >
+                            <div>
+                              <small>DELIVERY SETTINGS / إعدادات التوصيل</small>
+                              <strong>How should customers receive orders?</strong>
+                              <span>
+                                Store location is confirmed. Configure fulfillment,
+                                delivery timing, cutoff, and zones below.
+                              </span>
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setStorefrontSetupNotice109("");
+                                setDeliverySetupStage163("location");
+                              }}
+                            >
+                              ← Store location / موقع المتجر
+                            </button>
+                          </div>
+
 
                                             <section className={designStyles.pickupOnlyChoice114}>
                         <div className={designStyles.pickupOnlyChoiceCopy114}>
@@ -11534,18 +11680,126 @@ await saveStorefront(undefined, "manual");
                         <button type="button" className={setupForm.orderSubmissionMode === "both" ? designStyles.exactWizardSelected109V5 : ""} onClick={() => updateSetupField("orderSubmissionMode", "both")}><strong>Phone + online</strong><span>هاتف + إلكتروني</span></button>
                       </div>
 
-                      <label className={designStyles.exactWizardDeliveryTime109V5}>
-                        <span>Estimated delivery time / وقت التوصيل المتوقع</span>
-                        <div>
-                          <input
-                            type="number"
-                            min="1"
-                            value={setupForm.estimatedDeliveryMinutes}
-                            onChange={(event) => updateSetupField("estimatedDeliveryMinutes", event.target.value)}
-                          />
-                          <b>minutes / دقيقة</b>
+                      <section
+                        className={designStyles.deliveryTimingCard163}
+                        data-darik-delivery-timing163="true"
+                      >
+                        <div className={designStyles.deliveryTimingHead163}>
+                          <div>
+                            <small>DELIVERY PROMISE / موعد التوصيل</small>
+                            <strong>When will the customer receive the order?</strong>
+                            <span>
+                              Choose days, not minutes. Orders placed at or after
+                              the cutoff automatically move one day later.
+                            </span>
+                          </div>
                         </div>
-                      </label>
+
+                        <div className={designStyles.deliveryTimingChoices163}>
+                          <button
+                            type="button"
+                            aria-pressed={
+                              Number(setupForm.estimatedDeliveryDays || 0) === 0
+                            }
+                            className={
+                              Number(setupForm.estimatedDeliveryDays || 0) === 0
+                                ? designStyles.deliveryTimingSelected163
+                                : ""
+                            }
+                            onClick={() =>
+                              updateSetupField("estimatedDeliveryDays", "0")
+                            }
+                          >
+                            <strong>Same day / نفس اليوم</strong>
+                            <span>Customer receives it today before cutoff.</span>
+                          </button>
+
+                          <button
+                            type="button"
+                            aria-pressed={
+                              Number(setupForm.estimatedDeliveryDays || 0) === 1
+                            }
+                            className={
+                              Number(setupForm.estimatedDeliveryDays || 0) === 1
+                                ? designStyles.deliveryTimingSelected163
+                                : ""
+                            }
+                            onClick={() =>
+                              updateSetupField("estimatedDeliveryDays", "1")
+                            }
+                          >
+                            <strong>Next day / اليوم التالي</strong>
+                            <span>Customer receives it tomorrow before cutoff.</span>
+                          </button>
+
+                          <button
+                            type="button"
+                            aria-pressed={
+                              Number(setupForm.estimatedDeliveryDays || 0) >= 2
+                            }
+                            className={
+                              Number(setupForm.estimatedDeliveryDays || 0) >= 2
+                                ? designStyles.deliveryTimingSelected163
+                                : ""
+                            }
+                            onClick={() =>
+                              updateSetupField(
+                                "estimatedDeliveryDays",
+                                String(
+                                  Math.max(
+                                    2,
+                                    Number(setupForm.estimatedDeliveryDays || 2)
+                                  )
+                                )
+                              )
+                            }
+                          >
+                            <strong>Custom days / أيام مخصصة</strong>
+                            <span>Choose 2 or more days.</span>
+                          </button>
+                        </div>
+
+                        {Number(setupForm.estimatedDeliveryDays || 0) >= 2 ? (
+                          <label className={designStyles.deliveryCustomDays163}>
+                            <span>Number of days / عدد الأيام</span>
+                            <div>
+                              <input
+                                type="number"
+                                min="2"
+                                max="365"
+                                step="1"
+                                value={setupForm.estimatedDeliveryDays}
+                                onChange={(event) =>
+                                  updateSetupField(
+                                    "estimatedDeliveryDays",
+                                    event.target.value
+                                  )
+                                }
+                              />
+                              <b>days / أيام</b>
+                            </div>
+                          </label>
+                        ) : null}
+
+                        <label className={designStyles.deliveryCutoff163}>
+                          <span>Cutoff time / وقت الإغلاق</span>
+                          <input
+                            type="time"
+                            value={setupForm.deliveryCutoffTime}
+                            onChange={(event) =>
+                              updateSetupField(
+                                "deliveryCutoffTime",
+                                event.target.value
+                              )
+                            }
+                          />
+                          <small>
+                            Example: Same day + 5:00 PM means orders at/after
+                            5:00 PM show Tomorrow. Next day becomes 2 days after
+                            cutoff.
+                          </small>
+                        </label>
+                      </section>
 
                       <div
                         className={designStyles.exactWizardZones109V5}
@@ -11580,10 +11834,13 @@ await saveStorefront(undefined, "manual");
                       </div>
                         </>
                       ) : null}
-                    </section>
+
+                        </>
+                      )}
+</section>
                   ) : null}
 
-                  {storefrontSetupVisibleStep109 === 10 ? (
+{storefrontSetupVisibleStep109 === 10 ? (
                     <section data-darik-exact-step="10" className={designStyles.exactWizardPanel109V5}>
                       <div className={designStyles.exactWizardHeading109V5}>
                         <span>STEP 10 / الخطوة ١٠</span>

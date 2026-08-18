@@ -67,6 +67,7 @@ type ProductDetailExperienceProps = {
   deliveryEnabled: boolean;
   pickupEnabled: boolean;
   estimatedDeliveryMinutes: number | null;
+  deliveryPromiseLabel?: string;
   inCart: number;
   onClose: () => void;
   onAddToCart: () => void;
@@ -391,6 +392,7 @@ export default function ProductDetailExperience({
   deliveryEnabled,
   pickupEnabled,
   estimatedDeliveryMinutes,
+  deliveryPromiseLabel,
   inCart,
   onClose,
   onAddToCart,
@@ -854,8 +856,8 @@ export default function ProductDetailExperience({
                     <p>
                       <strong>Delivery</strong>
                       <small>
-                        {estimatedDeliveryMinutes
-                          ? `About ${estimatedDeliveryMinutes} min`
+                        {deliveryPromiseLabel || estimatedDeliveryMinutes
+                          ? deliveryPromiseLabel || `About ${estimatedDeliveryMinutes} min`
                           : "Available from this store"}
                       </small>
                     </p>

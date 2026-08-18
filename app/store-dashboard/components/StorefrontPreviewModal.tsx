@@ -10,7 +10,7 @@ type PreviewForm = {
   displayName: string; displayNameAr: string; tagline: string; taglineAr: string;
   logoUrl: string; heroImageUrl: string; primaryColor: string; accentColor: string;
   backgroundColor: string; deliveryFee: string; minimumOrder: string;
-  estimatedDeliveryMinutes: string; fulfillmentMode?: "delivery" | "pickup"; phone: string; whatsapp: string;
+  estimatedDeliveryMinutes: string; estimatedDeliveryDays?: string; deliveryCutoffTime?: string; fulfillmentMode?: "delivery" | "pickup"; phone: string; whatsapp: string;
   addressText: string; addressTextAr: string; aboutText: string; aboutTextAr: string;
   storefrontTheme?: string; appearanceMode?: string; productCardStyle?: string;
   cornerStyle?: string; heroLayout?: string; showPrices?: boolean;
@@ -139,7 +139,15 @@ export default function StorefrontPreviewModal({ open, retailerId, form, onClose
         <div className={styles.previewOnly}>PREVIEW ONLY — YOUR STORE IS NOT LIVE / معاينة فقط — متجرك غير مفعّل</div>
         <header className={styles.header}><div className={styles.identity}><div className={styles.logo}>{form.logoUrl ? <img src={form.logoUrl} alt="Store logo preview"/> : (form.displayName || "D").slice(0,1).toUpperCase()}</div><div><strong>{form.displayName || "Your store"}</strong><span>Darik Direct store / متجر داريك دايركت</span></div></div><span className={styles.headerBadge}>{form.showOrdering !== false ? "Orders disabled in preview / الطلبات معطّلة في المعاينة" : "Showcase-only website / موقع عرض فقط"}</span></header>
         <section className={styles.hero} style={heroStyle}><div className={styles.heroContent}><h1>{form.displayName || "Your store / متجرك"}</h1><p>{form.tagline || "Add a store tagline / أضف العبارة التعريفية للمتجر"}</p></div></section>
-        <section className={styles.stats}>{form.showOrdering !== false ? form.fulfillmentMode === "pickup" ? <><div><span>Fulfillment</span><strong>Pickup only</strong></div><div><span>Pickup fee</span><strong>Free</strong></div><div><span>Minimum order</span><strong>{money(form.minimumOrder || "0")}</strong></div></> : <><div><span>Delivery</span><strong>{money(form.deliveryFee || "0")}</strong></div><div><span>Minimum order</span><strong>{money(form.minimumOrder || "0")}</strong></div><div><span>Estimated time</span><strong>{form.estimatedDeliveryMinutes ? `${form.estimatedDeliveryMinutes} min` : "Set timing"}</strong></div></> : <div><span>Website mode</span><strong>Catalog showcase</strong></div>}<div><span>Contact</span><strong>{(form.showWhatsapp !== false ? form.whatsapp : "") || (form.showPhone !== false ? form.phone : "") || "Add contact"}</strong></div></section>
+        <section className={styles.stats}>{form.showOrdering !== false ? form.fulfillmentMode === "pickup" ? <><div><span>Fulfillment</span><strong>Pickup only</strong></div><div><span>Pickup fee</span><strong>Free</strong></div><div><span>Minimum order</span><strong>{money(form.minimumOrder || "0")}</strong></div></> : <><div><span>Delivery</span><strong>{money(form.deliveryFee || "0")}</strong></div><div><span>Minimum order</span><strong>{money(form.minimumOrder || "0")}</strong></div><div><span>Estimated time</span><strong>{form.estimatedDeliveryDays !== undefined
+      ? Number(form.estimatedDeliveryDays || 0) === 0
+        ? `Same day • cutoff ${form.deliveryCutoffTime || "17:00"}`
+        : Number(form.estimatedDeliveryDays || 0) === 1
+          ? `Next day • cutoff ${form.deliveryCutoffTime || "17:00"}`
+          : `${form.estimatedDeliveryDays} days • cutoff ${form.deliveryCutoffTime || "17:00"}`
+      : form.estimatedDeliveryMinutes
+        ? `${form.estimatedDeliveryMinutes} min`
+        : "Set timing"}</strong></div></> : <div><span>Website mode</span><strong>Catalog showcase</strong></div>}<div><span>Contact</span><strong>{(form.showWhatsapp !== false ? form.whatsapp : "") || (form.showPhone !== false ? form.phone : "") || "Add contact"}</strong></div></section>
         {(form.aboutText || form.addressText) ? <section className={styles.bilingualCopy}>
           {form.aboutText ? <article><strong>About the store / عن المتجر</strong><p>{form.aboutText}</p></article> : null}
           {form.addressText ? <article><strong>Address / العنوان</strong><p>{form.addressText}</p></article> : null}

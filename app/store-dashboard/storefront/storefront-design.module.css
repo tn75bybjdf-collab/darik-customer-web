@@ -3417,3 +3417,195 @@
   accent-color: #0f172a;
   cursor: pointer;
 }
+
+
+/* DARIK_DELIVERY_STAGES_DAYS_CUTOFF_163 */
+.deliveryLocationContinue163 {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 16px;
+}
+
+.deliveryLocationContinue163 button {
+  min-width: 180px;
+  min-height: 46px;
+  border: 0;
+  border-radius: 12px;
+  background: #0f172a;
+  color: #ffffff;
+  padding: 11px 18px;
+  font: inherit;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.deliveryLocationContinue163 button:disabled {
+  opacity: 0.42;
+  cursor: not-allowed;
+}
+
+.deliverySettingsIntro163 {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 18px;
+  margin-bottom: 18px;
+  padding: 16px;
+  border: 1px solid rgba(15, 23, 42, 0.12);
+  border-radius: 16px;
+  background: #f8fafc;
+}
+
+.deliverySettingsIntro163 > div {
+  display: grid;
+  gap: 5px;
+}
+
+.deliverySettingsIntro163 small,
+.deliveryTimingHead163 small {
+  font-size: 0.72rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  color: #64748b;
+}
+
+.deliverySettingsIntro163 strong,
+.deliveryTimingHead163 strong {
+  color: #0f172a;
+  font-size: 1rem;
+}
+
+.deliverySettingsIntro163 span,
+.deliveryTimingHead163 span {
+  color: #64748b;
+  font-size: 0.86rem;
+  line-height: 1.45;
+}
+
+.deliverySettingsIntro163 button {
+  flex: 0 0 auto;
+  border: 1px solid rgba(15, 23, 42, 0.14);
+  border-radius: 11px;
+  background: #ffffff;
+  padding: 9px 12px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.deliveryTimingCard163 {
+  display: grid;
+  gap: 14px;
+  margin: 16px 0;
+  padding: 16px;
+  border: 1px solid rgba(15, 23, 42, 0.12);
+  border-radius: 16px;
+  background: #ffffff;
+}
+
+.deliveryTimingHead163 > div {
+  display: grid;
+  gap: 5px;
+}
+
+.deliveryTimingChoices163 {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.deliveryTimingChoices163 button {
+  display: grid;
+  gap: 5px;
+  min-height: 92px;
+  text-align: left;
+  border: 1px solid rgba(15, 23, 42, 0.14);
+  border-radius: 13px;
+  background: #f8fafc;
+  padding: 12px;
+  cursor: pointer;
+}
+
+.deliveryTimingChoices163 button strong {
+  color: #0f172a;
+  font-size: 0.9rem;
+}
+
+.deliveryTimingChoices163 button span {
+  color: #64748b;
+  font-size: 0.78rem;
+  line-height: 1.35;
+}
+
+.deliveryTimingChoices163 button.deliveryTimingSelected163 {
+  border-color: #0f172a;
+  background: #eef2ff;
+  box-shadow: 0 0 0 2px rgba(15, 23, 42, 0.06);
+}
+
+.deliveryCustomDays163,
+.deliveryCutoff163 {
+  display: grid;
+  gap: 7px;
+}
+
+.deliveryCustomDays163 > span,
+.deliveryCutoff163 > span {
+  color: #334155;
+  font-size: 0.84rem;
+  font-weight: 850;
+}
+
+.deliveryCustomDays163 > div {
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+  width: min(280px, 100%);
+  border: 1px solid rgba(15, 23, 42, 0.14);
+  border-radius: 11px;
+}
+
+.deliveryCustomDays163 input,
+.deliveryCutoff163 input {
+  min-height: 44px;
+  border: 1px solid rgba(15, 23, 42, 0.14);
+  border-radius: 11px;
+  background: #ffffff;
+  padding: 9px 11px;
+  color: #0f172a;
+  font: inherit;
+}
+
+.deliveryCustomDays163 > div input {
+  flex: 1 1 auto;
+  min-width: 0;
+  border: 0;
+  border-radius: 0;
+}
+
+.deliveryCustomDays163 > div b {
+  flex: 0 0 auto;
+  padding: 0 11px;
+  color: #64748b;
+  font-size: 0.8rem;
+}
+
+.deliveryCutoff163 input {
+  width: min(220px, 100%);
+}
+
+.deliveryCutoff163 small {
+  max-width: 680px;
+  color: #64748b;
+  font-size: 0.78rem;
+  line-height: 1.45;
+}
+
+@media (max-width: 720px) {
+  .deliverySettingsIntro163 {
+    flex-direction: column;
+  }
+
+  .deliveryTimingChoices163 {
+    grid-template-columns: 1fr;
+  }
+}

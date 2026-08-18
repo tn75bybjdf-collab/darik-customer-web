@@ -64,6 +64,8 @@ type Storefront = {
   minimum_order: number | string;
   delivery_fee: number | string;
   estimated_delivery_minutes: number | null;
+  estimated_delivery_days?: number | null;
+  delivery_cutoff_time?: string | null;
   cash_on_delivery_enabled: boolean;
   cliq_enabled: boolean;
   cliq_account_name: string | null;
@@ -1376,6 +1378,72 @@ function darikIsBuilderPreview120() {
   );
 }
 
+// DARIK_DELIVERY_STAGES_DAYS_CUTOFF_163
+function darikJordanClockMinutes163(nowMs: number) {
+  const parts163 = new Intl.DateTimeFormat("en-GB", {
+    timeZone: "Asia/Amman",
+    hour: "2-digit",
+    minute: "2-digit",
+    hourCycle: "h23",
+  }).formatToParts(new Date(nowMs || Date.now()));
+
+  const hour163 = Number(
+    parts163.find((part163) => part163.type === "hour")?.value ?? 0
+  );
+  const minute163 = Number(
+    parts163.find((part163) => part163.type === "minute")?.value ?? 0
+  );
+
+  return hour163 * 60 + minute163;
+}
+
+function darikDeliveryPromise163(
+  rawDays163: unknown,
+  rawCutoff163: unknown,
+  nowMs163: number
+) {
+  const numericDays163 = Number(rawDays163);
+  const baseDays163 =
+    Number.isInteger(numericDays163) && numericDays163 >= 0
+      ? Math.min(365, numericDays163)
+      : 0;
+
+  const cutoffMatch163 = String(rawCutoff163 ?? "17:00").match(
+    /^(\d{1,2}):(\d{2})/
+  );
+  const cutoffHour163 = Math.min(
+    23,
+    Math.max(0, Number(cutoffMatch163?.[1] ?? 17))
+  );
+  const cutoffMinute163 = Math.min(
+    59,
+    Math.max(0, Number(cutoffMatch163?.[2] ?? 0))
+  );
+  const cutoffTotal163 = cutoffHour163 * 60 + cutoffMinute163;
+  const afterCutoff163 =
+    darikJordanClockMinutes163(nowMs163) >= cutoffTotal163;
+  const effectiveDays163 =
+    baseDays163 + (afterCutoff163 ? 1 : 0);
+
+  return {
+    baseDays: baseDays163,
+    effectiveDays: effectiveDays163,
+    afterCutoff: afterCutoff163,
+    customerLabel:
+      effectiveDays163 === 0
+        ? "Today"
+        : effectiveDays163 === 1
+          ? "Tomorrow"
+          : "In " + effectiveDays163 + " days",
+    shortLabel:
+      effectiveDays163 === 0
+        ? "Today"
+        : effectiveDays163 === 1
+          ? "Tomorrow"
+          : String(effectiveDays163) + "d",
+  };
+}
+
 function normalizeDarikCustomerLocation117(
   value: unknown
 ): DarikCustomerLocation117 | null {
@@ -1947,6 +2015,8 @@ export default function DarikDirectStorefrontPage() {
       "delivery_fee",
       "delivery_radius_km",
       "estimated_delivery_minutes",
+      "estimated_delivery_days",
+      "delivery_cutoff_time",
       "show_prices",
       "show_ordering",
       "show_phone",
@@ -5044,6 +5114,13 @@ export default function DarikDirectStorefrontPage() {
         deliveryEnabled={deliveryEnabled}
         pickupEnabled={pickupEnabled}
         estimatedDeliveryMinutes={storefront.estimated_delivery_minutes}
+        deliveryPromiseLabel={
+          darikDeliveryPromise163(
+            storefront.estimated_delivery_days,
+            storefront.delivery_cutoff_time,
+            storeClock115
+          ).customerLabel
+        }
         inCart={
           activeProduct
             ? cart.find((line) => line.productId === activeProduct.id)?.quantity ?? 0
@@ -5329,14 +5406,27 @@ style={{
                   <Icon name="clock" size={20} />
                   <span>{(pickupOnly || selectedPickup) ? "Pickup method" : "Estimated delivery"}</span>
                   <strong>
-                {(pickupOnly || selectedPickup) ? "Collect from store"
-                  : !storeIsOpenNow115 && effectiveAcceptingOrders
-                    ? storeHoursState115.phase === "before_open"
-                      ? `Delivery after ${storeHoursState115.openLabel}`
-                      : "Next-day delivery"
-                    : storefront.estimated_delivery_minutes
-                      ? `${storefront.estimated_delivery_minutes} min`
-                      : "Store estimate"}
+                {(pickupOnly || selectedPickup)
+                  ? "Collect from store"
+                  : (() => {
+                      const promise163 = darikDeliveryPromise163(
+                        storefront.estimated_delivery_days,
+                        storefront.delivery_cutoff_time,
+                        storeClock115
+                      );
+
+                      if (
+                        promise163.effectiveDays === 0 &&
+                        !storeIsOpenNow115 &&
+                        effectiveAcceptingOrders
+                      ) {
+                        return storeHoursState115.phase === "before_open"
+                          ? `Today after ${storeHoursState115.openLabel}`
+                          : "Tomorrow";
+                      }
+
+                      return promise163.customerLabel;
+                    })()}
 </strong>
                 </div>
                 <div>
@@ -5890,9 +5980,11 @@ style={{
             <strong>
               {pickupOnly
                 ? "Pickup"
-                : storefront.estimated_delivery_minutes
-                  ? `${storefront.estimated_delivery_minutes}m`
-                  : "Local"}
+                : darikDeliveryPromise163(
+                    storefront.estimated_delivery_days,
+                    storefront.delivery_cutoff_time,
+                    storeClock115
+                  ).shortLabel}
             </strong>
             <span>{pickupOnly ? "Local pickup" : "Delivery estimate"}</span>
           </article>
