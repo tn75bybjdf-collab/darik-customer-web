@@ -5415,16 +5415,11 @@ style={{
                         storeClock115
                       );
 
-                      if (
-                        promise163.effectiveDays === 0 &&
-                        !storeIsOpenNow115 &&
-                        effectiveAcceptingOrders
-                      ) {
-                        return storeHoursState115.phase === "before_open"
-                          ? `Today after ${storeHoursState115.openLabel}`
-                          : "Tomorrow";
-                      }
-
+                      // DARIK_DELIVERY_PROMISE_CUTOFF_SOURCE_OF_TRUTH_165
+                      // Delivery timing is controlled by the retailer's configured
+                      // delivery days + cutoff. Store business hours still control
+                      // the Open/Closed UI, but must not silently rewrite Today
+                      // into Tomorrow before the retailer's delivery cutoff.
                       return promise163.customerLabel;
                     })()}
 </strong>

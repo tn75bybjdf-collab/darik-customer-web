@@ -610,3 +610,179 @@
     justify-self: start;
   }
 }
+
+/* DARIK_FRONTEND_164_V3_MOBILE_GO_LIVE_RESPONSIVE_FIX
+   Mobile-only hardening for /store-dashboard/activation.
+   Desktop behavior above this block is untouched.
+*/
+@media (max-width: 760px) {
+  html,
+  body {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: hidden;
+  }
+
+  .content {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    margin: 0 !important;
+    padding-left: 14px !important;
+    padding-right: 14px !important;
+    padding-bottom: 44px !important;
+    box-sizing: border-box !important;
+    overflow-x: hidden !important;
+  }
+
+  .content *,
+  .topbar * {
+    min-width: 0;
+    box-sizing: border-box;
+  }
+
+  .topbar {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 10px !important;
+    box-sizing: border-box !important;
+  }
+
+  .topbar h1,
+  .topbar h2,
+  .topbar p,
+  .content h1,
+  .content h2,
+  .content h3,
+  .content p,
+  .content span,
+  .content strong,
+  .content small,
+  .content label {
+    max-width: 100% !important;
+    overflow-wrap: anywhere !important;
+    word-break: normal !important;
+  }
+
+  .content input,
+  .content select,
+  .content textarea {
+    display: block;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    box-sizing: border-box !important;
+  }
+
+  .content img,
+  .content video,
+  .content canvas,
+  .content iframe {
+    max-width: 100% !important;
+    height: auto;
+  }
+
+  .content table {
+    display: block;
+    width: 100%;
+    max-width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .page {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+    box-sizing: border-box !important;
+    overflow-x: hidden !important;
+  }
+
+  .sidebar {
+    position: static !important;
+    inset: auto !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    height: auto !important;
+    min-height: 0 !important;
+    box-sizing: border-box !important;
+  }
+
+  .nav {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    gap: 8px !important;
+  }
+
+  .nav a {
+    min-width: 0 !important;
+    max-width: 100% !important;
+    white-space: normal !important;
+    overflow-wrap: anywhere !important;
+  }
+
+  .planGrid,
+  .planSelected,
+  .domainGrid {
+    grid-template-columns: minmax(0, 1fr) !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    box-sizing: border-box !important;
+  }
+
+  .panel,
+  .planGrid,
+  .planWrap,
+  .plan,
+  .planSelected,
+  .planTitle,
+  .domainPanel,
+  .domainPanelHead,
+  .paymentBox,
+  .cliqCard,
+  .cliqHeading,
+  .form,
+  .receiptPreview {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    box-sizing: border-box !important;
+    overflow-wrap: anywhere !important;
+  }
+
+  .topbar {
+    max-width: 100% !important;
+    min-width: 0 !important;
+    flex-wrap: wrap !important;
+  }
+
+  .content button,
+  .content a {
+    max-width: 100% !important;
+    white-space: normal !important;
+    overflow-wrap: anywhere !important;
+  }
+}
+
+@media (max-width: 420px) {
+  .content {
+    padding-left: 10px !important;
+    padding-right: 10px !important;
+  }
+
+  .topbar h1,
+  .topbar h2 {
+    font-size: clamp(1.4rem, 8vw, 2rem) !important;
+    line-height: 1.08 !important;
+  }
+}
