@@ -3709,3 +3709,14 @@
     font-size: 13px;
   }
 }
+
+
+/* DARIK_COMPARE_AT_PRICE_PUBLIC_171 */
+.darikCompareAtPrice171 {
+  color: #dc2626 !important;
+  text-decoration-line: line-through !important;
+  text-decoration-color: #dc2626 !important;
+  text-decoration-thickness: 2px !important;
+  font-weight: 850 !important;
+  white-space: nowrap;
+}

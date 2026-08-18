@@ -1869,6 +1869,71 @@ export default function DarikDirectStorefrontPage() {
   useDarikTypographyFontLibrary105V5();
   const params = useParams<{ slug: string | string[] }>();
   const slug = normalizeParam(params?.slug);
+  // DARIK_COMPARE_AT_PRICE_PUBLIC_171
+  // Compare-at prices are intentionally fetched through a tiny public companion
+  // RPC so the mature public_storefront_products view never has to be rebuilt.
+  const [darikCompareAtByProduct171, setDarikCompareAtByProduct171] =
+    useState<Record<string, number>>({});
+
+  useEffect(() => {
+    let cancelled171 = false;
+
+    if (!slug || slug === "_darik-private-store-preview") {
+      setDarikCompareAtByProduct171({});
+      return () => {
+        cancelled171 = true;
+      };
+    }
+
+    void (async () => {
+      const result171 = await supabase.rpc(
+        "darik_direct_public_compare_at_prices_v1",
+        { p_slug: slug }
+      );
+
+      if (cancelled171) return;
+
+      // SQL 171 may be installed after this frontend deploy. Until then,
+      // storefront browsing continues normally without compare-at prices.
+      if (result171.error) {
+        setDarikCompareAtByProduct171({});
+        return;
+      }
+
+      const next171: Record<string, number> = {};
+
+      for (const raw171 of Array.isArray(result171.data)
+        ? result171.data
+        : []) {
+        const row171 = raw171 as {
+          product_id?: unknown;
+          direct_compare_at_price?: unknown;
+        };
+
+        const productId171 = String(
+          row171.product_id ?? ""
+        ).trim();
+        const compareAt171 = Number(
+          row171.direct_compare_at_price
+        );
+
+        if (
+          productId171 &&
+          Number.isFinite(compareAt171) &&
+          compareAt171 > 0
+        ) {
+          next171[productId171] = compareAt171;
+        }
+      }
+
+      setDarikCompareAtByProduct171(next171);
+    })();
+
+    return () => {
+      cancelled171 = true;
+    };
+  }, [slug]);
+
   const [previewRetailField, setPreviewRetailField] = useState("");
   useEffect(() => {
     const field = new URLSearchParams(window.location.search)
@@ -5351,6 +5416,21 @@ export default function DarikDirectStorefrontPage() {
     const thumbnailPhoto = productThumbnailPhotoUrl(photo);
     const stock = Number(product.quantity_in_stock ?? 0);
     const pricingMode = product.direct_pricing_mode || "price";
+    const currentPrice171 = Number(
+      product.app_price ?? 0
+    );
+    const compareAtPrice171 = Number(
+      product.direct_compare_at_price ??
+        darikCompareAtByProduct171[product.id] ??
+        0
+    );
+    const showCompareAtPrice171 =
+      pricingMode === "price" &&
+      showPrices &&
+      Number.isFinite(currentPrice171) &&
+      Number.isFinite(compareAtPrice171) &&
+      currentPrice171 > 0 &&
+      compareAtPrice171 > currentPrice171;
     const contactPricing = pricingMode !== "price";
     const fitment = productVehicleFitment(product);
     const availabilityStatus =
@@ -5480,7 +5560,21 @@ export default function DarikDirectStorefrontPage() {
 
           <div className={styles.productFooter}>
             <div>
-              <strong>{pricingLabel}</strong>
+              <strong>{showCompareAtPrice171 ? (
+              <span className={styles.darikSalePrice171}>
+                <span
+                  className={styles.darikCompareAtPrice171}
+                  aria-label={`Was ${money(compareAtPrice171)}`}
+                >
+                  {money(compareAtPrice171)}
+                </span>
+                <span className={styles.darikCurrentPrice171}>
+                  {money(currentPrice171)}
+                </span>
+              </span>
+            ) : (
+              pricingLabel
+            )}</strong>
               {!contactPricing && showOrdering && inCart > 0 ? <span>{inCart} in cart</span> : null}
             </div>
 
@@ -5774,7 +5868,19 @@ export default function DarikDirectStorefrontPage() {
       <style>{customerFacingNameCss144}</style>
       <ProductDetailExperience
         open={Boolean(activeProduct)}
-        product={activeProduct}
+        product={
+          activeProduct
+            ? {
+                ...activeProduct,
+                direct_compare_at_price:
+                  activeProduct.direct_compare_at_price ??
+                  darikCompareAtByProduct171[
+                    activeProduct.id
+                  ] ??
+                  null,
+              }
+            : null
+        }
         storeName={storefront.display_name}
         storeSlug={storefront.slug}
         primaryColor={fieldDesign.primaryColor}

@@ -21444,3 +21444,29 @@
       var(--darik-position-mobile-y-145);
   }
 }
+
+
+/* DARIK_COMPARE_AT_PRICE_PUBLIC_171
+   Sale display: old compare-at price first in red with a real strike-through,
+   followed by the current selling price. */
+.darikSalePrice171 {
+  display: inline-flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+
+.darikCompareAtPrice171 {
+  color: #dc2626 !important;
+  text-decoration-line: line-through;
+  text-decoration-color: #dc2626;
+  text-decoration-thickness: 2px;
+  font-weight: 850;
+  white-space: nowrap;
+}
+
+.darikCurrentPrice171 {
+  color: inherit;
+  font-weight: 950;
+  white-space: nowrap;
+}

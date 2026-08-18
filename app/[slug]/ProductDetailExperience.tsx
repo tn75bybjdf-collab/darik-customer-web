@@ -556,6 +556,7 @@ export default function ProductDetailExperience({
     (!product.direct_inventory_tracking_enabled || stock > 0);
   const compareAt = Number(product.direct_compare_at_price ?? 0);
   const price = Number(product.app_price ?? 0);
+  // DARIK_COMPARE_AT_PRICE_PUBLIC_171
   const hasCompareAt =
     !contactPricing &&
     showPrices &&
@@ -789,14 +790,14 @@ export default function ProductDetailExperience({
               <div className={styles.priceAvailabilityRow}>
                 <div className={styles.priceBlock}>
                   <small>{contactPricing ? "Pricing" : "Price"}</small>
-                  <strong>
+                  {hasCompareAt ? <del className={styles.darikCompareAtPrice171}>{money(compareAt)}</del> : null}
+          <strong>
                     {contactPricing
                       ? "Price on request"
                       : showPrices
                         ? money(product.app_price)
                         : "Contact for price"}
                   </strong>
-                  {hasCompareAt ? <del>{money(compareAt)}</del> : null}
                 </div>
 
                 <span className={`${styles.availabilityBadge} ${available ? styles.available : styles.unavailable}`}>
