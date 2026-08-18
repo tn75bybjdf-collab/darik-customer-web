@@ -7945,6 +7945,22 @@ export default function DarikDirectStorefrontSettingsPage() {
         return;
       }
 
+      // DARIK_SAME_HOURS_CHECKBOX_FIX_162
+      // The Same hours checkbox has its own change listener that copies the
+      // previous day's real hour controls. FRONTEND 161's document-level
+      // manual-edit listener was also seeing that trusted checkbox change
+      // and immediately unchecking the box again. Ignore the checkbox itself;
+      // real user edits to time/select controls still clear Same hours.
+      if (
+        target161 instanceof
+          HTMLInputElement &&
+        target161.hasAttribute(
+          "data-darik-same-hours161"
+        )
+      ) {
+        return;
+      }
+
       const fields161 =
         aboutFields161(root161);
 
