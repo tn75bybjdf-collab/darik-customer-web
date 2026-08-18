@@ -7210,6 +7210,890 @@ export default function DarikDirectStorefrontSettingsPage() {
     });
   }
 
+  // DARIK_ABOUT_REQUIRED_SAME_HOURS_161
+  useEffect(() => {
+    const dayDefinitions161 = [
+      { key: "sunday", names: ["sunday", "الأحد", "الاحد"] },
+      { key: "monday", names: ["monday", "الاثنين", "الإثنين"] },
+      { key: "tuesday", names: ["tuesday", "الثلاثاء"] },
+      { key: "wednesday", names: ["wednesday", "الأربعاء", "الاربعاء"] },
+      { key: "thursday", names: ["thursday", "الخميس"] },
+      { key: "friday", names: ["friday", "الجمعة"] },
+      { key: "saturday", names: ["saturday", "السبت"] },
+    ];
+
+    function normalize161(value161: string) {
+      return value161
+        .replace(/\\s+/g, " ")
+        .trim()
+        .toLowerCase();
+    }
+
+    function visible161(element161: HTMLElement | null) {
+      if (!element161) return false;
+
+      const style161 =
+        window.getComputedStyle(element161);
+
+      if (
+        style161.display === "none" ||
+        style161.visibility === "hidden"
+      ) {
+        return false;
+      }
+
+      const rect161 =
+        element161.getBoundingClientRect();
+
+      return (
+        rect161.width > 0 ||
+        rect161.height > 0
+      );
+    }
+
+    function stepRoot161() {
+      return (
+        Array.from(
+          document.querySelectorAll<HTMLElement>(
+            '[data-darik-exact-step="6"]'
+          )
+        ).find((candidate161) =>
+          visible161(candidate161)
+        ) ?? null
+      );
+    }
+
+    function fieldContext161(
+      field161:
+        | HTMLInputElement
+        | HTMLTextAreaElement
+    ) {
+      const label161 =
+        field161.closest("label");
+      const parent161 =
+        field161.parentElement;
+      const grand161 =
+        parent161?.parentElement ?? null;
+
+      return normalize161(
+        [
+          field161.name,
+          field161.id,
+          field161.placeholder,
+          field161.getAttribute("aria-label"),
+          label161?.textContent,
+          parent161?.textContent,
+          grand161?.textContent,
+        ]
+          .filter(Boolean)
+          .join(" ")
+      );
+    }
+
+    function aboutFields161(root161: HTMLElement) {
+      const candidates161 = Array.from(
+        root161.querySelectorAll<
+          HTMLInputElement | HTMLTextAreaElement
+        >(
+          [
+            "textarea",
+            'input[type="text"]',
+            'input:not([type])',
+          ].join(",")
+        )
+      ).filter((field161) =>
+        visible161(field161)
+      );
+
+      const scored161 = candidates161.map(
+        (field161, index161) => {
+          const context161 =
+            fieldContext161(field161);
+
+          let englishScore161 = 0;
+          let arabicScore161 = 0;
+
+          if (
+            context161.includes("about") ||
+            context161.includes("description")
+          ) {
+            englishScore161 += 8;
+          }
+
+          if (
+            context161.includes("english") ||
+            /(?:^|[_\\-\\s])en(?:$|[_\\-\\s])/.test(
+              context161
+            )
+          ) {
+            englishScore161 += 12;
+          }
+
+          if (
+            context161.includes("arabic") ||
+            context161.includes("العربية") ||
+            context161.includes("عربي") ||
+            context161.includes("عن المتجر") ||
+            context161.includes("وصف المتجر")
+          ) {
+            arabicScore161 += 12;
+          }
+
+          if (
+            /[\u0600-\u06FF]/.test(
+              context161
+            )
+          ) {
+            arabicScore161 += 4;
+          }
+
+          englishScore161 +=
+            Math.max(0, 2 - index161) *
+            0.1;
+
+          return {
+            field: field161,
+            englishScore: englishScore161,
+            arabicScore: arabicScore161,
+          };
+        }
+      );
+
+      const english161 =
+        [...scored161].sort(
+          (a161, b161) =>
+            b161.englishScore -
+            b161.arabicScore -
+            (a161.englishScore -
+              a161.arabicScore)
+        )[0]?.field ??
+        candidates161[0] ??
+        null;
+
+      const arabic161 =
+        [...scored161]
+          .filter(
+            (item161) =>
+              item161.field !== english161
+          )
+          .sort(
+            (a161, b161) =>
+              b161.arabicScore -
+              b161.englishScore -
+              (a161.arabicScore -
+                a161.englishScore)
+          )[0]?.field ??
+        candidates161.find(
+          (field161) =>
+            field161 !== english161
+        ) ??
+        null;
+
+      return {
+        english: english161,
+        arabic: arabic161,
+      };
+    }
+
+    function ensureFieldHint161(
+      field161:
+        | HTMLInputElement
+        | HTMLTextAreaElement
+        | null,
+      kind161: "required" | "optional"
+    ) {
+      if (!field161) return;
+
+      const attr161 =
+        kind161 === "required"
+          ? "data-darik-about-required-hint161"
+          : "data-darik-about-optional-hint161";
+
+      if (
+        field161.parentElement?.querySelector(
+          `[${attr161}="true"]`
+        )
+      ) {
+        return;
+      }
+
+      const hint161 =
+        document.createElement("div");
+
+      hint161.setAttribute(
+        attr161,
+        "true"
+      );
+
+      hint161.className =
+        kind161 === "required"
+          ? "darikAboutRequiredHint161"
+          : "darikAboutOptionalHint161";
+
+      hint161.textContent =
+        kind161 === "required"
+          ? "Required / مطلوب"
+          : "Optional / اختياري";
+
+      field161.insertAdjacentElement(
+        "beforebegin",
+        hint161
+      );
+    }
+
+    function clearAboutError161(
+      field161:
+        | HTMLInputElement
+        | HTMLTextAreaElement
+        | null
+    ) {
+      if (!field161) return;
+
+      field161.removeAttribute(
+        "aria-invalid"
+      );
+      field161.classList.remove(
+        "darikAboutInvalid161"
+      );
+
+      field161.parentElement
+        ?.querySelectorAll(
+          '[data-darik-about-error161="true"]'
+        )
+        .forEach((error161) =>
+          error161.remove()
+        );
+    }
+
+    function showAboutError161(
+      field161:
+        | HTMLInputElement
+        | HTMLTextAreaElement
+        | null
+    ) {
+      if (!field161) return;
+
+      field161.setAttribute(
+        "aria-invalid",
+        "true"
+      );
+      field161.classList.add(
+        "darikAboutInvalid161"
+      );
+
+      if (
+        field161.parentElement &&
+        !field161.parentElement.querySelector(
+          '[data-darik-about-error161="true"]'
+        )
+      ) {
+        const error161 =
+          document.createElement("div");
+
+        error161.setAttribute(
+          "data-darik-about-error161",
+          "true"
+        );
+        error161.className =
+          "darikAboutError161";
+        error161.textContent =
+          "About the store in English is required / وصف المتجر بالإنجليزية مطلوب";
+
+        field161.insertAdjacentElement(
+          "afterend",
+          error161
+        );
+      }
+
+      field161.scrollIntoView({
+        behavior: "smooth",
+        block: "center",
+      });
+
+      window.setTimeout(() => {
+        field161.focus({
+          preventScroll: true,
+        });
+      }, 260);
+    }
+
+    function hourControls161(
+      row161: HTMLElement
+    ) {
+      return Array.from(
+        row161.querySelectorAll<
+          HTMLInputElement | HTMLSelectElement
+        >(
+          [
+            'input[type="time"]',
+            "select",
+          ].join(",")
+        )
+      ).filter((control161) => {
+        if (
+          control161.hasAttribute(
+            "data-darik-same-hours161"
+          )
+        ) {
+          return false;
+        }
+
+        return visible161(control161);
+      });
+    }
+
+    function findDayLabel161(
+      root161: HTMLElement,
+      names161: string[]
+    ) {
+      return (
+        Array.from(
+          root161.querySelectorAll<HTMLElement>(
+            [
+              "span",
+              "label",
+              "strong",
+              "b",
+              "p",
+              "div",
+              "h4",
+              "h5",
+              "h6",
+            ].join(",")
+          )
+        )
+          .filter((element161) =>
+            visible161(element161)
+          )
+          .map((element161) => ({
+            element: element161,
+            text: normalize161(
+              element161.textContent ?? ""
+            ),
+          }))
+          .filter(({ text }) =>
+            names161.some((name161) => {
+              const normalizedName161 =
+                normalize161(name161);
+
+              return (
+                text === normalizedName161 ||
+                text.startsWith(
+                  normalizedName161 + " "
+                ) ||
+                text.endsWith(
+                  " " + normalizedName161
+                )
+              );
+            })
+          )
+          .sort(
+            (a161, b161) =>
+              a161.text.length -
+              b161.text.length
+          )[0]?.element ?? null
+      );
+    }
+
+    function findDayRow161(
+      root161: HTMLElement,
+      names161: string[]
+    ) {
+      const label161 =
+        findDayLabel161(
+          root161,
+          names161
+        );
+
+      if (!label161) return null;
+
+      let current161: HTMLElement | null =
+        label161;
+
+      while (
+        current161 &&
+        current161 !== root161
+      ) {
+        const controls161 =
+          hourControls161(current161);
+
+        if (
+          controls161.length >= 2 &&
+          controls161.length <= 4
+        ) {
+          return current161;
+        }
+
+        current161 =
+          current161.parentElement;
+      }
+
+      return null;
+    }
+
+    function setNativeValue161(
+      control161:
+        | HTMLInputElement
+        | HTMLSelectElement,
+      value161: string
+    ) {
+      if (
+        control161 instanceof
+        HTMLInputElement
+      ) {
+        const descriptor161 =
+          Object.getOwnPropertyDescriptor(
+            HTMLInputElement.prototype,
+            "value"
+          );
+
+        descriptor161?.set?.call(
+          control161,
+          value161
+        );
+      } else {
+        const descriptor161 =
+          Object.getOwnPropertyDescriptor(
+            HTMLSelectElement.prototype,
+            "value"
+          );
+
+        descriptor161?.set?.call(
+          control161,
+          value161
+        );
+
+        control161.value = value161;
+      }
+
+      control161.dispatchEvent(
+        new Event("input", {
+          bubbles: true,
+        })
+      );
+
+      control161.dispatchEvent(
+        new Event("change", {
+          bubbles: true,
+        })
+      );
+    }
+
+    function copyHours161(
+      sourceRow161: HTMLElement,
+      targetRow161: HTMLElement
+    ) {
+      const source161 =
+        hourControls161(sourceRow161);
+      const target161 =
+        hourControls161(targetRow161);
+
+      const count161 = Math.min(
+        source161.length,
+        target161.length
+      );
+
+      if (count161 < 2) {
+        return false;
+      }
+
+      for (
+        let index161 = 0;
+        index161 < count161;
+        index161 += 1
+      ) {
+        setNativeValue161(
+          target161[index161],
+          source161[index161].value
+        );
+      }
+
+      return true;
+    }
+
+    function ensureSameHours161(
+      root161: HTMLElement
+    ) {
+      const rows161 =
+        dayDefinitions161.map(
+          (day161) => ({
+            day: day161,
+            row: findDayRow161(
+              root161,
+              day161.names
+            ),
+          })
+        );
+
+      for (
+        let index161 = 1;
+        index161 < rows161.length;
+        index161 += 1
+      ) {
+        const current161 =
+          rows161[index161];
+        const previous161 =
+          rows161[index161 - 1];
+
+        if (
+          !current161.row ||
+          !previous161.row
+        ) {
+          continue;
+        }
+
+        current161.row.setAttribute(
+          "data-darik-hours-row161",
+          current161.day.key
+        );
+
+        previous161.row.setAttribute(
+          "data-darik-hours-row161",
+          previous161.day.key
+        );
+
+        if (
+          current161.row.querySelector(
+            '[data-darik-same-hours-wrap161="true"]'
+          )
+        ) {
+          continue;
+        }
+
+        const label161 =
+          document.createElement("label");
+
+        label161.setAttribute(
+          "data-darik-same-hours-wrap161",
+          "true"
+        );
+        label161.className =
+          "darikSameHoursWrap161";
+
+        const checkbox161 =
+          document.createElement("input");
+
+        checkbox161.type = "checkbox";
+        checkbox161.setAttribute(
+          "data-darik-same-hours161",
+          "true"
+        );
+        checkbox161.setAttribute(
+          "aria-label",
+          "Same hours / نفس الساعات"
+        );
+
+        const text161 =
+          document.createElement("span");
+
+        text161.textContent =
+          "Same hours / نفس الساعات";
+
+        label161.append(
+          checkbox161,
+          text161
+        );
+
+        current161.row.appendChild(
+          label161
+        );
+
+        checkbox161.addEventListener(
+          "change",
+          () => {
+            if (
+              !checkbox161.checked ||
+              !previous161.row ||
+              !current161.row
+            ) {
+              return;
+            }
+
+            copyHours161(
+              previous161.row,
+              current161.row
+            );
+          }
+        );
+      }
+    }
+
+    function applyAboutHours161() {
+      const root161 = stepRoot161();
+
+      if (!root161) return;
+
+      const fields161 =
+        aboutFields161(root161);
+
+      if (fields161.english) {
+        fields161.english.required = true;
+        fields161.english.setAttribute(
+          "aria-required",
+          "true"
+        );
+        fields161.english.setAttribute(
+          "data-darik-about-en-required161",
+          "true"
+        );
+
+        ensureFieldHint161(
+          fields161.english,
+          "required"
+        );
+
+        if (
+          fields161.english.value.trim()
+        ) {
+          clearAboutError161(
+            fields161.english
+          );
+        }
+      }
+
+      if (
+        fields161.arabic &&
+        fields161.arabic !==
+          fields161.english
+      ) {
+        fields161.arabic.required = false;
+        fields161.arabic.setAttribute(
+          "aria-required",
+          "false"
+        );
+        fields161.arabic.setAttribute(
+          "data-darik-about-ar-optional161",
+          "true"
+        );
+
+        ensureFieldHint161(
+          fields161.arabic,
+          "optional"
+        );
+      }
+
+      ensureSameHours161(root161);
+    }
+
+    function nextButtonClicked161(
+      event161: MouseEvent
+    ) {
+      const root161 = stepRoot161();
+
+      if (!root161) return;
+
+      const button161 =
+        event161.target instanceof Element
+          ? event161.target.closest<
+              HTMLButtonElement
+            >("button")
+          : null;
+
+      if (!button161) return;
+
+      const buttonText161 =
+        normalize161(
+          button161.textContent ?? ""
+        );
+
+      if (
+        !/(?:^|\\s)(?:next|continue)(?:\\s|$)|التالي|متابعة/i.test(
+          buttonText161
+        )
+      ) {
+        return;
+      }
+
+      const fields161 =
+        aboutFields161(root161);
+
+      if (
+        !fields161.english ||
+        fields161.english.value.trim()
+      ) {
+        return;
+      }
+
+      event161.preventDefault();
+      event161.stopPropagation();
+      event161.stopImmediatePropagation();
+
+      showAboutError161(
+        fields161.english
+      );
+    }
+
+    function inputChanged161(
+      event161: Event
+    ) {
+      const root161 = stepRoot161();
+
+      if (!root161) return;
+
+      const target161 = event161.target;
+
+      if (
+        !(
+          target161 instanceof
+            HTMLInputElement ||
+          target161 instanceof
+            HTMLTextAreaElement ||
+          target161 instanceof
+            HTMLSelectElement
+        )
+      ) {
+        return;
+      }
+
+      const fields161 =
+        aboutFields161(root161);
+
+      if (
+        fields161.english === target161 &&
+        target161.value.trim()
+      ) {
+        clearAboutError161(
+          fields161.english
+        );
+      }
+
+      const targetRow161 =
+        target161.closest<HTMLElement>(
+          "[data-darik-hours-row161]"
+        );
+
+      if (
+        targetRow161 &&
+        event161.isTrusted
+      ) {
+        const same161 =
+          targetRow161.querySelector<HTMLInputElement>(
+            'input[data-darik-same-hours161="true"]'
+          );
+
+        if (same161?.checked) {
+          same161.checked = false;
+        }
+      }
+
+      const sourceRow161 =
+        target161.closest<HTMLElement>(
+          "[data-darik-hours-row161]"
+        );
+
+      if (!sourceRow161) return;
+
+      const sourceKey161 =
+        sourceRow161.getAttribute(
+          "data-darik-hours-row161"
+        );
+
+      const sourceIndex161 =
+        dayDefinitions161.findIndex(
+          (day161) =>
+            day161.key === sourceKey161
+        );
+
+      if (
+        sourceIndex161 < 0 ||
+        sourceIndex161 >=
+          dayDefinitions161.length - 1
+      ) {
+        return;
+      }
+
+      const nextKey161 =
+        dayDefinitions161[
+          sourceIndex161 + 1
+        ].key;
+
+      const nextRow161 =
+        root161.querySelector<HTMLElement>(
+          `[data-darik-hours-row161="${nextKey161}"]`
+        );
+
+      const same161 =
+        nextRow161?.querySelector<HTMLInputElement>(
+          'input[data-darik-same-hours161="true"]'
+        );
+
+      if (
+        same161?.checked &&
+        nextRow161
+      ) {
+        copyHours161(
+          sourceRow161,
+          nextRow161
+        );
+      }
+    }
+
+    let scheduled161 = false;
+
+    function scheduleApply161() {
+      if (scheduled161) return;
+
+      scheduled161 = true;
+
+      window.requestAnimationFrame(() => {
+        scheduled161 = false;
+        applyAboutHours161();
+      });
+    }
+
+    document.addEventListener(
+      "click",
+      nextButtonClicked161,
+      true
+    );
+
+    document.addEventListener(
+      "input",
+      inputChanged161,
+      true
+    );
+
+    document.addEventListener(
+      "change",
+      inputChanged161,
+      true
+    );
+
+    const observer161 =
+      new MutationObserver(
+        scheduleApply161
+      );
+
+    observer161.observe(
+      document.body,
+      {
+        childList: true,
+        subtree: true,
+      }
+    );
+
+    scheduleApply161();
+
+    return () => {
+      document.removeEventListener(
+        "click",
+        nextButtonClicked161,
+        true
+      );
+      document.removeEventListener(
+        "input",
+        inputChanged161,
+        true
+      );
+      document.removeEventListener(
+        "change",
+        inputChanged161,
+        true
+      );
+      observer161.disconnect();
+    };
+  }, []);
+
   function serializeDeliveryZones109() {
     const normalized = deliveryZones109
       .map((zone) => {

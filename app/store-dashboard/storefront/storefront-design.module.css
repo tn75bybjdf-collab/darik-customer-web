@@ -3348,3 +3348,72 @@
     white-space: normal;
   }
 }
+
+
+/* DARIK_ABOUT_REQUIRED_SAME_HOURS_161 */
+:global(.darikAboutRequiredHint161),
+:global(.darikAboutOptionalHint161) {
+  width: fit-content;
+  margin: 0 0 7px;
+  padding: 4px 8px;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 800;
+  line-height: 1.2;
+}
+
+:global(.darikAboutRequiredHint161) {
+  color: #b42318;
+  background: #fef3f2;
+  border: 1px solid #fecdca;
+}
+
+:global(.darikAboutOptionalHint161) {
+  color: #475467;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+}
+
+:global(.darikAboutInvalid161) {
+  border-color: #d92d20 !important;
+  box-shadow: 0 0 0 3px rgba(217, 45, 32, 0.12) !important;
+}
+
+:global(.darikAboutError161) {
+  margin-top: 7px;
+  color: #b42318;
+  font-size: 0.84rem;
+  font-weight: 800;
+  line-height: 1.35;
+}
+
+:global(.darikSameHoursWrap161) {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  width: fit-content;
+  margin-top: 8px;
+  padding: 7px 10px;
+  border: 1px solid rgba(15, 23, 42, 0.12);
+  border-radius: 10px;
+  background: #f8fafc;
+  color: #334155;
+  font-size: 0.82rem;
+  font-weight: 800;
+  line-height: 1.2;
+  cursor: pointer;
+  user-select: none;
+}
+
+:global(.darikSameHoursWrap161:hover) {
+  border-color: rgba(15, 23, 42, 0.24);
+  background: #f1f5f9;
+}
+
+:global(.darikSameHoursWrap161 input) {
+  width: 17px;
+  height: 17px;
+  margin: 0;
+  accent-color: #0f172a;
+  cursor: pointer;
+}
