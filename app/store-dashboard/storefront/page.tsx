@@ -9807,12 +9807,23 @@ await saveStorefront(undefined, "manual");
                         >
                           <span>Permanent store link / رابط المتجر</span>
                           <div className={designStyles.exactWizardSlug109V5}>
-                            <b>getdarik.com/store/</b>
+                            <b></b>
+                            <div
+                            className={designStyles.darikLockedStoreLinkField159}
+                            data-darik-permanent-link159="true"
+                          >
+                            <span
+                              className={designStyles.darikLockedStoreLinkPrefix159}
+                              aria-hidden="true"
+                            >
+                              getdarik.com/
+                            </span>
                             <input
                               value={setupForm.slug}
                               onChange={(event) => updateSetupField("slug", cleanSlug(event.target.value))}
                               required
                             />
+                          </div>
                           </div>
                         </label>
                         <label data-darik-required157="display-name">
