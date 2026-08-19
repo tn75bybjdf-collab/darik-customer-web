@@ -2201,6 +2201,23 @@ export default function DarikDirectStorefrontPage() {
   }, []);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState("");
+  // DARIK_STORE_OPENING_CENTER_LOGO_188
+  const [openingStoreLogo188, setOpeningStoreLogo188] = useState("");
+
+  useEffect(() => {
+    setOpeningStoreLogo188("");
+    if (!slug) return;
+
+    try {
+      const cached188 = window.sessionStorage.getItem(`darik:opening-store-logo:188:${slug.toLowerCase()}`);
+      const normalized188 = String(cached188 ?? "").trim();
+      if (/^https?:\/\//i.test(normalized188)) {
+        setOpeningStoreLogo188(normalized188);
+      }
+    } catch {
+      // Loading screen falls back to Darik branding if storage is unavailable.
+    }
+  }, [slug]);
 
 
   useEffect(() => {
@@ -5487,6 +5504,11 @@ export default function DarikDirectStorefrontPage() {
   if (loading) {
     return (
       <main className={styles.statePage}>
+        {openingStoreLogo188 ? (
+          <div className="darikStoreOpeningLogo188" aria-hidden="true">
+            <img src={openingStoreLogo188} alt="" />
+          </div>
+        ) : null}
         <div className={styles.loadingBrand}>
           <div className={styles.spinner} />
           <span>Darik Direct</span>

@@ -572,6 +572,19 @@ function HomeStoreCard186({
       className="darikHomeStoreCard186"
       href={`/${store.slug}`}
       aria-label={`${t.shopStore}: ${displayStoreName(store, language)}`}
+      onClick={() => {
+        // DARIK_STORE_OPENING_CENTER_LOGO_188
+        try {
+          const storageKey188 = `darik:opening-store-logo:188:${store.slug.toLowerCase()}`;
+          if (logoUrl) {
+            window.sessionStorage.setItem(storageKey188, logoUrl);
+          } else {
+            window.sessionStorage.removeItem(storageKey188);
+          }
+        } catch {
+          // Store opening still works if browser storage is unavailable.
+        }
+      }}
     >
       <div
         className="darikHomeStoreCover186"
