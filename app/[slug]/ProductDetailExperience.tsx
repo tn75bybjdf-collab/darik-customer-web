@@ -719,65 +719,9 @@ export default function ProductDetailExperience({
     });
   }, [lightboxIndex]);
 
-  if (!open || !product) return null;
-
-  const name = productName(product);
-  const arabicName = clean(product.official_marketplace_name_ar);
-  const category = clean(product.direct_store_category_name) || clean(product.brand_name) || "Store selection";
-  const categoryAr = clean(product.direct_store_category_name_ar);
-  const fitment = productFitment(product);
-  const stock = Number(product.quantity_in_stock ?? 0);
-  const pricingMode = product.direct_pricing_mode || "price";
-  const contactPricing = pricingMode !== "price";
-  const available =
-    product.direct_availability_status !== "out_of_stock" &&
-    (!product.direct_inventory_tracking_enabled || stock > 0);
-  const compareAt = Number(product.direct_compare_at_price ?? 0);
-  const price = Number(product.app_price ?? 0);
-  // DARIK_COMPARE_AT_PRICE_PUBLIC_171
-  const hasCompareAt =
-    !contactPricing &&
-    showPrices &&
-    Number.isFinite(compareAt) &&
-    Number.isFinite(price) &&
-    compareAt > price &&
-    price > 0;
-  const sizeOptions = Array.isArray(product.direct_size_options)
-    ? product.direct_size_options
-        .map((item) => clean(item?.label))
-        .filter(Boolean)
-        .slice(0, 10)
-    : [];
-  const shoeSizes = Array.isArray(product.direct_shoe_sizes)
-    ? product.direct_shoe_sizes
-        .map((size) => [clean(size?.eu) && `EU ${clean(size?.eu)}`, clean(size?.us) && `US ${clean(size?.us)}`].filter(Boolean).join(" / "))
-        .filter(Boolean)
-        .slice(0, 10)
-    : [];
-  const optionLabels = uniqueStrings([...sizeOptions, ...shoeSizes]);
-  const whatsapp = whatsappDigits(whatsappNumber);
-  const productUrl =
-    typeof window !== "undefined"
-      ? `${window.location.origin}/${storeSlug}?product=${encodeURIComponent(product.id)}`
-      : `https://getdarik.com/${storeSlug}?product=${encodeURIComponent(product.id)}`;
-  const contactMessage = [
-    `Hello ${storeName}, I am interested in ${name}.`,
-    `مرحبا، مهتم بهذا المنتج: ${name}`,
-    fitment ? `Fitment: ${fitment}` : "",
-    productUrl,
-  ]
-    .filter(Boolean)
-    .join("\n");
-  const whatsappHref = whatsapp
-    ? `https://wa.me/${whatsapp}?text=${encodeURIComponent(contactMessage)}`
-    : null;
-  const canCall =
-    (pricingMode === "call" || pricingMode === "call_whatsapp") &&
-    Boolean(phoneHref);
-  const canWhatsapp =
-    (pricingMode === "whatsapp" || pricingMode === "call_whatsapp") &&
-    Boolean(whatsappHref);
-
+  // DARIK_184_HOOK_ORDER_RUNTIME_FIX_V3
+  // Keep all React hooks unconditional. The exact theme logic is unchanged;
+  // only its position in the component is corrected.
   // DARIK_EXACT_STOREFRONT_VISUAL_THEME_BRIDGE_184
   const [exactStoreVisual184, setExactStoreVisual184] = useState<{
     themeField: string;
@@ -1013,6 +957,66 @@ export default function ProductDetailExperience({
     renderedStoreTheme181?.fontFamily,
     renderedStoreTheme181?.muted,
   ]);
+
+  if (!open || !product) return null;
+
+  const name = productName(product);
+  const arabicName = clean(product.official_marketplace_name_ar);
+  const category = clean(product.direct_store_category_name) || clean(product.brand_name) || "Store selection";
+  const categoryAr = clean(product.direct_store_category_name_ar);
+  const fitment = productFitment(product);
+  const stock = Number(product.quantity_in_stock ?? 0);
+  const pricingMode = product.direct_pricing_mode || "price";
+  const contactPricing = pricingMode !== "price";
+  const available =
+    product.direct_availability_status !== "out_of_stock" &&
+    (!product.direct_inventory_tracking_enabled || stock > 0);
+  const compareAt = Number(product.direct_compare_at_price ?? 0);
+  const price = Number(product.app_price ?? 0);
+  // DARIK_COMPARE_AT_PRICE_PUBLIC_171
+  const hasCompareAt =
+    !contactPricing &&
+    showPrices &&
+    Number.isFinite(compareAt) &&
+    Number.isFinite(price) &&
+    compareAt > price &&
+    price > 0;
+  const sizeOptions = Array.isArray(product.direct_size_options)
+    ? product.direct_size_options
+        .map((item) => clean(item?.label))
+        .filter(Boolean)
+        .slice(0, 10)
+    : [];
+  const shoeSizes = Array.isArray(product.direct_shoe_sizes)
+    ? product.direct_shoe_sizes
+        .map((size) => [clean(size?.eu) && `EU ${clean(size?.eu)}`, clean(size?.us) && `US ${clean(size?.us)}`].filter(Boolean).join(" / "))
+        .filter(Boolean)
+        .slice(0, 10)
+    : [];
+  const optionLabels = uniqueStrings([...sizeOptions, ...shoeSizes]);
+  const whatsapp = whatsappDigits(whatsappNumber);
+  const productUrl =
+    typeof window !== "undefined"
+      ? `${window.location.origin}/${storeSlug}?product=${encodeURIComponent(product.id)}`
+      : `https://getdarik.com/${storeSlug}?product=${encodeURIComponent(product.id)}`;
+  const contactMessage = [
+    `Hello ${storeName}, I am interested in ${name}.`,
+    `مرحبا، مهتم بهذا المنتج: ${name}`,
+    fitment ? `Fitment: ${fitment}` : "",
+    productUrl,
+  ]
+    .filter(Boolean)
+    .join("\n");
+  const whatsappHref = whatsapp
+    ? `https://wa.me/${whatsapp}?text=${encodeURIComponent(contactMessage)}`
+    : null;
+  const canCall =
+    (pricingMode === "call" || pricingMode === "call_whatsapp") &&
+    Boolean(phoneHref);
+  const canWhatsapp =
+    (pricingMode === "whatsapp" || pricingMode === "call_whatsapp") &&
+    Boolean(whatsappHref);
+
   const rootStyle = {
     "--pd-primary": exactStoreVisual184?.accent || renderedStoreTheme181?.primary || primaryColor || "#111827",
     "--pd-accent": exactStoreVisual184?.accent || renderedStoreTheme181?.accent || accentColor || "#2563EB",
