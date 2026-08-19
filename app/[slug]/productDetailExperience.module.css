@@ -4398,3 +4398,217 @@
     transition: none;
   }
 }
+
+/* DARIK_PRODUCT_CART_QUANTITY_THEME_PARITY_180 */
+/*
+  Complete theme parity: product mechanics remain Customer-App-like, while
+  page/background/surface/text styling follows the retailer storefront theme.
+*/
+
+.overlay {
+  --pd-background: #f8fafc;
+  --pd-surface: color-mix(in srgb, var(--pd-background) 86%, #ffffff);
+  --pd-surface-strong: color-mix(in srgb, var(--pd-background) 72%, #ffffff);
+  --pd-text: #101828;
+  --pd-muted: #667085;
+  --pd-border: color-mix(in srgb, var(--pd-primary) 12%, transparent);
+  color: var(--pd-text);
+  background:
+    radial-gradient(circle at 12% 8%, color-mix(in srgb, var(--pd-accent) 19%, transparent), transparent 31%),
+    radial-gradient(circle at 86% 90%, color-mix(in srgb, var(--pd-primary) 16%, transparent), transparent 34%),
+    linear-gradient(
+      150deg,
+      color-mix(in srgb, var(--pd-background) 88%, #000000 12%),
+      color-mix(in srgb, var(--pd-background) 76%, var(--pd-primary) 24%)
+    );
+}
+
+.overlay[data-pd-appearance="dark"] {
+  --pd-surface: color-mix(in srgb, var(--pd-background) 84%, #111827);
+  --pd-surface-strong: color-mix(in srgb, var(--pd-background) 72%, #1f2937);
+  --pd-text: #f8fafc;
+  --pd-muted: #cbd5e1;
+  --pd-border: rgba(255, 255, 255, 0.13);
+}
+
+.productPage,
+.detailColumn {
+  color: var(--pd-text);
+  background: var(--pd-surface);
+}
+
+.productPage {
+  border-color: var(--pd-border);
+}
+
+.topBar,
+.actionDock {
+  border-color: var(--pd-border);
+  background: color-mix(in srgb, var(--pd-surface) 94%, transparent);
+}
+
+.mediaColumn {
+  border-color: var(--pd-border);
+  background: color-mix(in srgb, var(--pd-background) 82%, var(--pd-surface));
+}
+
+.mediaStage {
+  border-color: var(--pd-border);
+  background:
+    radial-gradient(
+      circle at 50% 42%,
+      color-mix(in srgb, var(--pd-surface-strong) 92%, #ffffff) 0%,
+      var(--pd-surface-strong) 100%
+    );
+}
+
+.backButton,
+.iconButton,
+.titleBlock h1,
+.priceBlock strong,
+.sectionLabel span,
+.fitmentCard strong,
+.fulfillmentStrip strong,
+.purchaseMeta strong,
+.weightCard strong {
+  color: var(--pd-text);
+}
+
+.titleBlock h2,
+.priceBlock small,
+.sectionLabel small,
+.fitmentCard small,
+.fitmentCard p,
+.descriptionSection p,
+.fulfillmentStrip small,
+.purchaseMeta small,
+.actionNote,
+.weightCard span {
+  color: var(--pd-muted);
+}
+
+.iconButton,
+.optionChips span,
+.weightCard,
+.fitmentCard,
+.fulfillmentStrip > div {
+  border-color: var(--pd-border);
+  color: var(--pd-text);
+  background: var(--pd-surface-strong);
+}
+
+.categoryArabic {
+  color: var(--pd-muted);
+  background: var(--pd-surface-strong);
+}
+
+.priceAvailabilityRow {
+  border-color: var(--pd-border);
+}
+
+.productCartButton180 {
+  position: relative;
+  flex: 0 0 auto;
+}
+
+.productCartBadge180 {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  min-width: 18px;
+  height: 18px;
+  display: grid;
+  place-items: center;
+  padding: 0 4px;
+  border: 2px solid var(--pd-surface);
+  border-radius: 999px;
+  color: color-mix(in srgb, var(--pd-primary) 92%, #000000);
+  background: var(--pd-accent);
+  font-size: 9px;
+  font-weight: 950;
+  line-height: 1;
+}
+
+.productCartActions180 {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.productQuantitySelector180 {
+  height: 44px;
+  display: grid;
+  grid-template-columns: 38px 34px 38px;
+  align-items: center;
+  overflow: hidden;
+  border: 1px solid var(--pd-border);
+  border-radius: 14px;
+  background: var(--pd-surface-strong);
+}
+
+.productQuantitySelector180 button {
+  width: 38px;
+  height: 42px;
+  display: grid;
+  place-items: center;
+  border: 0;
+  padding: 0;
+  color: var(--pd-text);
+  background: transparent;
+  font: inherit;
+  font-size: 22px;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.productQuantitySelector180 button:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--pd-accent) 12%, transparent);
+}
+
+.productQuantitySelector180 button:disabled {
+  opacity: 0.38;
+  cursor: not-allowed;
+}
+
+.productQuantitySelector180 > strong {
+  color: var(--pd-text);
+  font-size: 14px;
+  font-weight: 950;
+  text-align: center;
+}
+
+.viewCartAction180 {
+  min-width: 118px;
+}
+
+@media (max-width: 700px) {
+  .productCartLabel180 {
+    display: none;
+  }
+
+  .productCartButton180 {
+    width: 42px;
+    padding: 0;
+  }
+
+  .productCartActions180 {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+
+  .productQuantitySelector180 {
+    flex: 0 0 auto;
+    grid-template-columns: 36px 30px 36px;
+  }
+
+  .productQuantitySelector180 button {
+    width: 36px;
+  }
+
+  .viewCartAction180 {
+    flex: 1 1 auto;
+    min-width: 0;
+    padding-inline: 12px;
+  }
+}

@@ -5955,6 +5955,8 @@ export default function DarikDirectStorefrontPage() {
         storeSlug={storefront.slug}
         primaryColor={fieldDesign.primaryColor}
         accentColor={fieldDesign.accentColor}
+        backgroundColor={fieldDesign.backgroundColor}
+        appearanceMode={appearanceMode}
         phoneHref={phone}
         whatsappNumber={storefront.whatsapp_number}
         showPrices={showPrices}
@@ -5975,10 +5977,21 @@ export default function DarikDirectStorefrontPage() {
             ? cart.find((line) => line.productId === activeProduct.id)?.quantity ?? 0
             : 0
         }
+        cartCount={cartCount}
         onClose={closeProductDetail}
         onAddToCart={() => {
           if (!activeProduct) return;
           addToCart(activeProduct);
+        }}
+        onDecreaseCart={() => {
+          if (!activeProduct) return;
+          changeQuantity(activeProduct.id, -1);
+        }}
+        onOpenCart={() => {
+          // DARIK_PRODUCT_CART_QUANTITY_THEME_PARITY_180: match Customer App behavior.
+          // Leave the product screen first, then open the shared cart.
+          closeProductDetail();
+          window.setTimeout(() => setCartOpen(true), 120);
         }}
       />
 

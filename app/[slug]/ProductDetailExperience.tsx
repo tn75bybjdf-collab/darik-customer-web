@@ -61,6 +61,8 @@ type ProductDetailExperienceProps = {
   storeSlug: string;
   primaryColor: string;
   accentColor: string;
+  backgroundColor: string;
+  appearanceMode: string;
   phoneHref: string | null;
   whatsappNumber: string | null;
   showPrices: boolean;
@@ -71,8 +73,11 @@ type ProductDetailExperienceProps = {
   estimatedDeliveryMinutes: number | null;
   deliveryPromiseLabel?: string;
   inCart: number;
+  cartCount: number;
   onClose: () => void;
   onAddToCart: () => void;
+  onDecreaseCart: () => void;
+  onOpenCart: () => void;
 };
 
 type MediaSlide =
@@ -386,6 +391,8 @@ export default function ProductDetailExperience({
   storeSlug,
   primaryColor,
   accentColor,
+  backgroundColor,
+  appearanceMode,
   phoneHref,
   whatsappNumber,
   showPrices,
@@ -396,8 +403,11 @@ export default function ProductDetailExperience({
   estimatedDeliveryMinutes,
   deliveryPromiseLabel,
   inCart,
+  cartCount,
   onClose,
   onAddToCart,
+  onDecreaseCart,
+  onOpenCart,
 }: ProductDetailExperienceProps) {
   const galleryRef = useRef<HTMLDivElement | null>(null);
   const lightboxRef = useRef<HTMLDivElement | null>(null);
@@ -418,70 +428,36 @@ export default function ProductDetailExperience({
   const lightboxClosed178 = useRef(false);
   const lightboxTransformRef178 = useRef({ scale: 1, x: 0, y: 0, originX: 50, originY: 50 });
   const [lightboxTransform178, setLightboxTransform178] = useState(lightboxTransformRef178.current);
-  // DARIK_STICKY_PICKUP_AND_ADD_TO_BAG_FEEDBACK_119
-  const [addedQuantity119, setAddedQuantity119] =
-    useState<number | null>(null);
-  const addFeedbackTimer119 =
-    useRef<number | null>(null);
-
-  useEffect(() => {
-    return () => {
-      if (addFeedbackTimer119.current !== null) {
-        window.clearTimeout(
-          addFeedbackTimer119.current
-        );
-      }
-    };
-  }, []);
-
-  useEffect(() => {
-    /*
-      Switching products should never show the previous item's confirmation.
-    */
-    setAddedQuantity119(null);
-
-    if (addFeedbackTimer119.current !== null) {
-      window.clearTimeout(
-        addFeedbackTimer119.current
-      );
-      addFeedbackTimer119.current = null;
-    }
-  }, [product?.id]);
-
+  // DARIK_PRODUCT_CART_QUANTITY_THEME_PARITY_180
+  // The shared parent cart quantity is the permanent source of truth.
+  // No temporary '1 added' timer: after the first add, the UI stays at - 1 +.
   function handleAddToCart119() {
-    /*
-      The short lock is deliberate: mobile taps can easily fire repeatedly
-      when there is no visible response. One tap = one unit.
-    */
-    if (addedQuantity119 !== null) {
-      return;
-    }
-
-    const nextQuantity =
-      Math.max(0, Number(inCart) || 0) + 1;
-
     onAddToCart();
-    setAddedQuantity119(nextQuantity);
-
-    if (addFeedbackTimer119.current !== null) {
-      window.clearTimeout(
-        addFeedbackTimer119.current
-      );
-    }
-
-    addFeedbackTimer119.current =
-      window.setTimeout(() => {
-        setAddedQuantity119(null);
-        addFeedbackTimer119.current = null;
-      }, 1100);
   }
-
+  // DARIK_PRODUCT_RETURN_SCROLL_POSITION_179_V2
   useEffect(() => {
     if (!open) return;
+
+    // Keep the exact storefront browse position underneath the full-screen
+    // product page. Every close path (Back, X, edge swipe, pull-down, Escape)
+    // comes through the same product unmount, so one restore point covers all.
+    const returnScrollX179 = window.scrollX;
+    const returnScrollY179 = window.scrollY;
     const previous = document.body.style.overflow;
     document.body.style.overflow = "hidden";
+
     return () => {
       document.body.style.overflow = previous;
+
+      // iOS/mobile browsers can settle layout one frame after a fixed portal
+      // disappears. Restore twice across animation frames so the final browser
+      // position is the exact spot the shopper left.
+      window.requestAnimationFrame(() => {
+        window.scrollTo(returnScrollX179, returnScrollY179);
+        window.requestAnimationFrame(() => {
+          window.scrollTo(returnScrollX179, returnScrollY179);
+        });
+      });
     };
   }, [open]);
 
@@ -618,6 +594,7 @@ export default function ProductDetailExperience({
   const rootStyle = {
     "--pd-primary": primaryColor || "#111827",
     "--pd-accent": accentColor || "#2563EB",
+    "--pd-background": backgroundColor || "#F8FAFC",
   } as CSSProperties;
 
   function setLightboxTransformValue178(next: {
@@ -1087,7 +1064,7 @@ export default function ProductDetailExperience({
   if (typeof document === "undefined") return null;
 
   return createPortal(
-    <div className={styles.overlay} style={rootStyle} role="dialog" aria-modal="true" aria-label={`${name} product details`}>
+    <div className={styles.overlay} style={rootStyle} data-pd-appearance={appearanceMode === "dark" ? "dark" : "light"} role="dialog" aria-modal="true" aria-label={`${name} product details`}>
       <div className={styles.ambientOne} />
       <div className={styles.ambientTwo} />
 
@@ -1110,6 +1087,20 @@ export default function ProductDetailExperience({
             <button type="button" className={styles.iconButton} onClick={shareProduct} aria-label="Share product">
               <ShareIcon />
               <span>{shareState || "Share"}</span>
+            </button>
+            <button
+              type="button"
+              className={`${styles.iconButton} ${styles.productCartButton180}`}
+              onClick={onOpenCart}
+              aria-label={`Open cart, ${cartCount} ${cartCount === 1 ? "item" : "items"}`}
+            >
+              <BagIcon />
+              <span className={styles.productCartLabel180}>Cart</span>
+              {cartCount > 0 ? (
+                <strong className={styles.productCartBadge180}>
+                  {cartCount > 99 ? "99+" : cartCount}
+                </strong>
+              ) : null}
             </button>
             <button type="button" className={styles.closeButton} onClick={onClose} aria-label="Close product details">
               <CloseIcon />
@@ -1350,57 +1341,52 @@ export default function ProductDetailExperience({
               ) : showOrdering ? (
                 <div className={styles.purchaseRow}>
                   <div className={styles.purchaseMeta}>
-                    {addedQuantity119 !== null ? (
-                      <strong className={styles.addedMeta119}>
-                        ✓ Added • {addedQuantity119} in your bag
-                      </strong>
-                    ) : inCart > 0 ? (
-                      <strong>{inCart} in your bag</strong>
-                    ) : (
-                      <strong>Ready when you are</strong>
-                    )}
+                    <strong>
+                      {inCart > 0 ? `${inCart} in your bag` : "Ready when you are"}
+                    </strong>
                     <small>{acceptingOrders ? "Store is accepting orders" : "Ordering is paused"}</small>
                   </div>
-                  <button
-                    type="button"
-                    className={`${styles.primaryAction} ${
-                      addedQuantity119 !== null
-                        ? styles.addedToBag119
-                        : ""
-                    }`}
-                    onClick={handleAddToCart119}
-                    disabled={
-                      !acceptingOrders ||
-                      !available ||
-                      addedQuantity119 !== null
-                    }
-                    aria-live="polite"
-                  >
-                    {addedQuantity119 !== null ? (
-                      <>
-                        <span
-                          className={
-                            styles.addedCheck119
-                          }
-                          aria-hidden="true"
+
+                  {inCart > 0 ? (
+                    <div className={styles.productCartActions180}>
+                      <div className={styles.productQuantitySelector180} aria-label="Product quantity in cart">
+                        <button
+                          type="button"
+                          onClick={onDecreaseCart}
+                          aria-label="Remove one from cart"
                         >
-                          ✓
-                        </span>
-                        <span>
-                          Added to bag • {addedQuantity119}
-                        </span>
-                      </>
-                    ) : (
-                      <>
+                          <span aria-hidden="true">−</span>
+                        </button>
+                        <strong aria-live="polite">{inCart}</strong>
+                        <button
+                          type="button"
+                          onClick={handleAddToCart119}
+                          disabled={!acceptingOrders || !available}
+                          aria-label="Add one more to cart"
+                        >
+                          <span aria-hidden="true">+</span>
+                        </button>
+                      </div>
+                      <button
+                        type="button"
+                        className={`${styles.primaryAction} ${styles.viewCartAction180}`}
+                        onClick={onOpenCart}
+                      >
                         <BagIcon />
-                        <span>
-                          {available
-                            ? "Add to bag"
-                            : "Out of stock"}
-                        </span>
-                      </>
-                    )}
-                  </button>
+                        <span>View cart</span>
+                      </button>
+                    </div>
+                  ) : (
+                    <button
+                      type="button"
+                      className={styles.primaryAction}
+                      onClick={handleAddToCart119}
+                      disabled={!acceptingOrders || !available}
+                    >
+                      <BagIcon />
+                      <span>{available ? "Add to bag" : "Out of stock"}</span>
+                    </button>
+                  )}
                 </div>
               ) : (
                 <div className={styles.purchaseRow}>

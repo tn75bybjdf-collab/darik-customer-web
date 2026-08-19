@@ -21668,3 +21668,9 @@
     width: min(100%, 56px);
   }
 }
+
+/* DARIK_PRODUCT_CART_QUANTITY_THEME_PARITY_180 */
+/* Cart is a top-level customer task. It must sit above the persistent account hub. */
+.cartOverlay {
+  z-index: 2147483500;
+}
