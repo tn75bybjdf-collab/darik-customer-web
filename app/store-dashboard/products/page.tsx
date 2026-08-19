@@ -3384,11 +3384,52 @@ export default function DarikDirectProductsPage() {
     [context, selectedRetailerId]
   );
 
-  const catalogUnlocked190 = Boolean(
+  // DARIK_APPROVED_PAYMENT_AUTHORITATIVE_UNLOCK_193
+  const catalogContextFallback193 = Boolean(
     selectedStore?.activation_status === "active" &&
       (!selectedStore.activation_expires_at ||
         new Date(selectedStore.activation_expires_at) > new Date())
   );
+  const [catalogAccessAllowed193, setCatalogAccessAllowed193] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    let cancelled193 = false;
+
+    if (!selectedRetailerId) {
+      setCatalogAccessAllowed193(null);
+      return () => {
+        cancelled193 = true;
+      };
+    }
+
+    setCatalogAccessAllowed193(null);
+
+    void supabase
+      .rpc("darik_direct_catalog_access_v190", {
+        p_retailer_id: selectedRetailerId,
+      })
+      .then(({ data, error: accessError193 }) => {
+        if (cancelled193) return;
+
+        if (accessError193) {
+          setError(`Could not verify approved plan access: ${accessError193.message}`);
+          setCatalogAccessAllowed193(null);
+          return;
+        }
+
+        const accessPayload193 = data as { allowed?: boolean } | null;
+        setCatalogAccessAllowed193(accessPayload193?.allowed === true);
+      });
+
+    return () => {
+      cancelled193 = true;
+    };
+  }, [selectedRetailerId]);
+
+  const catalogUnlocked190 =
+    catalogAccessAllowed193 === null
+      ? catalogContextFallback193
+      : catalogAccessAllowed193;
 
   const loadContext = useCallback(async () => {
     const contextResult = await supabase.rpc("darik_direct_get_my_context");
@@ -3563,12 +3604,13 @@ export default function DarikDirectProductsPage() {
 
   useEffect(() => {
     if (!selectedRetailerId || !selectedStore) return;
+    if (catalogAccessAllowed193 === null && !catalogContextFallback193) return;
     if (!catalogUnlocked190) {
       router.replace("/store-dashboard/storefront?catalog=locked");
       return;
     }
     loadCatalog();
-  }, [catalogUnlocked190, loadCatalog, router, selectedRetailerId, selectedStore]);
+  }, [catalogAccessAllowed193, catalogContextFallback193, catalogUnlocked190, loadCatalog, router, selectedRetailerId, selectedStore]);
 
   useEffect(() => {
     let cancelled = false;

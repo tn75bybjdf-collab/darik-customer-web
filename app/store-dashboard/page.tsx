@@ -616,7 +616,49 @@ export default function DarikDirectOverviewPage() {
     activationStatus === "active" &&
     (!storefront?.activation_expires_at ||
       new Date(storefront.activation_expires_at) > new Date());
-  const catalogUnlocked190 = isLive;
+
+  // DARIK_APPROVED_PAYMENT_AUTHORITATIVE_UNLOCK_193
+  const catalogContextFallback193 = isLive;
+  const [catalogAccessAllowed193, setCatalogAccessAllowed193] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    let cancelled193 = false;
+
+    if (!selectedRetailerId) {
+      setCatalogAccessAllowed193(null);
+      return () => {
+        cancelled193 = true;
+      };
+    }
+
+    setCatalogAccessAllowed193(null);
+
+    void supabase
+      .rpc("darik_direct_catalog_access_v190", {
+        p_retailer_id: selectedRetailerId,
+      })
+      .then(({ data, error: accessError193 }) => {
+        if (cancelled193) return;
+
+        if (accessError193) {
+          console.error("Could not verify approved Darik plan access.", accessError193);
+          setCatalogAccessAllowed193(null);
+          return;
+        }
+
+        const accessPayload193 = data as { allowed?: boolean } | null;
+        setCatalogAccessAllowed193(accessPayload193?.allowed === true);
+      });
+
+    return () => {
+      cancelled193 = true;
+    };
+  }, [selectedRetailerId]);
+
+  const catalogUnlocked190 =
+    catalogAccessAllowed193 === null
+      ? catalogContextFallback193
+      : catalogAccessAllowed193;
 
   const setupTasks = useMemo<SetupTask[]>(() => {
     const paymentReady = Boolean(
