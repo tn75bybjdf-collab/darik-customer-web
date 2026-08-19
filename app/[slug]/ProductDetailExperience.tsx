@@ -415,6 +415,193 @@ export default function ProductDetailExperience({
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
   const [videoUrl, setVideoUrl] = useState("");
   const [shareState, setShareState] = useState("");
+  // DARIK_RENDERED_STOREFRONT_THEME_INHERITANCE_181
+  const [renderedStoreTheme181, setRenderedStoreTheme181] = useState<{
+    primary: string;
+    accent: string;
+    background: string;
+    text: string;
+    muted: string;
+    buttonText: string;
+    appearance: "light" | "dark";
+    fontFamily: string;
+  } | null>(null);
+
+  useEffect(() => {
+    if (!open) return;
+
+    const storefrontRoot = document.querySelector(
+      'main[data-theme][data-appearance][data-theme-field]'
+    ) as HTMLElement | null;
+
+    if (!storefrontRoot) return;
+
+    const rootComputed = window.getComputedStyle(storefrontRoot);
+
+    const cssVariable181 = (name: string) =>
+      rootComputed.getPropertyValue(name).trim();
+
+    const usableColor181 = (value: string | null | undefined) => {
+      const clean = String(value || "").trim().toLowerCase();
+      return Boolean(
+        clean &&
+          clean !== "transparent" &&
+          clean !== "rgba(0, 0, 0, 0)" &&
+          clean !== "rgba(0,0,0,0)"
+      );
+    };
+
+    const rgb181 = (value: string) => {
+      const clean = value.trim();
+
+      const rgbMatch = clean.match(/^rgba?\(\s*(\d+(?:\.\d+)?)\s*[, ]\s*(\d+(?:\.\d+)?)\s*[, ]\s*(\d+(?:\.\d+)?)/i);
+      if (rgbMatch) {
+        return [
+          Number(rgbMatch[1]),
+          Number(rgbMatch[2]),
+          Number(rgbMatch[3]),
+        ];
+      }
+
+      const hexMatch = clean.match(/^#([0-9a-f]{{6}})$/i);
+      if (hexMatch) {
+        return [
+          parseInt(hexMatch[1].slice(0, 2), 16),
+          parseInt(hexMatch[1].slice(2, 4), 16),
+          parseInt(hexMatch[1].slice(4, 6), 16),
+        ];
+      }
+
+      return null;
+    };
+
+    const luminance181 = (value: string) => {
+      const rgb = rgb181(value);
+      if (!rgb) return null;
+
+      const channels = rgb.map((channel) => {
+        const normalized = Math.max(0, Math.min(255, channel)) / 255;
+        return normalized <= 0.03928
+          ? normalized / 12.92
+          : Math.pow((normalized + 0.055) / 1.055, 2.4);
+      });
+
+      return (
+        channels[0] * 0.2126 +
+        channels[1] * 0.7152 +
+        channels[2] * 0.0722
+      );
+    };
+
+    const visibleElement181 = (element: Element | null) => {
+      if (!(element instanceof HTMLElement)) return false;
+      const rect = element.getBoundingClientRect();
+      const computed = window.getComputedStyle(element);
+      return (
+        rect.width > 0 &&
+        rect.height > 0 &&
+        computed.display !== "none" &&
+        computed.visibility !== "hidden"
+      );
+    };
+
+    const visibleNodes181 = Array.from(
+      storefrontRoot.querySelectorAll<HTMLElement>(
+        '[class*="price"],[class*="Price"],h1,h2,small,p'
+      )
+    ).filter(visibleElement181);
+
+    const priceProbe181 =
+      visibleNodes181.find((node) =>
+        /\bJOD\b/i.test(String(node.textContent || ""))
+      ) || null;
+
+    const headingProbe181 =
+      visibleNodes181.find((node) =>
+        /^(H1|H2)$/.test(node.tagName)
+      ) || null;
+
+    const mutedProbe181 =
+      visibleNodes181.find((node) =>
+        node.tagName === "SMALL"
+      ) || null;
+
+    const renderedBackground181 = rootComputed.backgroundColor;
+    const background181 = usableColor181(renderedBackground181)
+      ? renderedBackground181
+      : cssVariable181("--store-background") || backgroundColor || "#F8FAFC";
+
+    const rootText181 = rootComputed.color;
+    const headingText181 = headingProbe181
+      ? window.getComputedStyle(headingProbe181).color
+      : rootText181;
+    const text181 = usableColor181(headingText181)
+      ? headingText181
+      : rootText181 || "#101828";
+
+    const cssAccent181 =
+      cssVariable181("--store-accent") || accentColor || "#2563EB";
+    const observedAccent181 = priceProbe181
+      ? window.getComputedStyle(priceProbe181).color
+      : "";
+
+    const observedAccentLuma181 = usableColor181(observedAccent181)
+      ? luminance181(observedAccent181)
+      : null;
+    const textLuma181 = luminance181(text181);
+
+    const accent181 =
+      usableColor181(observedAccent181) &&
+      observedAccentLuma181 !== null &&
+      (textLuma181 === null ||
+        Math.abs(observedAccentLuma181 - textLuma181) > 0.08)
+        ? observedAccent181
+        : cssAccent181;
+
+    const muted181 =
+      cssVariable181("--theme-muted") ||
+      (mutedProbe181
+        ? window.getComputedStyle(mutedProbe181).color
+        : "") ||
+      (luminance181(background181) !== null &&
+      (luminance181(background181) ?? 1) < 0.45
+        ? "#B9C0C8"
+        : "#667085");
+
+    const backgroundLuma181 = luminance181(background181);
+    const appearance181: "light" | "dark" =
+      backgroundLuma181 !== null
+        ? backgroundLuma181 < 0.45
+          ? "dark"
+          : "light"
+        : storefrontRoot.dataset.appearance === "dark"
+          ? "dark"
+          : "light";
+
+    const accentLuma181 = luminance181(accent181);
+    const buttonText181 =
+      accentLuma181 !== null && accentLuma181 > 0.52
+        ? "#0B0F12"
+        : "#FFFFFF";
+
+    setRenderedStoreTheme181({
+      primary: cssVariable181("--store-primary") || primaryColor || "#111827",
+      accent: accent181,
+      background: background181,
+      text: text181,
+      muted: muted181,
+      buttonText: buttonText181,
+      appearance: appearance181,
+      fontFamily: rootComputed.fontFamily || "",
+    });
+  }, [
+    open,
+    product?.id,
+    primaryColor,
+    accentColor,
+    backgroundColor,
+    appearanceMode,
+  ]);
   // Customer-app parity: edge-back, swipe-down close, double-tap zoom, pinch zoom, and pan.
   const productEdgeGesture178 = useRef<{ x: number; y: number; time: number; pointerId: number } | null>(null);
   const productEdgeClosed178 = useRef(false);
@@ -592,9 +779,13 @@ export default function ProductDetailExperience({
     Boolean(whatsappHref);
 
   const rootStyle = {
-    "--pd-primary": primaryColor || "#111827",
-    "--pd-accent": accentColor || "#2563EB",
-    "--pd-background": backgroundColor || "#F8FAFC",
+    "--pd-primary": renderedStoreTheme181?.primary || primaryColor || "#111827",
+    "--pd-accent": renderedStoreTheme181?.accent || accentColor || "#2563EB",
+    "--pd-background": renderedStoreTheme181?.background || backgroundColor || "#F8FAFC",
+    "--pd-text": renderedStoreTheme181?.text || "#101828",
+    "--pd-muted": renderedStoreTheme181?.muted || "#667085",
+    "--pd-button-text": renderedStoreTheme181?.buttonText || "#FFFFFF",
+    fontFamily: renderedStoreTheme181?.fontFamily || undefined,
   } as CSSProperties;
 
   function setLightboxTransformValue178(next: {
@@ -1064,7 +1255,7 @@ export default function ProductDetailExperience({
   if (typeof document === "undefined") return null;
 
   return createPortal(
-    <div className={styles.overlay} style={rootStyle} data-pd-appearance={appearanceMode === "dark" ? "dark" : "light"} role="dialog" aria-modal="true" aria-label={`${name} product details`}>
+    <div className={styles.overlay} style={rootStyle} data-pd-appearance={renderedStoreTheme181?.appearance || (appearanceMode === "dark" ? "dark" : "light")} role="dialog" aria-modal="true" aria-label={`${name} product details`}>
       <div className={styles.ambientOne} />
       <div className={styles.ambientTwo} />
 

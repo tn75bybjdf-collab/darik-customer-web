@@ -21674,3 +21674,157 @@
 .cartOverlay {
   z-index: 2147483500;
 }
+
+/* DARIK_RENDERED_STOREFRONT_THEME_INHERITANCE_181 */
+/* About/store-info modal is a top-level task and must beat the account hub. */
+.modalOverlay {
+  z-index: 2147483500 !important;
+}
+
+.modalOverlay .modalHeader {
+  z-index: 5;
+}
+
+.modalOverlay .modalHeader > button {
+  position: relative;
+  z-index: 6;
+}
+
+/* DARIK_BEST_SELLER_CONTINUATION_AFFORDANCE_182 */
+/*
+  Best Sellers continuation affordance:
+  - appears only when the shelf actually has off-screen content
+  - theme-aware edge fade
+  - restrained functional chevron
+  - disappears automatically at the end
+*/
+.marketplaceBestSellerCarouselShell182 {
+  position: relative;
+  min-width: 0;
+}
+
+.marketplaceBestSellerCarouselShell182::after {
+  content: "";
+  position: absolute;
+  z-index: 23;
+  top: 0;
+  right: 0;
+  bottom: 4px;
+  width: 46px;
+  pointer-events: none;
+  opacity: 0;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    color-mix(
+      in srgb,
+      var(--store-background, #0b0f12) 72%,
+      transparent
+    ) 56%,
+    color-mix(
+      in srgb,
+      var(--store-background, #0b0f12) 94%,
+      transparent
+    ) 100%
+  );
+  transition: opacity 180ms ease;
+}
+
+.marketplaceBestSellerCarouselShell182[data-can-forward="true"]::after {
+  opacity: 1;
+}
+
+.marketplaceBestSellerContinue182 {
+  position: absolute;
+  z-index: 25;
+  top: 50%;
+  right: 5px;
+  width: 30px;
+  height: 48px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 1px solid
+    color-mix(in srgb, var(--store-accent, #ffffff) 22%, transparent);
+  border-radius: 999px;
+  color: var(--store-accent, #ffffff);
+  background: color-mix(
+    in srgb,
+    var(--store-background, #0b0f12) 84%,
+    transparent
+  );
+  box-shadow:
+    0 8px 24px rgba(0, 0, 0, 0.14),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(10px) saturate(125%);
+  -webkit-backdrop-filter: blur(10px) saturate(125%);
+  transform: translateY(-58%);
+  opacity: 0.88;
+  cursor: pointer;
+  transition:
+    opacity 160ms ease,
+    transform 160ms ease,
+    border-color 160ms ease,
+    background 160ms ease;
+}
+
+.marketplaceBestSellerContinue182 svg {
+  width: 14px;
+  height: 14px;
+}
+
+.marketplaceBestSellerContinue182:hover {
+  opacity: 1;
+  transform: translateY(-58%) translateX(1px);
+  border-color: color-mix(
+    in srgb,
+    var(--store-accent, #ffffff) 42%,
+    transparent
+  );
+}
+
+.marketplaceBestSellerContinue182:focus-visible {
+  outline: 2px solid
+    color-mix(in srgb, var(--store-accent, #ffffff) 68%, white);
+  outline-offset: 2px;
+}
+
+.marketplaceBestSellerCarouselShell182[data-can-back="true"]
+  .marketplaceBestSellerContinue182 {
+  opacity: 0.72;
+}
+
+@media (max-width: 760px) {
+  .marketplaceBestSellerCarouselShell182 {
+    margin-right: -8px;
+    padding-right: 8px;
+  }
+
+  .marketplaceBestSellerCarouselShell182::after {
+    width: 40px;
+  }
+
+  .marketplaceBestSellerContinue182 {
+    right: 3px;
+    width: 27px;
+    height: 44px;
+    opacity: 0.84;
+  }
+
+  .marketplaceBestSellerContinue182 svg {
+    width: 13px;
+    height: 13px;
+  }
+
+  .marketplaceBestSellerCarouselShell182[data-can-back="true"]
+    .marketplaceBestSellerContinue182 {
+    opacity: 0.58;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .marketplaceBestSellerContinue182,
+  .marketplaceBestSellerCarouselShell182::after {
+    transition: none;
+  }
+}

@@ -2675,6 +2675,103 @@ export default function DarikDirectStorefrontPage() {
       .filter((group) => group.products.length > 0);
   }, [filteredProducts, selectedCategoryId, visibleCategories]);
 
+  // DARIK_BEST_SELLER_CONTINUATION_AFFORDANCE_182
+  const [bestSellerShelfState182, setBestSellerShelfState182] = useState<
+    Record<string, { canGoBack: boolean; canGoForward: boolean }>
+  >({});
+
+  function updateBestSellerShelfState182(
+    categoryId: string,
+    element: HTMLDivElement
+  ) {
+    const maxScroll = Math.max(0, element.scrollWidth - element.clientWidth);
+    const currentScroll = Math.max(0, element.scrollLeft);
+    const nextState = {
+      canGoBack: currentScroll > 4,
+      canGoForward: maxScroll - currentScroll > 4,
+    };
+
+    setBestSellerShelfState182((current) => {
+      const previous = current[categoryId];
+
+      if (
+        previous?.canGoBack === nextState.canGoBack &&
+        previous?.canGoForward === nextState.canGoForward
+      ) {
+        return current;
+      }
+
+      return {
+        ...current,
+        [categoryId]: nextState,
+      };
+    });
+  }
+
+  function scrollBestSellerShelf182(categoryId: string) {
+    const carousel = Array.from(
+      document.querySelectorAll<HTMLDivElement>(
+        "[data-darik-best-seller-carousel-182]"
+      )
+    ).find(
+      (element) =>
+        element.dataset.darikBestSellerCarousel182 === categoryId
+    );
+
+    if (!carousel) return;
+
+    const firstItem = carousel.querySelector<HTMLElement>(
+      "[data-darik-best-seller-item-182]"
+    );
+    const itemWidth = firstItem?.getBoundingClientRect().width ?? 154;
+    const computed = window.getComputedStyle(carousel);
+    const gap = Number.parseFloat(computed.columnGap || computed.gap || "0") || 0;
+    const step = Math.max(itemWidth + gap, carousel.clientWidth * 0.72);
+
+    carousel.scrollBy({
+      left: step,
+      behavior: "smooth",
+    });
+  }
+
+  useEffect(() => {
+    if (selectedCategoryId !== "BestSellers") return;
+
+    const carousels = Array.from(
+      document.querySelectorAll<HTMLDivElement>(
+        "[data-darik-best-seller-carousel-182]"
+      )
+    );
+
+    if (carousels.length === 0) return;
+
+    const syncAll = () => {
+      for (const carousel of carousels) {
+        const categoryId = carousel.dataset.darikBestSellerCarousel182;
+        if (!categoryId) continue;
+        updateBestSellerShelfState182(categoryId, carousel);
+      }
+    };
+
+    const frame = window.requestAnimationFrame(syncAll);
+    const observer =
+      typeof ResizeObserver !== "undefined"
+        ? new ResizeObserver(syncAll)
+        : null;
+
+    for (const carousel of carousels) {
+      observer?.observe(carousel);
+    }
+
+    window.addEventListener("resize", syncAll);
+
+    return () => {
+      window.cancelAnimationFrame(frame);
+      observer?.disconnect();
+      window.removeEventListener("resize", syncAll);
+    };
+  }, [marketplaceBestSellerGroups, selectedCategoryId]);
+
   const cartCount = useMemo(
     () => cart.reduce((total, line) => total + line.quantity, 0),
     [cart]
@@ -6775,20 +6872,64 @@ style={{
                       {"Best Sellers in " + category.name + " →"}
                     </button>
 
-                    <div className={styles.marketplaceBestSellerCarousel}>
-                      {categoryProducts.map((product) => (
-                        <div
-                          key={`best-seller-${product.id}`}
-                          className={styles.marketplaceBestSellerItem}
+                    <div
+                      className={styles.marketplaceBestSellerCarouselShell182}
+                      data-can-forward={
+                        bestSellerShelfState182[category.id]?.canGoForward
+                          ? "true"
+                          : "false"
+                      }
+                      data-can-back={
+                        bestSellerShelfState182[category.id]?.canGoBack
+                          ? "true"
+                          : "false"
+                      }
+                    >
+                      <div
+                        className={styles.marketplaceBestSellerCarousel}
+                        data-darik-best-seller-carousel-182={category.id}
+                        onScroll={(event) =>
+                          updateBestSellerShelfState182(
+                            category.id,
+                            event.currentTarget
+                          )
+                        }
+                      >
+                        {categoryProducts.map((product) => (
+                          <div
+                            key={`best-seller-${product.id}`}
+                            className={styles.marketplaceBestSellerItem}
+                            data-darik-best-seller-item-182="true"
+                          >
+                            {renderProductCard(product)}
+                            <a
+                              className={styles.marketplaceBestSellerTapTarget}
+                              href={`/${storefront.slug}?product=${encodeURIComponent(product.id)}#catalog`}
+                              aria-label={`View ${productName(product)}`}
+                            />
+                          </div>
+                        ))}
+                      </div>
+
+                      {bestSellerShelfState182[category.id]?.canGoForward ? (
+                        <button
+                          type="button"
+                          className={styles.marketplaceBestSellerContinue182}
+                          onClick={() => scrollBestSellerShelf182(category.id)}
+                          aria-label={`Show more ${category.name} best sellers`}
                         >
-                          {renderProductCard(product)}
-                          <a
-                            className={styles.marketplaceBestSellerTapTarget}
-                            href={`/${storefront.slug}?product=${encodeURIComponent(product.id)}#catalog`}
-                            aria-label={`View ${productName(product)}`}
-                          />
-                        </div>
-                      ))}
+                          <svg viewBox="0 0 20 20" aria-hidden="true">
+                            <path
+                              d="m7.5 4.75 5.25 5.25-5.25 5.25"
+                              fill="none"
+                              stroke="currentColor"
+                              strokeWidth="1.8"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                            />
+                          </svg>
+                        </button>
+                      ) : null}
                     </div>
                   </section>
                 ))}

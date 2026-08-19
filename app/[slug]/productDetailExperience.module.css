@@ -4612,3 +4612,139 @@
     padding-inline: 12px;
   }
 }
+
+/* DARIK_RENDERED_STOREFRONT_THEME_INHERITANCE_181 */
+/*
+  ProductDetailExperience is portalled to body, so it cannot inherit the
+  storefront root naturally. TSX 181 snapshots the actual rendered store and
+  exposes it through --pd-* variables here.
+*/
+
+.overlay {
+  --pd-surface: color-mix(in srgb, var(--pd-background) 94%, var(--pd-text) 6%);
+  --pd-surface-strong: color-mix(in srgb, var(--pd-background) 88%, var(--pd-text) 12%);
+  --pd-border: color-mix(in srgb, var(--pd-text) 14%, transparent);
+  color: var(--pd-text) !important;
+  background: var(--pd-background) !important;
+}
+
+.productPage {
+  border-color: var(--pd-border) !important;
+  color: var(--pd-text) !important;
+  background: var(--pd-background) !important;
+  box-shadow:
+    0 28px 90px color-mix(in srgb, var(--pd-background) 68%, #000000 32%) !important;
+}
+
+.topBar,
+.detailColumn,
+.actionDock {
+  color: var(--pd-text) !important;
+  border-color: var(--pd-border) !important;
+  background: var(--pd-background) !important;
+}
+
+.mediaColumn {
+  border-color: var(--pd-border) !important;
+  background: var(--pd-background) !important;
+}
+
+/* Product photography remains on a clean white stage, matching store cards. */
+.mediaStage {
+  border-color: var(--pd-border) !important;
+  background: #ffffff !important;
+}
+
+.backButton,
+.iconButton {
+  border-color: var(--pd-border) !important;
+  color: var(--pd-text) !important;
+  background: var(--pd-surface) !important;
+}
+
+.titleBlock h1,
+.titleBlock h2,
+.sectionLabel span,
+.fitmentCard strong,
+.fulfillmentStrip strong,
+.purchaseMeta strong,
+.weightCard strong {
+  color: var(--pd-text) !important;
+}
+
+.priceBlock strong {
+  color: var(--pd-accent) !important;
+}
+
+.priceBlock small,
+.sectionLabel small,
+.fitmentCard small,
+.fitmentCard p,
+.descriptionSection p,
+.fulfillmentStrip small,
+.purchaseMeta small,
+.actionNote,
+.weightCard span,
+.categoryArabic {
+  color: var(--pd-muted) !important;
+}
+
+.descriptionSection,
+.fitmentCard,
+.weightCard,
+.optionChips span,
+.fulfillmentStrip > div,
+.categoryArabic {
+  border-color: var(--pd-border) !important;
+  background: var(--pd-surface) !important;
+}
+
+.priceAvailabilityRow,
+.descriptionSection,
+.optionsSection {
+  border-color: var(--pd-border) !important;
+}
+
+.primaryAction,
+.viewCartAction180 {
+  color: var(--pd-button-text) !important;
+  background: var(--pd-accent) !important;
+  box-shadow:
+    0 12px 28px color-mix(in srgb, var(--pd-accent) 24%, transparent) !important;
+}
+
+.productCartBadge180 {
+  color: var(--pd-button-text) !important;
+  background: var(--pd-accent) !important;
+  border-color: var(--pd-background) !important;
+}
+
+.productQuantitySelector180 {
+  border-color: var(--pd-border) !important;
+  background: var(--pd-surface) !important;
+}
+
+.productQuantitySelector180 button,
+.productQuantitySelector180 > strong {
+  color: var(--pd-text) !important;
+}
+
+.productQuantitySelector180 button:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--pd-accent) 16%, transparent) !important;
+}
+
+@media (max-width: 700px) {
+  .productPage,
+  .topBar,
+  .detailColumn,
+  .actionDock,
+  .mediaColumn {
+    background: var(--pd-background) !important;
+  }
+
+  .descriptionSection {
+    border: 1px solid var(--pd-border);
+    border-radius: 24px;
+    padding: 18px;
+  }
+}
