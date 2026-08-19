@@ -2902,6 +2902,10 @@ export default function DarikDirectStorefrontSettingsPage() {
       let selectedTarget152: Element | null = null;
       let selectionToolbar152: HTMLDivElement | null = null;
       let textEditor152: HTMLDivElement | null = null;
+
+      // DARIK_LOCATION_FULL_INTERACTION_MODE_200
+      let fullInteractionMode200 = false;
+      let interactionObserver200: MutationObserver | null = null;
       let textEditorDiscard153: (() => void) | null = null;
       let textEditorSave153: (() => void) | null = null;
       let toolbarStatusTimer152 = 0;
@@ -3669,6 +3673,46 @@ export default function DarikDirectStorefrontSettingsPage() {
         pinching151 = false;
         pinchTarget151 = null;
 
+        unlockDragScroll150C();
+      }
+
+      function locationDialogPresent200() {
+        return Boolean(
+          document150A.querySelector(
+            '[data-darik-live-editor-interaction200="location"], .customerLocationGate117'
+          )
+        );
+      }
+
+      function updateFullInteractionMode200() {
+        const next200 = locationDialogPresent200();
+
+        if (next200 === fullInteractionMode200) {
+          return;
+        }
+
+        fullInteractionMode200 = next200;
+
+        if (!fullInteractionMode200) {
+          return;
+        }
+
+        // Customer interaction wins completely over editor interaction.
+        clearHold150A();
+        restoreCandidateDecoration150A();
+        candidate150A = null;
+        dragging150A = false;
+
+        pinching151 = false;
+        pinchTarget151 = null;
+        pinchStartDistance151 = 0;
+        pinchBaseScale151 = 1;
+        pinchCurrentScale151 = 1;
+
+        blockClickTarget150A = null;
+        blockClickUntil150A = 0;
+
+        clearSelection152();
         unlockDragScroll150C();
       }
 
@@ -4829,6 +4873,12 @@ export default function DarikDirectStorefrontSettingsPage() {
       function handleSelectionClick152(
         event152: MouseEvent
       ) {
+        updateFullInteractionMode200();
+
+        if (fullInteractionMode200) {
+          return;
+        }
+
         if (
           Date.now() <
             blockClickUntil150A &&
@@ -5187,6 +5237,12 @@ export default function DarikDirectStorefrontSettingsPage() {
       function beginPinch151(
         event151: TouchEvent
       ) {
+        updateFullInteractionMode200();
+
+        if (fullInteractionMode200) {
+          return;
+        }
+
         if (
           event151.touches.length !== 2
         ) {
@@ -5450,6 +5506,12 @@ export default function DarikDirectStorefrontSettingsPage() {
       }
 
       function startCandidate150A(event150A: PointerEvent) {
+        updateFullInteractionMode200();
+
+        if (fullInteractionMode200) {
+          return;
+        }
+
         if (
           pinching151 &&
           event150A.pointerType === "touch"
@@ -5540,6 +5602,19 @@ export default function DarikDirectStorefrontSettingsPage() {
       }
 
       function moveCandidate150A(event150A: PointerEvent) {
+        updateFullInteractionMode200();
+
+        if (fullInteractionMode200) {
+          if (candidate150A) {
+            clearHold150A();
+            restoreCandidateDecoration150A();
+            candidate150A = null;
+            dragging150A = false;
+            unlockDragScroll150C();
+          }
+          return;
+        }
+
         if (pinching151) {
           return;
         }
@@ -5743,6 +5818,12 @@ export default function DarikDirectStorefrontSettingsPage() {
       function suppressPostDragClick150A(
         event150A: MouseEvent
       ) {
+        updateFullInteractionMode200();
+
+        if (fullInteractionMode200) {
+          return;
+        }
+
         if (Date.now() > blockClickUntil150A) return;
         if (!blockClickTarget150A) return;
 
@@ -5758,6 +5839,24 @@ export default function DarikDirectStorefrontSettingsPage() {
           event150A.stopImmediatePropagation();
         }
       }
+
+      // DARIK_LOCATION_FULL_INTERACTION_MODE_200
+      interactionObserver200?.disconnect();
+      interactionObserver200 = new MutationObserver(() => {
+        updateFullInteractionMode200();
+      });
+
+      if (document150A.body) {
+        interactionObserver200.observe(
+          document150A.body,
+          {
+            childList: true,
+            subtree: true,
+          }
+        );
+      }
+
+      updateFullInteractionMode200();
 
       document150A.addEventListener(
         "click",
@@ -6004,6 +6103,10 @@ export default function DarikDirectStorefrontSettingsPage() {
         pinchStartDistance151 = 0;
         pinchBaseScale151 = 1;
         pinchCurrentScale151 = 1;
+
+        interactionObserver200?.disconnect();
+        interactionObserver200 = null;
+        fullInteractionMode200 = false;
 
         domObserver150EV3?.disconnect();
         domObserver150EV3 = null;
@@ -11367,6 +11470,7 @@ await saveStorefront(undefined, "manual");
                         className={designStyles.privatePreviewGate150EV2}
                         ref={liveBuilderPreviewRef}
                         title="Live Darik storefront preview"
+                        allow="geolocation"
                         src={
                           usesActualLiveStoreEditor196() && storefront.slug
                             ? `/${encodeURIComponent(

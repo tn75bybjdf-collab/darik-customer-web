@@ -6274,6 +6274,7 @@ export default function DarikDirectStorefrontPage() {
 
       {/* DARIK_LIVE_EDITOR_LOCATION_INTERACTION_ZONE_197 */}
       {/* DARIK_DIRECT_OBJECT_DRAG_SAVE_TO_LIVE_198 */}
+      {/* DARIK_LOCATION_FULL_INTERACTION_MODE_200 */}
       {locationGateOpen117 &&
       deliveryEnabled &&
       !pickupOnly ? (
@@ -6281,6 +6282,7 @@ export default function DarikDirectStorefrontPage() {
           className={styles.customerLocationGate117}
           data-darik-live-editor-interaction197="true"
           data-darik-live-editor-interaction198="true"
+          data-darik-live-editor-interaction200="location"
           role="dialog"
           aria-modal="true"
           aria-labelledby="darik-location-title-117"
