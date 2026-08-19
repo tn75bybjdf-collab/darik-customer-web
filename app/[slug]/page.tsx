@@ -1655,6 +1655,37 @@ type DarikNearbyStoreMatch117 = {
   distance_km?: number | string | null;
 };
 
+// DARIK_SPECIAL_FREE_DELIVERY_ZONE_185
+type DarikSpecialDeliveryZone185 = {
+  enabled: boolean;
+  maxKm: number;
+  minimumQualifyingJod: number;
+  excludedCategoryIds: string[];
+};
+
+function normalizeDarikSpecialDeliveryZone185(
+  value: unknown
+): DarikSpecialDeliveryZone185 {
+  const row =
+    value && typeof value === "object"
+      ? (value as Record<string, unknown>)
+      : {};
+
+  return {
+    enabled: row.enabled === true,
+    maxKm: Math.max(0, Number(row.max_km ?? 0) || 0),
+    minimumQualifyingJod: Math.max(
+      0,
+      Number(row.minimum_qualifying_jod ?? 0) || 0
+    ),
+    excludedCategoryIds: Array.isArray(row.excluded_category_ids)
+      ? row.excluded_category_ids
+          .map((item) => String(item ?? "").trim())
+          .filter(Boolean)
+      : [],
+  };
+}
+
 type DarikGooglePrediction117 = {
   place_id: string;
   description: string;
@@ -2826,6 +2857,53 @@ export default function DarikDirectStorefrontPage() {
     useState<DarikGooglePrediction117[]>([]);
   const [locationSearchBusy117, setLocationSearchBusy117] =
     useState(false);
+
+  const [specialDeliveryZone185, setSpecialDeliveryZone185] =
+    useState<DarikSpecialDeliveryZone185>({
+      enabled: false,
+      maxKm: 0,
+      minimumQualifyingJod: 0,
+      excludedCategoryIds: [],
+    });
+
+  useEffect(() => {
+    if (!slug) {
+      setSpecialDeliveryZone185({
+        enabled: false,
+        maxKm: 0,
+        minimumQualifyingJod: 0,
+        excludedCategoryIds: [],
+      });
+      return;
+    }
+
+    let cancelled185 = false;
+
+    void (async () => {
+      const result185 = await supabase.rpc(
+        "darik_direct_public_special_delivery_zone_v185",
+        { p_slug: slug }
+      );
+
+      if (cancelled185) return;
+
+      if (result185.error) {
+        console.warn(
+          "Darik Special Zone could not load:",
+          result185.error.message
+        );
+        return;
+      }
+
+      setSpecialDeliveryZone185(
+        normalizeDarikSpecialDeliveryZone185(result185.data)
+      );
+    })();
+
+    return () => {
+      cancelled185 = true;
+    };
+  }, [slug]);
 
   useEffect(() => {
     if (!storefront || !slug) return;
@@ -4627,9 +4705,47 @@ export default function DarikDirectStorefrontPage() {
       storefront?.minimum_order ??
       0
   );
+
+  // DARIK_SPECIAL_FREE_DELIVERY_ZONE_185
+  const specialExcludedCategories185 = new Set(
+    specialDeliveryZone185.excludedCategoryIds
+  );
+  const specialProductById185 = new Map(
+    products.map((product) => [product.id, product] as const)
+  );
+  const specialQualifyingSubtotal185 = cart.reduce((total185, line185) => {
+    const product185 = specialProductById185.get(line185.productId);
+    const categoryId185 = String(product185?.category_id ?? "").trim();
+    if (categoryId185 && specialExcludedCategories185.has(categoryId185)) {
+      return total185;
+    }
+    return total185 + line185.price * line185.quantity;
+  }, 0);
+  const specialDistanceKm185 = Number(deliveryMatch117?.distance_km ?? NaN);
+  const specialOfferAtLocation185 = Boolean(
+    specialDeliveryZone185.enabled &&
+      deliveryMatch117 &&
+      Number.isFinite(specialDistanceKm185) &&
+      specialDistanceKm185 <= specialDeliveryZone185.maxKm + 0.0001
+  );
+  const specialDeliveryFree185 = Boolean(
+    deliveryEnabled &&
+      !selectedPickup &&
+      specialOfferAtLocation185 &&
+      specialDeliveryZone185.minimumQualifyingJod > 0 &&
+      specialQualifyingSubtotal185 + 0.0001 >=
+        specialDeliveryZone185.minimumQualifyingJod
+  );
+  const specialDeliveryRemaining185 = Math.max(
+    0,
+    specialDeliveryZone185.minimumQualifyingJod -
+      specialQualifyingSubtotal185
+  );
   const deliveryFee =
     deliveryEnabled && !selectedPickup
-      ? matchedDeliveryFee117
+      ? specialDeliveryFree185
+        ? 0
+        : matchedDeliveryFee117
       : 0;
   const orderTotal = cartSubtotal + deliveryFee;
   const minimumOrder = matchedMinimumOrder117;
@@ -4938,7 +5054,9 @@ export default function DarikDirectStorefrontPage() {
 
       setOrderConfirmation({
         orderNumber: response?.order_number || "Order received",
-        total: Number(response?.total ?? orderTotal),
+        total: specialDeliveryFree185
+          ? orderTotal
+          : Number(response?.total ?? orderTotal),
         paymentMethod:
           response?.payment_method ?? checkoutForm.paymentMethod,
         fulfillmentMethod:
@@ -6422,7 +6540,7 @@ style={{
                 <div>
                   <Icon name={pickupOnly ? "store" : "truck"} size={20} />
                   <span>{(pickupOnly || selectedPickup) ? "Pickup fee" : "Delivery fee"}</span>
-                  <strong>{(pickupOnly || selectedPickup) ? "Free" : money(matchedDeliveryFee117)}</strong>
+                  <strong>{(pickupOnly || selectedPickup) ? "Free" : specialDeliveryFree185 ? "Free" : money(deliveryFee)}</strong>
                 </div>
                 <div>
                   <Icon name="bag" size={20} />
@@ -6447,6 +6565,49 @@ style={{
           </div>
         </aside>
       </section>
+
+      {/* DARIK_MOBILE_DELIVERY_PROMISE_FEE_185 */}
+      {showOrdering && deliveryEnabled && !selectedPickup ? (
+        <section
+          className={styles.mobileDeliverySummary185}
+          aria-label="Delivery summary"
+        >
+          <div>
+            <Icon name="clock" size={18} />
+            <span>Delivery</span>
+            <strong>
+              {darikDeliveryPromise163(
+                storefront.estimated_delivery_days,
+                storefront.delivery_cutoff_time,
+                storeClock115
+              ).customerLabel}
+            </strong>
+          </div>
+          <div>
+            <Icon name="truck" size={18} />
+            <span>Delivery fee</span>
+            <strong>
+              {specialDeliveryFree185 ? "Free" : money(deliveryFee)}
+            </strong>
+          </div>
+          {specialOfferAtLocation185 ? (
+            <div className={styles.mobileSpecialDelivery185}>
+              <span>
+                {specialDeliveryFree185
+                  ? "Free delivery unlocked"
+                  : `Free delivery over ${money(
+                      specialDeliveryZone185.minimumQualifyingJod
+                    )} qualifying items`}
+              </span>
+              <small>
+                {specialDeliveryFree185
+                  ? `${money(specialQualifyingSubtotal185)} qualifying`
+                  : `${money(specialDeliveryRemaining185)} qualifying amount to go`}
+              </small>
+            </div>
+          ) : null}
+        </section>
+      ) : null}
 
       <section className={`${styles.quickInfoStrip} ${portfolioStyles.quickInfoPolish}`}>
         {(storefront.address_text || storefront.address_text_ar) ? (
@@ -7423,8 +7584,51 @@ style={{
                   </div>
                   <div>
                     <span>{selectedPickup ? "Pickup" : "Delivery"}</span>
-                    <strong>{selectedPickup ? "Free" : money(deliveryFee)}</strong>
+                    <strong>{selectedPickup ? "Free" : specialDeliveryFree185 ? "Free" : money(deliveryFee)}</strong>
                   </div>
+                  {!selectedPickup && specialOfferAtLocation185 ? (
+                    <div
+                      className={`${styles.specialDeliveryProgress185} ${
+                        specialDeliveryFree185
+                          ? styles.specialDeliveryUnlocked185
+                          : ""
+                      }`}
+                    >
+                      <div>
+                        <span>
+                          {specialDeliveryFree185
+                            ? "Free delivery unlocked"
+                            : "Free-delivery progress"}
+                        </span>
+                        <strong>
+                          {money(specialQualifyingSubtotal185)} / {money(
+                            specialDeliveryZone185.minimumQualifyingJod
+                          )}
+                        </strong>
+                      </div>
+                      {!specialDeliveryFree185 ? (
+                        <div className={styles.specialDeliveryTrack185}>
+                          <span
+                            style={{
+                              width: `${Math.min(
+                                100,
+                                specialDeliveryZone185.minimumQualifyingJod > 0
+                                  ? (specialQualifyingSubtotal185 /
+                                      specialDeliveryZone185.minimumQualifyingJod) *
+                                    100
+                                  : 100
+                              )}%`,
+                            }}
+                          />
+                        </div>
+                      ) : null}
+                      <small>
+                        {specialDeliveryFree185
+                          ? "Excluded-category items can ride along without removing this benefit."
+                          : `${money(specialDeliveryRemaining185)} more in qualifying categories. Excluded categories do not count.`}
+                      </small>
+                    </div>
+                  ) : null}
                   <div className={styles.cartTotal}>
                     <span>Total</span>
                     <strong>{money(orderTotal)}</strong>
@@ -8222,11 +8426,9 @@ style={{
                           deliveryMatch117 ? (
                             <small>
                               Delivery fee / رسوم التوصيل:{" "}
-                              {money(
-                                Number(
-                                  deliveryMatch117.delivery_fee ?? 0
-                                )
-                              )}
+                              {specialDeliveryFree185
+                                ? "Free"
+                                : money(deliveryFee)}
                               {" · "}
                               Minimum / الحد الأدنى:{" "}
                               {money(
@@ -8234,6 +8436,15 @@ style={{
                                   deliveryMatch117.minimum_order ?? 0
                                 )
                               )}
+                              {specialOfferAtLocation185 ? (
+                                <>
+                                  {" · "}
+                                  Special Zone / المنطقة الخاصة:{" "}
+                                  {specialDeliveryFree185
+                                    ? "Unlocked"
+                                    : `${money(specialDeliveryRemaining185)} qualifying to go`}
+                                </>
+                              ) : null}
                             </small>
                           ) : null}
                         </div>

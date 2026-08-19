@@ -969,6 +969,27 @@ type DarikDeliveryZone109 = {
   minimumOrderJod: string;
 };
 
+// DARIK_SPECIAL_FREE_DELIVERY_ZONE_185
+type DarikSpecialDeliveryCategory185 = {
+  id: string;
+  name: string;
+  nameAr: string;
+};
+
+type DarikSpecialDeliveryZone185 = {
+  enabled: boolean;
+  maxKm: string;
+  minimumQualifyingJod: string;
+  excludedCategoryIds: string[];
+};
+
+const defaultDarikSpecialDeliveryZone185: DarikSpecialDeliveryZone185 = {
+  enabled: false,
+  maxKm: "",
+  minimumQualifyingJod: "50",
+  excludedCategoryIds: [],
+};
+
 // DARIK_CONFIRMED_DELIVERY_LOCATION_PASSWORD_LOCK_112
 type DarikDeliveryLocation112 = {
   address: string;
@@ -1135,6 +1156,31 @@ function normalizeDarikDeliveryZones109(value: unknown): DarikDeliveryZone109[] 
     .filter((zone) => zone.maxKm.trim() !== "");
 }
 
+function normalizeDarikSpecialDeliveryZone185(
+  value: unknown
+): DarikSpecialDeliveryZone185 {
+  const row =
+    value && typeof value === "object"
+      ? (value as Record<string, unknown>)
+      : {};
+
+  const excludedCategoryIds = Array.isArray(row.excluded_category_ids)
+    ? row.excluded_category_ids
+        .map((value) => String(value ?? "").trim())
+        .filter(Boolean)
+    : [];
+
+  return {
+    enabled: row.enabled === true,
+    maxKm:
+      Number(row.max_km ?? 0) > 0 ? String(row.max_km) : "",
+    minimumQualifyingJod:
+      Number(row.minimum_qualifying_jod ?? 0) > 0
+        ? String(row.minimum_qualifying_jod)
+        : "50",
+    excludedCategoryIds,
+  };
+}
 // DARIK_CLICK_PREVIEW_POSITIONING_145
 type StorefrontPositionKey145 =
   | "display_name"
@@ -5977,6 +6023,20 @@ export default function DarikDirectStorefrontSettingsPage() {
   const [deliveryZonesSaveState109, setDeliveryZonesSaveState109] = useState<
     "idle" | "saving" | "saved" | "error"
   >("idle");
+
+  const [specialDeliveryZone185, setSpecialDeliveryZone185] =
+    useState<DarikSpecialDeliveryZone185>(
+      defaultDarikSpecialDeliveryZone185
+    );
+  const [specialDeliveryCategories185, setSpecialDeliveryCategories185] =
+    useState<DarikSpecialDeliveryCategory185[]>([]);
+  const [specialDeliveryLoaded185, setSpecialDeliveryLoaded185] =
+    useState(false);
+  const [specialDeliveryDirty185, setSpecialDeliveryDirty185] =
+    useState(false);
+  const [specialDeliverySaveState185, setSpecialDeliverySaveState185] =
+    useState<"idle" | "saving" | "saved" | "error">("idle");
+  const specialDeliverySaveTimer185 = useRef<number | null>(null);
   const [deliverySetupStage163, setDeliverySetupStage163] =
     useState<DarikDeliverySetupStage163>("location");
 
@@ -6178,7 +6238,66 @@ export default function DarikDirectStorefrontSettingsPage() {
     };
   }, [storefront?.id]);
 
-  // DARIK_USERNAME_SIGNUP_FORCED_ONBOARDING_136: keep Theme visible until the retailer explicitly presses Next.
+    useEffect(() => {
+    if (!storefront?.id || !selectedStore?.retailer_id) {
+      setSpecialDeliveryLoaded185(false);
+      setSpecialDeliveryCategories185([]);
+      setSpecialDeliveryZone185(defaultDarikSpecialDeliveryZone185);
+      return;
+    }
+
+    let cancelled185 = false;
+    setSpecialDeliveryLoaded185(false);
+
+    void (async () => {
+      const [configResult185, categoryResult185] = await Promise.all([
+        supabase.rpc(
+          "darik_direct_get_special_delivery_zone_v185",
+          { p_storefront_id: storefront.id }
+        ),
+        supabase
+          .from("retailer_store_categories")
+          .select("id,name,name_ar,category_status")
+          .eq("retailer_id", selectedStore.retailer_id)
+          .neq("category_status", "archived")
+          .order("sort_order", { ascending: true })
+          .order("name", { ascending: true }),
+      ]);
+
+      if (cancelled185) return;
+
+      if (configResult185.error) {
+        setSpecialDeliverySaveState185("error");
+        setStorefrontSetupNotice109(
+          configResult185.error.message ||
+            "Could not load the Special Zone settings."
+        );
+      } else {
+        setSpecialDeliveryZone185(
+          normalizeDarikSpecialDeliveryZone185(configResult185.data)
+        );
+        setSpecialDeliverySaveState185("idle");
+      }
+
+      if (!categoryResult185.error) {
+        setSpecialDeliveryCategories185(
+          (categoryResult185.data ?? []).map((row) => ({
+            id: String(row.id),
+            name: String(row.name ?? "Category"),
+            nameAr: String(row.name_ar ?? ""),
+          }))
+        );
+      }
+
+      setSpecialDeliveryDirty185(false);
+      setSpecialDeliveryLoaded185(true);
+    })();
+
+    return () => {
+      cancelled185 = true;
+    };
+  }, [storefront?.id, selectedStore?.retailer_id]);
+// DARIK_USERNAME_SIGNUP_FORCED_ONBOARDING_136: keep Theme visible until the retailer explicitly presses Next.
 
 
   useEffect(() => {
@@ -8143,6 +8262,179 @@ export default function DarikDirectStorefrontSettingsPage() {
     };
   }, []);
 
+  const farthestDeliveryZoneKm185 = deliveryZones109.reduce(
+    (highest, zone) => {
+      const value = Number(zone.maxKm);
+      return Number.isFinite(value) ? Math.max(highest, value) : highest;
+    },
+    0
+  );
+
+  function updateSpecialDeliveryZone185(
+    field: "enabled" | "maxKm" | "minimumQualifyingJod",
+    value: boolean | string
+  ) {
+    setSpecialDeliveryZone185((current) => ({
+      ...current,
+      [field]: value,
+    }));
+    setSpecialDeliveryDirty185(true);
+  }
+
+  function toggleSpecialDeliveryCategory185(categoryId: string) {
+    setSpecialDeliveryZone185((current) => {
+      const excluded = new Set(current.excludedCategoryIds);
+      if (excluded.has(categoryId)) excluded.delete(categoryId);
+      else excluded.add(categoryId);
+
+      return {
+        ...current,
+        excludedCategoryIds: Array.from(excluded),
+      };
+    });
+    setSpecialDeliveryDirty185(true);
+  }
+
+  async function saveSpecialDeliveryZone185(showError = false) {
+    if (!storefront?.id || !specialDeliveryLoaded185) return true;
+
+    const enabled185 = specialDeliveryZone185.enabled;
+    const maxKm185 = Number(specialDeliveryZone185.maxKm);
+    const minimum185 = Number(specialDeliveryZone185.minimumQualifyingJod);
+
+    if (enabled185) {
+      if (!deliveryLocation112) {
+        if (showError) {
+          setStorefrontSetupNotice109(
+            "Confirm the store delivery location before enabling the Special Zone. / أكد موقع المتجر قبل تفعيل المنطقة الخاصة."
+          );
+        }
+        return false;
+      }
+
+      if (farthestDeliveryZoneKm185 <= 0) {
+        if (showError) {
+          setStorefrontSetupNotice109(
+            "Add a normal delivery zone first. / أضف منطقة توصيل عادية أولاً."
+          );
+        }
+        return false;
+      }
+
+      if (
+        !Number.isFinite(maxKm185) ||
+        maxKm185 <= 0 ||
+        maxKm185 > farthestDeliveryZoneKm185
+      ) {
+        if (showError) {
+          setStorefrontSetupNotice109(
+            `Special Zone must be between 0.1 and ${farthestDeliveryZoneKm185.toFixed(1)} km. / المنطقة الخاصة لا يمكن أن تتجاوز أبعد منطقة توصيل.`
+          );
+        }
+        return false;
+      }
+
+      if (!Number.isFinite(minimum185) || minimum185 <= 0) {
+        if (showError) {
+          setStorefrontSetupNotice109(
+            "Enter the qualifying order amount for free delivery. / أدخل قيمة الطلب المؤهلة للتوصيل المجاني."
+          );
+        }
+        return false;
+      }
+    }
+
+    setSpecialDeliverySaveState185("saving");
+
+    const result185 = await supabase.rpc(
+      "darik_direct_set_special_delivery_zone_v185",
+      {
+        p_storefront_id: storefront.id,
+        p_enabled: enabled185,
+        p_max_km:
+          Number.isFinite(maxKm185) && maxKm185 > 0
+            ? Number(maxKm185.toFixed(2))
+            : Math.max(0, farthestDeliveryZoneKm185),
+        p_minimum_qualifying_jod:
+          Number.isFinite(minimum185) && minimum185 >= 0
+            ? Number(minimum185.toFixed(2))
+            : 0,
+        p_excluded_category_ids:
+          specialDeliveryZone185.excludedCategoryIds,
+        p_origin_latitude: deliveryLocation112?.latitude ?? null,
+        p_origin_longitude: deliveryLocation112?.longitude ?? null,
+      }
+    );
+
+    if (result185.error) {
+      setSpecialDeliverySaveState185("error");
+      if (showError) {
+        setStorefrontSetupNotice109(
+          result185.error.message ||
+            "Could not save the Special Zone."
+        );
+      }
+      return false;
+    }
+
+    setSpecialDeliveryZone185(
+      normalizeDarikSpecialDeliveryZone185(result185.data)
+    );
+    setSpecialDeliveryDirty185(false);
+    setSpecialDeliverySaveState185("saved");
+    window.setTimeout(() => {
+      setSpecialDeliverySaveState185((current) =>
+        current === "saved" ? "idle" : current
+      );
+    }, 1600);
+    return true;
+  }
+
+  useEffect(() => {
+    if (!specialDeliveryLoaded185 || !specialDeliveryDirty185) return;
+
+    if (specialDeliverySaveTimer185.current) {
+      window.clearTimeout(specialDeliverySaveTimer185.current);
+    }
+
+    specialDeliverySaveTimer185.current = window.setTimeout(() => {
+      void saveSpecialDeliveryZone185(false);
+    }, 750);
+
+    return () => {
+      if (specialDeliverySaveTimer185.current) {
+        window.clearTimeout(specialDeliverySaveTimer185.current);
+      }
+    };
+  }, [
+    specialDeliveryZone185,
+    specialDeliveryDirty185,
+    specialDeliveryLoaded185,
+    storefront?.id,
+    deliveryLocation112,
+    farthestDeliveryZoneKm185,
+  ]);
+
+  useEffect(() => {
+    if (!specialDeliveryLoaded185 || !specialDeliveryZone185.enabled) return;
+    const currentMax185 = Number(specialDeliveryZone185.maxKm);
+    if (
+      farthestDeliveryZoneKm185 > 0 &&
+      Number.isFinite(currentMax185) &&
+      currentMax185 > farthestDeliveryZoneKm185
+    ) {
+      setSpecialDeliveryZone185((current) => ({
+        ...current,
+        maxKm: String(Number(farthestDeliveryZoneKm185.toFixed(2))),
+      }));
+      setSpecialDeliveryDirty185(true);
+    }
+  }, [
+    farthestDeliveryZoneKm185,
+    specialDeliveryLoaded185,
+    specialDeliveryZone185.enabled,
+    specialDeliveryZone185.maxKm,
+  ]);
   function serializeDeliveryZones109() {
     const normalized = deliveryZones109
       .map((zone) => {
@@ -11831,6 +12123,169 @@ await saveStorefront(undefined, "manual");
                         <small className={designStyles.exactWizardZoneStatus109V5}>
                           {deliveryZonesSaveState109 === "saving" ? "Saving... / جارٍ الحفظ..." : deliveryZonesSaveState109 === "saved" ? "Zones saved / تم الحفظ" : deliveryZonesSaveState109 === "error" ? "Could not save / تعذر الحفظ" : "Zones save automatically / حفظ تلقائي"}
                         </small>
+
+                        <section
+                          className={designStyles.specialDeliveryZone185}
+                          data-special-zone-enabled={specialDeliveryZone185.enabled ? "true" : "false"}
+                        >
+                          <div className={designStyles.specialDeliveryZoneHead185}>
+                            <div>
+                              <small>SPECIAL ZONE / المنطقة الخاصة</small>
+                              <strong>Free delivery above a qualifying amount</strong>
+                              <span>
+                                This is an offer inside your normal delivery area — never a farther delivery zone.
+                              </span>
+                            </div>
+                            <label className={designStyles.specialDeliveryToggle185}>
+                              <input
+                                type="checkbox"
+                                checked={specialDeliveryZone185.enabled}
+                                disabled={
+                                  !specialDeliveryLoaded185 ||
+                                  farthestDeliveryZoneKm185 <= 0 ||
+                                  !deliveryLocation112
+                                }
+                                onChange={(event) => {
+                                  const enabled185 = event.target.checked;
+                                  setSpecialDeliveryZone185((current) => ({
+                                    ...current,
+                                    enabled: enabled185,
+                                    maxKm:
+                                      enabled185 && !current.maxKm
+                                        ? String(Number(farthestDeliveryZoneKm185.toFixed(2)))
+                                        : current.maxKm,
+                                  }));
+                                  setSpecialDeliveryDirty185(true);
+                                }}
+                              />
+                              <span>
+                                {specialDeliveryZone185.enabled
+                                  ? "Enabled / مفعّلة"
+                                  : "Off / متوقفة"}
+                              </span>
+                            </label>
+                          </div>
+
+                          {specialDeliveryZone185.enabled ? (
+                            <>
+                              <div className={designStyles.specialDeliveryRules185}>
+                                <label>
+                                  <span>Special Zone distance / مسافة المنطقة</span>
+                                  <div>
+                                    <input
+                                      type="number"
+                                      min="0.1"
+                                      max={Math.max(0.1, farthestDeliveryZoneKm185)}
+                                      step="0.1"
+                                      value={specialDeliveryZone185.maxKm}
+                                      onChange={(event) =>
+                                        updateSpecialDeliveryZone185(
+                                          "maxKm",
+                                          event.target.value
+                                        )
+                                      }
+                                    />
+                                    <b>km</b>
+                                  </div>
+                                  <small>
+                                    Maximum allowed: {farthestDeliveryZoneKm185.toFixed(1)} km — your farthest normal zone.
+                                  </small>
+                                </label>
+
+                                <label>
+                                  <span>Free delivery at / توصيل مجاني عند</span>
+                                  <div>
+                                    <input
+                                      type="number"
+                                      min="0.01"
+                                      step="0.01"
+                                      value={specialDeliveryZone185.minimumQualifyingJod}
+                                      onChange={(event) =>
+                                        updateSpecialDeliveryZone185(
+                                          "minimumQualifyingJod",
+                                          event.target.value
+                                        )
+                                      }
+                                    />
+                                    <b>JOD</b>
+                                  </div>
+                                  <small>Only qualifying categories count toward this amount.</small>
+                                </label>
+
+                                <div className={designStyles.specialDeliveryBenefit185}>
+                                  <small>BENEFIT / العرض</small>
+                                  <strong>FREE DELIVERY</strong>
+                                  <span>Normal zone fee becomes 0.00 JOD after qualification.</span>
+                                </div>
+                              </div>
+
+                              <div className={designStyles.specialDeliveryExclusions185}>
+                                <div>
+                                  <small>EXCLUDED CATEGORIES / الفئات المستثناة</small>
+                                  <strong>Choose categories that do not count toward the threshold</strong>
+                                  <p>
+                                    Example: 52 JOD qualifying + cigarettes = free delivery. 45 JOD qualifying + 20 JOD cigarettes = normal delivery fee.
+                                  </p>
+                                </div>
+
+                                {specialDeliveryCategories185.length > 0 ? (
+                                  <div className={designStyles.specialDeliveryCategoryGrid185}>
+                                    {specialDeliveryCategories185.map((category185) => {
+                                      const excluded185 =
+                                        specialDeliveryZone185.excludedCategoryIds.includes(
+                                          category185.id
+                                        );
+                                      return (
+                                        <label
+                                          key={category185.id}
+                                          className={
+                                            excluded185
+                                              ? designStyles.specialDeliveryCategoryExcluded185
+                                              : ""
+                                          }
+                                        >
+                                          <input
+                                            type="checkbox"
+                                            checked={excluded185}
+                                            onChange={() =>
+                                              toggleSpecialDeliveryCategory185(
+                                                category185.id
+                                              )
+                                            }
+                                          />
+                                          <span>
+                                            <strong>{category185.name}</strong>
+                                            {category185.nameAr ? (
+                                              <small>{category185.nameAr}</small>
+                                            ) : null}
+                                          </span>
+                                        </label>
+                                      );
+                                    })}
+                                  </div>
+                                ) : (
+                                  <div className={designStyles.specialDeliveryNoCategories185}>
+                                    No active categories available to exclude.
+                                  </div>
+                                )}
+                              </div>
+                            </>
+                          ) : (
+                            <p className={designStyles.specialDeliveryOffNote185}>
+                              Turn this on after your normal delivery zones are configured. The Special Zone can never extend beyond them.
+                            </p>
+                          )}
+
+                          <small className={designStyles.specialDeliverySaveState185}>
+                            {specialDeliverySaveState185 === "saving"
+                              ? "Saving Special Zone... / جارٍ الحفظ..."
+                              : specialDeliverySaveState185 === "saved"
+                                ? "Special Zone saved / تم حفظ المنطقة الخاصة"
+                                : specialDeliverySaveState185 === "error"
+                                  ? "Special Zone could not save / تعذر الحفظ"
+                                  : "Special Zone saves automatically / حفظ تلقائي"}
+                          </small>
+                        </section>
                       </div>
                         </>
                       ) : null}

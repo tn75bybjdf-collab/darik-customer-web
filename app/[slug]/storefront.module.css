@@ -21835,3 +21835,140 @@
     transition: none;
   }
 }
+
+/* DARIK_SPECIAL_FREE_DELIVERY_ZONE_185 */
+/* DARIK_MOBILE_DELIVERY_PROMISE_FEE_185 */
+.mobileDeliverySummary185 {
+  display: none;
+}
+
+.specialDeliveryProgress185 {
+  display: grid !important;
+  gap: 7px !important;
+  margin: 4px 0;
+  padding: 11px 12px !important;
+  border: 1px solid color-mix(in srgb, var(--store-accent) 18%, transparent);
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--store-accent) 7%, transparent);
+}
+
+.specialDeliveryProgress185 > div:first-child {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.specialDeliveryProgress185 > div:first-child span,
+.specialDeliveryProgress185 > div:first-child strong {
+  font-size: 11px;
+  font-weight: 900;
+}
+
+.specialDeliveryProgress185 > small {
+  color: var(--theme-muted, #64748b);
+  font-size: 10px;
+  line-height: 1.45;
+}
+
+.specialDeliveryTrack185 {
+  height: 5px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--store-primary) 10%, transparent);
+}
+
+.specialDeliveryTrack185 > span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--store-accent);
+}
+
+.specialDeliveryUnlocked185 {
+  border-color: color-mix(in srgb, var(--store-accent) 34%, transparent);
+  background: color-mix(in srgb, var(--store-accent) 11%, transparent);
+}
+
+@media (max-width: 760px) {
+  .mobileDeliverySummary185 {
+    width: calc(100% - 32px);
+    margin: 12px auto 0;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    overflow: hidden;
+    border: 1px solid color-mix(in srgb, var(--store-primary) 11%, transparent);
+    border-radius: 18px;
+    background: color-mix(in srgb, var(--theme-surface, #fff) 94%, transparent);
+    box-shadow: 0 12px 32px rgba(15, 23, 42, 0.08);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+  }
+
+  .mobileDeliverySummary185 > div:not(.mobileSpecialDelivery185) {
+    min-width: 0;
+    display: grid;
+    grid-template-columns: 22px minmax(0, 1fr);
+    gap: 2px 8px;
+    align-items: center;
+    padding: 12px 14px;
+  }
+
+  .mobileDeliverySummary185 > div:first-child {
+    border-right: 1px solid
+      color-mix(in srgb, var(--store-primary) 9%, transparent);
+  }
+
+  .mobileDeliverySummary185 svg {
+    grid-row: 1 / span 2;
+    color: var(--store-accent);
+  }
+
+  .mobileDeliverySummary185 span {
+    overflow: hidden;
+    color: var(--theme-muted, #64748b);
+    font-size: 9px;
+    font-weight: 850;
+    letter-spacing: 0.05em;
+    text-overflow: ellipsis;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  .mobileDeliverySummary185 strong {
+    overflow: hidden;
+    color: var(--theme-ink, var(--store-primary));
+    font-size: 13px;
+    font-weight: 950;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .mobileSpecialDelivery185 {
+    grid-column: 1 / -1;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    border-top: 1px solid
+      color-mix(in srgb, var(--store-accent) 16%, transparent);
+    padding: 8px 14px;
+    background: color-mix(in srgb, var(--store-accent) 8%, transparent);
+  }
+
+  .mobileSpecialDelivery185 span {
+    color: var(--theme-ink, var(--store-primary));
+    font-size: 10px;
+    letter-spacing: 0;
+    text-transform: none;
+    white-space: normal;
+  }
+
+  .mobileSpecialDelivery185 small {
+    flex: 0 0 auto;
+    color: var(--store-accent);
+    font-size: 9px;
+    font-weight: 900;
+    text-align: right;
+  }
+}
