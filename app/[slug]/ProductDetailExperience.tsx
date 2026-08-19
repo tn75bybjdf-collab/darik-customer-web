@@ -778,14 +778,263 @@ export default function ProductDetailExperience({
     (pricingMode === "whatsapp" || pricingMode === "call_whatsapp") &&
     Boolean(whatsappHref);
 
+  // DARIK_EXACT_STOREFRONT_VISUAL_THEME_BRIDGE_184
+  const [exactStoreVisual184, setExactStoreVisual184] = useState<{
+    themeField: string;
+    appearance: "light" | "dark";
+    backgroundColor: string;
+    backgroundImage: string;
+    backgroundSize: string;
+    backgroundPosition: string;
+    backgroundRepeat: string;
+    surface: string;
+    surfaceStrong: string;
+    imageStage: string;
+    text: string;
+    muted: string;
+    accent: string;
+    border: string;
+    radius: string;
+    shadow: string;
+    buttonText: string;
+    fontFamily: string;
+  } | null>(null);
+
+  useEffect(() => {
+    if (!open) return;
+
+    const root = document.querySelector(
+      'main[data-theme-field][data-theme][data-appearance]'
+    ) as HTMLElement | null;
+
+    if (!root) return;
+
+    const rootStyle184 = window.getComputedStyle(root);
+
+    const usableColor184 = (value: string | null | undefined) => {
+      const clean = String(value || "").trim().toLowerCase();
+      return Boolean(
+        clean &&
+          clean !== "transparent" &&
+          clean !== "rgba(0, 0, 0, 0)" &&
+          clean !== "rgba(0,0,0,0)"
+      );
+    };
+
+    const style184 = (selector: string) => {
+      const element = root.querySelector(selector);
+      return element instanceof HTMLElement
+        ? window.getComputedStyle(element)
+        : null;
+    };
+
+    const firstUsableBackground184 = (
+      styles: Array<CSSStyleDeclaration | null>,
+      fallback: string
+    ) => {
+      for (const candidate of styles) {
+        if (candidate && usableColor184(candidate.backgroundColor)) {
+          return candidate.backgroundColor;
+        }
+      }
+      return fallback;
+    };
+
+    const rgb184 = (value: string) => {
+      const match = value.match(
+        /^rgba?\(\s*(\d+(?:\.\d+)?)\s*[, ]\s*(\d+(?:\.\d+)?)\s*[, ]\s*(\d+(?:\.\d+)?)/i
+      );
+      if (!match) return null;
+      return [Number(match[1]), Number(match[2]), Number(match[3])];
+    };
+
+    const luminance184 = (value: string) => {
+      const rgb = rgb184(value);
+      if (!rgb) return null;
+      const channels = rgb.map((channel) => {
+        const normalized = Math.max(0, Math.min(255, channel)) / 255;
+        return normalized <= 0.03928
+          ? normalized / 12.92
+          : Math.pow((normalized + 0.055) / 1.055, 2.4);
+      });
+      return (
+        channels[0] * 0.2126 +
+        channels[1] * 0.7152 +
+        channels[2] * 0.0722
+      );
+    };
+
+    const storyStyle184 = style184('[class*="storeStory"]');
+    const conciergeStyle184 = style184('[class*="partsConcierge"]');
+    const categoryCardStyle184 = style184('[class*="categoryCard"]');
+    const productCardStyle184 = style184('[class*="marketplaceCategoryProductList"] [class*="productCard"]');
+    const bestSellerCardStyle184 = style184('[class*="marketplaceBestSellerCarousel"] [class*="productCard"]');
+    const imageStyle184 = style184('[class*="productImage"]');
+    const headingStyle184 =
+      style184('[class*="marketplaceListingHeader"] h3') ||
+      style184('[class*="sectionHeading"] h2') ||
+      style184('h1');
+    const mutedStyle184 =
+      style184('[class*="productArabic"]') ||
+      style184('[class*="marketplaceListingHeader"] small') ||
+      style184('small');
+    const priceStyle184 =
+      style184('[class*="marketplaceBestSellerCarousel"] [class*="productFooter"] strong') ||
+      style184('[class*="price"]');
+
+    let backgroundColor184 = rootStyle184.backgroundColor;
+
+    if (!usableColor184(backgroundColor184)) {
+      // Many Darik themes define a theme-specific --*-bg variable rather than
+      // overriding --store-background. Prefer the theme-specific computed var.
+      const customBackgrounds184: string[] = [];
+      for (let index = 0; index < rootStyle184.length; index += 1) {
+        const property = rootStyle184.item(index);
+        if (!property.startsWith("--")) continue;
+        if (!/(?:-bg|-background)$/i.test(property)) continue;
+        if (property === "--store-background") continue;
+        const value = rootStyle184.getPropertyValue(property).trim();
+        if (usableColor184(value)) customBackgrounds184.push(value);
+      }
+
+      backgroundColor184 =
+        customBackgrounds184[0] ||
+        rootStyle184.getPropertyValue("--store-background").trim() ||
+        backgroundColor || "#F8FAFC";
+    }
+
+    const surface184 = firstUsableBackground184(
+      [
+        storyStyle184,
+        conciergeStyle184,
+        productCardStyle184,
+        bestSellerCardStyle184,
+        categoryCardStyle184,
+      ],
+      backgroundColor184
+    );
+
+    const surfaceStrong184 = firstUsableBackground184(
+      [conciergeStyle184, categoryCardStyle184, storyStyle184],
+      surface184
+    );
+
+    const imageStage184 = firstUsableBackground184(
+      [imageStyle184],
+      "#FFFFFF"
+    );
+
+    const text184 =
+      (headingStyle184 && usableColor184(headingStyle184.color)
+        ? headingStyle184.color
+        : rootStyle184.color) ||
+      "#101828";
+
+    const muted184 =
+      (mutedStyle184 && usableColor184(mutedStyle184.color)
+        ? mutedStyle184.color
+        : renderedStoreTheme181?.muted) ||
+      "#667085";
+
+    const accent184 =
+      (priceStyle184 && usableColor184(priceStyle184.color)
+        ? priceStyle184.color
+        : renderedStoreTheme181?.accent) ||
+      accentColor ||
+      "#2563EB";
+
+    const surfaceProbe184 =
+      storyStyle184 ||
+      conciergeStyle184 ||
+      productCardStyle184 ||
+      categoryCardStyle184;
+
+    const border184 =
+      (surfaceProbe184 && usableColor184(surfaceProbe184.borderColor)
+        ? surfaceProbe184.borderColor
+        : "") ||
+      "color-mix(in srgb, currentColor 14%, transparent)";
+
+    const radius184 =
+      surfaceProbe184?.borderRadius && surfaceProbe184.borderRadius !== "0px"
+        ? surfaceProbe184.borderRadius
+        : "18px";
+
+    const shadow184 =
+      surfaceProbe184?.boxShadow && surfaceProbe184.boxShadow !== "none"
+        ? surfaceProbe184.boxShadow
+        : "none";
+
+    const backgroundLuma184 = luminance184(backgroundColor184);
+    const appearance184: "light" | "dark" =
+      backgroundLuma184 !== null
+        ? backgroundLuma184 < 0.45
+          ? "dark"
+          : "light"
+        : root.dataset.appearance === "dark"
+          ? "dark"
+          : "light";
+
+    const accentLuma184 = luminance184(accent184);
+    const buttonText184 =
+      accentLuma184 !== null && accentLuma184 > 0.52
+        ? "#0B0F12"
+        : "#FFFFFF";
+
+    setExactStoreVisual184({
+      themeField: root.dataset.themeField || "",
+      appearance: appearance184,
+      backgroundColor: backgroundColor184,
+      backgroundImage:
+        rootStyle184.backgroundImage === "none"
+          ? ""
+          : rootStyle184.backgroundImage,
+      backgroundSize: rootStyle184.backgroundSize,
+      backgroundPosition: rootStyle184.backgroundPosition,
+      backgroundRepeat: rootStyle184.backgroundRepeat,
+      surface: surface184,
+      surfaceStrong: surfaceStrong184,
+      imageStage: imageStage184,
+      text: text184,
+      muted: muted184,
+      accent: accent184,
+      border: border184,
+      radius: radius184,
+      shadow: shadow184,
+      buttonText: buttonText184,
+      fontFamily: rootStyle184.fontFamily || renderedStoreTheme181?.fontFamily || "",
+    });
+  }, [
+    open,
+    product?.id,
+    backgroundColor,
+    accentColor,
+    renderedStoreTheme181?.accent,
+    renderedStoreTheme181?.fontFamily,
+    renderedStoreTheme181?.muted,
+  ]);
   const rootStyle = {
-    "--pd-primary": renderedStoreTheme181?.primary || primaryColor || "#111827",
-    "--pd-accent": renderedStoreTheme181?.accent || accentColor || "#2563EB",
-    "--pd-background": renderedStoreTheme181?.background || backgroundColor || "#F8FAFC",
-    "--pd-text": renderedStoreTheme181?.text || "#101828",
-    "--pd-muted": renderedStoreTheme181?.muted || "#667085",
-    "--pd-button-text": renderedStoreTheme181?.buttonText || "#FFFFFF",
-    fontFamily: renderedStoreTheme181?.fontFamily || undefined,
+    "--pd-primary": exactStoreVisual184?.accent || renderedStoreTheme181?.primary || primaryColor || "#111827",
+    "--pd-accent": exactStoreVisual184?.accent || renderedStoreTheme181?.accent || accentColor || "#2563EB",
+    "--pd-background": exactStoreVisual184?.backgroundColor || renderedStoreTheme181?.background || backgroundColor || "#F8FAFC",
+    "--pd-surface": exactStoreVisual184?.surface || renderedStoreTheme181?.background || backgroundColor || "#F8FAFC",
+    "--pd-surface-strong": exactStoreVisual184?.surfaceStrong || exactStoreVisual184?.surface || renderedStoreTheme181?.background || backgroundColor || "#F8FAFC",
+    "--pd-image-stage": exactStoreVisual184?.imageStage || "#FFFFFF",
+    "--pd-text": exactStoreVisual184?.text || renderedStoreTheme181?.text || "#101828",
+    "--pd-muted": exactStoreVisual184?.muted || renderedStoreTheme181?.muted || "#667085",
+    "--pd-border": exactStoreVisual184?.border || "color-mix(in srgb, currentColor 14%, transparent)",
+    "--pd-radius": exactStoreVisual184?.radius || "18px",
+    "--pd-shadow": exactStoreVisual184?.shadow || "none",
+    "--pd-button-text": exactStoreVisual184?.buttonText || renderedStoreTheme181?.buttonText || "#FFFFFF",
+    backgroundColor: exactStoreVisual184?.backgroundColor,
+    backgroundImage: exactStoreVisual184?.backgroundImage || undefined,
+    backgroundSize: exactStoreVisual184?.backgroundSize || undefined,
+    backgroundPosition: exactStoreVisual184?.backgroundPosition || undefined,
+    backgroundRepeat: exactStoreVisual184?.backgroundRepeat || undefined,
+    fontFamily:
+      exactStoreVisual184?.fontFamily ||
+      renderedStoreTheme181?.fontFamily ||
+      undefined,
   } as CSSProperties;
 
   function setLightboxTransformValue178(next: {
@@ -1255,7 +1504,8 @@ export default function ProductDetailExperience({
   if (typeof document === "undefined") return null;
 
   return createPortal(
-    <div className={styles.overlay} style={rootStyle} data-pd-appearance={renderedStoreTheme181?.appearance || (appearanceMode === "dark" ? "dark" : "light")} role="dialog" aria-modal="true" aria-label={`${name} product details`}>
+    <div className={styles.overlay} style={rootStyle} data-pd-appearance={exactStoreVisual184?.appearance || renderedStoreTheme181?.appearance || (appearanceMode === "dark" ? "dark" : "light")}
+      data-pd-theme-field={exactStoreVisual184?.themeField || undefined} role="dialog" aria-modal="true" aria-label={`${name} product details`}>
       <div className={styles.ambientOne} />
       <div className={styles.ambientTwo} />
 

@@ -4748,3 +4748,130 @@
     padding: 18px;
   }
 }
+
+/* DARIK_EXACT_STOREFRONT_VISUAL_THEME_BRIDGE_184 */
+/*
+  Exact storefront visual bridge.
+  Product mechanics remain shared, but visuals are sampled directly from the
+  rendered storefront theme: background layers, surfaces, text, accent, border,
+  radius, shadow, image-stage background, typography, and dark/light identity.
+*/
+
+.overlay {
+  color: var(--pd-text) !important;
+}
+
+.productPage {
+  overflow: hidden;
+  border: 1px solid var(--pd-border) !important;
+  border-radius: var(--pd-radius) !important;
+  color: var(--pd-text) !important;
+  background: var(--pd-surface) !important;
+  box-shadow: var(--pd-shadow) !important;
+}
+
+.topBar,
+.detailColumn,
+.actionDock {
+  border-color: var(--pd-border) !important;
+  color: var(--pd-text) !important;
+  background: var(--pd-surface) !important;
+}
+
+.mediaColumn {
+  border-color: var(--pd-border) !important;
+  background: var(--pd-background) !important;
+}
+
+.mediaStage {
+  border-color: var(--pd-border) !important;
+  border-radius: var(--pd-radius) !important;
+  background: var(--pd-image-stage) !important;
+}
+
+.backButton,
+.iconButton,
+.productQuantitySelector180,
+.descriptionSection,
+.fitmentCard,
+.weightCard,
+.optionChips span,
+.fulfillmentStrip > div,
+.categoryArabic {
+  border-color: var(--pd-border) !important;
+  color: var(--pd-text) !important;
+  background: var(--pd-surface-strong) !important;
+  box-shadow: none !important;
+}
+
+.descriptionSection,
+.fitmentCard,
+.weightCard {
+  border-radius: var(--pd-radius) !important;
+}
+
+.titleBlock h1,
+.titleBlock h2,
+.sectionLabel span,
+.fitmentCard strong,
+.fulfillmentStrip strong,
+.purchaseMeta strong,
+.weightCard strong,
+.productQuantitySelector180 > strong,
+.productQuantitySelector180 button {
+  color: var(--pd-text) !important;
+}
+
+.priceBlock strong {
+  color: var(--pd-accent) !important;
+}
+
+.priceBlock small,
+.sectionLabel small,
+.fitmentCard small,
+.fitmentCard p,
+.descriptionSection p,
+.fulfillmentStrip small,
+.purchaseMeta small,
+.actionNote,
+.weightCard span,
+.categoryArabic {
+  color: var(--pd-muted) !important;
+}
+
+.primaryAction,
+.viewCartAction180 {
+  border-color: transparent !important;
+  color: var(--pd-button-text) !important;
+  background: var(--pd-accent) !important;
+  box-shadow:
+    0 12px 30px color-mix(in srgb, var(--pd-accent) 24%, transparent) !important;
+}
+
+.productCartBadge180 {
+  color: var(--pd-button-text) !important;
+  background: var(--pd-accent) !important;
+  border-color: var(--pd-surface) !important;
+}
+
+@media (max-width: 700px) {
+  .productPage {
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: var(--pd-background) !important;
+    box-shadow: none !important;
+  }
+
+  .topBar,
+  .detailColumn,
+  .actionDock {
+    background: var(--pd-background) !important;
+  }
+
+  .descriptionSection,
+  .fitmentCard,
+  .weightCard,
+  .fulfillmentStrip > div {
+    background: var(--pd-surface) !important;
+  }
+}
