@@ -1,5 +1,7 @@
 "use client";
 
+// DARIK_CUSTOMER_APP_PRODUCT_EXPERIENCE_PARITY_178
+
 // DARIK_CUSTOMER_PRODUCT_DETAIL_BEAUTY_079
 // DARIK_CUSTOMER_PRODUCT_VIEWPORT_MEDIA_PERFECTION_080
 // DARIK_CUSTOMER_PRODUCT_EXECUTIVE_SHOWCASE_081
@@ -403,6 +405,19 @@ export default function ProductDetailExperience({
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
   const [videoUrl, setVideoUrl] = useState("");
   const [shareState, setShareState] = useState("");
+  // Customer-app parity: edge-back, swipe-down close, double-tap zoom, pinch zoom, and pan.
+  const productEdgeGesture178 = useRef<{ x: number; y: number; time: number; pointerId: number } | null>(null);
+  const productEdgeClosed178 = useRef(false);
+  const productPullGesture178 = useRef<{ x: number; y: number } | null>(null);
+  const productPullClosed178 = useRef(false);
+  const lightboxPointers178 = useRef<Map<number, { x: number; y: number }>>(new Map());
+  const lightboxGesture178 = useRef<{ x: number; y: number; time: number; pointerId: number } | null>(null);
+  const lightboxPinch178 = useRef<{ distance: number; scale: number } | null>(null);
+  const lightboxPan178 = useRef<{ x: number; y: number; offsetX: number; offsetY: number; pointerId: number } | null>(null);
+  const lightboxLastTap178 = useRef<{ time: number; x: number; y: number } | null>(null);
+  const lightboxClosed178 = useRef(false);
+  const lightboxTransformRef178 = useRef({ scale: 1, x: 0, y: 0, originX: 50, originY: 50 });
+  const [lightboxTransform178, setLightboxTransform178] = useState(lightboxTransformRef178.current);
   // DARIK_STICKY_PICKUP_AND_ADD_TO_BAG_FEEDBACK_119
   const [addedQuantity119, setAddedQuantity119] =
     useState<number | null>(null);
@@ -605,6 +620,420 @@ export default function ProductDetailExperience({
     "--pd-accent": accentColor || "#2563EB",
   } as CSSProperties;
 
+  function setLightboxTransformValue178(next: {
+    scale: number;
+    x: number;
+    y: number;
+    originX: number;
+    originY: number;
+  }) {
+    lightboxTransformRef178.current = next;
+    setLightboxTransform178(next);
+  }
+
+  function resetLightboxTransform178() {
+    lightboxPointers178.current.clear();
+    lightboxGesture178.current = null;
+    lightboxPinch178.current = null;
+    lightboxPan178.current = null;
+    lightboxLastTap178.current = null;
+    lightboxClosed178.current = false;
+    setLightboxTransformValue178({
+      scale: 1,
+      x: 0,
+      y: 0,
+      originX: 50,
+      originY: 50,
+    });
+  }
+
+  function closeLightbox178() {
+    resetLightboxTransform178();
+    setLightboxIndex(null);
+  }
+
+  function clamp178(value: number, min: number, max: number) {
+    return Math.min(max, Math.max(min, value));
+  }
+
+  function lightboxPoint178(event: any) {
+    return {
+      x: Number(event?.clientX ?? 0),
+      y: Number(event?.clientY ?? 0),
+    };
+  }
+
+  function lightboxDistance178() {
+    const points = Array.from(lightboxPointers178.current.values());
+    if (points.length < 2) return 0;
+    const dx = points[0].x - points[1].x;
+    const dy = points[0].y - points[1].y;
+    return Math.hypot(dx, dy);
+  }
+
+  function lightboxZoomOrigin178(event: any) {
+    const target = event?.target;
+    if (!(target instanceof HTMLImageElement)) {
+      return { x: 50, y: 50 };
+    }
+
+    const rect = target.getBoundingClientRect();
+    if (rect.width <= 0 || rect.height <= 0) {
+      return { x: 50, y: 50 };
+    }
+
+    return {
+      x: clamp178(((Number(event.clientX) - rect.left) / rect.width) * 100, 0, 100),
+      y: clamp178(((Number(event.clientY) - rect.top) / rect.height) * 100, 0, 100),
+    };
+  }
+
+  function toggleLightboxZoom178(event: any) {
+    const target = event?.target;
+    if (!(target instanceof HTMLImageElement)) return;
+
+    const current = lightboxTransformRef178.current;
+    if (current.scale > 1.01) {
+      setLightboxTransformValue178({
+        scale: 1,
+        x: 0,
+        y: 0,
+        originX: 50,
+        originY: 50,
+      });
+      return;
+    }
+
+    const origin = lightboxZoomOrigin178(event);
+    setLightboxTransformValue178({
+      scale: 1.5,
+      x: 0,
+      y: 0,
+      originX: origin.x,
+      originY: origin.y,
+    });
+  }
+
+  function handleProductEdgePointerDown178(event: any) {
+    productEdgeClosed178.current = false;
+    productEdgeGesture178.current = {
+      x: Number(event?.clientX ?? 0),
+      y: Number(event?.clientY ?? 0),
+      time: Date.now(),
+      pointerId: Number(event?.pointerId ?? -1),
+    };
+
+    try {
+      event.currentTarget?.setPointerCapture?.(event.pointerId);
+    } catch {
+      // Pointer capture is only a reliability enhancement.
+    }
+  }
+
+  function handleProductEdgePointerMove178(event: any) {
+    if (productEdgeClosed178.current) return;
+
+    const start = productEdgeGesture178.current;
+    if (!start || Number(event?.pointerId ?? -2) !== start.pointerId) return;
+
+    const dx = Number(event?.clientX ?? 0) - start.x;
+    const dy = Number(event?.clientY ?? 0) - start.y;
+    const elapsed = Math.max(1, Date.now() - start.time);
+    const velocityX = dx / elapsed;
+
+    const movingRight = dx > 0;
+    const mostlyHorizontal = dx > Math.abs(dy) * 1.24;
+    const farEnough = dx > 88;
+    const fastEnough = dx > 62 && velocityX > 0.42;
+
+    if (movingRight && mostlyHorizontal && (farEnough || fastEnough)) {
+      productEdgeClosed178.current = true;
+      productEdgeGesture178.current = null;
+      onClose();
+    }
+  }
+
+  function resetProductEdgeGesture178() {
+    productEdgeGesture178.current = null;
+    productEdgeClosed178.current = false;
+  }
+
+  function handleProductPullTouchStart178(event: any) {
+    productPullClosed178.current = false;
+    const node = event?.currentTarget as HTMLElement | null;
+    if (!node || node.scrollTop > 1) {
+      productPullGesture178.current = null;
+      return;
+    }
+
+    const touch = event?.touches?.[0] ?? event?.nativeEvent?.touches?.[0];
+    if (!touch) {
+      productPullGesture178.current = null;
+      return;
+    }
+
+    productPullGesture178.current = {
+      x: Number(touch.clientX ?? touch.pageX ?? 0),
+      y: Number(touch.clientY ?? touch.pageY ?? 0),
+    };
+  }
+
+  function handleProductPullTouchMove178(event: any) {
+    if (productPullClosed178.current) return;
+
+    const start = productPullGesture178.current;
+    const node = event?.currentTarget as HTMLElement | null;
+    const touch = event?.touches?.[0] ?? event?.nativeEvent?.touches?.[0];
+
+    if (!start || !node || !touch || node.scrollTop > 1) return;
+
+    const dx = Number(touch.clientX ?? touch.pageX ?? 0) - start.x;
+    const dy = Number(touch.clientY ?? touch.pageY ?? 0) - start.y;
+
+    if (dy > 128 && dy > Math.abs(dx) * 1.24) {
+      productPullClosed178.current = true;
+      productPullGesture178.current = null;
+      onClose();
+    }
+  }
+
+  function resetProductPullGesture178() {
+    productPullGesture178.current = null;
+    productPullClosed178.current = false;
+  }
+
+  function handleLightboxPointerDown178(event: any) {
+    if (lightboxIndex === null) return;
+
+    const pointerId = Number(event?.pointerId ?? -1);
+    const point = lightboxPoint178(event);
+    lightboxPointers178.current.set(pointerId, point);
+    lightboxClosed178.current = false;
+
+    try {
+      event.currentTarget?.setPointerCapture?.(event.pointerId);
+    } catch {
+      // Pointer capture is only a reliability enhancement.
+    }
+
+    if (lightboxPointers178.current.size >= 2) {
+      const distance = lightboxDistance178();
+      if (distance > 0) {
+        lightboxPinch178.current = {
+          distance,
+          scale: lightboxTransformRef178.current.scale,
+        };
+      }
+      lightboxGesture178.current = null;
+      lightboxPan178.current = null;
+      lightboxLastTap178.current = null;
+      return;
+    }
+
+    lightboxGesture178.current = {
+      x: point.x,
+      y: point.y,
+      time: Date.now(),
+      pointerId,
+    };
+
+    const current = lightboxTransformRef178.current;
+    if (current.scale > 1.01) {
+      lightboxPan178.current = {
+        x: point.x,
+        y: point.y,
+        offsetX: current.x,
+        offsetY: current.y,
+        pointerId,
+      };
+    } else {
+      lightboxPan178.current = null;
+    }
+  }
+
+  function handleLightboxPointerMove178(event: any) {
+    if (lightboxIndex === null || lightboxClosed178.current) return;
+
+    const pointerId = Number(event?.pointerId ?? -1);
+    const point = lightboxPoint178(event);
+
+    if (lightboxPointers178.current.has(pointerId)) {
+      lightboxPointers178.current.set(pointerId, point);
+    }
+
+    if (lightboxPointers178.current.size >= 2 && lightboxPinch178.current) {
+      const distance = lightboxDistance178();
+      if (distance <= 0) return;
+
+      const nextScale = clamp178(
+        lightboxPinch178.current.scale *
+          (distance / Math.max(1, lightboxPinch178.current.distance)),
+        1,
+        4
+      );
+
+      const current = lightboxTransformRef178.current;
+      const next = {
+        ...current,
+        scale: nextScale,
+        x: nextScale <= 1.01 ? 0 : current.x,
+        y: nextScale <= 1.01 ? 0 : current.y,
+      };
+      setLightboxTransformValue178(next);
+      return;
+    }
+
+    const current = lightboxTransformRef178.current;
+    const pan = lightboxPan178.current;
+
+    if (
+      current.scale > 1.01 &&
+      pan &&
+      pan.pointerId === pointerId
+    ) {
+      const rawX = pan.offsetX + (point.x - pan.x);
+      const rawY = pan.offsetY + (point.y - pan.y);
+      const maxX =
+        typeof window !== "undefined"
+          ? Math.max(40, window.innerWidth * (current.scale - 1) * 0.48)
+          : 240;
+      const maxY =
+        typeof window !== "undefined"
+          ? Math.max(40, window.innerHeight * (current.scale - 1) * 0.48)
+          : 240;
+
+      setLightboxTransformValue178({
+        ...current,
+        x: clamp178(rawX, -maxX, maxX),
+        y: clamp178(rawY, -maxY, maxY),
+      });
+      return;
+    }
+
+    const start = lightboxGesture178.current;
+    if (!start || start.pointerId !== pointerId) return;
+
+    const dx = point.x - start.x;
+    const dy = point.y - start.y;
+    const elapsed = Math.max(1, Date.now() - start.time);
+    const velocityX = dx / elapsed;
+
+    // Exact customer-app close behavior: clean right swipe OR intentional pull down.
+    const closeRight =
+      dx > 0 &&
+      Math.abs(dx) > Math.abs(dy) * 1.08 &&
+      (dx > 66 || (dx > 42 && velocityX > 0.3));
+
+    const closeDown =
+      dy > 70 &&
+      Math.abs(dy) > Math.abs(dx) * 1.08;
+
+    if (closeRight || closeDown) {
+      lightboxClosed178.current = true;
+      closeLightbox178();
+    }
+  }
+
+  function handleLightboxPointerUp178(event: any) {
+    const pointerId = Number(event?.pointerId ?? -1);
+    const point = lightboxPoint178(event);
+    const start = lightboxGesture178.current;
+    const pointerType = String(event?.pointerType ?? "");
+
+    lightboxPointers178.current.delete(pointerId);
+
+    if (lightboxPointers178.current.size < 2) {
+      lightboxPinch178.current = null;
+    }
+
+    if (lightboxPointers178.current.size === 1) {
+      const remaining =
+        Array.from(lightboxPointers178.current.entries())[0];
+      const current = lightboxTransformRef178.current;
+      if (remaining && current.scale > 1.01) {
+        const [remainingId, remainingPoint] = remaining;
+        lightboxPan178.current = {
+          x: remainingPoint.x,
+          y: remainingPoint.y,
+          offsetX: current.x,
+          offsetY: current.y,
+          pointerId: remainingId,
+        };
+      }
+    } else if (lightboxPointers178.current.size === 0) {
+      lightboxPan178.current = null;
+    }
+
+    if (
+      !lightboxClosed178.current &&
+      start &&
+      start.pointerId === pointerId &&
+      pointerType !== "mouse" &&
+      Math.abs(point.x - start.x) < 14 &&
+      Math.abs(point.y - start.y) < 14 &&
+      Date.now() - start.time < 360 &&
+      event?.target instanceof HTMLImageElement
+    ) {
+      const previousTap = lightboxLastTap178.current;
+      const now = Date.now();
+
+      if (
+        previousTap &&
+        now - previousTap.time <= 320 &&
+        Math.abs(previousTap.x - point.x) <= 76 &&
+        Math.abs(previousTap.y - point.y) <= 76
+      ) {
+        lightboxLastTap178.current = null;
+        toggleLightboxZoom178(event);
+      } else {
+        lightboxLastTap178.current = {
+          time: now,
+          x: point.x,
+          y: point.y,
+        };
+      }
+    }
+
+    if (lightboxPointers178.current.size === 0) {
+      lightboxGesture178.current = null;
+      lightboxClosed178.current = false;
+    }
+  }
+
+  function handleLightboxPointerCancel178(event: any) {
+    const pointerId = Number(event?.pointerId ?? -1);
+    lightboxPointers178.current.delete(pointerId);
+
+    if (lightboxPointers178.current.size < 2) {
+      lightboxPinch178.current = null;
+    }
+
+    if (lightboxPointers178.current.size === 0) {
+      lightboxGesture178.current = null;
+      lightboxPan178.current = null;
+      lightboxClosed178.current = false;
+    }
+  }
+
+  function handleLightboxWheel178(event: any) {
+    if (!(event?.target instanceof HTMLImageElement)) return;
+
+    event.preventDefault?.();
+
+    const current = lightboxTransformRef178.current;
+    const direction = Number(event?.deltaY ?? 0) < 0 ? 0.18 : -0.18;
+    const nextScale = clamp178(current.scale + direction, 1, 4);
+    const origin = lightboxZoomOrigin178(event);
+
+    setLightboxTransformValue178({
+      scale: nextScale,
+      x: nextScale <= 1.01 ? 0 : current.x,
+      y: nextScale <= 1.01 ? 0 : current.y,
+      originX: nextScale <= 1.01 ? 50 : origin.x,
+      originY: nextScale <= 1.01 ? 50 : origin.y,
+    });
+  }
+
   function scrollGallery(index: number) {
     const width = galleryRef.current?.clientWidth || 0;
     galleryRef.current?.scrollTo({ left: width * index, behavior: "smooth" });
@@ -615,10 +1044,12 @@ export default function ProductDetailExperience({
     galleryRef.current
       ?.querySelectorAll<HTMLVideoElement>("video")
       .forEach((video) => video.pause());
+    resetLightboxTransform178();
     setLightboxIndex(index);
   }
 
   function scrollViewer(index: number) {
+    resetLightboxTransform178();
     const width = lightboxRef.current?.clientWidth || 0;
     lightboxRef.current?.scrollTo({ left: width * index, behavior: "smooth" });
     setLightboxIndex(index);
@@ -661,6 +1092,14 @@ export default function ProductDetailExperience({
       <div className={styles.ambientTwo} />
 
       <section className={styles.productPage}>
+        <div
+          className={styles.productEdgeSwipeZone178}
+          onPointerDown={handleProductEdgePointerDown178}
+          onPointerMove={handleProductEdgePointerMove178}
+          onPointerUp={resetProductEdgeGesture178}
+          onPointerCancel={resetProductEdgeGesture178}
+          aria-hidden="true"
+        />
         <header className={styles.topBar}>
           <button type="button" className={styles.backButton} onClick={onClose}>
             <ArrowIcon direction="left" />
@@ -678,7 +1117,13 @@ export default function ProductDetailExperience({
           </div>
         </header>
 
-        <div className={styles.productLayout}>
+        <div
+          className={styles.productLayout}
+          onTouchStart={handleProductPullTouchStart178}
+          onTouchMove={handleProductPullTouchMove178}
+          onTouchEnd={resetProductPullGesture178}
+          onTouchCancel={resetProductPullGesture178}
+        >
           <div className={styles.mediaColumn}>
             <div className={styles.mediaStage}>
               {slides.length > 0 ? (
@@ -979,6 +1424,12 @@ export default function ProductDetailExperience({
           role="dialog"
           aria-modal="true"
           aria-label={`${name} full-screen product media`}
+          onPointerDown={handleLightboxPointerDown178}
+          onPointerMove={handleLightboxPointerMove178}
+          onPointerUp={handleLightboxPointerUp178}
+          onPointerCancel={handleLightboxPointerCancel178}
+          onDoubleClick={toggleLightboxZoom178}
+          onWheel={handleLightboxWheel178}
         >
           <div className={styles.lightboxTop}>
             <span>{name}</span>
@@ -987,10 +1438,10 @@ export default function ProductDetailExperience({
             </strong>
             <button
               type="button"
-              onClick={() => setLightboxIndex(null)}
-              aria-label="Close full-screen product media"
+              onClick={closeLightbox178}
+              aria-label="Back from full-screen product media"
             >
-              <CloseIcon />
+              <ArrowIcon direction="left" />
             </button>
           </div>
 
@@ -1009,6 +1460,14 @@ export default function ProductDetailExperience({
                     src={slide.url}
                     alt={`${name} — enlarged photo ${index + 1}`}
                     draggable={false}
+                    style={
+                      index === lightboxIndex
+                        ? {
+                            transform: `translate3d(${lightboxTransform178.x}px, ${lightboxTransform178.y}px, 0) scale(${lightboxTransform178.scale})`,
+                            transformOrigin: `${lightboxTransform178.originX}% ${lightboxTransform178.originY}%`,
+                          }
+                        : undefined
+                    }
                   />
                 ) : (
                   <video
@@ -1022,6 +1481,10 @@ export default function ProductDetailExperience({
                 )}
               </div>
             ))}
+          </div>
+
+          <div className={styles.lightboxHint178}>
+            Double tap to zoom/reset • Swipe right/down to close
           </div>
 
           {slides.length > 1 ? (

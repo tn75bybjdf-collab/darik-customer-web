@@ -3761,3 +3761,640 @@
     margin: auto;
   }
 }
+/* DARIK_CUSTOMER_APP_PRODUCT_EXPERIENCE_PARITY_178
+   Interaction/layout parity with the Darik Customer App product detail.
+   Storefront colors remain theme-driven through --pd-primary / --pd-accent. */
+
+.overlay {
+  z-index: 2147483000;
+}
+
+.productEdgeSwipeZone178 {
+  position: absolute;
+  z-index: 40;
+  left: 0;
+  top: 58px;
+  bottom: 0;
+  width: 38px;
+  touch-action: pan-y;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.lightbox {
+  z-index: 2147483600;
+  background: #ffffff;
+  color: #101828;
+}
+
+.lightboxGallery {
+  overflow-x: hidden;
+  overflow-y: hidden;
+  touch-action: none;
+  overscroll-behavior: none;
+}
+
+.lightboxSlide img {
+  transition: transform 180ms ease-out;
+  will-change: transform;
+  cursor: zoom-in;
+}
+
+.lightboxHint178 {
+  position: absolute;
+  z-index: 7;
+  left: 50%;
+  bottom: max(18px, calc(env(safe-area-inset-bottom) + 10px));
+  max-width: calc(100vw - 48px);
+  transform: translateX(-50%);
+  padding: 8px 13px;
+  border-radius: 999px;
+  color: #ffffff;
+  background: color-mix(in srgb, var(--pd-primary) 84%, #000000);
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.18);
+  font-size: 11px;
+  font-weight: 850;
+  line-height: 1.15;
+  text-align: center;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+.lightboxTop {
+  position: absolute;
+  z-index: 10;
+  top: max(12px, env(safe-area-inset-top));
+  left: 14px;
+  right: 14px;
+  height: auto;
+  min-height: 52px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  pointer-events: none;
+}
+
+.lightboxTop > span {
+  display: none;
+}
+
+.lightboxTop > strong {
+  order: 2;
+  min-height: 38px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: auto;
+  padding: 0 12px;
+  border-radius: 999px;
+  color: #ffffff;
+  background: color-mix(in srgb, var(--pd-primary) 84%, #000000);
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.14);
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 0.04em;
+  pointer-events: none;
+}
+
+.lightboxTop button {
+  order: 1;
+  width: 52px;
+  height: 52px;
+  flex: 0 0 52px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 1px solid color-mix(in srgb, var(--pd-primary) 18%, transparent);
+  border-radius: 50%;
+  color: var(--pd-accent);
+  background: var(--pd-primary);
+  box-shadow: 0 10px 28px rgba(15, 23, 42, 0.2);
+  pointer-events: auto;
+}
+
+.lightboxTop button svg {
+  width: 25px;
+  height: 25px;
+}
+
+.lightboxDots {
+  position: absolute;
+  z-index: 8;
+  left: 50%;
+  bottom: max(56px, calc(env(safe-area-inset-bottom) + 48px));
+  min-height: 22px;
+  padding: 6px 9px;
+  border-radius: 999px;
+  transform: translateX(-50%);
+  background: color-mix(in srgb, var(--pd-primary) 78%, transparent);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.lightboxDots button {
+  background: color-mix(in srgb, #ffffff 46%, transparent);
+}
+
+.lightboxDots .lightboxDotActive {
+  background: var(--pd-accent);
+}
+
+.lightboxArrow {
+  z-index: 9;
+  width: 46px;
+  height: 46px;
+  color: #ffffff;
+  background: color-mix(in srgb, var(--pd-primary) 82%, transparent);
+  border-color: color-mix(in srgb, var(--pd-primary) 18%, #ffffff);
+}
+
+.lightboxSlide,
+.lightboxVideoSlide {
+  padding: 0;
+  background: #ffffff;
+}
+
+.lightboxSlide img {
+  width: min(calc(100vw - 28px), 1180px);
+  max-width: calc(100vw - 28px);
+  height: min(72dvh, 860px);
+  max-height: calc(100dvh - 92px);
+  object-fit: contain;
+  object-position: center center;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+.lightboxSlide video {
+  width: min(calc(100vw - 28px), 1180px);
+  max-width: calc(100vw - 28px);
+  height: min(72dvh, 860px);
+  max-height: calc(100dvh - 92px);
+  object-fit: contain;
+  object-position: center center;
+}
+
+@media (min-width: 901px) {
+  /* Preserve the proven FRONTEND 172 desktop photo-fit ceiling. */
+  .lightboxSlide img {
+    display: block;
+    width: auto !important;
+    height: auto !important;
+    max-width: min(960px, 80vw) !important;
+    max-height: calc(100dvh - 150px) !important;
+    object-fit: contain !important;
+    object-position: center center !important;
+    margin: auto;
+  }
+}
+
+@media (max-width: 900px) {
+  .overlay {
+    display: block;
+    padding: 0;
+    background: #ffffff;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+
+  .ambientOne,
+  .ambientTwo {
+    display: none;
+  }
+
+  .productPage {
+    width: 100vw;
+    max-width: none;
+    height: 100dvh;
+    max-height: none;
+    grid-template-rows:
+      calc(64px + env(safe-area-inset-top))
+      minmax(0, 1fr);
+    border: 0;
+    border-radius: 0;
+    background: #ffffff;
+    box-shadow: none;
+  }
+
+  .productPage::before {
+    display: none;
+  }
+
+  .topBar {
+    height: calc(64px + env(safe-area-inset-top));
+    padding:
+      env(safe-area-inset-top)
+      14px
+      0;
+    border-bottom: 1px solid rgba(15, 23, 42, 0.07);
+    background: rgba(255, 255, 255, 0.97);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+  }
+
+  .backButton {
+    width: 48px;
+    height: 48px;
+    min-width: 48px;
+    max-width: 48px;
+    justify-content: center;
+    padding: 0;
+    border: 1px solid rgba(15, 23, 42, 0.08);
+    border-radius: 50%;
+    color: var(--pd-primary);
+    background: rgba(255, 255, 255, 0.92);
+    box-shadow: 0 7px 20px rgba(15, 23, 42, 0.08);
+  }
+
+  .backButton span {
+    display: none;
+  }
+
+  .backButton svg {
+    width: 25px;
+    height: 25px;
+  }
+
+  .topBarActions {
+    gap: 8px;
+  }
+
+  .iconButton {
+    width: 48px;
+    height: 48px;
+    min-width: 48px;
+    padding: 0;
+    border: 1px solid rgba(15, 23, 42, 0.08);
+    border-radius: 50%;
+    color: var(--pd-primary);
+    background: rgba(255, 255, 255, 0.92);
+    box-shadow: 0 7px 20px rgba(15, 23, 42, 0.08);
+  }
+
+  .iconButton span {
+    display: none;
+  }
+
+  .closeButton {
+    display: none;
+  }
+
+  .productEdgeSwipeZone178 {
+    top: calc(64px + env(safe-area-inset-top));
+  }
+
+  .productLayout {
+    display: block;
+    height: 100%;
+    overflow-y: auto;
+    overflow-x: hidden;
+    overscroll-behavior-y: contain;
+    -webkit-overflow-scrolling: touch;
+    background: #ffffff;
+  }
+
+  .mediaColumn {
+    display: block;
+    overflow: visible;
+    padding: 0 18px;
+    border: 0;
+    background: #ffffff;
+  }
+
+  .mediaStage {
+    height: 280px;
+    margin-top: 14px;
+    overflow: hidden;
+    border: 0;
+    border-radius: 28px;
+    background: #ffffff;
+    box-shadow: none;
+  }
+
+  .mediaStage::after {
+    display: none;
+  }
+
+  .gallery {
+    height: 280px;
+    border-radius: 28px;
+    background: #ffffff;
+    touch-action: pan-x pan-y;
+  }
+
+  .photoButton {
+    border-radius: 24px;
+    background: #ffffff;
+  }
+
+  .photoButton img {
+    width: 100%;
+    height: 100%;
+    padding: 18px;
+    object-fit: contain;
+    object-position: center;
+    filter: none;
+  }
+
+  .photoButton:hover img {
+    transform: none;
+  }
+
+  .expandHint,
+  .videoExpandButton {
+    right: 12px;
+    bottom: 12px;
+    min-height: 32px;
+    padding: 6px 10px;
+    border: 0;
+    color: #ffffff;
+    background: color-mix(in srgb, var(--pd-primary) 78%, transparent);
+    box-shadow: none;
+    font-size: 10px;
+  }
+
+  .galleryArrow {
+    top: 50%;
+    width: 42px;
+    height: 42px;
+    border: 0;
+    color: #ffffff;
+    background: color-mix(in srgb, var(--pd-primary) 78%, transparent);
+    box-shadow: none;
+  }
+
+  .galleryArrowLeft {
+    left: 12px;
+  }
+
+  .galleryArrowRight {
+    right: 12px;
+  }
+
+  .mediaCounter {
+    top: 12px;
+    right: 12px;
+    bottom: auto;
+    left: auto;
+    min-width: 0;
+    padding: 6px 10px;
+    border: 0;
+    border-radius: 999px;
+    color: #ffffff;
+    background: color-mix(in srgb, var(--pd-primary) 78%, transparent);
+    box-shadow: none;
+    font-size: 11px;
+  }
+
+  .mediaNav {
+    position: static;
+    width: auto;
+    min-height: 78px;
+    display: flex;
+    justify-content: flex-start;
+    gap: 10px;
+    margin: 12px 0 0;
+    padding: 0;
+    overflow-x: auto;
+    overflow-y: hidden;
+    border: 0;
+    background: transparent;
+    box-shadow: none;
+    scrollbar-width: none;
+  }
+
+  .mediaNav::-webkit-scrollbar {
+    display: none;
+  }
+
+  .mediaThumb {
+    flex: 0 0 70px;
+    width: 70px;
+    height: 70px;
+    padding: 0;
+    overflow: hidden;
+    border: 2px solid #efefef;
+    border-radius: 18px;
+    background: #ffffff;
+    box-shadow: none;
+  }
+
+  .mediaThumbActive {
+    border-color: var(--pd-accent);
+    box-shadow: none;
+  }
+
+  .detailColumn {
+    display: block;
+    width: auto;
+    min-height: 0;
+    height: auto;
+    max-height: none;
+    margin: 0;
+    overflow: visible;
+    border: 0;
+    border-radius: 0;
+    background: #ffffff;
+    box-shadow: none;
+  }
+
+  .detailScroll {
+    display: block;
+    min-height: 0;
+    height: auto;
+    max-height: none;
+    overflow: visible;
+    padding: 16px 18px 10px;
+  }
+
+  .eyebrowRow {
+    margin-top: 0;
+    gap: 8px;
+  }
+
+  .categoryPill,
+  .categoryArabic,
+  .featuredPill {
+    min-height: 24px;
+    padding: 5px 9px;
+    border-radius: 999px;
+    font-size: 10px;
+  }
+
+  .titleBlock {
+    display: block;
+    margin-top: 14px;
+  }
+
+  .titleBlock h1 {
+    margin: 0;
+    max-width: 100%;
+    font-size: clamp(29px, 8vw, 34px);
+    line-height: 1.08;
+    letter-spacing: -0.035em;
+  }
+
+  .titleBlock h2 {
+    margin-top: 7px;
+    font-size: 18px;
+    line-height: 1.3;
+  }
+
+  .priceAvailabilityRow {
+    margin-top: 14px;
+    align-items: flex-end;
+    gap: 12px;
+  }
+
+  .priceBlock strong {
+    font-size: 26px;
+    line-height: 1.05;
+  }
+
+  .fitmentCard,
+  .optionsSection,
+  .weightCard,
+  .descriptionSection {
+    margin-top: 16px;
+    border: 1px solid #e7e7e7;
+    border-radius: 22px;
+    background: #ffffff;
+    box-shadow: none;
+  }
+
+  .fitmentCard,
+  .optionsSection,
+  .descriptionSection {
+    padding: 16px;
+  }
+
+  .descriptionSection p {
+    display: block;
+    margin-top: 8px;
+    overflow: visible;
+    -webkit-line-clamp: unset;
+    font-size: 14px;
+    line-height: 1.55;
+  }
+
+  .fulfillmentStrip {
+    margin-top: 16px;
+    padding: 14px 0 4px;
+    border-top: 1px solid #eceff3;
+    background: transparent;
+  }
+
+  .actionDock {
+    position: sticky;
+    z-index: 20;
+    bottom: 0;
+    min-height: 0;
+    margin: 0;
+    padding:
+      10px
+      14px
+      calc(10px + env(safe-area-inset-bottom));
+    border-top: 1px solid #edf0f3;
+    background: rgba(255, 255, 255, 0.97);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    box-shadow: 0 -8px 28px rgba(15, 23, 42, 0.06);
+  }
+
+  .purchaseRow,
+  .contactActions {
+    gap: 10px;
+  }
+
+  .primaryAction,
+  .secondaryAction {
+    min-height: 50px;
+    border-radius: 16px;
+  }
+
+  .lightbox {
+    grid-template-rows: minmax(0, 1fr);
+    background: #ffffff;
+  }
+
+  .lightboxGallery {
+    height: 100dvh;
+  }
+
+  .lightboxSlide {
+    min-width: 100%;
+    height: 100dvh;
+    padding: 0;
+  }
+
+  .lightboxSlide img {
+    width: calc(100vw - 28px) !important;
+    max-width: calc(100vw - 28px) !important;
+    height: 72dvh !important;
+    max-height: 72dvh !important;
+    object-fit: contain !important;
+    object-position: center center !important;
+    margin: auto;
+  }
+
+  .lightboxSlide video {
+    width: calc(100vw - 28px);
+    max-width: calc(100vw - 28px);
+    height: 72dvh;
+    max-height: 72dvh;
+    object-fit: contain;
+    margin: auto;
+  }
+
+  .lightboxArrow {
+    top: 50%;
+  }
+
+  .lightboxArrowLeft {
+    left: 14px;
+  }
+
+  .lightboxArrowRight {
+    right: 14px;
+  }
+}
+
+@media (max-width: 520px) {
+  .mediaColumn {
+    padding-inline: 14px;
+  }
+
+  .mediaStage,
+  .gallery {
+    height: 280px;
+  }
+
+  .detailScroll {
+    padding-inline: 18px;
+  }
+
+  .purchaseMeta {
+    min-width: 0;
+  }
+
+  .lightboxHint178 {
+    bottom: max(16px, calc(env(safe-area-inset-bottom) + 8px));
+    font-size: 10px;
+  }
+
+  .lightboxDots {
+    bottom: max(52px, calc(env(safe-area-inset-bottom) + 44px));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lightboxSlide img {
+    transition: none;
+  }
+}
