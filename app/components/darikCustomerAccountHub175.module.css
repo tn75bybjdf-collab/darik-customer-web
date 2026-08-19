@@ -374,3 +374,286 @@
     border-radius: 20px;
   }
 }
+/* DARIK_CUSTOMER_ORDER_RECEIPT_REORDER_176 */
+/* DARIK_CUSTOMER_ORDER_RECEIPT_REORDER_176_V2 */
+
+.darikOrderSummary176 {
+  width: 100%;
+  display: grid;
+  gap: 5px;
+  border: 1px solid #eaecf0;
+  border-radius: 13px;
+  padding: 11px 12px;
+  background: #f9fafb;
+  color: #101828;
+  text-align: left;
+  cursor: pointer;
+}
+
+.darikOrderSummary176:hover {
+  border-color: #d0d5dd;
+  background: #ffffff;
+}
+
+.darikOrderSummary176 > div {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.darikOrderSummary176 span {
+  color: #667085;
+  font-size: 10px;
+  font-weight: 850;
+}
+
+.darikOrderSummary176 strong {
+  color: #101828;
+  font-size: 12px;
+  font-weight: 950;
+}
+
+.darikOrderSummary176 small {
+  color: #475467;
+  font-size: 10px;
+  font-weight: 750;
+}
+
+.darikOpenOrder176 {
+  margin-top: 2px;
+  color: #8a6d00;
+  font-size: 10px;
+  font-weight: 950;
+}
+
+.darikReceiptHeader176 {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  border-bottom: 1px solid #eaecf0;
+  padding-bottom: 11px;
+}
+
+.darikReceiptHeader176 > div {
+  display: grid;
+  gap: 2px;
+}
+
+.darikReceiptHeader176 small {
+  color: #8a6d00;
+  font-size: 9px;
+  font-weight: 950;
+  letter-spacing: 0.11em;
+}
+
+.darikReceiptHeader176 h4 {
+  margin: 0;
+  color: #101828;
+  font-size: 19px;
+  font-weight: 950;
+}
+
+.darikReceiptHeader176 > strong {
+  max-width: 145px;
+  border-radius: 999px;
+  padding: 6px 9px;
+  background: #fff4b8;
+  color: #5f4b00;
+  font-size: 10px;
+  font-weight: 950;
+  text-align: center;
+}
+
+.darikReceiptMeta176 {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.darikReceiptMeta176 span {
+  border: 1px solid #eaecf0;
+  border-radius: 999px;
+  padding: 5px 8px;
+  background: #ffffff;
+  color: #475467;
+  font-size: 9px;
+  font-weight: 800;
+}
+
+.darikReceiptItems176 {
+  display: grid;
+  gap: 9px;
+}
+
+.darikReceiptItem176 {
+  display: grid;
+  grid-template-columns: 70px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 11px;
+  border: 1px solid #eaecf0;
+  border-radius: 15px;
+  padding: 9px;
+  background: #ffffff;
+  color: inherit;
+  text-decoration: none;
+}
+
+a.darikReceiptItem176 {
+  cursor: pointer;
+}
+
+a.darikReceiptItem176:hover {
+  border-color: #d0d5dd;
+  box-shadow: 0 8px 22px rgba(15, 23, 42, 0.06);
+}
+
+.darikReceiptImage176 {
+  width: 70px;
+  height: 70px;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  border: 1px solid #eaecf0;
+  border-radius: 12px;
+  background: #f8fafc;
+}
+
+.darikReceiptImage176 img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.darikReceiptImage176 span {
+  color: #98a2b3;
+  font-size: 28px;
+}
+
+.darikReceiptItemInfo176 {
+  min-width: 0;
+  display: grid;
+  gap: 4px;
+}
+
+.darikReceiptItemInfo176 strong {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: #101828;
+  font-size: 12px;
+  font-weight: 950;
+}
+
+.darikReceiptItemInfo176 span {
+  color: #475467;
+  font-size: 10px;
+  font-weight: 750;
+  line-height: 1.35;
+}
+
+.darikReceiptItemInfo176 small {
+  color: #8a6d00;
+  font-size: 9px;
+  font-weight: 950;
+}
+
+.darikReceiptLineTotal176 {
+  min-width: 76px;
+  display: grid;
+  gap: 3px;
+  text-align: right;
+}
+
+.darikReceiptLineTotal176 small {
+  color: #98a2b3;
+  font-size: 8px;
+  font-weight: 800;
+}
+
+.darikReceiptLineTotal176 strong {
+  color: #101828;
+  font-size: 11px;
+  font-weight: 950;
+}
+
+.darikReceiptTotals176 {
+  display: grid;
+  gap: 7px;
+  border: 1px solid #eaecf0;
+  border-radius: 15px;
+  padding: 11px 12px;
+  background: #f9fafb;
+}
+
+.darikReceiptTotals176 > div {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.darikReceiptTotals176 span {
+  color: #667085;
+  font-size: 10px;
+  font-weight: 800;
+}
+
+.darikReceiptTotals176 strong {
+  color: #101828;
+  font-size: 11px;
+  font-weight: 950;
+}
+
+.darikReceiptGrandTotal176 {
+  border-top: 1px solid #d0d5dd;
+  margin-top: 2px;
+  padding-top: 8px;
+}
+
+.darikReceiptGrandTotal176 span,
+.darikReceiptGrandTotal176 strong {
+  color: #101828;
+  font-size: 13px;
+}
+
+.darikReceiptPriceNote176 {
+  margin: 0;
+  border-radius: 11px;
+  padding: 9px 10px;
+  background: #fff9df;
+  color: #665200;
+  font-size: 9px;
+  font-weight: 750;
+  line-height: 1.45;
+}
+
+@media (max-width: 520px) {
+  .darikReceiptItem176 {
+    grid-template-columns: 60px minmax(0, 1fr);
+  }
+
+  .darikReceiptImage176 {
+    width: 60px;
+    height: 60px;
+  }
+
+  .darikReceiptLineTotal176 {
+    grid-column: 2;
+    min-width: 0;
+    text-align: left;
+  }
+}
+
+.darikReceiptStore176 {
+  color: #667085;
+  font-size: 9px;
+  font-style: normal;
+  font-weight: 850;
+}
+
+.darikReceiptUnavailable176 {
+  color: #98a2b3 !important;
+  font-weight: 800 !important;
+}

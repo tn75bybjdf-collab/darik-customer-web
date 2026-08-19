@@ -1,6 +1,8 @@
 "use client";
 
 // DARIK_SHARED_PERSISTENT_CUSTOMER_ACCOUNT_HUB_175_V2
+// DARIK_CUSTOMER_ORDER_RECEIPT_REORDER_176
+// DARIK_CUSTOMER_ORDER_RECEIPT_REORDER_176_V2
 
 import { useEffect, useMemo, useState } from "react";
 import type { Session } from "@supabase/supabase-js";
@@ -25,9 +27,48 @@ type DarikCustomerOrder175 = {
   created_at?: string | null;
   storefront_retailer_id?: string | null;
   storefront_name_snapshot?: string | null;
+  storefront_slug_snapshot?: string | null;
 };
 
-type DarikAccountView175 = "menu" | "orders" | "details" | "password";
+type DarikCustomerOrderItem176 = {
+  id: string;
+  order_id: string;
+  product_id?: string | null;
+  product_name?: string | null;
+  quantity?: number | string | null;
+  unit_price?: number | string | null;
+  line_total?: number | string | null;
+  image_url?: string | null;
+  retailer_id?: string | null;
+  store_slug?: string | null;
+  store_name?: string | null;
+  product_available?: boolean | null;
+  product_href?: string | null;
+};
+
+type DarikCustomerOrderDetail176 = {
+  id: string;
+  order_number?: string | number | null;
+  order_status?: string | null;
+  payment_method?: string | null;
+  payment_status?: string | null;
+  fulfillment_method?: string | null;
+  subtotal?: number | string | null;
+  delivery_fee?: number | string | null;
+  total?: number | string | null;
+  created_at?: string | null;
+  sales_channel?: string | null;
+  storefront_retailer_id?: string | null;
+  storefront_slug?: string | null;
+  storefront_name?: string | null;
+};
+
+type DarikAccountView175 =
+  | "menu"
+  | "orders"
+  | "order"
+  | "details"
+  | "password";
 
 type DarikCustomerAccountHub175Props = {
   scope: DarikAccountScope175;
@@ -50,6 +91,18 @@ function orderStatusLabel175(status: string | null | undefined) {
     .replace(/\b\w/g, (letter) => letter.toUpperCase());
 }
 
+function money176(value: number | string | null | undefined) {
+  const numberValue = Number(value ?? 0);
+  if (!Number.isFinite(numberValue)) return "0.00";
+  return numberValue.toFixed(2);
+}
+
+function cleanLabel176(value: string | null | undefined) {
+  return String(value || "")
+    .replaceAll("_", " ")
+    .replace(/\b\w/g, (letter) => letter.toUpperCase());
+}
+
 export default function DarikCustomerAccountHub175({
   scope,
   retailerId = null,
@@ -62,6 +115,13 @@ export default function DarikCustomerAccountHub175({
   const [view, setView] = useState<DarikAccountView175>("menu");
   const [orders, setOrders] = useState<DarikCustomerOrder175[]>([]);
   const [ordersBusy, setOrdersBusy] = useState(false);
+
+  const [selectedOrder176, setSelectedOrder176] =
+    useState<DarikCustomerOrderDetail176 | null>(null);
+  const [selectedOrderItems176, setSelectedOrderItems176] =
+    useState<DarikCustomerOrderItem176[]>([]);
+  const [orderDetailBusy176, setOrderDetailBusy176] = useState(false);
+
   const [message, setMessage] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -83,7 +143,6 @@ export default function DarikCustomerAccountHub175({
       .maybeSingle();
 
     if (result.error || !result.data) {
-      // A retailer/staff Supabase session is not a customer session.
       setProfile(null);
       setReady(true);
       return;
@@ -144,7 +203,7 @@ export default function DarikCustomerAccountHub175({
       let query = supabase
         .from("orders")
         .select(
-          "id,order_number,order_status,total,created_at,storefront_retailer_id,storefront_name_snapshot"
+          "id,order_number,order_status,total,created_at,storefront_retailer_id,storefront_name_snapshot,storefront_slug_snapshot"
         )
         .eq("customer_id", profile.id)
         .order("created_at", { ascending: false })
@@ -168,6 +227,57 @@ export default function DarikCustomerAccountHub175({
     }
   }
 
+  async function loadOrderDetail176(order: DarikCustomerOrder175) {
+    setOrderDetailBusy176(true);
+    setMessage("");
+    setSelectedOrder176(null);
+    setSelectedOrderItems176([]);
+    setView("order");
+
+    try {
+      const result = await supabase.rpc("darik_customer_order_detail_v176", {
+        p_order_id: order.id,
+      });
+
+      if (result.error) {
+        setMessage(
+          `${result.error.message} Run the DARIK 176 order-detail SQL if it has not been installed yet.`
+        );
+        return;
+      }
+
+      const payload = Array.isArray(result.data) ? result.data[0] : result.data;
+
+      if (!payload?.success) {
+        setMessage(payload?.message || "Could not open this Darik order.");
+        return;
+      }
+
+      const detail = (payload.order ?? {}) as DarikCustomerOrderDetail176;
+      const items = Array.isArray(payload.items)
+        ? (payload.items as DarikCustomerOrderItem176[])
+        : [];
+
+      // Store history must remain store-scoped even at detail level.
+      if (
+        scope === "store" &&
+        retailerId &&
+        detail.storefront_retailer_id &&
+        detail.storefront_retailer_id !== retailerId
+      ) {
+        setMessage("This order does not belong to this store.");
+        setSelectedOrder176(null);
+        setSelectedOrderItems176([]);
+        return;
+      }
+
+      setSelectedOrder176(detail);
+      setSelectedOrderItems176(items);
+    } finally {
+      setOrderDetailBusy176(false);
+    }
+  }
+
   async function signOut175() {
     setMessage("");
 
@@ -181,6 +291,8 @@ export default function DarikCustomerAccountHub175({
     setOpen(false);
     setView("menu");
     setOrders([]);
+    setSelectedOrder176(null);
+    setSelectedOrderItems176([]);
     setNewPassword("");
     setConfirmPassword("");
     setProfile(null);
@@ -303,7 +415,9 @@ export default function DarikCustomerAccountHub175({
                 <span>↺</span>
                 <div>
                   <strong>
-                    {scope === "store" ? "Past orders from this store" : "Past orders"}
+                    {scope === "store"
+                      ? "Past orders from this store"
+                      : "Past orders"}
                   </strong>
                   <small>
                     {scope === "store"
@@ -380,7 +494,12 @@ export default function DarikCustomerAccountHub175({
               ) : (
                 <div className={styles.darikOrderList175}>
                   {orders.map((order) => (
-                    <article key={order.id}>
+                    <button
+                      type="button"
+                      key={order.id}
+                      className={styles.darikOrderSummary176}
+                      onClick={() => void loadOrderDetail176(order)}
+                    >
                       <div>
                         <span>
                           #{String(order.order_number ?? order.id.slice(0, 8))}
@@ -395,15 +514,184 @@ export default function DarikCustomerAccountHub175({
                       ) : null}
 
                       <small>
-                        {Number(order.total ?? 0).toFixed(2)} JOD
+                        {money176(order.total)} JOD
                         {order.created_at
                           ? ` · ${new Date(order.created_at).toLocaleDateString()}`
                           : ""}
                       </small>
-                    </article>
+
+                      <b className={styles.darikOpenOrder176}>
+                        View order →
+                      </b>
+                    </button>
                   ))}
                 </div>
               )}
+            </div>
+          ) : null}
+
+          {view === "order" ? (
+            <div className={styles.darikAccountView175}>
+              <button
+                type="button"
+                className={styles.darikBack175}
+                onClick={() => {
+                  setMessage("");
+                  setSelectedOrder176(null);
+                  setSelectedOrderItems176([]);
+                  setView("orders");
+                }}
+              >
+                ← Past orders
+              </button>
+
+              {orderDetailBusy176 ? (
+                <p className={styles.darikMuted175}>Opening order...</p>
+              ) : selectedOrder176 ? (
+                <>
+                  <div className={styles.darikReceiptHeader176}>
+                    <div>
+                      <small>ORDER</small>
+                      <h4>
+                        #
+                        {String(
+                          selectedOrder176.order_number ??
+                            selectedOrder176.id.slice(0, 8)
+                        )}
+                      </h4>
+                    </div>
+                    <strong>
+                      {orderStatusLabel175(selectedOrder176.order_status)}
+                    </strong>
+                  </div>
+
+                  <div className={styles.darikReceiptMeta176}>
+                    {selectedOrder176.storefront_name ? (
+                      <span>{selectedOrder176.storefront_name}</span>
+                    ) : null}
+                    {selectedOrder176.created_at ? (
+                      <span>
+                        {new Date(
+                          selectedOrder176.created_at
+                        ).toLocaleString()}
+                      </span>
+                    ) : null}
+                    {selectedOrder176.payment_method ? (
+                      <span>
+                        {cleanLabel176(selectedOrder176.payment_method)}
+                      </span>
+                    ) : null}
+                    {selectedOrder176.fulfillment_method ? (
+                      <span>
+                        {cleanLabel176(selectedOrder176.fulfillment_method)}
+                      </span>
+                    ) : null}
+                  </div>
+
+                  <div className={styles.darikReceiptItems176}>
+                    {selectedOrderItems176.length === 0 ? (
+                      <p className={styles.darikMuted175}>
+                        No item rows were found for this order.
+                      </p>
+                    ) : (
+                      selectedOrderItems176.map((item) => {
+                        const itemContent = (
+                          <>
+                            <div className={styles.darikReceiptImage176}>
+                              {item.image_url ? (
+                                <img
+                                  src={item.image_url}
+                                  alt={item.product_name || "Ordered product"}
+                                />
+                              ) : (
+                                <span>□</span>
+                              )}
+                            </div>
+
+                            <div className={styles.darikReceiptItemInfo176}>
+                              <strong>
+                                {item.product_name || "Ordered item"}
+                              </strong>
+                              <span>
+                                Qty {Number(item.quantity ?? 0)} · Price paid{" "}
+                                {money176(item.unit_price)} JOD each
+                              </span>
+                              {scope === "all" && item.store_name ? (
+                                <em className={styles.darikReceiptStore176}>
+                                  {item.store_name}
+                                </em>
+                              ) : null}
+                              {item.product_href ? (
+                                <small>
+                                  {item.product_available === false
+                                    ? "View retailer / product"
+                                    : "View product / reorder"}{" "}
+                                  →
+                                </small>
+                              ) : (
+                                <small className={styles.darikReceiptUnavailable176}>
+                                  Product link unavailable
+                                </small>
+                              )}
+                            </div>
+
+                            <div className={styles.darikReceiptLineTotal176}>
+                              <small>Line total</small>
+                              <strong>
+                                {money176(item.line_total)} JOD
+                              </strong>
+                            </div>
+                          </>
+                        );
+
+                        return item.product_href ? (
+                          <a
+                            key={item.id}
+                            href={item.product_href}
+                            className={styles.darikReceiptItem176}
+                            onClick={() => setOpen(false)}
+                          >
+                            {itemContent}
+                          </a>
+                        ) : (
+                          <div
+                            key={item.id}
+                            className={styles.darikReceiptItem176}
+                          >
+                            {itemContent}
+                          </div>
+                        );
+                      })
+                    )}
+                  </div>
+
+                  <div className={styles.darikReceiptTotals176}>
+                    <div>
+                      <span>Subtotal</span>
+                      <strong>
+                        {money176(selectedOrder176.subtotal)} JOD
+                      </strong>
+                    </div>
+                    <div>
+                      <span>Delivery</span>
+                      <strong>
+                        {money176(selectedOrder176.delivery_fee)} JOD
+                      </strong>
+                    </div>
+                    <div className={styles.darikReceiptGrandTotal176}>
+                      <span>Order total</span>
+                      <strong>
+                        {money176(selectedOrder176.total)} JOD
+                      </strong>
+                    </div>
+                  </div>
+
+                  <p className={styles.darikReceiptPriceNote176}>
+                    Prices above are the prices recorded when this order was
+                    placed. Current store prices may be different.
+                  </p>
+                </>
+              ) : null}
             </div>
           ) : null}
 
