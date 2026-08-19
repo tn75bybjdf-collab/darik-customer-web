@@ -3290,6 +3290,9 @@ export default function DarikDirectStorefrontSettingsPage() {
         );
       }
 
+      // DARIK_LIVE_EDITOR_LOCATION_INTERACTION_ZONE_197
+      // Real customer controls inside marked interaction zones must remain
+      // clickable/typable even while the live storefront editor is active.
       function isEditorChrome152(
         eventTarget152: EventTarget | null
       ) {
@@ -3301,7 +3304,7 @@ export default function DarikDirectStorefrontSettingsPage() {
 
         return Boolean(
           element152?.closest(
-            '[data-darik-selection-toolbar152="true"], [data-darik-text-editor152="true"], [data-darik-reset-layout150c="true"]'
+            '[data-darik-selection-toolbar152="true"], [data-darik-text-editor152="true"], [data-darik-reset-layout150c="true"], [data-darik-live-editor-interaction197="true"]'
           )
         );
       }
