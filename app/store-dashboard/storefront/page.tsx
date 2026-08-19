@@ -1323,6 +1323,13 @@ export default function DarikDirectStorefrontSettingsPage() {
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
   const [previewOpen, setPreviewOpen] = useState(false);
+
+  // DARIK_APPROVED_ONLY_ACTUAL_LIVE_STORE_EDITOR_196
+  // null = checking, false = not approved, true = approved/live editor unlocked.
+  const [liveStoreEditorApproved196, setLiveStoreEditorApproved196] =
+    useState<boolean | null>(null);
+  const [liveStoreEditorStatus196, setLiveStoreEditorStatus196] =
+    useState("Checking account approval... / جار التحقق من الموافقة...");
   const [selectedThemeField, setSelectedThemeField] = useState("");
   const [themeSaveState, setThemeSaveState] = useState<
     "idle" | "loading" | "saving" | "saved" | "error"
@@ -1374,6 +1381,46 @@ export default function DarikDirectStorefrontSettingsPage() {
 
   const [themePickerOpen, setThemePickerOpen] = useState(false);
   const liveBuilderPreviewRef = useRef<HTMLIFrameElement | null>(null);
+  const liveStoreEditorRefreshTimer196 = useRef<number | null>(null);
+
+  function usesActualLiveStoreEditor196() {
+    return Boolean(
+      liveStoreEditorApproved196 === true &&
+      storefront?.slug
+    );
+  }
+
+  function refreshActualLiveStoreEditor196(delay196 = 220) {
+    if (!usesActualLiveStoreEditor196() || !storefront?.slug) return;
+
+    if (liveStoreEditorRefreshTimer196.current !== null) {
+      window.clearTimeout(liveStoreEditorRefreshTimer196.current);
+    }
+
+    liveStoreEditorRefreshTimer196.current = window.setTimeout(() => {
+      liveStoreEditorRefreshTimer196.current = null;
+
+      const iframe196 = liveBuilderPreviewRef.current;
+      if (!iframe196) return;
+
+      const next196 =
+        `/${encodeURIComponent(storefront.slug)}?builderPreview=1&darikLiveEditor196=1&sync196=${Date.now()}`;
+
+      try {
+        iframe196.contentWindow?.location.replace(next196);
+      } catch {
+        iframe196.src = next196;
+      }
+    }, Math.max(80, delay196));
+  }
+
+  useEffect(() => {
+    return () => {
+      if (liveStoreEditorRefreshTimer196.current !== null) {
+        window.clearTimeout(liveStoreEditorRefreshTimer196.current);
+      }
+    };
+  }, []);
 
   const [storefrontContentPositioning145, setStorefrontContentPositioning145] =
     useState<StorefrontContentPositioning145>(() =>
@@ -1501,6 +1548,11 @@ export default function DarikDirectStorefrontSettingsPage() {
   }
 
   function pushLiveBuilderDraft() {
+    // DARIK_APPROVED_ONLY_ACTUAL_LIVE_STORE_EDITOR_196
+    // Approved editor = actual live page. Never inject local unsaved draft
+    // values into it, otherwise preview can look different from customers.
+    if (usesActualLiveStoreEditor196()) return;
+
     const target = liveBuilderPreviewRef.current?.contentWindow;
     if (!target || !selectedThemeField) return;
 
@@ -1634,6 +1686,7 @@ export default function DarikDirectStorefrontSettingsPage() {
 
         positioningDirtyRef145.current = false;
         setPreviewPositionSaveState145("saved");
+        refreshActualLiveStoreEditor196(180);
       })();
     }, 350);
 
@@ -2239,10 +2292,12 @@ export default function DarikDirectStorefrontSettingsPage() {
         }
       );
 
-      if (
-        sequence150D !== saveSequence150D ||
-        !result150D.error
-      ) {
+      if (sequence150D !== saveSequence150D) {
+        return;
+      }
+
+      if (!result150D.error) {
+        refreshActualLiveStoreEditor196(180);
         return;
       }
 
@@ -5949,6 +6004,29 @@ export default function DarikDirectStorefrontSettingsPage() {
       ? catalogContextFallback193
       : catalogAccessAllowed193;
 
+  // DARIK_APPROVED_ONLY_ACTUAL_LIVE_STORE_EDITOR_196
+  // FRONTEND 193 already owns the authoritative paid/approved access check.
+  // Reuse that exact result instead of creating a second competing RPC path.
+  useEffect(() => {
+    const approved196 = catalogUnlocked190 === true;
+
+    setLiveStoreEditorApproved196(approved196);
+    setLiveStoreEditorStatus196(
+      approved196
+        ? "Approved — live store editor unlocked. / تمت الموافقة — محرر المتجر المباشر متاح."
+        : "Preview unlocks after Darik approves your CliQ payment. / تفتح المعاينة بعد موافقة داريك على دفعة كليك."
+    );
+
+    if (approved196) {
+      setLiveBuilderPreviewOpen(true);
+      return;
+    }
+
+    setLiveBuilderPreviewOpen(false);
+    setLiveBuilderPreviewExpanded111(false);
+    setPreviewCustomizeOpen160(false);
+  }, [catalogUnlocked190]);
+
 
   useEffect(() => {
     const retailerId = selectedStore?.retailer_id;
@@ -6055,6 +6133,7 @@ export default function DarikDirectStorefrontSettingsPage() {
         setTypographyDirty(false);
         window.localStorage.removeItem(pendingKey);
         setTypographySaveState("saved");
+        refreshActualLiveStoreEditor196(180);
 
         window.setTimeout(() => {
           setTypographySaveState((current) =>
@@ -10803,6 +10882,46 @@ await saveStorefront(undefined, "manual");
                     </span>
                   </div>
                 </section>
+              ) : liveStoreEditorApproved196 !== true ? (
+                <section className={designStyles.themeFirstStepScreen}>
+                  <div className={designStyles.themeFirstStepHeader}>
+                    <div>
+                      <span className={designStyles.themeStepBadge}>
+                        {liveStoreEditorApproved196 === null
+                          ? "CHECKING"
+                          : "LOCKED"}
+                      </span>
+                      <span className={designStyles.themeFirstEyebrow}>
+                        LIVE STORE EDITOR / محرر المتجر المباشر
+                      </span>
+                      <h2>
+                        {liveStoreEditorApproved196 === null
+                          ? "Checking approval / جار التحقق من الموافقة"
+                          : "Preview unlocks after approval / تفتح المعاينة بعد الموافقة"}
+                      </h2>
+                      <p>{liveStoreEditorStatus196}</p>
+                    </div>
+                  </div>
+
+                  <div className={designStyles.themeFirstStepFoot}>
+                    <strong>
+                      No separate draft preview.
+                    </strong>
+                    <span>
+                      Once Darik approves your account, this area becomes the actual live storefront editor — the exact page customers see.
+                      {" / بعد موافقة داريك، تصبح هذه المنطقة محرر المتجر المباشر نفسه الذي يراه العملاء."}
+                    </span>
+                  </div>
+
+                  {liveStoreEditorApproved196 === false ? (
+                    <div>
+                      <a href="/store-dashboard/activation">
+                        Check payment / approval status
+                        {" / تحقق من حالة الدفع والموافقة"}
+                      </a>
+                    </div>
+                  ) : null}
+                </section>
               ) : (
                 <>
                 {!liveBuilderPreviewOpen ? (
@@ -10811,7 +10930,7 @@ await saveStorefront(undefined, "manual");
                     className={designStyles.liveBuilderOpenPreviewTab107}
                     onClick={() => setLiveBuilderPreviewOpen(true)}
                   >
-                    Open preview / فتح المعاينة
+                    Open live editor / فتح المحرر المباشر
                   </button>
                 ) : null}
                 <section
@@ -10829,9 +10948,9 @@ await saveStorefront(undefined, "manual");
                     <div className={designStyles.liveBuilderPreviewIdentity}>
                       <span className={designStyles.liveBuilderLiveDot} />
                       <div>
-                        <strong>LIVE STOREFRONT PREVIEW</strong>
+                        <strong>LIVE STOREFRONT EDITOR</strong>
                         <small>
-                          {selectedThemeOption?.name || "Darik Theme"} · Scroll inside the preview
+                          {selectedThemeOption?.name || "Darik Theme"} · Actual live customer storefront
                         </small>
                       </div>
                     </div>
@@ -11050,14 +11169,24 @@ await saveStorefront(undefined, "manual");
                         className={designStyles.privatePreviewGate150EV2}
                         ref={liveBuilderPreviewRef}
                         title="Live Darik storefront preview"
-                        src={`/_darik-private-store-preview?storefrontId=${encodeURIComponent(
-                          storefront.id
-                        )}&previewField=${encodeURIComponent(
-                          liveBuilderPreviewTheme138
-                        )}&fieldLab=1&builderPreview=1&previewKey=${encodeURIComponent(
-                          realPrivatePreviewKey143
-                        )}`}
-                        onLoad={pushLiveBuilderDraft}
+                        src={
+                          usesActualLiveStoreEditor196() && storefront.slug
+                            ? `/${encodeURIComponent(
+                                storefront.slug
+                              )}?builderPreview=1&darikLiveEditor196=1`
+                            : `/_darik-private-store-preview?storefrontId=${encodeURIComponent(
+                                storefront.id
+                              )}&previewField=${encodeURIComponent(
+                                liveBuilderPreviewTheme138
+                              )}&fieldLab=1&builderPreview=1&previewKey=${encodeURIComponent(
+                                realPrivatePreviewKey143
+                              )}`
+                        }
+                        onLoad={() => {
+                          if (!usesActualLiveStoreEditor196()) {
+                            pushLiveBuilderDraft();
+                          }
+                        }}
                       />
                     ) : (
                       <div

@@ -1759,6 +1759,20 @@ function darikIsBuilderPreview120() {
   );
 }
 
+// DARIK_APPROVED_ONLY_ACTUAL_LIVE_STORE_EDITOR_196
+// Approved retailer editor mode is the ACTUAL public storefront route.
+// builderPreview enables editor interaction; darikLiveEditor196 prevents the
+// data layer from falling back to the old private/draft preview behavior.
+function darikIsActualLiveEditor196() {
+  if (typeof window === "undefined") return false;
+
+  return (
+    new URLSearchParams(window.location.search).get(
+      "darikLiveEditor196"
+    ) === "1"
+  );
+}
+
 // DARIK_DELIVERY_STAGES_DAYS_CUTOFF_163
 function darikJordanClockMinutes163(nowMs: number) {
   const parts163 = new Intl.DateTimeFormat("en-GB", {
@@ -2053,7 +2067,8 @@ export default function DarikDirectStorefrontPage() {
     if (
       !slug ||
       slug === "_darik-private-store-preview" ||
-      isBuilderPositionPreview145
+      (isBuilderPositionPreview145 &&
+        !darikIsActualLiveEditor196())
     ) {
       setDarikStorefrontVisualTruth194(null);
       return;
@@ -3137,7 +3152,10 @@ export default function DarikDirectStorefrontPage() {
       Retailer builder preview is not a customer visit. Never block setup or
       preview rendering behind a customer delivery-location question.
     */
-    if (darikIsBuilderPreview120()) {
+    if (
+      darikIsBuilderPreview120() &&
+      !darikIsActualLiveEditor196()
+    ) {
       setLocationGateOpen117(false);
       setLocationGateBusy117(false);
       setLocationGateError117("");
@@ -5361,7 +5379,8 @@ export default function DarikDirectStorefrontPage() {
     if (
       !slug ||
       slug === "_darik-private-store-preview" ||
-      isBuilderPositionPreview145
+      (isBuilderPositionPreview145 &&
+        !darikIsActualLiveEditor196())
     ) {
       setDarikPublicLayout166(null);
       return;
@@ -5422,7 +5441,8 @@ export default function DarikDirectStorefrontPage() {
 
   useEffect(() => {
     if (
-      isBuilderPositionPreview145 ||
+      (isBuilderPositionPreview145 &&
+        !darikIsActualLiveEditor196()) ||
       slug === "_darik-private-store-preview"
     ) {
       return;
