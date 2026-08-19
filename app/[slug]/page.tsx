@@ -1991,6 +1991,17 @@ export default function DarikDirectStorefrontPage() {
     setPreviewRetailField(field || "");
   }, []);
 
+  // DARIK_STOREFRONT_VISUAL_TRUTH_194
+  type DarikStorefrontVisualTruth194 = {
+    freeform_layout?: unknown;
+    typography?: unknown;
+    content_positioning?: unknown;
+    updated_at?: unknown;
+  };
+
+  const [darikStorefrontVisualTruth194, setDarikStorefrontVisualTruth194] =
+    useState<DarikStorefrontVisualTruth194 | null>(null);
+
   // DARIK_RETAILER_THEME_GALLERY_102
   const [savedThemeField, setSavedThemeField] = useState("");
 
@@ -2037,6 +2048,50 @@ export default function DarikDirectStorefrontPage() {
   useEffect(() => {
     setIsBuilderPositionPreview145(darikIsBuilderPreview120());
   }, []);
+
+  useEffect(() => {
+    if (
+      !slug ||
+      slug === "_darik-private-store-preview" ||
+      isBuilderPositionPreview145
+    ) {
+      setDarikStorefrontVisualTruth194(null);
+      return;
+    }
+
+    let cancelled194 = false;
+    setDarikStorefrontVisualTruth194(null);
+
+    void (async () => {
+      const result194 = await supabase.rpc(
+        "darik_direct_public_storefront_visual_v194",
+        { p_slug: slug }
+      );
+
+      if (cancelled194) return;
+
+      if (result194.error) {
+        console.warn(
+          "Darik live visual truth could not load:",
+          result194.error.message
+        );
+        return;
+      }
+
+      const raw194 =
+        result194.data &&
+        typeof result194.data === "object" &&
+        !Array.isArray(result194.data)
+          ? (result194.data as DarikStorefrontVisualTruth194)
+          : null;
+
+      setDarikStorefrontVisualTruth194(raw194);
+    })();
+
+    return () => {
+      cancelled194 = true;
+    };
+  }, [slug, isBuilderPositionPreview145]);
 
   useEffect(() => {
     if (!slug) {
@@ -5354,12 +5409,14 @@ export default function DarikDirectStorefrontPage() {
   const darikEffectivePublicLayout166 = useMemo(
     () =>
       darikNormalizePublicLayout166(
-        darikPublicLayout166 ??
+        darikStorefrontVisualTruth194?.freeform_layout ??
+          darikPublicLayout166 ??
           darikStorefrontLayoutRaw166
       ),
     [
       darikStorefrontLayoutRaw166,
       darikPublicLayout166,
+      darikStorefrontVisualTruth194,
     ]
   );
 
@@ -5687,7 +5744,8 @@ export default function DarikDirectStorefrontPage() {
 
   const effectiveStorefrontTypography =
     normalizeStorefrontTypography(
-      (storefront as unknown as { direct_typography?: unknown }).direct_typography ??
+      darikStorefrontVisualTruth194?.typography ??
+        (storefront as unknown as { direct_typography?: unknown }).direct_typography ??
         savedStorefrontTypography
     );
 
@@ -5710,11 +5768,13 @@ export default function DarikDirectStorefrontPage() {
 
   const effectiveContentPositioning145 =
     normalizeStorefrontContentPositioning145(
-      (
-        storefront as unknown as {
-          direct_content_positioning?: unknown;
-        }
-      ).direct_content_positioning ?? savedContentPositioning145
+      darikStorefrontVisualTruth194?.content_positioning ??
+        (
+          storefront as unknown as {
+            direct_content_positioning?: unknown;
+          }
+        ).direct_content_positioning ??
+        savedContentPositioning145
     );
 
   function selectBuilderPositionTarget145(

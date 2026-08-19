@@ -1616,14 +1616,14 @@ export default function DarikDirectStorefrontSettingsPage() {
       void (async () => {
         setPreviewPositionSaveState145("saving");
 
-        const result = await supabase
-          .from("retailer_storefronts")
-          .update({
-            direct_content_positioning: snapshot,
-          })
-          .eq("id", storefront.id)
-          .select("id,direct_content_positioning")
-          .single();
+        const result = await supabase.rpc(
+          "darik_direct_set_storefront_visual_v194",
+          {
+            p_storefront_id: storefront.id,
+            p_component: "content_positioning",
+            p_payload: snapshot,
+          }
+        );
 
         if (revision !== positioningRevisionRef145.current) return;
 
@@ -1640,6 +1640,8 @@ export default function DarikDirectStorefrontSettingsPage() {
     return () => window.clearTimeout(timer);
   }, [storefrontContentPositioning145, storefront?.id]);
 
+  // DARIK_STOREFRONT_VISUAL_TRUTH_194
+  // Preview and live storefront now persist/read the exact same visual JSON.
   // DARIK_DASHBOARD_ONLY_DRAG_PROOF_150A
   // DARIK_LIVE_IFRAME_BINDING_FIX_150B
   // DARIK_DRAG_SCROLL_LOCK_RESET_HERO_LOCK_150C
@@ -2228,12 +2230,14 @@ export default function DarikDirectStorefrontSettingsPage() {
       const snapshot150D =
         normalizeLayout150D(savedLayout150D);
 
-      const result150D = await supabase
-        .from("retailer_storefronts")
-        .update({
-          direct_freeform_layout: snapshot150D,
-        })
-        .eq("id", storefront.id);
+      const result150D = await supabase.rpc(
+        "darik_direct_set_storefront_visual_v194",
+        {
+          p_storefront_id: storefront.id,
+          p_component: "freeform_layout",
+          p_payload: snapshot150D,
+        }
+      );
 
       if (
         sequence150D !== saveSequence150D ||
@@ -2259,11 +2263,10 @@ export default function DarikDirectStorefrontSettingsPage() {
         return;
       }
 
-      const result150D = await supabase
-        .from("retailer_storefronts")
-        .select("direct_freeform_layout")
-        .eq("id", storefront.id)
-        .maybeSingle();
+      const result150D = await supabase.rpc(
+        "darik_direct_get_storefront_visual_v194",
+        { p_storefront_id: storefront.id }
+      );
 
       if (result150D.error) {
         console.error(
@@ -2277,7 +2280,13 @@ export default function DarikDirectStorefrontSettingsPage() {
       }
 
       savedLayout150D = normalizeLayout150D(
-        result150D.data?.direct_freeform_layout
+        (
+          result150D.data &&
+          typeof result150D.data === "object" &&
+          !Array.isArray(result150D.data)
+            ? (result150D.data as { freeform_layout?: unknown }).freeform_layout
+            : undefined
+        )
       );
 
       layoutLoaded150D = true;
@@ -3782,12 +3791,11 @@ export default function DarikDirectStorefrontSettingsPage() {
 
         const typographyResult152 =
           await supabase.rpc(
-            "darik_direct_set_storefront_typography",
+            "darik_direct_set_storefront_visual_v194",
             {
-              p_storefront_id:
-                storefront.id,
-              p_typography:
-                nextTypography152,
+              p_storefront_id: storefront.id,
+              p_component: "typography",
+              p_payload: nextTypography152,
             }
           );
 
@@ -5974,9 +5982,10 @@ export default function DarikDirectStorefrontSettingsPage() {
     setTypographySaveState("loading");
 
     void (async () => {
-      const result = await supabase.rpc("darik_direct_public_typography", {
-        p_slug: storefront.slug,
-      });
+      const result = await supabase.rpc(
+        "darik_direct_get_storefront_visual_v194",
+        { p_storefront_id: storefront.id }
+      );
 
       if (cancelled || typographyDirtyRef.current) return;
 
@@ -5986,7 +5995,13 @@ export default function DarikDirectStorefrontSettingsPage() {
       }
 
       setStorefrontTypographyDraft(
-        normalizeStorefrontTypography(result.data)
+        normalizeStorefrontTypography(
+          result.data &&
+          typeof result.data === "object" &&
+          !Array.isArray(result.data)
+            ? (result.data as { typography?: unknown }).typography
+            : undefined
+        )
       );
       setTypographySaveState("idle");
     })();
@@ -6023,10 +6038,11 @@ export default function DarikDirectStorefrontSettingsPage() {
 
       void (async () => {
         const result = await supabase.rpc(
-          "darik_direct_set_storefront_typography",
+          "darik_direct_set_storefront_visual_v194",
           {
             p_storefront_id: storefront.id,
-            p_typography: storefrontTypographyDraft,
+            p_component: "typography",
+            p_payload: storefrontTypographyDraft,
           }
         );
 
