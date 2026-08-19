@@ -795,6 +795,26 @@ export default function DarikDiscoveryHome() {
 
   return (
     <main className={styles.page} dir={language === "ar" ? "rtl" : "ltr"}>
+      {/* DARIK_REAL_LOGO_POPUP_AND_HOME_174 */}
+      <div
+        data-darik-main-logo-174
+        style={{
+          display: "flex",
+          justifyContent: "center",
+          padding: "18px 16px 6px",
+        }}
+      >
+        <img
+          src="/darik_logo_final_v2.png"
+          alt="Darik"
+          style={{
+            display: "block",
+            width: "min(240px, 62vw)",
+            height: "auto",
+            objectFit: "contain",
+          }}
+        />
+      </div>
       <header className={styles.header}>
         <div className={styles.headerInner}>
           <a className={styles.brand} href="/" aria-label="Darik Marketplace home">

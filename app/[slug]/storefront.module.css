@@ -21636,3 +21636,35 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* DARIK_REAL_LOGO_POPUP_AND_HOME_174 */
+.darikGuestCheckoutNudgeLogoWrap174 {
+  width: 78px;
+  height: 78px;
+  display: grid;
+  place-items: center;
+  margin-bottom: 16px;
+  border-radius: 22px;
+  background: #ffffff;
+  border: 1px solid #eaecf0;
+  box-shadow: 0 8px 28px rgba(15, 23, 42, 0.08);
+}
+
+.darikGuestCheckoutNudgeLogo174 {
+  display: block;
+  width: min(100%, 62px);
+  height: auto;
+  object-fit: contain;
+}
+
+@media (max-width: 620px) {
+  .darikGuestCheckoutNudgeLogoWrap174 {
+    width: 70px;
+    height: 70px;
+    border-radius: 20px;
+  }
+
+  .darikGuestCheckoutNudgeLogo174 {
+    width: min(100%, 56px);
+  }
+}

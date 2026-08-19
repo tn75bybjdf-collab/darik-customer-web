@@ -3539,6 +3539,9 @@ export default function DarikDirectStorefrontPage() {
     }
   }
 
+  // DARIK_REAL_LOGO_POPUP_AND_HOME_174
+  const darikBrandLogoSrc174 = "/darik_logo_final_v2.png";
+
   function handleCheckoutWithAccountNudge173() {
     if (darikCustomerProfile121) {
       void placeOnlineOrder();
@@ -7270,7 +7273,13 @@ style={{
                     aria-labelledby="darik-guest-nudge-title-173"
                   >
                     <div className={styles.darikGuestCheckoutNudgeCard173}>
-                      <div className={styles.darikGuestCheckoutNudgeIcon173}>D</div>
+                      <div className={styles.darikGuestCheckoutNudgeLogoWrap174}>
+                        <img
+                          src={darikBrandLogoSrc174}
+                          alt="Darik"
+                          className={styles.darikGuestCheckoutNudgeLogo174}
+                        />
+                      </div>
                       <div className={styles.darikGuestCheckoutNudgeHeading173}>
                         <span>ONE QUICK THING</span>
                         <h3 id="darik-guest-nudge-title-173">
