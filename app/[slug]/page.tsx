@@ -2072,6 +2072,14 @@ export default function DarikDirectStorefrontPage() {
   const [selectedVehicleYear, setSelectedVehicleYear] = useState("all");
   const [cart, setCart] = useState<CartLine[]>([]);
   const [activeProductId, setActiveProductId] = useState("");
+
+  // DARIK_PRODUCT_PARENT_SCROLL_RETURN_183
+  // Parent-level browse position is authoritative because some product entry
+  // points used to navigate the page before ProductDetailExperience mounted.
+  const productReturnPosition183Ref = useRef<{
+    x: number;
+    y: number;
+  } | null>(null);
   const [cartOpen, setCartOpen] = useState(false);
   const [onlineCheckoutOpen, setOnlineCheckoutOpen] = useState(false);
   const [checkoutForm, setCheckoutForm] = useState<OnlineCheckoutForm>({
@@ -4632,6 +4640,11 @@ export default function DarikDirectStorefrontPage() {
   );
 
   function openProductDetail(product: Product) {
+    productReturnPosition183Ref.current = {
+      x: window.scrollX,
+      y: window.scrollY,
+    };
+
     setActiveProductId(product.id);
 
     const url = new URL(window.location.href);
@@ -4640,11 +4653,33 @@ export default function DarikDirectStorefrontPage() {
   }
 
   function closeProductDetail() {
+    const returnPosition183 = productReturnPosition183Ref.current;
+
     setActiveProductId("");
 
     const url = new URL(window.location.href);
     url.searchParams.delete("product");
     window.history.replaceState(window.history.state, "", url.toString());
+
+    if (returnPosition183) {
+      productReturnPosition183Ref.current = null;
+
+      const restore183 = () => {
+        window.scrollTo({
+          left: returnPosition183.x,
+          top: returnPosition183.y,
+          behavior: "auto",
+        });
+      };
+
+      window.requestAnimationFrame(() => {
+        restore183();
+        window.requestAnimationFrame(() => {
+          restore183();
+          window.setTimeout(restore183, 80);
+        });
+      });
+    }
   }
 
   function addToCart(product: Product) {
@@ -6902,9 +6937,10 @@ style={{
                             data-darik-best-seller-item-182="true"
                           >
                             {renderProductCard(product)}
-                            <a
+                            <button
+                              type="button"
                               className={styles.marketplaceBestSellerTapTarget}
-                              href={`/${storefront.slug}?product=${encodeURIComponent(product.id)}#catalog`}
+                              onClick={() => openProductDetail(product)}
                               aria-label={`View ${productName(product)}`}
                             />
                           </div>
