@@ -12921,3 +12921,48 @@ main[dir="rtl"] .darikHomeStoreShelfShell186::after {
     margin-left: -14px;
   }
 }
+
+/* DARIK_HOME_STORE_LOGO_DEAD_CENTER_187 */
+/*
+  Store logo is the visual anchor of every discovery card:
+  dead-center on top of the storefront photo, with a quiet legibility plate.
+*/
+.darikHomeStoreLogoStage187 {
+  position: absolute;
+  z-index: 3;
+  top: 50%;
+  left: 50%;
+  width: 62%;
+  height: 62%;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  border-radius: 20px;
+  padding: 10px;
+  background: rgba(255, 255, 255, 0.84);
+  box-shadow:
+    0 12px 30px rgba(8, 15, 29, 0.18),
+    inset 0 1px 0 rgba(255, 255, 255, 0.72);
+  backdrop-filter: blur(10px) saturate(118%);
+  -webkit-backdrop-filter: blur(10px) saturate(118%);
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+
+.darikHomeStoreLogoStage187 .darikHomeStoreCoverLogo186 {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: contain;
+  filter: drop-shadow(0 4px 10px rgba(8, 15, 29, 0.12));
+}
+
+@media (min-width: 761px) {
+  .darikHomeStoreLogoStage187 {
+    width: 60%;
+    height: 60%;
+    padding: 12px;
+    border-radius: 22px;
+  }
+}

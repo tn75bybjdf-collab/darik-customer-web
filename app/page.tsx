@@ -585,8 +585,11 @@ function HomeStoreCard186({
               }
         }
       >
-        {!heroImageUrl && logoUrl ? (
-          <img className="darikHomeStoreCoverLogo186" src={logoUrl} alt="" />
+        {/* DARIK_HOME_STORE_LOGO_DEAD_CENTER_187 */}
+        {logoUrl ? (
+          <span className="darikHomeStoreLogoStage187" aria-hidden="true">
+            <img className="darikHomeStoreCoverLogo186" src={logoUrl} alt="" />
+          </span>
         ) : null}
         <span
           className={`darikHomeStoreStatus186 ${
