@@ -3335,9 +3335,13 @@ export default function DarikDirectStorefrontPage() {
   const [darikLoginEmail121, setDarikLoginEmail121] = useState("");
   const [darikLoginPassword121, setDarikLoginPassword121] = useState("");
 
-  const [darikSignupName121, setDarikSignupName121] = useState("");
+  // DARIK_GUEST_CHECKOUT_ACCOUNT_NUDGE_SIGNUP_CONFIRM_173
+  const [darikSignupFirstName173, setDarikSignupFirstName173] = useState("");
+  const [darikSignupLastName173, setDarikSignupLastName173] = useState("");
   const [darikSignupPhone121, setDarikSignupPhone121] = useState("");
+  const [darikSignupPhoneConfirm173, setDarikSignupPhoneConfirm173] = useState("");
   const [darikSignupEmail121, setDarikSignupEmail121] = useState("");
+  const [darikSignupEmailConfirm173, setDarikSignupEmailConfirm173] = useState("");
   const [darikSignupPassword121, setDarikSignupPassword121] = useState("");
   const [darikSignupPasswordConfirm121, setDarikSignupPasswordConfirm121] =
     useState("");
@@ -3347,6 +3351,8 @@ export default function DarikDirectStorefrontPage() {
     useState<DarikSignupStep121>("details");
   const [darikPendingPhoneSession121, setDarikPendingPhoneSession121] =
     useState<any>(null);
+  const [darikGuestCheckoutNudgeOpen173, setDarikGuestCheckoutNudgeOpen173] =
+    useState(false);
 
   function normalizeDarikCustomerPhone121(rawPhone: string) {
     const digits = String(rawPhone ?? "").replace(/\D/g, "");
@@ -3533,6 +3539,37 @@ export default function DarikDirectStorefrontPage() {
     }
   }
 
+  function handleCheckoutWithAccountNudge173() {
+    if (darikCustomerProfile121) {
+      void placeOnlineOrder();
+      return;
+    }
+
+    if (darikCheckoutIdentity121 === "guest") {
+      setDarikGuestCheckoutNudgeOpen173(true);
+      return;
+    }
+
+    void placeOnlineOrder();
+  }
+
+  function continueGuestCheckoutAfterNudge173() {
+    setDarikGuestCheckoutNudgeOpen173(false);
+    void placeOnlineOrder();
+  }
+
+  function openDarikSignInFromCheckoutNudge173() {
+    setDarikGuestCheckoutNudgeOpen173(false);
+    setDarikAuthMessage121("");
+    setDarikCheckoutIdentity121("login");
+
+    window.requestAnimationFrame(() => {
+      document
+        .querySelector<HTMLElement>("[data-darik-customer-account='checkout']")
+        ?.scrollIntoView({ behavior: "smooth", block: "center" });
+    });
+  }
+
   async function chooseDarikGuestCheckout121() {
     setDarikAuthMessage121("");
 
@@ -3598,17 +3635,43 @@ export default function DarikDirectStorefrontPage() {
   }
 
   function validateDarikSignup121() {
-    const name = darikSignupName121.trim();
+    const firstName = darikSignupFirstName173.trim();
+    const lastName = darikSignupLastName173.trim();
+    const name = `${firstName} ${lastName}`.replace(/\s+/g, " ").trim();
     const phone = normalizeDarikCustomerPhone121(darikSignupPhone121);
+    const phoneConfirm = normalizeDarikCustomerPhone121(
+      darikSignupPhoneConfirm173
+    );
     const email = darikSignupEmail121.trim().toLowerCase();
+    const emailConfirm = darikSignupEmailConfirm173.trim().toLowerCase();
 
-    if (name.length < 2 || phone.length < 8 || !email || !darikSignupPassword121) {
-      setDarikAuthMessage121("Enter your name, phone, email, and password.");
+    if (!firstName || !lastName) {
+      setDarikAuthMessage121("Enter your first name and last name.");
       return null;
     }
 
-    if (!email.includes("@") || !email.includes(".")) {
+    if (!email || !email.includes("@") || !email.includes(".")) {
       setDarikAuthMessage121("Enter a valid email address.");
+      return null;
+    }
+
+    if (email !== emailConfirm) {
+      setDarikAuthMessage121("Email addresses do not match.");
+      return null;
+    }
+
+    if (phone.length < 8) {
+      setDarikAuthMessage121("Enter a valid phone number.");
+      return null;
+    }
+
+    if (phone !== phoneConfirm) {
+      setDarikAuthMessage121("Phone numbers do not match.");
+      return null;
+    }
+
+    if (!darikSignupPassword121) {
+      setDarikAuthMessage121("Enter a password.");
       return null;
     }
 
@@ -3624,7 +3687,7 @@ export default function DarikDirectStorefrontPage() {
       return null;
     }
 
-    return { name, phone, email };
+    return { firstName, lastName, name, phone, email };
   }
 
   async function startDarikCustomerSignup121() {
@@ -3663,6 +3726,8 @@ export default function DarikDirectStorefrontPage() {
         options: {
           data: {
             full_name: details.name,
+            first_name: details.firstName,
+            last_name: details.lastName,
             phone: details.phone,
           },
         },
@@ -7197,8 +7262,60 @@ style={{
                   minimumReached &&
                   storefront.is_accepting_orders ? (
                     <div className={styles.onlineCheckoutForm}>
+                {darikGuestCheckoutNudgeOpen173 ? (
+                  <div
+                    className={styles.darikGuestCheckoutNudgeOverlay173}
+                    role="dialog"
+                    aria-modal="true"
+                    aria-labelledby="darik-guest-nudge-title-173"
+                  >
+                    <div className={styles.darikGuestCheckoutNudgeCard173}>
+                      <div className={styles.darikGuestCheckoutNudgeIcon173}>D</div>
+                      <div className={styles.darikGuestCheckoutNudgeHeading173}>
+                        <span>ONE QUICK THING</span>
+                        <h3 id="darik-guest-nudge-title-173">
+                          Are you sure you don’t want to sign in?
+                        </h3>
+                        <p>هل أنت متأكد أنك لا تريد تسجيل الدخول قبل إكمال الطلب؟</p>
+                      </div>
+
+                      <p className={styles.darikGuestCheckoutNudgeCopy173}>
+                        A Darik account makes every order easier. Sign in before checkout
+                        and keep your shopping history connected in one place.
+                      </p>
+
+                      <div className={styles.darikGuestCheckoutBenefits173}>
+                        <div><strong>✉</strong><span>Emailed receipts<small>إيصالات عبر البريد الإلكتروني</small></span></div>
+                        <div><strong>↺</strong><span>See past orders<small>عرض طلباتك السابقة</small></span></div>
+                        <div><strong>⌖</strong><span>Save locations<small>حفظ مواقع التوصيل</small></span></div>
+                        <div><strong>●</strong><span>Track orders<small>تتبع حالة الطلب</small></span></div>
+                      </div>
+
+                      <div className={styles.darikGuestCheckoutNudgeActions173}>
+                        <button
+                          type="button"
+                          className={styles.darikGuestCheckoutNudgeSignIn173}
+                          onClick={openDarikSignInFromCheckoutNudge173}
+                        >
+                          Sign in / تسجيل الدخول
+                        </button>
+                        <button
+                          type="button"
+                          className={styles.darikGuestCheckoutNudgeNoThanks173}
+                          onClick={continueGuestCheckoutAfterNudge173}
+                        >
+                          No thanks, checkout as guest / لا شكراً
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ) : null}
+
               {!darikIsBuilderPreview120() ? (
-                <section className={styles.darikCheckoutIdentity121}>
+                <section
+                  className={styles.darikCheckoutIdentity121}
+                  data-darik-customer-account="checkout"
+                >
                   <div className={styles.darikCheckoutIdentityHeader121}>
                     <div>
                       <span>حساب داريك / Darik account</span>
@@ -7360,14 +7477,49 @@ style={{
                       {darikSignupStep121 === "details" ? (
                         <div className={styles.darikAccountFormGrid121}>
                           <label>
-                            Full name / الاسم الكامل
+                            First name / الاسم الأول
                             <input
-                              value={darikSignupName121}
+                              value={darikSignupFirstName173}
                               onChange={(event) =>
-                                setDarikSignupName121(event.target.value)
+                                setDarikSignupFirstName173(event.target.value)
                               }
-                              placeholder="Your full name"
-                              autoComplete="name"
+                              placeholder="First name"
+                              autoComplete="given-name"
+                            />
+                          </label>
+                          <label>
+                            Last name / اسم العائلة
+                            <input
+                              value={darikSignupLastName173}
+                              onChange={(event) =>
+                                setDarikSignupLastName173(event.target.value)
+                              }
+                              placeholder="Last name"
+                              autoComplete="family-name"
+                            />
+                          </label>
+                          <label>
+                            Email / البريد الإلكتروني
+                            <input
+                              type="email"
+                              value={darikSignupEmail121}
+                              onChange={(event) =>
+                                setDarikSignupEmail121(event.target.value)
+                              }
+                              placeholder="you@example.com"
+                              autoComplete="email"
+                            />
+                          </label>
+                          <label>
+                            Confirm email / تأكيد البريد الإلكتروني
+                            <input
+                              type="email"
+                              value={darikSignupEmailConfirm173}
+                              onChange={(event) =>
+                                setDarikSignupEmailConfirm173(event.target.value)
+                              }
+                              placeholder="Repeat email"
+                              autoComplete="off"
                             />
                           </label>
                           <label>
@@ -7383,15 +7535,15 @@ style={{
                             />
                           </label>
                           <label>
-                            Email / البريد الإلكتروني
+                            Confirm phone / تأكيد رقم الهاتف
                             <input
-                              type="email"
-                              value={darikSignupEmail121}
+                              type="tel"
+                              value={darikSignupPhoneConfirm173}
                               onChange={(event) =>
-                                setDarikSignupEmail121(event.target.value)
+                                setDarikSignupPhoneConfirm173(event.target.value)
                               }
-                              placeholder="you@example.com"
-                              autoComplete="email"
+                              placeholder="Repeat phone"
+                              autoComplete="off"
                             />
                           </label>
                           <label>
@@ -7977,7 +8129,7 @@ style={{
                       <button
                         type="button"
                         className={styles.checkoutButton}
-                        onClick={placeOnlineOrder}
+                        onClick={() => void handleCheckoutWithAccountNudge173()}
                         disabled={placingOrder}
                       >
                         {placingOrder
