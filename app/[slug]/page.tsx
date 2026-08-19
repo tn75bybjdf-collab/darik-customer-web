@@ -1271,7 +1271,10 @@ type StorefrontPositionKey145 =
   | "display_name_ar"
   | "tagline"
   | "tagline_ar"
-  | "shop";
+  | "shop"
+  | "hero_logo"
+  | "hero_label"
+  | "primary_button";
 
 type StorefrontPositionPoint145 = {
   x: number;
@@ -1294,12 +1297,15 @@ const storefrontPositionKeys145: StorefrontPositionKey145[] = [
   "tagline",
   "tagline_ar",
   "shop",
+  "hero_logo",
+  "hero_label",
+  "primary_button",
 ];
 
 function clampStorefrontPosition145(value: unknown) {
   const numeric = Number(value);
   if (!Number.isFinite(numeric)) return 0;
-  return Math.max(-240, Math.min(240, Math.round(numeric)));
+  return Math.max(-1200, Math.min(1200, Math.round(numeric)));
 }
 
 function storefrontDefaultContentPositioning145(): StorefrontContentPositioning145 {
@@ -1321,6 +1327,18 @@ function storefrontDefaultContentPositioning145(): StorefrontContentPositioning1
       mobile: { x: 0, y: 0 },
     },
     shop: {
+      desktop: { x: 0, y: 0 },
+      mobile: { x: 0, y: 0 },
+    },
+    hero_logo: {
+      desktop: { x: 0, y: 0 },
+      mobile: { x: 0, y: 0 },
+    },
+    hero_label: {
+      desktop: { x: 0, y: 0 },
+      mobile: { x: 0, y: 0 },
+    },
+    primary_button: {
       desktop: { x: 0, y: 0 },
       mobile: { x: 0, y: 0 },
     },
@@ -5769,6 +5787,8 @@ export default function DarikDirectStorefrontPage() {
         savedStorefrontTypography
     );
 
+  // DARIK_CANONICAL_HERO_POSITION_BRIDGE_202
+  // Core hero movement now uses canonical React-rendered positioning.
   // DARIK_CUSTOMER_FACING_NAME_FONT_PRIORITY_144
   const customerFacingNameFontKey144 =
     effectiveStorefrontTypography.display_name.font !== "theme"
@@ -6668,7 +6688,23 @@ export default function DarikDirectStorefrontPage() {
               ) : null}
             </div>
           ) : null}
-          <div className={styles.heroLogo}>
+          <div
+            id="darik-layout-hero-logo-202"
+            className={[
+              styles.heroLogo,
+              styles.builderPositionTarget145,
+              builderSelectedPosition145 === "hero_logo"
+                ? styles.builderPositionSelected145
+                : "",
+            ].filter(Boolean).join(" ")}
+            style={storefrontPositionStyle145(
+              effectiveContentPositioning145,
+              "hero_logo"
+            )}
+            onClick={(event) =>
+              selectBuilderPositionTarget145(event, "hero_logo")
+            }
+          >
             {storefront.logo_url ? (
               <img
                 src={storefront.logo_url}
@@ -6680,7 +6716,23 @@ export default function DarikDirectStorefrontPage() {
           </div>
 
           <div className={styles.heroCopy}>
-            <div className={styles.heroLabel}>
+            <div
+              id="darik-layout-hero-label-202"
+              className={[
+                styles.heroLabel,
+                styles.builderPositionTarget145,
+                builderSelectedPosition145 === "hero_label"
+                  ? styles.builderPositionSelected145
+                  : "",
+              ].filter(Boolean).join(" ")}
+              style={storefrontPositionStyle145(
+                effectiveContentPositioning145,
+                "hero_label"
+              )}
+              onClick={(event) =>
+                selectBuilderPositionTarget145(event, "hero_label")
+              }
+            >
               <Icon name="store" size={15} />
               {isAutoParts ? "Auto parts / \u0642\u0637\u0639 \u063a\u064a\u0627\u0631" : isGroceryStore ? "Hypermarket / \u0647\u0627\u064a\u0628\u0631\u0645\u0627\u0631\u0643\u062a" : "Official store / \u0627\u0644\u0645\u062a\u062c\u0631 \u0627\u0644\u0631\u0633\u0645\u064a"}
             </div>
@@ -6784,7 +6836,30 @@ style={{
             ) : null}
 
             <div className={styles.heroButtons}>
-              <button className={styles.primaryHeroButton} onClick={jumpToCatalog}>
+              <button
+                id="darik-layout-primary-button-202"
+                className={[
+                  styles.primaryHeroButton,
+                  styles.builderPositionTarget145,
+                  builderSelectedPosition145 === "primary_button"
+                    ? styles.builderPositionSelected145
+                    : "",
+                ].filter(Boolean).join(" ")}
+                style={storefrontPositionStyle145(
+                  effectiveContentPositioning145,
+                  "primary_button"
+                )}
+                onClick={(event) => {
+                  if (isBuilderPositionPreview145) {
+                    selectBuilderPositionTarget145(
+                      event,
+                      "primary_button"
+                    );
+                    return;
+                  }
+                  jumpToCatalog();
+                }}
+              >
                 {isAutoParts ? "Find a part / \u0627\u0628\u062d\u062b \u0639\u0646 \u0642\u0637\u0639\u0629" : isGroceryStore ? "Shop groceries / \u062a\u0633\u0648\u0642 \u0627\u0644\u0645\u0646\u062a\u062c\u0627\u062a" : "Browse products"}
                 <Icon name="arrow" size={18} />
               </button>

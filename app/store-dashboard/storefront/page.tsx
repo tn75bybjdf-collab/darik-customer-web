@@ -1189,7 +1189,10 @@ type StorefrontPositionKey145 =
   | "display_name_ar"
   | "tagline"
   | "tagline_ar"
-  | "shop";
+  | "shop"
+  | "hero_logo"
+  | "hero_label"
+  | "primary_button";
 
 type StorefrontPositionDevice145 = "desktop" | "mobile";
 
@@ -1214,6 +1217,9 @@ const storefrontPositionKeys145: StorefrontPositionKey145[] = [
   "tagline",
   "tagline_ar",
   "shop",
+  "hero_logo",
+  "hero_label",
+  "primary_button",
 ];
 
 const storefrontPositionLabels145: Record<
@@ -1225,12 +1231,15 @@ const storefrontPositionLabels145: Record<
   tagline: "Store tagline",
   tagline_ar: "Arabic tagline",
   shop: "Shop tab",
+  hero_logo: "Store logo",
+  hero_label: "Official store badge",
+  primary_button: "Main browse button",
 };
 
 function clampStorefrontPosition145(value: unknown) {
   const numeric = Number(value);
   if (!Number.isFinite(numeric)) return 0;
-  return Math.max(-240, Math.min(240, Math.round(numeric)));
+  return Math.max(-1200, Math.min(1200, Math.round(numeric)));
 }
 
 function storefrontDefaultContentPositioning145(): StorefrontContentPositioning145 {
@@ -1252,6 +1261,18 @@ function storefrontDefaultContentPositioning145(): StorefrontContentPositioning1
       mobile: { x: 0, y: 0 },
     },
     shop: {
+      desktop: { x: 0, y: 0 },
+      mobile: { x: 0, y: 0 },
+    },
+    hero_logo: {
+      desktop: { x: 0, y: 0 },
+      mobile: { x: 0, y: 0 },
+    },
+    hero_label: {
+      desktop: { x: 0, y: 0 },
+      mobile: { x: 0, y: 0 },
+    },
+    primary_button: {
       desktop: { x: 0, y: 0 },
       mobile: { x: 0, y: 0 },
     },
@@ -2361,6 +2382,50 @@ export default function DarikDirectStorefrontSettingsPage() {
     let layoutLoaded150D = false;
     let applySavedNow150D = () => {};
     let saveSequence150D = 0;
+
+    // DARIK_CANONICAL_HERO_POSITION_BRIDGE_202
+    function canonicalPositionKey202(
+      target202: Element
+    ): StorefrontPositionKey145 | null {
+      const id202 =
+        target202.getAttribute("id") ?? "";
+
+      const classes202 = (
+        target202.getAttribute("class") ?? ""
+      ).toLowerCase();
+
+      if (
+        id202 === "darik-customer-facing-store-name-144"
+      ) {
+        return "display_name";
+      }
+
+      if (id202 === "darik-layout-hero-logo-202") {
+        return "hero_logo";
+      }
+
+      if (id202 === "darik-layout-hero-label-202") {
+        return "hero_label";
+      }
+
+      if (id202 === "darik-layout-primary-button-202") {
+        return "primary_button";
+      }
+
+      if (classes202.includes("arabicname")) {
+        return "display_name_ar";
+      }
+
+      if (classes202.includes("arabictagline")) {
+        return "tagline_ar";
+      }
+
+      if (classes202.includes("tagline")) {
+        return "tagline";
+      }
+
+      return null;
+    }
 
     async function saveLayout150D() {
       if (!storefront?.id) return;
@@ -5736,46 +5801,73 @@ export default function DarikDirectStorefrontSettingsPage() {
               }
             }
 
-            const priorPoint151 =
-              nextDevice150D[
-                locatorKey150D
-              ];
-
-            nextDevice150D[locatorKey150D] = {
-              x: x150D,
-              y: y150D,
-              ...(priorPoint151?.scale !==
-              undefined
-                ? {
-                    scale:
-                      clampScale151(
-                        priorPoint151.scale
-                      ),
-                  }
-                : {}),
-              ...(priorPoint151?.hidden !==
-              undefined
-                ? {
-                    hidden:
-                      priorPoint151.hidden,
-                  }
-                : {}),
-              label: label150D(
+            const canonicalKey202 =
+              canonicalPositionKey202(
                 completed150A.target
-              ),
-            };
+              );
 
-            savedLayout150D = {
-              ...savedLayout150D,
-              [currentDevice150D]: nextDevice150D,
-            };
+            if (canonicalKey202) {
+              // Remove any old freeform offset for this same target so the
+              // canonical position is the only source of movement.
+              delete nextDevice150D[locatorKey150D];
+
+              savedLayout150D = {
+                ...savedLayout150D,
+                [currentDevice150D]:
+                  nextDevice150D,
+              };
+
+              updatePreviewPosition145(
+                canonicalKey202,
+                currentDevice150D,
+                x150D,
+                y150D
+              );
+
+              void saveLayout150D();
+            } else {
+              const priorPoint151 =
+                nextDevice150D[
+                  locatorKey150D
+                ];
+
+              nextDevice150D[locatorKey150D] = {
+                x: x150D,
+                y: y150D,
+                ...(priorPoint151?.scale !==
+                undefined
+                  ? {
+                      scale:
+                        clampScale151(
+                          priorPoint151.scale
+                        ),
+                    }
+                  : {}),
+                ...(priorPoint151?.hidden !==
+                undefined
+                  ? {
+                      hidden:
+                        priorPoint151.hidden,
+                    }
+                  : {}),
+                label: label150D(
+                  completed150A.target
+                ),
+              };
+
+              savedLayout150D = {
+                ...savedLayout150D,
+                [currentDevice150D]:
+                  nextDevice150D,
+              };
+
+              void saveLayout150D();
+            }
 
             completed150A.target.setAttribute(
               "data-darik-persisted150d",
               "true"
             );
-
-            void saveLayout150D();
           }
         }
 
