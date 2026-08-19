@@ -1,5 +1,7 @@
 "use client";
 
+
+import DarikCustomerAccountHub175 from "../components/DarikCustomerAccountHub175";
 // DARIK_REAL_PRIVATE_PREVIEW_ALIAS_143
 
 
@@ -3576,16 +3578,7 @@ export default function DarikDirectStorefrontPage() {
   async function chooseDarikGuestCheckout121() {
     setDarikAuthMessage121("");
 
-    if (darikCustomerProfile121) {
-      const { error } = await supabase.auth.signOut();
-      if (error) {
-        setDarikAuthMessage121(error.message);
-        return;
-      }
-      setDarikCustomerUser121(null);
-      setDarikCustomerProfile121(null);
-    }
-
+    // DARIK_SHARED_PERSISTENT_CUSTOMER_ACCOUNT_HUB_175_V2: guest checkout does not destroy the remembered Darik login.
     setDarikCheckoutIdentity121("guest");
   }
 
@@ -5724,6 +5717,15 @@ export default function DarikDirectStorefrontPage() {
       data-category-count={String(visibleCategories.length)}
       data-direct-purchase={hasDirectPurchaseProducts ? "yes" : "no"}
     >
+      {/* DARIK_SHARED_PERSISTENT_CUSTOMER_ACCOUNT_HUB_175_V2 */}
+      {!isBuilderPositionPreview145 &&
+      slug !== "_darik-private-store-preview" ? (
+        <DarikCustomerAccountHub175
+          scope="store"
+          retailerId={storefront?.retailer_id ?? null}
+        />
+      ) : null}
+
       {locationGateOpen117 &&
       deliveryEnabled &&
       !pickupOnly ? (

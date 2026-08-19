@@ -1,0 +1,376 @@
+/* DARIK_SHARED_PERSISTENT_CUSTOMER_ACCOUNT_HUB_175_V2 */
+
+.darikAccountHub175 {
+  position: fixed;
+  top: max(14px, env(safe-area-inset-top));
+  right: 18px;
+  z-index: 2147482500;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: inherit;
+  color: #101828;
+}
+
+.darikHello175 {
+  min-width: 0;
+  min-height: 42px;
+  max-width: 190px;
+  display: flex;
+  align-items: baseline;
+  gap: 5px;
+  border: 1px solid rgba(15, 23, 42, 0.11);
+  border-radius: 999px;
+  padding: 9px 12px;
+  background: rgba(255, 255, 255, 0.96);
+  box-shadow: 0 10px 28px rgba(15, 23, 42, 0.11);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.darikHello175 span {
+  color: #667085;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.darikHello175 strong {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: #101828;
+  font-size: 13px;
+  font-weight: 950;
+  white-space: nowrap;
+}
+
+.darikAccountIcon175 {
+  width: 42px;
+  height: 42px;
+  display: grid;
+  place-items: center;
+  border: 1px solid #111827;
+  border-radius: 50%;
+  padding: 0;
+  background: #111827;
+  color: #ffd23f;
+  box-shadow: 0 10px 28px rgba(15, 23, 42, 0.16);
+  cursor: pointer;
+}
+
+.darikAccountPopover175 {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  width: min(370px, calc(100vw - 24px));
+  max-height: min(650px, calc(100dvh - 82px));
+  overflow: auto;
+  border: 1px solid #e4e7ec;
+  border-radius: 22px;
+  padding: 15px;
+  background: #ffffff;
+  color: #101828;
+  box-shadow: 0 24px 70px rgba(15, 23, 42, 0.22);
+}
+
+.darikAccountHeader175 {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 3px 3px 12px;
+  border-bottom: 1px solid #eaecf0;
+}
+
+.darikAccountHeader175 > div {
+  min-width: 0;
+  display: grid;
+  gap: 3px;
+}
+
+.darikAccountHeader175 small {
+  color: #8a6d00;
+  font-size: 9px;
+  font-weight: 950;
+  letter-spacing: 0.12em;
+}
+
+.darikAccountHeader175 strong {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 17px;
+  white-space: nowrap;
+}
+
+.darikAccountHeader175 > button {
+  width: 32px;
+  height: 32px;
+  border: 0;
+  border-radius: 50%;
+  padding: 0;
+  background: #f2f4f7;
+  color: #344054;
+  font-size: 21px;
+  cursor: pointer;
+}
+
+.darikAccountMenu175 {
+  display: grid;
+  gap: 8px;
+  padding-top: 12px;
+}
+
+.darikAccountMenu175 > button {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  border: 1px solid #eaecf0;
+  border-radius: 15px;
+  padding: 11px;
+  background: #ffffff;
+  color: #101828;
+  text-align: left;
+  cursor: pointer;
+}
+
+.darikAccountMenu175 > button:hover {
+  background: #f9fafb;
+}
+
+.darikAccountMenu175 > button:disabled {
+  cursor: wait;
+  opacity: 0.6;
+}
+
+.darikAccountMenu175 > button > span {
+  flex: 0 0 auto;
+  width: 32px;
+  height: 32px;
+  display: grid;
+  place-items: center;
+  border-radius: 10px;
+  background: #fff4b8;
+  color: #5f4b00;
+  font-weight: 950;
+}
+
+.darikAccountMenu175 > button > div {
+  min-width: 0;
+  display: grid;
+  gap: 2px;
+}
+
+.darikAccountMenu175 strong {
+  font-size: 13px;
+  font-weight: 950;
+}
+
+.darikAccountMenu175 small {
+  color: #667085;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.darikSignOut175 {
+  border-color: #fecaca !important;
+  background: #fff7f7 !important;
+}
+
+.darikSignOut175 > span {
+  background: #fee2e2 !important;
+  color: #991b1b !important;
+}
+
+.darikAccountView175 {
+  display: grid;
+  gap: 12px;
+  padding-top: 12px;
+}
+
+.darikBack175 {
+  width: fit-content;
+  border: 0;
+  padding: 0;
+  background: transparent;
+  color: #475467;
+  font: inherit;
+  font-size: 11px;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.darikViewHeading175 {
+  display: grid;
+  gap: 4px;
+}
+
+.darikViewHeading175 h4 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 950;
+}
+
+.darikViewHeading175 p,
+.darikMuted175 {
+  margin: 0;
+  color: #667085;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1.45;
+}
+
+.darikOrderList175 {
+  display: grid;
+  gap: 8px;
+}
+
+.darikOrderList175 article {
+  display: grid;
+  gap: 4px;
+  border: 1px solid #eaecf0;
+  border-radius: 13px;
+  padding: 11px 12px;
+  background: #f9fafb;
+}
+
+.darikOrderList175 article > div {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.darikOrderList175 span {
+  color: #667085;
+  font-size: 10px;
+  font-weight: 850;
+}
+
+.darikOrderList175 strong {
+  color: #101828;
+  font-size: 12px;
+  font-weight: 950;
+}
+
+.darikOrderList175 small {
+  color: #475467;
+  font-size: 10px;
+  font-weight: 750;
+}
+
+.darikStoreName175 {
+  color: #8a6d00 !important;
+  font-weight: 900 !important;
+}
+
+.darikDetails175 {
+  display: grid;
+  gap: 8px;
+}
+
+.darikDetails175 label {
+  display: grid;
+  gap: 3px;
+  border: 1px solid #eaecf0;
+  border-radius: 13px;
+  padding: 11px 12px;
+  background: #f9fafb;
+}
+
+.darikDetails175 span,
+.darikPasswordField175 span {
+  color: #667085;
+  font-size: 10px;
+  font-weight: 850;
+}
+
+.darikDetails175 strong {
+  overflow-wrap: anywhere;
+  font-size: 12px;
+}
+
+.darikPasswordField175 {
+  display: grid;
+  gap: 6px;
+}
+
+.darikPasswordField175 input {
+  width: 100%;
+  min-height: 43px;
+  box-sizing: border-box;
+  border: 1px solid #d0d5dd;
+  border-radius: 12px;
+  padding: 9px 11px;
+  background: #ffffff;
+  color: #101828;
+  font: inherit;
+  outline: none;
+}
+
+.darikPasswordField175 input:focus {
+  border-color: #111827;
+  box-shadow: 0 0 0 3px rgba(255, 210, 63, 0.28);
+}
+
+.darikPasswordSave175 {
+  min-height: 44px;
+  border: 1px solid #111827;
+  border-radius: 13px;
+  background: #111827;
+  color: #ffd23f;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 950;
+  cursor: pointer;
+}
+
+.darikPasswordSave175:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.darikMessage175 {
+  margin: 10px 0 0;
+  border: 1px solid #f1d56d;
+  border-radius: 11px;
+  padding: 9px 10px;
+  background: #fff9df;
+  color: #665200;
+  font-size: 10px;
+  font-weight: 800;
+  line-height: 1.45;
+}
+
+@media (max-width: 700px) {
+  .darikAccountHub175 {
+    top: max(10px, env(safe-area-inset-top));
+    right: 10px;
+    gap: 6px;
+  }
+
+  .darikHello175 {
+    max-width: 138px;
+    min-height: 38px;
+    padding: 8px 10px;
+  }
+
+  .darikHello175 span {
+    display: none;
+  }
+
+  .darikHello175 strong {
+    font-size: 12px;
+  }
+
+  .darikAccountIcon175 {
+    width: 38px;
+    height: 38px;
+  }
+
+  .darikAccountPopover175 {
+    width: min(350px, calc(100vw - 20px));
+    max-height: calc(100dvh - 70px);
+    border-radius: 20px;
+  }
+}

@@ -1,5 +1,7 @@
 "use client";
 
+
+import DarikCustomerAccountHub175 from "./components/DarikCustomerAccountHub175";
 // DARIK_FRONTEND_132_HOME_FREE_RETAILER_ACCOUNT_CTA
 
 // DARIK_ROOT_LINKS_027
@@ -795,6 +797,9 @@ export default function DarikDiscoveryHome() {
 
   return (
     <main className={styles.page} dir={language === "ar" ? "rtl" : "ltr"}>
+      {/* DARIK_SHARED_PERSISTENT_CUSTOMER_ACCOUNT_HUB_175_V2 */}
+      <DarikCustomerAccountHub175 scope="all" />
+
       {/* DARIK_REAL_LOGO_POPUP_AND_HOME_174 */}
       <div
         data-darik-main-logo-174
