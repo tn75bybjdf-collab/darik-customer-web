@@ -1381,6 +1381,12 @@ export default function DarikDirectStorefrontSettingsPage() {
 
   const [themePickerOpen, setThemePickerOpen] = useState(false);
   const liveBuilderPreviewRef = useRef<HTMLIFrameElement | null>(null);
+
+  // DARIK_DIRECT_OBJECT_DRAG_SAVE_TO_LIVE_198
+  const forceFreeformSave198 = useRef<null | (() => Promise<void>)>(null);
+  const [saveToLiveState198, setSaveToLiveState198] = useState<
+    "idle" | "saving" | "saved" | "error"
+  >("idle");
   const liveStoreEditorRefreshTimer196 = useRef<number | null>(null);
 
   function usesActualLiveStoreEditor196() {
@@ -1421,6 +1427,86 @@ export default function DarikDirectStorefrontSettingsPage() {
       }
     };
   }, []);
+
+  async function saveEverythingToLive198() {
+    if (!storefront?.id || !usesActualLiveStoreEditor196()) {
+      return;
+    }
+
+    setSaveToLiveState198("saving");
+    setError("");
+    setMessage("");
+
+    try {
+      // Save the ordinary storefront/profile draft first.
+      await saveStorefront(undefined, "manual");
+
+      // Force-save the two visual state objects that normally autosave.
+      const [positionResult198, typographyResult198] = await Promise.all([
+        supabase.rpc(
+          "darik_direct_set_storefront_visual_v194",
+          {
+            p_storefront_id: storefront.id,
+            p_component: "content_positioning",
+            p_payload: storefrontContentPositioning145,
+          }
+        ),
+        supabase.rpc(
+          "darik_direct_set_storefront_visual_v194",
+          {
+            p_storefront_id: storefront.id,
+            p_component: "typography",
+            p_payload: storefrontTypographyDraft,
+          }
+        ),
+      ]);
+
+      if (positionResult198.error) {
+        throw new Error(positionResult198.error.message);
+      }
+
+      if (typographyResult198.error) {
+        throw new Error(typographyResult198.error.message);
+      }
+
+      // Freeform drag/resize lives inside the iframe editor effect, so expose
+      // one explicit force-save hook from that effect.
+      if (forceFreeformSave198.current) {
+        await forceFreeformSave198.current();
+      }
+
+      positioningDirtyRef145.current = false;
+      typographyDirtyRef.current = false;
+      setTypographyDirty(false);
+      setPreviewPositionSaveState145("saved");
+      setTypographySaveState("saved");
+      setSaveToLiveState198("saved");
+      setMessage(
+        "Saved to live store. / تم حفظ التغييرات على المتجر المباشر."
+      );
+
+      // Reload the ACTUAL /slug renderer after persistence completes.
+      refreshActualLiveStoreEditor196(80);
+
+      window.setTimeout(() => {
+        setSaveToLiveState198((current198) =>
+          current198 === "saved" ? "idle" : current198
+        );
+      }, 1800);
+    } catch (error198) {
+      const message198 =
+        error198 instanceof Error
+          ? error198.message
+          : "Could not save changes to the live store.";
+
+      console.error("Darik Save to Live failed:", error198);
+      setSaveToLiveState198("error");
+      setError(message198);
+      window.alert(
+        `Could not save to live store: ${message198}`
+      );
+    }
+  }
 
   const [storefrontContentPositioning145, setStorefrontContentPositioning145] =
     useState<StorefrontContentPositioning145>(() =>
@@ -2310,6 +2396,28 @@ export default function DarikDirectStorefrontSettingsPage() {
         "Darik could not save that position. Please move the item again."
       );
     }
+
+    forceFreeformSave198.current = async () => {
+      if (!storefront?.id) {
+        throw new Error("Storefront is not ready.");
+      }
+
+      const forcedSnapshot198 =
+        normalizeLayout150D(savedLayout150D);
+
+      const forcedResult198 = await supabase.rpc(
+        "darik_direct_set_storefront_visual_v194",
+        {
+          p_storefront_id: storefront.id,
+          p_component: "freeform_layout",
+          p_payload: forcedSnapshot198,
+        }
+      );
+
+      if (forcedResult198.error) {
+        throw new Error(forcedResult198.error.message);
+      }
+    };
 
     void (async () => {
       if (!storefront?.id) {
@@ -3293,6 +3401,23 @@ export default function DarikDirectStorefrontSettingsPage() {
       // DARIK_LIVE_EDITOR_LOCATION_INTERACTION_ZONE_197
       // Real customer controls inside marked interaction zones must remain
       // clickable/typable even while the live storefront editor is active.
+      // DARIK_DIRECT_OBJECT_DRAG_SAVE_TO_LIVE_198
+      function isRealCustomerControl198(
+        eventTarget198: EventTarget | null
+      ) {
+        const element198 =
+          eventTarget198 &&
+          typeof (eventTarget198 as Node).nodeType === "number"
+            ? (eventTarget198 as Element)
+            : null;
+
+        return Boolean(
+          element198?.closest(
+            '[data-darik-live-editor-interaction197="true"], [data-darik-live-editor-interaction198="true"]'
+          )
+        );
+      }
+
       function isEditorChrome152(
         eventTarget152: EventTarget | null
       ) {
@@ -3304,7 +3429,7 @@ export default function DarikDirectStorefrontSettingsPage() {
 
         return Boolean(
           element152?.closest(
-            '[data-darik-selection-toolbar152="true"], [data-darik-text-editor152="true"], [data-darik-reset-layout150c="true"], [data-darik-live-editor-interaction197="true"]'
+            '[data-darik-selection-toolbar152="true"], [data-darik-text-editor152="true"], [data-darik-reset-layout150c="true"], [data-darik-live-editor-interaction197="true"], [data-darik-live-editor-interaction198="true"]'
           )
         );
       }
@@ -4713,6 +4838,15 @@ export default function DarikDirectStorefrontSettingsPage() {
         }
 
         if (
+          isRealCustomerControl198(
+            event152.target
+          )
+        ) {
+          clearSelection152();
+          return;
+        }
+
+        if (
           isEditorChrome152(
             event152.target
           )
@@ -5080,6 +5214,26 @@ export default function DarikDirectStorefrontSettingsPage() {
         const target151 =
           selectedTarget152;
 
+        const firstElement198 =
+          firstTouch151.target as Element | null;
+        const secondElement198 =
+          secondTouch151.target as Element | null;
+
+        if (
+          !firstElement198 ||
+          !secondElement198 ||
+          !(
+            firstElement198 === target151 ||
+            target151.contains(firstElement198)
+          ) ||
+          !(
+            secondElement198 === target151 ||
+            target151.contains(secondElement198)
+          )
+        ) {
+          return;
+        }
+
         clearHold150A();
 
         if (dragging150A) {
@@ -5332,6 +5486,26 @@ export default function DarikDirectStorefrontSettingsPage() {
         const target150A =
           selectedTarget152;
 
+        const pointerElement198 =
+          event150A.target &&
+          typeof (event150A.target as Node).nodeType === "number"
+            ? (event150A.target as Element)
+            : null;
+
+        // DARIK_DIRECT_OBJECT_DRAG_SAVE_TO_LIVE_198
+        // DIRECT MANIPULATION ONLY:
+        // A selected element moves only when the pointer starts on that
+        // element itself. Clicking anywhere else behaves like the real store.
+        if (
+          !pointerElement198 ||
+          !(
+            pointerElement198 === target150A ||
+            target150A.contains(pointerElement198)
+          )
+        ) {
+          return;
+        }
+
         const computed150A = parseTranslate150A(
           window150A.getComputedStyle(target150A).translate
         );
@@ -5361,8 +5535,8 @@ export default function DarikDirectStorefrontSettingsPage() {
           originalTouchAction: style150A.touchAction,
         };
 
-        // Selected-object mode: one finger can move the selected
-        // element from anywhere in the preview without a hold delay.
+        // DARIK_DIRECT_OBJECT_DRAG_SAVE_TO_LIVE_198
+        // Selected-object mode: drag the selected object itself.
       }
 
       function moveCandidate150A(event150A: PointerEvent) {
@@ -5926,6 +6100,7 @@ export default function DarikDirectStorefrontSettingsPage() {
     );
 
     return () => {
+      forceFreeformSave198.current = null;
       window.clearInterval(livePreviewRetry150B);
 
       if (boundIframe150B) {
@@ -11018,6 +11193,26 @@ await saveStorefront(undefined, "manual");
                           تخصيص المتجر / Customize Store
                         </button>
 <button
+                        type="button"
+                        onClick={() => {
+                          void saveEverythingToLive198();
+                        }}
+                        disabled={
+                          saveToLiveState198 === "saving" ||
+                          !usesActualLiveStoreEditor196()
+                        }
+                        title="Force-save editor changes and reload the actual live storefront"
+                      >
+                        {saveToLiveState198 === "saving"
+                          ? "Saving to live... / جار الحفظ..."
+                          : saveToLiveState198 === "saved"
+                            ? "Saved ✓ / تم الحفظ ✓"
+                            : saveToLiveState198 === "error"
+                              ? "Save failed — retry / فشل الحفظ"
+                              : "Save to live / حفظ على المتجر"}
+                      </button>
+
+                      <button
                         type="button"
                         className={designStyles.liveBuilderClosePreview107}
                         onClick={() => {

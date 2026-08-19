@@ -6273,12 +6273,14 @@ export default function DarikDirectStorefrontPage() {
       ) : null}
 
       {/* DARIK_LIVE_EDITOR_LOCATION_INTERACTION_ZONE_197 */}
+      {/* DARIK_DIRECT_OBJECT_DRAG_SAVE_TO_LIVE_198 */}
       {locationGateOpen117 &&
       deliveryEnabled &&
       !pickupOnly ? (
         <div
           className={styles.customerLocationGate117}
           data-darik-live-editor-interaction197="true"
+          data-darik-live-editor-interaction198="true"
           role="dialog"
           aria-modal="true"
           aria-labelledby="darik-location-title-117"
