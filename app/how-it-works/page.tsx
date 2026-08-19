@@ -1,4 +1,6 @@
 "use client";
+
+// DARIK_PAYMENT_FIRST_YEARLY_PLANS_CATALOG_GATE_190
 // DARIK_UTF8_CLEAN_REBUILD_029_V4
 
 // DARIK_HOW_IT_WORKS_026
@@ -20,7 +22,7 @@ const content = {
     titleB: "Every store that can reach it.",
     lead: "Darik connects customers to local retailers based on the retailer’s real delivery range—not a random city list or a guessed neighborhood.",
     findStores: "Find stores near me",
-    startStore: "Create a retailer store",
+    startStore: "Sign up today",
     liveCheck: "Live delivery-zone check",
     eligibleOnly: "Eligible stores only",
     flowLocation: "Customer location",
@@ -59,12 +61,12 @@ const content = {
     retailerTitle: "Build once. Get discovered automatically whenever a nearby customer qualifies.",
     retailerBody: "Retailers control their storefront, catalog, delivery settings, and order availability from the existing Darik dashboard.",
     retailerSteps: [
-      ["01", "Create the store", "Sign up and build the storefront privately before activation."],
-      ["02", "Configure delivery", "Set the store location, public address, radius, fee, minimum, and timing."],
-      ["03", "Add the catalog", "Create categories and products from the retailer dashboard."],
-      ["04", "Go public", "After Darik activation, qualifying customers can discover and enter the store."],
+      ["01", "Sign up", "Create the retailer login and choose the retail field."],
+      ["02", "Choose & pay", "Choose a yearly product limit, send CliQ, and upload the receipt."],
+      ["03", "Build the storefront", "While payment is reviewed, set branding, location, delivery, payment, and storefront design."],
+      ["04", "Approval unlocks commerce", "After Darik approves CliQ, products, categories, orders, and the public store unlock."],
     ],
-    retailerCta: "Start building free",
+    retailerCta: "Sign up today",
     ctaLabel: "READY TO USE DARIK?",
     ctaTitle: "Choose your side of the marketplace.",
     ctaBody: "Customers discover stores by delivery range. Retailers build their own storefront and become visible to nearby shoppers.",
@@ -86,7 +88,7 @@ const content = {
     titleB: "كل متجر يقدر يوصل له.",
     lead: "يربط داريك الزبون بالمتاجر المحلية حسب نطاق التوصيل الحقيقي لكل متجر، وليس حسب قائمة عشوائية أو تخمين للمنطقة.",
     findStores: "اعثر على متاجر قريبة",
-    startStore: "أنشئ متجر تاجر",
+    startStore: "سجّل اليوم",
     liveCheck: "فحص مباشر لنطاق التوصيل",
     eligibleOnly: "متاجر مؤهلة فقط",
     flowLocation: "موقع الزبون",
@@ -125,12 +127,12 @@ const content = {
     retailerTitle: "ابنِ متجرك مرة واحدة واظهر تلقائياً لكل زبون قريب مؤهل.",
     retailerBody: "يتحكم التاجر بواجهته وكتالوجه وإعدادات التوصيل وحالة استقبال الطلبات من لوحة داريك الحالية.",
     retailerSteps: [
-      ["01", "أنشئ المتجر", "سجل وابنِ الواجهة بشكل خاص قبل التفعيل."],
-      ["02", "اضبط التوصيل", "حدد موقع المتجر والعنوان العام والنطاق والرسوم والحد الأدنى والوقت."],
-      ["03", "أضف الكتالوج", "أنشئ الأقسام والمنتجات من لوحة التاجر."],
-      ["04", "انشر المتجر", "بعد تفعيل داريك يظهر المتجر للزبائن الذين يشملهم نطاق التوصيل."],
+      ["01", "سجّل", "أنشئ حساب التاجر واختر مجال المتجر."],
+      ["02", "اختر وادفع", "اختر الحد السنوي للمنتجات وأرسل CliQ وارفع الإيصال."],
+      ["03", "ابنِ الواجهة", "أثناء مراجعة الدفع اضبط الهوية والموقع والتوصيل والدفع وتصميم الواجهة."],
+      ["04", "الموافقة تفتح التجارة", "بعد موافقة داريك على CliQ تفتح المنتجات والفئات والطلبات وينشر المتجر."],
     ],
-    retailerCta: "ابدأ البناء مجاناً",
+    retailerCta: "سجّل اليوم",
     ctaLabel: "جاهز تستخدم داريك؟",
     ctaTitle: "اختر جانبك من السوق.",
     ctaBody: "الزبائن يكتشفون المتاجر حسب نطاق التوصيل، والتجار يبنون واجهاتهم ويظهرون للمتسوقين القريبين.",

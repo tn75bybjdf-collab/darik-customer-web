@@ -1,5 +1,7 @@
 "use client";
 
+// DARIK_PAYMENT_FIRST_YEARLY_PLANS_CATALOG_GATE_190
+
 // DARIK_REAL_PRIVATE_PREVIEW_ALIAS_143
 
 // DARIK_INTERNAL_SETUP_SLUG_PRIVACY_142_V3
@@ -5892,6 +5894,12 @@ export default function DarikDirectStorefrontSettingsPage() {
     [context, selectedRetailerId]
   );
 
+  const catalogUnlocked190 = Boolean(
+    selectedStore?.activation_status === "active" &&
+      (!selectedStore.activation_expires_at ||
+        new Date(selectedStore.activation_expires_at) > new Date())
+  );
+
 
   useEffect(() => {
     const retailerId = selectedStore?.retailer_id;
@@ -6037,6 +6045,9 @@ export default function DarikDirectStorefrontSettingsPage() {
   const [specialDeliverySaveState185, setSpecialDeliverySaveState185] =
     useState<"idle" | "saving" | "saved" | "error">("idle");
   const specialDeliverySaveTimer185 = useRef<number | null>(null);
+  const [deliveryTruthSaveState191, setDeliveryTruthSaveState191] =
+    useState<"idle" | "saving" | "saved" | "error">("idle");
+  const deliveryTruthSaveTimer191 = useRef<number | null>(null);
   const [deliverySetupStage163, setDeliverySetupStage163] =
     useState<DarikDeliverySetupStage163>("location");
 
@@ -8270,6 +8281,105 @@ export default function DarikDirectStorefrontSettingsPage() {
     0
   );
 
+  // DARIK_DELIVERY_TRUTH_SPECIAL_ZONE_COUNTDOWN_191
+  async function saveDeliveryTruth191(showError = false) {
+    if (!storefront?.id) return true;
+
+    const days191 = Number(setupForm.estimatedDeliveryDays);
+    const cutoff191 = String(setupForm.deliveryCutoffTime ?? "").trim();
+
+    if (
+      !Number.isInteger(days191) ||
+      days191 < 0 ||
+      days191 > 365 ||
+      !/^\d{2}:\d{2}$/.test(cutoff191)
+    ) {
+      setDeliveryTruthSaveState191("error");
+      if (showError) {
+        setStorefrontSetupNotice109(
+          "Delivery promise is invalid. Choose valid days and a cutoff time. / إعداد موعد التوصيل غير صالح."
+        );
+      }
+      return false;
+    }
+
+    setDeliveryTruthSaveState191("saving");
+    const truthResult191 = await supabase.rpc(
+      "darik_direct_save_delivery_truth_v191",
+      {
+        p_storefront_id: storefront.id,
+        p_estimated_delivery_days: days191,
+        p_delivery_cutoff_time: cutoff191,
+        p_farthest_normal_km: Number(farthestDeliveryZoneKm185.toFixed(2)),
+      }
+    );
+
+    if (truthResult191.error) {
+      setDeliveryTruthSaveState191("error");
+      if (showError) {
+        setStorefrontSetupNotice109(
+          truthResult191.error.message ||
+            "Could not save the live delivery promise. / تعذر حفظ موعد التوصيل المباشر."
+        );
+      }
+      return false;
+    }
+
+    setStorefront((current) =>
+      current
+        ? {
+            ...current,
+            estimated_delivery_days: days191,
+            delivery_cutoff_time: cutoff191,
+            delivery_radius_km:
+              farthestDeliveryZoneKm185 > 0
+                ? farthestDeliveryZoneKm185
+                : current.delivery_radius_km,
+          }
+        : current
+    );
+    setDeliveryTruthSaveState191("saved");
+    window.setTimeout(() => {
+      setDeliveryTruthSaveState191((current) =>
+        current === "saved" ? "idle" : current
+      );
+    }, 1600);
+    return true;
+  }
+
+  useEffect(() => {
+    if (!storefront?.id || setupForm.fulfillmentMode !== "delivery") return;
+
+    const days191 = Number(setupForm.estimatedDeliveryDays);
+    const cutoff191 = String(setupForm.deliveryCutoffTime ?? "").trim();
+    if (
+      !Number.isInteger(days191) ||
+      days191 < 0 ||
+      days191 > 365 ||
+      !/^\d{2}:\d{2}$/.test(cutoff191)
+    ) return;
+
+    if (deliveryTruthSaveTimer191.current) {
+      window.clearTimeout(deliveryTruthSaveTimer191.current);
+    }
+
+    deliveryTruthSaveTimer191.current = window.setTimeout(() => {
+      void saveDeliveryTruth191(true);
+    }, 300);
+
+    return () => {
+      if (deliveryTruthSaveTimer191.current) {
+        window.clearTimeout(deliveryTruthSaveTimer191.current);
+      }
+    };
+  }, [
+    storefront?.id,
+    setupForm.fulfillmentMode,
+    setupForm.estimatedDeliveryDays,
+    setupForm.deliveryCutoffTime,
+    farthestDeliveryZoneKm185,
+  ]);
+
   function updateSpecialDeliveryZone185(
     field: "enabled" | "maxKm" | "minimumQualifyingJod",
     value: boolean | string
@@ -8344,10 +8454,16 @@ export default function DarikDirectStorefrontSettingsPage() {
       }
     }
 
+    const truthSaved191 = await saveDeliveryTruth191(showError);
+    if (!truthSaved191) {
+      setSpecialDeliverySaveState185("error");
+      return false;
+    }
+
     setSpecialDeliverySaveState185("saving");
 
     const result185 = await supabase.rpc(
-      "darik_direct_set_special_delivery_zone_v185",
+      "darik_direct_set_special_delivery_zone_v191",
       {
         p_storefront_id: storefront.id,
         p_enabled: enabled185,
@@ -8363,6 +8479,7 @@ export default function DarikDirectStorefrontSettingsPage() {
           specialDeliveryZone185.excludedCategoryIds,
         p_origin_latitude: deliveryLocation112?.latitude ?? null,
         p_origin_longitude: deliveryLocation112?.longitude ?? null,
+        p_farthest_normal_km: Number(farthestDeliveryZoneKm185.toFixed(2)),
       }
     );
 
@@ -8398,7 +8515,7 @@ export default function DarikDirectStorefrontSettingsPage() {
     }
 
     specialDeliverySaveTimer185.current = window.setTimeout(() => {
-      void saveSpecialDeliveryZone185(false);
+      void saveSpecialDeliveryZone185(true);
     }, 750);
 
     return () => {
@@ -8515,6 +8632,12 @@ export default function DarikDirectStorefrontSettingsPage() {
           result.error.message || "Could not save delivery zones."
         );
       }
+      return false;
+    }
+
+    const truthSynced191 = await saveDeliveryTruth191(showError);
+    if (!truthSynced191) {
+      setDeliveryZonesSaveState109("error");
       return false;
     }
 
@@ -8889,7 +9012,7 @@ await saveStorefront(undefined, "manual");
         throw completeResult.error;
       }
 
-      if (managedUsernameOnboarding136) {
+      if (managedUsernameOnboarding136 && catalogUnlocked190) {
         try {
           window.sessionStorage.setItem(
             gettingStartedAfterPreviewKey157,
@@ -10308,10 +10431,16 @@ await saveStorefront(undefined, "manual");
           <a className={styles.activeNav} href="/store-dashboard/storefront">
             Storefront
           </a>
-          <a href="/store-dashboard/orders">Orders</a>
-          <a href="/store-dashboard/products">Products</a>
-          <a href="/store-dashboard/categories">Categories</a>
-          <a href="/store-dashboard/activation">Go live</a>
+          <a href={catalogUnlocked190 ? "/store-dashboard/orders" : "/store-dashboard/activation"}>
+            {catalogUnlocked190 ? "Orders" : "Orders 🔒"}
+          </a>
+          <a href={catalogUnlocked190 ? "/store-dashboard/products" : "/store-dashboard/activation"}>
+            {catalogUnlocked190 ? "Products" : "Products 🔒"}
+          </a>
+          <a href={catalogUnlocked190 ? "/store-dashboard/categories" : "/store-dashboard/activation"}>
+            {catalogUnlocked190 ? "Categories" : "Categories 🔒"}
+          </a>
+          <a href="/store-dashboard/activation">Plan & payment</a>
         </nav>
 
         <div className={styles.sidebarFooter}>
@@ -10344,6 +10473,17 @@ await saveStorefront(undefined, "manual");
         {error ? <p className={styles.errorBanner}>{error}</p> : null}
         {message ? <p className={styles.successBanner}>{message}</p> : null}
 
+        {selectedStore && !catalogUnlocked190 ? (
+          <section className={styles.panel}>
+            <strong>Storefront setup only / إعداد الواجهة فقط</strong>
+            <p>
+              You can complete branding, theme, location, delivery and storefront settings while CliQ is reviewed.
+              Products, Categories and Orders unlock only after Darik approves the yearly payment. / يمكنك إكمال الهوية
+              والتصميم والموقع والتوصيل وإعدادات الواجهة أثناء مراجعة CliQ، وتفتح المنتجات والفئات والطلبات بعد الموافقة.
+            </p>
+          </section>
+        ) : null}
+
         {!selectedStore ? (
           <section className={styles.emptyState}>
             <span>No retailer membership found / لم يتم العثور على عضوية متجر</span>
@@ -10373,7 +10513,11 @@ await saveStorefront(undefined, "manual");
                       <>
                       </>
                     ) : (
-                      <a href="/store-dashboard/activation">Pay by CliQ to go live / ادفع عبر كليك لتفعيل المتجر</a>
+                      <a href="/store-dashboard/activation">
+                        {storefront.activation_status === "payment_review"
+                          ? "CliQ under review / دفعة CliQ قيد المراجعة"
+                          : "Choose yearly plan & pay / اختر الخطة السنوية وادفع"}
+                      </a>
                     )}
                   </div>
                 ) : null}
@@ -12091,6 +12235,15 @@ await saveStorefront(undefined, "manual");
                             cutoff.
                           </small>
                         </label>
+                        <small className={designStyles.deliveryTruthStatus191}>
+                          {deliveryTruthSaveState191 === "saving"
+                            ? "Saving live delivery promise... / جارٍ حفظ موعد التوصيل..."
+                            : deliveryTruthSaveState191 === "saved"
+                              ? "Live delivery promise saved / تم حفظ موعد التوصيل المباشر"
+                              : deliveryTruthSaveState191 === "error"
+                                ? "LIVE DELIVERY PROMISE NOT SAVED / لم يتم حفظ موعد التوصيل"
+                                : "Delivery promise saves independently / حفظ مستقل لموعد التوصيل"}
+                        </small>
                       </section>
 
                       <div

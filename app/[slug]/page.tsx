@@ -1783,6 +1783,22 @@ function darikDeliveryPromise163(
   rawCutoff163: unknown,
   nowMs163: number
 ) {
+  // DARIK_DELIVERY_TRUTH_SPECIAL_ZONE_COUNTDOWN_191
+  const hasExplicitDays191 =
+    rawDays163 !== null &&
+    rawDays163 !== undefined &&
+    String(rawDays163).trim() !== "";
+
+  if (!hasExplicitDays191) {
+    return {
+      baseDays: null,
+      effectiveDays: null,
+      afterCutoff: false,
+      customerLabel: "Checking delivery time…",
+      shortLabel: "…",
+    };
+  }
+
   const numericDays163 = Number(rawDays163);
   const baseDays163 =
     Number.isInteger(numericDays163) && numericDays163 >= 0
@@ -2957,6 +2973,16 @@ export default function DarikDirectStorefrontPage() {
       excludedCategoryIds: [],
     });
 
+  const [deliveryTruth191, setDeliveryTruth191] = useState<{
+    loaded: boolean;
+    estimatedDeliveryDays: number | null;
+    deliveryCutoffTime: string | null;
+  }>({
+    loaded: false,
+    estimatedDeliveryDays: null,
+    deliveryCutoffTime: null,
+  });
+
   useEffect(() => {
     if (!slug) {
       setSpecialDeliveryZone185({
@@ -2965,34 +2991,87 @@ export default function DarikDirectStorefrontPage() {
         minimumQualifyingJod: 0,
         excludedCategoryIds: [],
       });
+      setDeliveryTruth191({
+        loaded: false,
+        estimatedDeliveryDays: null,
+        deliveryCutoffTime: null,
+      });
       return;
     }
 
-    let cancelled185 = false;
+    if (darikIsBuilderPreview120() || slug === "_darik-private-store-preview") {
+      setDeliveryTruth191({
+        loaded: false,
+        estimatedDeliveryDays: null,
+        deliveryCutoffTime: null,
+      });
+      return;
+    }
+
+    let cancelled191 = false;
+    setDeliveryTruth191({
+      loaded: false,
+      estimatedDeliveryDays: null,
+      deliveryCutoffTime: null,
+    });
 
     void (async () => {
-      const result185 = await supabase.rpc(
-        "darik_direct_public_special_delivery_zone_v185",
-        { p_slug: slug }
-      );
+      const [specialResult191, truthResult191] = await Promise.all([
+        supabase.rpc("darik_direct_public_special_delivery_zone_v185", {
+          p_slug: slug,
+        }),
+        supabase.rpc("darik_direct_public_delivery_truth_v191", {
+          p_slug: slug,
+        }),
+      ]);
 
-      if (cancelled185) return;
+      if (cancelled191) return;
 
-      if (result185.error) {
+      if (specialResult191.error) {
         console.warn(
           "Darik Special Zone could not load:",
-          result185.error.message
+          specialResult191.error.message
         );
-        return;
+      } else {
+        setSpecialDeliveryZone185(
+          normalizeDarikSpecialDeliveryZone185(specialResult191.data)
+        );
       }
 
-      setSpecialDeliveryZone185(
-        normalizeDarikSpecialDeliveryZone185(result185.data)
-      );
+      if (truthResult191.error) {
+        console.error(
+          "Darik live delivery truth could not load:",
+          truthResult191.error.message
+        );
+        setDeliveryTruth191({
+          loaded: true,
+          estimatedDeliveryDays: null,
+          deliveryCutoffTime: null,
+        });
+      } else {
+        const truth191 =
+          truthResult191.data && typeof truthResult191.data === "object"
+            ? (truthResult191.data as Record<string, unknown>)
+            : {};
+        const rawDays191 = truth191.estimated_delivery_days;
+        const parsedDays191 = Number(rawDays191);
+        const cutoff191 = String(truth191.delivery_cutoff_time ?? "").slice(0, 5);
+
+        setDeliveryTruth191({
+          loaded: true,
+          estimatedDeliveryDays:
+            Number.isInteger(parsedDays191) && parsedDays191 >= 0
+              ? parsedDays191
+              : null,
+          deliveryCutoffTime: /^\d{2}:\d{2}$/.test(cutoff191)
+            ? cutoff191
+            : null,
+        });
+      }
     })();
 
     return () => {
-      cancelled185 = true;
+      cancelled191 = true;
     };
   }, [slug]);
 
@@ -4798,6 +4877,19 @@ export default function DarikDirectStorefrontPage() {
   );
 
   // DARIK_SPECIAL_FREE_DELIVERY_ZONE_185
+  const usePublicDeliveryTruth191 =
+    !darikIsBuilderPreview120() && slug !== "_darik-private-store-preview";
+  const deliveryPromiseDays191 = usePublicDeliveryTruth191
+    ? deliveryTruth191.loaded
+      ? deliveryTruth191.estimatedDeliveryDays
+      : null
+    : storefront?.estimated_delivery_days;
+  const deliveryPromiseCutoff191 = usePublicDeliveryTruth191
+    ? deliveryTruth191.loaded
+      ? deliveryTruth191.deliveryCutoffTime
+      : null
+    : storefront?.delivery_cutoff_time;
+
   const specialExcludedCategories185 = new Set(
     specialDeliveryZone185.excludedCategoryIds
   );
@@ -4806,7 +4898,9 @@ export default function DarikDirectStorefrontPage() {
   );
   const specialQualifyingSubtotal185 = cart.reduce((total185, line185) => {
     const product185 = specialProductById185.get(line185.productId);
-    const categoryId185 = String(product185?.category_id ?? "").trim();
+    const categoryId185 = String(
+      product185?.direct_store_category_id ?? ""
+    ).trim();
     if (categoryId185 && specialExcludedCategories185.has(categoryId185)) {
       return total185;
     }
@@ -4832,6 +4926,32 @@ export default function DarikDirectStorefrontPage() {
     specialDeliveryZone185.minimumQualifyingJod -
       specialQualifyingSubtotal185
   );
+
+  const specialOfferConfigured191 = Boolean(
+    deliveryEnabled &&
+      specialDeliveryZone185.enabled &&
+      specialDeliveryZone185.maxKm > 0 &&
+      specialDeliveryZone185.minimumQualifyingJod > 0
+  );
+  const specialLocationKnown191 = Boolean(
+    deliveryMatch117 && Number.isFinite(specialDistanceKm185)
+  );
+  const specialCountdownEligible191 = Boolean(
+    specialOfferConfigured191 &&
+      (!specialLocationKnown191 || specialOfferAtLocation185)
+  );
+  const specialThresholdLabel191 = money(
+    specialDeliveryZone185.minimumQualifyingJod
+  );
+  const specialRadiusLabel191 =
+    specialDeliveryZone185.maxKm % 1 === 0
+      ? String(specialDeliveryZone185.maxKm)
+      : specialDeliveryZone185.maxKm.toFixed(1);
+  const specialCartCountdown191 = specialDeliveryFree185
+    ? `FREE delivery unlocked — you save ${money(matchedDeliveryFee117)} JOD`
+    : specialCountdownEligible191
+      ? `Add ${money(specialDeliveryRemaining185)} JOD more and get FREE delivery`
+      : `Free delivery over ${specialThresholdLabel191} JOD is available within ${specialRadiusLabel191} km`;
   const deliveryFee =
     deliveryEnabled && !selectedPickup
       ? specialDeliveryFree185
@@ -6313,8 +6433,8 @@ export default function DarikDirectStorefrontPage() {
         estimatedDeliveryMinutes={storefront.estimated_delivery_minutes}
         deliveryPromiseLabel={
           darikDeliveryPromise163(
-            storefront.estimated_delivery_days,
-            storefront.delivery_cutoff_time,
+            deliveryPromiseDays191,
+            deliveryPromiseCutoff191,
             storeClock115
           ).customerLabel
         }
@@ -6618,8 +6738,8 @@ style={{
                   ? "Collect from store"
                   : (() => {
                       const promise163 = darikDeliveryPromise163(
-                        storefront.estimated_delivery_days,
-                        storefront.delivery_cutoff_time,
+                        deliveryPromiseDays191,
+                        deliveryPromiseCutoff191,
                         storeClock115
                       );
 
@@ -6659,6 +6779,23 @@ style={{
               <strong>{currentDayHours || "See store hours"}</strong>
             </div>
           </div>
+
+          {specialOfferConfigured191 && !pickupOnly ? (
+            <div className={styles.specialDeliverySnapshot191}>
+              <div>
+                <small>FREE DELIVERY OFFER</small>
+                <strong>Free delivery over {specialThresholdLabel191} JOD</strong>
+                <span>
+                  {specialOfferAtLocation185
+                    ? specialDeliveryFree185
+                      ? `Unlocked now • normal fee ${money(matchedDeliveryFee117)} JOD`
+                      : `${money(matchedDeliveryFee117)} JOD normal delivery until ${specialThresholdLabel191} JOD qualifying`
+                    : `${money(matchedDeliveryFee117)} JOD normal delivery • offer available within ${specialRadiusLabel191} km`}
+                </span>
+              </div>
+              <b>FREE</b>
+            </div>
+          ) : null}
         </aside>
       </section>
 
@@ -6673,8 +6810,8 @@ style={{
             <span>Delivery</span>
             <strong>
               {darikDeliveryPromise163(
-                storefront.estimated_delivery_days,
-                storefront.delivery_cutoff_time,
+                deliveryPromiseDays191,
+                deliveryPromiseCutoff191,
                 storeClock115
               ).customerLabel}
             </strong>
@@ -6686,19 +6823,19 @@ style={{
               {specialDeliveryFree185 ? "Free" : money(deliveryFee)}
             </strong>
           </div>
-          {specialOfferAtLocation185 ? (
+          {specialOfferConfigured191 ? (
             <div className={styles.mobileSpecialDelivery185}>
               <span>
                 {specialDeliveryFree185
-                  ? "Free delivery unlocked"
-                  : `Free delivery over ${money(
-                      specialDeliveryZone185.minimumQualifyingJod
-                    )} qualifying items`}
+                  ? "FREE delivery unlocked"
+                  : `Free delivery over ${specialThresholdLabel191} JOD`}
               </span>
               <small>
                 {specialDeliveryFree185
-                  ? `${money(specialQualifyingSubtotal185)} qualifying`
-                  : `${money(specialDeliveryRemaining185)} qualifying amount to go`}
+                  ? `Saved ${money(matchedDeliveryFee117)} JOD delivery`
+                  : specialOfferAtLocation185
+                    ? `Add ${money(specialDeliveryRemaining185)} JOD more`
+                    : `Within ${specialRadiusLabel191} km • otherwise ${money(matchedDeliveryFee117)} JOD`}
               </small>
             </div>
           ) : null}
@@ -7273,8 +7410,8 @@ style={{
               {pickupOnly
                 ? "Pickup"
                 : darikDeliveryPromise163(
-                    storefront.estimated_delivery_days,
-                    storefront.delivery_cutoff_time,
+                    deliveryPromiseDays191,
+                    deliveryPromiseCutoff191,
                     storeClock115
                   ).shortLabel}
             </strong>
@@ -7588,6 +7725,41 @@ style={{
               </button>
             </div>
 
+            {!orderConfirmation && cart.length > 0 && specialOfferConfigured191 && !selectedPickup ? (
+              <div className={`${styles.specialDeliveryCountdown191} ${
+                specialDeliveryFree185 ? styles.specialDeliveryCountdownUnlocked191 : ""
+              }`}>
+                <div className={styles.specialDeliveryCountdownTop191}>
+                  <span>{specialDeliveryFree185 ? "✓" : "FREE"}</span>
+                  <div>
+                    <strong>{specialCartCountdown191}</strong>
+                    <small>
+                      {specialDeliveryFree185
+                        ? `Qualifying subtotal: ${money(specialQualifyingSubtotal185)} JOD`
+                        : specialCountdownEligible191
+                          ? `${money(specialQualifyingSubtotal185)} of ${specialThresholdLabel191} JOD qualifying`
+                          : `Offer radius: ${specialRadiusLabel191} km from the store`}
+                    </small>
+                  </div>
+                </div>
+                {!specialDeliveryFree185 && specialCountdownEligible191 ? (
+                  <div className={styles.specialDeliveryCountdownTrack191}>
+                    <span style={{ width: `${Math.min(
+                      100,
+                      specialDeliveryZone185.minimumQualifyingJod > 0
+                        ? (specialQualifyingSubtotal185 / specialDeliveryZone185.minimumQualifyingJod) * 100
+                        : 100
+                    )}%` }} />
+                  </div>
+                ) : null}
+                {specialDeliveryZone185.excludedCategoryIds.length > 0 ? (
+                  <small className={styles.specialDeliveryCountdownExclusion191}>
+                    Excluded categories do not count toward the free-delivery minimum.
+                  </small>
+                ) : null}
+              </div>
+            ) : null}
+
             {orderConfirmation ? (
               <div className={styles.orderConfirmation}>
                 <span>
@@ -7682,7 +7854,7 @@ style={{
                     <span>{selectedPickup ? "Pickup" : "Delivery"}</span>
                     <strong>{selectedPickup ? "Free" : specialDeliveryFree185 ? "Free" : money(deliveryFee)}</strong>
                   </div>
-                  {!selectedPickup && specialOfferAtLocation185 ? (
+                  {!selectedPickup && specialOfferConfigured191 ? (
                     <div
                       className={`${styles.specialDeliveryProgress185} ${
                         specialDeliveryFree185
@@ -7693,8 +7865,10 @@ style={{
                       <div>
                         <span>
                           {specialDeliveryFree185
-                            ? "Free delivery unlocked"
-                            : "Free-delivery progress"}
+                            ? "FREE delivery unlocked"
+                            : specialCountdownEligible191
+                              ? `Add ${money(specialDeliveryRemaining185)} JOD more and get FREE delivery`
+                              : `Free delivery over ${specialThresholdLabel191} JOD within ${specialRadiusLabel191} km`}
                         </span>
                         <strong>
                           {money(specialQualifyingSubtotal185)} / {money(

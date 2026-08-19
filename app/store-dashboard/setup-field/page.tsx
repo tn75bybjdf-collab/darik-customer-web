@@ -1,5 +1,7 @@
 "use client";
 
+// DARIK_PAYMENT_FIRST_YEARLY_PLANS_CATALOG_GATE_190
+
 /* DARIK_USERNAME_SIGNUP_FORCED_ONBOARDING_136 */
 
 import { useEffect, useMemo, useState } from "react";
@@ -96,9 +98,7 @@ export default function DarikInitialRetailFieldPage() {
 
       if (state.field_selected) {
         if (!state.setup_completed) {
-          router.replace("/store-dashboard/storefront");
-        } else if (state.getting_started_status === "pending") {
-          router.replace("/store-dashboard/getting-started");
+          router.replace("/store-dashboard/activation?onboarding=1");
         } else {
           router.replace("/store-dashboard");
         }
@@ -146,7 +146,13 @@ export default function DarikInitialRetailFieldPage() {
       });
       if (markerError) throw markerError;
 
-      router.replace("/store-dashboard/storefront");
+      const prepareResult190 = await supabase.rpc(
+        "darik_direct_prepare_payment_storefront_v190",
+        { p_retailer_id: retailerId }
+      );
+      if (prepareResult190.error) throw prepareResult190.error;
+
+      router.replace("/store-dashboard/activation?onboarding=1");
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : "Could not save the retail field.");
       setSaving(false);
@@ -201,11 +207,11 @@ export default function DarikInitialRetailFieldPage() {
 
           <div className={styles.themeNext}>
             <div>
-              <strong>Next: Storefront Theme</strong>
-              <span>التالي: اختر تصميم واجهة المتجر</span>
+              <strong>Next: Choose yearly plan & pay by CliQ</strong>
+              <span>التالي: اختر الخطة السنوية وادفع عبر CliQ</span>
             </div>
             <button type="button" disabled={!canContinue || saving} onClick={continueToTheme}>
-              {saving ? "Saving… / جار الحفظ…" : "Continue to Theme → / التالي إلى التصميم"}
+              {saving ? "Saving… / جار الحفظ…" : "Choose yearly plan → / اختر الخطة السنوية"}
             </button>
           </div>
 

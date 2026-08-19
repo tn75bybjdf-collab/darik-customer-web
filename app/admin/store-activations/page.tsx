@@ -1,5 +1,7 @@
 "use client";
 
+// DARIK_PAYMENT_FIRST_YEARLY_PLANS_CATALOG_GATE_190
+
 // DARIK_FRONTEND_ADMIN_MEMBERSHIP_CONTROL_CENTER_133
 
 import {
@@ -203,13 +205,25 @@ function membershipPlanLabel(row: MembershipRow) {
   }
 
   const labels: Record<string, string> = {
-    basic_monthly: "Monthly",
-    basic_6_month: "6 months",
-    basic_12_month: "Annual Basic",
-    premium_annual: "Annual Premium",
+    annual_1000: "300 JOD/year · up to 1,000 items",
+    annual_3000: "400 JOD/year · up to 3,000 items",
+    annual_10000: "500 JOD/year · up to 10,000 items",
+    basic_monthly: "Legacy plan",
+    basic_6_month: "Legacy plan",
+    basic_12_month: "Legacy plan",
+    premium_annual: "Legacy plan",
   };
 
   return labels[plan] || cleanStatus(plan);
+}
+
+function activationRequestPlanLabel190(code: string) {
+  const labels: Record<string, string> = {
+    annual_1000: "300 JOD/year · 1,000 items",
+    annual_3000: "400 JOD/year · 3,000 items",
+    annual_10000: "500 JOD/year · 10,000 items",
+  };
+  return labels[code] || cleanStatus(code);
 }
 
 function daysRemainingLabel(row: MembershipRow) {
@@ -511,7 +525,11 @@ export default function StoreActivationsAdminPage() {
     setError("");
     setMessage("");
 
-    const result = await supabase.rpc("darik_direct_admin_review_activation", {
+    const reviewRpc190 = row.plan_code.startsWith("annual_")
+      ? "darik_direct_admin_review_activation_v190"
+      : "darik_direct_admin_review_activation";
+
+    const result = await supabase.rpc(reviewRpc190, {
       p_session_token: admin.session_token,
       p_request_id: row.id,
       p_decision: decision,
@@ -917,7 +935,7 @@ export default function StoreActivationsAdminPage() {
                         <div className={styles.detail}>
                           <span>Plan / amount</span>
                           <strong>
-                            {cleanStatus(row.plan_code)} ·{" "}
+                            {activationRequestPlanLabel190(row.plan_code)} ·{" "}
                             {Number(row.amount_expected_jod).toFixed(2)} JOD
                           </strong>
                         </div>

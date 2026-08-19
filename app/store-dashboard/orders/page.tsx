@@ -1,5 +1,7 @@
 "use client";
 
+// DARIK_PAYMENT_FIRST_YEARLY_PLANS_CATALOG_GATE_190
+
 // DARIK_MOBILE_DASHBOARD_LOGOUT_035
 
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -22,6 +24,9 @@ type StoreContext = {
   storefront_status: string | null;
   direct_storefront_enabled: boolean | null;
   is_accepting_orders: boolean | null;
+  activation_status?: string | null;
+  activation_plan?: string | null;
+  activation_expires_at?: string | null;
 };
 
 type ContextResult = {
@@ -153,6 +158,12 @@ export default function DarikDirectOrdersPage() {
     [context, selectedRetailerId],
   );
 
+  const catalogUnlocked190 = Boolean(
+    selectedStore?.activation_status === "active" &&
+      (!selectedStore.activation_expires_at ||
+        new Date(selectedStore.activation_expires_at) > new Date())
+  );
+
   const storeIsLive = Boolean(
     selectedStore?.direct_storefront_enabled &&
       selectedStore?.storefront_status === "published",
@@ -255,8 +266,13 @@ export default function DarikDirectOrdersPage() {
   }, [session?.user.id, loadContext]);
 
   useEffect(() => {
-    if (selectedRetailerId) loadOrders();
-  }, [selectedRetailerId, loadOrders]);
+    if (!selectedRetailerId || !selectedStore) return;
+    if (!catalogUnlocked190) {
+      router.replace("/store-dashboard/storefront?catalog=locked");
+      return;
+    }
+    loadOrders();
+  }, [catalogUnlocked190, loadOrders, router, selectedRetailerId, selectedStore]);
 
   const filteredOrders = useMemo(() => {
     const term = search.trim().toLowerCase();

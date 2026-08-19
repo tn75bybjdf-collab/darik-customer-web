@@ -1,5 +1,7 @@
 "use client";
 
+// DARIK_PAYMENT_FIRST_YEARLY_PLANS_CATALOG_GATE_190
+
 // DARIK_ACTIVATION_EXISTING_PRICING_028
 
 import { ChangeEvent, useCallback, useEffect, useState } from "react";
@@ -48,37 +50,31 @@ type Plan = {
 
 const plans: readonly Plan[] = [
   {
-    code: "basic_monthly",
-    title: "Monthly",
-    titleAr: "شهري",
-    price: 45,
-    detail: "45 JOD each month",
-    detailAr: "45 دينارًا كل شهر",
-  },
-  {
-    code: "basic_6_month",
-    title: "6 months",
-    titleAr: "6 أشهر",
-    price: 210,
-    detail: "35 JOD/month prepaid",
-    detailAr: "35 دينارًا شهريًا، مدفوعة مقدمًا",
-  },
-  {
-    code: "basic_12_month",
-    title: "12 months",
-    titleAr: "12 شهرًا",
+    code: "annual_1000",
+    title: "Up to 1,000 items",
+    titleAr: "حتى 1,000 منتج",
     price: 300,
-    detail: "25 JOD/month prepaid",
-    detailAr: "25 دينارًا شهريًا، مدفوعة مقدمًا",
+    detail: "300 JOD/year · paid up front",
+    detailAr: "300 دينار سنوياً · الدفع مقدماً",
+    premium: false,
   },
   {
-    code: "premium_annual",
-    title: "Premium annual",
-    titleAr: "الباقة السنوية المميزة",
-    price: 600,
-    detail: "Annual plan plus a custom domain",
-    detailAr: "الخطة السنوية مع نطاق خاص",
-    premium: true,
+    code: "annual_3000",
+    title: "Up to 3,000 items",
+    titleAr: "حتى 3,000 منتج",
+    price: 400,
+    detail: "400 JOD/year · paid up front",
+    detailAr: "400 دينار سنوياً · الدفع مقدماً",
+    premium: false,
+  },
+  {
+    code: "annual_10000",
+    title: "Up to 10,000 items",
+    titleAr: "حتى 10,000 منتج",
+    price: 500,
+    detail: "500 JOD/year · paid up front",
+    detailAr: "500 دينار سنوياً · الدفع مقدماً",
+    premium: false,
   },
 ] as const;
 
@@ -112,17 +108,19 @@ function isValidDomain(value: string) {
 }
 
 function statusLabel(value: string | null | undefined) {
-  switch (value || "free_draft") {
+  switch (value || "payment_required") {
     case "active":
       return "ACTIVE / مفعّل";
     case "payment_review":
-      return "UNDER REVIEW / قيد المراجعة";
+      return "PAYMENT REVIEW / مراجعة الدفع";
     case "suspended":
       return "SUSPENDED / موقوف";
     case "expired":
       return "EXPIRED / منتهي";
+    case "rejected":
+      return "PAYMENT REJECTED / الدفع مرفوض";
     default:
-      return "FREE DRAFT / مسودة مجانية";
+      return "PAYMENT REQUIRED / الدفع مطلوب";
   }
 }
 
@@ -141,7 +139,14 @@ function requestStatusLabel(value: string) {
 
 function planLabel(code: string) {
   const item = planByCode.get(code);
-  return item ? `${item.title} / ${item.titleAr}` : code.replace(/_/g, " ");
+  if (item) return `${item.title} / ${item.titleAr}`;
+  const legacy: Record<string, string> = {
+    basic_monthly: "Legacy plan / خطة قديمة",
+    basic_6_month: "Legacy plan / خطة قديمة",
+    basic_12_month: "Legacy plan / خطة قديمة",
+    premium_annual: "Legacy plan / خطة قديمة",
+  };
+  return legacy[code] || code.replace(/_/g, " ");
 }
 
 export default function StoreActivationPage() {
@@ -150,7 +155,7 @@ export default function StoreActivationPage() {
   const [loading, setLoading] = useState(true);
   const [store, setStore] = useState<StoreContext | null>(null);
   const [requests, setRequests] = useState<ActivationRequest[]>([]);
-  const [plan, setPlan] = useState("basic_monthly");
+  const [plan, setPlan] = useState("annual_1000");
   const [senderName, setSenderName] = useState("");
   const [cliqReference, setCliqReference] = useState("");
   const [note, setNote] = useState("");
@@ -257,7 +262,7 @@ export default function StoreActivationPage() {
   }
 
   async function submitActivation() {
-    if (!session || !store?.storefront_id || !store.retailer_id) return;
+    if (!session || !store?.retailer_id) return;
 
     setError("");
     setMessage("");
@@ -279,40 +284,7 @@ export default function StoreActivationPage() {
       return;
     }
 
-    let normalizedDomains: string[] | null = null;
-
-    if (selectedPlan.premium) {
-      normalizedDomains = domainPreferences.map(normalizeDomain);
-
-      if (normalizedDomains.some((value) => !isValidDomain(value))) {
-        setError(
-          "Enter five valid domain names without https://, www, spaces, or page paths. / أدخل خمسة أسماء نطاقات صحيحة من دون https:// أو www أو مسافات أو روابط صفحات.",
-        );
-        return;
-      }
-
-      if (new Set(normalizedDomains).size !== 5) {
-        setError(
-          "All five domain choices must be different. / يجب أن تكون خيارات النطاقات الخمسة مختلفة.",
-        );
-        return;
-      }
-    }
-
     setBusy(true);
-
-    if (selectedPlan.premium && normalizedDomains) {
-      const domainResult = await supabase.rpc("darik_direct_save_premium_domain_preferences", {
-        p_storefront_id: store.storefront_id,
-        p_domain_preferences: normalizedDomains,
-      });
-
-      if (domainResult.error) {
-        setBusy(false);
-        setError(domainResult.error.message);
-        return;
-      }
-    }
 
     const extension = receipt.name.split(".").pop()?.toLowerCase() || "jpg";
     const path = `${store.retailer_id}/${crypto.randomUUID()}-${safeFileName(
@@ -333,8 +305,8 @@ export default function StoreActivationPage() {
       return;
     }
 
-    const result = await supabase.rpc("darik_direct_submit_activation_request", {
-      p_storefront_id: store.storefront_id,
+    const result = await supabase.rpc("darik_direct_submit_activation_request_v190", {
+      p_retailer_id: store.retailer_id,
       p_plan_code: plan,
       p_sender_name: senderName.trim(),
       p_receipt_path: path,
@@ -351,14 +323,14 @@ export default function StoreActivationPage() {
 
     setBusy(false);
     setMessage(
-      "Payment submitted. Darik will review the receipt before your public store goes live. / تم إرسال الدفعة. ستراجع داريك الإيصال قبل تفعيل متجرك للعامة.",
+      "Payment submitted. Storefront setup is now open while Darik reviews CliQ. Catalog tools unlock only after approval. / تم إرسال الدفعة. يمكنك الآن إعداد الواجهة أثناء مراجعة CliQ، وتفتح أدوات الكتالوج فقط بعد الموافقة.",
     );
     setReceipt(null);
     setSenderName("");
     setCliqReference("");
     setNote("");
     setDomainPreferences(["", "", "", "", ""]);
-    await loadData();
+    router.replace("/store-dashboard/storefront?payment=pending");
   }
 
   if (loading || !session) {
@@ -383,11 +355,17 @@ export default function StoreActivationPage() {
         <nav className={styles.nav}>
           <a href="/store-dashboard">Overview / نظرة عامة</a>
           <a href="/store-dashboard/storefront">Storefront / واجهة المتجر</a>
-          <a href="/store-dashboard/products">Products / المنتجات</a>
-          <a href="/store-dashboard/categories">Categories / الفئات</a>
-          <a href="/store-dashboard/orders">Orders / الطلبات</a>
+          <a href={active ? "/store-dashboard/products" : "/store-dashboard/activation"}>
+            {active ? "Products / المنتجات" : "Products 🔒 / المنتجات 🔒"}
+          </a>
+          <a href={active ? "/store-dashboard/categories" : "/store-dashboard/activation"}>
+            {active ? "Categories / الفئات" : "Categories 🔒 / الفئات 🔒"}
+          </a>
+          <a href={active ? "/store-dashboard/orders" : "/store-dashboard/activation"}>
+            {active ? "Orders / الطلبات" : "Orders 🔒 / الطلبات 🔒"}
+          </a>
           <a className={styles.active} href="/store-dashboard/activation">
-            Go live / تفعيل المتجر
+            Plan & payment / الخطة والدفع
           </a>
         </nav>
         <div style={{ marginTop: "auto", paddingTop: 20 }}>
@@ -428,20 +406,22 @@ export default function StoreActivationPage() {
           <section className={styles.panel}>
             <h2>Payment under review / الدفعة قيد المراجعة</h2>
             <p>
-              Your public page remains Coming Soon while Darik verifies the CliQ receipt. You can continue editing and
-              previewing the store. / ستبقى صفحتك العامة بحالة «قريبًا» حتى تتحقق داريك من إيصال كليك. يمكنك الاستمرار في
-              تعديل المتجر ومعاينته.
+              Your CliQ receipt is under review. Storefront design and settings are unlocked now, but Products,
+              Categories, and Orders stay locked until Darik approves the payment. / إيصال CliQ قيد المراجعة. إعدادات
+              وتصميم الواجهة متاحة الآن، لكن المنتجات والفئات والطلبات تبقى مقفلة حتى موافقة داريك على الدفع.
             </p>
+            <a href="/store-dashboard/storefront">Continue storefront setup / متابعة إعداد الواجهة →</a>
           </section>
         ) : null}
 
         {!active && !pending ? (
           <>
             <section className={styles.panel}>
-              <h2>Choose how you want to activate / اختر طريقة تفعيل متجرك</h2>
+              <h2>Choose your yearly plan / اختر خطتك السنوية</h2>
               <p>
-                The account and private preview stay free. Payment is required only to publish the customer-facing store.
-                / يبقى الحساب والمعاينة الخاصة مجانيين. الدفع مطلوب فقط لنشر المتجر للعملاء.
+                Payment comes before catalog creation. Choose one yearly plan and pay by CliQ. After you submit the
+                receipt, storefront setup opens while Darik reviews it. / الدفع يسبق إنشاء الكتالوج. اختر خطة سنوية
+                وادفع عبر CliQ، وبعد إرسال الإيصال يفتح إعداد الواجهة أثناء مراجعة داريك.
               </p>
 
               <div className={styles.planGrid}>
@@ -681,7 +661,7 @@ export default function StoreActivationPage() {
             ) : (
               <div className={styles.locked}>
                 <strong>No activation payments yet / لا توجد دفعات تفعيل بعد</strong>
-                <span>Your free draft remains available. / ستبقى مسودتك المجانية متاحة.</span>
+                <span>Choose a yearly plan and submit CliQ to start storefront setup. / اختر خطة سنوية وأرسل دفعة CliQ لبدء إعداد الواجهة.</span>
               </div>
             )}
           </div>

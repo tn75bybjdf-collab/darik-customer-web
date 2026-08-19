@@ -1,5 +1,7 @@
 "use client";
 
+// DARIK_PAYMENT_FIRST_YEARLY_PLANS_CATALOG_GATE_190
+
 // DARIK_RETAIL_FIELDS_SMOKE_SHOP_050
 // DARIK_MECHANICS_LAB_048
 // DARIK_CATEGORIES_UTF8_REPAIR_030
@@ -37,6 +39,9 @@ type StoreContext = {
   storefront_status: string | null;
   direct_storefront_enabled: boolean | null;
   is_accepting_orders: boolean | null;
+  activation_status?: string | null;
+  activation_plan?: string | null;
+  activation_expires_at?: string | null;
 };
 
 type ContextResult = {
@@ -151,6 +156,12 @@ export default function DarikDirectCategoriesPage() {
         (store) => store.retailer_id === selectedRetailerId
       ) ?? null,
     [context, selectedRetailerId]
+  );
+
+  const catalogUnlocked190 = Boolean(
+    selectedStore?.activation_status === "active" &&
+      (!selectedStore.activation_expires_at ||
+        new Date(selectedStore.activation_expires_at) > new Date())
   );
 
   const loadContext = useCallback(async () => {
@@ -312,10 +323,13 @@ export default function DarikDirectCategoriesPage() {
   }, [session, loadContext]);
 
   useEffect(() => {
-    if (selectedRetailerId) {
-      loadCategories();
+    if (!selectedRetailerId || !selectedStore) return;
+    if (!catalogUnlocked190) {
+      router.replace("/store-dashboard/storefront?catalog=locked");
+      return;
     }
-  }, [selectedRetailerId, loadCategories]);
+    loadCategories();
+  }, [catalogUnlocked190, loadCategories, router, selectedRetailerId, selectedStore]);
 
   const productCountByCategory = useMemo(() => {
     const counts = new Map<string, number>();

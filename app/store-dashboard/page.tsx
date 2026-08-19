@@ -1,5 +1,7 @@
 "use client";
 
+// DARIK_PAYMENT_FIRST_YEARLY_PLANS_CATALOG_GATE_190
+
 // DARIK_USERNAME_SIGNUP_FORCED_ONBOARDING_136
 
 // DARIK_MOBILE_DASHBOARD_LOGOUT_035
@@ -311,7 +313,7 @@ function isToday(value: string) {
 
 function activationLabel(value: string | null | undefined) {
   const labels: Record<string, string> = {
-    free_draft: "Free Draft / مسودة مجانية",
+    free_draft: "Payment Required / الدفع مطلوب",
     payment_review: "Payment Review / مراجعة الدفع",
     pending_review: "Payment Review / مراجعة الدفع",
     active: "Live / مباشر",
@@ -319,15 +321,18 @@ function activationLabel(value: string | null | undefined) {
     expired: "Expired / منتهي",
     rejected: "Payment Rejected / الدفع مرفوض",
   };
-  return labels[value || "free_draft"] || "Free Draft / مسودة مجانية";
+  return labels[value || "free_draft"] || "Payment Required / الدفع مطلوب";
 }
 
 function planLabel(value: string | null | undefined) {
   const labels: Record<string, string> = {
-    monthly: "Monthly / شهري",
-    six_months: "6 Months / 6 أشهر",
-    annual: "12 Months / 12 شهر",
-    premium_annual: "Premium Annual / سنوي مميز",
+    annual_1000: "300 JOD/year · 1,000 items",
+    annual_3000: "400 JOD/year · 3,000 items",
+    annual_10000: "500 JOD/year · 10,000 items",
+    basic_monthly: "Legacy plan",
+    basic_6_month: "Legacy plan",
+    basic_12_month: "Legacy plan",
+    premium_annual: "Legacy plan",
   };
   return value ? labels[value] || value.replace(/_/g, " ") : "No plan selected / لم يتم اختيار خطة";
 }
@@ -607,7 +612,11 @@ export default function DarikDirectOverviewPage() {
 
   const activationStatus =
     storefront?.activation_status || selectedStore?.activation_status || "free_draft";
-  const isLive = activationStatus === "active";
+  const isLive =
+    activationStatus === "active" &&
+    (!storefront?.activation_expires_at ||
+      new Date(storefront.activation_expires_at) > new Date());
+  const catalogUnlocked190 = isLive;
 
   const setupTasks = useMemo<SetupTask[]>(() => {
     const paymentReady = Boolean(
@@ -616,58 +625,64 @@ export default function DarikDirectOverviewPage() {
 
     return [
       {
+        id: "activation",
+        title: "Yearly plan & CliQ / الخطة السنوية وCliQ",
+        detail: "Payment approval comes before catalog creation / موافقة الدفع تسبق إنشاء الكتالوج",
+        href: "/store-dashboard/activation",
+        action:
+          activationStatus === "payment_review"
+            ? "Payment under review / الدفع قيد المراجعة"
+            : isLive
+              ? "Plan approved / تمت الموافقة"
+              : "Choose plan & pay / اختر الخطة وادفع",
+        complete: isLive,
+      },
+      {
         id: "identity",
         title: "Store identity / هوية المتجر",
         detail: "Name, permanent link and public information / الاسم والرابط والمعلومات العامة",
         href: "/store-dashboard/storefront",
         action: "Review profile / مراجعة الملف",
-        complete: Boolean(
-          storefront?.slug &&
-            (storefront?.display_name || selectedStore?.business_name),
-        ),
+        complete: Boolean(storefront?.slug && (storefront?.display_name || selectedStore?.business_name)),
       },
       {
         id: "branding",
         title: "Logo and branding / الشعار والهوية البصرية",
-        detail: "Add a logo and a clear storefront presentation / أضف شعاراً ومظهراً واضحاً للمتجر",
+        detail: "Add a logo and storefront presentation / أضف الشعار ومظهر الواجهة",
         href: "/store-dashboard/storefront",
         action: "Add branding / إضافة الهوية",
         complete: Boolean(storefront?.logo_url),
       },
       {
+        id: "operations",
+        title: "Storefront operations / تشغيل الواجهة",
+        detail: "Configure ordering, payment and delivery settings / اضبط الطلب والدفع والتوصيل",
+        href: "/store-dashboard/storefront",
+        action: "Configure storefront / إعداد الواجهة",
+        complete: Boolean(storefront?.order_submission_mode && paymentReady),
+      },
+      {
         id: "categories",
         title: "Catalog structure / هيكلة الكتالوج",
-        detail: "Create at least one customer-facing category / أنشئ فئة واحدة على الأقل",
-        href: "/store-dashboard/categories",
-        action: "Create category / إنشاء فئة",
-        complete: categoryCount > 0,
+        detail: catalogUnlocked190
+          ? "Create customer-facing categories / أنشئ فئات للعملاء"
+          : "Locked until yearly payment approval / مقفل حتى موافقة الدفع السنوي",
+        href: catalogUnlocked190 ? "/store-dashboard/categories" : "/store-dashboard/activation",
+        action: catalogUnlocked190 ? "Create category / إنشاء فئة" : "Locked 🔒 / مقفل",
+        complete: catalogUnlocked190 && categoryCount > 0,
       },
       {
         id: "products",
         title: "Products / المنتجات",
-        detail: "Add at least one priced product customers can see / أضف منتجاً مسعّراً يمكن للعملاء رؤيته",
-        href: "/store-dashboard/products",
-        action: "Add product / إضافة منتج",
-        complete: productCount > 0,
-      },
-      {
-        id: "operations",
-        title: "Ordering and payments / الطلب والدفع",
-        detail: "Choose an ordering method and customer payment option / اختر طريقة الطلب والدفع للعملاء",
-        href: "/store-dashboard/storefront",
-        action: "Configure orders / إعداد الطلبات",
-        complete: Boolean(storefront?.order_submission_mode && paymentReady),
-      },
-      {
-        id: "activation",
-        title: "Store activation / تفعيل المتجر",
-        detail: "Submit your plan and payment proof for Darik approval / أرسل الخطة وإثبات الدفع للموافقة",
-        href: "/store-dashboard/activation",
-        action: isLive ? "View plan / عرض الخطة" : "Go live / تفعيل المتجر",
-        complete: isLive,
+        detail: catalogUnlocked190
+          ? "Add products within your yearly plan limit / أضف المنتجات ضمن حد خطتك"
+          : "Locked until yearly payment approval / مقفل حتى موافقة الدفع السنوي",
+        href: catalogUnlocked190 ? "/store-dashboard/products" : "/store-dashboard/activation",
+        action: catalogUnlocked190 ? "Add product / إضافة منتج" : "Locked 🔒 / مقفل",
+        complete: catalogUnlocked190 && productCount > 0,
       },
     ];
-  }, [categoryCount, isLive, productCount, selectedStore, storefront]);
+  }, [activationStatus, catalogUnlocked190, categoryCount, isLive, productCount, selectedStore, storefront]);
 
   const completedSetupTasks = setupTasks.filter((task) => task.complete).length;
   const setupProgress = Math.round(
@@ -785,7 +800,7 @@ export default function DarikDirectOverviewPage() {
             <button type="submit">Sign in / تسجيل الدخول</button>
           </form>
           <a className={styles.marketplaceLink} href="/store-signup">
-            Create a store for free / أنشئ متجراً مجاناً
+            Sign up today / سجّل اليوم
           </a>
           <a className={styles.marketplaceLink} href="/">
             Return to Darik Marketplace / العودة إلى داريك
@@ -816,10 +831,16 @@ export default function DarikDirectOverviewPage() {
             Overview
           </a>
           <a href="/store-dashboard/storefront">Storefront</a>
-          <a href="/store-dashboard/orders">Orders</a>
-          <a href="/store-dashboard/products">Products</a>
-          <a href="/store-dashboard/categories">Categories</a>
-          <a href="/store-dashboard/activation">Go live</a>
+          <a href={catalogUnlocked190 ? "/store-dashboard/orders" : "/store-dashboard/activation"}>
+            {catalogUnlocked190 ? "Orders" : "Orders 🔒"}
+          </a>
+          <a href={catalogUnlocked190 ? "/store-dashboard/products" : "/store-dashboard/activation"}>
+            {catalogUnlocked190 ? "Products" : "Products 🔒"}
+          </a>
+          <a href={catalogUnlocked190 ? "/store-dashboard/categories" : "/store-dashboard/activation"}>
+            {catalogUnlocked190 ? "Categories" : "Categories 🔒"}
+          </a>
+          <a href="/store-dashboard/activation">Plan & payment</a>
         </nav>
         <div className={styles.sidebarFooter}>
           <span>{session.user.user_metadata?.darik_retailer_username ? `@${session.user.user_metadata.darik_retailer_username}` : session.user.email}</span>
@@ -904,9 +925,9 @@ export default function DarikDirectOverviewPage() {
                 </button>
                 <a
                   className={styles.commandSecondaryButton}
-                  href="/store-dashboard/products"
+                  href={catalogUnlocked190 ? "/store-dashboard/products" : "/store-dashboard/activation"}
                 >
-                  Add product / إضافة منتج
+                  {catalogUnlocked190 ? "Add product / إضافة منتج" : "Catalog locked 🔒 / الكتالوج مقفل"}
                 </a>
                 <a
                   className={styles.commandPrimaryButton}
@@ -920,7 +941,7 @@ export default function DarikDirectOverviewPage() {
                 >
                   {isLive
                     ? "Open live store / فتح المتجر"
-                    : "Go live / تفعيل المتجر"}
+                    : "Plan & payment / الخطة والدفع"}
                 </a>
               </div>
             </header>

@@ -1,4 +1,6 @@
 "use client";
+
+// DARIK_PAYMENT_FIRST_YEARLY_PLANS_CATALOG_GATE_190
 // DARIK_MECHANICS_LAB_048
 // DARIK_GROCERY_WEIGHT_3_PHOTO_049
 // DARIK_RETAIL_FIELDS_SMOKE_SHOP_050
@@ -67,6 +69,9 @@ type StoreContext = {
   storefront_status: string | null;
   direct_storefront_enabled: boolean | null;
   is_accepting_orders: boolean | null;
+  activation_status?: string | null;
+  activation_plan?: string | null;
+  activation_expires_at?: string | null;
 };
 
 type ContextResult = {
@@ -3379,6 +3384,12 @@ export default function DarikDirectProductsPage() {
     [context, selectedRetailerId]
   );
 
+  const catalogUnlocked190 = Boolean(
+    selectedStore?.activation_status === "active" &&
+      (!selectedStore.activation_expires_at ||
+        new Date(selectedStore.activation_expires_at) > new Date())
+  );
+
   const loadContext = useCallback(async () => {
     const contextResult = await supabase.rpc("darik_direct_get_my_context");
 
@@ -3551,10 +3562,13 @@ export default function DarikDirectProductsPage() {
   }, [session, loadContext]);
 
   useEffect(() => {
-    if (selectedRetailerId) {
-      loadCatalog();
+    if (!selectedRetailerId || !selectedStore) return;
+    if (!catalogUnlocked190) {
+      router.replace("/store-dashboard/storefront?catalog=locked");
+      return;
     }
-  }, [selectedRetailerId, loadCatalog]);
+    loadCatalog();
+  }, [catalogUnlocked190, loadCatalog, router, selectedRetailerId, selectedStore]);
 
   useEffect(() => {
     let cancelled = false;

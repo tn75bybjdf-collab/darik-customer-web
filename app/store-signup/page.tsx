@@ -1,5 +1,7 @@
 "use client";
 
+// DARIK_PAYMENT_FIRST_YEARLY_PLANS_CATALOG_GATE_190
+
 /* DARIK_USERNAME_SIGNUP_FORCED_ONBOARDING_136 */
 
 import { useEffect, useMemo, useState } from "react";
@@ -206,7 +208,7 @@ export default function DarikStoreSignupPage() {
           <div className={styles.cardHeading}>
             <span>ACCOUNT / الحساب</span>
             <h2>Create your Darik login</h2>
-            <p>Store setup starts immediately after this account is created. / يبدأ إعداد المتجر مباشرة بعد إنشاء الحساب.</p>
+            <p>After signup, choose your retail field and yearly plan, then submit CliQ before storefront setup. / بعد التسجيل اختر مجال المتجر والخطة السنوية ثم أرسل دفعة كليك قبل إعداد الواجهة.</p>
           </div>
 
           <div className={styles.formGrid}>
@@ -280,8 +282,8 @@ export default function DarikStoreSignupPage() {
 
           <div className={styles.notice}>
             <strong>What happens next?</strong>
-            <span>You will choose your Retail Field first, then your Storefront Theme. Nothing is preselected.</span>
-            <span dir="rtl">بعد إنشاء الحساب ستختار مجال المتجر أولاً ثم تصميم المتجر. لن يتم اختيار أي مجال مسبقاً.</span>
+            <span>You will choose your Retail Field, choose a yearly plan, send CliQ, then build the storefront while Darik reviews the payment.</span>
+            <span dir="rtl">بعد التسجيل ستختار مجال المتجر ثم الخطة السنوية وترسل دفعة CliQ، وبعدها تبدأ إعداد الواجهة أثناء مراجعة الدفعة.</span>
           </div>
 
           {error ? <div className={styles.error}>{error}</div> : null}
@@ -293,7 +295,7 @@ export default function DarikStoreSignupPage() {
               disabled={busy || usernameState !== "available"}
               onClick={createAccount}
             >
-              {busy ? "Creating account… / جار إنشاء الحساب…" : "Create Account & Set Up Store / إنشاء الحساب وإعداد المتجر"}
+              {busy ? "Creating account… / جار إنشاء الحساب…" : "Sign up today / سجّل اليوم"}
             </button>
           </div>
         </section>
