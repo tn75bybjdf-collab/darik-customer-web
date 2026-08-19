@@ -12606,3 +12606,318 @@ body {
 .mobileSponsoredProductAdButton:active {
   transform: translateY(1px) !important;
 }
+
+/* DARIK_HOME_STORE_SHELVES_TRUE_BESTSELLERS_186 */
+/*
+  getdarik.com discovery shelves intentionally use the same card footprint as
+  storefront Best Sellers:
+    mobile: 184px
+    desktop: 210px
+*/
+.darikHomeBrandSpacer186 {
+  display: block;
+  width: min(190px, 22vw);
+  min-width: 36px;
+  height: 1px;
+}
+
+.darikHomeStoreShelfStack186 {
+  display: grid;
+  gap: 34px;
+}
+
+.darikHomeStoreGroup186 {
+  min-width: 0;
+}
+
+.darikHomeStoreShelfHeading186 {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 18px;
+  margin: 0 0 12px;
+}
+
+.darikHomeStoreShelfHeading186 > div {
+  min-width: 0;
+  display: grid;
+  gap: 3px;
+}
+
+.darikHomeStoreShelfHeading186 span {
+  color: #7b8798;
+  font-size: 9px;
+  font-weight: 900;
+  letter-spacing: 0.13em;
+}
+
+.darikHomeStoreShelfHeading186 h3 {
+  margin: 0;
+  color: #111827;
+  font-size: clamp(21px, 2.1vw, 30px);
+  font-weight: 950;
+  letter-spacing: -0.035em;
+  line-height: 1.05;
+}
+
+.darikHomeStoreShelfHeading186 > small {
+  flex: 0 0 auto;
+  color: #8a95a5;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.darikHomeStoreShelfShell186 {
+  position: relative;
+  min-width: 0;
+}
+
+.darikHomeStoreShelf186 {
+  display: flex;
+  align-items: flex-start;
+  gap: 18px;
+  width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 0 1px 5px;
+  scrollbar-width: none;
+  scroll-snap-type: x proximity;
+  overscroll-behavior-x: contain;
+  -webkit-overflow-scrolling: touch;
+}
+
+.darikHomeStoreShelf186::-webkit-scrollbar {
+  display: none;
+}
+
+.darikHomeStoreCard186 {
+  flex: 0 0 184px;
+  width: 184px;
+  min-width: 184px;
+  display: block;
+  color: inherit;
+  text-decoration: none;
+  scroll-snap-align: start;
+}
+
+.darikHomeStoreCover186 {
+  position: relative;
+  width: 184px;
+  min-width: 184px;
+  height: 184px;
+  min-height: 184px;
+  overflow: hidden;
+  display: grid;
+  place-items: center;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  border-radius: 18px;
+  background-color: #eef2f6;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+  box-shadow: 0 9px 24px rgba(15, 23, 42, 0.08);
+  transition:
+    transform 180ms ease,
+    box-shadow 180ms ease;
+}
+
+.darikHomeStoreCard186:hover .darikHomeStoreCover186 {
+  transform: translateY(-2px);
+  box-shadow: 0 15px 32px rgba(15, 23, 42, 0.12);
+}
+
+.darikHomeStoreCoverLogo186 {
+  width: 58%;
+  height: 58%;
+  object-fit: contain;
+  filter: drop-shadow(0 6px 16px rgba(0, 0, 0, 0.16));
+}
+
+.darikHomeStoreStatus186 {
+  position: absolute;
+  top: 9px;
+  left: 9px;
+  min-height: 22px;
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid rgba(255, 255, 255, 0.46);
+  border-radius: 999px;
+  padding: 4px 8px;
+  color: #ffffff;
+  background: rgba(15, 23, 42, 0.62);
+  font-size: 8px;
+  font-weight: 900;
+  letter-spacing: 0.03em;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+.darikHomeStoreStatusOpen186 {
+  background: rgba(20, 83, 45, 0.78);
+}
+
+.darikHomeStoreStatusClosed186 {
+  background: rgba(127, 29, 29, 0.76);
+}
+
+.darikHomeStoreStatusShowcase186 {
+  background: rgba(30, 41, 59, 0.72);
+}
+
+.darikHomeStoreBody186 {
+  min-width: 0;
+  display: grid;
+  gap: 4px;
+  padding: 10px 2px 0;
+}
+
+.darikHomeStoreBody186 h3 {
+  margin: 0;
+  overflow: hidden;
+  color: #111827;
+  font-size: 14px;
+  font-weight: 900;
+  letter-spacing: -0.018em;
+  line-height: 1.24;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.darikHomeStoreSpecial186 {
+  overflow: hidden;
+  color: #138a55;
+  font-size: 10px;
+  font-weight: 900;
+  line-height: 1.25;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.darikHomeStoreFee186 {
+  color: #111827;
+  font-size: 13px;
+  font-weight: 950;
+  line-height: 1.2;
+}
+
+.darikHomeStoreDistance186 {
+  color: #8a95a5;
+  font-size: 9px;
+  font-weight: 750;
+}
+
+.darikHomeStoreShelfShell186::after {
+  content: "";
+  position: absolute;
+  z-index: 22;
+  top: 0;
+  right: 0;
+  bottom: 4px;
+  width: 42px;
+  pointer-events: none;
+  opacity: 0;
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0),
+    rgba(248, 250, 252, 0.92)
+  );
+  transition: opacity 160ms ease;
+}
+
+.darikHomeStoreShelfShell186[data-can-forward="true"]::after {
+  opacity: 1;
+}
+
+.darikHomeStoreContinue186 {
+  position: absolute;
+  z-index: 24;
+  top: 82px;
+  right: 5px;
+  width: 28px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  border: 1px solid rgba(15, 23, 42, 0.12);
+  border-radius: 999px;
+  padding: 0;
+  color: #253044;
+  background: rgba(255, 255, 255, 0.88);
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.12);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  cursor: pointer;
+  transform: translateY(-50%);
+}
+
+main[dir="rtl"] .darikHomeStoreContinue186 {
+  right: auto;
+  left: 5px;
+  transform: translateY(-50%) rotate(180deg);
+}
+
+main[dir="rtl"] .darikHomeStoreShelfShell186::after {
+  right: auto;
+  left: 0;
+  transform: scaleX(-1);
+}
+
+@media (min-width: 761px) {
+  .darikHomeStoreCard186 {
+    flex-basis: 210px;
+    width: 210px;
+    min-width: 210px;
+  }
+
+  .darikHomeStoreCover186 {
+    width: 210px;
+    min-width: 210px;
+    height: 210px;
+    min-height: 210px;
+  }
+
+  .darikHomeStoreBody186 h3 {
+    font-size: 15px;
+  }
+
+  .darikHomeStoreContinue186 {
+    top: 95px;
+  }
+}
+
+@media (max-width: 760px) {
+  .darikHomeBrandSpacer186 {
+    width: 38px;
+    min-width: 38px;
+  }
+
+  .darikHomeStoreShelfStack186 {
+    gap: 28px;
+  }
+
+  .darikHomeStoreShelfHeading186 {
+    margin-bottom: 10px;
+  }
+
+  .darikHomeStoreShelfHeading186 h3 {
+    font-size: 22px;
+  }
+
+  .darikHomeStoreShelf186 {
+    gap: 14px;
+    padding-right: 20px;
+  }
+
+  .darikHomeStoreShelfShell186 {
+    margin-right: -14px;
+  }
+
+  main[dir="rtl"] .darikHomeStoreShelf186 {
+    padding-right: 0;
+    padding-left: 20px;
+  }
+
+  main[dir="rtl"] .darikHomeStoreShelfShell186 {
+    margin-right: 0;
+    margin-left: -14px;
+  }
+}

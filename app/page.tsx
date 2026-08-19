@@ -70,6 +70,13 @@ type NearbyStore = {
   distance_km: number | string;
 };
 
+// DARIK_HOME_STORE_SHELVES_TRUE_BESTSELLERS_186
+type DarikHomeSpecialDelivery186 = {
+  enabled: boolean;
+  maxKm: number;
+  minimumQualifyingJod: number;
+};
+
 type IconName =
   | "arrow"
   | "auto"
@@ -214,6 +221,46 @@ const businessTypeLabels: Record<string, { en: string; ar: string }> = {
   books_stationery: { en: "Books & stationery", ar: "كتب وقرطاسية" },
   sports: { en: "Sports equipment", ar: "معدات رياضية" },
   other: { en: "Local store", ar: "متجر محلي" },
+};
+
+const retailFieldShelfLabels186: Record<string, { en: string; ar: string }> = {
+  smoke_shop: { en: "Smoke shops", ar: "محلات التدخين" },
+  supermarket: { en: "Supermarkets", ar: "سوبرماركت" },
+  grocery: { en: "Grocery stores", ar: "بقالات" },
+  mini_market: { en: "Mini-markets", ar: "ميني ماركت" },
+  pharmacy: { en: "Pharmacies", ar: "صيدليات" },
+  restaurant: { en: "Restaurants", ar: "مطاعم" },
+  fast_food: { en: "Fast food", ar: "وجبات سريعة" },
+  bakery: { en: "Bakeries & sweets", ar: "مخابز وحلويات" },
+  cafe: { en: "Cafés", ar: "مقاهي" },
+  butcher: { en: "Butchers", ar: "ملاحم" },
+  produce: { en: "Fruit & vegetables", ar: "خضار وفواكه" },
+  frozen_food: { en: "Frozen food", ar: "مواد غذائية مجمدة" },
+  clothing: { en: "Clothing stores", ar: "محلات ملابس" },
+  shoes: { en: "Shoe stores", ar: "محلات أحذية" },
+  jewelry: { en: "Jewelry stores", ar: "محلات مجوهرات" },
+  cosmetics: { en: "Cosmetics & beauty", ar: "تجميل وعناية" },
+  perfume: { en: "Perfume stores", ar: "محلات عطور" },
+  electronics: { en: "Electronics", ar: "إلكترونيات" },
+  computers: { en: "Computer stores", ar: "محلات كمبيوتر" },
+  mobile_phones: { en: "Mobile phone stores", ar: "محلات هواتف" },
+  furniture: { en: "Furniture stores", ar: "محلات أثاث" },
+  home_appliances: { en: "Home appliances", ar: "أجهزة منزلية" },
+  home_decor: { en: "Home décor", ar: "ديكور منزلي" },
+  auto_parts: { en: "Auto parts", ar: "قطع سيارات" },
+  tires: { en: "Tires & accessories", ar: "إطارات وإكسسوارات" },
+  hardware: { en: "Hardware stores", ar: "عدد وأدوات" },
+  building_materials: { en: "Building materials", ar: "مواد بناء" },
+  electrical_supplies: { en: "Electrical supplies", ar: "مواد كهربائية" },
+  plumbing: { en: "Plumbing supplies", ar: "مواد صحية وسباكة" },
+  tools: { en: "Tools & equipment", ar: "أدوات ومعدات" },
+  pet_supplies: { en: "Pet supplies", ar: "مستلزمات حيوانات" },
+  flowers: { en: "Flower shops", ar: "محلات زهور" },
+  gifts: { en: "Gift shops", ar: "محلات هدايا" },
+  toys: { en: "Toy stores", ar: "محلات ألعاب" },
+  books_stationery: { en: "Books & stationery", ar: "كتب وقرطاسية" },
+  sports: { en: "Sports stores", ar: "محلات رياضية" },
+  other: { en: "Local stores", ar: "متاجر محلية" },
 };
 
 const copy = {
@@ -467,70 +514,118 @@ function displayTagline(store: NearbyStore, language: Language) {
   return store.tagline?.trim() || store.tagline_ar?.trim() || retailFieldLabel(store, language);
 }
 
-function StoreCard({ store, language }: { store: NearbyStore; language: Language }) {
+function retailFieldShelfKey186(store: NearbyStore) {
+  return String(store.retail_field || "other").trim().toLowerCase() || "other";
+}
+
+function retailFieldShelfLabel186(field: string, language: Language) {
+  const exact = retailFieldShelfLabels186[field];
+  if (exact) return exact[language];
+  const known = businessTypeLabels[field];
+  if (known) return known[language];
+  return field
+    .replace(/_/g, " ")
+    .replace(/\b\w/g, (letter) => letter.toUpperCase());
+}
+
+function storeDeliveryFee186(store: NearbyStore) {
+  const value = Number(store.delivery_fee ?? 0);
+  return Number.isFinite(value) ? Math.max(0, value) : Number.POSITIVE_INFINITY;
+}
+
+function normalizeHomeSpecialDelivery186(
+  value: unknown
+): DarikHomeSpecialDelivery186 | null {
+  if (!value || typeof value !== "object") return null;
+  const row = value as Record<string, unknown>;
+  const maxKm = Number(row.max_km ?? 0);
+  const threshold = Number(row.minimum_qualifying_jod ?? 0);
+  if (row.enabled !== true || !Number.isFinite(maxKm) || maxKm <= 0) return null;
+  if (!Number.isFinite(threshold) || threshold <= 0) return null;
+  return { enabled: true, maxKm, minimumQualifyingJod: threshold };
+}
+
+function HomeStoreCard186({
+  store,
+  language,
+  special,
+}: {
+  store: NearbyStore;
+  language: Language;
+  special: DarikHomeSpecialDelivery186 | null;
+}) {
   const t = copy[language];
   const distance = Number(store.distance_km || 0);
-  const deliveryFee = Number(store.delivery_fee || 0);
+  const deliveryFee = storeDeliveryFee186(store);
   const primaryColor = safeColor(store.primary_color, "#101828");
   const accentColor = safeColor(store.accent_color, "#ffcc33");
   const heroImageUrl = safeImageUrl(store.hero_image_url);
   const logoUrl = safeImageUrl(store.logo_url);
-  const coverStyle = heroImageUrl
-    ? {
-        backgroundImage: `linear-gradient(180deg, rgba(8,15,29,.03), rgba(8,15,29,.68)), url(${JSON.stringify(heroImageUrl)})`,
-      }
-    : {
-        backgroundImage: `radial-gradient(circle at 78% 16%, ${accentColor}55, transparent 34%), linear-gradient(135deg, ${primaryColor}, #111827)`,
-      };
+  const specialAtLocation = Boolean(
+    special?.enabled &&
+      Number.isFinite(distance) &&
+      distance <= special.maxKm + 0.0001
+  );
 
   return (
-    <a className={styles.storeCard} href={`/${store.slug}`} aria-label={`${t.shopStore}: ${displayStoreName(store, language)}`}>
-      <div className={styles.storeCover} style={coverStyle}>
-        <div className={`${styles.orderStatus} ${store.show_ordering === false ? styles.orderStatusShowcase : store.is_accepting_orders ? styles.orderStatusOpen : styles.orderStatusPaused}`}>
-          <span />
-          {store.show_ordering === false ? t.showcase : store.is_accepting_orders ? t.open : t.closed}
-        </div>
-        <div className={styles.distanceBadge}>
-          <Icon name="location" size={15} />
-          {distance < 1 ? `${Math.max(1, Math.round(distance * 1000))} m` : `${distance.toFixed(1)} km`} {t.away}
-        </div>
+    <a
+      className="darikHomeStoreCard186"
+      href={`/${store.slug}`}
+      aria-label={`${t.shopStore}: ${displayStoreName(store, language)}`}
+    >
+      <div
+        className="darikHomeStoreCover186"
+        style={
+          heroImageUrl
+            ? {
+                backgroundImage: `linear-gradient(180deg, rgba(8,15,29,.02), rgba(8,15,29,.16)), url(${JSON.stringify(heroImageUrl)})`,
+              }
+            : {
+                backgroundImage: `radial-gradient(circle at 75% 18%, ${accentColor}5c, transparent 35%), linear-gradient(145deg, ${primaryColor}, #111827)`,
+              }
+        }
+      >
+        {!heroImageUrl && logoUrl ? (
+          <img className="darikHomeStoreCoverLogo186" src={logoUrl} alt="" />
+        ) : null}
+        <span
+          className={`darikHomeStoreStatus186 ${
+            store.show_ordering === false
+              ? "darikHomeStoreStatusShowcase186"
+              : store.is_accepting_orders
+                ? "darikHomeStoreStatusOpen186"
+                : "darikHomeStoreStatusClosed186"
+          }`}
+        >
+          {store.show_ordering === false
+            ? t.showcase
+            : store.is_accepting_orders
+              ? t.open
+              : t.closed}
+        </span>
       </div>
 
-      <div className={styles.storeCardBody}>
-        <div className={styles.storeIdentityRow}>
-          <div className={styles.storeLogo} style={{ borderColor: `${accentColor}70` }}>
-            {logoUrl ? <img src={logoUrl} alt="" /> : <span>{displayStoreName(store, language).slice(0, 1)}</span>}
-          </div>
-          <div className={styles.storeIdentityText}>
-            <p>{retailFieldLabel(store, language)}</p>
-            <h3>{displayStoreName(store, language)}</h3>
-          </div>
-          <span className={styles.cardArrow}><Icon name="chevron" size={20} /></span>
-        </div>
-
-        <p className={styles.storeTagline}>{displayTagline(store, language)}</p>
-        {(language === "ar" ? store.public_address_ar || store.public_address : store.public_address || store.public_address_ar) ? <p className={styles.storeAddress}><Icon name="location" size={16} />{language === "ar" ? store.public_address_ar || store.public_address : store.public_address || store.public_address_ar}</p> : null}
-
-        <div className={styles.storeFacts}>
-          {store.show_ordering === false ? (
-            <>
-              <span><Icon name="shop" size={17} />{t.browseCatalog}</span>
-              <span><Icon name="heart" size={17} />{t.contactStore}</span>
-              <span>{t.showcase}</span>
-            </>
-          ) : (
-            <>
-              <span><Icon name="clock" size={17} />{store.estimated_delivery_minutes ? `${store.estimated_delivery_minutes} ${t.min}` : "—"}</span>
-              <span><Icon name="shop" size={17} />{deliveryFee <= 0 ? t.free : `${money(deliveryFee)} JOD`} {t.delivery}</span>
-              <span>{money(store.minimum_order)} JOD {t.minimum}</span>
-            </>
-          )}
-        </div>
+      <div className="darikHomeStoreBody186">
+        <h3>{displayStoreName(store, language)}</h3>
+        {specialAtLocation && deliveryFee > 0 ? (
+          <span className="darikHomeStoreSpecial186">
+            Free delivery over {money(special!.minimumQualifyingJod)} JOD
+          </span>
+        ) : null}
+        <strong className="darikHomeStoreFee186">
+          {deliveryFee <= 0
+            ? "Free delivery"
+            : `${money(deliveryFee)} JOD delivery`}
+        </strong>
+        <small className="darikHomeStoreDistance186">
+          {distance < 1
+            ? `${Math.max(1, Math.round(distance * 1000))} m away`
+            : `${distance.toFixed(1)} km away`}
+        </small>
       </div>
     </a>
   );
 }
-
 export default function DarikDiscoveryHome() {
   const [language, setLanguage] = useState<Language>("en");
   const [locationReady, setLocationReady] = useState(false);
@@ -544,9 +639,15 @@ export default function DarikDiscoveryHome() {
   const [stores, setStores] = useState<NearbyStore[]>([]);
   const [storesLoading, setStoresLoading] = useState(false);
   const [storesError, setStoresError] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState<CategoryKey>("all");
   const [storeSearch, setStoreSearch] = useState("");
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
+
+  const [specialDeliveryBySlug186, setSpecialDeliveryBySlug186] = useState<
+    Record<string, DarikHomeSpecialDelivery186>
+  >({});
+  const [storeShelfState186, setStoreShelfState186] = useState<
+    Record<string, { canGoBack: boolean; canGoForward: boolean }>
+  >({});
 
   const t = copy[language];
 
@@ -634,6 +735,54 @@ export default function DarikDiscoveryHome() {
     setStoresLoading(false);
   }
 
+  useEffect(() => {
+    const slugs186 = Array.from(
+      new Set(stores.map((store) => store.slug.trim()).filter(Boolean))
+    );
+
+    if (slugs186.length === 0) {
+      setSpecialDeliveryBySlug186({});
+      return;
+    }
+
+    let cancelled186 = false;
+
+    void (async () => {
+      const result186 = await supabase.rpc(
+        "darik_direct_public_special_delivery_zones_v186",
+        { p_slugs: slugs186 }
+      );
+
+      if (cancelled186) return;
+
+      if (result186.error) {
+        console.warn(
+          "Darik homepage Special Zone badges unavailable:",
+          result186.error.message
+        );
+        setSpecialDeliveryBySlug186({});
+        return;
+      }
+
+      const payload186 =
+        result186.data && typeof result186.data === "object"
+          ? (result186.data as Record<string, unknown>)
+          : {};
+      const next186: Record<string, DarikHomeSpecialDelivery186> = {};
+
+      for (const [slug186, raw186] of Object.entries(payload186)) {
+        const normalized186 = normalizeHomeSpecialDelivery186(raw186);
+        if (normalized186) next186[slug186.toLowerCase()] = normalized186;
+      }
+
+      setSpecialDeliveryBySlug186(next186);
+    })();
+
+    return () => {
+      cancelled186 = true;
+    };
+  }, [stores]);
+
   function saveLocation(nextLocation: CustomerLocation) {
     window.localStorage.removeItem(STORAGE_LOCATION_KEY);
     window.sessionStorage.setItem(
@@ -655,7 +804,6 @@ export default function DarikDiscoveryHome() {
     setLocationError("");
     setPredictions([]);
     setPlaceQuery("");
-    setSelectedCategory("all");
   }
 
   async function reverseGeocode(latitude: number, longitude: number) {
@@ -758,10 +906,9 @@ export default function DarikDiscoveryHome() {
 
   const matchingStores = useMemo(() => {
     const normalizedSearch = storeSearch.trim().toLowerCase();
+    if (!normalizedSearch) return stores;
+
     return stores.filter((store) => {
-      const categoryMatch = selectedCategory === "all" || storeGroupKey(store) === selectedCategory;
-      if (!categoryMatch) return false;
-      if (!normalizedSearch) return true;
       const haystack = [
         store.display_name,
         store.display_name_ar,
@@ -771,23 +918,136 @@ export default function DarikDiscoveryHome() {
         store.retail_field_other,
         store.public_address,
         store.public_address_ar,
-      ].filter(Boolean).join(" ").toLowerCase();
+      ]
+        .filter(Boolean)
+        .join(" ")
+        .toLowerCase();
       return haystack.includes(normalizedSearch);
     });
-  }, [selectedCategory, storeSearch, stores]);
+  }, [storeSearch, stores]);
 
+  // DARIK_HOME_STORE_SHELVES_TRUE_BESTSELLERS_186
   const groupedStores = useMemo(() => {
-    if (selectedCategory !== "all" || storeSearch.trim()) {
-      const selectedGroup = categoryGroups.find((group) => group.key === selectedCategory) || categoryGroups[0];
-      return [{ group: selectedGroup, stores: matchingStores }];
+    const buckets186 = new Map<string, NearbyStore[]>();
+
+    for (const store of matchingStores) {
+      const field186 = retailFieldShelfKey186(store);
+      const bucket186 = buckets186.get(field186) ?? [];
+      bucket186.push(store);
+      buckets186.set(field186, bucket186);
     }
 
-    return categoryGroups
-      .filter((group) => group.key !== "all")
-      .map((group) => ({ group, stores: stores.filter((store) => storeGroupKey(store) === group.key) }))
-      .filter((section) => section.stores.length > 0);
-  }, [matchingStores, selectedCategory, storeSearch, stores]);
+    return Array.from(buckets186.entries())
+      .map(([field, fieldStores]) => {
+        const sortedStores = [...fieldStores].sort((a, b) => {
+          const feeDifference = storeDeliveryFee186(a) - storeDeliveryFee186(b);
+          if (feeDifference !== 0) return feeDifference;
 
+          const distanceDifference =
+            Number(a.distance_km ?? 0) - Number(b.distance_km ?? 0);
+          if (distanceDifference !== 0) return distanceDifference;
+
+          return displayStoreName(a, language).localeCompare(
+            displayStoreName(b, language),
+            language === "ar" ? "ar" : "en"
+          );
+        });
+
+        return {
+          field,
+          label: retailFieldShelfLabel186(field, language),
+          stores: sortedStores,
+          cheapestFee: sortedStores.length
+            ? storeDeliveryFee186(sortedStores[0])
+            : Number.POSITIVE_INFINITY,
+        };
+      })
+      .sort((a, b) => {
+        const feeDifference = a.cheapestFee - b.cheapestFee;
+        if (feeDifference !== 0) return feeDifference;
+        return a.label.localeCompare(b.label, language === "ar" ? "ar" : "en");
+      });
+  }, [matchingStores, language]);
+
+  function updateStoreShelfState186(field186: string, element: HTMLDivElement) {
+    const maxScroll186 = Math.max(0, element.scrollWidth - element.clientWidth);
+    const scroll186 = Math.abs(element.scrollLeft);
+    const next186 = {
+      canGoBack: scroll186 > 4,
+      canGoForward: maxScroll186 - scroll186 > 4,
+    };
+
+    setStoreShelfState186((current) => {
+      const previous = current[field186];
+      if (
+        previous?.canGoBack === next186.canGoBack &&
+        previous?.canGoForward === next186.canGoForward
+      ) {
+        return current;
+      }
+      return { ...current, [field186]: next186 };
+    });
+  }
+
+  function scrollStoreShelf186(field186: string) {
+    const shelf186 = Array.from(
+      document.querySelectorAll<HTMLDivElement>(
+        "[data-darik-home-store-shelf-186]"
+      )
+    ).find(
+      (element) => element.dataset.darikHomeStoreShelf186 === field186
+    );
+
+    if (!shelf186) return;
+    const card186 = shelf186.querySelector<HTMLElement>(
+      ".darikHomeStoreCard186"
+    );
+    const cardWidth186 = card186?.getBoundingClientRect().width ?? 184;
+    const computed186 = window.getComputedStyle(shelf186);
+    const gap186 =
+      Number.parseFloat(computed186.columnGap || computed186.gap || "0") || 0;
+    const main186 = shelf186.closest("main");
+    const rtl186 = main186?.getAttribute("dir") === "rtl";
+    const amount186 = Math.max(
+      cardWidth186 + gap186,
+      shelf186.clientWidth * 0.72
+    );
+
+    shelf186.scrollBy({
+      left: rtl186 ? -amount186 : amount186,
+      behavior: "smooth",
+    });
+  }
+
+  useEffect(() => {
+    const shelves186 = Array.from(
+      document.querySelectorAll<HTMLDivElement>(
+        "[data-darik-home-store-shelf-186]"
+      )
+    );
+    if (shelves186.length === 0) return;
+
+    const sync186 = () => {
+      for (const shelf186 of shelves186) {
+        const field186 = shelf186.dataset.darikHomeStoreShelf186;
+        if (field186) updateStoreShelfState186(field186, shelf186);
+      }
+    };
+
+    const frame186 = window.requestAnimationFrame(sync186);
+    const observer186 =
+      typeof ResizeObserver !== "undefined"
+        ? new ResizeObserver(sync186)
+        : null;
+    shelves186.forEach((shelf186) => observer186?.observe(shelf186));
+    window.addEventListener("resize", sync186);
+
+    return () => {
+      window.cancelAnimationFrame(frame186);
+      observer186?.disconnect();
+      window.removeEventListener("resize", sync186);
+    };
+  }, [groupedStores]);
   const heroCounts = useMemo(() => {
     return ["groceries", "pharmacy", "fashion", "technology"].map((key) => {
       const group = categoryGroups.find((item) => item.key === key)!;
@@ -822,9 +1082,7 @@ export default function DarikDiscoveryHome() {
       </div>
       <header className={styles.header}>
         <div className={styles.headerInner}>
-          <a className={styles.brand} href="/" aria-label="Darik Marketplace home">
-            <img className={styles.brandLogo} src="/darik_logo_final_v3.png" alt="Darik Marketplace" />
-          </a>
+          <span className="darikHomeBrandSpacer186" aria-hidden="true" />
 
           <nav className={styles.desktopNav} aria-label="Primary navigation">
             <a href="#stores">{t.stores}</a>
@@ -939,24 +1197,7 @@ export default function DarikDiscoveryHome() {
             ) : null}
           </div>
 
-          <div className={styles.categoryScroller}>
-            {categoryGroups.map((group) => {
-              const count = storeCounts.get(group.key) || 0;
-              return (
-                <button
-                  key={group.key}
-                  className={`${styles.categoryChip} ${selectedCategory === group.key ? styles.categoryChipActive : ""}`}
-                  type="button"
-                  onClick={() => setSelectedCategory(group.key)}
-                  disabled={!location}
-                >
-                  <span><Icon name={group.icon} size={20} /></span>
-                  <strong>{categoryLabel(group, language)}</strong>
-                  <small>{count}</small>
-                </button>
-              );
-            })}
-          </div>
+
 
           {!location ? (
             <div className={styles.locationEmptyState}>
@@ -984,20 +1225,50 @@ export default function DarikDiscoveryHome() {
               <button type="button" onClick={() => location && void loadNearbyStores(location)}>{t.retry}</button>
             </div>
           ) : groupedStores.length ? (
-            <div className={styles.storeSections}>
-              {groupedStores.map(({ group, stores: sectionStores }) => (
-                <section className={styles.storeGroup} key={group.key}>
-                  <div className={styles.storeGroupHeading}>
-                    <div className={styles.groupTitle}>
-                      <span><Icon name={group.icon} size={22} /></span>
-                      <div><h3>{categoryLabel(group, language)}</h3><p>{sectionStores.length} {sectionStores.length === 1 ? t.store : t.storesCount}</p></div>
+            <div className="darikHomeStoreShelfStack186">
+              {groupedStores.map(({ field, label, stores: sectionStores }) => (
+                <section className="darikHomeStoreGroup186" key={field}>
+                  <div className="darikHomeStoreShelfHeading186">
+                    <div>
+                      <span>{language === "ar" ? "متاجر قريبة" : "NEARBY STORES"}</span>
+                      <h3>{label}</h3>
                     </div>
-                    {selectedCategory === "all" && !storeSearch.trim() ? (
-                      <button type="button" onClick={() => setSelectedCategory(group.key)}>{t.seeAll}<Icon name="chevron" size={17} /></button>
-                    ) : null}
+                    <small>{sectionStores.length} {sectionStores.length === 1 ? t.store : t.storesCount}</small>
                   </div>
-                  <div className={styles.storeGrid}>
-                    {sectionStores.map((store) => <StoreCard key={store.storefront_id} store={store} language={language} />)}
+
+                  <div
+                    className="darikHomeStoreShelfShell186"
+                    data-can-forward={storeShelfState186[field]?.canGoForward ? "true" : "false"}
+                  >
+                    <div
+                      className="darikHomeStoreShelf186"
+                      data-darik-home-store-shelf-186={field}
+                      onScroll={(event) =>
+                        updateStoreShelfState186(field, event.currentTarget)
+                      }
+                    >
+                      {sectionStores.map((store) => (
+                        <HomeStoreCard186
+                          key={store.storefront_id}
+                          store={store}
+                          language={language}
+                          special={
+                            specialDeliveryBySlug186[store.slug.toLowerCase()] ?? null
+                          }
+                        />
+                      ))}
+                    </div>
+
+                    {storeShelfState186[field]?.canGoForward ? (
+                      <button
+                        type="button"
+                        className="darikHomeStoreContinue186"
+                        onClick={() => scrollStoreShelf186(field)}
+                        aria-label={`${language === "ar" ? "عرض المزيد من" : "Show more"} ${label}`}
+                      >
+                        <Icon name="chevron" size={17} />
+                      </button>
+                    ) : null}
                   </div>
                 </section>
               ))}
@@ -1047,7 +1318,7 @@ export default function DarikDiscoveryHome() {
       <footer className={styles.footer}>
         <div className={styles.footerInner}>
           <div className={styles.footerBrand}>
-            <a className={styles.brand} href="/" aria-label="Darik Marketplace home"><img className={styles.brandLogo} src="/darik_logo_final_v3.png" alt="Darik Marketplace" /></a>
+            <a className={styles.brand} href="/" aria-label="Darik Marketplace home"><img className={styles.brandLogo} src="/darik_logo_final_v2.png" alt="Darik Marketplace" /></a>
             <p>{t.footerBody}</p>
           </div>
           <div className={styles.footerLinks}>

@@ -2097,6 +2097,57 @@ export default function DarikDirectStorefrontPage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [selectedCategoryId, setSelectedCategoryId] = useState("BestSellers");
+
+  // DARIK_HOME_STORE_SHELVES_TRUE_BESTSELLERS_186
+  const [bestSellerUnits186, setBestSellerUnits186] = useState<
+    Record<string, number>
+  >({});
+
+  useEffect(() => {
+    if (!slug) {
+      setBestSellerUnits186({});
+      return;
+    }
+
+    let cancelled186 = false;
+
+    void (async () => {
+      const result186 = await supabase.rpc(
+        "darik_direct_public_bestseller_sales_v186",
+        { p_slug: slug }
+      );
+
+      if (cancelled186) return;
+
+      if (result186.error) {
+        console.warn(
+          "Darik true Best Sellers ranking unavailable:",
+          result186.error.message
+        );
+        setBestSellerUnits186({});
+        return;
+      }
+
+      const next186: Record<string, number> = {};
+      const rows186 = Array.isArray(result186.data) ? result186.data : [];
+
+      for (const raw186 of rows186) {
+        if (!raw186 || typeof raw186 !== "object") continue;
+        const row186 = raw186 as Record<string, unknown>;
+        const productId186 = String(row186.product_id ?? "").trim();
+        const units186 = Number(row186.units_sold ?? 0);
+        if (productId186 && Number.isFinite(units186) && units186 > 0) {
+          next186[productId186] = units186;
+        }
+      }
+
+      setBestSellerUnits186(next186);
+    })();
+
+    return () => {
+      cancelled186 = true;
+    };
+  }, [slug]);
   const [search, setSearch] = useState("");
   const [selectedVehicleMake, setSelectedVehicleMake] = useState("all");
   const [selectedVehicleModel, setSelectedVehicleModel] = useState("all");
@@ -2706,13 +2757,36 @@ export default function DarikDirectStorefrontPage() {
   const marketplaceBestSellerGroups = useMemo(() => {
     if (selectedCategoryId !== "BestSellers") return [];
 
+    const originalOrder186 = new Map(
+      filteredProducts.map((product, index) => [product.id, index] as const)
+    );
+
     return visibleCategories
       .map((category) => ({
         category,
-        products: filteredProducts.filter((product) => product.direct_store_category_id === category.id),
+        products: filteredProducts
+          .filter(
+            (product) => product.direct_store_category_id === category.id
+          )
+          .sort((a, b) => {
+            const salesDifference186 =
+              (bestSellerUnits186[b.id] ?? 0) -
+              (bestSellerUnits186[a.id] ?? 0);
+            if (salesDifference186 !== 0) return salesDifference186;
+
+            return (
+              (originalOrder186.get(a.id) ?? Number.MAX_SAFE_INTEGER) -
+              (originalOrder186.get(b.id) ?? Number.MAX_SAFE_INTEGER)
+            );
+          }),
       }))
       .filter((group) => group.products.length > 0);
-  }, [filteredProducts, selectedCategoryId, visibleCategories]);
+  }, [
+    bestSellerUnits186,
+    filteredProducts,
+    selectedCategoryId,
+    visibleCategories,
+  ]);
 
   // DARIK_BEST_SELLER_CONTINUATION_AFFORDANCE_182
   const [bestSellerShelfState182, setBestSellerShelfState182] = useState<
