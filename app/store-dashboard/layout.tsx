@@ -2,6 +2,7 @@
 
 /* DARIK_USERNAME_SIGNUP_FORCED_ONBOARDING_136 */
 /* DARIK_ONBOARDING_GATE_STABILITY_139 */
+/* DARIK_PAYMENT_ROUTE_AND_PENDING_SETUP_ACCESS_208 */
 
 import type { ReactNode } from "react";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -24,16 +25,38 @@ function destinationFor139(pathname: string, state: OnboardingState) {
       : "/store-dashboard/setup-field";
   }
 
+  // FRONTEND 208:
+  // Plan & Payment must remain reachable as soon as the retail field has been
+  // selected. The previous gate redirected /activation straight back to
+  // /storefront whenever setup_completed=false, creating the visible loop.
+  //
+  // This route also stays reachable after Finish Store Setup so a retailer can
+  // check a pending/rejected payment or submit a replacement receipt.
+  if (pathname === "/store-dashboard/activation") {
+    return null;
+  }
+
   if (!state.setup_completed) {
+    // Storefront is the only setup route besides Plan & Payment.
+    // FRONTEND 206 separately verifies that an activation/payment request
+    // exists before the storefront setup wizard is allowed to continue.
     return pathname === "/store-dashboard/storefront"
       ? null
       : "/store-dashboard/storefront";
   }
 
   if (state.getting_started_status === "pending") {
-    return pathname === "/store-dashboard/getting-started"
-      ? null
-      : "/store-dashboard/getting-started";
+    // Finishing setup must not make the pending-payment storefront inaccessible.
+    // Keep both storefront editing and Plan & Payment reachable while the normal
+    // Getting Started step remains the default destination for other routes.
+    if (
+      pathname === "/store-dashboard/storefront" ||
+      pathname === "/store-dashboard/getting-started"
+    ) {
+      return null;
+    }
+
+    return "/store-dashboard/getting-started";
   }
 
   if (
