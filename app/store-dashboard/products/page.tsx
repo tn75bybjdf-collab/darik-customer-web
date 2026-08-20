@@ -27,6 +27,7 @@
 // DARIK_REUSED_LIVE_CAMERA_PREVIEW_073
 // DARIK_ALL_FIELDS_GUIDED_ADD_PRODUCT_WIZARD_074
 // DARIK_FURNITURE_IKEA_COLOR_VARIANTS_216
+// DARIK_FURNITURE_MEDIA_ORDER_UPLOAD_FIX_217
 // DARIK_EYEGLASSES_RETAIL_FIELD_MECHANICS_135
 // DARIK_PHOTO_UPLOAD_DECODE_LOADING_076
 // DARIK_PHOTO_PRELOAD_READY_STATE_077
@@ -6384,6 +6385,10 @@ export default function DarikDirectProductsPage() {
           : "The color photo could not be uploaded / تعذر رفع صورة اللون."
       );
     } finally {
+      // FRONTEND 217: uploadImage() sets the shared uploading flag.
+      // Always release it after a Furniture color-photo upload so Photo 2/3,
+      // video recording, and all other media controls become usable again.
+      setUploading(false);
       setUploadingFurnitureColorId216(null);
       event.target.value = "";
     }
@@ -9356,7 +9361,7 @@ export default function DarikDirectProductsPage() {
                                 />
 
                                 <label className={styles.uploadButton}>
-                                  {uploading
+                                  {uploadingPhotoField === slot.field
                                     ? "Uploading… / جارٍ الرفع…"
                                     : `Upload ${slot.label} / رفع ${slot.labelAr}`}
                                   <input
@@ -9416,6 +9421,23 @@ export default function DarikDirectProductsPage() {
                             );
                           })}
                         </div>
+
+                        {shoeWizardPhotoSlots < 3 &&
+                        shoeWizardLatestPhotoFilled ? (
+                          <button
+                            type="button"
+                            className={styles.shoeWizardOptional}
+                            onClick={() =>
+                              setShoeWizardPhotoSlots((current) =>
+                                Math.min(3, current + 1)
+                              )
+                            }
+                          >
+                            {shoeWizardPhotoSlots === 1
+                              ? "Add Main Photo 2 (optional) / إضافة الصورة الرئيسية 2 (اختياري)"
+                              : "Add Main Photo 3 (optional) / إضافة الصورة الرئيسية 3 (اختياري)"}
+                          </button>
+                        ) : null}
 
                         {renderFurnitureColors216()}
                         {isFurnitureMechanics ? (
@@ -9672,22 +9694,6 @@ export default function DarikDirectProductsPage() {
                           >
                             Back / رجوع
                           </button>
-
-                          {shoeWizardPhotoSlots < 3 &&
-                          shoeWizardLatestPhotoFilled ? (
-                            <button
-                              type="button"
-                              className={styles.shoeWizardOptional}
-                              onClick={() =>
-                                setShoeWizardPhotoSlots((current) =>
-                                  Math.min(3, current + 1)
-                                )
-                              }
-                            >
-                              Add another photo (optional) /
-                              إضافة صورة أخرى (اختياري)
-                            </button>
-                          ) : null}
 
                           <button
                             type="button"
