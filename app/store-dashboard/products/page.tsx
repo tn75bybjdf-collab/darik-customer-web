@@ -26,6 +26,7 @@
 // DARIK_CAMERA_FIRST_FRAME_READY_072
 // DARIK_REUSED_LIVE_CAMERA_PREVIEW_073
 // DARIK_ALL_FIELDS_GUIDED_ADD_PRODUCT_WIZARD_074
+// DARIK_FURNITURE_IKEA_COLOR_VARIANTS_216
 // DARIK_EYEGLASSES_RETAIL_FIELD_MECHANICS_135
 // DARIK_PHOTO_UPLOAD_DECODE_LOADING_076
 // DARIK_PHOTO_PRELOAD_READY_STATE_077
@@ -2892,6 +2893,8 @@ type DirectProduct = {
   direct_photo_url: string | null;
   retailer_raw_photo_url_2: string | null;
   retailer_raw_photo_url_3: string | null;
+  direct_furniture_multiple_colors: boolean;
+  direct_furniture_color_variants: FurnitureColorVariantStored216[] | null;
   direct_sold_by_weight: boolean;
   direct_weight_unit: string | null;
   direct_weight_step: number | string | null;
@@ -2919,6 +2922,23 @@ type DirectProduct = {
   direct_product_status: "draft" | "published" | "paused" | "archived";
   direct_updated_at: string | null;
   created_at: string;
+};
+
+type FurnitureColorVariantStored216 = {
+  id?: string | null;
+  name?: string | null;
+  name_ar?: string | null;
+  photo_url?: string | null;
+  is_primary?: boolean | null;
+  sort_order?: number | string | null;
+};
+
+type FurnitureColorVariantForm216 = {
+  id: string;
+  name: string;
+  nameAr: string;
+  photoUrl: string;
+  isPrimary: boolean;
 };
 
 type ProductForm = {
@@ -2962,6 +2982,8 @@ type ProductForm = {
   photoUrl: string;
   photoUrl2: string;
   photoUrl3: string;
+  furnitureMultipleColors: boolean;
+  furnitureColorVariants: FurnitureColorVariantForm216[];
   status: "draft" | "published" | "paused";
   featured: boolean;
   sortOrder: string;
@@ -3008,6 +3030,8 @@ const emptyForm: ProductForm = {
   photoUrl: "",
   photoUrl2: "",
   photoUrl3: "",
+  furnitureMultipleColors: false,
+  furnitureColorVariants: [],
   status: "published",
   featured: false,
   sortOrder: "1000",
@@ -3318,6 +3342,7 @@ export default function DarikDirectProductsPage() {
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [uploadingPhotoField, setUploadingPhotoField] = useState<PhotoField | null>(null);
+  const [uploadingFurnitureColorId216, setUploadingFurnitureColorId216] = useState<string | null>(null);
   const [editingProductId, setEditingProductId] = useState<string | null>(null);
   const [formOpen, setFormOpen] = useState(false);
   const [shoeWizardStep, setShoeWizardStep] = useState<1 | 2 | 3 | 4 | 5 | 6 | 7>(1);
@@ -3516,6 +3541,8 @@ export default function DarikDirectProductsPage() {
             "direct_photo_url",
             "retailer_raw_photo_url_2",
             "retailer_raw_photo_url_3",
+            "direct_furniture_multiple_colors",
+            "direct_furniture_color_variants",
             "direct_sold_by_weight",
             "direct_weight_unit",
             "direct_weight_step",
@@ -3764,6 +3791,88 @@ export default function DarikDirectProductsPage() {
     value: ProductForm[K]
   ) {
     setForm((current) => ({ ...current, [key]: value }));
+  }
+
+  function furnitureColorId216() {
+    if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
+      return crypto.randomUUID();
+    }
+    return `furniture-color-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+  }
+
+  function setFurnitureMultipleColors216(enabled: boolean) {
+    setForm((current) => {
+      if (!enabled) {
+        return { ...current, furnitureMultipleColors: false };
+      }
+
+      if (current.furnitureColorVariants.length >= 2) {
+        return { ...current, furnitureMultipleColors: true };
+      }
+
+      return {
+        ...current,
+        furnitureMultipleColors: true,
+        furnitureColorVariants: [
+          {
+            id: furnitureColorId216(),
+            name: "",
+            nameAr: "",
+            photoUrl: "",
+            isPrimary: true,
+          },
+          {
+            id: furnitureColorId216(),
+            name: "",
+            nameAr: "",
+            photoUrl: "",
+            isPrimary: false,
+          },
+        ],
+      };
+    });
+    clearShoeWizardError("furnitureColors");
+  }
+
+  function updateFurnitureColor216(
+    colorId: string,
+    patch: Partial<FurnitureColorVariantForm216>
+  ) {
+    setForm((current) => ({
+      ...current,
+      furnitureColorVariants: current.furnitureColorVariants.map((color) =>
+        color.id === colorId ? { ...color, ...patch } : color
+      ),
+    }));
+    clearShoeWizardError("furnitureColors");
+  }
+
+  function addFurnitureColor216() {
+    setForm((current) => ({
+      ...current,
+      furnitureMultipleColors: true,
+      furnitureColorVariants: [
+        ...current.furnitureColorVariants,
+        {
+          id: furnitureColorId216(),
+          name: "",
+          nameAr: "",
+          photoUrl: "",
+          isPrimary: false,
+        },
+      ],
+    }));
+    clearShoeWizardError("furnitureColors");
+  }
+
+  function removeFurnitureColor216(colorId: string) {
+    setForm((current) => ({
+      ...current,
+      furnitureColorVariants: current.furnitureColorVariants.filter(
+        (color) => color.id !== colorId || color.isPrimary
+      ),
+    }));
+    clearShoeWizardError("furnitureColors");
   }
 
   function setEyewearColorMode(multiple: boolean) {
@@ -4402,6 +4511,43 @@ export default function DarikDirectProductsPage() {
     if (step === 6 && !form.photoUrl.trim()) {
       errors.photo =
         "Please add the main product photo / يرجى إضافة الصورة الرئيسية للمنتج";
+    }
+
+    if (
+      step === 6 &&
+      isFurnitureColorVariants216 &&
+      form.furnitureMultipleColors
+    ) {
+      const colors216 = form.furnitureColorVariants;
+      const primary216 = colors216.find((color) => color.isPrimary);
+      const additional216 = colors216.filter((color) => !color.isPrimary);
+
+      if (!primary216 || additional216.length < 1) {
+        errors.furnitureColors =
+          "Add a primary color and at least one additional color / أضف اللون الأساسي ولونًا إضافيًا واحدًا على الأقل";
+      } else if (
+        !primary216.name.trim() ||
+        !primary216.nameAr.trim() ||
+        additional216.some(
+          (color) =>
+            !color.name.trim() ||
+            !color.nameAr.trim() ||
+            !color.photoUrl.trim()
+        )
+      ) {
+        errors.furnitureColors =
+          "Every color needs English and Arabic names, and every additional color needs one photo / كل لون يحتاج اسمًا بالإنجليزية والعربية، وكل لون إضافي يحتاج صورة واحدة";
+      } else {
+        const english216 = colors216.map((color) => color.name.trim().toLowerCase());
+        const arabic216 = colors216.map((color) => color.nameAr.trim());
+        if (
+          new Set(english216).size !== english216.length ||
+          new Set(arabic216).size !== arabic216.length
+        ) {
+          errors.furnitureColors =
+            "Color names must be unique / يجب أن تكون أسماء الألوان غير مكررة";
+        }
+      }
     }
 
     setShoeWizardErrors(errors);
@@ -5070,6 +5216,9 @@ export default function DarikDirectProductsPage() {
   const isFurnitureMechanics = ["furniture", "home_appliances"].includes(
     effectiveBusinessType
   );
+  // FRONTEND 216: IKEA-style color variants are Furniture-only.
+  // Home Appliances keeps the shared short-video mechanic but not Furniture colors.
+  const isFurnitureColorVariants216 = actualBusinessType === "furniture";
   const furnitureVideoDisplayUrl =
     furnitureVideoPreviewUrl ||
     (!furnitureVideoRemoveRequested ? furnitureVideoExistingUrl : "");
@@ -5912,6 +6061,24 @@ export default function DarikDirectProductsPage() {
       photoUrl: product.direct_photo_url || "",
       photoUrl2: product.retailer_raw_photo_url_2 || "",
       photoUrl3: product.retailer_raw_photo_url_3 || "",
+      furnitureMultipleColors: Boolean(product.direct_furniture_multiple_colors),
+      furnitureColorVariants:
+        Array.isArray(product.direct_furniture_color_variants)
+          ? product.direct_furniture_color_variants
+              .map((color, index) => ({
+                id:
+                  String(color?.id || "").trim() ||
+                  furnitureColorId216(),
+                name: String(color?.name || ""),
+                nameAr: String(color?.name_ar || ""),
+                photoUrl: String(color?.photo_url || ""),
+                isPrimary:
+                  color?.is_primary === true ||
+                  String(color?.is_primary || "").toLowerCase() === "true" ||
+                  index === 0,
+              }))
+              .filter((color) => Boolean(color.id))
+          : [],
       status:
         product.direct_product_status === "archived"
           ? "paused"
@@ -6193,6 +6360,200 @@ export default function DarikDirectProductsPage() {
       setUploadingPhotoField(null);
       event.target.value = "";
     }
+  }
+
+  async function handleFurnitureColorPhoto216(
+    event: ChangeEvent<HTMLInputElement>,
+    colorId: string
+  ) {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    setError("");
+    setMessage("");
+    setUploadingFurnitureColorId216(colorId);
+
+    try {
+      const publicUrl = await uploadImage(file);
+      updateFurnitureColor216(colorId, { photoUrl: publicUrl });
+      setMessage("Furniture color photo uploaded / تم رفع صورة اللون.");
+    } catch (uploadError) {
+      setError(
+        uploadError instanceof Error
+          ? uploadError.message
+          : "The color photo could not be uploaded / تعذر رفع صورة اللون."
+      );
+    } finally {
+      setUploadingFurnitureColorId216(null);
+      event.target.value = "";
+    }
+  }
+
+  function renderFurnitureColors216() {
+    if (!isFurnitureColorVariants216) return null;
+
+    const primary216 =
+      form.furnitureColorVariants.find((color) => color.isPrimary) || null;
+    const additional216 = form.furnitureColorVariants.filter(
+      (color) => !color.isPrimary
+    );
+
+    return (
+      <section className={styles.furnitureColors216}>
+        <div className={styles.furnitureColorsHeading216}>
+          <div>
+            <strong>Color options / خيارات الألوان</strong>
+            <span>
+              If this item comes in multiple colors, name every color in English and Arabic. The primary color uses the main 1–3 photos and optional video. Each additional color gets one photo. /
+              إذا كان المنتج متوفرًا بعدة ألوان، اكتب اسم كل لون بالإنجليزية والعربية. اللون الأساسي يستخدم الصور الرئيسية والفيديو الاختياري، وكل لون إضافي له صورة واحدة.
+            </span>
+          </div>
+        </div>
+
+        <div className={styles.furnitureColorToggle216}>
+          <button
+            type="button"
+            className={form.furnitureMultipleColors ? styles.furnitureColorToggleActive216 : ""}
+            onClick={() => setFurnitureMultipleColors216(true)}
+          >
+            Yes, multiple colors / نعم، عدة ألوان
+          </button>
+          <button
+            type="button"
+            className={!form.furnitureMultipleColors ? styles.furnitureColorToggleActive216 : ""}
+            onClick={() => setFurnitureMultipleColors216(false)}
+          >
+            No / لا
+          </button>
+        </div>
+
+        {form.furnitureMultipleColors ? (
+          <div className={styles.furnitureColorCards216}>
+            {primary216 ? (
+              <article className={[styles.furnitureColorCard216, styles.furnitureColorPrimary216].join(" ")}>
+                <div className={styles.furnitureColorCardTop216}>
+                  <div>
+                    <b>Primary color / اللون الأساسي</b>
+                    <small>Uses Photos 1–3 + product video / يستخدم الصور الرئيسية والفيديو</small>
+                  </div>
+                  {form.photoUrl ? (
+                    <img src={form.photoUrl} alt="" />
+                  ) : (
+                    <span className={styles.furnitureColorNoPhoto216}>Photo 1</span>
+                  )}
+                </div>
+                <div className={styles.furnitureColorNameGrid216}>
+                  <label>
+                    <span>Color name (English)</span>
+                    <input
+                      value={primary216.name}
+                      onChange={(event) =>
+                        updateFurnitureColor216(primary216.id, {
+                          name: event.target.value,
+                        })
+                      }
+                      placeholder="Vissle beige"
+                    />
+                  </label>
+                  <label>
+                    <span>اسم اللون بالعربية</span>
+                    <input
+                      dir="rtl"
+                      value={primary216.nameAr}
+                      onChange={(event) =>
+                        updateFurnitureColor216(primary216.id, {
+                          nameAr: event.target.value,
+                        })
+                      }
+                      placeholder="بيج فيسل"
+                    />
+                  </label>
+                </div>
+              </article>
+            ) : null}
+
+            {additional216.map((color, index) => (
+              <article className={styles.furnitureColorCard216} key={color.id}>
+                <div className={styles.furnitureColorCardTop216}>
+                  <div>
+                    <b>Additional color {index + 1} / لون إضافي {index + 1}</b>
+                    <small>One photo for this color / صورة واحدة لهذا اللون</small>
+                  </div>
+                  <button
+                    type="button"
+                    className={styles.furnitureColorRemove216}
+                    onClick={() => removeFurnitureColor216(color.id)}
+                  >
+                    Remove / حذف
+                  </button>
+                </div>
+
+                <div className={styles.furnitureColorNameGrid216}>
+                  <label>
+                    <span>Color name (English)</span>
+                    <input
+                      value={color.name}
+                      onChange={(event) =>
+                        updateFurnitureColor216(color.id, {
+                          name: event.target.value,
+                        })
+                      }
+                      placeholder="Red"
+                    />
+                  </label>
+                  <label>
+                    <span>اسم اللون بالعربية</span>
+                    <input
+                      dir="rtl"
+                      value={color.nameAr}
+                      onChange={(event) =>
+                        updateFurnitureColor216(color.id, {
+                          nameAr: event.target.value,
+                        })
+                      }
+                      placeholder="أحمر"
+                    />
+                  </label>
+                </div>
+
+                <label className={styles.furnitureColorPhoto216}>
+                  {color.photoUrl ? (
+                    <img src={color.photoUrl} alt={color.name || "Furniture color"} />
+                  ) : (
+                    <span>+ Add color photo / إضافة صورة اللون</span>
+                  )}
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={(event) =>
+                      void handleFurnitureColorPhoto216(event, color.id)
+                    }
+                    disabled={saving || uploadingFurnitureColorId216 === color.id}
+                  />
+                  {uploadingFurnitureColorId216 === color.id ? (
+                    <b>Uploading… / جارٍ الرفع…</b>
+                  ) : null}
+                </label>
+              </article>
+            ))}
+
+            <button
+              type="button"
+              className={styles.furnitureColorAdd216}
+              onClick={addFurnitureColor216}
+            >
+              + Add another color / إضافة لون آخر
+            </button>
+          </div>
+        ) : null}
+
+        {shoeWizardErrors.furnitureColors ? (
+          <p className={styles.shoeWizardError}>
+            {shoeWizardErrors.furnitureColors}
+          </p>
+        ) : null}
+      </section>
+    );
   }
 
   async function resolveDirectCategoryId(rawValue: string) {
@@ -6644,6 +7005,37 @@ export default function DarikDirectProductsPage() {
       );
       await loadCatalog();
       return;
+    }
+
+    if (isFurnitureColorVariants216) {
+      const furnitureColorResult216 = await supabase.rpc(
+        "darik_direct_set_product_furniture_colors_v1",
+        {
+          p_product_id: savedProductId,
+          p_multiple_colors: form.furnitureMultipleColors,
+          p_variants: form.furnitureMultipleColors
+            ? form.furnitureColorVariants.map((color, index) => ({
+                id: color.id,
+                name: color.name.trim(),
+                name_ar: color.nameAr.trim(),
+                photo_url: color.isPrimary
+                  ? form.photoUrl.trim()
+                  : color.photoUrl.trim(),
+                is_primary: color.isPrimary,
+                sort_order: index + 1,
+              }))
+            : [],
+        }
+      );
+
+      if (furnitureColorResult216.error) {
+        setSaving(false);
+        setError(
+          `The product was saved, but its Furniture colors could not be saved. / تم حفظ المنتج، لكن تعذر حفظ ألوان الأثاث. ${furnitureColorResult216.error.message}`
+        );
+        await loadCatalog();
+        return;
+      }
     }
 
     const groceryMechanicsResult = await supabase.rpc(
@@ -9025,6 +9417,7 @@ export default function DarikDirectProductsPage() {
                           })}
                         </div>
 
+                        {renderFurnitureColors216()}
                         {isFurnitureMechanics ? (
                                               <section className={styles.furnitureVideoPanel}>
                                                 <div className={styles.furnitureVideoHeading}>
@@ -9409,6 +9802,18 @@ export default function DarikDirectProductsPage() {
                                 {form.soldByWeight
                                   ? "By kilogram / بالكيلو"
                                   : "By item / بالقطعة"}
+                              </strong>
+                            </div>
+                          ) : null}
+
+                          {isFurnitureColorVariants216 && form.furnitureMultipleColors ? (
+                            <div>
+                              <span>Colors / الألوان</span>
+                              <strong>
+                                {form.furnitureColorVariants
+                                  .map((color) => color.name.trim())
+                                  .filter(Boolean)
+                                  .join(", ") || "Not entered / غير مدخل"}
                               </strong>
                             </div>
                           ) : null}
@@ -10728,6 +11133,7 @@ export default function DarikDirectProductsPage() {
                   </p>
                 </div>
 
+                    {renderFurnitureColors216()}
                     {isFurnitureMechanics ? (
                       <section className={styles.furnitureVideoPanel}>
                         <div className={styles.furnitureVideoHeading}>

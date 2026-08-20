@@ -22017,3 +22017,17 @@
   .specialDeliveryCountdown191 { margin: 10px 12px 0; }
   .specialDeliveryCountdownTop191 strong { font-size: 12px; }
 }
+
+
+/* DARIK_FURNITURE_IKEA_COLOR_VARIANTS_216 */
+.cartColor216 {
+  display: block;
+  margin: 3px 0 1px;
+  color: var(--muted, #667085);
+  font-size: 11px;
+  font-weight: 800;
+  line-height: 1.35;
+}
+.cartColor216 span {
+  font: inherit;
+}

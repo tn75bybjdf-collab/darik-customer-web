@@ -1,5 +1,7 @@
 "use client";
 
+// DARIK_FURNITURE_IKEA_COLOR_VARIANTS_216
+
 
 import DarikCustomerAccountHub175 from "../components/DarikCustomerAccountHub175";
 // DARIK_REAL_PRIVATE_PREVIEW_ALIAS_143
@@ -154,12 +156,24 @@ type Category = {
   product_count: number | string;
 };
 
+type FurnitureColorSelection216 = {
+  id: string;
+  name: string;
+  nameAr: string;
+  photoUrl: string | null;
+  isPrimary: boolean;
+};
+
 type CartLine = {
+  lineId: string;
   productId: string;
   name: string;
   price: number;
   quantity: number;
   photoUrl: string | null;
+  colorVariantId: string | null;
+  colorName: string | null;
+  colorNameAr: string | null;
 };
 
 type OnlineCheckoutForm = {
@@ -2356,7 +2370,36 @@ export default function DarikDirectStorefrontPage() {
 
     try {
       const saved = window.localStorage.getItem(storageKey);
-      if (saved) setCart(JSON.parse(saved) as CartLine[]);
+      if (saved) {
+        const parsed216 = JSON.parse(saved) as Array<Partial<CartLine> & { productId?: string }>;
+        if (Array.isArray(parsed216)) {
+          setCart(
+            parsed216
+              .filter((line) => Boolean(line?.productId))
+              .map((line) => {
+                const productId216 = String(line.productId || "");
+                const colorVariantId216 =
+                  typeof line.colorVariantId === "string" && line.colorVariantId
+                    ? line.colorVariantId
+                    : null;
+                return {
+                  lineId:
+                    typeof line.lineId === "string" && line.lineId
+                      ? line.lineId
+                      : cartLineId216(productId216, colorVariantId216),
+                  productId: productId216,
+                  name: String(line.name || "Product"),
+                  price: Number(line.price || 0),
+                  quantity: Math.max(1, Number(line.quantity || 1)),
+                  photoUrl: typeof line.photoUrl === "string" ? line.photoUrl : null,
+                  colorVariantId: colorVariantId216,
+                  colorName: typeof line.colorName === "string" ? line.colorName : null,
+                  colorNameAr: typeof line.colorNameAr === "string" ? line.colorNameAr : null,
+                };
+              })
+          );
+        }
+      }
     } catch {
       setCart([]);
     }
@@ -5100,7 +5143,26 @@ export default function DarikDirectStorefrontPage() {
     }
   }
 
-  function addToCart(product: Product) {
+  function cartLineId216(
+    productId: string,
+    colorVariantId: string | null | undefined
+  ) {
+    return `${productId}:${colorVariantId || "default"}`;
+  }
+
+  function productCartQuantities216(productId: string) {
+    return cart.reduce<Record<string, number>>((result, line) => {
+      if (line.productId !== productId) return result;
+      const key216 = line.colorVariantId || "default";
+      result[key216] = (result[key216] || 0) + line.quantity;
+      return result;
+    }, {});
+  }
+
+  function addToCart(
+    product: Product,
+    colorVariant216: FurnitureColorSelection216 | null = null
+  ) {
     setOrderConfirmation(null);
     if ((product.direct_pricing_mode || "price") !== "price") return;
     if (
@@ -5111,12 +5173,14 @@ export default function DarikDirectStorefrontPage() {
     const price = Number(product.app_price ?? 0);
     if (!Number.isFinite(price) || price <= 0) return;
 
+    const lineId216 = cartLineId216(product.id, colorVariant216?.id || null);
+
     setCart((current) => {
-      const existing = current.find((line) => line.productId === product.id);
+      const existing = current.find((line) => line.lineId === lineId216);
 
       if (existing) {
         return current.map((line) =>
-          line.productId === product.id
+          line.lineId === lineId216
             ? { ...line, quantity: line.quantity + 1 }
             : line
         );
@@ -5125,21 +5189,25 @@ export default function DarikDirectStorefrontPage() {
       return [
         ...current,
         {
+          lineId: lineId216,
           productId: product.id,
           name: productName(product),
           price,
           quantity: 1,
-          photoUrl: productPhoto(product),
+          photoUrl: colorVariant216?.photoUrl || productPhoto(product),
+          colorVariantId: colorVariant216?.id || null,
+          colorName: colorVariant216?.name || null,
+          colorNameAr: colorVariant216?.nameAr || null,
         },
       ];
     });
   }
 
-  function changeQuantity(productId: string, change: number) {
+  function changeQuantity(lineId: string, change: number) {
     setCart((current) =>
       current
         .map((line) =>
-          line.productId === productId
+          line.lineId === lineId
             ? { ...line, quantity: line.quantity + change }
             : line
         )
@@ -5326,7 +5394,7 @@ export default function DarikDirectStorefrontPage() {
           ? await uploadCliqReceipt()
           : null;
 
-      const result = await supabase.rpc("darik_direct_place_online_order_v3", {
+      const result = await supabase.rpc("darik_direct_place_online_order_v4", {
         p_storefront_slug: storefront.slug,
         p_customer_name: customerName,
         p_customer_phone: customerPhone,
@@ -5336,6 +5404,7 @@ export default function DarikDirectStorefrontPage() {
         p_items: cart.map((line) => ({
           product_id: line.productId,
           quantity: line.quantity,
+          color_variant_id: line.colorVariantId,
         })),
         p_payment_method: checkoutForm.paymentMethod,
         p_cliq_receipt_path: receiptPath,
@@ -5977,7 +6046,7 @@ export default function DarikDirectStorefrontPage() {
     "",
     ...cart.map(
       (line) =>
-        `${line.quantity} × ${line.name} — ${money(line.price * line.quantity)}`
+        `${line.quantity} × ${line.name}${line.colorName ? ` — ${line.colorName}${line.colorNameAr ? ` / ${line.colorNameAr}` : ""}` : ""} — ${money(line.price * line.quantity)}`
     ),
     "",
     `Fulfillment: ${pickupOnly ? "Local pickup" : "Delivery"}`,
@@ -6549,15 +6618,21 @@ export default function DarikDirectStorefrontPage() {
             ? cart.find((line) => line.productId === activeProduct.id)?.quantity ?? 0
             : 0
         }
+        cartQuantitiesByVariant216={
+          activeProduct ? productCartQuantities216(activeProduct.id) : {}
+        }
         cartCount={cartCount}
         onClose={closeProductDetail}
-        onAddToCart={() => {
+        onAddToCart={(colorVariant216) => {
           if (!activeProduct) return;
-          addToCart(activeProduct);
+          addToCart(activeProduct, colorVariant216);
         }}
-        onDecreaseCart={() => {
+        onDecreaseCart={(colorVariant216) => {
           if (!activeProduct) return;
-          changeQuantity(activeProduct.id, -1);
+          changeQuantity(
+            cartLineId216(activeProduct.id, colorVariant216?.id || null),
+            -1
+          );
         }}
         onOpenCart={() => {
           // DARIK_PRODUCT_CART_QUANTITY_THEME_PARITY_180: match Customer App behavior.
@@ -7972,7 +8047,7 @@ style={{
                     </div>
                   ) : (
                     cart.map((line) => (
-                      <div className={styles.cartLine} key={line.productId}>
+                      <div className={styles.cartLine} key={line.lineId}>
                         <div className={styles.cartThumb}>
                           {line.photoUrl ? (
                             <img src={line.photoUrl} alt={line.name} />
@@ -7982,17 +8057,25 @@ style={{
                         </div>
                         <div className={styles.cartLineInfo}>
                           <h3>{line.name}</h3>
+                          {line.colorName ? (
+                            <small className={styles.cartColor216}>
+                              {line.colorName}
+                              {line.colorNameAr ? (
+                                <span dir="rtl"> / {line.colorNameAr}</span>
+                              ) : null}
+                            </small>
+                          ) : null}
                           <p>{money(line.price)}</p>
                         </div>
                         <div className={styles.quantity}>
                           <button
-                            onClick={() => changeQuantity(line.productId, -1)}
+                            onClick={() => changeQuantity(line.lineId, -1)}
                           >
                             <Icon name="minus" size={15} />
                           </button>
                           <span>{line.quantity}</span>
                           <button
-                            onClick={() => changeQuantity(line.productId, 1)}
+                            onClick={() => changeQuantity(line.lineId, 1)}
                           >
                             <Icon name="plus" size={15} />
                           </button>

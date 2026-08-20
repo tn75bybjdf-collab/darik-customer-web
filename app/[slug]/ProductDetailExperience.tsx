@@ -21,8 +21,27 @@ import { createPortal } from "react-dom";
 import { supabase } from "@/lib/supabaseBrowser";
 import styles from "./productDetailExperience.module.css";
 
+// DARIK_FURNITURE_IKEA_COLOR_VARIANTS_216
+
 type SizeOption = { label?: string | null };
 type ShoeSize = { eu?: string | null; us?: string | null };
+
+export type FurnitureColorSelection216 = {
+  id: string;
+  name: string;
+  nameAr: string;
+  photoUrl: string | null;
+  isPrimary: boolean;
+};
+
+type FurnitureColorApi216 = {
+  id?: string | null;
+  name?: string | null;
+  name_ar?: string | null;
+  photo_url?: string | null;
+  is_primary?: boolean | null;
+  sort_order?: number | string | null;
+};
 
 export type ProductDetailProduct = {
   id: string;
@@ -73,10 +92,11 @@ type ProductDetailExperienceProps = {
   estimatedDeliveryMinutes: number | null;
   deliveryPromiseLabel?: string;
   inCart: number;
+  cartQuantitiesByVariant216: Record<string, number>;
   cartCount: number;
   onClose: () => void;
-  onAddToCart: () => void;
-  onDecreaseCart: () => void;
+  onAddToCart: (color: FurnitureColorSelection216 | null) => void;
+  onDecreaseCart: (color: FurnitureColorSelection216 | null) => void;
   onOpenCart: () => void;
 };
 
@@ -403,6 +423,7 @@ export default function ProductDetailExperience({
   estimatedDeliveryMinutes,
   deliveryPromiseLabel,
   inCart,
+  cartQuantitiesByVariant216,
   cartCount,
   onClose,
   onAddToCart,
@@ -414,6 +435,11 @@ export default function ProductDetailExperience({
   const [galleryIndex, setGalleryIndex] = useState(0);
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
   const [videoUrl, setVideoUrl] = useState("");
+  const [furnitureColors216, setFurnitureColors216] = useState<FurnitureColorSelection216[]>([]);
+  const [furniturePrimaryPhotos216, setFurniturePrimaryPhotos216] = useState<string[]>([]);
+  const [selectedFurnitureColorId216, setSelectedFurnitureColorId216] = useState("");
+  const [furnitureColorsReady216, setFurnitureColorsReady216] = useState(false);
+  const [furnitureColorsError216, setFurnitureColorsError216] = useState("");
   const [shareState, setShareState] = useState("");
   // DARIK_RENDERED_STOREFRONT_THEME_INHERITANCE_181
   const [renderedStoreTheme181, setRenderedStoreTheme181] = useState<{
@@ -619,7 +645,8 @@ export default function ProductDetailExperience({
   // The shared parent cart quantity is the permanent source of truth.
   // No temporary '1 added' timer: after the first add, the UI stays at - 1 +.
   function handleAddToCart119() {
-    onAddToCart();
+    if (!furnitureColorsReady216 || furnitureColorsError216) return;
+    onAddToCart(selectedFurnitureColor216);
   }
   // DARIK_PRODUCT_RETURN_SCROLL_POSITION_179_V2
   useEffect(() => {
@@ -693,11 +720,148 @@ export default function ProductDetailExperience({
     };
   }, [open, product?.id]);
 
-  const photos = useMemo(() => {
+  useEffect(() => {
+    setFurnitureColors216([]);
+    setFurniturePrimaryPhotos216([]);
+    setSelectedFurnitureColorId216("");
+    setFurnitureColorsError216("");
+    setFurnitureColorsReady216(false);
+
+    if (!open || !product?.id) {
+      setFurnitureColorsReady216(true);
+      return;
+    }
+
+    let cancelled216 = false;
+
+    void supabase
+      .rpc("darik_direct_public_furniture_color_media_v1", {
+        p_product_id: product.id,
+        p_storefront_slug: storeSlug,
+      })
+      .then(({ data, error }) => {
+        if (cancelled216) return;
+
+        if (error) {
+          setFurnitureColorsError216(
+            "Color options could not be loaded. Please refresh / تعذر تحميل خيارات الألوان. حدّث الصفحة"
+          );
+          setFurnitureColorsReady216(true);
+          return;
+        }
+
+        const payload216 = (data || {}) as {
+          multiple_colors?: boolean;
+          variants?: FurnitureColorApi216[];
+          primary_photos?: string[];
+        };
+
+        const photos216 = Array.isArray(payload216.primary_photos)
+          ? uniqueStrings(payload216.primary_photos)
+          : [];
+
+        const colors216 =
+          payload216.multiple_colors === true &&
+          Array.isArray(payload216.variants)
+            ? payload216.variants
+                .map((color, index) => ({
+                  id: clean(color?.id),
+                  name: clean(color?.name),
+                  nameAr: clean(color?.name_ar),
+                  photoUrl: clean(color?.photo_url) || null,
+                  isPrimary:
+                    color?.is_primary === true ||
+                    String(color?.is_primary || "").toLowerCase() === "true" ||
+                    index === 0,
+                  sortOrder: Number(color?.sort_order ?? index + 1),
+                }))
+                .filter(
+                  (color) =>
+                    Boolean(color.id) &&
+                    Boolean(color.name) &&
+                    Boolean(color.nameAr)
+                )
+                .sort((left, right) => left.sortOrder - right.sortOrder)
+                .map(({ sortOrder: _sortOrder, ...color }) => color)
+            : [];
+
+        setFurniturePrimaryPhotos216(photos216);
+        setFurnitureColors216(colors216);
+
+        const primary216 =
+          colors216.find((color) => color.isPrimary) || colors216[0] || null;
+
+        setSelectedFurnitureColorId216(primary216?.id || "");
+        setFurnitureColorsReady216(true);
+      });
+
+    return () => {
+      cancelled216 = true;
+    };
+  }, [open, product?.id, storeSlug]);
+
+  const selectedFurnitureColor216 = useMemo(
+    () =>
+      furnitureColors216.find(
+        (color) => color.id === selectedFurnitureColorId216
+      ) ||
+      furnitureColors216.find((color) => color.isPrimary) ||
+      furnitureColors216[0] ||
+      null,
+    [furnitureColors216, selectedFurnitureColorId216]
+  );
+
+  const defaultPhotos216 = useMemo(() => {
     if (!product) return [];
-    const primary = clean(product.official_product_photo_url) || clean(product.official_product_thumbnail_url);
+    const primary =
+      clean(product.official_product_photo_url) ||
+      clean(product.official_product_thumbnail_url);
     return uniqueStrings([primary, product.official_product_photo_url_2]);
   }, [product]);
+
+  const basePhotos216 = useMemo(
+    () =>
+      furniturePrimaryPhotos216.length > 0
+        ? furniturePrimaryPhotos216
+        : defaultPhotos216,
+    [defaultPhotos216, furniturePrimaryPhotos216]
+  );
+
+  const photos = useMemo(() => {
+    if (
+      selectedFurnitureColor216 &&
+      !selectedFurnitureColor216.isPrimary &&
+      selectedFurnitureColor216.photoUrl
+    ) {
+      // IKEA behavior: the selected color becomes the hero/main photo.
+      // Photos 2-3 remain available as the shared product detail/angle media.
+      return uniqueStrings([
+        selectedFurnitureColor216.photoUrl,
+        ...basePhotos216.slice(1),
+      ]);
+    }
+
+    return basePhotos216;
+  }, [basePhotos216, selectedFurnitureColor216]);
+
+  const selectedColorCartKey216 =
+    selectedFurnitureColor216?.id || "default";
+
+  const selectedInCart216 = Math.max(
+    0,
+    Number(
+      cartQuantitiesByVariant216[selectedColorCartKey216] ??
+        (selectedFurnitureColor216 ? 0 : inCart) ??
+        0
+    ) || 0
+  );
+
+  function selectFurnitureColor216(color: FurnitureColorSelection216) {
+    setSelectedFurnitureColorId216(color.id);
+    setGalleryIndex(0);
+    setLightboxIndex(null);
+    galleryRef.current?.scrollTo({ left: 0, behavior: "smooth" });
+  }
 
   const slides = useMemo<MediaSlide[]>(() => {
     const media: MediaSlide[] = photos.map((url, index) => ({
@@ -1687,6 +1851,51 @@ export default function ProductDetailExperience({
                 </span>
               </div>
 
+              {furnitureColors216.length > 1 && selectedFurnitureColor216 ? (
+                <section className={styles.furnitureColorSelector216}>
+                  <div className={styles.furnitureColorLabel216}>
+                    <span>Choose color / اختر اللون:</span>
+                    <strong>
+                      {selectedFurnitureColor216.name}
+                      <span dir="rtl"> / {selectedFurnitureColor216.nameAr}</span>
+                    </strong>
+                  </div>
+                  <div
+                    className={styles.furnitureColorThumbs216}
+                    aria-label="Furniture color options"
+                  >
+                    {furnitureColors216.map((color) => (
+                      <button
+                        type="button"
+                        key={color.id}
+                        className={
+                          color.id === selectedFurnitureColor216.id
+                            ? styles.furnitureColorThumbActive216
+                            : ""
+                        }
+                        onClick={() => selectFurnitureColor216(color)}
+                        aria-label={`Choose ${color.name} / ${color.nameAr}`}
+                        aria-pressed={
+                          color.id === selectedFurnitureColor216.id
+                        }
+                      >
+                        {color.photoUrl ? (
+                          <img src={color.photoUrl} alt="" />
+                        ) : (
+                          <span>{color.name.slice(0, 1)}</span>
+                        )}
+                      </button>
+                    ))}
+                  </div>
+                </section>
+              ) : null}
+
+              {furnitureColorsError216 ? (
+                <p className={styles.furnitureColorError216}>
+                  {furnitureColorsError216}
+                </p>
+              ) : null}
+
               {fitment ? (
                 <section className={styles.fitmentCard}>
                   <div className={styles.fitmentIcon}>✓</div>
@@ -1787,17 +1996,17 @@ export default function ProductDetailExperience({
                 <div className={styles.purchaseRow}>
                   <div className={styles.purchaseMeta}>
                     <strong>
-                      {inCart > 0 ? `${inCart} in your bag` : "Ready when you are"}
+                      {selectedInCart216 > 0 ? `${selectedInCart216} in your bag` : "Ready when you are"}
                     </strong>
                     <small>{acceptingOrders ? "Store is accepting orders" : "Ordering is paused"}</small>
                   </div>
 
-                  {inCart > 0 ? (
+                  {selectedInCart216 > 0 ? (
                     <div className={styles.productCartActions180}>
                       <div className={styles.productQuantitySelector180} aria-label="Product quantity in cart">
                         <button
                           type="button"
-                          onClick={onDecreaseCart}
+                          onClick={() => onDecreaseCart(selectedFurnitureColor216)}
                           aria-label="Remove one from cart"
                         >
                           <span aria-hidden="true">−</span>
@@ -1806,7 +2015,7 @@ export default function ProductDetailExperience({
                         <button
                           type="button"
                           onClick={handleAddToCart119}
-                          disabled={!acceptingOrders || !available}
+                          disabled={!acceptingOrders || !available || !furnitureColorsReady216 || Boolean(furnitureColorsError216)}
                           aria-label="Add one more to cart"
                         >
                           <span aria-hidden="true">+</span>
@@ -1826,7 +2035,7 @@ export default function ProductDetailExperience({
                       type="button"
                       className={styles.primaryAction}
                       onClick={handleAddToCart119}
-                      disabled={!acceptingOrders || !available}
+                      disabled={!acceptingOrders || !available || !furnitureColorsReady216 || Boolean(furnitureColorsError216)}
                     >
                       <BagIcon />
                       <span>{available ? "Add to bag" : "Out of stock"}</span>
