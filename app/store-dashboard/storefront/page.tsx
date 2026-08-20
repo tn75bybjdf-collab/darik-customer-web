@@ -2,6 +2,8 @@
 
 // DARIK_PAYMENT_FIRST_YEARLY_PLANS_CATALOG_GATE_190
 
+// DARIK_PAYMENT_THEN_SETUP_PREVIEW_UNTIL_FINISH_206
+
 // DARIK_REAL_PRIVATE_PREVIEW_ALIAS_143
 
 // DARIK_INTERNAL_SETUP_SLUG_PRIVACY_142_V3
@@ -6330,6 +6332,69 @@ export default function DarikDirectStorefrontSettingsPage() {
     [context, selectedRetailerId]
   );
 
+  // DARIK FRONTEND 206:
+  // Payment must be submitted before storefront setup opens.
+  // We intentionally check request history instead of trusting free_draft alone,
+  // because a rejected / needs-new-receipt payment can legitimately return a
+  // storefront to free_draft while the retailer should still be able to edit setup.
+  const [hasActivationRequest206, setHasActivationRequest206] =
+    useState<boolean | null>(null);
+
+  useEffect(() => {
+    let cancelled206 = false;
+    const retailerId206 = selectedStore?.retailer_id ?? null;
+    const activationStatus206 = selectedStore?.activation_status ?? null;
+
+    if (!retailerId206) {
+      setHasActivationRequest206(null);
+      return () => {
+        cancelled206 = true;
+      };
+    }
+
+    setHasActivationRequest206(null);
+
+    void supabase
+      .from("retailer_store_activation_requests")
+      .select("id")
+      .eq("retailer_id", retailerId206)
+      .limit(1)
+      .then(({ data, error: requestError206 }) => {
+        if (cancelled206) return;
+
+        if (requestError206) {
+          console.error(
+            "Could not verify Darik activation-payment history.",
+            requestError206
+          );
+          setHasActivationRequest206(null);
+          return;
+        }
+
+        const hasRequest206 =
+          Array.isArray(data) && data.length > 0;
+
+        setHasActivationRequest206(hasRequest206);
+
+        if (
+          !hasRequest206 &&
+          (activationStatus206 === "free_draft" ||
+            activationStatus206 === "payment_required")
+        ) {
+          window.location.replace(
+            "/store-dashboard/activation?onboarding=1"
+          );
+        }
+      });
+
+    return () => {
+      cancelled206 = true;
+    };
+  }, [
+    selectedStore?.retailer_id,
+    selectedStore?.activation_status,
+  ]);
+
   // DARIK_APPROVED_PAYMENT_AUTHORITATIVE_UNLOCK_193
   const catalogContextFallback193 = Boolean(
     selectedStore?.activation_status === "active" &&
@@ -6378,27 +6443,22 @@ export default function DarikDirectStorefrontSettingsPage() {
       : catalogAccessAllowed193;
 
   // DARIK_APPROVED_ONLY_ACTUAL_LIVE_STORE_EDITOR_196
-  // FRONTEND 193 already owns the authoritative paid/approved access check.
-  // Reuse that exact result instead of creating a second competing RPC path.
+  // FRONTEND 193 still owns authoritative paid/approved access.
+  // FRONTEND 206 separates that approval truth from the temporary onboarding
+  // setup preview. Approved stores use the ACTUAL live storefront. Pending
+  // stores may use the private setup preview only until Finish Store Setup.
   useEffect(() => {
     const approved196 = catalogUnlocked190 === true;
 
     setLiveStoreEditorApproved196(approved196);
     setLiveStoreEditorStatus196(
       approved196
-        ? "Approved — live store editor unlocked. / تمت الموافقة — محرر المتجر المباشر متاح."
-        : "Preview unlocks after Darik approves your CliQ payment. / تفتح المعاينة بعد موافقة داريك على دفعة كليك."
+        ? "Approved — actual live storefront editor unlocked. / تمت الموافقة — محرر المتجر المباشر الفعلي متاح."
+        : hasActivationRequest206 === true
+          ? "Private setup preview is available while you build the store. Finish Store Setup locks it until Darik approves CliQ. / معاينة الإعداد الخاصة متاحة أثناء تجهيز المتجر، وبعد إنهاء الإعداد تُقفل حتى موافقة داريك على كليك."
+          : "Choose a yearly plan and submit CliQ payment before storefront setup. / اختر خطة سنوية وأرسل دفعة كليك قبل إعداد واجهة المتجر."
     );
-
-    if (approved196) {
-      setLiveBuilderPreviewOpen(true);
-      return;
-    }
-
-    setLiveBuilderPreviewOpen(false);
-    setLiveBuilderPreviewExpanded111(false);
-    setPreviewCustomizeOpen160(false);
-  }, [catalogUnlocked190]);
+  }, [catalogUnlocked190, hasActivationRequest206]);
 
 
   useEffect(() => {
@@ -6535,6 +6595,35 @@ export default function DarikDirectStorefrontSettingsPage() {
     useState<DarikStorefrontSetupStep109>(1);
   const [storefrontSetupNotice109, setStorefrontSetupNotice109] = useState("");
   const [storefrontSetupBusy109, setStorefrontSetupBusy109] = useState(false);
+
+  const storefrontDraftPreviewAllowed206 =
+    storefrontSetupMode109 === "wizard" &&
+    catalogUnlocked190 !== true &&
+    hasActivationRequest206 === true;
+
+  useEffect(() => {
+    if (storefrontSetupMode109 === "loading") {
+      setLiveBuilderPreviewOpen(false);
+      return;
+    }
+
+    if (
+      catalogUnlocked190 === true ||
+      storefrontDraftPreviewAllowed206
+    ) {
+      setLiveBuilderPreviewOpen(true);
+      return;
+    }
+
+    setLiveBuilderPreviewOpen(false);
+    setLiveBuilderPreviewExpanded111(false);
+    setPreviewCustomizeOpen160(false);
+  }, [
+    catalogUnlocked190,
+    storefrontDraftPreviewAllowed206,
+    storefrontSetupMode109,
+  ]);
+
   const [deliveryZones109, setDeliveryZones109] = useState<DarikDeliveryZone109[]>([]);
   const [deliveryZonesLoaded109, setDeliveryZonesLoaded109] = useState(false);
   const [deliveryZonesSaveState109, setDeliveryZonesSaveState109] = useState<
@@ -9535,14 +9624,24 @@ await saveStorefront(undefined, "manual");
       setStorefrontSetupMode109("tabs");
       setStorefrontSetupTab109(1);
       setLiveBuilderPreviewExpanded111(false);
-      setLiveBuilderPreviewOpen(true);
 
-      window.setTimeout(() => {
-        setPreviewCustomizeOpen160(true);
-      }, 90);
-      setMessage(
-        "Storefront setup complete. You can now edit every section from the tabs. / اكتمل إعداد المتجر ويمكنك تعديل أي قسم من التبويبات."
-      );
+      if (catalogUnlocked190) {
+        setLiveBuilderPreviewOpen(true);
+
+        window.setTimeout(() => {
+          setPreviewCustomizeOpen160(true);
+        }, 90);
+
+        setMessage(
+          "Storefront setup complete. Your approved live storefront editor is open. / اكتمل إعداد المتجر ومحرر واجهة المتجر المباشرة متاح الآن."
+        );
+      } else {
+        setLiveBuilderPreviewOpen(false);
+        setPreviewCustomizeOpen160(false);
+        setMessage(
+          "Storefront setup complete. Your information is saved and the preview is now locked until Darik approves your CliQ payment. You may still edit the setup tabs while payment is reviewed. / اكتمل إعداد المتجر وتم حفظ معلوماتك. المعاينة الآن مقفلة حتى موافقة داريك على دفعة كليك، ويمكنك متابعة تعديل تبويبات الإعداد أثناء مراجعة الدفع."
+        );
+      }
     } catch (finishError) {
       setStorefrontSetupNotice109(
         finishError instanceof Error
@@ -11255,7 +11354,7 @@ await saveStorefront(undefined, "manual");
                     </span>
                   </div>
                 </section>
-              ) : liveStoreEditorApproved196 !== true ? (
+              ) : liveStoreEditorApproved196 !== true && !storefrontDraftPreviewAllowed206 ? (
                 <section className={designStyles.themeFirstStepScreen}>
                   <div className={designStyles.themeFirstStepHeader}>
                     <div>
@@ -11270,7 +11369,7 @@ await saveStorefront(undefined, "manual");
                       <h2>
                         {liveStoreEditorApproved196 === null
                           ? "Checking approval / جار التحقق من الموافقة"
-                          : "Preview unlocks after approval / تفتح المعاينة بعد الموافقة"}
+                          : "Store setup finished — preview locked until approval / اكتمل إعداد المتجر — المعاينة مقفلة حتى الموافقة"}
                       </h2>
                       <p>{liveStoreEditorStatus196}</p>
                     </div>
@@ -11278,11 +11377,11 @@ await saveStorefront(undefined, "manual");
 
                   <div className={designStyles.themeFirstStepFoot}>
                     <strong>
-                      No separate draft preview.
+                      Your store information is saved.
                     </strong>
                     <span>
-                      Once Darik approves your account, this area becomes the actual live storefront editor — the exact page customers see.
-                      {" / بعد موافقة داريك، تصبح هذه المنطقة محرر المتجر المباشر نفسه الذي يراه العملاء."}
+                      You can keep editing the setup tabs while CliQ is reviewed. The preview reopens after Darik approval as the actual live customer storefront.
+                      {" / معلومات متجرك محفوظة ويمكنك متابعة تعديل التبويبات أثناء مراجعة كليك. بعد موافقة داريك تفتح المعاينة من جديد كواجهة المتجر الفعلية التي يراها العملاء."}
                     </span>
                   </div>
 
@@ -11303,7 +11402,9 @@ await saveStorefront(undefined, "manual");
                     className={designStyles.liveBuilderOpenPreviewTab107}
                     onClick={() => setLiveBuilderPreviewOpen(true)}
                   >
-                    Open live editor / فتح المحرر المباشر
+                    {storefrontDraftPreviewAllowed206
+                      ? "Open setup preview / فتح معاينة الإعداد"
+                      : "Open live editor / فتح المحرر المباشر"}
                   </button>
                 ) : null}
                 <section
@@ -11321,9 +11422,15 @@ await saveStorefront(undefined, "manual");
                     <div className={designStyles.liveBuilderPreviewIdentity}>
                       <span className={designStyles.liveBuilderLiveDot} />
                       <div>
-                        <strong>LIVE STOREFRONT EDITOR</strong>
+                        <strong>
+                          {storefrontDraftPreviewAllowed206
+                            ? "PRIVATE SETUP PREVIEW"
+                            : "LIVE STOREFRONT EDITOR"}
+                        </strong>
                         <small>
-                          {selectedThemeOption?.name || "Darik Theme"} · Actual live customer storefront
+                          {storefrontDraftPreviewAllowed206
+                            ? `${selectedThemeOption?.name || "Darik Theme"} · Private during setup · locks after Finish Store Setup until payment approval`
+                            : `${selectedThemeOption?.name || "Darik Theme"} · Actual live customer storefront`}
                         </small>
                       </div>
                     </div>
