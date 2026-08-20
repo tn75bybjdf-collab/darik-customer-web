@@ -5119,3 +5119,71 @@
     border-radius: 10px !important;
   }
 }
+/* DARIK_VELVET_PRODUCT_TEXT_CONTRAST_FIX_219
+ *
+ * Velvet is the retailer-facing name for visual theme key "perfume".
+ * Its luxurious pale/gold storefront lettering can become too low-contrast when
+ * ProductDetailExperience places that inherited text onto its light commerce
+ * surface. Keep Velvet's gold accent/price, but force essential shopping text
+ * to accessible high-contrast ink.
+ */
+.overlay[data-pd-theme-field="perfume"] .titleBlock h1 {
+  color: #21171b !important;
+  opacity: 1 !important;
+  text-shadow: none !important;
+}
+
+.overlay[data-pd-theme-field="perfume"] .titleBlock h2 {
+  color: #604d55 !important;
+  opacity: 1 !important;
+  text-shadow: none !important;
+}
+
+/* IKEA-style Furniture color selector added in FRONTEND 216. */
+.overlay[data-pd-theme-field="perfume"] .furnitureColorLabel216,
+.overlay[data-pd-theme-field="perfume"] .furnitureColorLabel216 > span,
+.overlay[data-pd-theme-field="perfume"] .furnitureColorLabel216 strong,
+.overlay[data-pd-theme-field="perfume"] .furnitureColorLabel216 strong > span {
+  color: #2a1d22 !important;
+  opacity: 1 !important;
+  text-shadow: none !important;
+}
+
+/* Keep fallback color initials readable when a variant thumbnail has no image. */
+.overlay[data-pd-theme-field="perfume"] .furnitureColorThumbs216 button {
+  color: #2a1d22 !important;
+}
+
+/* Selected color gets a clear Velvet-gold frame without weakening its text. */
+.overlay[data-pd-theme-field="perfume"]
+  .furnitureColorThumbs216
+  .furnitureColorThumbActive216 {
+  border-color: #b99758 !important;
+  box-shadow:
+    0 0 0 1px rgba(185, 151, 88, 0.22),
+    0 4px 14px rgba(44, 29, 35, 0.08) !important;
+}
+
+/* Product-detail informational labels that sit directly beside the product
+ * identity should not inherit Velvet's faint decorative tone. */
+.overlay[data-pd-theme-field="perfume"] .sectionLabel span {
+  color: #33242a !important;
+  opacity: 1 !important;
+}
+
+@media (max-width: 900px) {
+  .overlay[data-pd-theme-field="perfume"] .titleBlock h1 {
+    color: #1d1418 !important;
+  }
+
+  .overlay[data-pd-theme-field="perfume"] .titleBlock h2 {
+    color: #59464e !important;
+  }
+
+  .overlay[data-pd-theme-field="perfume"] .furnitureColorLabel216,
+  .overlay[data-pd-theme-field="perfume"] .furnitureColorLabel216 > span,
+  .overlay[data-pd-theme-field="perfume"] .furnitureColorLabel216 strong,
+  .overlay[data-pd-theme-field="perfume"] .furnitureColorLabel216 strong > span {
+    color: #21171b !important;
+  }
+}
