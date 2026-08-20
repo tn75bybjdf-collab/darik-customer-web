@@ -4017,3 +4017,83 @@ button.commandSecondaryButton:disabled {
     width: 100%;
   }
 }
+
+/* DARIK_SUBSCRIPTION_END_DATE_RENEW_WARNING_225 */
+.sidebarAccount225 {
+  display: grid;
+  min-width: 0;
+  gap: 7px;
+}
+
+.sidebarLogin225 {
+  display: block;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-weight: 800;
+}
+
+.sidebarFooter .subscriptionDate225 {
+  display: flex;
+  width: fit-content;
+  max-width: 100%;
+  flex-wrap: wrap;
+  gap: 4px;
+  align-items: baseline;
+  padding: 7px 9px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.84);
+  font-size: 0.72rem;
+  line-height: 1.25;
+}
+
+.sidebarFooter .subscriptionDate225 strong {
+  color: #ffffff;
+  font-weight: 900;
+}
+
+.sidebarFooter .subscriptionWarning225 {
+  display: grid;
+  width: 100%;
+  gap: 2px;
+  padding: 9px 10px;
+  border: 1px solid rgba(248, 113, 113, 0.88);
+  border-radius: 11px;
+  background: rgba(127, 29, 29, 0.54);
+  color: #ffffff;
+  text-decoration: none;
+  box-shadow: 0 8px 20px rgba(127, 29, 29, 0.18);
+}
+
+.sidebarFooter .subscriptionWarning225:hover {
+  background: rgba(153, 27, 27, 0.72);
+  border-color: rgba(252, 165, 165, 0.98);
+}
+
+.sidebarFooter .subscriptionWarning225 strong {
+  color: #fecaca;
+  font-size: 0.76rem;
+  line-height: 1.25;
+  font-weight: 950;
+}
+
+.sidebarFooter .subscriptionWarning225 span {
+  color: #ffffff;
+  font-size: 0.72rem;
+  line-height: 1.25;
+  font-weight: 900;
+}
+
+@media (max-width: 760px) {
+  .sidebarAccount225 {
+    width: 100%;
+  }
+
+  .sidebarFooter .subscriptionDate225,
+  .sidebarFooter .subscriptionWarning225 {
+    max-width: 100%;
+  }
+}

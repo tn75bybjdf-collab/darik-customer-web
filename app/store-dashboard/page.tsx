@@ -337,6 +337,41 @@ function planLabel(value: string | null | undefined) {
   return value ? labels[value] || value.replace(/_/g, " ") : "No plan selected / لم يتم اختيار خطة";
 }
 
+// DARIK_SUBSCRIPTION_END_DATE_RENEW_WARNING_225
+type SubscriptionStatus225 = {
+  formattedDate: string;
+  daysRemaining: number;
+  expired: boolean;
+  urgent: boolean;
+};
+
+function getSubscriptionStatus225(
+  value: string | null | undefined,
+): SubscriptionStatus225 | null {
+  if (!value) return null;
+
+  const expiresAt = new Date(value);
+  if (Number.isNaN(expiresAt.getTime())) return null;
+
+  const remainingMs = expiresAt.getTime() - Date.now();
+  const expired = remainingMs <= 0;
+  const daysRemaining = expired
+    ? 0
+    : Math.max(1, Math.ceil(remainingMs / (24 * 60 * 60 * 1000)));
+
+  return {
+    formattedDate: expiresAt.toLocaleDateString("en-GB", {
+      day: "numeric",
+      month: "short",
+      year: "numeric",
+      timeZone: "Asia/Amman",
+    }),
+    daysRemaining,
+    expired,
+    urgent: expired || daysRemaining <= 7,
+  };
+}
+
 function orderStatusLabel(value: string) {
   return orderStatusLabels[value] || value.replace(/_/g, " ");
 }
@@ -617,6 +652,14 @@ export default function DarikDirectOverviewPage() {
     (!storefront?.activation_expires_at ||
       new Date(storefront.activation_expires_at) > new Date());
 
+  const subscriptionExpiresAt225 =
+    storefront?.activation_expires_at ||
+    selectedStore?.activation_expires_at ||
+    null;
+  const subscriptionStatus225 = getSubscriptionStatus225(
+    subscriptionExpiresAt225,
+  );
+
   // DARIK_APPROVED_PAYMENT_AUTHORITATIVE_UNLOCK_193
   const catalogContextFallback193 = isLive;
   const [catalogAccessAllowed193, setCatalogAccessAllowed193] = useState<boolean | null>(null);
@@ -885,7 +928,39 @@ export default function DarikDirectOverviewPage() {
           <a href="/store-dashboard/activation">Plan & payment</a>
         </nav>
         <div className={styles.sidebarFooter}>
-          <span>{session.user.user_metadata?.darik_retailer_username ? `@${session.user.user_metadata.darik_retailer_username}` : session.user.email}</span>
+          <div className={styles.sidebarAccount225}>
+            <span className={styles.sidebarLogin225}>
+              {session.user.user_metadata?.darik_retailer_username
+                ? `@${session.user.user_metadata.darik_retailer_username}`
+                : session.user.email}
+            </span>
+
+            {subscriptionStatus225 ? (
+              subscriptionStatus225.urgent ? (
+                <a
+                  className={styles.subscriptionWarning225}
+                  href="/store-dashboard/activation"
+                  aria-label="Renew Darik subscription today"
+                >
+                  <strong>
+                    {subscriptionStatus225.expired
+                      ? "Subscription expired"
+                      : `Subscription ends ${subscriptionStatus225.formattedDate}`}
+                  </strong>
+                  <span>
+                    {subscriptionStatus225.expired
+                      ? "Renew today"
+                      : `${subscriptionStatus225.daysRemaining} day${subscriptionStatus225.daysRemaining === 1 ? "" : "s"} left — Renew today`}
+                  </span>
+                </a>
+              ) : (
+                <div className={styles.subscriptionDate225}>
+                  Subscription ends:{" "}
+                  <strong>{subscriptionStatus225.formattedDate}</strong>
+                </div>
+              )
+            ) : null}
+          </div>
           <DashboardLogoutButton />
         </div>
       </aside>
