@@ -645,6 +645,7 @@ export default function ProductDetailExperience({
   // Full-screen media now also supports left/right swipe navigation at 1x zoom.
   // DARIK_PRODUCT_GESTURE_DESCRIPTION_REPAIR_222
   // DARIK_EXPANDED_MEDIA_POINTER_SWIPE_FIX_223
+  // DARIK_STATE_DRIVEN_EXPANDED_MEDIA_224
   const productEdgeGesture178 = useRef<{ x: number; y: number; time: number; pointerId: number } | null>(null);
   const productEdgeClosed178 = useRef(false);
   const productPullGesture178 = useRef<{ x: number; y: number } | null>(null);
@@ -661,6 +662,8 @@ export default function ProductDetailExperience({
     y: number;
     time: number;
   } | null>(null);
+
+  const lightboxSwipeCommitted224 = useRef(false);
   const [lightboxTransform178, setLightboxTransform178] = useState(lightboxTransformRef178.current);
   // DARIK_PRODUCT_CART_QUANTITY_THEME_PARITY_180
   // The shared parent cart quantity is the permanent source of truth.
@@ -1426,6 +1429,7 @@ export default function ProductDetailExperience({
     const point = lightboxPoint178(event);
     lightboxPointers178.current.set(pointerId, point);
     lightboxClosed178.current = false;
+    lightboxSwipeCommitted224.current = false;
 
     try {
       event.currentTarget?.setPointerCapture?.(event.pointerId);
@@ -1533,9 +1537,42 @@ export default function ProductDetailExperience({
     const dx = point.x - start.x;
     const dy = point.y - start.y;
 
-    // FRONTEND 220:
-    // Horizontal gestures are reserved for previous/next media and are resolved
-    // on pointer-up. Keep only the intentional downward close gesture here.
+    // FRONTEND 224:
+    // Pointer MOVE is confirmed to fire reliably on mobile. At normal zoom,
+    // commit the media change as soon as a deliberate horizontal swipe crosses
+    // the threshold. There is no scroll container animation involved.
+    if (
+      !lightboxSwipeCommitted224.current &&
+      current.scale <= 1.01 &&
+      lightboxPointers178.current.size === 1 &&
+      Math.abs(dx) >= 42 &&
+      Math.abs(dx) > Math.abs(dy) * 1.08 &&
+      lightboxIndex !== null
+    ) {
+      const direction224 = dx < 0 ? 1 : -1;
+      const nextIndex224 = Math.max(
+        0,
+        Math.min(slides.length - 1, lightboxIndex + direction224)
+      );
+
+      if (nextIndex224 !== lightboxIndex) {
+        lightboxSwipeCommitted224.current = true;
+        lightboxLastTap178.current = null;
+        lightboxGesture178.current = null;
+
+        setLightboxTransformValue178({
+          scale: 1,
+          x: 0,
+          y: 0,
+          originX: 50,
+          originY: 50,
+        });
+
+        setLightboxIndex(nextIndex224);
+        return;
+      }
+    }
+
     const closeDown =
       dy > 82 &&
       Math.abs(dy) > Math.abs(dx) * 1.18;
@@ -1574,6 +1611,13 @@ export default function ProductDetailExperience({
       }
     } else if (lightboxPointers178.current.size === 0) {
       lightboxPan178.current = null;
+    }
+
+    if (lightboxSwipeCommitted224.current) {
+      lightboxSwipeCommitted224.current = false;
+      lightboxGesture178.current = null;
+      lightboxLastTap178.current = null;
+      return;
     }
 
     const currentTransform220 = lightboxTransformRef178.current;
@@ -1745,9 +1789,13 @@ export default function ProductDetailExperience({
 
   function scrollViewer(index: number) {
     resetLightboxTransform178();
-    const width = lightboxRef.current?.clientWidth || 0;
-    lightboxRef.current?.scrollTo({ left: width * index, behavior: "smooth" });
-    setLightboxIndex(index);
+
+    const nextIndex224 = Math.max(
+      0,
+      Math.min(slides.length - 1, index)
+    );
+
+    setLightboxIndex(nextIndex224);
   }
 
   function handleGalleryScroll() {
@@ -1758,10 +1806,9 @@ export default function ProductDetailExperience({
   }
 
   function handleLightboxScroll() {
-    const node = lightboxRef.current;
-    if (!node || node.clientWidth <= 0) return;
-    const next = Math.round(node.scrollLeft / node.clientWidth);
-    if (next !== lightboxIndex) setLightboxIndex(next);
+    // FRONTEND 224:
+    // Expanded media is state-driven. Scroll position is intentionally ignored.
+    return;
   }
 
   async function shareProduct() {
@@ -2235,6 +2282,11 @@ export default function ProductDetailExperience({
               <div
                 className={`${styles.lightboxSlide} ${slide.kind === "video" ? styles.lightboxVideoSlide : ""}`}
                 key={`lightbox-${slide.kind}-${slide.url}`}
+                style={
+                  index === lightboxIndex
+                    ? undefined
+                    : { display: "none" }
+                }
               >
                 {slide.kind === "photo" ? (
                   <img
