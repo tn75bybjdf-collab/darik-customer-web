@@ -4,6 +4,8 @@
 
 /* DARIK_USERNAME_SIGNUP_FORCED_ONBOARDING_136 */
 
+// DARIK_SETUP_FIELD_IDEMPOTENT_ERROR_TRUTH_204
+
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabaseBrowser";
@@ -17,6 +19,36 @@ type OnboardingState = {
   setup_completed?: boolean;
   getting_started_status?: "pending" | "completed" | "skipped" | string;
 };
+
+function onboardingErrorMessage204(caught: unknown) {
+  if (caught instanceof Error && caught.message.trim()) {
+    return caught.message.trim();
+  }
+
+  if (caught && typeof caught === "object") {
+    const value = caught as {
+      message?: unknown;
+      details?: unknown;
+      hint?: unknown;
+      code?: unknown;
+    };
+
+    const parts = [
+      typeof value.message === "string" ? value.message.trim() : "",
+      typeof value.details === "string" ? value.details.trim() : "",
+      typeof value.hint === "string" ? `Hint: ${value.hint.trim()}` : "",
+      typeof value.code === "string" ? `Code: ${value.code.trim()}` : "",
+    ].filter(Boolean);
+
+    if (parts.length) return parts.join(" · ");
+  }
+
+  if (typeof caught === "string" && caught.trim()) {
+    return caught.trim();
+  }
+
+  return "Unknown Supabase error.";
+}
 
 const RETAIL_FIELDS = [
   ["supermarket", "Supermarket / Hypermarket", "سوبرماركت / هايبرماركت"],
@@ -96,7 +128,10 @@ export default function DarikInitialRetailFieldPage() {
         return;
       }
 
-      if (state.field_selected) {
+      // FRONTEND 204: a previous failed attempt may have marked field_selected
+      // before the payment storefront was actually created. Only leave this
+      // page when both pieces of onboarding state exist.
+      if (state.field_selected && state.storefront_id) {
         if (!state.setup_completed) {
           router.replace("/store-dashboard/activation?onboarding=1");
         } else {
@@ -131,9 +166,12 @@ export default function DarikInitialRetailFieldPage() {
     setSaving(true);
     setError("");
 
+    let saveStage204 = "saving the retail field";
+
     try {
       const normalizedOther = selectedField === "other" ? otherLabel.trim() : null;
 
+      saveStage204 = "saving the retail field";
       const { error: fieldError } = await supabase.rpc("darik_direct_change_my_retail_field_v1", {
         p_retailer_id: retailerId,
         p_business_type: selectedField,
@@ -141,20 +179,32 @@ export default function DarikInitialRetailFieldPage() {
       });
       if (fieldError) throw fieldError;
 
-      const { error: markerError } = await supabase.rpc("darik_direct_mark_initial_field_selected_v1", {
-        p_retailer_id: retailerId,
-      });
-      if (markerError) throw markerError;
-
+      // FRONTEND 204: create/verify the storefront BEFORE marking the field as
+      // completed. The v190 RPC is idempotent and returns the existing
+      // storefront when one already exists, so retrying is safe.
+      saveStage204 = "creating the payment storefront";
       const prepareResult190 = await supabase.rpc(
         "darik_direct_prepare_payment_storefront_v190",
         { p_retailer_id: retailerId }
       );
       if (prepareResult190.error) throw prepareResult190.error;
 
+      if (!prepareResult190.data) {
+        throw new Error("Darik did not receive a storefront ID from the payment storefront RPC.");
+      }
+
+      saveStage204 = "marking the retail field as selected";
+      const { error: markerError } = await supabase.rpc("darik_direct_mark_initial_field_selected_v1", {
+        p_retailer_id: retailerId,
+      });
+      if (markerError) throw markerError;
+
       router.replace("/store-dashboard/activation?onboarding=1");
     } catch (caught) {
-      setError(caught instanceof Error ? caught.message : "Could not save the retail field.");
+      const detail204 = onboardingErrorMessage204(caught);
+      setError(
+        `Could not finish ${saveStage204}: ${detail204} / تعذر إكمال إعداد المتجر.`
+      );
       setSaving(false);
     }
   }
