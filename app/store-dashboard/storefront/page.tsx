@@ -9221,7 +9221,8 @@ export default function DarikDirectStorefrontSettingsPage() {
     setSpecialDeliverySaveState185("saving");
 
     const result185 = await supabase.rpc(
-      "darik_direct_set_special_delivery_zone_v191",
+      /* DARIK_SPECIAL_ZONE_EMPTY_EXCLUSIONS_JSONB_226D */
+      "darik_direct_set_special_delivery_zone_v226",
       {
         p_storefront_id: storefront.id,
         p_enabled: enabled185,
@@ -13221,8 +13222,8 @@ await saveStorefront(undefined, "manual");
 
                               <div className={designStyles.specialDeliveryExclusions185}>
                                 <div>
-                                  <small>EXCLUDED CATEGORIES / الفئات المستثناة</small>
-                                  <strong>Choose categories that do not count toward the threshold</strong>
+                                  <small>EXCLUDED CATEGORIES (OPTIONAL) / الفئات المستثناة (اختياري)</small>
+                                  <strong>Leave all unchecked if every category should count toward the threshold</strong>
                                   <p>
                                     Example: 52 JOD qualifying + cigarettes = free delivery. 45 JOD qualifying + 20 JOD cigarettes = normal delivery fee.
                                   </p>
