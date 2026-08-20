@@ -441,6 +441,18 @@ export default function ProductDetailExperience({
   const [furnitureColorsReady216, setFurnitureColorsReady216] = useState(false);
   const [furnitureColorsError216, setFurnitureColorsError216] = useState("");
   const [shareState, setShareState] = useState("");
+
+  // DARIK_PRODUCT_DESCRIPTION_COLLAPSE_EXPAND_221_V2
+  const [descriptionExpanded221, setDescriptionExpanded221] = useState(false);
+
+  const productDescription221 = String(product?.description || "").trim();
+  const descriptionExpandable221 =
+    productDescription221.length > 180 ||
+    productDescription221.split(/\r?\n/).length > 3;
+
+  useEffect(() => {
+    setDescriptionExpanded221(false);
+  }, [product?.id]);
   // DARIK_RENDERED_STOREFRONT_THEME_INHERITANCE_181
   const [renderedStoreTheme181, setRenderedStoreTheme181] = useState<{
     primary: string;
@@ -629,6 +641,8 @@ export default function ProductDetailExperience({
     appearanceMode,
   ]);
   // Customer-app parity: edge-back, swipe-down close, double-tap zoom, pinch zoom, and pan.
+  // DARIK_EXPANDED_MEDIA_SWIPE_NAVIGATION_220
+  // Full-screen media now also supports left/right swipe navigation at 1x zoom.
   const productEdgeGesture178 = useRef<{ x: number; y: number; time: number; pointerId: number } | null>(null);
   const productEdgeClosed178 = useRef(false);
   const productPullGesture178 = useRef<{ x: number; y: number } | null>(null);
@@ -1500,20 +1514,15 @@ export default function ProductDetailExperience({
 
     const dx = point.x - start.x;
     const dy = point.y - start.y;
-    const elapsed = Math.max(1, Date.now() - start.time);
-    const velocityX = dx / elapsed;
 
-    // Exact customer-app close behavior: clean right swipe OR intentional pull down.
-    const closeRight =
-      dx > 0 &&
-      Math.abs(dx) > Math.abs(dy) * 1.08 &&
-      (dx > 66 || (dx > 42 && velocityX > 0.3));
-
+    // FRONTEND 220:
+    // Horizontal gestures are reserved for previous/next media and are resolved
+    // on pointer-up. Keep only the intentional downward close gesture here.
     const closeDown =
-      dy > 70 &&
-      Math.abs(dy) > Math.abs(dx) * 1.08;
+      dy > 82 &&
+      Math.abs(dy) > Math.abs(dx) * 1.18;
 
-    if (closeRight || closeDown) {
+    if (closeDown) {
       lightboxClosed178.current = true;
       closeLightbox178();
     }
@@ -1547,6 +1556,43 @@ export default function ProductDetailExperience({
       }
     } else if (lightboxPointers178.current.size === 0) {
       lightboxPan178.current = null;
+    }
+
+    const currentTransform220 = lightboxTransformRef178.current;
+
+    if (
+      !lightboxClosed178.current &&
+      start &&
+      start.pointerId === pointerId &&
+      lightboxPointers178.current.size === 0 &&
+      currentTransform220.scale <= 1.01
+    ) {
+      const dx220 = point.x - start.x;
+      const dy220 = point.y - start.y;
+      const elapsed220 = Math.max(1, Date.now() - start.time);
+      const velocityX220 = dx220 / elapsed220;
+
+      const horizontalSwipe220 =
+        Math.abs(dx220) > Math.abs(dy220) * 1.15 &&
+        (
+          Math.abs(dx220) >= 54 ||
+          (Math.abs(dx220) >= 34 && Math.abs(velocityX220) >= 0.28)
+        );
+
+      if (horizontalSwipe220 && lightboxIndex !== null) {
+        const direction220 = dx220 < 0 ? 1 : -1;
+        const nextIndex220 = Math.max(
+          0,
+          Math.min(slides.length - 1, lightboxIndex + direction220)
+        );
+
+        if (nextIndex220 !== lightboxIndex) {
+          lightboxLastTap178.current = null;
+          lightboxGesture178.current = null;
+          scrollViewer(nextIndex220);
+          return;
+        }
+      }
     }
 
     if (
@@ -1931,12 +1977,41 @@ export default function ProductDetailExperience({
                 </section>
               ) : null}
 
-              {product.description ? (
+              {productDescription221 ? (
                 <section className={styles.descriptionSection}>
                   <div className={styles.sectionLabel}>
                     <span>Details / التفاصيل</span>
                   </div>
-                  <p>{product.description}</p>
+
+                  <div className={styles.descriptionBody221}>
+                    <p
+                      className={
+                        descriptionExpanded221
+                          ? styles.descriptionExpanded221
+                          : styles.descriptionCollapsed221
+                      }
+                    >
+                      {productDescription221}
+                    </p>
+
+                    {descriptionExpandable221 ? (
+                      <button
+                        type="button"
+                        className={styles.descriptionToggle221}
+                        onClick={() =>
+                          setDescriptionExpanded221((current) => !current)
+                        }
+                        aria-expanded={descriptionExpanded221}
+                      >
+                        {descriptionExpanded221
+                          ? "Show less / عرض أقل"
+                          : "Read more / عرض المزيد"}
+                        <span aria-hidden="true">
+                          {descriptionExpanded221 ? "↑" : "↓"}
+                        </span>
+                      </button>
+                    ) : null}
+                  </div>
                 </section>
               ) : null}
 
@@ -2124,7 +2199,7 @@ export default function ProductDetailExperience({
           </div>
 
           <div className={styles.lightboxHint178}>
-            Double tap to zoom/reset • Swipe right/down to close
+            Swipe left/right for more • Swipe down to close • Double tap to zoom
           </div>
 
           {slides.length > 1 ? (
