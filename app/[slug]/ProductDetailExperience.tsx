@@ -644,6 +644,7 @@ export default function ProductDetailExperience({
   // DARIK_EXPANDED_MEDIA_SWIPE_NAVIGATION_220
   // Full-screen media now also supports left/right swipe navigation at 1x zoom.
   // DARIK_PRODUCT_GESTURE_DESCRIPTION_REPAIR_222
+  // DARIK_EXPANDED_MEDIA_POINTER_SWIPE_FIX_223
   const productEdgeGesture178 = useRef<{ x: number; y: number; time: number; pointerId: number } | null>(null);
   const productEdgeClosed178 = useRef(false);
   const productPullGesture178 = useRef<{ x: number; y: number } | null>(null);
@@ -1582,8 +1583,7 @@ export default function ProductDetailExperience({
       start &&
       start.pointerId === pointerId &&
       lightboxPointers178.current.size === 0 &&
-      currentTransform220.scale <= 1.01 &&
-      pointerType !== "touch"
+      currentTransform220.scale <= 1.01
     ) {
       const dx220 = point.x - start.x;
       const dy220 = point.y - start.y;
@@ -1591,10 +1591,10 @@ export default function ProductDetailExperience({
       const velocityX220 = dx220 / elapsed220;
 
       const horizontalSwipe220 =
-        Math.abs(dx220) > Math.abs(dy220) * 1.15 &&
+        Math.abs(dx220) > Math.abs(dy220) * 1.08 &&
         (
-          Math.abs(dx220) >= 54 ||
-          (Math.abs(dx220) >= 34 && Math.abs(velocityX220) >= 0.28)
+          Math.abs(dx220) >= 42 ||
+          (Math.abs(dx220) >= 28 && Math.abs(velocityX220) >= 0.22)
         );
 
       if (horizontalSwipe220 && lightboxIndex !== null) {
@@ -1607,7 +1607,43 @@ export default function ProductDetailExperience({
         if (nextIndex220 !== lightboxIndex) {
           lightboxLastTap178.current = null;
           lightboxGesture178.current = null;
-          scrollViewer(nextIndex220);
+
+          resetLightboxTransform178();
+
+          const node223 = lightboxRef.current;
+          const slide223 =
+            node223?.children?.[nextIndex220] instanceof HTMLElement
+              ? (node223.children[nextIndex220] as HTMLElement)
+              : null;
+
+          const targetLeft223 =
+            slide223?.offsetLeft ??
+            ((node223?.clientWidth || window.innerWidth || 0) * nextIndex220);
+
+          if (node223) {
+            node223.scrollTo({
+              left: targetLeft223,
+              behavior: "auto",
+            });
+            node223.scrollLeft = targetLeft223;
+          }
+
+          setLightboxIndex(nextIndex220);
+
+          if (typeof window !== "undefined" && node223) {
+            window.requestAnimationFrame(() => {
+              const refreshedSlide223 =
+                node223.children?.[nextIndex220] instanceof HTMLElement
+                  ? (node223.children[nextIndex220] as HTMLElement)
+                  : null;
+
+              const refreshedLeft223 =
+                refreshedSlide223?.offsetLeft ?? targetLeft223;
+
+              node223.scrollLeft = refreshedLeft223;
+            });
+          }
+
           return;
         }
       }
@@ -1649,93 +1685,14 @@ export default function ProductDetailExperience({
     }
   }
 
-  function handleLightboxTouchStart222(event: any) {
-    if (
-      lightboxIndex === null ||
-      lightboxTransformRef178.current.scale > 1.01
-    ) {
-      lightboxTouchSwipe222.current = null;
-      return;
-    }
-
-    const touches =
-      event?.touches ||
-      event?.nativeEvent?.touches ||
-      [];
-
-    if (!touches || touches.length !== 1) {
-      lightboxTouchSwipe222.current = null;
-      return;
-    }
-
-    const touch = touches[0];
-
-    lightboxTouchSwipe222.current = {
-      x: Number(touch.clientX ?? touch.pageX ?? 0),
-      y: Number(touch.clientY ?? touch.pageY ?? 0),
-      time: Date.now(),
-    };
+  function handleLightboxTouchStart222(_event: any) {
+    // FRONTEND 223: pointer events own mobile swipe navigation.
+    lightboxTouchSwipe222.current = null;
   }
 
-  function handleLightboxTouchEnd222(event: any) {
-    const start222 = lightboxTouchSwipe222.current;
+  function handleLightboxTouchEnd222(_event: any) {
+    // FRONTEND 223: pointer events own mobile swipe navigation.
     lightboxTouchSwipe222.current = null;
-
-    if (
-      !start222 ||
-      lightboxIndex === null ||
-      lightboxTransformRef178.current.scale > 1.01
-    ) {
-      return;
-    }
-
-    const touches =
-      event?.changedTouches ||
-      event?.nativeEvent?.changedTouches ||
-      [];
-
-    const touch = touches?.[0];
-    if (!touch) return;
-
-    const x222 = Number(touch.clientX ?? touch.pageX ?? 0);
-    const y222 = Number(touch.clientY ?? touch.pageY ?? 0);
-
-    const dx222 = x222 - start222.x;
-    const dy222 = y222 - start222.y;
-    const elapsed222 = Math.max(1, Date.now() - start222.time);
-    const velocityX222 = dx222 / elapsed222;
-
-    const horizontal222 =
-      Math.abs(dx222) > Math.abs(dy222) * 1.08 &&
-      (
-        Math.abs(dx222) >= 44 ||
-        (Math.abs(dx222) >= 30 && Math.abs(velocityX222) >= 0.24)
-      );
-
-    if (!horizontal222) return;
-
-    const direction222 = dx222 < 0 ? 1 : -1;
-
-    const nextIndex222 = Math.max(
-      0,
-      Math.min(slides.length - 1, lightboxIndex + direction222)
-    );
-
-    if (nextIndex222 === lightboxIndex) return;
-
-    resetLightboxTransform178();
-
-    const node222 = lightboxRef.current;
-    if (node222) {
-      const width222 = node222.clientWidth || 0;
-
-      // Use a direct position change first for reliability, then let the
-      // browser settle the scroll-snap state. This avoids the "tiny nudge"
-      // behavior seen with pointer-only smooth scrolling on mobile.
-      node222.scrollLeft = width222 * nextIndex222;
-    }
-
-    setLightboxIndex(nextIndex222);
   }
 
   function handleLightboxPointerCancel178(event: any) {
