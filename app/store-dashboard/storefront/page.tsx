@@ -2962,6 +2962,18 @@ export default function DarikDirectStorefrontSettingsPage() {
       let pinchBaseScale151 = 1;
       let pinchCurrentScale151 = 1;
 
+      // DARIK_TEXT_PINCH_FONT_SIZE_226
+      // Text elements use their real typography size instead of generic element scale.
+      // Non-text objects keep the existing FRONTEND 151 pinch/scale behavior.
+      let pinchTextTypographyKey226:
+        | "display_name"
+        | "display_name_ar"
+        | "tagline"
+        | "tagline_ar"
+        | null = null;
+      let pinchTextBaseSize226 = 0;
+      let pinchTextCurrentSize226 = 0;
+
       let holdTimer150A = 0;
       let blockClickTarget150A: Element | null = null;
       let blockClickUntil150A = 0;
@@ -5337,6 +5349,44 @@ export default function DarikDirectStorefrontSettingsPage() {
         const target151 =
           selectedTarget152;
 
+        const textMeta226 =
+          editableTextMeta152(target151);
+        pinchTextTypographyKey226 =
+          textMeta226?.typographyKey ?? null;
+        pinchTextBaseSize226 = 0;
+        pinchTextCurrentSize226 = 0;
+
+        if (pinchTextTypographyKey226) {
+          const savedTextSize226 = Number(
+            inlineTypography152[
+              pinchTextTypographyKey226
+            ]?.size ?? 0
+          );
+          const computedTextSize226 =
+            Number.parseFloat(
+              window150A.getComputedStyle(
+                target151
+              ).fontSize
+            );
+          const startingTextSize226 =
+            savedTextSize226 > 0
+              ? savedTextSize226
+              : computedTextSize226;
+
+          pinchTextBaseSize226 = Math.max(
+            10,
+            Math.min(
+              96,
+              Number.isFinite(startingTextSize226) &&
+                startingTextSize226 > 0
+                ? startingTextSize226
+                : 16
+            )
+          );
+          pinchTextCurrentSize226 =
+            pinchTextBaseSize226;
+        }
+
         const firstElement198 =
           firstTouch151.target as Element | null;
         const secondElement198 =
@@ -5438,6 +5488,34 @@ export default function DarikDirectStorefrontSettingsPage() {
             pinchStartDistance151
           );
 
+        if (pinchTextTypographyKey226) {
+          pinchTextCurrentSize226 =
+            Math.max(
+              10,
+              Math.min(
+                96,
+                Math.round(
+                  pinchTextBaseSize226 *
+                    ratio151
+                )
+              )
+            );
+
+          (
+            pinchTarget151 as HTMLElement
+          ).style.setProperty(
+            "font-size",
+            `${pinchTextCurrentSize226}px`,
+            "important"
+          );
+
+          positionSelectionUi152();
+
+          event151.preventDefault();
+          event151.stopPropagation();
+          return;
+        }
+
         pinchCurrentScale151 =
           clampScale151(
             pinchBaseScale151 *
@@ -5478,10 +5556,51 @@ export default function DarikDirectStorefrontSettingsPage() {
           pinchTarget151;
 
         if (completed151) {
-          saveScale151(
-            completed151,
-            pinchCurrentScale151
-          );
+          if (pinchTextTypographyKey226) {
+            const textSize226 = Math.max(
+              10,
+              Math.min(
+                96,
+                Math.round(
+                  pinchTextCurrentSize226 ||
+                    pinchTextBaseSize226 ||
+                    16
+                )
+              )
+            );
+
+            inlineTypography152 = {
+              ...inlineTypography152,
+              [pinchTextTypographyKey226]: {
+                ...inlineTypography152[
+                  pinchTextTypographyKey226
+                ],
+                size: textSize226,
+              },
+            };
+
+            (
+              completed151 as HTMLElement
+            ).style.setProperty(
+              "font-size",
+              `${textSize226}px`,
+              "important"
+            );
+
+            updateStorefrontTypography(
+              pinchTextTypographyKey226,
+              { size: textSize226 }
+            );
+
+            showToolbarStatus152(
+              `Text size ${textSize226}px — saving...`
+            );
+          } else {
+            saveScale151(
+              completed151,
+              pinchCurrentScale151
+            );
+          }
 
           completed151.removeAttribute(
             "data-darik-pinching151"
@@ -5515,10 +5634,51 @@ export default function DarikDirectStorefrontSettingsPage() {
           pinchTarget151;
 
         if (completed151) {
-          saveScale151(
-            completed151,
-            pinchCurrentScale151
-          );
+          if (pinchTextTypographyKey226) {
+            const textSize226 = Math.max(
+              10,
+              Math.min(
+                96,
+                Math.round(
+                  pinchTextCurrentSize226 ||
+                    pinchTextBaseSize226 ||
+                    16
+                )
+              )
+            );
+
+            inlineTypography152 = {
+              ...inlineTypography152,
+              [pinchTextTypographyKey226]: {
+                ...inlineTypography152[
+                  pinchTextTypographyKey226
+                ],
+                size: textSize226,
+              },
+            };
+
+            (
+              completed151 as HTMLElement
+            ).style.setProperty(
+              "font-size",
+              `${textSize226}px`,
+              "important"
+            );
+
+            updateStorefrontTypography(
+              pinchTextTypographyKey226,
+              { size: textSize226 }
+            );
+
+            showToolbarStatus152(
+              `Text size ${textSize226}px — saving...`
+            );
+          } else {
+            saveScale151(
+              completed151,
+              pinchCurrentScale151
+            );
+          }
 
           completed151.removeAttribute(
             "data-darik-pinching151"
