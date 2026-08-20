@@ -643,6 +643,7 @@ export default function ProductDetailExperience({
   // Customer-app parity: edge-back, swipe-down close, double-tap zoom, pinch zoom, and pan.
   // DARIK_EXPANDED_MEDIA_SWIPE_NAVIGATION_220
   // Full-screen media now also supports left/right swipe navigation at 1x zoom.
+  // DARIK_PRODUCT_GESTURE_DESCRIPTION_REPAIR_222
   const productEdgeGesture178 = useRef<{ x: number; y: number; time: number; pointerId: number } | null>(null);
   const productEdgeClosed178 = useRef(false);
   const productPullGesture178 = useRef<{ x: number; y: number } | null>(null);
@@ -654,6 +655,11 @@ export default function ProductDetailExperience({
   const lightboxLastTap178 = useRef<{ time: number; x: number; y: number } | null>(null);
   const lightboxClosed178 = useRef(false);
   const lightboxTransformRef178 = useRef({ scale: 1, x: 0, y: 0, originX: 50, originY: 50 });
+  const lightboxTouchSwipe222 = useRef<{
+    x: number;
+    y: number;
+    time: number;
+  } | null>(null);
   const [lightboxTransform178, setLightboxTransform178] = useState(lightboxTransformRef178.current);
   // DARIK_PRODUCT_CART_QUANTITY_THEME_PARITY_180
   // The shared parent cart quantity is the permanent source of truth.
@@ -1389,7 +1395,18 @@ export default function ProductDetailExperience({
     const dx = Number(touch.clientX ?? touch.pageX ?? 0) - start.x;
     const dy = Number(touch.clientY ?? touch.pageY ?? 0) - start.y;
 
-    if (dy > 128 && dy > Math.abs(dx) * 1.24) {
+    // FRONTEND 222:
+    // A product page should close only after a deliberate long downward pull.
+    // On a typical phone this resolves to roughly 220-250px instead of 128px.
+    const closeDistance222 =
+      typeof window !== "undefined"
+        ? Math.max(220, window.innerHeight * 0.28)
+        : 220;
+
+    if (
+      dy > closeDistance222 &&
+      dy > Math.abs(dx) * 1.32
+    ) {
       productPullClosed178.current = true;
       productPullGesture178.current = null;
       onClose();
@@ -1565,7 +1582,8 @@ export default function ProductDetailExperience({
       start &&
       start.pointerId === pointerId &&
       lightboxPointers178.current.size === 0 &&
-      currentTransform220.scale <= 1.01
+      currentTransform220.scale <= 1.01 &&
+      pointerType !== "touch"
     ) {
       const dx220 = point.x - start.x;
       const dy220 = point.y - start.y;
@@ -1629,6 +1647,95 @@ export default function ProductDetailExperience({
       lightboxGesture178.current = null;
       lightboxClosed178.current = false;
     }
+  }
+
+  function handleLightboxTouchStart222(event: any) {
+    if (
+      lightboxIndex === null ||
+      lightboxTransformRef178.current.scale > 1.01
+    ) {
+      lightboxTouchSwipe222.current = null;
+      return;
+    }
+
+    const touches =
+      event?.touches ||
+      event?.nativeEvent?.touches ||
+      [];
+
+    if (!touches || touches.length !== 1) {
+      lightboxTouchSwipe222.current = null;
+      return;
+    }
+
+    const touch = touches[0];
+
+    lightboxTouchSwipe222.current = {
+      x: Number(touch.clientX ?? touch.pageX ?? 0),
+      y: Number(touch.clientY ?? touch.pageY ?? 0),
+      time: Date.now(),
+    };
+  }
+
+  function handleLightboxTouchEnd222(event: any) {
+    const start222 = lightboxTouchSwipe222.current;
+    lightboxTouchSwipe222.current = null;
+
+    if (
+      !start222 ||
+      lightboxIndex === null ||
+      lightboxTransformRef178.current.scale > 1.01
+    ) {
+      return;
+    }
+
+    const touches =
+      event?.changedTouches ||
+      event?.nativeEvent?.changedTouches ||
+      [];
+
+    const touch = touches?.[0];
+    if (!touch) return;
+
+    const x222 = Number(touch.clientX ?? touch.pageX ?? 0);
+    const y222 = Number(touch.clientY ?? touch.pageY ?? 0);
+
+    const dx222 = x222 - start222.x;
+    const dy222 = y222 - start222.y;
+    const elapsed222 = Math.max(1, Date.now() - start222.time);
+    const velocityX222 = dx222 / elapsed222;
+
+    const horizontal222 =
+      Math.abs(dx222) > Math.abs(dy222) * 1.08 &&
+      (
+        Math.abs(dx222) >= 44 ||
+        (Math.abs(dx222) >= 30 && Math.abs(velocityX222) >= 0.24)
+      );
+
+    if (!horizontal222) return;
+
+    const direction222 = dx222 < 0 ? 1 : -1;
+
+    const nextIndex222 = Math.max(
+      0,
+      Math.min(slides.length - 1, lightboxIndex + direction222)
+    );
+
+    if (nextIndex222 === lightboxIndex) return;
+
+    resetLightboxTransform178();
+
+    const node222 = lightboxRef.current;
+    if (node222) {
+      const width222 = node222.clientWidth || 0;
+
+      // Use a direct position change first for reliability, then let the
+      // browser settle the scroll-snap state. This avoids the "tiny nudge"
+      // behavior seen with pointer-only smooth scrolling on mobile.
+      node222.scrollLeft = width222 * nextIndex222;
+    }
+
+    setLightboxIndex(nextIndex222);
   }
 
   function handleLightboxPointerCancel178(event: any) {
@@ -2164,6 +2271,8 @@ export default function ProductDetailExperience({
             className={styles.lightboxGallery}
             ref={lightboxRef}
             onScroll={handleLightboxScroll}
+            onTouchStart={handleLightboxTouchStart222}
+            onTouchEnd={handleLightboxTouchEnd222}
           >
             {slides.map((slide, index) => (
               <div
@@ -2199,7 +2308,7 @@ export default function ProductDetailExperience({
           </div>
 
           <div className={styles.lightboxHint178}>
-            Swipe left/right for more • Swipe down to close • Double tap to zoom
+            Swipe left/right for more • Double tap to zoom • Swipe down to close
           </div>
 
           {slides.length > 1 ? (

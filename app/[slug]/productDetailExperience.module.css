@@ -5259,3 +5259,74 @@
     font-size: 12px;
   }
 }
+
+
+/* DARIK_PRODUCT_GESTURE_DESCRIPTION_REPAIR_222
+ *
+ * FRONTEND 221 introduced the collapse UI, but the old .descriptionSection p
+ * selector has higher specificity than .descriptionCollapsed221 and can restore
+ * the full paragraph. These final rules intentionally win that cascade.
+ */
+.descriptionSection .descriptionBody221 {
+  display: grid !important;
+  gap: 8px !important;
+  min-width: 0 !important;
+}
+
+.descriptionSection .descriptionBody221 > p.descriptionCollapsed221 {
+  display: -webkit-box !important;
+
+  /* Hard visual fallback even when line-clamp support is inconsistent. */
+  max-height: calc(1.55em * 3) !important;
+  overflow: hidden !important;
+
+  -webkit-box-orient: vertical !important;
+  -webkit-line-clamp: 3 !important;
+  line-clamp: 3 !important;
+
+  white-space: pre-wrap !important;
+  line-height: 1.55 !important;
+}
+
+.descriptionSection .descriptionBody221 > p.descriptionExpanded221 {
+  display: block !important;
+  max-height: none !important;
+  overflow: visible !important;
+  white-space: pre-wrap !important;
+}
+
+.descriptionSection .descriptionToggle221 {
+  position: relative;
+  z-index: 2;
+  width: max-content;
+  margin-top: 0 !important;
+  align-self: start;
+}
+
+/* A subtle fade makes it obvious that more text exists without exposing the
+ * remainder of the paragraph before the user taps Read more. */
+.descriptionSection .descriptionBody221 {
+  position: relative;
+}
+
+.descriptionSection
+  .descriptionBody221:has(> p.descriptionCollapsed221)::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: calc(1.55em * 2.15);
+  height: calc(1.55em * 0.85);
+  pointer-events: none;
+  background: linear-gradient(
+    to bottom,
+    transparent,
+    var(--pd-surface, #ffffff)
+  );
+}
+
+.descriptionSection
+  .descriptionBody221:has(> p.descriptionCollapsed221)
+  .descriptionToggle221 {
+  margin-top: 2px !important;
+}
