@@ -2,6 +2,7 @@
 // DARIK_GROK_AI_STANDARD_IMAGE_MODEL_232
 // DARIK_GROK_AI_TIMEOUT_CATALOG_STYLE_233
 // DARIK_GROK_AI_STRICT_PRODUCT_PROPORTIONS_234
+// DARIK_GROK_AI_DYNAMIC_FRAMING_NO_SMUSH_235
 import { createClient } from "@supabase/supabase-js";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -16,19 +17,25 @@ const PRODUCT_BUCKET = "darik-direct-products";
 const ENHANCEMENT_PROMPT = [
   "Create a premium ecommerce studio product image from this exact source product photo.",
   "STRICT PRODUCT PRESERVATION: keep the exact same product identity, packaging, container type, visible condition, logos, brand marks, printed wording and spelling, labels, colors, quantity, and physical details.",
-  "Preserve the exact physical form, size, dimensions, proportions, scale, and height-to-width ratio of the product exactly as shown in the source.",
-  "Do not make the product taller, shorter, wider, slimmer, thicker, rounder, straighter, more symmetrical, or more perfect than the source.",
-  "Preserve the exact silhouette, edges, curves, corners, lid shape, cap shape, base shape, and overall container structure.",
-  "For cans, bottles, jars, boxes, pouches, and similar packages, preserve the exact original proportions and structure. Do not reinterpret the form factor.",
+  "Preserve the exact physical form, size, dimensions, proportions, scale, silhouette, and height-to-width ratio of the product exactly as shown in the source.",
+  "Never squash, stretch, compress, widen, slim, fatten, shorten, lengthen, round, straighten, or otherwise distort the product in order to make it fit the square frame.",
+  "Do not make the product more symmetrical, more perfect, or more idealized than the source. Preserve the real shape exactly.",
+  "Preserve the exact edges, curves, corners, lid shape, cap shape, trigger shape, base shape, and overall container structure.",
+  "For cans, bottles, jars, boxes, pouches, trigger bottles, and similar packages, preserve the exact original proportions and structure. Do not reinterpret the form factor.",
+  "FRAMING RULE: the square canvas must adapt to the product; the product must never adapt its shape to the square canvas.",
+  "For tall or narrow products, zoom the camera OUT farther and leave more empty background above, below, and/or beside the product so the entire product fits naturally at its original proportions.",
+  "For wide products, zoom the camera OUT farther and leave more empty background on the left and right so the entire product fits naturally at its original proportions.",
+  "If necessary, let the product occupy significantly less of the square frame. It is better to have extra clean background than to alter the product shape.",
+  "Do not crop the top, bottom, trigger, cap, corners, edges, or any other part of the product. The complete original silhouette must remain visible.",
   "Do not invent, remove, replace, rewrite, stylize, or redesign any part of the product, packaging, logo, label, or printed text.",
   "If any printed text cannot be reproduced safely and exactly, keep that printed area visually unchanged from the source rather than inventing or correcting text.",
   "PHOTO IMPROVEMENT ONLY: improve lighting, exposure, white balance, clarity, sharpness, background cleanliness, and realistic soft contact shadows.",
-  "COMPOSITION: use a square 1:1 catalog image with a very light gray or near-white studio background. Keep the entire product fully visible and centered cleanly with approximately 10 to 14 percent breathing room.",
+  "COMPOSITION: use a square 1:1 catalog image with a very light gray or near-white studio background. Center the product naturally without forcing it to fill the canvas.",
   "If the source contains exactly one product item, output exactly one product item only. Do not duplicate, add, remove, or merge product pieces.",
   "If the source clearly communicates a flavor or ingredient such as fruit, coffee, flowers, spices, or ice, you may add a small tasteful arrangement of only those clearly supported ingredients along the lower foreground. Do not guess ingredients that are not evident from the source.",
   "Optional top-left logo is allowed only if it exactly matches the brand visible in the source. If exact reproduction is uncertain, leave that area empty.",
   "No people, hands, unrelated props, extra marketing copy, badges, watermarks, or invented accessories.",
-  "The finished result should look like a professional catalog photo while remaining an accurate representation of the original product with unchanged physical proportions and scale.",
+  "The finished result should look like a professional catalog photo while remaining an accurate representation of the original product with unchanged physical proportions, shape, and scale.",
 ].join(" ");
 
 type EnhanceRequestBody = {
