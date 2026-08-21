@@ -4,6 +4,7 @@
 // DARIK_GROK_STRICT_PROPORTIONS_234
 // DARIK_GROK_DYNAMIC_FRAMING_235
 // DARIK_GROK_PREPAD_SQUARE_236
+// DARIK_GROK_LIVE_SQUARE_ACTUAL_CROP_237
 import { createClient } from "@supabase/supabase-js";
 import { NextRequest, NextResponse } from "next/server";
 import sharp from "sharp";
@@ -25,7 +26,7 @@ const PREPAD_BACKGROUND = { r: 248, g: 248, b: 246, alpha: 1 };
 
 const ENHANCEMENT_PROMPT = [
   "Create a premium ecommerce studio product image from this exact source product photo.",
-  "The provided source image is already square-framed and centered on purpose. Use that framing as the composition guide rather than zooming in closer.",
+  "The provided source image is already the retailer-selected square composition. Preserve that crop and make the product feel confidently sized within it without changing its proportions.",
   "STRICT PRODUCT PRESERVATION: keep the exact same product identity, packaging, container type, visible condition, logos, brand marks, printed wording and spelling, labels, colors, quantity, and physical details.",
   "Preserve the exact physical form, size, dimensions, proportions, scale, silhouette, and height-to-width ratio of the product exactly as shown in the source.",
   "Never squash, stretch, compress, widen, slim, fatten, shorten, lengthen, round, straighten, or otherwise distort the product in order to make it fit the square frame.",
@@ -35,7 +36,7 @@ const ENHANCEMENT_PROMPT = [
   "FRAMING RULE: the square canvas must adapt to the product; the product must never adapt its shape to the square canvas.",
   "If the product is tall or narrow, keep extra empty background above, below, and/or beside it so the whole product fits naturally at its original proportions.",
   "If the product is wide, keep extra empty background on the left and right so the whole product fits naturally at its original proportions.",
-  "If necessary, let the product occupy less of the square frame. It is better to have extra clean background than to alter the product shape.",
+  "Use the available square efficiently: keep the full product visible, preserve its exact proportions, and aim for the product plus intentional foreground props to occupy roughly 82 to 90 percent of the dominant canvas dimension when that can be done without cropping.",
   "Do not crop the top, bottom, trigger, cap, corners, edges, or any other part of the product. The complete original silhouette must remain visible.",
   "Do not invent, remove, replace, rewrite, stylize, or redesign any part of the product, packaging, logo, label, or printed text.",
   "If any printed text cannot be reproduced safely and exactly, keep that printed area visually unchanged from the source rather than inventing or correcting text.",
@@ -155,8 +156,16 @@ async function frameSourceToSquare(imageUrl: string): Promise<FramedSourceResult
     MAX_SOURCE_BYTES,
   );
 
-  const source = sharp(bytes, { failOn: "none" }).rotate();
-  const metadata = await source.metadata();
+  // APP 040 shows the retailer a centered live square while composing.
+  // Use that same centered square as the REAL source crop. Cropping changes
+  // canvas boundaries only; it never changes X/Y scale or product proportions.
+  const orientedBytes = await sharp(bytes, { failOn: "none" })
+    .rotate()
+    .png()
+    .toBuffer();
+
+  const oriented = sharp(orientedBytes, { failOn: "none" });
+  const metadata = await oriented.metadata();
   const width = Number(metadata.width || 0);
   const height = Number(metadata.height || 0);
 
@@ -164,34 +173,21 @@ async function frameSourceToSquare(imageUrl: string): Promise<FramedSourceResult
     throw new Error("Could not read source image dimensions.");
   }
 
-  const longest = Math.max(width, height);
-  const squareSize = Math.max(1400, Math.min(2200, Math.round(longest * 1.28)));
-  const innerBox = Math.max(900, Math.round(squareSize * 0.72));
+  const side = Math.min(width, height);
+  const left = Math.max(0, Math.round((width - side) / 2));
+  const top = Math.max(0, Math.round((height - side) / 2));
+  const outputSize = Math.max(1400, Math.min(2200, side));
 
-  const fitted = await source
-    .resize(innerBox, innerBox, {
-      fit: "contain",
-      background: { r: 0, g: 0, b: 0, alpha: 0 },
-      withoutEnlargement: false,
+  const framedBuffer = await oriented
+    .extract({
+      left,
+      top,
+      width: side,
+      height: side,
     })
-    .png()
-    .toBuffer();
-
-  const framedBuffer = await sharp({
-    create: {
-      width: squareSize,
-      height: squareSize,
-      channels: 4,
-      background: PREPAD_BACKGROUND,
-    },
-  })
-    .composite([
-      {
-        input: fitted,
-        left: Math.round((squareSize - innerBox) / 2),
-        top: Math.round((squareSize - innerBox) / 2),
-      },
-    ])
+    .resize(outputSize, outputSize, {
+      fit: "fill",
+    })
     .png()
     .toBuffer();
 
