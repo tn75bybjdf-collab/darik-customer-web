@@ -1,26 +1,29 @@
 // DARIK_GROK_AI_PRODUCT_PHOTO_BACKEND_231
 // DARIK_GROK_AI_STANDARD_IMAGE_MODEL_232
+// DARIK_GROK_AI_TIMEOUT_CATALOG_STYLE_233
 import { createClient } from "@supabase/supabase-js";
 import { NextRequest, NextResponse } from "next/server";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
-export const maxDuration = 60;
+export const maxDuration = 180;
 
 const XAI_IMAGE_EDIT_ENDPOINT = "https://api.x.ai/v1/images/edits";
 const XAI_IMAGE_MODEL = "grok-imagine-image";
 const PRODUCT_BUCKET = "darik-direct-products";
 
 const ENHANCEMENT_PROMPT = [
-  "Create a premium ecommerce catalog photograph from this exact source product photo.",
-  "PRESERVE THE PRODUCT EXACTLY: same product identity, packaging, logos, brand marks, printed wording and spelling, labels, colors, proportions, quantity, visible condition, and physical details.",
-  "Do not invent, remove, replace, rewrite, stylize, or redesign any part of the product, packaging, logo, or printed text.",
-  "If any printed text cannot be reproduced safely and exactly, leave that area visually unchanged from the source rather than inventing text.",
-  "Improve only presentation: correct exposure and white balance, improve clarity and sharpness naturally, reduce distracting background clutter, and use a clean white or very light neutral studio background.",
-  "Center the entire product in a square catalog composition with approximately 12 to 15 percent breathing room on every side.",
-  "Keep the entire product visible. Do not crop any edge of the product.",
-  "Use realistic product photography, natural perspective, and a subtle realistic contact shadow.",
-  "Do not add props, badges, marketing copy, watermarks, hands, people, or extra products.",
+  "Create a premium ecommerce studio product image from this exact source product photo, matching the polished reference style used by top retail catalogs.",
+  "STRICT PRODUCT PRESERVATION: keep the exact same product identity, packaging, bottle or container shape, logos, brand marks, printed wording and spelling, labels, colors, proportions, quantity, visible condition, and physical details.",
+  "Do not invent, remove, replace, rewrite, stylize, or redesign any part of the product, packaging, logo, label, or printed text.",
+  "If any printed text cannot be reproduced safely and exactly, keep that printed area visually unchanged from the source rather than inventing or correcting text.",
+  "COMPOSITION: square 1:1 catalog image, very light gray or near-white studio background, main product centered and large, entire product fully visible, no cropped edges, approximately 10 to 14 percent clean breathing room around the outermost product elements.",
+  "LIGHTING: clean professional commercial studio lighting, crisp natural detail, corrected exposure and white balance, realistic soft contact shadows, no harsh glare, no fake plastic look.",
+  "REFERENCE-STYLE LAYOUT: when the source clearly includes a package plus a matching bottle or secondary product piece, keep the main package centered and place the matching secondary piece naturally in the front-right, without changing either item.",
+  "If the source clearly communicates a flavor or ingredient such as fruit, coffee, flowers, spices, or ice, you may add a small tasteful arrangement of only those clearly supported ingredients along the lower foreground. Do not guess ingredients that are not evident from the source.",
+  "If an exact brand logo is clearly readable in the source, you may place the same exact logo once in the upper-left as a clean brand mark. If exact reproduction is uncertain, leave the upper-left empty rather than inventing a logo or text.",
+  "No people, hands, unrelated props, badges, extra marketing copy, watermarks, duplicate products, or invented accessories.",
+  "The finished result should look like a professionally designed high-end retail product listing while remaining an accurate representation of the original product.",
 ].join(" ");
 
 type EnhanceRequestBody = {
@@ -260,8 +263,13 @@ export async function POST(request: NextRequest) {
     );
   }
 
+  const xaiStartedAt = Date.now();
+  console.info("Darik AI 233 starting xAI image edit", {
+    retailerId,
+    model: XAI_IMAGE_MODEL,
+  });
   const xaiController = new AbortController();
-  const xaiTimeout = setTimeout(() => xaiController.abort(), 55_000);
+  const xaiTimeout = setTimeout(() => xaiController.abort(), 145_000);
 
   let xaiResponse: Response;
   let xaiPayload: XaiEditResponse;
@@ -288,6 +296,10 @@ export async function POST(request: NextRequest) {
     });
 
     xaiPayload = (await xaiResponse.json().catch(() => ({}))) as XaiEditResponse;
+    console.info("Darik AI 233 xAI image edit returned", {
+      status: xaiResponse.status,
+      elapsedMs: Date.now() - xaiStartedAt,
+    });
   } catch (error) {
     const timedOut =
       error instanceof Error && error.name === "AbortError";
@@ -365,7 +377,7 @@ export async function POST(request: NextRequest) {
   }
 
   const outputController = new AbortController();
-  const outputTimeout = setTimeout(() => outputController.abort(), 20_000);
+  const outputTimeout = setTimeout(() => outputController.abort(), 25_000);
 
   try {
     const generatedResponse = await fetch(generatedUrl, {
@@ -421,6 +433,11 @@ export async function POST(request: NextRequest) {
     if (!enhancedUrl) {
       throw new Error("Could not create the enhanced Darik image URL.");
     }
+
+    console.info("Darik AI 233 enhancement saved", {
+      elapsedMs: Date.now() - xaiStartedAt,
+      retailerId,
+    });
 
     return json({
       ok: true,
