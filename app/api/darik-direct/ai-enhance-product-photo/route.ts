@@ -1,6 +1,7 @@
 // DARIK_GROK_AI_PRODUCT_PHOTO_BACKEND_231
 // DARIK_GROK_AI_STANDARD_IMAGE_MODEL_232
 // DARIK_GROK_AI_TIMEOUT_CATALOG_STYLE_233
+// DARIK_GROK_AI_STRICT_PRODUCT_PROPORTIONS_234
 import { createClient } from "@supabase/supabase-js";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -13,17 +14,21 @@ const XAI_IMAGE_MODEL = "grok-imagine-image";
 const PRODUCT_BUCKET = "darik-direct-products";
 
 const ENHANCEMENT_PROMPT = [
-  "Create a premium ecommerce studio product image from this exact source product photo, matching the polished reference style used by top retail catalogs.",
-  "STRICT PRODUCT PRESERVATION: keep the exact same product identity, packaging, bottle or container shape, logos, brand marks, printed wording and spelling, labels, colors, proportions, quantity, visible condition, and physical details.",
+  "Create a premium ecommerce studio product image from this exact source product photo.",
+  "STRICT PRODUCT PRESERVATION: keep the exact same product identity, packaging, container type, visible condition, logos, brand marks, printed wording and spelling, labels, colors, quantity, and physical details.",
+  "Preserve the exact physical form, size, dimensions, proportions, scale, and height-to-width ratio of the product exactly as shown in the source.",
+  "Do not make the product taller, shorter, wider, slimmer, thicker, rounder, straighter, more symmetrical, or more perfect than the source.",
+  "Preserve the exact silhouette, edges, curves, corners, lid shape, cap shape, base shape, and overall container structure.",
+  "For cans, bottles, jars, boxes, pouches, and similar packages, preserve the exact original proportions and structure. Do not reinterpret the form factor.",
   "Do not invent, remove, replace, rewrite, stylize, or redesign any part of the product, packaging, logo, label, or printed text.",
   "If any printed text cannot be reproduced safely and exactly, keep that printed area visually unchanged from the source rather than inventing or correcting text.",
-  "COMPOSITION: square 1:1 catalog image, very light gray or near-white studio background, main product centered and large, entire product fully visible, no cropped edges, approximately 10 to 14 percent clean breathing room around the outermost product elements.",
-  "LIGHTING: clean professional commercial studio lighting, crisp natural detail, corrected exposure and white balance, realistic soft contact shadows, no harsh glare, no fake plastic look.",
-  "REFERENCE-STYLE LAYOUT: when the source clearly includes a package plus a matching bottle or secondary product piece, keep the main package centered and place the matching secondary piece naturally in the front-right, without changing either item.",
+  "PHOTO IMPROVEMENT ONLY: improve lighting, exposure, white balance, clarity, sharpness, background cleanliness, and realistic soft contact shadows.",
+  "COMPOSITION: use a square 1:1 catalog image with a very light gray or near-white studio background. Keep the entire product fully visible and centered cleanly with approximately 10 to 14 percent breathing room.",
+  "If the source contains exactly one product item, output exactly one product item only. Do not duplicate, add, remove, or merge product pieces.",
   "If the source clearly communicates a flavor or ingredient such as fruit, coffee, flowers, spices, or ice, you may add a small tasteful arrangement of only those clearly supported ingredients along the lower foreground. Do not guess ingredients that are not evident from the source.",
-  "If an exact brand logo is clearly readable in the source, you may place the same exact logo once in the upper-left as a clean brand mark. If exact reproduction is uncertain, leave the upper-left empty rather than inventing a logo or text.",
-  "No people, hands, unrelated props, badges, extra marketing copy, watermarks, duplicate products, or invented accessories.",
-  "The finished result should look like a professionally designed high-end retail product listing while remaining an accurate representation of the original product.",
+  "Optional top-left logo is allowed only if it exactly matches the brand visible in the source. If exact reproduction is uncertain, leave that area empty.",
+  "No people, hands, unrelated props, extra marketing copy, badges, watermarks, or invented accessories.",
+  "The finished result should look like a professional catalog photo while remaining an accurate representation of the original product with unchanged physical proportions and scale.",
 ].join(" ");
 
 type EnhanceRequestBody = {
