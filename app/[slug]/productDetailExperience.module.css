@@ -5368,3 +5368,48 @@
   object-fit: contain !important;
   object-position: center center !important;
 }
+
+/* ==========================================================================
+   DARIK_CATALOG_PRODUCT_PHOTO_STAGE_230
+   Give retailer-shot photos a deliberate commerce/catalog stage instead of
+   letting the source rectangle visually consume the entire mobile hero.
+
+   Important:
+   - The stored image is NOT cropped or rewritten.
+   - Fullscreen inspection remains unchanged.
+   - This only reduces the normal product-detail hero image footprint so there
+     is guaranteed breathing room around the photo on every phone.
+   ========================================================================== */
+
+.photoButton {
+  place-items: center !important;
+  overflow: hidden !important;
+  background:
+    radial-gradient(circle at 50% 44%, #ffffff 0%, #fbfcfd 58%, #f3f6f8 100%) !important;
+}
+
+.photoButton img {
+  width: auto !important;
+  height: auto !important;
+  max-width: 88% !important;
+  max-height: 88% !important;
+  padding: 0 !important;
+  object-fit: contain !important;
+  object-position: center center !important;
+  transform: none !important;
+  filter: none !important;
+}
+
+@media (max-width: 900px) {
+  .photoButton img {
+    max-width: 84% !important;
+    max-height: 84% !important;
+  }
+}
+
+@media (max-width: 520px) {
+  .photoButton img {
+    max-width: 82% !important;
+    max-height: 82% !important;
+  }
+}
