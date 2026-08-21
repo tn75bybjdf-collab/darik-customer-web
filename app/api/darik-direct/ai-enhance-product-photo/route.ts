@@ -1,10 +1,12 @@
 // DARIK_GROK_AI_PRODUCT_PHOTO_BACKEND_231
 // DARIK_GROK_AI_STANDARD_IMAGE_MODEL_232
-// DARIK_GROK_AI_TIMEOUT_CATALOG_STYLE_233
-// DARIK_GROK_AI_STRICT_PRODUCT_PROPORTIONS_234
-// DARIK_GROK_AI_DYNAMIC_FRAMING_NO_SMUSH_235
+// DARIK_GROK_TIMEOUT_CATALOG_STYLE_233
+// DARIK_GROK_STRICT_PROPORTIONS_234
+// DARIK_GROK_DYNAMIC_FRAMING_235
+// DARIK_GROK_PREPAD_SQUARE_236
 import { createClient } from "@supabase/supabase-js";
 import { NextRequest, NextResponse } from "next/server";
+import sharp from "sharp";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -13,9 +15,17 @@ export const maxDuration = 180;
 const XAI_IMAGE_EDIT_ENDPOINT = "https://api.x.ai/v1/images/edits";
 const XAI_IMAGE_MODEL = "grok-imagine-image";
 const PRODUCT_BUCKET = "darik-direct-products";
+const SOURCE_STAGE_PREFIX = "ai-source-square";
+const SOURCE_FETCH_TIMEOUT_MS = 25_000;
+const XAI_TIMEOUT_MS = 145_000;
+const OUTPUT_TIMEOUT_MS = 25_000;
+const MAX_SOURCE_BYTES = 15 * 1024 * 1024;
+const MAX_OUTPUT_BYTES = 15 * 1024 * 1024;
+const PREPAD_BACKGROUND = { r: 248, g: 248, b: 246, alpha: 1 };
 
 const ENHANCEMENT_PROMPT = [
   "Create a premium ecommerce studio product image from this exact source product photo.",
+  "The provided source image is already square-framed and centered on purpose. Use that framing as the composition guide rather than zooming in closer.",
   "STRICT PRODUCT PRESERVATION: keep the exact same product identity, packaging, container type, visible condition, logos, brand marks, printed wording and spelling, labels, colors, quantity, and physical details.",
   "Preserve the exact physical form, size, dimensions, proportions, scale, silhouette, and height-to-width ratio of the product exactly as shown in the source.",
   "Never squash, stretch, compress, widen, slim, fatten, shorten, lengthen, round, straighten, or otherwise distort the product in order to make it fit the square frame.",
@@ -23,9 +33,9 @@ const ENHANCEMENT_PROMPT = [
   "Preserve the exact edges, curves, corners, lid shape, cap shape, trigger shape, base shape, and overall container structure.",
   "For cans, bottles, jars, boxes, pouches, trigger bottles, and similar packages, preserve the exact original proportions and structure. Do not reinterpret the form factor.",
   "FRAMING RULE: the square canvas must adapt to the product; the product must never adapt its shape to the square canvas.",
-  "For tall or narrow products, zoom the camera OUT farther and leave more empty background above, below, and/or beside the product so the entire product fits naturally at its original proportions.",
-  "For wide products, zoom the camera OUT farther and leave more empty background on the left and right so the entire product fits naturally at its original proportions.",
-  "If necessary, let the product occupy significantly less of the square frame. It is better to have extra clean background than to alter the product shape.",
+  "If the product is tall or narrow, keep extra empty background above, below, and/or beside it so the whole product fits naturally at its original proportions.",
+  "If the product is wide, keep extra empty background on the left and right so the whole product fits naturally at its original proportions.",
+  "If necessary, let the product occupy less of the square frame. It is better to have extra clean background than to alter the product shape.",
   "Do not crop the top, bottom, trigger, cap, corners, edges, or any other part of the product. The complete original silhouette must remain visible.",
   "Do not invent, remove, replace, rewrite, stylize, or redesign any part of the product, packaging, logo, label, or printed text.",
   "If any printed text cannot be reproduced safely and exactly, keep that printed area visually unchanged from the source rather than inventing or correcting text.",
@@ -50,15 +60,17 @@ type XaiEditResponse = {
     revised_prompt?: unknown;
   }>;
   usage?: {
-    cost_in_usd_ticks?: unknown;
+    cost_in_usd_tickets?: unknown;
   };
   error?: unknown;
 };
 
-function json(
-  payload: Record<string, unknown>,
-  status = 200,
-) {
+type FramedSourceResult = {
+  bytes: Uint8Array;
+  mime: string;
+};
+
+function json(payload: Record<string, unknown>, status = 200) {
   return NextResponse.json(payload, {
     status,
     headers: {
@@ -102,7 +114,95 @@ function extensionForMime(mimeType: string) {
   return { ext: "jpg", mime: "image/jpeg" };
 }
 
+async function fetchImageBytes(url: string, timeoutMs: number, maxBytes: number) {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), timeoutMs);
+
+  try {
+    const response = await fetch(url, {
+      signal: controller.signal,
+      cache: "no-store",
+    });
+
+    if (!response.ok) {
+      throw new Error(`Image download failed (${response.status}).`);
+    }
+
+    const contentLength = Number(response.headers.get("content-length") || "0");
+    if (contentLength > maxBytes) {
+      throw new Error("Image is too large.");
+    }
+
+    const bytes = new Uint8Array(await response.arrayBuffer());
+    if (bytes.byteLength === 0) {
+      throw new Error("Image was empty.");
+    }
+    if (bytes.byteLength > maxBytes) {
+      throw new Error("Image is too large.");
+    }
+
+    const contentType = response.headers.get("content-type") || "image/jpeg";
+    return { bytes, contentType };
+  } finally {
+    clearTimeout(timeout);
+  }
+}
+
+async function frameSourceToSquare(imageUrl: string): Promise<FramedSourceResult> {
+  const { bytes } = await fetchImageBytes(
+    imageUrl,
+    SOURCE_FETCH_TIMEOUT_MS,
+    MAX_SOURCE_BYTES,
+  );
+
+  const source = sharp(bytes, { failOn: "none" }).rotate();
+  const metadata = await source.metadata();
+  const width = Number(metadata.width || 0);
+  const height = Number(metadata.height || 0);
+
+  if (!width || !height) {
+    throw new Error("Could not read source image dimensions.");
+  }
+
+  const longest = Math.max(width, height);
+  const squareSize = Math.max(1400, Math.min(2200, Math.round(longest * 1.28)));
+  const innerBox = Math.max(900, Math.round(squareSize * 0.72));
+
+  const fitted = await source
+    .resize(innerBox, innerBox, {
+      fit: "contain",
+      background: { r: 0, g: 0, b: 0, alpha: 0 },
+      withoutEnlargement: false,
+    })
+    .png()
+    .toBuffer();
+
+  const framedBuffer = await sharp({
+    create: {
+      width: squareSize,
+      height: squareSize,
+      channels: 4,
+      background: PREPAD_BACKGROUND,
+    },
+  })
+    .composite([
+      {
+        input: fitted,
+        left: Math.round((squareSize - innerBox) / 2),
+        top: Math.round((squareSize - innerBox) / 2),
+      },
+    ])
+    .png()
+    .toBuffer();
+
+  return {
+    bytes: new Uint8Array(framedBuffer),
+    mime: "image/png",
+  };
+}
+
 export async function POST(request: NextRequest) {
+  const startedAt = Date.now();
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
   const serviceRoleKey =
     process.env.SUPABASE_SERVICE_ROLE_KEY ||
@@ -110,9 +210,18 @@ export async function POST(request: NextRequest) {
     "";
   const xaiApiKey = process.env.XAI_API_KEY || "";
 
+  const logStage = (stage: string, extra?: unknown) => {
+    const elapsed = Date.now() - startedAt;
+    if (typeof extra === "undefined") {
+      console.log(`[DARIK AI 236] ${stage} (${elapsed}ms)`);
+    } else {
+      console.log(`[DARIK AI 236] ${stage} (${elapsed}ms)`, extra);
+    }
+  };
+
   if (!supabaseUrl || !serviceRoleKey) {
     console.error(
-      "Darik AI 231 is missing Supabase server environment variables.",
+      "Darik AI 236 is missing Supabase server environment variables.",
     );
     return json(
       {
@@ -124,7 +233,7 @@ export async function POST(request: NextRequest) {
   }
 
   if (!xaiApiKey) {
-    console.error("Darik AI 231 is missing XAI_API_KEY.");
+    console.error("Darik AI 236 is missing XAI_API_KEY.");
     return json(
       {
         ok: false,
@@ -166,8 +275,7 @@ export async function POST(request: NextRequest) {
     },
   });
 
-  const { data: userData, error: userError } =
-    await admin.auth.getUser(accessToken);
+  const { data: userData, error: userError } = await admin.auth.getUser(accessToken);
   const authUser = userData.user;
 
   if (userError || !authUser?.id) {
@@ -184,7 +292,7 @@ export async function POST(request: NextRequest) {
     .maybeSingle();
 
   if (retailerError) {
-    console.error("Darik AI 231 retailer lookup failed:", retailerError.message);
+    console.error("Darik AI 236 retailer lookup failed:", retailerError.message);
     return json({ ok: false, error: "Could not verify this Darik store." }, 500);
   }
 
@@ -194,99 +302,72 @@ export async function POST(request: NextRequest) {
 
   if (retailer.account_restricted === true) {
     return json(
-      { ok: false, error: "This retailer account is currently restricted." },
+      { ok: false, error: "This Darik account is currently restricted." },
       403,
     );
   }
 
-  const [membershipResult, usernameOwnerResult] = await Promise.all([
-    admin
-      .from("retailer_store_members")
-      .select("id,member_status")
-      .eq("auth_user_id", authUser.id)
-      .eq("retailer_id", retailerId)
-      .eq("member_status", "active")
-      .limit(1)
-      .maybeSingle(),
-    admin
-      .from("darik_direct_username_accounts")
-      .select("auth_user_id,retailer_id")
-      .eq("auth_user_id", authUser.id)
-      .eq("retailer_id", retailerId)
-      .limit(1)
-      .maybeSingle(),
-  ]);
-
-  if (membershipResult.error) {
-    console.error(
-      "Darik AI 231 membership lookup failed:",
-      membershipResult.error.message,
-    );
-  }
-  if (usernameOwnerResult.error) {
-    console.error(
-      "Darik AI 231 username owner lookup failed:",
-      usernameOwnerResult.error.message,
-    );
-  }
-
-  const emailOwner =
-    Boolean(retailer.email) &&
-    Boolean(authUser.email) &&
-    String(retailer.email).trim().toLowerCase() ===
-      String(authUser.email).trim().toLowerCase();
-
-  const authorized =
-    emailOwner ||
-    Boolean(membershipResult.data?.id) ||
-    Boolean(usernameOwnerResult.data?.auth_user_id);
-
-  if (!authorized) {
+  if (text(retailer.email, 320).toLowerCase() !== text(authUser.email, 320).toLowerCase()) {
     return json(
-      { ok: false, error: "You do not have access to this Darik store." },
+      {
+        ok: false,
+        error: "The signed-in retailer does not match this Darik store.",
+      },
       403,
     );
   }
 
-  let sourceUrl: URL;
-  let supabaseOrigin: URL;
+  logStage("request accepted");
+
+  let stagedSquareUrl = "";
   try {
-    sourceUrl = new URL(imageUrl);
-    supabaseOrigin = new URL(supabaseUrl);
-  } catch {
-    return json({ ok: false, error: "Invalid source product photo URL." }, 400);
-  }
+    logStage("source pre-pad start");
+    const framed = await frameSourceToSquare(imageUrl);
+    const stagePath = `${retailerId}/${SOURCE_STAGE_PREFIX}/${Date.now()}-${crypto.randomUUID()}.png`;
 
-  const expectedPathPrefix =
-    `/storage/v1/object/public/${PRODUCT_BUCKET}/${retailerId}/`;
+    const stageUpload = await admin.storage
+      .from(PRODUCT_BUCKET)
+      .upload(stagePath, framed.bytes, {
+        cacheControl: "3600",
+        contentType: framed.mime,
+        upsert: false,
+      });
 
-  if (
-    sourceUrl.protocol !== "https:" ||
-    sourceUrl.origin !== supabaseOrigin.origin ||
-    !sourceUrl.pathname.startsWith(expectedPathPrefix)
-  ) {
+    if (stageUpload.error) {
+      throw new Error(stageUpload.error.message);
+    }
+
+    stagedSquareUrl = admin.storage
+      .from(PRODUCT_BUCKET)
+      .getPublicUrl(stageUpload.data.path).data.publicUrl;
+
+    if (!stagedSquareUrl) {
+      throw new Error("Could not create the framed source image URL.");
+    }
+
+    logStage("source pre-pad complete", stagedSquareUrl);
+  } catch (error) {
+    console.error(
+      "Darik AI 236 could not pre-frame the source image:",
+      safeMessage(error),
+    );
     return json(
       {
         ok: false,
         error:
-          "AI enhancement only accepts photos uploaded by this Darik retailer.",
+          "The source photo could not be prepared for enhancement. Your original photo is safe.",
       },
-      400,
+      502,
     );
   }
 
-  const xaiStartedAt = Date.now();
-  console.info("Darik AI 233 starting xAI image edit", {
-    retailerId,
-    model: XAI_IMAGE_MODEL,
-  });
-  const xaiController = new AbortController();
-  const xaiTimeout = setTimeout(() => xaiController.abort(), 145_000);
-
   let xaiResponse: Response;
-  let xaiPayload: XaiEditResponse;
+  let xaiPayload: XaiEditResponse = {};
+  const xaiController = new AbortController();
+  const xaiTimeout = setTimeout(() => xaiController.abort(), XAI_TIMEOUT_MS);
 
   try {
+    logStage("xAI request start");
     xaiResponse = await fetch(XAI_IMAGE_EDIT_ENDPOINT, {
       method: "POST",
       headers: {
@@ -297,7 +378,7 @@ export async function POST(request: NextRequest) {
         model: XAI_IMAGE_MODEL,
         prompt: ENHANCEMENT_PROMPT,
         image: {
-          url: imageUrl,
+          url: stagedSquareUrl,
           type: "image_url",
         },
         aspect_ratio: "1:1",
@@ -308,15 +389,11 @@ export async function POST(request: NextRequest) {
     });
 
     xaiPayload = (await xaiResponse.json().catch(() => ({}))) as XaiEditResponse;
-    console.info("Darik AI 233 xAI image edit returned", {
-      status: xaiResponse.status,
-      elapsedMs: Date.now() - xaiStartedAt,
-    });
+    logStage("xAI request complete", { status: xaiResponse.status });
   } catch (error) {
-    const timedOut =
-      error instanceof Error && error.name === "AbortError";
+    const timedOut = error instanceof Error && error.name === "AbortError";
     console.error(
-      "Darik AI 231 xAI request failed:",
+      "Darik AI 236 xAI request failed:",
       timedOut ? "timeout" : safeMessage(error),
     );
     return json(
@@ -334,7 +411,7 @@ export async function POST(request: NextRequest) {
 
   if (!xaiResponse.ok) {
     console.error(
-      "Darik AI 231 xAI rejected request:",
+      "Darik AI 236 xAI rejected request:",
       xaiResponse.status,
       safeMessage(xaiPayload.error),
     );
@@ -352,7 +429,7 @@ export async function POST(request: NextRequest) {
   const generatedMime = text(xaiPayload.data?.[0]?.mime_type, 100);
 
   if (!generatedUrl) {
-    console.error("Darik AI 231 xAI response did not include an image URL.");
+    console.error("Darik AI 236 xAI response did not include an image URL.");
     return json(
       {
         ok: false,
@@ -389,24 +466,23 @@ export async function POST(request: NextRequest) {
   }
 
   const outputController = new AbortController();
-  const outputTimeout = setTimeout(() => outputController.abort(), 25_000);
+  const outputTimeout = setTimeout(() => outputController.abort(), OUTPUT_TIMEOUT_MS);
 
   try {
+    logStage("enhanced output download start");
     const generatedResponse = await fetch(generatedUrl, {
       signal: outputController.signal,
       cache: "no-store",
     });
 
     if (!generatedResponse.ok) {
-      throw new Error(
-        `Enhanced image download failed (${generatedResponse.status}).`,
-      );
+      throw new Error(`Enhanced image download failed (${generatedResponse.status}).`);
     }
 
     const contentLength = Number(
       generatedResponse.headers.get("content-length") || "0",
     );
-    if (contentLength > 15 * 1024 * 1024) {
+    if (contentLength > MAX_OUTPUT_BYTES) {
       throw new Error("Enhanced image is too large.");
     }
 
@@ -414,17 +490,14 @@ export async function POST(request: NextRequest) {
     if (outputBytes.byteLength === 0) {
       throw new Error("Enhanced image was empty.");
     }
-    if (outputBytes.byteLength > 15 * 1024 * 1024) {
+    if (outputBytes.byteLength > MAX_OUTPUT_BYTES) {
       throw new Error("Enhanced image is too large.");
     }
 
     const contentType =
-      generatedMime ||
-      generatedResponse.headers.get("content-type") ||
-      "image/jpeg";
+      generatedMime || generatedResponse.headers.get("content-type") || "image/jpeg";
     const outputType = extensionForMime(contentType);
-    const outputPath =
-      `${retailerId}/ai-enhanced/${Date.now()}-${crypto.randomUUID()}.${outputType.ext}`;
+    const outputPath = `${retailerId}/ai-enhanced/${Date.now()}-${crypto.randomUUID()}.${outputType.ext}`;
 
     const uploadResult = await admin.storage
       .from(PRODUCT_BUCKET)
@@ -446,23 +519,21 @@ export async function POST(request: NextRequest) {
       throw new Error("Could not create the enhanced Darik image URL.");
     }
 
-    console.info("Darik AI 233 enhancement saved", {
-      elapsedMs: Date.now() - xaiStartedAt,
-      retailerId,
-    });
+    logStage("enhanced output saved", enhancedUrl);
 
     return json({
       ok: true,
       enhanced_url: enhancedUrl,
+      staged_square_url: stagedSquareUrl,
       credits: {
         mode: "unlimited_testing",
         remaining: null,
-        label: "Unlimited — Testing Mode",
+        label: "Unlimited â€” Testing Mode",
       },
     });
   } catch (error) {
     console.error(
-      "Darik AI 231 could not persist enhanced image:",
+      "Darik AI 236 could not persist enhanced image:",
       safeMessage(error),
     );
     return json(
