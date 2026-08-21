@@ -1,4 +1,5 @@
 // DARIK_GROK_AI_PRODUCT_PHOTO_BACKEND_231
+// DARIK_GROK_AI_STANDARD_IMAGE_MODEL_232
 import { createClient } from "@supabase/supabase-js";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -7,7 +8,7 @@ export const dynamic = "force-dynamic";
 export const maxDuration = 60;
 
 const XAI_IMAGE_EDIT_ENDPOINT = "https://api.x.ai/v1/images/edits";
-const XAI_IMAGE_MODEL = "grok-imagine-image-quality";
+const XAI_IMAGE_MODEL = "grok-imagine-image";
 const PRODUCT_BUCKET = "darik-direct-products";
 
 const ENHANCEMENT_PROMPT = [
