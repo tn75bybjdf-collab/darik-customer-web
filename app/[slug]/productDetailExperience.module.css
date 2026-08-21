@@ -5330,3 +5330,41 @@
   .descriptionToggle221 {
   margin-top: 2px !important;
 }
+
+/* ==========================================================================
+   DARIK_CAMERA_PRODUCT_PHOTO_SAFE_FRAMING_228
+   Retailer camera photos are commonly portrait or landscape rather than
+   pre-cropped catalog squares. Product commerce media must never crop away
+   the actual item just to fill the hero frame.
+
+   The existing upload pipeline already preserves the source aspect ratio and
+   creates separate thumb/full files. This final visual override therefore
+   fixes BOTH existing retailer photos and future uploads without rewriting
+   stored media or changing the database.
+   ========================================================================== */
+
+.photoButton img {
+  width: 100% !important;
+  height: 100% !important;
+  max-width: 100% !important;
+  max-height: 100% !important;
+  object-fit: contain !important;
+  object-position: center center !important;
+  padding: clamp(8px, 1.6vw, 16px) !important;
+  transform: none !important;
+}
+
+.photoButton:hover img {
+  transform: none !important;
+}
+
+.mediaThumb img {
+  object-fit: contain !important;
+  object-position: center center !important;
+  background: var(--pd-image-stage, #ffffff);
+}
+
+.lightboxSlide img {
+  object-fit: contain !important;
+  object-position: center center !important;
+}
