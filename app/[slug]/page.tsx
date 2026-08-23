@@ -1,5 +1,6 @@
 "use client";
 
+// DARIK_GLOBAL_SIZE_SELECTION_AVAILABILITY_245
 // DARIK_FURNITURE_IKEA_COLOR_VARIANTS_216
 
 
@@ -174,6 +175,8 @@ type CartLine = {
   colorVariantId: string | null;
   colorName: string | null;
   colorNameAr: string | null;
+  sizeKey: string | null;
+  sizeLabel: string | null;
 };
 
 type OnlineCheckoutForm = {
@@ -2386,7 +2389,11 @@ export default function DarikDirectStorefrontPage() {
                   lineId:
                     typeof line.lineId === "string" && line.lineId
                       ? line.lineId
-                      : cartLineId216(productId216, colorVariantId216),
+                      : cartLineId216(
+                          productId216,
+                          colorVariantId216,
+                          typeof line.sizeKey === "string" ? line.sizeKey : null
+                        ),
                   productId: productId216,
                   name: String(line.name || "Product"),
                   price: Number(line.price || 0),
@@ -2395,6 +2402,8 @@ export default function DarikDirectStorefrontPage() {
                   colorVariantId: colorVariantId216,
                   colorName: typeof line.colorName === "string" ? line.colorName : null,
                   colorNameAr: typeof line.colorNameAr === "string" ? line.colorNameAr : null,
+                  sizeKey: typeof line.sizeKey === "string" ? line.sizeKey : null,
+                  sizeLabel: typeof line.sizeLabel === "string" ? line.sizeLabel : null,
                 };
               })
           );
@@ -5145,15 +5154,17 @@ export default function DarikDirectStorefrontPage() {
 
   function cartLineId216(
     productId: string,
-    colorVariantId: string | null | undefined
+    colorVariantId: string | null | undefined,
+    sizeKey245: string | null | undefined = null
   ) {
-    return `${productId}:${colorVariantId || "default"}`;
+    return `${productId}:${colorVariantId || "default"}:${sizeKey245 || "default"}`;
   }
 
   function productCartQuantities216(productId: string) {
     return cart.reduce<Record<string, number>>((result, line) => {
       if (line.productId !== productId) return result;
-      const key216 = line.colorVariantId || "default";
+      const key216 =
+        `${line.colorVariantId || "default"}|${line.sizeKey || "default"}`;
       result[key216] = (result[key216] || 0) + line.quantity;
       return result;
     }, {});
@@ -5161,7 +5172,8 @@ export default function DarikDirectStorefrontPage() {
 
   function addToCart(
     product: Product,
-    colorVariant216: FurnitureColorSelection216 | null = null
+    colorVariant216: FurnitureColorSelection216 | null = null,
+    sizeSelection245: { key: string; label: string } | null = null
   ) {
     setOrderConfirmation(null);
     if ((product.direct_pricing_mode || "price") !== "price") return;
@@ -5173,7 +5185,26 @@ export default function DarikDirectStorefrontPage() {
     const price = Number(product.app_price ?? 0);
     if (!Number.isFinite(price) || price <= 0) return;
 
-    const lineId216 = cartLineId216(product.id, colorVariant216?.id || null);
+    const hasSizes245 =
+      (Array.isArray(product.direct_size_options) &&
+        product.direct_size_options.some((size) =>
+          Boolean(String(size?.label || "").trim())
+        )) ||
+      (Array.isArray(product.direct_shoe_sizes) &&
+        product.direct_shoe_sizes.some((size) =>
+          Boolean(String(size?.eu || "").trim())
+        ));
+
+    if (hasSizes245 && !sizeSelection245?.key) {
+      setActiveProductId(product.id);
+      return;
+    }
+
+    const lineId216 = cartLineId216(
+      product.id,
+      colorVariant216?.id || null,
+      sizeSelection245?.key || null
+    );
 
     setCart((current) => {
       const existing = current.find((line) => line.lineId === lineId216);
@@ -5198,6 +5229,8 @@ export default function DarikDirectStorefrontPage() {
           colorVariantId: colorVariant216?.id || null,
           colorName: colorVariant216?.name || null,
           colorNameAr: colorVariant216?.nameAr || null,
+          sizeKey: sizeSelection245?.key || null,
+          sizeLabel: sizeSelection245?.label || null,
         },
       ];
     });
@@ -5394,7 +5427,7 @@ export default function DarikDirectStorefrontPage() {
           ? await uploadCliqReceipt()
           : null;
 
-      const result = await supabase.rpc("darik_direct_place_online_order_v4", {
+      const result = await supabase.rpc("darik_direct_place_online_order_v5", {
         p_storefront_slug: storefront.slug,
         p_customer_name: customerName,
         p_customer_phone: customerPhone,
@@ -5405,6 +5438,7 @@ export default function DarikDirectStorefrontPage() {
           product_id: line.productId,
           quantity: line.quantity,
           color_variant_id: line.colorVariantId,
+          size_key: line.sizeKey,
         })),
         p_payment_method: checkoutForm.paymentMethod,
         p_cliq_receipt_path: receiptPath,
@@ -6046,7 +6080,7 @@ export default function DarikDirectStorefrontPage() {
     "",
     ...cart.map(
       (line) =>
-        `${line.quantity} × ${line.name}${line.colorName ? ` — ${line.colorName}${line.colorNameAr ? ` / ${line.colorNameAr}` : ""}` : ""} — ${money(line.price * line.quantity)}`
+        `${line.quantity} × ${line.name}${line.colorName ? ` — ${line.colorName}${line.colorNameAr ? ` / ${line.colorNameAr}` : ""}` : ""}${line.sizeLabel ? ` — Size: ${line.sizeLabel}` : ""} — ${money(line.price * line.quantity)}`
     ),
     "",
     `Fulfillment: ${pickupOnly ? "Local pickup" : "Delivery"}`,
@@ -6623,14 +6657,18 @@ export default function DarikDirectStorefrontPage() {
         }
         cartCount={cartCount}
         onClose={closeProductDetail}
-        onAddToCart={(colorVariant216) => {
+        onAddToCart={(colorVariant216, sizeSelection245) => {
           if (!activeProduct) return;
-          addToCart(activeProduct, colorVariant216);
+          addToCart(activeProduct, colorVariant216, sizeSelection245);
         }}
-        onDecreaseCart={(colorVariant216) => {
+        onDecreaseCart={(colorVariant216, sizeSelection245) => {
           if (!activeProduct) return;
           changeQuantity(
-            cartLineId216(activeProduct.id, colorVariant216?.id || null),
+            cartLineId216(
+              activeProduct.id,
+              colorVariant216?.id || null,
+              sizeSelection245?.key || null
+            ),
             -1
           );
         }}
@@ -8063,6 +8101,11 @@ style={{
                               {line.colorNameAr ? (
                                 <span dir="rtl"> / {line.colorNameAr}</span>
                               ) : null}
+                            </small>
+                          ) : null}
+                          {line.sizeLabel ? (
+                            <small className={styles.cartSize245}>
+                              Size / المقاس: <strong>{line.sizeLabel}</strong>
                             </small>
                           ) : null}
                           <p>{money(line.price)}</p>

@@ -26,6 +26,7 @@
 // DARIK_CAMERA_FIRST_FRAME_READY_072
 // DARIK_REUSED_LIVE_CAMERA_PREVIEW_073
 // DARIK_ALL_FIELDS_GUIDED_ADD_PRODUCT_WIZARD_074
+// DARIK_GLOBAL_SIZE_SELECTION_AVAILABILITY_245
 // DARIK_FURNITURE_IKEA_COLOR_VARIANTS_216
 // DARIK_COSMETICS_FURNITURE_STYLE_SHADE_VARIANTS_239
 // DARIK_HARDWARE_COLOR_FINISH_VARIANTS_242
@@ -2996,6 +2997,7 @@ type DirectProduct = {
   direct_shoe_sizes: Array<{ eu?: string; us?: string | null }> | null;
   direct_shoe_us_sizes_enabled: boolean;
   direct_size_options: Array<{ label?: string }> | null;
+  direct_size_availability: Record<string, boolean> | null;
   direct_eyewear_multiple_colors: boolean;
   direct_eyewear_colors: Array<{ name?: string; name_ar?: string | null; hex?: string | null }> | null;
   direct_eyewear_model_code: string | null;
@@ -3444,6 +3446,24 @@ export default function DarikDirectProductsPage() {
   const [shoeWizardErrors, setShoeWizardErrors] = useState<Record<string, string>>({});
   const [shoeWizardPhotoSlots, setShoeWizardPhotoSlots] = useState(1);
   const [form, setForm] = useState<ProductForm>(emptyForm);
+  const [sizeAvailability245, setSizeAvailability245] = useState<Record<string, boolean>>({});
+
+  function genericSizeKey245(label: string) {
+    return `size:${String(label || "").trim().toLowerCase()}`;
+  }
+
+  function shoeSizeKey245(eu: string, us: string) {
+    return `shoe:${String(eu || "").trim().toLowerCase()}|${String(us || "").trim().toLowerCase()}`;
+  }
+
+  function shoeSizeLabel245(eu: string, us: string) {
+    const cleanEu245 = String(eu || "").trim();
+    const cleanUs245 = String(us || "").trim();
+    if (!cleanEu245) return "";
+    return cleanUs245
+      ? `EU ${cleanEu245} / US ${cleanUs245}`
+      : `EU ${cleanEu245}`;
+  }
 
   const [inlineCategoryOpen241, setInlineCategoryOpen241] = useState(false);
   const [inlineCategoryName241, setInlineCategoryName241] = useState("");
@@ -3667,6 +3687,7 @@ export default function DarikDirectProductsPage() {
             "direct_shoe_sizes",
             "direct_shoe_us_sizes_enabled",
             "direct_size_options",
+            "direct_size_availability",
             "direct_eyewear_multiple_colors",
             "direct_eyewear_colors",
             "direct_eyewear_model_code",
@@ -6287,6 +6308,7 @@ export default function DarikDirectProductsPage() {
   }
 
   function openCreateForm() {
+    setSizeAvailability245({});
     resetFurnitureVideoState();
     setCosmeticsSubcategory240("");
     setCosmeticsCustomSubcategory240("");
@@ -6479,6 +6501,18 @@ export default function DarikDirectProductsPage() {
       featured: Boolean(product.storefront_featured),
       sortOrder: String(product.storefront_sort_order ?? 1000),
     });
+    setSizeAvailability245(
+      product.direct_size_availability &&
+      typeof product.direct_size_availability === "object" &&
+      !Array.isArray(product.direct_size_availability)
+        ? Object.fromEntries(
+            Object.entries(product.direct_size_availability).map(([key, value]) => [
+              key,
+              value !== false,
+            ])
+          )
+        : {}
+    );
     setError("");
     setMessage("");
     setFormOpen(true);
@@ -6784,6 +6818,104 @@ export default function DarikDirectProductsPage() {
       setUploadingFurnitureColorId216(null);
       event.target.value = "";
     }
+  }
+
+  function renderSizeAvailability245() {
+    const rows245 = [
+      ...form.sizeOptions
+        .map((label) => String(label || "").trim())
+        .filter(
+          (label) =>
+            Boolean(label) &&
+            label !== CUSTOM_RETAIL_SIZE_VALUE
+        )
+        .map((label) => ({
+          key: genericSizeKey245(label),
+          label,
+        })),
+      ...form.shoeSizes
+        .map((size) => ({
+          eu: String(size.eu || "").trim(),
+          us: String(size.us || "").trim(),
+        }))
+        .filter((size) => Boolean(size.eu))
+        .map((size) => ({
+          key: shoeSizeKey245(size.eu, size.us),
+          label: shoeSizeLabel245(size.eu, size.us),
+        })),
+    ].filter(
+      (row, index, all) =>
+        Boolean(row.key) &&
+        Boolean(row.label) &&
+        all.findIndex((candidate) => candidate.key === row.key) === index
+    );
+
+    if (rows245.length === 0) return null;
+
+    return (
+      <section className={styles.sizeAvailability245}>
+        <div className={styles.sizeAvailabilityHeading245}>
+          <div>
+            <strong>Size availability / توفر المقاسات</strong>
+            <span>
+              Mark only the sold-out sizes unavailable. Other sizes stay available and the product can still be ordered. /
+              عطّل فقط المقاس النافد. تبقى المقاسات الأخرى متوفرة ويمكن للزبون طلب المنتج.
+            </span>
+          </div>
+        </div>
+
+        <div className={styles.sizeAvailabilityRows245}>
+          {rows245.map((row) => {
+            const available245 = sizeAvailability245[row.key] !== false;
+
+            return (
+              <article
+                className={styles.sizeAvailabilityRow245}
+                key={row.key}
+              >
+                <strong>{row.label}</strong>
+
+                <div className={styles.sizeAvailabilityToggle245}>
+                  <button
+                    type="button"
+                    className={
+                      available245
+                        ? styles.sizeAvailabilityActive245
+                        : ""
+                    }
+                    onClick={() =>
+                      setSizeAvailability245((current) => ({
+                        ...current,
+                        [row.key]: true,
+                      }))
+                    }
+                  >
+                    Available / متوفر
+                  </button>
+
+                  <button
+                    type="button"
+                    className={
+                      !available245
+                        ? styles.sizeAvailabilityUnavailableActive245
+                        : ""
+                    }
+                    onClick={() =>
+                      setSizeAvailability245((current) => ({
+                        ...current,
+                        [row.key]: false,
+                      }))
+                    }
+                  >
+                    Unavailable / غير متوفر
+                  </button>
+                </div>
+              </article>
+            );
+          })}
+        </div>
+      </section>
+    );
   }
 
   function renderFurnitureColors216() {
@@ -7869,6 +8001,23 @@ export default function DarikDirectProductsPage() {
       setSaving(false);
       setError(
         `The product was saved, but its category sizes failed. / تم حفظ المنتج، لكن تعذر حفظ مقاسات الفئة. ${genericSizesResult.error.message}`
+      );
+      await loadCatalog();
+      return;
+    }
+
+    const sizeAvailabilityResult245 = await supabase.rpc(
+      "darik_direct_set_product_size_availability_v1",
+      {
+        p_product_id: savedProductId,
+        p_availability: sizeAvailability245,
+      }
+    );
+
+    if (sizeAvailabilityResult245.error) {
+      setSaving(false);
+      setError(
+        `The product was saved, but size availability could not be saved. / تم حفظ المنتج، لكن تعذر حفظ توفر المقاسات. ${sizeAvailabilityResult245.error.message}`
       );
       await loadCatalog();
       return;
@@ -10064,6 +10213,7 @@ export default function DarikDirectProductsPage() {
                           </button>
                         ) : null}
 
+                        {renderSizeAvailability245()}
                         {renderFurnitureColors216()}
                         {isFurnitureMechanics ? (
                                               <section className={styles.furnitureVideoPanel}>
@@ -11797,7 +11947,8 @@ export default function DarikDirectProductsPage() {
                   </p>
                 </div>
 
-                    {renderFurnitureColors216()}
+                    {renderSizeAvailability245()}
+                        {renderFurnitureColors216()}
                     {isFurnitureMechanics ? (
                       <section className={styles.furnitureVideoPanel}>
                         <div className={styles.furnitureVideoHeading}>

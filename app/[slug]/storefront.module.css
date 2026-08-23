@@ -22031,3 +22031,19 @@
 .cartColor216 span {
   font: inherit;
 }
+
+
+/* DARIK_GLOBAL_SIZE_SELECTION_AVAILABILITY_245 */
+.cartSize245 {
+  display: block;
+  margin: 3px 0 1px;
+  color: var(--muted, #667085);
+  font-size: 11px;
+  font-weight: 800;
+  line-height: 1.35;
+}
+.cartSize245 strong {
+  color: inherit;
+  font: inherit;
+  font-weight: 950;
+}

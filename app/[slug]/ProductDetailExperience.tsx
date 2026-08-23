@@ -21,11 +21,18 @@ import { createPortal } from "react-dom";
 import { supabase } from "@/lib/supabaseBrowser";
 import styles from "./productDetailExperience.module.css";
 
+// DARIK_GLOBAL_SIZE_SELECTION_AVAILABILITY_245
 // DARIK_FURNITURE_IKEA_COLOR_VARIANTS_216
 // DARIK_COSMETICS_FURNITURE_STYLE_SHADE_VARIANTS_239
 
 type SizeOption = { label?: string | null };
 type ShoeSize = { eu?: string | null; us?: string | null };
+
+export type ProductSizeSelection245 = {
+  key: string;
+  label: string;
+  available: boolean;
+};
 
 export type FurnitureColorSelection216 = {
   id: string;
@@ -96,8 +103,14 @@ type ProductDetailExperienceProps = {
   cartQuantitiesByVariant216: Record<string, number>;
   cartCount: number;
   onClose: () => void;
-  onAddToCart: (color: FurnitureColorSelection216 | null) => void;
-  onDecreaseCart: (color: FurnitureColorSelection216 | null) => void;
+  onAddToCart: (
+    color: FurnitureColorSelection216 | null,
+    size: ProductSizeSelection245 | null
+  ) => void;
+  onDecreaseCart: (
+    color: FurnitureColorSelection216 | null,
+    size: ProductSizeSelection245 | null
+  ) => void;
   onOpenCart: () => void;
 };
 
@@ -436,6 +449,11 @@ export default function ProductDetailExperience({
   const [galleryIndex, setGalleryIndex] = useState(0);
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
   const [videoUrl, setVideoUrl] = useState("");
+  const [sizeChoices245, setSizeChoices245] = useState<ProductSizeSelection245[]>([]);
+  const [selectedSizeKey245, setSelectedSizeKey245] = useState("");
+  const [sizeChoicesReady245, setSizeChoicesReady245] = useState(false);
+  const [sizeChoicesError245, setSizeChoicesError245] = useState("");
+
   const [furnitureColors216, setFurnitureColors216] = useState<FurnitureColorSelection216[]>([]);
   const [furniturePrimaryPhotos216, setFurniturePrimaryPhotos216] = useState<string[]>([]);
   const [selectedFurnitureColorId216, setSelectedFurnitureColorId216] = useState("");
@@ -671,7 +689,9 @@ export default function ProductDetailExperience({
   // No temporary '1 added' timer: after the first add, the UI stays at - 1 +.
   function handleAddToCart119() {
     if (!furnitureColorsReady216 || furnitureColorsError216) return;
-    onAddToCart(selectedFurnitureColor216);
+    if (!sizeChoicesReady245 || sizeChoicesError245) return;
+    if (!selectedSizeReady245) return;
+    onAddToCart(selectedFurnitureColor216, selectedSize245);
   }
   // DARIK_PRODUCT_RETURN_SCROLL_POSITION_179_V2
   useEffect(() => {
@@ -825,6 +845,110 @@ export default function ProductDetailExperience({
     };
   }, [open, product?.id, storeSlug]);
 
+  useEffect(() => {
+    if (!open || !product?.id) {
+      setSizeChoices245([]);
+      setSelectedSizeKey245("");
+      setSizeChoicesReady245(false);
+      setSizeChoicesError245("");
+      return;
+    }
+
+    const localHasSizes245 =
+      (Array.isArray(product.direct_size_options) &&
+        product.direct_size_options.some((size) =>
+          Boolean(clean(size?.label))
+        )) ||
+      (Array.isArray(product.direct_shoe_sizes) &&
+        product.direct_shoe_sizes.some((size) =>
+          Boolean(clean(size?.eu))
+        ));
+
+    setSelectedSizeKey245("");
+    setSizeChoicesError245("");
+
+    if (!localHasSizes245) {
+      setSizeChoices245([]);
+      setSizeChoicesReady245(true);
+      return;
+    }
+
+    let cancelled245 = false;
+    setSizeChoicesReady245(false);
+
+    void supabase
+      .rpc("darik_direct_public_product_size_options_v1", {
+        p_product_id: product.id,
+        p_storefront_slug: storeSlug,
+      })
+      .then(({ data, error }) => {
+        if (cancelled245) return;
+
+        if (error) {
+          setSizeChoices245([]);
+          setSizeChoicesReady245(false);
+          setSizeChoicesError245(
+            `Sizes could not be loaded / تعذر تحميل المقاسات. ${error.message}`
+          );
+          return;
+        }
+
+        const payload245 =
+          data && typeof data === "object"
+            ? (data as {
+                has_sizes?: boolean;
+                sizes?: Array<{
+                  key?: string | null;
+                  label?: string | null;
+                  available?: boolean | null;
+                }>;
+              })
+            : null;
+
+        const choices245 = Array.isArray(payload245?.sizes)
+          ? payload245.sizes
+              .map((size) => ({
+                key: clean(size?.key),
+                label: clean(size?.label),
+                available: size?.available !== false,
+              }))
+              .filter((size) => Boolean(size.key) && Boolean(size.label))
+          : [];
+
+        setSizeChoices245(choices245);
+        setSizeChoicesReady245(true);
+      });
+
+    return () => {
+      cancelled245 = true;
+    };
+  }, [open, product?.id, product?.direct_size_options, product?.direct_shoe_sizes, storeSlug]);
+
+  const selectedSize245 = useMemo(
+    () =>
+      sizeChoices245.find(
+        (size) => size.key === selectedSizeKey245
+      ) || null,
+    [sizeChoices245, selectedSizeKey245]
+  );
+
+  const localProductHasSizes245 =
+    (Array.isArray(product?.direct_size_options) &&
+      product.direct_size_options.some((size) =>
+        Boolean(clean(size?.label))
+      )) ||
+    (Array.isArray(product?.direct_shoe_sizes) &&
+      product.direct_shoe_sizes.some((size) =>
+        Boolean(clean(size?.eu))
+      ));
+
+  const sizeRequired245 =
+    localProductHasSizes245 || sizeChoices245.length > 0;
+
+  const selectedSizeReady245 =
+    !sizeRequired245 ||
+    (Boolean(selectedSize245) && selectedSize245?.available !== false);
+
   const selectedFurnitureColor216 = useMemo(
     () =>
       furnitureColors216.find(
@@ -872,11 +996,14 @@ export default function ProductDetailExperience({
   const selectedColorCartKey216 =
     selectedFurnitureColor216?.id || "default";
 
+  const selectedCartKey245 =
+    `${selectedColorCartKey216}|${selectedSize245?.key || "default"}`;
+
   const selectedInCart216 = Math.max(
     0,
     Number(
-      cartQuantitiesByVariant216[selectedColorCartKey216] ??
-        (selectedFurnitureColor216 ? 0 : inCart) ??
+      cartQuantitiesByVariant216[selectedCartKey245] ??
+        (!selectedFurnitureColor216 && !sizeRequired245 ? inCart : 0) ??
         0
     ) || 0
   );
@@ -2054,6 +2181,64 @@ export default function ProductDetailExperience({
                 </p>
               ) : null}
 
+              {sizeRequired245 ? (
+                <section className={styles.sizeSelector245}>
+                  <div className={styles.sizeSelectorHeading245}>
+                    <span>Choose size / اختر المقاس</span>
+                    {selectedSize245 ? (
+                      <strong>{selectedSize245.label}</strong>
+                    ) : (
+                      <small>Required before adding to bag / مطلوب قبل الإضافة للسلة</small>
+                    )}
+                  </div>
+
+                  {!sizeChoicesReady245 ? (
+                    <p className={styles.sizeStatus245}>
+                      Loading sizes… / جارٍ تحميل المقاسات…
+                    </p>
+                  ) : sizeChoicesError245 ? (
+                    <p className={styles.sizeError245}>
+                      {sizeChoicesError245}
+                    </p>
+                  ) : (
+                    <div className={styles.sizeChoices245}>
+                      {sizeChoices245.map((size) => {
+                        const selected245 =
+                          size.key === selectedSizeKey245;
+
+                        return (
+                          <button
+                            type="button"
+                            key={size.key}
+                            disabled={!size.available}
+                            className={[
+                              selected245
+                                ? styles.sizeChoiceSelected245
+                                : "",
+                              !size.available
+                                ? styles.sizeChoiceUnavailable245
+                                : "",
+                            ]
+                              .filter(Boolean)
+                              .join(" ")}
+                            onClick={() => {
+                              if (!size.available) return;
+                              setSelectedSizeKey245(size.key);
+                            }}
+                            aria-pressed={selected245}
+                          >
+                            <strong>{size.label}</strong>
+                            {!size.available ? (
+                              <small>Out / غير متوفر</small>
+                            ) : null}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  )}
+                </section>
+              ) : null}
+
               {fitment ? (
                 <section className={styles.fitmentCard}>
                   <div className={styles.fitmentIcon}>✓</div>
@@ -2065,7 +2250,7 @@ export default function ProductDetailExperience({
                 </section>
               ) : null}
 
-              {optionLabels.length > 0 ? (
+              {optionLabels.length > 0 && !sizeRequired245 ? (
                 <section className={styles.optionsSection}>
                   <div className={styles.sectionLabel}>
                     <span>Available options</span>
@@ -2193,7 +2378,12 @@ export default function ProductDetailExperience({
                       <div className={styles.productQuantitySelector180} aria-label="Product quantity in cart">
                         <button
                           type="button"
-                          onClick={() => onDecreaseCart(selectedFurnitureColor216)}
+                          onClick={() =>
+                            onDecreaseCart(
+                              selectedFurnitureColor216,
+                              selectedSize245
+                            )
+                          }
                           aria-label="Remove one from cart"
                         >
                           <span aria-hidden="true">−</span>
@@ -2202,7 +2392,7 @@ export default function ProductDetailExperience({
                         <button
                           type="button"
                           onClick={handleAddToCart119}
-                          disabled={!acceptingOrders || !available || !furnitureColorsReady216 || Boolean(furnitureColorsError216)}
+                          disabled={!acceptingOrders || !available || !furnitureColorsReady216 || Boolean(furnitureColorsError216) || !sizeChoicesReady245 || Boolean(sizeChoicesError245) || !selectedSizeReady245}
                           aria-label="Add one more to cart"
                         >
                           <span aria-hidden="true">+</span>
@@ -2222,7 +2412,7 @@ export default function ProductDetailExperience({
                       type="button"
                       className={styles.primaryAction}
                       onClick={handleAddToCart119}
-                      disabled={!acceptingOrders || !available || !furnitureColorsReady216 || Boolean(furnitureColorsError216)}
+                      disabled={!acceptingOrders || !available || !furnitureColorsReady216 || Boolean(furnitureColorsError216) || !sizeChoicesReady245 || Boolean(sizeChoicesError245) || !selectedSizeReady245}
                     >
                       <BagIcon />
                       <span>{available ? "Add to bag" : "Out of stock"}</span>
