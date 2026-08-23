@@ -31,6 +31,7 @@
 // DARIK_HARDWARE_COLOR_FINISH_VARIANTS_242
 // DARIK_CLOTHING_COLOR_VARIANTS_243
 // DARIK_COSMETICS_OPTIONAL_PREFILLED_SUBCATEGORY_240
+// DARIK_CLOTHING_OPTIONAL_PREFILLED_SUBCATEGORY_244B
 // DARIK_FURNITURE_MEDIA_ORDER_UPLOAD_FIX_217
 // DARIK_EYEGLASSES_RETAIL_FIELD_MECHANICS_135
 // DARIK_PHOTO_UPLOAD_DECODE_LOADING_076
@@ -1494,6 +1495,55 @@ const COSMETICS_SUBCATEGORY_OPTIONS_240 = [
 const COSMETICS_CUSTOM_SUBCATEGORY_240 =
   "__custom_cosmetics_subcategory__";
 
+const CLOTHING_SUBCATEGORY_OPTIONS_244 = [
+  { value: "T-Shirts", ar: "تيشيرتات" },
+  { value: "Shirts", ar: "قمصان" },
+  { value: "Polo Shirts", ar: "قمصان بولو" },
+  { value: "Blouses", ar: "بلوزات" },
+  { value: "Tank Tops", ar: "قمصان بدون أكمام" },
+  { value: "Hoodies", ar: "هوديز" },
+  { value: "Sweatshirts", ar: "سويت شيرت" },
+  { value: "Sweaters", ar: "كنزات" },
+  { value: "Cardigans", ar: "كارديغان" },
+  { value: "Jackets", ar: "جاكيتات" },
+  { value: "Coats", ar: "معاطف" },
+  { value: "Blazers", ar: "بليزرات" },
+  { value: "Suits", ar: "بدلات" },
+  { value: "Pants", ar: "بناطيل" },
+  { value: "Jeans", ar: "جينز" },
+  { value: "Joggers", ar: "بناطيل رياضية" },
+  { value: "Leggings", ar: "ليقنز" },
+  { value: "Shorts", ar: "شورتات" },
+  { value: "Skirts", ar: "تنانير" },
+  { value: "Dresses", ar: "فساتين" },
+  { value: "Jumpsuits", ar: "جمبسوت" },
+  { value: "Sets", ar: "أطقم" },
+  { value: "Tracksuits", ar: "بدلات رياضية" },
+  { value: "Abayas", ar: "عبايات" },
+  { value: "Thobes", ar: "أثواب" },
+  { value: "Underwear", ar: "ملابس داخلية" },
+  { value: "Bras", ar: "حمالات صدر" },
+  { value: "Sleepwear", ar: "ملابس نوم" },
+  { value: "Activewear", ar: "ملابس رياضية" },
+  { value: "Swimwear", ar: "ملابس سباحة" },
+  { value: "Shoes", ar: "أحذية" },
+  { value: "Sneakers", ar: "أحذية رياضية" },
+  { value: "Sandals", ar: "صنادل" },
+  { value: "Boots", ar: "بوتات" },
+  { value: "Heels", ar: "أحذية كعب" },
+  { value: "Flats", ar: "أحذية مسطحة" },
+  { value: "Slippers", ar: "شباشب" },
+  { value: "Socks", ar: "جوارب" },
+  { value: "Hats & Caps", ar: "قبعات وكابات" },
+  { value: "Scarves", ar: "أوشحة" },
+  { value: "Belts", ar: "أحزمة" },
+  { value: "Bags", ar: "حقائب" },
+  { value: "Accessories", ar: "إكسسوارات" },
+] as const;
+
+const CLOTHING_CUSTOM_SUBCATEGORY_244 =
+  "__custom_clothing_subcategory__";
+
 const PERFUME_STANDARD_BOTTLE_SIZE_OPTIONS = [
   "5 ml", "10 ml", "15 ml", "20 ml", "30 ml", "40 ml", "50 ml",
   "60 ml", "75 ml", "80 ml", "90 ml", "100 ml", "125 ml", "150 ml", "200 ml",
@@ -2907,6 +2957,8 @@ type DirectProduct = {
   direct_store_subsubcategory_id: string | null;
   direct_cosmetics_subcategory: string | null;
   direct_cosmetics_subcategory_ar: string | null;
+  direct_clothing_subcategory: string | null;
+  direct_clothing_subcategory_ar: string | null;
   direct_item_video_url: string | null;
   direct_item_video_duration_seconds: number | string | null;
   direct_item_video_storage_path: string | null;
@@ -3405,6 +3457,12 @@ export default function DarikDirectProductsPage() {
   const [cosmeticsCustomSubcategoryAr240, setCosmeticsCustomSubcategoryAr240] =
     useState("");
 
+  const [clothingSubcategory244, setClothingSubcategory244] = useState("");
+  const [clothingCustomSubcategory244, setClothingCustomSubcategory244] =
+    useState("");
+  const [clothingCustomSubcategoryAr244, setClothingCustomSubcategoryAr244] =
+    useState("");
+
   const [furnitureVideoFile, setFurnitureVideoFile] = useState<File | null>(null);
   const [furnitureVideoPreviewUrl, setFurnitureVideoPreviewUrl] = useState("");
   const [furnitureVideoDuration, setFurnitureVideoDuration] = useState<number | null>(null);
@@ -3570,6 +3628,8 @@ export default function DarikDirectProductsPage() {
             "direct_store_subsubcategory_id",
             "direct_cosmetics_subcategory",
             "direct_cosmetics_subcategory_ar",
+            "direct_clothing_subcategory",
+            "direct_clothing_subcategory_ar",
             "direct_item_video_url",
             "direct_item_video_duration_seconds",
             "direct_item_video_storage_path",
@@ -4080,6 +4140,21 @@ export default function DarikDirectProductsPage() {
           selectedProductCategoryName
         )
       : null;
+
+  const clothingSubcategoryPreset244 =
+    CLOTHING_SUBCATEGORY_OPTIONS_244.find(
+      (option) => option.value === clothingSubcategory244
+    ) ?? null;
+
+  const clothingSubcategoryName244 =
+    clothingSubcategory244 === CLOTHING_CUSTOM_SUBCATEGORY_244
+      ? clothingCustomSubcategory244.trim()
+      : clothingSubcategoryPreset244?.value ?? "";
+
+  const clothingSubcategoryNameAr244 =
+    clothingSubcategory244 === CLOTHING_CUSTOM_SUBCATEGORY_244
+      ? clothingCustomSubcategoryAr244.trim()
+      : clothingSubcategoryPreset244?.ar ?? "";
 
   const cosmeticsSubcategoryPreset240 =
     COSMETICS_SUBCATEGORY_OPTIONS_240.find(
@@ -5197,6 +5272,95 @@ export default function DarikDirectProductsPage() {
       </section>
     ) : null;
 
+  const clothingSubcategoryPanel244 =
+    effectiveBusinessType === "clothing" ? (
+      <section className={styles.mobileHierarchyPanel}>
+        <div className={styles.mobileHierarchyHeading}>
+          <div>
+            <strong>
+              Product subcategory / التصنيف الفرعي للمنتج
+            </strong>
+            <span>
+              Optional. Pick the specific clothing or footwear type. Darik will use it
+              to keep product details and sizing more accurate. /
+              اختياري. اختر نوع الملابس أو الأحذية بشكل أدق حتى يعرض داريك
+              تفاصيل ومقاسات أنسب.
+            </span>
+          </div>
+        </div>
+
+        <div className={styles.mobileHierarchyFields}>
+          <label>
+            <BilingualLabel
+              en="Subcategory (optional)"
+              ar="التصنيف الفرعي (اختياري)"
+            />
+            <select
+              value={clothingSubcategory244}
+              onChange={(event) => {
+                const next244 = event.target.value;
+                setClothingSubcategory244(next244);
+
+                if (next244 !== CLOTHING_CUSTOM_SUBCATEGORY_244) {
+                  setClothingCustomSubcategory244("");
+                  setClothingCustomSubcategoryAr244("");
+                }
+              }}
+            >
+              <option value="">
+                No subcategory / بدون تصنيف فرعي
+              </option>
+
+              {CLOTHING_SUBCATEGORY_OPTIONS_244.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.value} / {option.ar}
+                </option>
+              ))}
+
+              <option value={CLOTHING_CUSTOM_SUBCATEGORY_244}>
+                Other / custom / أخرى / مخصص
+              </option>
+            </select>
+          </label>
+
+          {clothingSubcategory244 === CLOTHING_CUSTOM_SUBCATEGORY_244 ? (
+            <>
+              <label>
+                <BilingualLabel
+                  en="Custom subcategory (English)"
+                  ar="التصنيف الفرعي المخصص بالإنجليزية"
+                />
+                <input
+                  value={clothingCustomSubcategory244}
+                  onChange={(event) =>
+                    setClothingCustomSubcategory244(event.target.value)
+                  }
+                  maxLength={100}
+                  placeholder="Example: Cargo pants"
+                />
+              </label>
+
+              <label>
+                <BilingualLabel
+                  en="Custom subcategory (Arabic)"
+                  ar="التصنيف الفرعي المخصص بالعربية"
+                />
+                <input
+                  dir="rtl"
+                  value={clothingCustomSubcategoryAr244}
+                  onChange={(event) =>
+                    setClothingCustomSubcategoryAr244(event.target.value)
+                  }
+                  maxLength={100}
+                  placeholder="مثال: بنطال كارغو"
+                />
+              </label>
+            </>
+          ) : null}
+        </div>
+      </section>
+    ) : null;
+
   const mobileCategoryPath = [
     mobileMechanicsPreviewCategory?.name || selectedMobileTopCategory?.name,
     selectedMobileSubcategory?.name,
@@ -6127,6 +6291,9 @@ export default function DarikDirectProductsPage() {
     setCosmeticsSubcategory240("");
     setCosmeticsCustomSubcategory240("");
     setCosmeticsCustomSubcategoryAr240("");
+    setClothingSubcategory244("");
+    setClothingCustomSubcategory244("");
+    setClothingCustomSubcategoryAr244("");
     setMobileSubcategoryId("");
     setMobileSubsubcategoryId("");
     setMobileAddSubcategoryOpen(false);
@@ -6189,6 +6356,29 @@ export default function DarikDirectProductsPage() {
       setCosmeticsCustomSubcategory240(savedCosmeticsSubcategory240);
       setCosmeticsCustomSubcategoryAr240(
         String(product.direct_cosmetics_subcategory_ar || "").trim()
+      );
+    }
+
+    const savedClothingSubcategory244 =
+      String(product.direct_clothing_subcategory || "").trim();
+    const savedClothingPreset244 =
+      CLOTHING_SUBCATEGORY_OPTIONS_244.find(
+        (option) => option.value === savedClothingSubcategory244
+      ) ?? null;
+
+    if (!savedClothingSubcategory244) {
+      setClothingSubcategory244("");
+      setClothingCustomSubcategory244("");
+      setClothingCustomSubcategoryAr244("");
+    } else if (savedClothingPreset244) {
+      setClothingSubcategory244(savedClothingPreset244.value);
+      setClothingCustomSubcategory244("");
+      setClothingCustomSubcategoryAr244("");
+    } else {
+      setClothingSubcategory244(CLOTHING_CUSTOM_SUBCATEGORY_244);
+      setClothingCustomSubcategory244(savedClothingSubcategory244);
+      setClothingCustomSubcategoryAr244(
+        String(product.direct_clothing_subcategory_ar || "").trim()
       );
     }
 
@@ -7645,6 +7835,26 @@ export default function DarikDirectProductsPage() {
       }
     }
 
+    if (actualBusinessType === "clothing") {
+      const clothingSubcategoryResult244 = await supabase.rpc(
+        "darik_direct_set_product_clothing_subcategory_v1",
+        {
+          p_product_id: savedProductId,
+          p_subcategory: clothingSubcategoryName244 || null,
+          p_subcategory_ar: clothingSubcategoryNameAr244 || null,
+        }
+      );
+
+      if (clothingSubcategoryResult244.error) {
+        setSaving(false);
+        setError(
+          `The product was saved, but its Clothing subcategory could not be saved. / تم حفظ المنتج، لكن تعذر حفظ التصنيف الفرعي للملابس. ${clothingSubcategoryResult244.error.message}`
+        );
+        await loadCatalog();
+        return;
+      }
+    }
+
     const genericSizesResult = await supabase.rpc(
       "darik_direct_set_product_size_options_v1",
       {
@@ -8453,6 +8663,8 @@ export default function DarikDirectProductsPage() {
 
 
                         {cosmeticsSubcategoryPanel240}
+
+                        {clothingSubcategoryPanel244}
 
                         {isHierarchyMechanics && form.directCategoryId ? (
                                             <section className={styles.mobileHierarchyPanel}>
@@ -10165,6 +10377,20 @@ export default function DarikDirectProductsPage() {
                               </strong>
                             </div>
                           ) : null}
+                          {effectiveBusinessType === "clothing" &&
+                          clothingSubcategoryName244 ? (
+                            <div>
+                              <span>
+                                Subcategory / التصنيف الفرعي
+                              </span>
+                              <strong>
+                                {clothingSubcategoryName244}
+                                {clothingSubcategoryNameAr244
+                                  ? ` / ${clothingSubcategoryNameAr244}`
+                                  : ""}
+                              </strong>
+                            </div>
+                          ) : null}
                           <div>
                             <span>Sizes / المقاسات</span>
                             <strong>
@@ -10401,6 +10627,8 @@ export default function DarikDirectProductsPage() {
                   {renderInlineCategoryCreator241()}
 
                   {cosmeticsSubcategoryPanel240}
+
+                        {clothingSubcategoryPanel244}
 
                         {isHierarchyMechanics && form.directCategoryId ? (
                     <section className={styles.mobileHierarchyPanel}>
