@@ -28,6 +28,7 @@
 // DARIK_ALL_FIELDS_GUIDED_ADD_PRODUCT_WIZARD_074
 // DARIK_FURNITURE_IKEA_COLOR_VARIANTS_216
 // DARIK_COSMETICS_FURNITURE_STYLE_SHADE_VARIANTS_239
+// DARIK_HARDWARE_COLOR_FINISH_VARIANTS_242
 // DARIK_COSMETICS_OPTIONAL_PREFILLED_SUBCATEGORY_240
 // DARIK_FURNITURE_MEDIA_ORDER_UPLOAD_FIX_217
 // DARIK_EYEGLASSES_RETAIL_FIELD_MECHANICS_135
@@ -5384,8 +5385,13 @@ export default function DarikDirectProductsPage() {
   // FRONTEND 216: IKEA-style color variants are Furniture-only.
   // Home Appliances keeps the shared short-video mechanic but not Furniture colors.
   const isCosmeticsShadeVariants239 = actualBusinessType === "cosmetics";
+  const isHardwareColorFinishVariants242 =
+    actualBusinessType.includes("hardware") ||
+    ["tools", "tool_store", "tools_store"].includes(actualBusinessType);
   const isFurnitureColorVariants216 =
-    actualBusinessType === "furniture" || isCosmeticsShadeVariants239;
+    actualBusinessType === "furniture" ||
+    isCosmeticsShadeVariants239 ||
+    isHardwareColorFinishVariants242;
   const furnitureVideoDisplayUrl =
     furnitureVideoPreviewUrl ||
     (!furnitureVideoRemoveRequested ? furnitureVideoExistingUrl : "");
@@ -6570,7 +6576,7 @@ export default function DarikDirectProductsPage() {
     try {
       const publicUrl = await uploadImage(file);
       updateFurnitureColor216(colorId, { photoUrl: publicUrl });
-      setMessage("Color / shade photo uploaded / تم رفع صورة اللون / الدرجة.");
+      setMessage("Color / finish / shade photo uploaded / تم رفع صورة اللون / التشطيب / الدرجة.");
     } catch (uploadError) {
       setError(
         uploadError instanceof Error
@@ -6600,7 +6606,7 @@ export default function DarikDirectProductsPage() {
       <section className={styles.furnitureColors216}>
         <div className={styles.furnitureColorsHeading216}>
           <div>
-            <strong>Color / shade options / خيارات الألوان والدرجات</strong>
+            <strong>Color / finish / shade options / خيارات اللون / التشطيب / الدرجات</strong>
             <span>
               If this item comes in multiple colors, name every color in English and Arabic. The primary color uses the main 1–3 photos and optional video. Each additional color gets one photo. /
               إذا كان المنتج متوفرًا بعدة ألوان، اكتب اسم كل لون بالإنجليزية والعربية. اللون الأساسي يستخدم الصور الرئيسية والفيديو الاختياري، وكل لون إضافي له صورة واحدة.
@@ -6614,7 +6620,7 @@ export default function DarikDirectProductsPage() {
             className={form.furnitureMultipleColors ? styles.furnitureColorToggleActive216 : ""}
             onClick={() => setFurnitureMultipleColors216(true)}
           >
-            Yes, multiple colors / shades / نعم، عدة ألوان / درجات
+            Yes, multiple colors / finishes / shades / نعم، عدة ألوان / تشطيبات / درجات
           </button>
           <button
             type="button"
@@ -6631,7 +6637,7 @@ export default function DarikDirectProductsPage() {
               <article className={[styles.furnitureColorCard216, styles.furnitureColorPrimary216].join(" ")}>
                 <div className={styles.furnitureColorCardTop216}>
                   <div>
-                    <b>Primary color / shade / اللون / الدرجة الأساسية</b>
+                    <b>Primary color / finish / shade / اللون / التشطيب / الدرجة الأساسية</b>
                     <small>Uses Photos 1–3 + product video / يستخدم الصور الرئيسية والفيديو</small>
                   </div>
                   {form.photoUrl ? (
@@ -6642,7 +6648,7 @@ export default function DarikDirectProductsPage() {
                 </div>
                 <div className={styles.furnitureColorNameGrid216}>
                   <label>
-                    <span>Color / shade name (English)</span>
+                    <span>Color / finish / shade name (English)</span>
                     <input
                       value={primary216.name}
                       onChange={(event) =>
@@ -6654,7 +6660,7 @@ export default function DarikDirectProductsPage() {
                     />
                   </label>
                   <label>
-                    <span>اسم اللون / الدرجة بالعربية</span>
+                    <span>اسم اللون / التشطيب / الدرجة بالعربية</span>
                     <input
                       dir="rtl"
                       value={primary216.nameAr}
@@ -6674,7 +6680,7 @@ export default function DarikDirectProductsPage() {
               <article className={styles.furnitureColorCard216} key={color.id}>
                 <div className={styles.furnitureColorCardTop216}>
                   <div>
-                    <b>Additional color / shade {index + 1} / لون / درجة إضافية {index + 1}</b>
+                    <b>Additional color / finish / shade {index + 1} / لون / تشطيب / درجة إضافية {index + 1}</b>
                     <small>One photo for this color / صورة واحدة لهذا اللون</small>
                   </div>
                   <button
@@ -6688,7 +6694,7 @@ export default function DarikDirectProductsPage() {
 
                 <div className={styles.furnitureColorNameGrid216}>
                   <label>
-                    <span>Color / shade name (English)</span>
+                    <span>Color / finish / shade name (English)</span>
                     <input
                       value={color.name}
                       onChange={(event) =>
@@ -6700,7 +6706,7 @@ export default function DarikDirectProductsPage() {
                     />
                   </label>
                   <label>
-                    <span>اسم اللون / الدرجة بالعربية</span>
+                    <span>اسم اللون / التشطيب / الدرجة بالعربية</span>
                     <input
                       dir="rtl"
                       value={color.nameAr}
@@ -6740,7 +6746,7 @@ export default function DarikDirectProductsPage() {
               className={styles.furnitureColorAdd216}
               onClick={addFurnitureColor216}
             >
-              + Add another color / shade / إضافة لون / درجة أخرى
+              + Add another color / finish / shade / إضافة لون / تشطيب / درجة أخرى
             </button>
           </div>
         ) : null}
@@ -9249,7 +9255,7 @@ export default function DarikDirectProductsPage() {
 
                             {form.eyewearMultipleColors ? (
                               <button type="button" className={styles.eyewearAddColorButton} onClick={addEyewearColor}>
-                                + Add another color / shade / إضافة لون / درجة أخرى
+                                + Add another color / finish / shade / إضافة لون / تشطيب / درجة أخرى
                               </button>
                             ) : null}
 
@@ -10232,7 +10238,7 @@ export default function DarikDirectProductsPage() {
 
                           {isFurnitureColorVariants216 && form.furnitureMultipleColors ? (
                             <div>
-                              <span>Colors / shades / الألوان / الدرجات</span>
+                              <span>Colors / finishes / shades / الألوان / التشطيبات / الدرجات</span>
                               <strong>
                                 {form.furnitureColorVariants
                                   .map((color) => color.name.trim())
@@ -11171,7 +11177,7 @@ export default function DarikDirectProductsPage() {
 
                     {form.eyewearMultipleColors ? (
                       <button type="button" className={styles.eyewearAddColorButton} onClick={addEyewearColor}>
-                        + Add another color / shade / إضافة لون / درجة أخرى
+                        + Add another color / finish / shade / إضافة لون / تشطيب / درجة أخرى
                       </button>
                     ) : null}
 
