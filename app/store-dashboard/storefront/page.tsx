@@ -5392,16 +5392,54 @@ export default function DarikDirectStorefrontSettingsPage() {
         const secondElement198 =
           secondTouch151.target as Element | null;
 
+        // DARIK_TEXT_PINCH_RECOVERY_238
+        // Two-finger text resizing must remain usable even when one finger lands
+        // just outside a small text node or on the selection decoration.
+        const textTarget238 =
+          Boolean(editableTextMeta152(target151));
+
+        const touchHitsSelectedTarget238 = (
+          touch238: Touch,
+          element238: Element | null
+        ) => {
+          if (
+            element238 &&
+            (
+              element238 === target151 ||
+              target151.contains(element238)
+            )
+          ) {
+            return true;
+          }
+
+          if (!textTarget238) {
+            return false;
+          }
+
+          const rect238 =
+            target151.getBoundingClientRect();
+          const padding238 = 44;
+
+          return (
+            touch238.clientX >=
+              rect238.left - padding238 &&
+            touch238.clientX <=
+              rect238.right + padding238 &&
+            touch238.clientY >=
+              rect238.top - padding238 &&
+            touch238.clientY <=
+              rect238.bottom + padding238
+          );
+        };
+
         if (
-          !firstElement198 ||
-          !secondElement198 ||
-          !(
-            firstElement198 === target151 ||
-            target151.contains(firstElement198)
+          !touchHitsSelectedTarget238(
+            firstTouch151,
+            firstElement198
           ) ||
-          !(
-            secondElement198 === target151 ||
-            target151.contains(secondElement198)
+          !touchHitsSelectedTarget238(
+            secondTouch151,
+            secondElement198
           )
         ) {
           return;
