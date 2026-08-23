@@ -29,6 +29,7 @@
 // DARIK_FURNITURE_IKEA_COLOR_VARIANTS_216
 // DARIK_COSMETICS_FURNITURE_STYLE_SHADE_VARIANTS_239
 // DARIK_HARDWARE_COLOR_FINISH_VARIANTS_242
+// DARIK_CLOTHING_COLOR_VARIANTS_243
 // DARIK_COSMETICS_OPTIONAL_PREFILLED_SUBCATEGORY_240
 // DARIK_FURNITURE_MEDIA_ORDER_UPLOAD_FIX_217
 // DARIK_EYEGLASSES_RETAIL_FIELD_MECHANICS_135
@@ -5388,10 +5389,12 @@ export default function DarikDirectProductsPage() {
   const isHardwareColorFinishVariants242 =
     actualBusinessType.includes("hardware") ||
     ["tools", "tool_store", "tools_store"].includes(actualBusinessType);
+  const isClothingColorVariants243 = actualBusinessType === "clothing";
   const isFurnitureColorVariants216 =
     actualBusinessType === "furniture" ||
     isCosmeticsShadeVariants239 ||
-    isHardwareColorFinishVariants242;
+    isHardwareColorFinishVariants242 ||
+    isClothingColorVariants243;
   const furnitureVideoDisplayUrl =
     furnitureVideoPreviewUrl ||
     (!furnitureVideoRemoveRequested ? furnitureVideoExistingUrl : "");
