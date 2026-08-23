@@ -13001,3 +13001,236 @@ main[dir="rtl"] .darikHomeStoreShelfShell186::after {
     height: 102px;
   }
 }
+
+
+/* DARIK_MARKETPLACE_REDESIGN_CHECKPOINT2_STORE_LIST_246B */
+.darikMarketplaceStoreList246B {
+  display: grid;
+  gap: 10px;
+}
+
+.darikMarketplaceStoreList246B .darikHomeStoreCard186 {
+  position: relative;
+  width: 100%;
+  min-width: 0;
+  min-height: 126px;
+  display: grid;
+  grid-template-columns: 132px minmax(0, 1fr) 30px;
+  align-items: center;
+  gap: 14px;
+  padding: 10px;
+  overflow: hidden;
+  border: 1px solid #e4e7ec;
+  border-radius: 19px;
+  background: #fff;
+  color: inherit;
+  text-decoration: none;
+  scroll-snap-align: none;
+  box-shadow: 0 8px 22px rgba(15,23,42,.055);
+  transition: transform 160ms ease, border-color 160ms ease, box-shadow 160ms ease;
+}
+
+.darikMarketplaceStoreList246B .darikHomeStoreCard186:hover {
+  transform: translateY(-1px);
+  border-color: #d0d5dd;
+  box-shadow: 0 13px 28px rgba(15,23,42,.09);
+}
+
+.darikMarketplaceStoreList246B .darikHomeStoreCover186 {
+  width: 132px;
+  min-width: 132px;
+  height: 106px;
+  min-height: 106px;
+  border: 0;
+  border-radius: 14px;
+  box-shadow: none;
+}
+
+.darikMarketplaceStoreList246B .darikHomeStoreCard186:hover .darikHomeStoreCover186 {
+  transform: none;
+  box-shadow: none;
+}
+
+.darikMarketplaceStoreList246B .darikHomeStoreLogoStage187 {
+  width: 54px;
+  height: 54px;
+  border: 3px solid rgba(255,255,255,.94);
+  background: #fff;
+  box-shadow: 0 7px 15px rgba(15,23,42,.13);
+}
+
+.darikMarketplaceStoreList246B .darikHomeStoreStatus186 {
+  display: none;
+}
+
+.darikMarketplaceStoreList246B .darikHomeStoreBody186 {
+  align-self: stretch;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 5px;
+  padding: 0;
+  min-width: 0;
+}
+
+.darikMarketplaceStoreList246B .darikHomeStoreBody186 h3 {
+  margin: 0;
+  color: #111827;
+  font-size: 16px;
+  font-weight: 950;
+  letter-spacing: -.026em;
+  line-height: 1.15;
+  white-space: normal;
+}
+
+.darikHomeStoreInlineStatus246B {
+  width: fit-content;
+  min-height: 24px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+  border-radius: 999px;
+  font-size: 8px;
+  font-weight: 900;
+  line-height: 1;
+}
+
+.darikHomeStoreInlineStatusOpen246B {
+  background: #eaf8ee;
+  color: #15803d;
+}
+
+.darikHomeStoreInlineStatusClosed246B {
+  background: #fff1f2;
+  color: #b42318;
+}
+
+.darikHomeStoreInlineStatusShowcase246B {
+  background: #f2f4f7;
+  color: #475467;
+}
+
+.darikMarketplaceStoreList246B .darikHomeStoreSpecial186 {
+  color: #138a55;
+  font-size: 10px;
+  font-weight: 900;
+  line-height: 1.25;
+  white-space: normal;
+}
+
+.darikMarketplaceStoreList246B .darikHomeStoreFee186 {
+  color: #344054;
+  font-size: 10px;
+  font-weight: 850;
+  line-height: 1.25;
+}
+
+.darikHomeStoreMeta246B {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  color: #98a2b3;
+  font-size: 9px;
+  font-weight: 800;
+}
+
+.darikMarketplaceStoreList246B .darikHomeStoreDistance186,
+.darikHomeStoreMeta246B small {
+  color: #98a2b3;
+  font-size: 9px;
+  font-weight: 800;
+}
+
+.darikHomeStoreArrow246B {
+  width: 30px;
+  height: 30px;
+  display: grid;
+  place-items: center;
+  border-radius: 10px;
+  color: #475467;
+  background: #f8fafc;
+}
+
+main[dir="rtl"] .darikHomeStoreArrow246B svg {
+  transform: rotate(180deg);
+}
+
+@media (max-width: 760px) {
+  .darikMarketplaceStoreList246B {
+    gap: 8px;
+  }
+
+  .darikMarketplaceStoreList246B .darikHomeStoreCard186 {
+    min-height: 112px;
+    grid-template-columns: 102px minmax(0, 1fr) 24px;
+    gap: 10px;
+    padding: 8px;
+    border-radius: 16px;
+    box-shadow: 0 6px 17px rgba(15,23,42,.045);
+  }
+
+  .darikMarketplaceStoreList246B .darikHomeStoreCover186 {
+    width: 102px;
+    min-width: 102px;
+    height: 96px;
+    min-height: 96px;
+    border-radius: 12px;
+  }
+
+  .darikMarketplaceStoreList246B .darikHomeStoreLogoStage187 {
+    width: 48px;
+    height: 48px;
+    border-width: 2px;
+  }
+
+  .darikMarketplaceStoreList246B .darikHomeStoreBody186 {
+    gap: 4px;
+  }
+
+  .darikMarketplaceStoreList246B .darikHomeStoreBody186 h3 {
+    font-size: 13px;
+  }
+
+  .darikHomeStoreInlineStatus246B {
+    min-height: 21px;
+    padding: 3px 7px;
+    font-size: 7px;
+  }
+
+  .darikMarketplaceStoreList246B .darikHomeStoreSpecial186,
+  .darikMarketplaceStoreList246B .darikHomeStoreFee186 {
+    font-size: 9px;
+  }
+
+  .darikMarketplaceStoreList246B .darikHomeStoreDistance186,
+  .darikHomeStoreMeta246B small,
+  .darikHomeStoreMeta246B {
+    font-size: 8px;
+  }
+
+  .darikHomeStoreArrow246B {
+    width: 24px;
+    height: 28px;
+    border-radius: 8px;
+    background: transparent;
+  }
+}
+
+@media (max-width: 350px) {
+  .darikMarketplaceStoreList246B .darikHomeStoreCard186 {
+    grid-template-columns: 92px minmax(0,1fr) 20px;
+    gap: 8px;
+  }
+
+  .darikMarketplaceStoreList246B .darikHomeStoreCover186 {
+    width: 92px;
+    min-width: 92px;
+    height: 90px;
+    min-height: 90px;
+  }
+
+  .darikMarketplaceStoreList246B .darikHomeStoreBody186 h3 {
+    font-size: 12px;
+  }
+}

@@ -918,3 +918,1838 @@
   color: #ffffff !important;
   border-color: #0b5f54 !important;
 }
+
+
+/* DARIK_MARKETPLACE_REDESIGN_CHECKPOINT1_246A */
+/* DARIK_MARKETPLACE_REDESIGN_CHECKPOINT1_CSS_FIX_246A_V3 */
+.header {
+  position: sticky;
+  top: 0;
+  z-index: 90;
+  border-bottom: 1px solid rgba(228, 231, 236, .9);
+  background: rgba(255,255,255,.96);
+  box-shadow: 0 1px 0 rgba(16,24,40,.02);
+  backdrop-filter: blur(18px);
+}
+
+.headerInner {
+  width: min(1180px, calc(100% - 40px));
+  min-height: 76px;
+  grid-template-columns: auto minmax(150px, auto) 1fr auto;
+  gap: 24px;
+}
+
+.brand {
+  position: relative;
+  z-index: 2;
+}
+
+.brandLogo {
+  width: 164px;
+  height: 54px;
+  object-fit: contain;
+  object-position: center;
+}
+
+.headerMenu246 {
+  display: none;
+}
+
+.discoveryToolbar246 {
+  position: relative;
+  z-index: 70;
+  padding: 18px 20px 22px;
+  background: #fff;
+}
+
+.discoveryToolbarInner246 {
+  width: min(1180px, 100%);
+  margin: 0 auto;
+  display: grid;
+  gap: 12px;
+}
+
+.discoveryLocation246 {
+  width: 100%;
+  min-height: 84px;
+  display: grid;
+  grid-template-columns: 58px minmax(0,1fr) auto;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 18px 12px 12px;
+  border: 0;
+  border-radius: 22px;
+  background:
+    linear-gradient(135deg, #111827 0%, #0f172a 68%, #182238 100%);
+  color: #fff;
+  text-align: start;
+  box-shadow:
+    0 14px 28px rgba(15,23,42,.13),
+    inset 0 1px 0 rgba(255,255,255,.06);
+  cursor: pointer;
+}
+
+.discoveryLocationIcon246 {
+  width: 58px;
+  height: 58px;
+  display: grid;
+  place-items: center;
+  border-radius: 18px;
+  background: #ffd43b;
+  color: #111827;
+  box-shadow: inset 0 -1px 0 rgba(0,0,0,.08);
+}
+
+.discoveryLocationText246 {
+  min-width: 0;
+}
+
+.discoveryLocationText246 small {
+  display: block;
+  color: #98a2b3;
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: .11em;
+  text-transform: uppercase;
+}
+
+.discoveryLocationText246 strong {
+  display: block;
+  margin-top: 5px;
+  overflow: hidden;
+  color: #fff;
+  font-size: 18px;
+  font-weight: 950;
+  letter-spacing: -.018em;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.discoveryLocationChange246 {
+  min-width: 88px;
+  padding-inline-start: 18px;
+  border-inline-start: 1px solid rgba(255,255,255,.22);
+  text-align: center;
+}
+
+.discoveryLocationChange246 strong {
+  display: block;
+  color: #ffd43b;
+  font-size: 13px;
+  font-weight: 950;
+}
+
+.discoveryLocationChange246 small {
+  display: block;
+  margin-top: 3px;
+  color: #cbd5e1;
+  font-size: 10px;
+  font-weight: 750;
+}
+
+.discoverySearchRow246 {
+  display: grid;
+  grid-template-columns: minmax(0,1fr) 58px;
+  gap: 10px;
+}
+
+.discoverySearch246 {
+  min-width: 0;
+  min-height: 60px;
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  padding: 0 18px;
+  border: 1px solid #e3e7ed;
+  border-radius: 18px;
+  background: #f8f9fb;
+  color: #98a2b3;
+  transition:
+    border-color .16s ease,
+    box-shadow .16s ease,
+    background .16s ease;
+}
+
+.discoverySearch246:focus-within {
+  border-color: #d7aa00;
+  background: #fff;
+  box-shadow: 0 0 0 3px rgba(255,212,59,.18);
+}
+
+.discoverySearch246 input {
+  width: 100%;
+  min-width: 0;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: #111827;
+  font-size: 14px;
+  font-weight: 800;
+}
+
+.discoverySearch246 input::placeholder {
+  color: #98a2b3;
+}
+
+.discoverySearch246 input:disabled {
+  cursor: not-allowed;
+  opacity: .65;
+}
+
+.discoveryFilterButton246 {
+  width: 58px;
+  min-height: 60px;
+  display: grid;
+  place-items: center;
+  border: 1px solid #e3e7ed;
+  border-radius: 18px;
+  background: #fff;
+  color: #344054;
+  cursor: pointer;
+  transition:
+    transform .16s ease,
+    border-color .16s ease,
+    background .16s ease;
+}
+
+.discoveryFilterButton246:hover:not(:disabled) {
+  transform: translateY(-1px);
+  border-color: #d0d5dd;
+  background: #f8fafc;
+}
+
+.discoveryFilterButton246:disabled {
+  cursor: not-allowed;
+  opacity: .48;
+}
+
+.discoveryFilterButtonActive246 {
+  border-color: #d8a800;
+  background: #fff9df;
+  color: #8a6700;
+}
+
+.discoveryFilterPanel246 {
+  padding: 14px;
+  border: 1px solid #e4e7ec;
+  border-radius: 18px;
+  background: #fff;
+  box-shadow: 0 18px 38px rgba(15,23,42,.11);
+}
+
+.discoveryFilterHeading246 {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.discoveryFilterHeading246 > div {
+  display: grid;
+  gap: 3px;
+}
+
+.discoveryFilterHeading246 strong {
+  color: #111827;
+  font-size: 13px;
+  font-weight: 950;
+}
+
+.discoveryFilterHeading246 small {
+  color: #667085;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.discoveryFilterHeading246 > button {
+  border: 0;
+  background: transparent;
+  color: #9a7400;
+  font-size: 10px;
+  font-weight: 950;
+  cursor: pointer;
+}
+
+.discoveryFilterChips246 {
+  margin-top: 12px;
+  display: flex;
+  gap: 7px;
+  overflow-x: auto;
+  padding-bottom: 2px;
+  scrollbar-width: none;
+}
+
+.discoveryFilterChips246::-webkit-scrollbar {
+  display: none;
+}
+
+.discoveryFilterChips246 > button {
+  min-height: 39px;
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 5px 9px 5px 6px;
+  border: 1px solid #e4e7ec;
+  border-radius: 999px;
+  background: #fff;
+  color: #475467;
+  cursor: pointer;
+}
+
+.discoveryFilterChips246 > button > span {
+  width: 28px;
+  height: 28px;
+  display: grid;
+  place-items: center;
+  border-radius: 999px;
+  background: #fff7d1;
+  color: #a47b00;
+}
+
+.discoveryFilterChips246 > button strong {
+  font-size: 10px;
+  font-weight: 900;
+}
+
+.discoveryFilterChips246 > button small {
+  min-width: 20px;
+  height: 20px;
+  display: grid;
+  place-items: center;
+  border-radius: 999px;
+  background: #f2f4f7;
+  color: #667085;
+  font-size: 9px;
+  font-weight: 900;
+}
+
+.discoveryFilterChips246 > .discoveryFilterChipActive246 {
+  border-color: #111827;
+  background: #111827;
+  color: #fff;
+}
+
+.discoveryFilterChips246 > .discoveryFilterChipActive246 > span {
+  background: #ffd43b;
+  color: #111827;
+}
+
+.discoveryFilterChips246 > .discoveryFilterChipActive246 small {
+  background: rgba(255,255,255,.15);
+  color: #fff;
+}
+
+@media (max-width: 980px) {
+  .headerInner {
+    grid-template-columns: 46px minmax(0,1fr) auto;
+  }
+
+  .headerMenu246 {
+    display: grid;
+    grid-column: 1;
+  }
+
+  .brand {
+    grid-column: 2;
+    justify-self: center;
+  }
+
+  .headerActions {
+    grid-column: 3;
+  }
+}
+
+@media (max-width: 720px) {
+  .headerInner {
+    width: calc(100% - 28px);
+    min-height: 68px;
+    gap: 10px;
+  }
+
+  .headerMenu246,
+  .languageButton {
+    width: 44px;
+    min-height: 44px;
+    border-radius: 14px;
+    background: #fff;
+  }
+
+  .headerMenu246 {
+    border-color: transparent;
+  }
+
+  .brandLogo {
+    width: 148px;
+    height: 48px;
+  }
+
+  .headerActions {
+    gap: 8px;
+    padding-inline-end: 50px;
+  }
+
+  .page :global([data-darik-customer-account-hub175="all"]) {
+    top: max(12px, env(safe-area-inset-top));
+    right: 14px;
+  }
+
+  .page :global([data-darik-customer-account-hub175="all"]) > div {
+    display: none !important;
+  }
+
+  .page :global([data-darik-customer-account-hub175="all"]) > button {
+    width: 44px !important;
+    height: 44px !important;
+    border: 1px solid #e4e7ec !important;
+    background: #fff !important;
+    color: #111827 !important;
+    box-shadow: none !important;
+  }
+
+  .discoveryToolbar246 {
+    padding: 12px 12px 16px;
+  }
+
+  .discoveryToolbarInner246 {
+    gap: 10px;
+  }
+
+  .discoveryLocation246 {
+    min-height: 76px;
+    grid-template-columns: 52px minmax(0,1fr) 72px;
+    gap: 11px;
+    padding: 10px 13px 10px 10px;
+    border-radius: 20px;
+  }
+
+  .discoveryLocationIcon246 {
+    width: 52px;
+    height: 52px;
+    border-radius: 16px;
+  }
+
+  .discoveryLocationText246 small {
+    font-size: 9px;
+    letter-spacing: .1em;
+  }
+
+  .discoveryLocationText246 strong {
+    margin-top: 4px;
+    font-size: 15px;
+  }
+
+  .discoveryLocationChange246 {
+    min-width: 68px;
+    padding-inline-start: 11px;
+  }
+
+  .discoveryLocationChange246 strong {
+    font-size: 11px;
+  }
+
+  .discoveryLocationChange246 small {
+    font-size: 8px;
+  }
+
+  .discoverySearchRow246 {
+    grid-template-columns: minmax(0,1fr) 52px;
+    gap: 8px;
+  }
+
+  .discoverySearch246 {
+    min-height: 54px;
+    padding: 0 15px;
+    border-radius: 16px;
+  }
+
+  .discoverySearch246 input {
+    font-size: 13px;
+  }
+
+  .discoveryFilterButton246 {
+    width: 52px;
+    min-height: 54px;
+    border-radius: 16px;
+  }
+
+  .discoveryFilterPanel246 {
+    padding: 12px;
+    border-radius: 16px;
+  }
+
+  .heroInner {
+    padding-top: 36px;
+  }
+}
+
+
+/* DARIK_MARKETPLACE_REDESIGN_CHECKPOINT1_MOBILE_ALIGNMENT_246A4 */
+
+/*
+  Mobile location-selected state follows the approved mockup:
+  delivery card -> search/filter -> stores.
+  The branding/marketing hero is for location-entry mode only.
+*/
+@media (max-width: 720px) {
+  .page[data-location-selected="true"] .header {
+    display: none;
+  }
+
+  .page[data-location-selected="true"] .heroSection {
+    display: none;
+  }
+
+  .page[data-location-selected="true"] :global([data-darik-customer-account-hub175="all"]) {
+    display: none !important;
+  }
+
+  .page[data-location-selected="true"] .discoveryToolbar246 {
+    padding: 10px 10px 12px;
+    border-bottom: 1px solid #eef0f3;
+  }
+
+  .page[data-location-selected="true"] .discoveryToolbarInner246 {
+    gap: 9px;
+  }
+
+  .page[data-location-selected="true"] .discoveryLocation246 {
+    min-height: 68px;
+    grid-template-columns: 46px minmax(0, 1fr) 64px;
+    gap: 10px;
+    padding: 9px 11px 9px 9px;
+    border-radius: 17px;
+    box-shadow: none;
+  }
+
+  .page[data-location-selected="true"] .discoveryLocationIcon246 {
+    width: 46px;
+    height: 46px;
+    border-radius: 13px;
+  }
+
+  .page[data-location-selected="true"] .discoveryLocationText246 small {
+    font-size: 8px;
+    letter-spacing: .11em;
+  }
+
+  .page[data-location-selected="true"] .discoveryLocationText246 strong {
+    margin-top: 3px;
+    font-size: 13px;
+    letter-spacing: -.01em;
+  }
+
+  .page[data-location-selected="true"] .discoveryLocationChange246 {
+    min-width: 62px;
+    padding-inline-start: 9px;
+  }
+
+  .page[data-location-selected="true"] .discoveryLocationChange246 strong {
+    font-size: 10px;
+  }
+
+  .page[data-location-selected="true"] .discoveryLocationChange246 small {
+    font-size: 7px;
+  }
+
+  .page[data-location-selected="true"] .discoverySearchRow246 {
+    grid-template-columns: minmax(0, 1fr) 48px;
+    gap: 8px;
+  }
+
+  .page[data-location-selected="true"] .discoverySearch246 {
+    min-height: 48px;
+    padding: 0 14px;
+    border-radius: 14px;
+    background: #fff;
+  }
+
+  .page[data-location-selected="true"] .discoverySearch246 input {
+    font-size: 12px;
+  }
+
+  .page[data-location-selected="true"] .discoveryFilterButton246 {
+    width: 48px;
+    min-height: 48px;
+    border: 1px solid #f3c400;
+    border-radius: 14px;
+    background: #ffd43b;
+    color: #111827;
+    box-shadow: none;
+  }
+
+  .page[data-location-selected="true"] .discoveryFilterButton246:hover:not(:disabled),
+  .page[data-location-selected="true"] .discoveryFilterButtonActive246 {
+    border-color: #d6a900;
+    background: #f8c900;
+    color: #111827;
+  }
+
+  .page[data-location-selected="true"] .marketSection {
+    padding-top: 24px;
+  }
+
+  .page[data-location-selected="true"] .marketHeadingRow {
+    margin-bottom: 20px;
+  }
+
+  /*
+    The toolbar is now the only location control in stores mode.
+    Hide the old repeated location pill in the results heading.
+  */
+  .page[data-location-selected="true"] .currentLocationPill {
+    display: none;
+  }
+}
+
+
+/* DARIK_MARKETPLACE_REDESIGN_CHECKPOINT2_STORE_LIST_246B */
+.storeCount246B {
+  flex: 0 0 auto;
+  align-self: end;
+  padding-bottom: 7px;
+  color: #98a2b3;
+  font-size: 12px;
+  font-weight: 900;
+  white-space: nowrap;
+}
+
+.categoryTabs246B {
+  display: flex;
+  gap: 7px;
+  margin: -6px 0 20px;
+  overflow-x: auto;
+  padding: 0 0 4px;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+
+.categoryTabs246B::-webkit-scrollbar {
+  display: none;
+}
+
+.categoryTabs246B > button {
+  min-height: 36px;
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px 4px 6px;
+  border: 1px solid #e4e7ec;
+  border-radius: 999px;
+  background: #fff;
+  color: #475467;
+  cursor: pointer;
+}
+
+.categoryTabs246B > button > span {
+  width: 26px;
+  height: 26px;
+  display: grid;
+  place-items: center;
+  border-radius: 999px;
+  background: #fff7d1;
+  color: #9b7500;
+}
+
+.categoryTabs246B > button strong {
+  font-size: 10px;
+  font-weight: 900;
+  white-space: nowrap;
+}
+
+.categoryTabs246B > button small {
+  min-width: 18px;
+  height: 18px;
+  display: grid;
+  place-items: center;
+  border-radius: 999px;
+  background: #f2f4f7;
+  color: #667085;
+  font-size: 8px;
+  font-weight: 900;
+}
+
+.categoryTabs246B > .categoryTabActive246B {
+  border-color: #111827;
+  background: #111827;
+  color: #fff;
+}
+
+.categoryTabs246B > .categoryTabActive246B > span {
+  background: #ffd43b;
+  color: #111827;
+}
+
+.categoryTabs246B > .categoryTabActive246B small {
+  background: rgba(255,255,255,.14);
+  color: #fff;
+}
+
+@media (max-width: 720px) {
+  .page[data-location-selected="true"] .marketSection {
+    padding: 20px 0 56px;
+  }
+
+  .page[data-location-selected="true"] .marketHeadingRow {
+    display: grid;
+    grid-template-columns: minmax(0,1fr) auto;
+    align-items: end;
+    gap: 10px;
+    margin-bottom: 14px;
+  }
+
+  .page[data-location-selected="true"] .marketHeadingRow > div {
+    min-width: 0;
+  }
+
+  .page[data-location-selected="true"] .marketHeadingRow h2 {
+    margin-top: 5px;
+    font-size: 25px;
+    line-height: 1.02;
+    letter-spacing: -.045em;
+  }
+
+  .page[data-location-selected="true"] .marketHeadingRow p {
+    margin-top: 8px;
+    max-width: 260px;
+    font-size: 11px;
+    line-height: 1.55;
+  }
+
+  .storeCount246B {
+    padding-bottom: 3px;
+    font-size: 9px;
+  }
+
+  .categoryTabs246B {
+    margin: 0 0 15px;
+    gap: 6px;
+  }
+
+  .categoryTabs246B > button {
+    min-height: 33px;
+    padding: 3px 9px 3px 5px;
+  }
+
+  .categoryTabs246B > button > span {
+    width: 24px;
+    height: 24px;
+  }
+
+  .categoryTabs246B > button strong {
+    font-size: 9px;
+  }
+
+  .categoryTabs246B > button small {
+    display: none;
+  }
+}
+
+
+/* DARIK_MARKETPLACE_REDESIGN_CHECKPOINT3_CATEGORIES_BROWSER_246C */
+.categoryBrowseTrigger246C {
+  border-style: dashed !important;
+}
+
+.categoryBrowseTrigger246C > svg {
+  flex: 0 0 auto;
+}
+
+.categoryBrowserBackdrop246C {
+  position: fixed;
+  inset: 0;
+  z-index: 220;
+  display: grid;
+  place-items: center;
+  padding: 18px;
+  background: rgba(15,23,42,.36);
+  backdrop-filter: blur(8px);
+}
+
+.categoryBrowser246C {
+  width: min(720px, 100%);
+  max-height: min(760px, calc(100dvh - 36px));
+  overflow: hidden;
+  display: grid;
+  grid-template-rows: auto minmax(0,1fr);
+  border: 1px solid #e4e7ec;
+  border-radius: 28px;
+  background: #f8fafc;
+  box-shadow: 0 28px 80px rgba(15,23,42,.24);
+}
+
+.categoryBrowserHeader246C {
+  min-height: 82px;
+  display: grid;
+  grid-template-columns: 44px minmax(0,1fr) 44px;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 18px;
+  border-bottom: 1px solid #e4e7ec;
+  background: rgba(255,255,255,.96);
+}
+
+.categoryBrowserHeader246C > button,
+.categoryBrowserSearchIcon246C {
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  border: 1px solid #e4e7ec;
+  border-radius: 14px;
+  background: #fff;
+  color: #111827;
+}
+
+.categoryBrowserHeader246C > button {
+  cursor: pointer;
+}
+
+.categoryBrowserHeader246C > button svg {
+  transform: rotate(180deg);
+}
+
+.page[dir="rtl"] .categoryBrowserHeader246C > button svg {
+  transform: none;
+}
+
+.categoryBrowserHeader246C > div {
+  min-width: 0;
+  display: grid;
+  gap: 2px;
+  text-align: center;
+}
+
+.categoryBrowserHeader246C strong {
+  color: #111827;
+  font-size: 21px;
+  font-weight: 950;
+  letter-spacing: -.035em;
+}
+
+.categoryBrowserHeader246C small {
+  color: #667085;
+  font-size: 10px;
+  font-weight: 750;
+}
+
+.categoryBrowserGrid246C {
+  min-height: 0;
+  overflow-y: auto;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0,1fr));
+  gap: 12px;
+  padding: 16px;
+  scrollbar-width: thin;
+}
+
+.categoryBrowserCard246C {
+  min-width: 0;
+  overflow: hidden;
+  display: grid;
+  grid-template-rows: 132px auto;
+  padding: 0;
+  border: 1px solid #e4e7ec;
+  border-radius: 18px;
+  background: #fff;
+  color: inherit;
+  text-align: start;
+  box-shadow: 0 8px 20px rgba(15,23,42,.05);
+  cursor: pointer;
+  transition:
+    transform .16s ease,
+    border-color .16s ease,
+    box-shadow .16s ease;
+}
+
+.categoryBrowserCard246C:hover {
+  transform: translateY(-2px);
+  border-color: #d0d5dd;
+  box-shadow: 0 14px 28px rgba(15,23,42,.09);
+}
+
+.categoryBrowserImage246C {
+  position: relative;
+  display: grid;
+  place-items: center;
+  background-size: cover;
+  background-position: center;
+}
+
+.categoryBrowserImage246C::after {
+  content: "";
+  position: absolute;
+  inset: auto 0 0;
+  height: 42%;
+  background: linear-gradient(180deg, transparent, rgba(15,23,42,.16));
+  pointer-events: none;
+}
+
+.categoryBrowserImage246C > span {
+  width: 58px;
+  height: 58px;
+  display: grid;
+  place-items: center;
+  border: 1px solid rgba(255,255,255,.3);
+  border-radius: 18px;
+  background: rgba(255,255,255,.92);
+  color: #111827;
+  box-shadow: 0 10px 22px rgba(15,23,42,.16);
+}
+
+.categoryBrowserCardBody246C {
+  min-width: 0;
+  display: grid;
+  gap: 4px;
+  padding: 12px 13px 13px;
+}
+
+.categoryBrowserCardBody246C strong {
+  overflow: hidden;
+  color: #111827;
+  font-size: 13px;
+  font-weight: 950;
+  line-height: 1.2;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.categoryBrowserCardBody246C small {
+  color: #667085;
+  font-size: 10px;
+  font-weight: 800;
+}
+
+@media (max-width: 720px) {
+  .categoryBrowserBackdrop246C {
+    place-items: stretch;
+    padding: 0;
+    background: #f8fafc;
+    backdrop-filter: none;
+  }
+
+  .categoryBrowser246C {
+    width: 100%;
+    max-height: 100dvh;
+    min-height: 100dvh;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+  }
+
+  .categoryBrowserHeader246C {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    min-height: 68px;
+    grid-template-columns: 38px minmax(0,1fr) 38px;
+    padding: 10px 12px;
+  }
+
+  .categoryBrowserHeader246C > button,
+  .categoryBrowserSearchIcon246C {
+    width: 38px;
+    height: 38px;
+    border-radius: 12px;
+  }
+
+  .categoryBrowserHeader246C strong {
+    font-size: 18px;
+  }
+
+  .categoryBrowserHeader246C small {
+    font-size: 9px;
+  }
+
+  .categoryBrowserGrid246C {
+    gap: 9px;
+    padding: 12px 12px 28px;
+  }
+
+  .categoryBrowserCard246C {
+    grid-template-rows: 104px auto;
+    border-radius: 15px;
+  }
+
+  .categoryBrowserCardBody246C {
+    gap: 3px;
+    padding: 9px 10px 10px;
+  }
+
+  .categoryBrowserCardBody246C strong {
+    font-size: 11px;
+  }
+
+  .categoryBrowserCardBody246C small {
+    font-size: 8px;
+  }
+
+  .categoryBrowserImage246C > span {
+    width: 48px;
+    height: 48px;
+    border-radius: 15px;
+  }
+}
+
+
+/* DARIK_MARKETPLACE_REDESIGN_CHECKPOINT3_ENTRY_FIX_246C4 */
+.categoryBrowseStandalone246C4 {
+  width: 100%;
+  min-height: 54px;
+  display: grid;
+  grid-template-columns: 36px minmax(0,1fr) 28px;
+  align-items: center;
+  gap: 10px;
+  margin: -4px 0 16px;
+  padding: 8px 10px;
+  border: 1px solid #e4e7ec;
+  border-radius: 16px;
+  background: #fff;
+  color: #111827;
+  text-align: start;
+  box-shadow: 0 6px 16px rgba(15,23,42,.045);
+  cursor: pointer;
+}
+
+.categoryBrowseStandalone246C4:hover {
+  border-color: #d0d5dd;
+  background: #fcfcfd;
+}
+
+.categoryBrowseStandaloneIcon246C4 {
+  width: 36px;
+  height: 36px;
+  display: grid;
+  place-items: center;
+  border-radius: 11px;
+  background: #ffd43b;
+  color: #111827;
+}
+
+.categoryBrowseStandaloneText246C4 {
+  min-width: 0;
+  display: grid;
+  gap: 2px;
+}
+
+.categoryBrowseStandaloneText246C4 strong {
+  color: #111827;
+  font-size: 11px;
+  font-weight: 950;
+  line-height: 1.2;
+}
+
+.categoryBrowseStandaloneText246C4 small {
+  color: #667085;
+  font-size: 8px;
+  font-weight: 750;
+  line-height: 1.25;
+}
+
+.categoryBrowseStandaloneArrow246C4 {
+  width: 28px;
+  height: 28px;
+  display: grid;
+  place-items: center;
+  border-radius: 9px;
+  background: #f8fafc;
+  color: #475467;
+}
+
+.page[dir="rtl"] .categoryBrowseStandaloneArrow246C4 svg {
+  transform: rotate(180deg);
+}
+
+@media (max-width: 720px) {
+  .categoryBrowseStandalone246C4 {
+    min-height: 50px;
+    grid-template-columns: 34px minmax(0,1fr) 26px;
+    gap: 9px;
+    margin: -2px 0 14px;
+    padding: 7px 9px;
+    border-radius: 14px;
+  }
+
+  .categoryBrowseStandaloneIcon246C4 {
+    width: 34px;
+    height: 34px;
+    border-radius: 10px;
+  }
+
+  .categoryBrowseStandaloneText246C4 strong {
+    font-size: 10px;
+  }
+
+  .categoryBrowseStandaloneText246C4 small {
+    font-size: 7px;
+  }
+
+  .categoryBrowseStandaloneArrow246C4 {
+    width: 26px;
+    height: 26px;
+    background: transparent;
+  }
+}
+
+
+/* DARIK_MARKETPLACE_REDESIGN_CHECKPOINT3_CARD_LABEL_FIX_246C5 */
+
+.categoryBrowserCard246C {
+  height: auto !important;
+  min-height: 176px !important;
+  grid-template-rows: 112px minmax(54px, auto) !important;
+  align-content: stretch !important;
+}
+
+.categoryBrowserImage246C {
+  min-height: 112px !important;
+}
+
+.categoryBrowserCardBody246C {
+  position: relative !important;
+  z-index: 2 !important;
+  min-height: 54px !important;
+  display: grid !important;
+  align-content: center !important;
+  gap: 3px !important;
+  padding: 9px 10px 10px !important;
+  background: #ffffff !important;
+  color: #111827 !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+.categoryBrowserCardBody246C strong {
+  display: block !important;
+  color: #111827 !important;
+  font-size: 11px !important;
+  font-weight: 950 !important;
+  line-height: 1.2 !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+.categoryBrowserCardBody246C small {
+  display: block !important;
+  color: #667085 !important;
+  font-size: 8px !important;
+  font-weight: 800 !important;
+  line-height: 1.2 !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+@media (max-width: 720px) {
+  .categoryBrowserCard246C {
+    min-height: 160px !important;
+    grid-template-rows: 102px minmax(50px, auto) !important;
+  }
+
+  .categoryBrowserImage246C {
+    min-height: 102px !important;
+  }
+
+  .categoryBrowserCardBody246C {
+    min-height: 50px !important;
+    padding: 8px 9px 9px !important;
+  }
+
+  .categoryBrowserCardBody246C strong {
+    font-size: 10px !important;
+  }
+
+  .categoryBrowserCardBody246C small {
+    font-size: 7px !important;
+  }
+}
+
+/* DARIK_MARKETPLACE_REDESIGN_CHECKPOINT4_STORE_PREVIEW_246D */
+.storePreviewBackdrop246D {
+  position: fixed;
+  inset: 0;
+  z-index: 240;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  background: rgba(15,23,42,.48);
+  backdrop-filter: blur(10px);
+}
+
+.storePreview246D {
+  width: min(620px, 100%);
+  max-height: min(820px, calc(100dvh - 40px));
+  overflow: hidden;
+  display: grid;
+  grid-template-rows: auto 250px minmax(0,1fr) auto;
+  border: 1px solid #e4e7ec;
+  border-radius: 28px;
+  background: #fff;
+  box-shadow: 0 34px 90px rgba(15,23,42,.3);
+}
+
+.storePreviewTopbar246D {
+  min-height: 66px;
+  display: grid;
+  grid-template-columns: 42px minmax(0,1fr) 42px;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  border-bottom: 1px solid #eaecf0;
+  background: #fff;
+}
+
+.storePreviewTopbar246D > button,
+.storePreviewTopbar246D > span {
+  width: 42px;
+  height: 42px;
+  display: grid;
+  place-items: center;
+  border: 1px solid #e4e7ec;
+  border-radius: 13px;
+  background: #fff;
+  color: #111827;
+}
+
+.storePreviewTopbar246D > button {
+  cursor: pointer;
+}
+
+.storePreviewTopbar246D > button svg {
+  transform: rotate(180deg);
+}
+
+.page[dir="rtl"] .storePreviewTopbar246D > button svg {
+  transform: none;
+}
+
+.storePreviewTopbar246D > strong {
+  color: #111827;
+  font-size: 14px;
+  font-weight: 950;
+  text-align: center;
+}
+
+.storePreviewHero246D {
+  position: relative;
+  display: grid;
+  place-items: center;
+  background-size: cover;
+  background-position: center;
+}
+
+.storePreviewHero246D::after {
+  content: "";
+  position: absolute;
+  inset: auto 0 0;
+  height: 36%;
+  background: linear-gradient(180deg, transparent, rgba(15,23,42,.2));
+  pointer-events: none;
+}
+
+.storePreviewLogo246D,
+.storePreviewLogoFallback246D {
+  position: relative;
+  z-index: 2;
+  width: 112px;
+  height: 112px;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  border: 5px solid rgba(255,255,255,.96);
+  border-radius: 999px;
+  background: #fff;
+  color: #111827;
+  box-shadow: 0 18px 36px rgba(15,23,42,.22);
+}
+
+.storePreviewLogo246D img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.storePreviewStatus246D {
+  position: absolute;
+  z-index: 3;
+  left: 18px;
+  bottom: 16px;
+  min-height: 30px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 900;
+  box-shadow: 0 6px 16px rgba(15,23,42,.1);
+}
+
+.storePreviewStatusOpen246D {
+  background: #eaf8ee;
+  color: #15803d;
+}
+
+.storePreviewStatusClosed246D {
+  background: #fff1f2;
+  color: #b42318;
+}
+
+.storePreviewStatusShowcase246D {
+  background: #f2f4f7;
+  color: #475467;
+}
+
+.storePreviewBody246D {
+  min-height: 0;
+  overflow-y: auto;
+  padding: 18px;
+  background: #fff;
+}
+
+.storePreviewIdentity246D {
+  display: grid;
+  gap: 6px;
+}
+
+.storePreviewIdentity246D > span {
+  width: fit-content;
+  padding: 5px 9px;
+  border-radius: 999px;
+  background: #fff7d1;
+  color: #8a6800;
+  font-size: 9px;
+  font-weight: 900;
+}
+
+.storePreviewIdentity246D h2 {
+  margin: 0;
+  color: #111827;
+  font-size: 28px;
+  font-weight: 950;
+  line-height: 1.05;
+  letter-spacing: -.045em;
+}
+
+.storePreviewIdentity246D p {
+  margin: 0;
+  color: #475467;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.55;
+}
+
+.storePreviewIdentity246D small {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  margin-top: 2px;
+  color: #667085;
+  font-size: 10px;
+  font-weight: 750;
+  line-height: 1.4;
+}
+
+.storePreviewIdentity246D small svg {
+  flex: 0 0 auto;
+  margin-top: 1px;
+  color: #b58a00;
+}
+
+.storePreviewFacts246D {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0,1fr));
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.storePreviewFacts246D > span {
+  min-width: 0;
+  min-height: 86px;
+  display: grid;
+  align-content: center;
+  gap: 5px;
+  padding: 10px;
+  border: 1px solid #eaecf0;
+  border-radius: 14px;
+  background: #f8fafc;
+}
+
+.storePreviewFacts246D svg {
+  color: #b58a00;
+}
+
+.storePreviewFacts246D small {
+  color: #98a2b3;
+  font-size: 8px;
+  font-weight: 850;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+}
+
+.storePreviewFacts246D strong {
+  overflow: hidden;
+  color: #111827;
+  font-size: 10px;
+  font-weight: 950;
+  line-height: 1.25;
+  text-overflow: ellipsis;
+}
+
+.storePreviewMinimum246D {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  margin-top: 10px;
+  padding: 11px 12px;
+  border: 1px solid #f0e4ad;
+  border-radius: 13px;
+  background: #fffbea;
+}
+
+.storePreviewMinimum246D span {
+  color: #667085;
+  font-size: 9px;
+  font-weight: 800;
+}
+
+.storePreviewMinimum246D strong {
+  color: #8a6800;
+  font-size: 11px;
+  font-weight: 950;
+}
+
+.storePreviewServices246D {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin-top: 12px;
+}
+
+.storePreviewServices246D > span {
+  min-height: 30px;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 9px;
+  border: 1px solid #e4e7ec;
+  border-radius: 999px;
+  background: #fff;
+  color: #475467;
+  font-size: 9px;
+  font-weight: 850;
+}
+
+.storePreviewServices246D > span svg {
+  color: #15803d;
+}
+
+.storePreviewActions246D {
+  display: grid;
+  grid-template-columns: 104px minmax(0,1fr);
+  gap: 10px;
+  padding: 12px 14px 14px;
+  border-top: 1px solid #eaecf0;
+  background: rgba(255,255,255,.98);
+}
+
+.storePreviewActions246D > button,
+.storePreviewActions246D > a {
+  min-height: 56px;
+  border-radius: 16px;
+  font-family: inherit;
+}
+
+.storePreviewActions246D > button {
+  border: 1px solid #e4e7ec;
+  background: #fff;
+  color: #344054;
+  font-size: 11px;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.storePreviewActions246D > a {
+  display: grid;
+  grid-template-columns: 24px minmax(0,1fr) 20px;
+  align-items: center;
+  gap: 9px;
+  padding: 8px 12px;
+  border: 1px solid #e4b800;
+  background: #ffd43b;
+  color: #111827;
+  text-decoration: none;
+  box-shadow: 0 8px 20px rgba(213,165,0,.16);
+}
+
+.storePreviewActions246D > a > span {
+  min-width: 0;
+  display: grid;
+  gap: 2px;
+}
+
+.storePreviewActions246D > a strong {
+  font-size: 11px;
+  font-weight: 950;
+}
+
+.storePreviewActions246D > a small {
+  color: #5d4a00;
+  font-size: 8px;
+  font-weight: 800;
+}
+
+.page[dir="rtl"] .storePreviewActions246D > a > svg:last-child {
+  transform: rotate(180deg);
+}
+
+@media (max-width: 720px) {
+  .storePreviewBackdrop246D {
+    place-items: stretch;
+    padding: 0;
+    background: #fff;
+    backdrop-filter: none;
+  }
+
+  .storePreview246D {
+    width: 100%;
+    max-height: 100dvh;
+    min-height: 100dvh;
+    grid-template-rows: 58px 220px minmax(0,1fr) auto;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+  }
+
+  .storePreviewTopbar246D {
+    min-height: 58px;
+    grid-template-columns: 38px minmax(0,1fr) 38px;
+    padding: 8px 10px;
+  }
+
+  .storePreviewTopbar246D > button,
+  .storePreviewTopbar246D > span {
+    width: 38px;
+    height: 38px;
+    border-radius: 12px;
+  }
+
+  .storePreviewTopbar246D > strong {
+    font-size: 12px;
+  }
+
+  .storePreviewLogo246D,
+  .storePreviewLogoFallback246D {
+    width: 92px;
+    height: 92px;
+    border-width: 4px;
+  }
+
+  .storePreviewStatus246D {
+    left: 12px;
+    bottom: 12px;
+    min-height: 27px;
+    padding: 5px 9px;
+    font-size: 8px;
+  }
+
+  .storePreviewBody246D {
+    padding: 14px 12px 16px;
+  }
+
+  .storePreviewIdentity246D h2 {
+    font-size: 23px;
+  }
+
+  .storePreviewIdentity246D p {
+    font-size: 11px;
+  }
+
+  .storePreviewIdentity246D small {
+    font-size: 9px;
+  }
+
+  .storePreviewFacts246D {
+    gap: 6px;
+    margin-top: 13px;
+  }
+
+  .storePreviewFacts246D > span {
+    min-height: 76px;
+    padding: 8px;
+    border-radius: 12px;
+  }
+
+  .storePreviewFacts246D small {
+    font-size: 7px;
+  }
+
+  .storePreviewFacts246D strong {
+    font-size: 9px;
+  }
+
+  .storePreviewActions246D {
+    grid-template-columns: 84px minmax(0,1fr);
+    gap: 8px;
+    padding: 9px 10px max(10px, env(safe-area-inset-bottom));
+  }
+
+  .storePreviewActions246D > button,
+  .storePreviewActions246D > a {
+    min-height: 52px;
+    border-radius: 14px;
+  }
+
+  .storePreviewActions246D > a {
+    grid-template-columns: 21px minmax(0,1fr) 18px;
+    gap: 7px;
+    padding: 7px 10px;
+  }
+
+  .storePreviewActions246D > a strong {
+    font-size: 10px;
+  }
+
+  .storePreviewActions246D > a small {
+    font-size: 7px;
+  }
+}
+
+
+/* DARIK_MARKETPLACE_REDESIGN_CHECKPOINT5_FINAL_POLISH_246E */
+
+/* Once the customer has chosen a delivery location, GetDarik becomes
+   a focused discovery experience. Retailer marketing lives outside it. */
+.page[data-location-selected="true"] .retailerSection,
+.page[data-location-selected="true"] .footer {
+  display: none;
+}
+
+.page[data-location-selected="true"] .marketSection {
+  min-height: calc(100dvh - 150px);
+}
+
+.filterSheetHandle246E {
+  display: none;
+}
+
+.filterSection246E {
+  display: grid;
+  gap: 9px;
+  margin-top: 14px;
+}
+
+.filterLabel246E {
+  color: #667085;
+  font-size: 9px;
+  font-weight: 900;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+}
+
+.filterSortGrid246E {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0,1fr));
+  gap: 7px;
+}
+
+.filterSortGrid246E > button {
+  min-width: 0;
+  min-height: 68px;
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 6px;
+  padding: 8px 6px;
+  border: 1px solid #e4e7ec;
+  border-radius: 13px;
+  background: #fff;
+  color: #475467;
+  cursor: pointer;
+}
+
+.filterSortGrid246E > button strong {
+  font-size: 9px;
+  font-weight: 900;
+  line-height: 1.15;
+  text-align: center;
+}
+
+.filterSortGrid246E > .filterChoiceActive246E {
+  border-color: #111827;
+  background: #111827;
+  color: #fff;
+  box-shadow: 0 8px 18px rgba(15,23,42,.12);
+}
+
+.filterSortGrid246E > .filterChoiceActive246E svg {
+  color: #ffd43b;
+}
+
+.filterToggleRow246E {
+  width: 100%;
+  min-height: 58px;
+  display: grid;
+  grid-template-columns: 34px minmax(0,1fr) 38px;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 9px;
+  border: 1px solid #e4e7ec;
+  border-radius: 13px;
+  background: #fff;
+  color: #111827;
+  text-align: start;
+  cursor: pointer;
+}
+
+.filterToggleIcon246E {
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  border-radius: 10px;
+  background: #fff7d1;
+  color: #9b7500;
+}
+
+.filterToggleRow246E > span:nth-child(2) {
+  min-width: 0;
+  display: grid;
+  gap: 2px;
+}
+
+.filterToggleRow246E strong {
+  font-size: 10px;
+  font-weight: 900;
+}
+
+.filterToggleRow246E small {
+  color: #667085;
+  font-size: 8px;
+  font-weight: 700;
+  line-height: 1.25;
+}
+
+.filterToggleRow246E > i {
+  position: relative;
+  width: 38px;
+  height: 22px;
+  justify-self: end;
+  border-radius: 999px;
+  background: #e4e7ec;
+  transition: background .15s ease;
+}
+
+.filterToggleRow246E > i::after {
+  content: "";
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 16px;
+  height: 16px;
+  border-radius: 999px;
+  background: #fff;
+  box-shadow: 0 2px 5px rgba(15,23,42,.14);
+  transition: transform .15s ease;
+}
+
+.filterToggleRow246E > .filterSwitchActive246E {
+  background: #111827;
+}
+
+.filterToggleRow246E > .filterSwitchActive246E::after {
+  transform: translateX(16px);
+  background: #ffd43b;
+}
+
+.page[dir="rtl"] .filterToggleRow246E > i::after {
+  left: auto;
+  right: 3px;
+}
+
+.page[dir="rtl"] .filterToggleRow246E > .filterSwitchActive246E::after {
+  transform: translateX(-16px);
+}
+
+.filterDone246E {
+  width: 100%;
+  min-height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  margin-top: 14px;
+  border: 1px solid #e4b800;
+  border-radius: 13px;
+  background: #ffd43b;
+  color: #111827;
+  font-size: 10px;
+  font-weight: 950;
+  cursor: pointer;
+}
+
+.page[dir="rtl"] .filterDone246E svg {
+  transform: rotate(180deg);
+}
+
+@media (max-width: 720px) {
+  .page[data-location-selected="true"] .marketSection {
+    min-height: calc(100dvh - 132px);
+    padding-bottom: max(34px, env(safe-area-inset-bottom));
+  }
+
+  .discoveryFilterPanel246 {
+    position: fixed;
+    z-index: 235;
+    left: 10px;
+    right: 10px;
+    bottom: max(10px, env(safe-area-inset-bottom));
+    max-height: calc(100dvh - 28px);
+    overflow-y: auto;
+    margin: 0;
+    padding: 10px 12px 12px;
+    border: 1px solid #e4e7ec;
+    border-radius: 22px;
+    background: rgba(255,255,255,.99);
+    box-shadow: 0 28px 70px rgba(15,23,42,.26);
+  }
+
+  .filterSheetHandle246E {
+    width: 38px;
+    height: 4px;
+    display: block;
+    margin: 0 auto 10px;
+    border-radius: 999px;
+    background: #d0d5dd;
+  }
+
+  .discoveryFilterHeading246 strong {
+    font-size: 12px;
+  }
+
+  .discoveryFilterHeading246 small {
+    font-size: 8px;
+  }
+
+  .filterSection246E {
+    margin-top: 12px;
+  }
+
+  .filterSortGrid246E > button {
+    min-height: 62px;
+    border-radius: 12px;
+  }
+
+  .filterSortGrid246E > button strong {
+    font-size: 8px;
+  }
+
+  .filterToggleRow246E {
+    min-height: 54px;
+  }
+
+  .filterDone246E {
+    min-height: 46px;
+  }
+}

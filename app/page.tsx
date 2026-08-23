@@ -9,6 +9,13 @@ import DarikCustomerAccountHub175 from "./components/DarikCustomerAccountHub175"
 // DARIK_ROOT_LINKS_027
 
 // DARIK_DISCOVERY_HOME_026
+// DARIK_MARKETPLACE_REDESIGN_CHECKPOINT1_246A
+// DARIK_MARKETPLACE_REDESIGN_CHECKPOINT1_MOBILE_ALIGNMENT_246A4
+// DARIK_MARKETPLACE_REDESIGN_CHECKPOINT2_STORE_LIST_246B
+// DARIK_MARKETPLACE_REDESIGN_CHECKPOINT3_CATEGORIES_BROWSER_246C
+// DARIK_MARKETPLACE_REDESIGN_CHECKPOINT3_ENTRY_FIX_246C4
+// DARIK_MARKETPLACE_REDESIGN_CHECKPOINT4_STORE_PREVIEW_246D
+// DARIK_MARKETPLACE_REDESIGN_CHECKPOINT5_FINAL_POLISH_246E
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import { supabase } from "@/lib/supabaseBrowser";
 import styles from "./home.module.css";
@@ -87,6 +94,7 @@ type IconName =
   | "chevron"
   | "clock"
   | "food"
+  | "filter"
   | "grid"
   | "grocery"
   | "heart"
@@ -451,6 +459,7 @@ function Icon({ name, size = 22 }: { name: IconName; size?: number }) {
   if (name === "clock") return <svg {...common}><circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 2" /></svg>;
   if (name === "location") return <svg {...common}><path d="M20 10c0 5-8 11-8 11S4 15 4 10a8 8 0 1 1 16 0Z" /><circle cx="12" cy="10" r="2.4" /></svg>;
   if (name === "search") return <svg {...common}><circle cx="11" cy="11" r="7" /><path d="m20 20-4-4" /></svg>;
+  if (name === "filter") return <svg {...common}><path d="M4 7h9M17 7h3M4 17h3M11 17h9" /><circle cx="15" cy="7" r="2" /><circle cx="9" cy="17" r="2" /></svg>;
   if (name === "language") return <svg {...common}><circle cx="12" cy="12" r="9" /><path d="M3 12h18M12 3a15 15 0 0 1 0 18M12 3a15 15 0 0 0 0 18" /></svg>;
   if (name === "user") return <svg {...common}><circle cx="12" cy="8" r="3.5" /><path d="M5 21a7 7 0 0 1 14 0" /></svg>;
   if (name === "menu") return <svg {...common}><path d="M4 7h16M4 12h16M4 17h16" /></svg>;
@@ -551,10 +560,12 @@ function HomeStoreCard186({
   store,
   language,
   special,
+  onPreview,
 }: {
   store: NearbyStore;
   language: Language;
   special: DarikHomeSpecialDelivery186 | null;
+  onPreview: (store: NearbyStore) => void;
 }) {
   const t = copy[language];
   const distance = Number(store.distance_km || 0);
@@ -574,18 +585,9 @@ function HomeStoreCard186({
       className="darikHomeStoreCard186"
       href={`/${store.slug}`}
       aria-label={`${t.shopStore}: ${displayStoreName(store, language)}`}
-      onClick={() => {
-        // DARIK_STORE_OPENING_CENTER_LOGO_188
-        try {
-          const storageKey188 = `darik:opening-store-logo:188:${store.slug.toLowerCase()}`;
-          if (logoUrl) {
-            window.sessionStorage.setItem(storageKey188, logoUrl);
-          } else {
-            window.sessionStorage.removeItem(storageKey188);
-          }
-        } catch {
-          // Store opening still works if browser storage is unavailable.
-        }
+      onClick={(event) => {
+        event.preventDefault();
+        onPreview(store);
       }}
     >
       <div
@@ -624,23 +626,67 @@ function HomeStoreCard186({
       </div>
 
       <div className="darikHomeStoreBody186">
+        <span
+          className={`darikHomeStoreInlineStatus246B ${
+            store.show_ordering === false
+              ? "darikHomeStoreInlineStatusShowcase246B"
+              : store.is_accepting_orders
+                ? "darikHomeStoreInlineStatusOpen246B"
+                : "darikHomeStoreInlineStatusClosed246B"
+          }`}
+        >
+          <Icon
+            name={
+              store.show_ordering === false
+                ? "shop"
+                : store.is_accepting_orders
+                  ? "check"
+                  : "clock"
+            }
+            size={12}
+          />
+          {store.show_ordering === false
+            ? t.showcase
+            : store.is_accepting_orders
+              ? t.open
+              : t.closed}
+        </span>
+
         <h3>{displayStoreName(store, language)}</h3>
+
         {specialAtLocation && deliveryFee > 0 ? (
           <span className="darikHomeStoreSpecial186">
             Free delivery over {money(special!.minimumQualifyingJod)} JOD
           </span>
-        ) : null}
-        <strong className="darikHomeStoreFee186">
-          {deliveryFee <= 0
-            ? "Free delivery"
-            : `${money(deliveryFee)} JOD delivery`}
-        </strong>
-        <small className="darikHomeStoreDistance186">
-          {distance < 1
-            ? `${Math.max(1, Math.round(distance * 1000))} m away`
-            : `${distance.toFixed(1)} km away`}
-        </small>
+        ) : (
+          <strong className="darikHomeStoreFee186">
+            {deliveryFee <= 0
+              ? "Free delivery"
+              : `${money(deliveryFee)} JOD delivery`}
+          </strong>
+        )}
+
+        <div className="darikHomeStoreMeta246B">
+          <small className="darikHomeStoreDistance186">
+            {distance < 1
+              ? `${Math.max(1, Math.round(distance * 1000))} m away`
+              : `${distance.toFixed(1)} km away`}
+          </small>
+
+          {Number(store.estimated_delivery_minutes || 0) > 0 ? (
+            <>
+              <span aria-hidden="true">•</span>
+              <small>
+                ~{Math.round(Number(store.estimated_delivery_minutes))} min
+              </small>
+            </>
+          ) : null}
+        </div>
       </div>
+
+      <span className="darikHomeStoreArrow246B" aria-hidden="true">
+        <Icon name="chevron" size={18} />
+      </span>
     </a>
   );
 }
@@ -659,6 +705,17 @@ export default function DarikDiscoveryHome() {
   const [storesError, setStoresError] = useState("");
   const [storeSearch, setStoreSearch] = useState("");
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
+  const [filterOpen246, setFilterOpen246] = useState(false);
+  const [selectedCategory246, setSelectedCategory246] =
+    useState<CategoryKey>("all");
+  const [categoryBrowserOpen246C, setCategoryBrowserOpen246C] =
+    useState(false);
+  const [selectedStorePreview246D, setSelectedStorePreview246D] =
+    useState<NearbyStore | null>(null);
+  const [sortMode246E, setSortMode246E] =
+    useState<"recommended" | "nearest" | "delivery">("recommended");
+  const [openOnly246E, setOpenOnly246E] = useState(false);
+  const [freeDeliveryOnly246E, setFreeDeliveryOnly246E] = useState(false);
 
   const [specialDeliveryBySlug186, setSpecialDeliveryBySlug186] = useState<
     Record<string, DarikHomeSpecialDelivery186>
@@ -924,9 +981,17 @@ export default function DarikDiscoveryHome() {
 
   const matchingStores = useMemo(() => {
     const normalizedSearch = storeSearch.trim().toLowerCase();
-    if (!normalizedSearch) return stores;
 
     return stores.filter((store) => {
+      if (
+        selectedCategory246 !== "all" &&
+        storeGroupKey(store) !== selectedCategory246
+      ) {
+        return false;
+      }
+
+      if (!normalizedSearch) return true;
+
       const haystack = [
         store.display_name,
         store.display_name_ar,
@@ -940,9 +1005,80 @@ export default function DarikDiscoveryHome() {
         .filter(Boolean)
         .join(" ")
         .toLowerCase();
+
       return haystack.includes(normalizedSearch);
     });
-  }, [storeSearch, stores]);
+  }, [selectedCategory246, storeSearch, stores]);
+
+  const visibleStores246B = useMemo(() => {
+    const filtered246E = matchingStores.filter((store) => {
+      if (
+        openOnly246E &&
+        (store.show_ordering === false || !store.is_accepting_orders)
+      ) {
+        return false;
+      }
+
+      if (
+        freeDeliveryOnly246E &&
+        storeDeliveryFee186(store) > 0
+      ) {
+        return false;
+      }
+
+      return true;
+    });
+
+    return [...filtered246E].sort((a, b) => {
+      if (sortMode246E === "nearest") {
+        const distanceDifference246E =
+          Number(a.distance_km ?? 0) - Number(b.distance_km ?? 0);
+
+        if (distanceDifference246E !== 0) return distanceDifference246E;
+      }
+
+      if (sortMode246E === "delivery") {
+        const feeDifference246E =
+          storeDeliveryFee186(a) - storeDeliveryFee186(b);
+
+        if (feeDifference246E !== 0) return feeDifference246E;
+
+        const distanceDifference246E =
+          Number(a.distance_km ?? 0) - Number(b.distance_km ?? 0);
+
+        if (distanceDifference246E !== 0) return distanceDifference246E;
+      }
+
+      if (sortMode246E === "recommended") {
+        const openDifference246E =
+          Number(b.show_ordering !== false && b.is_accepting_orders) -
+          Number(a.show_ordering !== false && a.is_accepting_orders);
+
+        if (openDifference246E !== 0) return openDifference246E;
+
+        const distanceDifference246E =
+          Number(a.distance_km ?? 0) - Number(b.distance_km ?? 0);
+
+        if (distanceDifference246E !== 0) return distanceDifference246E;
+
+        const feeDifference246E =
+          storeDeliveryFee186(a) - storeDeliveryFee186(b);
+
+        if (feeDifference246E !== 0) return feeDifference246E;
+      }
+
+      return displayStoreName(a, language).localeCompare(
+        displayStoreName(b, language),
+        language === "ar" ? "ar" : "en"
+      );
+    });
+  }, [
+    matchingStores,
+    language,
+    sortMode246E,
+    openOnly246E,
+    freeDeliveryOnly246E,
+  ]);
 
   // DARIK_HOME_STORE_SHELVES_TRUE_BESTSELLERS_186
   const groupedStores = useMemo(() => {
@@ -1074,33 +1210,34 @@ export default function DarikDiscoveryHome() {
   }, [storeCounts]);
 
   return (
-    <main className={styles.page} dir={language === "ar" ? "rtl" : "ltr"}>
+    <main
+      className={styles.page}
+      dir={language === "ar" ? "rtl" : "ltr"}
+      data-location-selected={location ? "true" : "false"}
+    >
       {/* DARIK_SHARED_PERSISTENT_CUSTOMER_ACCOUNT_HUB_175_V2 */}
       <DarikCustomerAccountHub175 scope="all" />
 
       {/* DARIK_REAL_LOGO_POPUP_AND_HOME_174 */}
-      <div
-        data-darik-main-logo-174
-        style={{
-          display: "flex",
-          justifyContent: "center",
-          padding: "18px 16px 6px",
-        }}
-      >
-        <img
-          src="/darik_logo_final_v2.png"
-          alt="Darik"
-          style={{
-            display: "block",
-            width: "min(240px, 62vw)",
-            height: "auto",
-            objectFit: "contain",
-          }}
-        />
-      </div>
       <header className={styles.header}>
         <div className={styles.headerInner}>
-          <span className="darikHomeBrandSpacer186" aria-hidden="true" />
+          <button
+            className={[styles.mobileMenuButton, styles.headerMenu246].join(" ")}
+            type="button"
+            onClick={() => setMobileNavOpen((open) => !open)}
+            aria-label="Open navigation"
+            aria-expanded={mobileNavOpen}
+          >
+            <Icon name="menu" />
+          </button>
+
+          <a className={styles.brand} href="/" aria-label="Darik Marketplace home">
+            <img
+              className={styles.brandLogo}
+              src="/darik_logo_final_v2.png"
+              alt="Darik Marketplace"
+            />
+          </a>
 
           <nav className={styles.desktopNav} aria-label="Primary navigation">
             <a href="#stores">{t.stores}</a>
@@ -1115,9 +1252,6 @@ export default function DarikDiscoveryHome() {
             </button>
             <a className={styles.dashboardLink} href="/store-dashboard"><Icon name="user" size={18} />{t.dashboard}</a>
             <a className={styles.retailerButton} href="/store-signup">{t.retailerSignup}<Icon name="arrow" size={18} /></a>
-            <button className={styles.mobileMenuButton} type="button" onClick={() => setMobileNavOpen((open) => !open)} aria-label="Open navigation">
-              <Icon name="menu" />
-            </button>
           </div>
         </div>
 
@@ -1132,6 +1266,583 @@ export default function DarikDiscoveryHome() {
         ) : null}
       </header>
 
+      <section className={styles.discoveryToolbar246}>
+        <div className={styles.discoveryToolbarInner246}>
+          <button
+            className={styles.discoveryLocation246}
+            type="button"
+            onClick={() => setLocationDialogOpen(true)}
+          >
+            <span className={styles.discoveryLocationIcon246}>
+              <Icon name="location" size={24} />
+            </span>
+
+            <span className={styles.discoveryLocationText246}>
+              <small>
+                {location ? t.deliveringTo : t.locationRequired}
+              </small>
+              <strong>
+                {location?.label || t.useLocation}
+              </strong>
+            </span>
+
+            <span className={styles.discoveryLocationChange246}>
+              <strong>{t.changeLocation}</strong>
+              <small>{language === "ar" ? "تغيير الموقع" : "Change"}</small>
+            </span>
+          </button>
+
+          <div className={styles.discoverySearchRow246}>
+            <label className={styles.discoverySearch246}>
+              <Icon name="search" size={22} />
+              <input
+                value={storeSearch}
+                onChange={(event) => setStoreSearch(event.target.value)}
+                placeholder={t.searchPlaceholder}
+                disabled={!location}
+              />
+            </label>
+
+            <button
+              className={[
+                styles.discoveryFilterButton246,
+                filterOpen246 || selectedCategory246 !== "all"
+                  ? styles.discoveryFilterButtonActive246
+                  : "",
+              ]
+                .filter(Boolean)
+                .join(" ")}
+              type="button"
+              onClick={() => setFilterOpen246((open) => !open)}
+              aria-label={
+                language === "ar"
+                  ? "فلترة المتاجر"
+                  : "Filter stores"
+              }
+              aria-expanded={filterOpen246}
+              disabled={!location}
+            >
+              <Icon name="filter" size={22} />
+            </button>
+          </div>
+
+          {filterOpen246 && location ? (
+            <div className={styles.discoveryFilterPanel246}>
+              <div className={styles.filterSheetHandle246E} />
+
+              <div className={styles.discoveryFilterHeading246}>
+                <div>
+                  <strong>
+                    {language === "ar" ? "رتّب وفلتر المتاجر" : "Sort & filter stores"}
+                  </strong>
+                  <small>
+                    {language === "ar"
+                      ? "اعرض النتائج بالطريقة الأنسب لك."
+                      : "Refine the stores that deliver to your location."}
+                  </small>
+                </div>
+
+                {sortMode246E !== "recommended" ||
+                openOnly246E ||
+                freeDeliveryOnly246E ? (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSortMode246E("recommended");
+                      setOpenOnly246E(false);
+                      setFreeDeliveryOnly246E(false);
+                    }}
+                  >
+                    {language === "ar" ? "إعادة" : "Reset"}
+                  </button>
+                ) : null}
+              </div>
+
+              <div className={styles.filterSection246E}>
+                <span className={styles.filterLabel246E}>
+                  {language === "ar" ? "الترتيب" : "Sort by"}
+                </span>
+
+                <div className={styles.filterSortGrid246E}>
+                  <button
+                    type="button"
+                    aria-pressed={sortMode246E === "recommended"}
+                    className={
+                      sortMode246E === "recommended"
+                        ? styles.filterChoiceActive246E
+                        : ""
+                    }
+                    onClick={() => setSortMode246E("recommended")}
+                  >
+                    <Icon name="sparkle" size={17} />
+                    <strong>
+                      {language === "ar" ? "مقترح" : "Recommended"}
+                    </strong>
+                  </button>
+
+                  <button
+                    type="button"
+                    aria-pressed={sortMode246E === "nearest"}
+                    className={
+                      sortMode246E === "nearest"
+                        ? styles.filterChoiceActive246E
+                        : ""
+                    }
+                    onClick={() => setSortMode246E("nearest")}
+                  >
+                    <Icon name="location" size={17} />
+                    <strong>
+                      {language === "ar" ? "الأقرب" : "Nearest"}
+                    </strong>
+                  </button>
+
+                  <button
+                    type="button"
+                    aria-pressed={sortMode246E === "delivery"}
+                    className={
+                      sortMode246E === "delivery"
+                        ? styles.filterChoiceActive246E
+                        : ""
+                    }
+                    onClick={() => setSortMode246E("delivery")}
+                  >
+                    <Icon name="shop" size={17} />
+                    <strong>
+                      {language === "ar" ? "أقل توصيل" : "Lowest delivery"}
+                    </strong>
+                  </button>
+                </div>
+              </div>
+
+              <div className={styles.filterSection246E}>
+                <span className={styles.filterLabel246E}>
+                  {language === "ar" ? "خيارات" : "Options"}
+                </span>
+
+                <button
+                  type="button"
+                  className={styles.filterToggleRow246E}
+                  aria-pressed={openOnly246E}
+                  onClick={() => setOpenOnly246E((current) => !current)}
+                >
+                  <span className={styles.filterToggleIcon246E}>
+                    <Icon name="check" size={16} />
+                  </span>
+                  <span>
+                    <strong>
+                      {language === "ar"
+                        ? "يستقبل الطلبات الآن"
+                        : "Accepting orders now"}
+                    </strong>
+                    <small>
+                      {language === "ar"
+                        ? "إخفاء المتاجر المغلقة أو العرض فقط."
+                        : "Hide closed and showcase-only stores."}
+                    </small>
+                  </span>
+                  <i
+                    className={
+                      openOnly246E
+                        ? styles.filterSwitchActive246E
+                        : ""
+                    }
+                  />
+                </button>
+
+                <button
+                  type="button"
+                  className={styles.filterToggleRow246E}
+                  aria-pressed={freeDeliveryOnly246E}
+                  onClick={() =>
+                    setFreeDeliveryOnly246E((current) => !current)
+                  }
+                >
+                  <span className={styles.filterToggleIcon246E}>
+                    <Icon name="shop" size={16} />
+                  </span>
+                  <span>
+                    <strong>
+                      {language === "ar"
+                        ? "توصيل مجاني"
+                        : "Free delivery"}
+                    </strong>
+                    <small>
+                      {language === "ar"
+                        ? "إظهار المتاجر ذات رسوم التوصيل صفر."
+                        : "Only stores with a zero delivery fee."}
+                    </small>
+                  </span>
+                  <i
+                    className={
+                      freeDeliveryOnly246E
+                        ? styles.filterSwitchActive246E
+                        : ""
+                    }
+                  />
+                </button>
+              </div>
+
+              <button
+                className={styles.filterDone246E}
+                type="button"
+                onClick={() => setFilterOpen246(false)}
+              >
+                <span>
+                  {language === "ar"
+                    ? `عرض ${visibleStores246B.length} متجر`
+                    : `Show ${visibleStores246B.length} ${
+                        visibleStores246B.length === 1 ? "store" : "stores"
+                      }`}
+                </span>
+                <Icon name="arrow" size={17} />
+              </button>
+            </div>
+          ) : null}
+        </div>
+      </section>
+
+      {categoryBrowserOpen246C ? (
+        <div
+          className={styles.categoryBrowserBackdrop246C}
+          role="dialog"
+          aria-modal="true"
+          aria-label={
+            language === "ar"
+              ? "تصفح فئات المتاجر"
+              : "Browse store categories"
+          }
+        >
+          <section className={styles.categoryBrowser246C}>
+            <header className={styles.categoryBrowserHeader246C}>
+              <button
+                type="button"
+                onClick={() => setCategoryBrowserOpen246C(false)}
+                aria-label={language === "ar" ? "إغلاق" : "Close"}
+              >
+                <Icon name="chevron" size={20} />
+              </button>
+
+              <div>
+                <strong>
+                  {language === "ar" ? "الفئات" : "Categories"}
+                </strong>
+                <small>
+                  {language === "ar"
+                    ? "اختر نوع المتاجر التي تريدها"
+                    : "Choose the kind of stores you want"}
+                </small>
+              </div>
+
+              <span className={styles.categoryBrowserSearchIcon246C}>
+                <Icon name="search" size={20} />
+              </span>
+            </header>
+
+            <div className={styles.categoryBrowserGrid246C}>
+              {categoryGroups
+                .filter((group) => group.key !== "all")
+                .map((group) => {
+                  const previewStore246C = stores.find(
+                    (store) => storeGroupKey(store) === group.key
+                  );
+                  const previewImage246C = safeImageUrl(
+                    previewStore246C?.hero_image_url
+                  );
+                  const count246C = storeCounts.get(group.key) || 0;
+                  const primary246C = safeColor(
+                    previewStore246C?.primary_color,
+                    "#101828"
+                  );
+                  const accent246C = safeColor(
+                    previewStore246C?.accent_color,
+                    "#ffcc33"
+                  );
+
+                  return (
+                    <button
+                      type="button"
+                      key={group.key}
+                      className={styles.categoryBrowserCard246C}
+                      onClick={() => {
+                        setSelectedCategory246(group.key);
+                        setCategoryBrowserOpen246C(false);
+                      }}
+                    >
+                      <span
+                        className={styles.categoryBrowserImage246C}
+                        style={
+                          previewImage246C
+                            ? {
+                                backgroundImage: `linear-gradient(180deg, rgba(8,15,29,.03), rgba(8,15,29,.18)), url(${JSON.stringify(previewImage246C)})`,
+                              }
+                            : {
+                                backgroundImage: `radial-gradient(circle at 72% 18%, ${accent246C}85, transparent 34%), linear-gradient(145deg, ${primary246C}, #111827)`,
+                              }
+                        }
+                      >
+                        {!previewImage246C ? (
+                          <span>
+                            <Icon name={group.icon} size={28} />
+                          </span>
+                        ) : null}
+                      </span>
+
+                      <span className={styles.categoryBrowserCardBody246C}>
+                        <strong>{categoryLabel(group, language)}</strong>
+                        <small>
+                          {count246C}{" "}
+                          {count246C === 1 ? t.store : t.storesCount}
+                        </small>
+                      </span>
+                    </button>
+                  );
+                })}
+            </div>
+          </section>
+        </div>
+      ) : null}
+
+      {selectedStorePreview246D ? (() => {
+        const store246D = selectedStorePreview246D;
+        const distance246D = Number(store246D.distance_km || 0);
+        const deliveryFee246D = storeDeliveryFee186(store246D);
+        const hero246D = safeImageUrl(store246D.hero_image_url);
+        const logo246D = safeImageUrl(store246D.logo_url);
+        const primary246D = safeColor(store246D.primary_color, "#101828");
+        const accent246D = safeColor(store246D.accent_color, "#ffcc33");
+        const special246D =
+          specialDeliveryBySlug186[store246D.slug.toLowerCase()] ?? null;
+        const specialAtLocation246D = Boolean(
+          special246D?.enabled &&
+            Number.isFinite(distance246D) &&
+            distance246D <= special246D.maxKm + 0.0001
+        );
+        const address246D =
+          language === "ar"
+            ? store246D.public_address_ar?.trim() ||
+              store246D.public_address?.trim()
+            : store246D.public_address?.trim() ||
+              store246D.public_address_ar?.trim();
+        const category246D = retailFieldLabel(store246D, language);
+        const orderingOpen246D =
+          store246D.show_ordering !== false &&
+          Boolean(store246D.is_accepting_orders);
+
+        return (
+          <div
+            className={styles.storePreviewBackdrop246D}
+            role="dialog"
+            aria-modal="true"
+            aria-label={`${displayStoreName(store246D, language)} preview`}
+            onClick={() => setSelectedStorePreview246D(null)}
+          >
+            <section
+              className={styles.storePreview246D}
+              onClick={(event) => event.stopPropagation()}
+            >
+              <header className={styles.storePreviewTopbar246D}>
+                <button
+                  type="button"
+                  onClick={() => setSelectedStorePreview246D(null)}
+                  aria-label={language === "ar" ? "إغلاق" : "Close"}
+                >
+                  <Icon name="chevron" size={20} />
+                </button>
+
+                <strong>
+                  {language === "ar" ? "معاينة المتجر" : "Store preview"}
+                </strong>
+
+                <span aria-hidden="true">
+                  <Icon name="shop" size={18} />
+                </span>
+              </header>
+
+              <div
+                className={styles.storePreviewHero246D}
+                style={
+                  hero246D
+                    ? {
+                        backgroundImage: `linear-gradient(180deg, rgba(8,15,29,.02), rgba(8,15,29,.28)), url(${JSON.stringify(hero246D)})`,
+                      }
+                    : {
+                        backgroundImage: `radial-gradient(circle at 76% 18%, ${accent246D}78, transparent 34%), linear-gradient(145deg, ${primary246D}, #111827)`,
+                      }
+                }
+              >
+                {logo246D ? (
+                  <span className={styles.storePreviewLogo246D}>
+                    <img src={logo246D} alt="" />
+                  </span>
+                ) : (
+                  <span className={styles.storePreviewLogoFallback246D}>
+                    <Icon name="shop" size={28} />
+                  </span>
+                )}
+
+                <span
+                  className={`${styles.storePreviewStatus246D} ${
+                    store246D.show_ordering === false
+                      ? styles.storePreviewStatusShowcase246D
+                      : orderingOpen246D
+                        ? styles.storePreviewStatusOpen246D
+                        : styles.storePreviewStatusClosed246D
+                  }`}
+                >
+                  <Icon
+                    name={
+                      store246D.show_ordering === false
+                        ? "shop"
+                        : orderingOpen246D
+                          ? "check"
+                          : "clock"
+                    }
+                    size={13}
+                  />
+                  {store246D.show_ordering === false
+                    ? t.showcase
+                    : orderingOpen246D
+                      ? t.open
+                      : t.closed}
+                </span>
+              </div>
+
+              <div className={styles.storePreviewBody246D}>
+                <div className={styles.storePreviewIdentity246D}>
+                  <span>{category246D}</span>
+                  <h2>{displayStoreName(store246D, language)}</h2>
+                  <p>{displayTagline(store246D, language)}</p>
+
+                  {address246D ? (
+                    <small>
+                      <Icon name="location" size={14} />
+                      {address246D}
+                    </small>
+                  ) : null}
+                </div>
+
+                <div className={styles.storePreviewFacts246D}>
+                  <span>
+                    <Icon name="location" size={17} />
+                    <small>{language === "ar" ? "المسافة" : "Distance"}</small>
+                    <strong>
+                      {distance246D < 1
+                        ? `${Math.max(1, Math.round(distance246D * 1000))} m`
+                        : `${distance246D.toFixed(1)} km`}
+                    </strong>
+                  </span>
+
+                  <span>
+                    <Icon name="clock" size={17} />
+                    <small>{language === "ar" ? "الوقت" : "ETA"}</small>
+                    <strong>
+                      {Number(store246D.estimated_delivery_minutes || 0) > 0
+                        ? `~${Math.round(Number(store246D.estimated_delivery_minutes))} min`
+                        : language === "ar"
+                          ? "حسب المتجر"
+                          : "Store estimate"}
+                    </strong>
+                  </span>
+
+                  <span>
+                    <Icon name="shop" size={17} />
+                    <small>{language === "ar" ? "التوصيل" : "Delivery"}</small>
+                    <strong>
+                      {specialAtLocation246D && deliveryFee246D > 0
+                        ? language === "ar"
+                          ? `مجاني فوق ${money(special246D!.minimumQualifyingJod)} د.أ`
+                          : `Free over ${money(special246D!.minimumQualifyingJod)} JOD`
+                        : deliveryFee246D <= 0
+                          ? language === "ar"
+                            ? "مجاني"
+                            : "Free"
+                          : `${money(deliveryFee246D)} JOD`}
+                    </strong>
+                  </span>
+                </div>
+
+                {Number(store246D.minimum_order || 0) > 0 ? (
+                  <div className={styles.storePreviewMinimum246D}>
+                    <span>
+                      {language === "ar" ? "الحد الأدنى للطلب" : "Minimum order"}
+                    </span>
+                    <strong>{money(store246D.minimum_order)} JOD</strong>
+                  </div>
+                ) : null}
+
+                <div className={styles.storePreviewServices246D}>
+                  {store246D.cash_on_delivery_enabled ? (
+                    <span>
+                      <Icon name="check" size={13} />
+                      {language === "ar" ? "دفع عند الاستلام" : "Cash on delivery"}
+                    </span>
+                  ) : null}
+
+                  {store246D.cliq_enabled ? (
+                    <span>
+                      <Icon name="check" size={13} />
+                      CliQ
+                    </span>
+                  ) : null}
+
+                  {store246D.card_enabled ? (
+                    <span>
+                      <Icon name="check" size={13} />
+                      {language === "ar" ? "بطاقة" : "Card"}
+                    </span>
+                  ) : null}
+
+                  {store246D.pickup_enabled ? (
+                    <span>
+                      <Icon name="check" size={13} />
+                      {language === "ar" ? "استلام من المتجر" : "Pickup"}
+                    </span>
+                  ) : null}
+                </div>
+              </div>
+
+              <footer className={styles.storePreviewActions246D}>
+                <button
+                  type="button"
+                  onClick={() => setSelectedStorePreview246D(null)}
+                >
+                  {language === "ar" ? "رجوع" : "Back"}
+                </button>
+
+                <a
+                  href={`/${store246D.slug}`}
+                  onClick={() => {
+                    try {
+                      const storageKey188 = `darik:opening-store-logo:188:${store246D.slug.toLowerCase()}`;
+                      if (logo246D) {
+                        window.sessionStorage.setItem(storageKey188, logo246D);
+                      } else {
+                        window.sessionStorage.removeItem(storageKey188);
+                      }
+                    } catch {
+                      // Store opening still works if browser storage is unavailable.
+                    }
+                  }}
+                >
+                  <Icon name="shop" size={18} />
+                  <span>
+                    <strong>
+                      {language === "ar" ? "افتح المتجر" : "Open store"}
+                    </strong>
+                    <small>
+                      {language === "ar"
+                        ? "انتقل إلى موقع المتجر"
+                        : "Continue to retailer site"}
+                    </small>
+                  </span>
+                  <Icon name="arrow" size={17} />
+                </a>
+              </footer>
+            </section>
+          </div>
+        );
+      })() : null}
+
       <section className={styles.heroSection}>
         <div className={styles.heroGlowOne} />
         <div className={styles.heroGlowTwo} />
@@ -1140,27 +1851,6 @@ export default function DarikDiscoveryHome() {
             <div className={styles.eyebrow}><Icon name="sparkle" size={16} />{t.eyebrow}</div>
             <h1><span>{t.heroTitleA}</span><strong>{t.heroTitleB}</strong></h1>
             <p className={styles.heroBody}>{t.heroBody}</p>
-
-            <div className={styles.heroLocationPanel}>
-              <button className={styles.locationButton} type="button" onClick={() => setLocationDialogOpen(true)}>
-                <span className={styles.locationIcon}><Icon name="location" /></span>
-                <span className={styles.locationText}>
-                  <small>{location ? t.deliveringTo : t.locationNeeded}</small>
-                  <strong>{location?.label || t.useLocation}</strong>
-                </span>
-                <span className={styles.changeLocation}>{location ? t.changeLocation : <Icon name="chevron" size={20} />}</span>
-              </button>
-
-              <label className={styles.heroSearch}>
-                <Icon name="search" size={20} />
-                <input
-                  value={storeSearch}
-                  onChange={(event) => setStoreSearch(event.target.value)}
-                  placeholder={t.searchPlaceholder}
-                  disabled={!location}
-                />
-              </label>
-            </div>
 
             <div className={styles.heroTrustRow}>
               <span><Icon name="check" size={16} />{language === "ar" ? "فلترة حقيقية حسب نطاق التوصيل" : "Real delivery-range filtering"}</span>
@@ -1206,16 +1896,70 @@ export default function DarikDiscoveryHome() {
               <h2>{t.nearbyStores}</h2>
               <p>{location ? t.nearbyBody : t.locationRequiredBody}</p>
             </div>
+
             {location ? (
-              <button className={styles.currentLocationPill} type="button" onClick={() => setLocationDialogOpen(true)}>
-                <Icon name="location" size={18} />
-                <span>{location.label}</span>
-                <strong>{t.changeLocation}</strong>
-              </button>
+              <strong className={styles.storeCount246B}>
+                {visibleStores246B.length}{" "}
+                {visibleStores246B.length === 1 ? t.store : t.storesCount}
+              </strong>
             ) : null}
           </div>
 
+          {location ? (
+            <div className={styles.categoryTabs246B} aria-label="Store categories">
+              {categoryGroups.map((group) => {
+                const active246B = selectedCategory246 === group.key;
+                const count246B = storeCounts.get(group.key) || 0;
 
+                return (
+                  <button
+                    type="button"
+                    key={group.key}
+                    className={
+                      active246B
+                        ? styles.categoryTabActive246B
+                        : ""
+                    }
+                    onClick={() => setSelectedCategory246(group.key)}
+                  >
+                    <span>
+                      <Icon name={group.icon} size={15} />
+                    </span>
+                    <strong>{categoryLabel(group, language)}</strong>
+                    <small>{count246B}</small>
+                  </button>
+                );
+              })}
+
+            </div>
+          ) : null}
+
+          {location ? (
+            <button
+              type="button"
+              className={styles.categoryBrowseStandalone246C4}
+              onClick={() => setCategoryBrowserOpen246C(true)}
+            >
+              <span className={styles.categoryBrowseStandaloneIcon246C4}>
+                <Icon name="grid" size={17} />
+              </span>
+
+              <span className={styles.categoryBrowseStandaloneText246C4}>
+                <strong>
+                  {language === "ar" ? "تصفح جميع الفئات" : "Browse all categories"}
+                </strong>
+                <small>
+                  {language === "ar"
+                    ? "شاهد المتاجر حسب النوع"
+                    : "See stores grouped by type"}
+                </small>
+              </span>
+
+              <span className={styles.categoryBrowseStandaloneArrow246C4}>
+                <Icon name="chevron" size={16} />
+              </span>
+            </button>
+          ) : null}
 
           {!location ? (
             <div className={styles.locationEmptyState}>
@@ -1242,53 +1986,18 @@ export default function DarikDiscoveryHome() {
               <div><h3>{t.loadError}</h3><p>{storesError}</p></div>
               <button type="button" onClick={() => location && void loadNearbyStores(location)}>{t.retry}</button>
             </div>
-          ) : groupedStores.length ? (
-            <div className="darikHomeStoreShelfStack186">
-              {groupedStores.map(({ field, label, stores: sectionStores }) => (
-                <section className="darikHomeStoreGroup186" key={field}>
-                  <div className="darikHomeStoreShelfHeading186">
-                    <div>
-                      <span>{language === "ar" ? "متاجر قريبة" : "NEARBY STORES"}</span>
-                      <h3>{label}</h3>
-                    </div>
-                    <small>{sectionStores.length} {sectionStores.length === 1 ? t.store : t.storesCount}</small>
-                  </div>
-
-                  <div
-                    className="darikHomeStoreShelfShell186"
-                    data-can-forward={storeShelfState186[field]?.canGoForward ? "true" : "false"}
-                  >
-                    <div
-                      className="darikHomeStoreShelf186"
-                      data-darik-home-store-shelf-186={field}
-                      onScroll={(event) =>
-                        updateStoreShelfState186(field, event.currentTarget)
-                      }
-                    >
-                      {sectionStores.map((store) => (
-                        <HomeStoreCard186
-                          key={store.storefront_id}
-                          store={store}
-                          language={language}
-                          special={
-                            specialDeliveryBySlug186[store.slug.toLowerCase()] ?? null
-                          }
-                        />
-                      ))}
-                    </div>
-
-                    {storeShelfState186[field]?.canGoForward ? (
-                      <button
-                        type="button"
-                        className="darikHomeStoreContinue186"
-                        onClick={() => scrollStoreShelf186(field)}
-                        aria-label={`${language === "ar" ? "عرض المزيد من" : "Show more"} ${label}`}
-                      >
-                        <Icon name="chevron" size={17} />
-                      </button>
-                    ) : null}
-                  </div>
-                </section>
+          ) : visibleStores246B.length ? (
+            <div className="darikMarketplaceStoreList246B">
+              {visibleStores246B.map((store) => (
+                <HomeStoreCard186
+                  key={store.storefront_id}
+                  store={store}
+                  language={language}
+                  special={
+                    specialDeliveryBySlug186[store.slug.toLowerCase()] ?? null
+                  }
+                  onPreview={setSelectedStorePreview246D}
+                />
               ))}
             </div>
           ) : (
