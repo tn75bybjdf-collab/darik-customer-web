@@ -4,11 +4,58 @@
 // DARIK_SHOE_STORE_CATEGORIES_055
 // DARIK_SHOES_RETAIL_FINAL_056
 // Runtime category-preset overlay for the retail-field system.
+// DARIK_HARDWARE_PRESETS_INLINE_CATEGORY_241
 // The database preset table remains authoritative for real category provisioning.
 
 import { getBusinessCategoryPreset as getBaseBusinessCategoryPreset } from "./categoryPresets";
 
 type BusinessPreset = ReturnType<typeof getBaseBusinessCategoryPreset>;
+
+
+const HARDWARE_CATEGORIES_241 = [
+  ["Hand Tools", "أدوات يدوية"],
+  ["Power Tools", "أدوات كهربائية"],
+  ["Drill Bits & Driver Bits", "ريش دريل ولقم مفكات"],
+  ["Cutting & Grinding", "قص وجلخ"],
+  ["Saw Blades & Cutting Discs", "شفرات مناشير وأقراص قص"],
+  ["Abrasives & Sandpaper", "مواد صنفرة وورق زجاج"],
+  ["Measuring & Leveling", "قياس وميزان"],
+  ["Tool Storage & Boxes", "صناديق وحفظ الأدوات"],
+  ["Screws", "براغي"],
+  ["Nails", "مسامير"],
+  ["Nuts, Bolts & Washers", "صواميل وبراغي وورد"],
+  ["Anchors & Wall Plugs", "رول بلاك ومثبتات"],
+  ["Other Fasteners", "مثبتات أخرى"],
+  ["Plumbing Tools & Supplies", "أدوات ولوازم سباكة"],
+  ["Pipes & Fittings", "مواسير ووصلات"],
+  ["Faucets & Mixers", "حنفيات وخلاطات"],
+  ["Valves", "محابس وصمامات"],
+  ["Water Hoses & Accessories", "خراطيم مياه وملحقاتها"],
+  ["Electrical Tools & Supplies", "أدوات ولوازم كهرباء"],
+  ["Wires & Cables", "أسلاك وكوابل"],
+  ["Switches & Sockets", "مفاتيح وأباريز كهرباء"],
+  ["Breakers, Fuses & Panels", "قواطع وفيوزات ولوحات"],
+  ["Extension Cords & Power Strips", "وصلات كهرباء ومشتركات"],
+  ["Lighting & Bulbs", "إنارة ولمبات"],
+  ["Paint", "دهانات"],
+  ["Painting Tools & Supplies", "أدوات ولوازم دهان"],
+  ["Adhesives & Glues", "مواد لاصقة وغراء"],
+  ["Silicone, Sealants & Caulk", "سيليكون ومواد سد"],
+  ["Locks & Padlocks", "أقفال وأقفال معلقة"],
+  ["Door Hardware", "إكسسوارات الأبواب"],
+  ["Hinges", "مفصلات"],
+  ["Cabinet & Furniture Hardware", "إكسسوارات الخزائن والأثاث"],
+  ["Chains, Ropes & Wire", "سلاسل وحبال وأسلاك"],
+  ["Welding Tools & Supplies", "أدوات ولوازم لحام"],
+  ["Safety & Protective Gear", "معدات سلامة وحماية"],
+  ["Ladders & Access Equipment", "سلالم ومعدات وصول"],
+  ["Garden Tools & Irrigation", "أدوات حدائق وري"],
+  ["Cleaning & Maintenance Supplies", "مواد تنظيف وصيانة"],
+  ["Construction Materials", "مواد بناء"],
+  ["Cement, Plaster & Mortar", "إسمنت وجبص ومونة"],
+  ["Tile & Flooring Tools", "أدوات بلاط وأرضيات"],
+  ["Hardware Accessories & Miscellaneous", "إكسسوارات وعدة متنوعة"],
+] as const;
 
 const SMOKE_SHOP_CATEGORIES = [
   ["Cigarettes", "سجائر"],
@@ -97,6 +144,20 @@ export function getBusinessCategoryPreset(
   const normalized = String(businessType || "")
     .trim()
     .toLowerCase();
+
+
+  if (
+    normalized.includes("hardware") ||
+    normalized === "tools" ||
+    normalized === "tool_store" ||
+    normalized === "tools_store"
+  ) {
+    return {
+      label: "Hardware Store",
+      labelAr: "محل عدد وأدوات",
+      categories: HARDWARE_CATEGORIES_241.map(([name, nameAr]) => [name, nameAr]),
+    } as unknown as BusinessPreset;
+  }
 
   if (normalized === "shoes") {
     return {

@@ -38,6 +38,7 @@
 
 // DARIK_AUTOPARTS_FITMENT_FILTERS_033
 // Mobile-safe bilingual product form with automatic retail categories.
+// DARIK_HARDWARE_PRESETS_INLINE_CATEGORY_241
 
 import {
   ChangeEvent,
@@ -3389,6 +3390,12 @@ export default function DarikDirectProductsPage() {
   const [shoeWizardErrors, setShoeWizardErrors] = useState<Record<string, string>>({});
   const [shoeWizardPhotoSlots, setShoeWizardPhotoSlots] = useState(1);
   const [form, setForm] = useState<ProductForm>(emptyForm);
+
+  const [inlineCategoryOpen241, setInlineCategoryOpen241] = useState(false);
+  const [inlineCategoryName241, setInlineCategoryName241] = useState("");
+  const [inlineCategoryNameAr241, setInlineCategoryNameAr241] = useState("");
+  const [inlineCategorySaving241, setInlineCategorySaving241] = useState(false);
+  const [inlineCategoryError241, setInlineCategoryError241] = useState("");
 
   const [cosmeticsSubcategory240, setCosmeticsSubcategory240] = useState("");
   const [cosmeticsCustomSubcategory240, setCosmeticsCustomSubcategory240] =
@@ -6747,6 +6754,194 @@ export default function DarikDirectProductsPage() {
     );
   }
 
+
+  function resetInlineCategory241() {
+    setInlineCategoryOpen241(false);
+    setInlineCategoryName241("");
+    setInlineCategoryNameAr241("");
+    setInlineCategoryError241("");
+  }
+
+  async function createInlineCategory241() {
+    if (!selectedRetailerId || inlineCategorySaving241) return;
+
+    const name = inlineCategoryName241.trim();
+    const nameAr = inlineCategoryNameAr241.trim();
+    if (!name) {
+      setInlineCategoryError241("Enter the category name / أدخل اسم الفئة");
+      return;
+    }
+
+    const existing = categories.find(
+      (category) => normalizedCategoryKey(category.name) === normalizedCategoryKey(name)
+    );
+    if (existing) {
+      setForm((current) => ({ ...current, directCategoryId: existing.id }));
+      setShoeWizardErrors((current) => {
+        if (!current.category) return current;
+        const next = { ...current };
+        delete next.category;
+        return next;
+      });
+      resetInlineCategory241();
+      return;
+    }
+
+    setInlineCategorySaving241(true);
+    setInlineCategoryError241("");
+    try {
+      const nextSortOrder =
+        categories.reduce(
+          (highest, category) => Math.max(highest, Number(category.sort_order) || 0),
+          0
+        ) + 10;
+
+      const result = await supabase.rpc("darik_direct_create_store_category", {
+        p_retailer_id: selectedRetailerId,
+        p_name: name,
+        p_name_ar: nameAr || null,
+        p_description: null,
+        p_image_url: null,
+        p_status: "active",
+        p_sort_order: nextSortOrder,
+      });
+
+      if (result.error) throw new Error(result.error.message);
+
+      let saved = result.data as unknown as Category | null;
+      if (!saved?.id) {
+        const lookup = await supabase
+          .from("retailer_store_categories")
+          .select("id,retailer_id,name,name_ar,category_status,sort_order")
+          .eq("retailer_id", selectedRetailerId)
+          .eq("name", name)
+          .neq("category_status", "archived")
+          .limit(1)
+          .maybeSingle();
+
+        if (lookup.error || !lookup.data?.id) {
+          throw new Error("Category was created but could not be loaded / تم إنشاء الفئة ولكن تعذر تحميلها");
+        }
+        saved = lookup.data as unknown as Category;
+      }
+
+      if (!saved?.id) {
+        throw new Error("Category could not be selected / تعذر تحديد الفئة");
+      }
+      const savedCategory = saved;
+      setCategories((current) =>
+        [...current.filter((category) => category.id !== savedCategory.id), savedCategory].sort(
+          (a, b) =>
+            (Number(a.sort_order) || 0) - (Number(b.sort_order) || 0) ||
+            a.name.localeCompare(b.name)
+        )
+      );
+      setForm((current) => ({ ...current, directCategoryId: savedCategory.id }));
+      setShoeWizardErrors((current) => {
+        if (!current.category) return current;
+        const next = { ...current };
+        delete next.category;
+        return next;
+      });
+      resetInlineCategory241();
+    } catch (error) {
+      setInlineCategoryError241(
+        error instanceof Error
+          ? error.message
+          : "Could not create category / تعذر إنشاء الفئة"
+      );
+    } finally {
+      setInlineCategorySaving241(false);
+    }
+  }
+
+  function renderInlineCategoryCreator241() {
+    if (mechanicsTestField) return null;
+
+    return (
+      <div
+        style={{
+          marginTop: 10,
+          padding: inlineCategoryOpen241 ? 12 : 0,
+          border: inlineCategoryOpen241 ? "1px solid rgba(120, 120, 120, 0.25)" : "none",
+          borderRadius: 12,
+          background: inlineCategoryOpen241 ? "rgba(127, 127, 127, 0.06)" : "transparent",
+        }}
+      >
+        <button
+          type="button"
+          onClick={() => {
+            setInlineCategoryOpen241((current) => !current);
+            setInlineCategoryError241("");
+          }}
+          style={{
+            width: "100%",
+            minHeight: 44,
+            borderRadius: 10,
+            border: "1px dashed rgba(90, 90, 90, 0.45)",
+            background: "transparent",
+            fontWeight: 800,
+            cursor: "pointer",
+          }}
+        >
+          {inlineCategoryOpen241
+            ? "Cancel new category / إلغاء الفئة الجديدة"
+            : "+ Add new category / + إضافة فئة جديدة"}
+        </button>
+
+        {inlineCategoryOpen241 ? (
+          <div style={{ display: "grid", gap: 9, marginTop: 10 }}>
+            <input
+              value={inlineCategoryName241}
+              onChange={(event) => setInlineCategoryName241(event.target.value)}
+              onKeyDown={(event) => {
+                if (event.key === "Enter") {
+                  event.preventDefault();
+                  void createInlineCategory241();
+                }
+              }}
+              placeholder="Category name / اسم الفئة"
+              autoFocus
+            />
+            <input
+              value={inlineCategoryNameAr241}
+              onChange={(event) => setInlineCategoryNameAr241(event.target.value)}
+              onKeyDown={(event) => {
+                if (event.key === "Enter") {
+                  event.preventDefault();
+                  void createInlineCategory241();
+                }
+              }}
+              placeholder="Arabic name (optional) / الاسم بالعربية (اختياري)"
+              dir="auto"
+            />
+            {inlineCategoryError241 ? (
+              <span style={{ fontSize: 13, fontWeight: 700 }}>
+                {inlineCategoryError241}
+              </span>
+            ) : null}
+            <button
+              type="button"
+              disabled={inlineCategorySaving241}
+              onClick={() => void createInlineCategory241()}
+              style={{
+                minHeight: 44,
+                borderRadius: 10,
+                border: 0,
+                fontWeight: 900,
+                cursor: inlineCategorySaving241 ? "wait" : "pointer",
+              }}
+            >
+              {inlineCategorySaving241
+                ? "Saving… / جارٍ الحفظ…"
+                : "Save & use category / حفظ واستخدام الفئة"}
+            </button>
+          </div>
+        ) : null}
+      </div>
+    );
+  }
+
   async function resolveDirectCategoryId(rawValue: string) {
     const clean = String(rawValue || "").trim();
     if (!clean) return null;
@@ -8212,6 +8407,7 @@ export default function DarikDirectProductsPage() {
                             </span>
                           ) : null}
                         </label>
+                  {renderInlineCategoryCreator241()}
 
                         <div className={styles.shoeWizardActions}>
                           <button
@@ -10190,9 +10386,10 @@ export default function DarikDirectProductsPage() {
                       className={styles.manageCategoriesLink}
                       href="/store-dashboard/categories"
                     >
-                      Create or manage categories / إنشاء أو إدارة الفئات
+                      Manage all categories / إدارة جميع الفئات
                     </a>
                   </label>
+                  {renderInlineCategoryCreator241()}
 
                   {cosmeticsSubcategoryPanel240}
 
