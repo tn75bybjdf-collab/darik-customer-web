@@ -27,6 +27,7 @@
 // DARIK_REUSED_LIVE_CAMERA_PREVIEW_073
 // DARIK_ALL_FIELDS_GUIDED_ADD_PRODUCT_WIZARD_074
 // DARIK_GLOBAL_SIZE_SELECTION_AVAILABILITY_245
+// DARIK_GLOBAL_SIZE_SELECTION_AVAILABILITY_FIX_245B
 // DARIK_FURNITURE_IKEA_COLOR_VARIANTS_216
 // DARIK_COSMETICS_FURNITURE_STYLE_SHADE_VARIANTS_239
 // DARIK_HARDWARE_COLOR_FINISH_VARIANTS_242
@@ -10213,7 +10214,7 @@ export default function DarikDirectProductsPage() {
                           </button>
                         ) : null}
 
-                        {renderSizeAvailability245()}
+                        {editingProductId ? renderSizeAvailability245() : null}
                         {renderFurnitureColors216()}
                         {isFurnitureMechanics ? (
                                               <section className={styles.furnitureVideoPanel}>
@@ -11947,7 +11948,7 @@ export default function DarikDirectProductsPage() {
                   </p>
                 </div>
 
-                    {renderSizeAvailability245()}
+                    {editingProductId ? renderSizeAvailability245() : null}
                         {renderFurnitureColors216()}
                     {isFurnitureMechanics ? (
                       <section className={styles.furnitureVideoPanel}>

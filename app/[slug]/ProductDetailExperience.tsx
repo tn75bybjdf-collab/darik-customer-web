@@ -22,6 +22,7 @@ import { supabase } from "@/lib/supabaseBrowser";
 import styles from "./productDetailExperience.module.css";
 
 // DARIK_GLOBAL_SIZE_SELECTION_AVAILABILITY_245
+// DARIK_GLOBAL_SIZE_SELECTION_AVAILABILITY_FIX_245B
 // DARIK_FURNITURE_IKEA_COLOR_VARIANTS_216
 // DARIK_COSMETICS_FURNITURE_STYLE_SHADE_VARIANTS_239
 
@@ -453,6 +454,7 @@ export default function ProductDetailExperience({
   const [selectedSizeKey245, setSelectedSizeKey245] = useState("");
   const [sizeChoicesReady245, setSizeChoicesReady245] = useState(false);
   const [sizeChoicesError245, setSizeChoicesError245] = useState("");
+  const [productHasSizes245, setProductHasSizes245] = useState(false);
 
   const [furnitureColors216, setFurnitureColors216] = useState<FurnitureColorSelection216[]>([]);
   const [furniturePrimaryPhotos216, setFurniturePrimaryPhotos216] = useState<string[]>([]);
@@ -851,30 +853,17 @@ export default function ProductDetailExperience({
       setSelectedSizeKey245("");
       setSizeChoicesReady245(false);
       setSizeChoicesError245("");
-      return;
-    }
-
-    const localHasSizes245 =
-      (Array.isArray(product.direct_size_options) &&
-        product.direct_size_options.some((size) =>
-          Boolean(clean(size?.label))
-        )) ||
-      (Array.isArray(product.direct_shoe_sizes) &&
-        product.direct_shoe_sizes.some((size) =>
-          Boolean(clean(size?.eu))
-        ));
-
-    setSelectedSizeKey245("");
-    setSizeChoicesError245("");
-
-    if (!localHasSizes245) {
-      setSizeChoices245([]);
-      setSizeChoicesReady245(true);
+      setProductHasSizes245(false);
       return;
     }
 
     let cancelled245 = false;
+
+    setSelectedSizeKey245("");
+    setSizeChoices245([]);
     setSizeChoicesReady245(false);
+    setSizeChoicesError245("");
+    setProductHasSizes245(false);
 
     void supabase
       .rpc("darik_direct_public_product_size_options_v1", {
@@ -886,6 +875,7 @@ export default function ProductDetailExperience({
 
         if (error) {
           setSizeChoices245([]);
+          setProductHasSizes245(false);
           setSizeChoicesReady245(false);
           setSizeChoicesError245(
             `Sizes could not be loaded / تعذر تحميل المقاسات. ${error.message}`
@@ -915,14 +905,18 @@ export default function ProductDetailExperience({
               .filter((size) => Boolean(size.key) && Boolean(size.label))
           : [];
 
+        const hasSizes245 =
+          payload245?.has_sizes === true || choices245.length > 0;
+
         setSizeChoices245(choices245);
+        setProductHasSizes245(hasSizes245);
         setSizeChoicesReady245(true);
       });
 
     return () => {
       cancelled245 = true;
     };
-  }, [open, product?.id, product?.direct_size_options, product?.direct_shoe_sizes, storeSlug]);
+  }, [open, product?.id, storeSlug]);
 
   const selectedSize245 = useMemo(
     () =>
@@ -932,18 +926,8 @@ export default function ProductDetailExperience({
     [sizeChoices245, selectedSizeKey245]
   );
 
-  const localProductHasSizes245 =
-    (Array.isArray(product?.direct_size_options) &&
-      product.direct_size_options.some((size) =>
-        Boolean(clean(size?.label))
-      )) ||
-    (Array.isArray(product?.direct_shoe_sizes) &&
-      product.direct_shoe_sizes.some((size) =>
-        Boolean(clean(size?.eu))
-      ));
-
   const sizeRequired245 =
-    localProductHasSizes245 || sizeChoices245.length > 0;
+    productHasSizes245 || sizeChoices245.length > 0;
 
   const selectedSizeReady245 =
     !sizeRequired245 ||
