@@ -2753,3 +2753,121 @@
     min-height: 46px;
   }
 }
+
+
+/* DARIK_MARKETPLACE_RESTORE_FULL_SITE_SHELL_246F */
+
+/*
+  246F corrects an over-aggressive cleanup from Checkpoints 1/5.
+  The redesigned discovery experience stays intact, but GetDarik remains
+  a complete website with branding, retailer access, pricing and footer.
+*/
+.page[data-location-selected="true"] .retailerSection,
+.page[data-location-selected="true"] .footer {
+  display: block !important;
+}
+
+/* The retailer panel now has explicit Signup + Dashboard + Pricing actions. */
+.retailerActions a:nth-child(2),
+.retailerActions a:nth-child(3) {
+  border: 1px solid rgba(255,255,255,.2);
+  background: rgba(255,255,255,.07);
+  color: #fff;
+}
+
+.retailerActions a:nth-child(2):hover,
+.retailerActions a:nth-child(3):hover {
+  border-color: rgba(255,255,255,.34);
+  background: rgba(255,255,255,.12);
+}
+
+/*
+  Keep the large marketing hero hidden after a delivery location is chosen.
+  That preserves the approved delivery-card -> search -> stores hierarchy.
+  Restore only the site chrome and retailer/business content.
+*/
+@media (max-width: 720px) {
+  .page[data-location-selected="true"] .header {
+    display: block !important;
+  }
+
+  .page[data-location-selected="true"] .headerInner {
+    width: calc(100% - 24px);
+    min-height: 66px;
+    grid-template-columns: 44px minmax(0,1fr) 44px;
+    gap: 8px;
+  }
+
+  .page[data-location-selected="true"] .headerMenu246 {
+    width: 44px;
+    min-height: 44px;
+    grid-column: 1;
+    display: grid !important;
+    place-items: center;
+  }
+
+  .page[data-location-selected="true"] .brand {
+    grid-column: 2;
+    justify-self: center;
+  }
+
+  .page[data-location-selected="true"] .brandLogo {
+    width: 140px;
+    height: 46px;
+  }
+
+  .page[data-location-selected="true"] .headerActions {
+    grid-column: 3;
+    width: 44px;
+    padding-inline-end: 0;
+    gap: 0;
+  }
+
+  .page[data-location-selected="true"] .languageButton {
+    width: 44px;
+    min-height: 44px;
+  }
+
+  /*
+    The floating customer-account control stays hidden here because it would
+    overlap the restored compact header. Account access remains independent
+    elsewhere; this correction is specifically about restoring site shell.
+  */
+  .page[data-location-selected="true"]
+  :global([data-darik-customer-account-hub175="all"]) {
+    display: none !important;
+  }
+
+  .page[data-location-selected="true"] .discoveryToolbar246 {
+    padding-top: 10px;
+  }
+
+  .page[data-location-selected="true"] .retailerSection {
+    padding: 34px 0 54px;
+  }
+
+  .page[data-location-selected="true"] .retailerPanel {
+    min-height: auto;
+    padding: 32px 20px;
+    border-radius: 26px;
+  }
+
+  .page[data-location-selected="true"] .retailerCopy h2 {
+    font-size: 36px;
+    line-height: 1.02;
+  }
+
+  .page[data-location-selected="true"] .retailerActions {
+    margin-top: 22px;
+    flex-direction: column;
+  }
+
+  .page[data-location-selected="true"] .retailerActions a {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .page[data-location-selected="true"] .footer {
+    padding: 42px 18px 22px;
+  }
+}

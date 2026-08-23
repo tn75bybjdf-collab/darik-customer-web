@@ -16,6 +16,7 @@ import DarikCustomerAccountHub175 from "./components/DarikCustomerAccountHub175"
 // DARIK_MARKETPLACE_REDESIGN_CHECKPOINT3_ENTRY_FIX_246C4
 // DARIK_MARKETPLACE_REDESIGN_CHECKPOINT4_STORE_PREVIEW_246D
 // DARIK_MARKETPLACE_REDESIGN_CHECKPOINT5_FINAL_POLISH_246E
+// DARIK_MARKETPLACE_RESTORE_FULL_SITE_SHELL_246F
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import { supabase } from "@/lib/supabaseBrowser";
 import styles from "./home.module.css";
@@ -2022,8 +2023,20 @@ export default function DarikDiscoveryHome() {
               <h2>{t.retailerTitle}</h2>
               <p>{t.retailerBody}</p>
               <div className={styles.retailerActions}>
-                <a href="/store-signup">{t.startFree}<Icon name="arrow" size={19} /></a>
-                <a href="/store-dashboard"><Icon name="user" size={19} />{t.openDashboard}</a>
+                <a href="/store-signup">
+                  {t.startFree}
+                  <Icon name="arrow" size={19} />
+                </a>
+
+                <a href="/store-dashboard">
+                  <Icon name="user" size={19} />
+                  {t.openDashboard}
+                </a>
+
+                <a href="/pricing">
+                  <Icon name="sparkle" size={19} />
+                  {t.pricing}
+                </a>
               </div>
             </div>
 
