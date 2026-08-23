@@ -28,6 +28,7 @@
 // DARIK_ALL_FIELDS_GUIDED_ADD_PRODUCT_WIZARD_074
 // DARIK_FURNITURE_IKEA_COLOR_VARIANTS_216
 // DARIK_COSMETICS_FURNITURE_STYLE_SHADE_VARIANTS_239
+// DARIK_COSMETICS_OPTIONAL_PREFILLED_SUBCATEGORY_240
 // DARIK_FURNITURE_MEDIA_ORDER_UPLOAD_FIX_217
 // DARIK_EYEGLASSES_RETAIL_FIELD_MECHANICS_135
 // DARIK_PHOTO_UPLOAD_DECODE_LOADING_076
@@ -1455,6 +1456,41 @@ const COSMETICS_GENERAL_SIZE_OPTIONS = [
   "Mini / Travel Size", "Small", "Standard / Full Size", "Large", "Jumbo",
 ] as const;
 
+const COSMETICS_SUBCATEGORY_OPTIONS_240 = [
+  { value: "Foundation", ar: "فاونديشن" },
+  { value: "Concealer", ar: "كونسيلر" },
+  { value: "BB / CC Cream", ar: "بي بي / سي سي كريم" },
+  { value: "Powder", ar: "بودرة" },
+  { value: "Blush", ar: "بلاشر" },
+  { value: "Bronzer", ar: "برونزر" },
+  { value: "Highlighter", ar: "هايلايتر" },
+  { value: "Primer", ar: "برايمر" },
+  { value: "Setting Spray", ar: "سبراي تثبيت" },
+  { value: "Lipstick", ar: "أحمر شفاه" },
+  { value: "Lip Gloss", ar: "ملمع شفاه" },
+  { value: "Lip Liner", ar: "محدد شفاه" },
+  { value: "Mascara", ar: "ماسكارا" },
+  { value: "Eyeliner", ar: "آيلاينر" },
+  { value: "Eyeshadow", ar: "ظلال عيون" },
+  { value: "Eyebrow", ar: "حواجب" },
+  { value: "False Lashes", ar: "رموش صناعية" },
+  { value: "Makeup Remover", ar: "مزيل مكياج" },
+  { value: "Cleanser", ar: "غسول" },
+  { value: "Toner", ar: "تونر" },
+  { value: "Serum", ar: "سيروم" },
+  { value: "Moisturizer", ar: "مرطب" },
+  { value: "Sunscreen", ar: "واقي شمس" },
+  { value: "Face Mask", ar: "ماسك وجه" },
+  { value: "Hair Care", ar: "عناية بالشعر" },
+  { value: "Body Care", ar: "عناية بالجسم" },
+  { value: "Nail Polish", ar: "طلاء أظافر" },
+  { value: "Nail Care", ar: "عناية بالأظافر" },
+  { value: "Makeup Tools", ar: "أدوات مكياج" },
+] as const;
+
+const COSMETICS_CUSTOM_SUBCATEGORY_240 =
+  "__custom_cosmetics_subcategory__";
+
 const PERFUME_STANDARD_BOTTLE_SIZE_OPTIONS = [
   "5 ml", "10 ml", "15 ml", "20 ml", "30 ml", "40 ml", "50 ml",
   "60 ml", "75 ml", "80 ml", "90 ml", "100 ml", "125 ml", "150 ml", "200 ml",
@@ -2866,6 +2902,8 @@ type DirectProduct = {
   direct_store_category_id: string | null;
   direct_store_subcategory_id: string | null;
   direct_store_subsubcategory_id: string | null;
+  direct_cosmetics_subcategory: string | null;
+  direct_cosmetics_subcategory_ar: string | null;
   direct_item_video_url: string | null;
   direct_item_video_duration_seconds: number | string | null;
   direct_item_video_storage_path: string | null;
@@ -3351,6 +3389,13 @@ export default function DarikDirectProductsPage() {
   const [shoeWizardErrors, setShoeWizardErrors] = useState<Record<string, string>>({});
   const [shoeWizardPhotoSlots, setShoeWizardPhotoSlots] = useState(1);
   const [form, setForm] = useState<ProductForm>(emptyForm);
+
+  const [cosmeticsSubcategory240, setCosmeticsSubcategory240] = useState("");
+  const [cosmeticsCustomSubcategory240, setCosmeticsCustomSubcategory240] =
+    useState("");
+  const [cosmeticsCustomSubcategoryAr240, setCosmeticsCustomSubcategoryAr240] =
+    useState("");
+
   const [furnitureVideoFile, setFurnitureVideoFile] = useState<File | null>(null);
   const [furnitureVideoPreviewUrl, setFurnitureVideoPreviewUrl] = useState("");
   const [furnitureVideoDuration, setFurnitureVideoDuration] = useState<number | null>(null);
@@ -3514,6 +3559,8 @@ export default function DarikDirectProductsPage() {
             "direct_store_category_id",
             "direct_store_subcategory_id",
             "direct_store_subsubcategory_id",
+            "direct_cosmetics_subcategory",
+            "direct_cosmetics_subcategory_ar",
             "direct_item_video_url",
             "direct_item_video_duration_seconds",
             "direct_item_video_storage_path",
@@ -4025,10 +4072,30 @@ export default function DarikDirectProductsPage() {
         )
       : null;
 
+  const cosmeticsSubcategoryPreset240 =
+    COSMETICS_SUBCATEGORY_OPTIONS_240.find(
+      (option) => option.value === cosmeticsSubcategory240
+    ) ?? null;
+
+  const cosmeticsSubcategoryName240 =
+    cosmeticsSubcategory240 === COSMETICS_CUSTOM_SUBCATEGORY_240
+      ? cosmeticsCustomSubcategory240.trim()
+      : cosmeticsSubcategoryPreset240?.value ?? "";
+
+  const cosmeticsSubcategoryNameAr240 =
+    cosmeticsSubcategory240 === COSMETICS_CUSTOM_SUBCATEGORY_240
+      ? cosmeticsCustomSubcategoryAr240.trim()
+      : cosmeticsSubcategoryPreset240?.ar ?? "";
+
+  const cosmeticsSizingCategoryName240 =
+    effectiveBusinessType === "cosmetics" && cosmeticsSubcategoryName240
+      ? cosmeticsSubcategoryName240
+      : selectedProductCategoryName;
+
   const cosmeticsSizePreset =
     effectiveBusinessType === "cosmetics"
       ? cosmeticsSizePresetFromCategoryName(
-          selectedProductCategoryName
+          cosmeticsSizingCategoryName240
         )
       : null;
 
@@ -5032,6 +5099,95 @@ export default function DarikDirectProductsPage() {
     [categories, form.directCategoryId]
   );
 
+
+  const cosmeticsSubcategoryPanel240 =
+    effectiveBusinessType === "cosmetics" ? (
+      <section className={styles.mobileHierarchyPanel}>
+        <div className={styles.mobileHierarchyHeading}>
+          <div>
+            <strong>
+              Product subcategory / التصنيف الفرعي للمنتج
+            </strong>
+            <span>
+              Optional. Choose the specific cosmetics type so Darik can show the right
+              size mechanic. / اختياري. اختر نوع مستحضرات التجميل ليعرض داريك
+              خيارات الحجم المناسبة.
+            </span>
+          </div>
+        </div>
+
+        <div className={styles.mobileHierarchyFields}>
+          <label>
+            <BilingualLabel
+              en="Subcategory (optional)"
+              ar="التصنيف الفرعي (اختياري)"
+            />
+            <select
+              value={cosmeticsSubcategory240}
+              onChange={(event) => {
+                const next240 = event.target.value;
+                setCosmeticsSubcategory240(next240);
+
+                if (next240 !== COSMETICS_CUSTOM_SUBCATEGORY_240) {
+                  setCosmeticsCustomSubcategory240("");
+                  setCosmeticsCustomSubcategoryAr240("");
+                }
+              }}
+            >
+              <option value="">
+                No subcategory / بدون تصنيف فرعي
+              </option>
+
+              {COSMETICS_SUBCATEGORY_OPTIONS_240.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.value} / {option.ar}
+                </option>
+              ))}
+
+              <option value={COSMETICS_CUSTOM_SUBCATEGORY_240}>
+                Other / custom / أخرى / مخصص
+              </option>
+            </select>
+          </label>
+
+          {cosmeticsSubcategory240 === COSMETICS_CUSTOM_SUBCATEGORY_240 ? (
+            <>
+              <label>
+                <BilingualLabel
+                  en="Custom subcategory (English)"
+                  ar="التصنيف الفرعي المخصص بالإنجليزية"
+                />
+                <input
+                  value={cosmeticsCustomSubcategory240}
+                  onChange={(event) =>
+                    setCosmeticsCustomSubcategory240(event.target.value)
+                  }
+                  maxLength={100}
+                  placeholder="Example: Tinted moisturizer"
+                />
+              </label>
+
+              <label>
+                <BilingualLabel
+                  en="Custom subcategory (Arabic)"
+                  ar="التصنيف الفرعي المخصص بالعربية"
+                />
+                <input
+                  dir="rtl"
+                  value={cosmeticsCustomSubcategoryAr240}
+                  onChange={(event) =>
+                    setCosmeticsCustomSubcategoryAr240(event.target.value)
+                  }
+                  maxLength={100}
+                  placeholder="مثال: مرطب ملون"
+                />
+              </label>
+            </>
+          ) : null}
+        </div>
+      </section>
+    ) : null;
+
   const mobileCategoryPath = [
     mobileMechanicsPreviewCategory?.name || selectedMobileTopCategory?.name,
     selectedMobileSubcategory?.name,
@@ -5952,6 +6108,9 @@ export default function DarikDirectProductsPage() {
 
   function openCreateForm() {
     resetFurnitureVideoState();
+    setCosmeticsSubcategory240("");
+    setCosmeticsCustomSubcategory240("");
+    setCosmeticsCustomSubcategoryAr240("");
     setMobileSubcategoryId("");
     setMobileSubsubcategoryId("");
     setMobileAddSubcategoryOpen(false);
@@ -5993,6 +6152,30 @@ export default function DarikDirectProductsPage() {
     setMobileCustomSubcategoryNameAr("");
     setMobileCustomDetailName("");
     setMobileCustomDetailNameAr("");
+
+    const savedCosmeticsSubcategory240 =
+      String(product.direct_cosmetics_subcategory || "").trim();
+    const savedCosmeticsPreset240 =
+      COSMETICS_SUBCATEGORY_OPTIONS_240.find(
+        (option) => option.value === savedCosmeticsSubcategory240
+      ) ?? null;
+
+    if (!savedCosmeticsSubcategory240) {
+      setCosmeticsSubcategory240("");
+      setCosmeticsCustomSubcategory240("");
+      setCosmeticsCustomSubcategoryAr240("");
+    } else if (savedCosmeticsPreset240) {
+      setCosmeticsSubcategory240(savedCosmeticsPreset240.value);
+      setCosmeticsCustomSubcategory240("");
+      setCosmeticsCustomSubcategoryAr240("");
+    } else {
+      setCosmeticsSubcategory240(COSMETICS_CUSTOM_SUBCATEGORY_240);
+      setCosmeticsCustomSubcategory240(savedCosmeticsSubcategory240);
+      setCosmeticsCustomSubcategoryAr240(
+        String(product.direct_cosmetics_subcategory_ar || "").trim()
+      );
+    }
+
     setEditingProductId(product.id);
     setForm({
       name: productDisplayName(product),
@@ -7238,6 +7421,26 @@ export default function DarikDirectProductsPage() {
       }
     }
 
+    if (actualBusinessType === "cosmetics") {
+      const cosmeticsSubcategoryResult240 = await supabase.rpc(
+        "darik_direct_set_product_cosmetics_subcategory_v1",
+        {
+          p_product_id: savedProductId,
+          p_subcategory: cosmeticsSubcategoryName240 || null,
+          p_subcategory_ar: cosmeticsSubcategoryNameAr240 || null,
+        }
+      );
+
+      if (cosmeticsSubcategoryResult240.error) {
+        setSaving(false);
+        setError(
+          `The product was saved, but its Cosmetics subcategory could not be saved. / تم حفظ المنتج، لكن تعذر حفظ التصنيف الفرعي لمستحضرات التجميل. ${cosmeticsSubcategoryResult240.error.message}`
+        );
+        await loadCatalog();
+        return;
+      }
+    }
+
     const genericSizesResult = await supabase.rpc(
       "darik_direct_set_product_size_options_v1",
       {
@@ -8043,6 +8246,8 @@ export default function DarikDirectProductsPage() {
                         </div>
 
 
+
+                        {cosmeticsSubcategoryPanel240}
 
                         {isHierarchyMechanics && form.directCategoryId ? (
                                             <section className={styles.mobileHierarchyPanel}>
@@ -9741,6 +9946,20 @@ export default function DarikDirectProductsPage() {
                               {selectedProductCategoryName || "—"}
                             </strong>
                           </div>
+                          {effectiveBusinessType === "cosmetics" &&
+                          cosmeticsSubcategoryName240 ? (
+                            <div>
+                              <span>
+                                Subcategory / التصنيف الفرعي
+                              </span>
+                              <strong>
+                                {cosmeticsSubcategoryName240}
+                                {cosmeticsSubcategoryNameAr240
+                                  ? ` / ${cosmeticsSubcategoryNameAr240}`
+                                  : ""}
+                              </strong>
+                            </div>
+                          ) : null}
                           <div>
                             <span>Sizes / المقاسات</span>
                             <strong>
@@ -9975,7 +10194,9 @@ export default function DarikDirectProductsPage() {
                     </a>
                   </label>
 
-                  {isHierarchyMechanics && form.directCategoryId ? (
+                  {cosmeticsSubcategoryPanel240}
+
+                        {isHierarchyMechanics && form.directCategoryId ? (
                     <section className={styles.mobileHierarchyPanel}>
                       <div className={styles.mobileHierarchyHeading}>
                         <div>
