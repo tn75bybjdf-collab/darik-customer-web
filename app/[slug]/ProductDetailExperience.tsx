@@ -22,6 +22,7 @@ import { supabase } from "@/lib/supabaseBrowser";
 import styles from "./productDetailExperience.module.css";
 
 // DARIK_FURNITURE_IKEA_COLOR_VARIANTS_216
+// DARIK_COSMETICS_FURNITURE_STYLE_SHADE_VARIANTS_239
 
 type SizeOption = { label?: string | null };
 type ShoeSize = { eu?: string | null; us?: string | null };
@@ -2011,7 +2012,7 @@ export default function ProductDetailExperience({
               {furnitureColors216.length > 1 && selectedFurnitureColor216 ? (
                 <section className={styles.furnitureColorSelector216}>
                   <div className={styles.furnitureColorLabel216}>
-                    <span>Choose color / اختر اللون:</span>
+                    <span>Choose color / shade / اختر اللون / الدرجة:</span>
                     <strong>
                       {selectedFurnitureColor216.name}
                       <span dir="rtl"> / {selectedFurnitureColor216.nameAr}</span>
@@ -2019,7 +2020,7 @@ export default function ProductDetailExperience({
                   </div>
                   <div
                     className={styles.furnitureColorThumbs216}
-                    aria-label="Furniture color options"
+                    aria-label="Color or shade options"
                   >
                     {furnitureColors216.map((color) => (
                       <button
