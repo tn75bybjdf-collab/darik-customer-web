@@ -3369,6 +3369,7 @@ function ProductPhotoPreview({
   );
 }
 
+// DARIK_SMOKE_SHOP_WEIGHT_SELLING_247
 const WEIGHT_MECHANICS_FIELDS = new Set([
   "supermarket",
   "bakery",
@@ -3881,7 +3882,10 @@ export default function DarikDirectProductsPage() {
     .toLowerCase();
   const effectiveBusinessType = mechanicsTestField || actualBusinessType;
   const isAutoParts = effectiveBusinessType === "auto_parts";
-  const supportsWeightSelling = WEIGHT_MECHANICS_FIELDS.has(effectiveBusinessType);
+  const effectiveWeightBusinessType247 = effectiveBusinessType
+    .replace(/[\s-]+/g, "_");
+  const supportsWeightSelling =
+    WEIGHT_MECHANICS_FIELDS.has(effectiveWeightBusinessType247);
 
   const mechanicsPresetCategories = useMemo(() => {
     if (!mechanicsTestField) return [] as MechanicsPresetCategory[];
