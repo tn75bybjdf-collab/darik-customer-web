@@ -7,7 +7,6 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 export const maxDuration = 180;
 
-const XAI_IMAGE_EDIT_ENDPOINT = "https://api.x.ai/v1/images/edits";
 const XAI_IMAGE_GENERATE_ENDPOINT = "https://api.x.ai/v1/images/generations";
 const XAI_BANNER_MODEL = process.env.XAI_BANNER_MODEL || "grok-imagine-image";
 const PRODUCT_BUCKET = "darik-direct-products";
@@ -115,6 +114,99 @@ async function fetchImageBytes(url: string, timeoutMs: number, maxBytes: number)
   }
 }
 
+// DARIK_BANNER_CREATIVE_OVERHAUL_279
+function normalizeBrandColor(value: string, fallback: string) {
+  const color = value.trim();
+  return /^#[0-9a-f]{6}$/i.test(color) ? color : fallback;
+}
+
+function splitPromotionCopy(value: string, rtl: boolean) {
+  let working = value.replace(/\s+/g, " ").trim();
+  let badge = "";
+
+  if (!rtl) {
+    const onlyMatch = working.match(/\b([A-Za-z][A-Za-z.'’-]*(?:\s+[A-Za-z][A-Za-z.'’-]*){0,2})\s+only\s*$/i);
+    if (onlyMatch) {
+      const stopWords = new Set(["and", "or", "above", "over", "orders", "order", "for", "on", "with", "in", "at", "from", "of", "the"]);
+      const tokens = onlyMatch[1].trim().split(/\s+/);
+      while (tokens.length > 1 && stopWords.has(tokens[0].toLowerCase())) tokens.shift();
+      if (tokens.length && !stopWords.has(tokens[0].toLowerCase())) {
+        badge = `${tokens.join(" ")} only`;
+        working = working.slice(0, Math.max(0, working.length - badge.length)).trim();
+      }
+    }
+  } else {
+    const arabicOnly = working.match(/([\u0600-\u06ff]+(?:\s+[\u0600-\u06ff]+){0,2})\s+فقط\s*$/);
+    if (arabicOnly) {
+      badge = `${arabicOnly[1].trim()} فقط`;
+      working = working.slice(0, Math.max(0, working.length - badge.length)).trim();
+    }
+  }
+
+  let headline = working;
+  let detail = "";
+
+  if (!rtl) {
+    const connector = working.match(/\s+(for|with|on|when|while|if|in|at)\s+/i);
+    if (connector?.index && connector.index >= 4 && connector.index <= 36) {
+      headline = working.slice(0, connector.index).trim();
+      detail = working.slice(connector.index).trim();
+    }
+  }
+
+  if (!detail) {
+    const words = working.split(/\s+/).filter(Boolean);
+    if (words.length > 4 || working.length > 34) {
+      let take = 0;
+      let length = 0;
+      for (let i = 0; i < words.length && i < 5; i += 1) {
+        const next = length + (i ? 1 : 0) + words[i].length;
+        if (i >= 2 && next > 30) break;
+        take = i + 1;
+        length = next;
+      }
+      take = Math.max(2, take);
+      headline = words.slice(0, take).join(" ");
+      detail = words.slice(take).join(" ");
+    }
+  }
+
+  return {
+    headline: headline || value,
+    detail,
+    badge,
+  };
+}
+
+async function renderPangoText(args: {
+  value: string;
+  width: number;
+  height: number;
+  align: "left" | "right" | "center";
+  bold?: boolean;
+  color?: string;
+  spacing?: number;
+}) {
+  const weightOpen = args.bold === false ? "" : "<b>";
+  const weightClose = args.bold === false ? "" : "</b>";
+  const markup = `<span foreground="${args.color || "#ffffff"}">${weightOpen}${escapeXml(args.value)}${weightClose}</span>`;
+
+  return sharp({
+    text: {
+      text: markup,
+      font: "sans",
+      width: args.width,
+      height: args.height,
+      align: args.align,
+      rgba: true,
+      spacing: args.spacing ?? 6,
+      wrap: "word-char",
+    },
+  })
+    .png()
+    .toBuffer();
+}
+
 function bannerPrompt(args: {
   message: string;
   storeName: string;
@@ -125,25 +217,23 @@ function bannerPrompt(args: {
   rtl: boolean;
   hasLogo: boolean;
 }) {
-  const safeSide = args.rtl ? "RIGHT" : "LEFT";
-  const visualSide = args.rtl ? "LEFT" : "RIGHT";
+  const copySide = args.rtl ? "RIGHT" : "LEFT";
   return [
-    `Create premium storefront promotional banner artwork for ${args.storeName || "a Darik retailer"}.`,
+    `Create a premium, high-converting storefront campaign image for ${args.storeName || "a Darik retailer"}.`,
     `Retail category: ${args.businessType || "retail"}.`,
-    `Promotion concept: ${args.message}.`,
-    `Current storefront hero size: ${args.heroSize.toUpperCase()}.`,
+    `Promotion concept to communicate visually: ${args.message}.`,
     `Brand palette reference: primary ${args.primary || "not specified"}, accent ${args.accent || "not specified"}.`,
-    args.hasLogo
-      ? "The supplied image is the retailer's real logo and is provided ONLY as a brand identity/color reference. Do not redraw, duplicate, distort, or place the logo in the artwork. Darik will place the exact original logo afterward."
-      : "No logo reference is available; use the store name/category and brand palette only.",
-    "DO NOT render any words, letters, numbers, prices, badges, watermarks, fake logos, or marketing copy anywhere in the image.",
-    `Reserve the ${safeSide} roughly 48% of the composition as a clean, low-detail safe zone for Darik to place the exact logo and exact promotion text afterward.`,
-    `Keep the strongest visual interest on the ${visualSide} side so the safe zone remains readable.`,
+    "The exact retailer logo and exact promotion wording will be added afterward by Darik, so do not generate any logo or text yourself.",
+    "ABSOLUTELY NO words, letters, numbers, prices, signs, watermarks, labels, badges, fake logos, or UI elements.",
+    "Use ONE cohesive full-bleed commercial scene across the entire canvas. Fill the frame edge-to-edge.",
+    "DO NOT make a split-screen composition. DO NOT leave half the image black, blank, empty, or a solid-color panel. DO NOT create a template mockup or text box.",
+    `Keep natural breathing room on the ${copySide} side through lighting, depth of field, sky, wall, or soft background detail, but that area must still feel like part of the same scene.`,
+    "The promotion concept must drive the visual storytelling. For delivery promotions, show a tasteful local-delivery cue such as a branded-looking delivery bag, parcel, scooter, or store-to-door moment appropriate to the retail category, without adding text.",
+    "Make it look like a real premium ecommerce campaign photographed or art-directed by a professional advertising agency: strong focal point, clean depth, polished lighting, expensive composition, no clutter.",
     args.heroSize === "compact"
-      ? "COMPACT HERO: keep the composition bold, simple, high-contrast, mobile-safe, and readable after aggressive responsive cropping. Avoid important details near the outer edges."
-      : "DEFAULT HERO: create a richer premium retail scene while still keeping the safe text zone uncluttered and resilient to responsive cropping.",
-    "Aspect ratio must feel like a wide website banner/header. Photorealistic or polished commercial illustration is acceptable depending on the store category.",
-    "No people unless genuinely helpful to the category, and never place faces or critical objects in the reserved text safe zone.",
+      ? "COMPACT HERO: use a bold simple focal subject and mobile-safe composition that remains attractive under tighter responsive crops."
+      : "DEFAULT HERO: use a rich cinematic wide composition while keeping the main subject and natural copy area balanced.",
+    "Wide 2:1 website hero banner composition. No important subject should touch the outer 8% edges.",
   ].join(" ");
 }
 
@@ -152,96 +242,137 @@ async function makeFinalBanner(args: {
   logoBytes: Uint8Array | null;
   message: string;
   rtl: boolean;
+  accent: string;
 }) {
   const base = await sharp(args.generatedBytes, { failOn: "none" })
     .rotate()
     .resize(BANNER_WIDTH, BANNER_HEIGHT, { fit: "cover", position: "centre" })
-    .jpeg({ quality: 92, chromaSubsampling: "4:4:4" })
+    .modulate({ saturation: 1.04, brightness: 0.98 })
+    .jpeg({ quality: 93, chromaSubsampling: "4:4:4" })
     .toBuffer();
 
   const rtl = args.rtl;
-  const gradient = Buffer.from(`
+  const accent = normalizeBrandColor(args.accent, "#38BDF8");
+  const contentWidth = 980;
+  const contentLeft = rtl ? BANNER_WIDTH - 150 - contentWidth : 150;
+  const align: "left" | "right" = rtl ? "right" : "left";
+  const copy = splitPromotionCopy(args.message, rtl);
+
+  const overlay = Buffer.from(`
     <svg width="${BANNER_WIDTH}" height="${BANNER_HEIGHT}" xmlns="http://www.w3.org/2000/svg">
       <defs>
-        <linearGradient id="g" x1="${rtl ? "100%" : "0%"}" y1="0%" x2="${rtl ? "0%" : "100%"}" y2="0%">
-          <stop offset="0%" stop-color="#030712" stop-opacity="0.82"/>
-          <stop offset="48%" stop-color="#030712" stop-opacity="0.56"/>
-          <stop offset="72%" stop-color="#030712" stop-opacity="0.08"/>
-          <stop offset="100%" stop-color="#030712" stop-opacity="0"/>
+        <linearGradient id="copyFade" x1="${rtl ? "100%" : "0%"}" y1="0%" x2="${rtl ? "0%" : "100%"}" y2="0%">
+          <stop offset="0%" stop-color="#020617" stop-opacity="0.72"/>
+          <stop offset="28%" stop-color="#020617" stop-opacity="0.52"/>
+          <stop offset="52%" stop-color="#020617" stop-opacity="0.18"/>
+          <stop offset="72%" stop-color="#020617" stop-opacity="0.03"/>
+          <stop offset="100%" stop-color="#020617" stop-opacity="0"/>
         </linearGradient>
-        <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
-          <feDropShadow dx="0" dy="8" stdDeviation="8" flood-color="#000000" flood-opacity="0.42"/>
-        </filter>
+        <linearGradient id="bottomFade" x1="0%" y1="100%" x2="0%" y2="0%">
+          <stop offset="0%" stop-color="#020617" stop-opacity="0.24"/>
+          <stop offset="42%" stop-color="#020617" stop-opacity="0"/>
+        </linearGradient>
       </defs>
-      <rect width="${BANNER_WIDTH}" height="${BANNER_HEIGHT}" fill="url(#g)"/>
+      <rect width="${BANNER_WIDTH}" height="${BANNER_HEIGHT}" fill="url(#copyFade)"/>
+      <rect width="${BANNER_WIDTH}" height="${BANNER_HEIGHT}" fill="url(#bottomFade)"/>
+      <rect x="${contentLeft}" y="340" width="150" height="12" rx="6" fill="${accent}"/>
     </svg>
   `);
 
-  const maxChars = args.message.length <= 42 ? 25 : args.message.length <= 80 ? 30 : 34;
-  const lines = wrapBannerText(args.message, maxChars);
-  const fontSize = lines.length <= 2 ? 118 : lines.length === 3 ? 96 : 78;
-  const lineHeight = Math.round(fontSize * 1.17);
-  const startY = Math.max(470, 610 - Math.round(((lines.length - 1) * lineHeight) / 2));
-  const x = rtl ? 2240 : 160;
-  const anchor = rtl ? "end" : "start";
-  const direction = rtl ? "rtl" : "ltr";
+  const composites = [{ input: overlay, top: 0, left: 0 }];
 
-  const tspans = lines
-    .map((line, index) => `<tspan x="${x}" dy="${index === 0 ? 0 : lineHeight}">${escapeXml(line)}</tspan>`)
-    .join("");
-
-  const copySvg = Buffer.from(`
-    <svg width="${BANNER_WIDTH}" height="${BANNER_HEIGHT}" xmlns="http://www.w3.org/2000/svg">
-      <defs>
-        <filter id="copyShadow" x="-20%" y="-20%" width="140%" height="140%">
-          <feDropShadow dx="0" dy="7" stdDeviation="7" flood-color="#000000" flood-opacity="0.50"/>
-        </filter>
-      </defs>
-      <text x="${x}" y="${startY}" text-anchor="${anchor}" direction="${direction}" unicode-bidi="plaintext"
-        fill="#ffffff" font-family="Arial, DejaVu Sans, sans-serif" font-size="${fontSize}" font-weight="900"
-        letter-spacing="-2" filter="url(#copyShadow)">${tspans}</text>
-    </svg>
-  `);
-
-  const composites = [
-    { input: gradient, top: 0, left: 0 },
-  ];
-
-  if (args.logoBytes?.byteLength) {
-    const plateWidth = 330;
-    const plateHeight = 190;
-    const plateLeft = rtl ? BANNER_WIDTH - 160 - plateWidth : 160;
-    const plateTop = 115;
+  const hasLogo = Boolean(args.logoBytes?.byteLength);
+  if (hasLogo && args.logoBytes) {
+    const plateWidth = 360;
+    const plateHeight = 188;
+    const plateLeft = rtl ? BANNER_WIDTH - 150 - plateWidth : 150;
+    const plateTop = 92;
     const plate = Buffer.from(`
       <svg width="${plateWidth}" height="${plateHeight}" xmlns="http://www.w3.org/2000/svg">
-        <rect x="0" y="0" width="${plateWidth}" height="${plateHeight}" rx="34" fill="#ffffff" fill-opacity="0.96"/>
+        <defs>
+          <filter id="s" x="-20%" y="-25%" width="140%" height="150%">
+            <feDropShadow dx="0" dy="12" stdDeviation="12" flood-color="#000000" flood-opacity="0.24"/>
+          </filter>
+        </defs>
+        <rect x="8" y="8" width="${plateWidth - 16}" height="${plateHeight - 16}" rx="34"
+          fill="#ffffff" fill-opacity="0.96" filter="url(#s)"/>
       </svg>
     `);
     composites.push({ input: plate, top: plateTop, left: plateLeft });
 
     const logo = await sharp(args.logoBytes, { failOn: "none" })
       .rotate()
-      .resize(260, 130, { fit: "inside", withoutEnlargement: true })
+      .resize(286, 128, { fit: "inside", withoutEnlargement: true })
       .png()
       .toBuffer();
     const logoMeta = await sharp(logo).metadata();
     const logoWidth = Number(logoMeta.width || 0);
     const logoHeight = Number(logoMeta.height || 0);
     composites.push({
-      // DARIK_274B_SHARP_BUFFER_TYPE_FIX
-      // Sharp returns Buffer<ArrayBufferLike>; clone it so this composite array
-      // keeps the concrete Buffer<ArrayBuffer> type inferred from the SVG buffers.
       input: Buffer.from(logo),
       top: plateTop + Math.max(0, Math.round((plateHeight - logoHeight) / 2)),
       left: plateLeft + Math.max(0, Math.round((plateWidth - logoWidth) / 2)),
     });
   }
 
-  composites.push({ input: copySvg, top: 0, left: 0 });
+  const headlineTop = hasLogo ? 392 : 180;
+  const headlineHeight = copy.detail ? 270 : 390;
+  const headlineImage = await renderPangoText({
+    value: copy.headline,
+    width: contentWidth,
+    height: headlineHeight,
+    align,
+    bold: true,
+    spacing: 4,
+  });
+  composites.push({ input: Buffer.from(headlineImage), top: headlineTop, left: contentLeft });
+
+  let nextTop = headlineTop + headlineHeight + 28;
+
+  if (copy.detail) {
+    const detailImage = await renderPangoText({
+      value: copy.detail,
+      width: contentWidth,
+      height: 190,
+      align,
+      bold: false,
+      color: "#F8FAFC",
+      spacing: 4,
+    });
+    composites.push({ input: Buffer.from(detailImage), top: nextTop, left: contentLeft });
+    nextTop += 218;
+  }
+
+  if (copy.badge) {
+    const badgeWidth = Math.min(520, Math.max(270, 150 + copy.badge.length * 18));
+    const badgeLeft = rtl ? BANNER_WIDTH - 150 - badgeWidth : 150;
+    const badgeTop = Math.min(1040, nextTop + 18);
+    const badgePlate = Buffer.from(`
+      <svg width="${badgeWidth}" height="98" xmlns="http://www.w3.org/2000/svg">
+        <rect width="${badgeWidth}" height="98" rx="49" fill="${accent}" fill-opacity="0.98"/>
+      </svg>
+    `);
+    composites.push({ input: badgePlate, top: badgeTop, left: badgeLeft });
+
+    const badgeText = await renderPangoText({
+      value: copy.badge,
+      width: badgeWidth - 44,
+      height: 60,
+      align: "center",
+      bold: true,
+      color: "#071018",
+      spacing: 2,
+    });
+    composites.push({
+      input: Buffer.from(badgeText),
+      top: badgeTop + 19,
+      left: badgeLeft + 22,
+    });
+  }
 
   return sharp(base)
     .composite(composites)
-    .jpeg({ quality: 94, chromaSubsampling: "4:4:4" })
+    .jpeg({ quality: 95, chromaSubsampling: "4:4:4" })
     .toBuffer();
 }
 
@@ -335,18 +466,17 @@ export async function POST(request: NextRequest) {
   let xaiPayload: XaiImageResponse = {};
 
   try {
-    const endpoint = logoUrl ? XAI_IMAGE_EDIT_ENDPOINT : XAI_IMAGE_GENERATE_ENDPOINT;
+    // DARIK_279_GENERATE_BACKGROUND_FROM_SCRATCH
+    // The retailer logo is composited exactly afterward. Using the logo as an
+    // image-edit source was biasing the model toward awkward template/split layouts.
     const xaiBody: Record<string, unknown> = {
       model: XAI_BANNER_MODEL,
       prompt,
       aspect_ratio: "2:1",
       response_format: "url",
     };
-    if (logoUrl) {
-      xaiBody.image = { url: logoUrl, type: "image_url" };
-    }
 
-    xaiResponse = await fetch(endpoint, {
+    xaiResponse = await fetch(XAI_IMAGE_GENERATE_ENDPOINT, {
       method: "POST",
       headers: { Authorization: `Bearer ${xaiApiKey}`, "Content-Type": "application/json" },
       body: JSON.stringify(xaiBody),
@@ -386,7 +516,7 @@ export async function POST(request: NextRequest) {
       .jpeg({ quality: 91 })
       .toBuffer();
 
-    const finalBuffer = await makeFinalBanner({ generatedBytes, logoBytes, message: bannerText, rtl });
+    const finalBuffer = await makeFinalBanner({ generatedBytes, logoBytes, message: bannerText, rtl, accent: text(storefront.accent_color, 40) });
     const bannerId = crypto.randomUUID();
     const timestamp = Date.now();
     const backgroundPath = `${retailerId}/ai-banners/${timestamp}-${bannerId}-background.jpg`;
