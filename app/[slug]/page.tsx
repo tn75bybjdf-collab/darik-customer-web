@@ -105,16 +105,6 @@ function normalizeHeroSize254(value: unknown): HeroSize254 {
   return candidate === "compact" ? "compact" : "default";
 }
 
-// DARIK_HERO_SIZE_PERSISTENCE_FIX_257
-function heroSizeFromVisual257(value: unknown): HeroSize254 {
-  const raw =
-    value && typeof value === "object" && !Array.isArray(value)
-      ? (value as Record<string, unknown>)
-      : {};
-
-  return normalizeHeroSize254(raw["__darik_hero_size_254"]);
-}
-
 type PublicStoreStatus = {
   slug: string;
   display_name: string;
@@ -2072,6 +2062,45 @@ export default function DarikDirectStorefrontPage() {
   const [darikStorefrontVisualTruth194, setDarikStorefrontVisualTruth194] =
     useState<DarikStorefrontVisualTruth194 | null>(null);
 
+  // DARIK_REAL_HERO_SIZE_COLUMN_260
+  const [heroSize260, setHeroSize260] =
+    useState<HeroSize254>("default");
+
+  useEffect(() => {
+    if (!slug || slug === "_darik-private-store-preview") {
+      setHeroSize260("default");
+      return;
+    }
+
+    let cancelled260 = false;
+
+    void (async () => {
+      const result260 = await supabase.rpc(
+        "darik_direct_public_hero_size_v260",
+        { p_slug: slug }
+      );
+
+      if (cancelled260) return;
+
+      if (result260.error) {
+        console.warn(
+          "Darik hero size could not load:",
+          result260.error.message
+        );
+        setHeroSize260("default");
+        return;
+      }
+
+      setHeroSize260(
+        result260.data === "compact" ? "compact" : "default"
+      );
+    })();
+
+    return () => {
+      cancelled260 = true;
+    };
+  }, [slug]);
+
   // DARIK_RETAILER_THEME_GALLERY_102
   const [savedThemeField, setSavedThemeField] = useState("");
 
@@ -2108,10 +2137,6 @@ export default function DarikDirectStorefrontPage() {
     useState<StorefrontContentPositioning145>(() =>
       storefrontDefaultContentPositioning145()
     );
-
-  // DARIK_HERO_SIZE_PROVEN_SAVE_PATH_259
-  const [savedHeroSize259, setSavedHeroSize259] =
-    useState<HeroSize254>("default");
 
   const [builderSelectedPosition145, setBuilderSelectedPosition145] =
     useState<StorefrontPositionKey145 | null>(null);
@@ -2173,7 +2198,6 @@ export default function DarikDirectStorefrontPage() {
       setSavedContentPositioning145(
         storefrontDefaultContentPositioning145()
       );
-      setSavedHeroSize259("default");
       return;
     }
 
@@ -2186,10 +2210,6 @@ export default function DarikDirectStorefrontPage() {
       );
 
       if (cancelled || result.error) return;
-
-      setSavedHeroSize259(
-        heroSizeFromVisual257(result.data)
-      );
 
       setSavedContentPositioning145(
         normalizeStorefrontContentPositioning145(result.data)
@@ -6387,26 +6407,7 @@ export default function DarikDirectStorefrontPage() {
     );
   }
 
-  const storefrontRawContentPositioning259 = (
-    storefront as unknown as {
-      direct_content_positioning?: unknown;
-    } | null
-  )?.direct_content_positioning;
-
-  const heroSizeFromStorefront259 =
-    heroSizeFromVisual257(storefrontRawContentPositioning259);
-
-  const heroSizeFromVisualTruth259 =
-    heroSizeFromVisual257(
-      darikStorefrontVisualTruth194?.content_positioning
-    );
-
-  const heroSize254: HeroSize254 =
-    heroSizeFromStorefront259 === "compact"
-      ? "compact"
-      : heroSizeFromVisualTruth259 === "compact"
-        ? "compact"
-        : savedHeroSize259;
+  const heroSize254: HeroSize254 = heroSize260;
 
   const hasActiveVehicleFilter =
     selectedVehicleMake !== "all" ||
