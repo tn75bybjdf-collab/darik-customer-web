@@ -705,8 +705,12 @@ function HomeStoreCard186({
       className="darikHomeStoreCard186"
       href={`/${store.slug}`}
       aria-label={`${t.shopStore}: ${displayStoreName(store, language)}`}
-      onClick={() => {
-        // DARIK_STORE_DIRECT_OPEN_248
+      onClick={(event) => {
+        // DARIK_BESTSELLER_EXACT_PRODUCT_OPEN_250
+        const clickedProduct250 = (
+          event.target as HTMLElement
+        ).closest<HTMLElement>("[data-darik-product-id249]");
+
         try {
           const storageKey188 = `darik:opening-store-logo:188:${store.slug.toLowerCase()}`;
           if (logoUrl) {
@@ -715,7 +719,19 @@ function HomeStoreCard186({
             window.sessionStorage.removeItem(storageKey188);
           }
         } catch {
-          // Direct store opening still works if browser storage is unavailable.
+          // Store opening still works if browser storage is unavailable.
+        }
+
+        if (clickedProduct250) {
+          const productId250 =
+            clickedProduct250.dataset.darikProductId249?.trim();
+
+          if (productId250) {
+            event.preventDefault();
+            window.location.assign(
+              `/${store.slug}?product=${encodeURIComponent(productId250)}`
+            );
+          }
         }
       }}
     >
@@ -829,7 +845,15 @@ function HomeStoreCard186({
       ) : bestSellers249.length > 0 ? (
         <div className="darikHomeStoreProducts249" aria-hidden="true">
           {bestSellers249.map((product249) => (
-            <span key={product249.id}>
+            <span
+              key={product249.id}
+              data-darik-product-id249={product249.id}
+              title={
+                language === "ar"
+                  ? "فتح هذا المنتج"
+                  : "Open this product"
+              }
+            >
               <img
                 src={product249.imageUrl}
                 alt=""
