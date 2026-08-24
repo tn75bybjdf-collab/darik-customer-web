@@ -140,17 +140,17 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const heroSize = storefront.direct_hero_size === "compact" ? "compact" : "default";
-  const expected =
-    heroSize === "compact"
-      ? { width: 1600, height: 900 }
-      : { width: 1200, height: 1200 };
+  // DARIK_HALF_COMPACT_BANNER_284
+  // Compact Hero is 1600x900. Banner is always the same width at exactly
+  // half the Hero height: 1600x450. Legacy direct_hero_size values are ignored.
+  const heroSize = "compact";
+  const expected = { width: 1600, height: 450 };
 
   if (imageWidth !== expected.width || imageHeight !== expected.height) {
     return json282(
       {
         ok: false,
-        error: `This ${heroSize} Hero requires a ${expected.width} × ${expected.height} px banner.`,
+        error: `Your Compact Hero is 1600 × 900 px. Upload a half-height ${expected.width} × ${expected.height} px banner.`,
       },
       400
     );
