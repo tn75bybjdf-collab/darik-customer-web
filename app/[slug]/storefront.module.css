@@ -22362,3 +22362,50 @@
 .page[data-hero-size="compact"][data-theme-field][data-hero] .hero {
   margin-top: 0 !important;
 }
+
+/* DARIK_GLOBAL_PRODUCT_CARD_SHAPE_TOGGLE_271
+   Retailer-controlled product-card shape for every Darik storefront.
+   This is independent of Hero Size and independent of each retail field's
+   overall corner system.
+*/
+
+/* SQUARE */
+.page[data-product-card-corners="square"][data-theme-field] .productCard,
+.page[data-product-card-corners="square"][data-theme-field] .autoPartsProductCard,
+.page[data-product-card-corners="square"][data-theme-field] .marketplaceCategoryProductList .productCard,
+.page[data-product-card-corners="square"][data-theme-field] .marketplaceCategoryProductList .autoPartsProductCard,
+.page[data-product-card-corners="square"][data-theme-field] .marketplaceBestSellerCarousel .productCard,
+.page[data-product-card-corners="square"][data-theme-field] .marketplaceBestSellerCarousel .autoPartsProductCard {
+  border-radius: 0 !important;
+}
+
+.page[data-product-card-corners="square"][data-theme-field] .productImage,
+.page[data-product-card-corners="square"][data-theme-field] .marketplaceCategoryProductList .productImage,
+.page[data-product-card-corners="square"][data-theme-field] .marketplaceBestSellerCarousel .productImage {
+  border-radius: 0 !important;
+}
+
+/* ROUNDED */
+.page[data-product-card-corners="rounded"][data-theme-field] .productCard,
+.page[data-product-card-corners="rounded"][data-theme-field] .autoPartsProductCard,
+.page[data-product-card-corners="rounded"][data-theme-field] .marketplaceCategoryProductList .productCard,
+.page[data-product-card-corners="rounded"][data-theme-field] .marketplaceCategoryProductList .autoPartsProductCard,
+.page[data-product-card-corners="rounded"][data-theme-field] .marketplaceBestSellerCarousel .productCard,
+.page[data-product-card-corners="rounded"][data-theme-field] .marketplaceBestSellerCarousel .autoPartsProductCard {
+  overflow: hidden !important;
+  border: 1px solid color-mix(
+    in srgb,
+    var(--store-accent, #64748b) 16%,
+    #dfe4ea
+  ) !important;
+  border-radius: 24px !important;
+  background: var(--theme-surface, #ffffff) !important;
+  box-shadow: 0 12px 30px rgba(15, 23, 42, 0.08) !important;
+}
+
+.page[data-product-card-corners="rounded"][data-theme-field] .productImage,
+.page[data-product-card-corners="rounded"][data-theme-field] .marketplaceCategoryProductList .productImage,
+.page[data-product-card-corners="rounded"][data-theme-field] .marketplaceBestSellerCarousel .productImage {
+  overflow: hidden !important;
+  border-radius: 22px 22px 0 0 !important;
+}

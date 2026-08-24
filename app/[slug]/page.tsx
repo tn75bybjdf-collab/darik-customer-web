@@ -6040,6 +6040,9 @@ export default function DarikDirectStorefrontPage() {
   const storefrontTheme = fieldDesign.storefrontTheme;
   const appearanceMode = fieldDesign.appearanceMode;
   const productCardStyle = fieldDesign.productCardStyle;
+  // DARIK_GLOBAL_PRODUCT_CARD_SHAPE_TOGGLE_271
+  const productCardCorners271 =
+    storefront.corner_style === "square" ? "square" : "rounded";
   const cornerStyle = fieldDesign.cornerStyle;
   const heroLayout = fieldDesign.heroLayout;
   const sectionOrder = fieldDesign.sectionOrder;
@@ -6468,6 +6471,7 @@ export default function DarikDirectStorefrontPage() {
       data-theme={storefrontTheme}
       data-appearance={appearanceMode}
       data-card-style={productCardStyle}
+      data-product-card-corners={productCardCorners271}
       data-corners={cornerStyle}
       data-hero={heroLayout}
       data-hero-size={heroSize254}

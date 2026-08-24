@@ -98,6 +98,8 @@ type CornerStyle = "rounded" | "soft" | "square";
 type HeroLayout = "centered" | "split" | "immersive";
 // DARIK_STOREFRONT_HERO_SIZE_OPTION_254
 type HeroSize254 = "default" | "compact";
+// DARIK_GLOBAL_PRODUCT_CARD_SHAPE_TOGGLE_271
+type ProductCardCorners271 = "square" | "rounded";
 type StorefrontSection = "categories" | "catalog" | "story";
 
 type StorefrontDesign = {
@@ -1371,6 +1373,11 @@ export default function DarikDirectStorefrontSettingsPage() {
   const [heroSizeSaveState254, setHeroSizeSaveState254] = useState<
     "idle" | "saving" | "saved" | "error"
   >("idle");
+
+  const [productCardCorners271, setProductCardCorners271] =
+    useState<ProductCardCorners271>("rounded");
+  const [productCardCornersSaveState271, setProductCardCornersSaveState271] =
+    useState<"idle" | "saving" | "saved" | "error">("idle");
 
   useDarikTypographyFontLibrary105V5();
   const [session, setSession] = useState<Session | null>(null);
@@ -6964,6 +6971,83 @@ export default function DarikDirectStorefrontSettingsPage() {
     }, 1400);
   }
 
+  // DARIK_GLOBAL_PRODUCT_CARD_SHAPE_TOGGLE_271
+  useEffect(() => {
+    const raw271 = storefront?.corner_style;
+
+    setProductCardCorners271(
+      raw271 === "square" ? "square" : "rounded"
+    );
+    setProductCardCornersSaveState271("idle");
+  }, [storefront?.id, storefront?.corner_style]);
+
+  async function saveProductCardCorners271(
+    next271: ProductCardCorners271
+  ) {
+    const previous271 = productCardCorners271;
+
+    setProductCardCorners271(next271);
+    setProductCardCornersSaveState271("saving");
+    setError("");
+
+    if (!storefront?.id) {
+      setProductCardCornersSaveState271("error");
+      setProductCardCorners271(previous271);
+      window.alert(
+        "Product card shape cannot save yet because the storefront record is not ready."
+      );
+      return;
+    }
+
+    const result271 = await supabase
+      .from("retailer_storefronts")
+      .update({
+        corner_style: next271,
+      })
+      .eq("id", storefront.id)
+      .select("id,corner_style")
+      .single();
+
+    if (result271.error) {
+      setProductCardCorners271(previous271);
+      setProductCardCornersSaveState271("error");
+
+      const message271 =
+        `Product card shape could not save: ${result271.error.message}`;
+
+      setError(
+        `${message271} / تعذر حفظ شكل بطاقات المنتجات`
+      );
+      window.alert(message271);
+      return;
+    }
+
+    const saved271 =
+      result271.data?.corner_style === "square"
+        ? "square"
+        : "rounded";
+
+    setStorefront((current271) =>
+      current271
+        ? {
+            ...current271,
+            corner_style: saved271,
+          }
+        : current271
+    );
+
+    setProductCardCorners271(saved271);
+    setProductCardCornersSaveState271("saved");
+
+    refreshActualLiveStoreEditor196(100);
+
+    window.setTimeout(() => {
+      setProductCardCornersSaveState271((current271) =>
+        current271 === "saved" ? "idle" : current271
+      );
+    }, 1400);
+  }
+
   useEffect(() => {
     const retailerId = selectedStore?.retailer_id;
 
@@ -11933,25 +12017,7 @@ await saveStorefront(undefined, "manual");
                         >
                           تخصيص المتجر / Customize Store
                         </button>
-<button
-                        type="button"
-                        onClick={() => {
-                          void saveEverythingToLive198();
-                        }}
-                        disabled={
-                          saveToLiveState198 === "saving" ||
-                          !usesActualLiveStoreEditor196()
-                        }
-                        title="Force-save editor changes and reload the actual live storefront"
-                      >
-                        {saveToLiveState198 === "saving"
-                          ? "Saving to live... / جار الحفظ..."
-                          : saveToLiveState198 === "saved"
-                            ? "Saved ✓ / تم الحفظ ✓"
-                            : saveToLiveState198 === "error"
-                              ? "Save failed — retry / فشل الحفظ"
-                              : "Save to live / حفظ على المتجر"}
-                      </button>
+
 
                       <button
                         type="button"
@@ -12005,6 +12071,26 @@ await saveStorefront(undefined, "manual");
                           : heroSize254 === "compact"
                             ? "Hero size: Default / حجم الواجهة: افتراضي"
                             : "Hero size: Compact / حجم الواجهة: مدمج"}
+                      </button>
+
+                      {/* DARIK_GLOBAL_PRODUCT_CARD_SHAPE_TOGGLE_271 */}
+                      <button
+                        type="button"
+                        className={designStyles.heroSizeToggle256}
+                        disabled={productCardCornersSaveState271 === "saving"}
+                        onClick={() =>
+                          void saveProductCardCorners271(
+                            productCardCorners271 === "rounded"
+                              ? "square"
+                              : "rounded"
+                          )
+                        }
+                      >
+                        {productCardCornersSaveState271 === "saving"
+                          ? "Saving... / جارٍ الحفظ"
+                          : productCardCorners271 === "rounded"
+                            ? "Product cards: Square / بطاقات المنتجات: مربعة"
+                            : "Product cards: Rounded / بطاقات المنتجات: مستديرة"}
                       </button>
 </div>
                   </div>
