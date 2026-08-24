@@ -22409,3 +22409,77 @@
   overflow: hidden !important;
   border-radius: 22px 22px 0 0 !important;
 }
+
+/* DARIK_PRODUCT_IMAGE_CORNERS_FLOATING_TEXT_272
+   Product Card Shape now controls ONLY the product image frame.
+   Product name / description / price stay unboxed and float directly
+   on the storefront background in BOTH Square and Rounded modes.
+*/
+
+/* Remove card chrome around words for both choices. */
+.page[data-product-card-corners][data-theme-field] .productCard,
+.page[data-product-card-corners][data-theme-field] .autoPartsProductCard,
+.page[data-product-card-corners][data-theme-field] .marketplaceCategoryProductList .productCard,
+.page[data-product-card-corners][data-theme-field] .marketplaceCategoryProductList .autoPartsProductCard,
+.page[data-product-card-corners][data-theme-field] .marketplaceBestSellerCarousel .productCard,
+.page[data-product-card-corners][data-theme-field] .marketplaceBestSellerCarousel .autoPartsProductCard {
+  overflow: visible !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+/* Keep the text area completely free of a card/background. */
+.page[data-product-card-corners][data-theme-field] .productBody,
+.page[data-product-card-corners][data-theme-field] .marketplaceCategoryProductList .productBody,
+.page[data-product-card-corners][data-theme-field] .marketplaceBestSellerCarousel .productBody {
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+/* Kill decorative card pseudo-elements that could recreate a box. */
+.page[data-product-card-corners][data-theme-field] .productCard::before,
+.page[data-product-card-corners][data-theme-field] .autoPartsProductCard::before,
+.page[data-product-card-corners][data-theme-field] .marketplaceCategoryProductList .productCard::before,
+.page[data-product-card-corners][data-theme-field] .marketplaceCategoryProductList .autoPartsProductCard::before,
+.page[data-product-card-corners][data-theme-field] .marketplaceBestSellerCarousel .productCard::before,
+.page[data-product-card-corners][data-theme-field] .marketplaceBestSellerCarousel .autoPartsProductCard::before {
+  display: none !important;
+}
+
+/* The PHOTO is the only framed surface. */
+.page[data-product-card-corners][data-theme-field] .productImage,
+.page[data-product-card-corners][data-theme-field] .marketplaceCategoryProductList .productImage,
+.page[data-product-card-corners][data-theme-field] .marketplaceBestSellerCarousel .productImage {
+  overflow: hidden !important;
+  border: 1px solid color-mix(
+    in srgb,
+    var(--store-accent, #64748b) 13%,
+    rgba(148, 163, 184, 0.34)
+  ) !important;
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.06) !important;
+}
+
+/* SQUARE = square PHOTO only. */
+.page[data-product-card-corners="square"][data-theme-field] .productImage,
+.page[data-product-card-corners="square"][data-theme-field] .marketplaceCategoryProductList .productImage,
+.page[data-product-card-corners="square"][data-theme-field] .marketplaceBestSellerCarousel .productImage {
+  border-radius: 0 !important;
+}
+
+/* ROUNDED = rounded PHOTO only. */
+.page[data-product-card-corners="rounded"][data-theme-field] .productImage,
+.page[data-product-card-corners="rounded"][data-theme-field] .marketplaceCategoryProductList .productImage,
+.page[data-product-card-corners="rounded"][data-theme-field] .marketplaceBestSellerCarousel .productImage {
+  border-radius: 24px !important;
+}
+
+/* Let the actual image follow the frame cleanly. */
+.page[data-product-card-corners][data-theme-field] .productImage img,
+.page[data-product-card-corners][data-theme-field] .marketplaceCategoryProductList .productImage img,
+.page[data-product-card-corners][data-theme-field] .marketplaceBestSellerCarousel .productImage img {
+  border-radius: inherit !important;
+}
