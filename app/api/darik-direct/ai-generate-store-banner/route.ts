@@ -125,7 +125,7 @@ function splitPromotionCopy(value: string, rtl: boolean) {
   let badge = "";
 
   if (!rtl) {
-    const onlyMatch = working.match(/\b([A-Za-z][A-Za-z.'’-]*(?:\s+[A-Za-z][A-Za-z.'’-]*){0,2})\s+only\s*$/i);
+    const onlyMatch = working.match(/\b([A-Za-z][A-Za-z.'â€™-]*(?:\s+[A-Za-z][A-Za-z.'â€™-]*){0,2})\s+only\s*$/i);
     if (onlyMatch) {
       const stopWords = new Set(["and", "or", "above", "over", "orders", "order", "for", "on", "with", "in", "at", "from", "of", "the"]);
       const tokens = onlyMatch[1].trim().split(/\s+/);
@@ -136,9 +136,9 @@ function splitPromotionCopy(value: string, rtl: boolean) {
       }
     }
   } else {
-    const arabicOnly = working.match(/([\u0600-\u06ff]+(?:\s+[\u0600-\u06ff]+){0,2})\s+فقط\s*$/);
+    const arabicOnly = working.match(/([\u0600-\u06ff]+(?:\s+[\u0600-\u06ff]+){0,2})\s+ظپظ‚ط·\s*$/);
     if (arabicOnly) {
-      badge = `${arabicOnly[1].trim()} فقط`;
+      badge = `${arabicOnly[1].trim()} ظپظ‚ط·`;
       working = working.slice(0, Math.max(0, working.length - badge.length)).trim();
     }
   }
@@ -207,33 +207,52 @@ async function renderPangoText(args: {
     .toBuffer();
 }
 
+// DARIK_BANNER_RESPONSIVE_HTML_OVERLAY_280
+function promotionVisualConcept(message: string, businessType: string) {
+  const lower = message.toLowerCase();
+  const category = businessType || "local retail";
+
+  if (/deliver|delivery|طھظˆطµظٹظ„|طھظˆطµظٹظ„ط©|طھظˆطµظٹظ„ظ‡/.test(lower)) {
+    return `A premium ${category} order handoff and local last-mile delivery moment in Jordan: a professional courier with an unbranded delivery bag or parcel, a tasteful scooter or delivery cue, real products from the retail category, and a warm trustworthy store-to-customer feeling.`;
+  }
+  if (/discount|sale|off|ط®طµظ…|طھظ†ط²ظٹظ„|ط¹ط±ط¶/.test(lower)) {
+    return `A premium ${category} promotional shopping scene with desirable products, energetic but elegant retail styling, and a clear sense of a limited special offer without showing any written sale signage.`;
+  }
+  if (/new|arrival|just in|ط¬ط¯ظٹط¯|ظˆطµظ„|طھط´ظƒظٹظ„ط©/.test(lower)) {
+    return `A premium ${category} new-arrival campaign scene with freshly presented products, refined merchandising, beautiful lighting, and a sense of discovery.`;
+  }
+  if (/buy|free|gift|ظ‡ط¯ظٹط©|ظ…ط¬ط§ظ†ط§|ظ…ط¬ط§ظ†ط§ظ‹/.test(lower)) {
+    return `A premium ${category} value-promotion scene with a tasteful product bundle or customer order, polished ecommerce advertising energy, and no written offer graphics.`;
+  }
+
+  return `A premium ${category} ecommerce campaign scene in Jordan, professionally art-directed around the retailer's current promotion with attractive products, natural human context where appropriate, polished commercial lighting, and no written promotional graphics.`;
+}
+
 function bannerPrompt(args: {
-  message: string;
-  storeName: string;
+  visualConcept: string;
   businessType: string;
   heroSize: "default" | "compact";
   primary: string;
   accent: string;
   rtl: boolean;
-  hasLogo: boolean;
 }) {
   const copySide = args.rtl ? "RIGHT" : "LEFT";
+  const subjectSide = args.rtl ? "LEFT-CENTER" : "RIGHT-CENTER";
   return [
-    `Create a premium, high-converting storefront campaign image for ${args.storeName || "a Darik retailer"}.`,
-    `Retail category: ${args.businessType || "retail"}.`,
-    `Promotion concept to communicate visually: ${args.message}.`,
-    `Brand palette reference: primary ${args.primary || "not specified"}, accent ${args.accent || "not specified"}.`,
-    "The exact retailer logo and exact promotion wording will be added afterward by Darik, so do not generate any logo or text yourself.",
-    "ABSOLUTELY NO words, letters, numbers, prices, signs, watermarks, labels, badges, fake logos, or UI elements.",
-    "Use ONE cohesive full-bleed commercial scene across the entire canvas. Fill the frame edge-to-edge.",
-    "DO NOT make a split-screen composition. DO NOT leave half the image black, blank, empty, or a solid-color panel. DO NOT create a template mockup or text box.",
-    `Keep natural breathing room on the ${copySide} side through lighting, depth of field, sky, wall, or soft background detail, but that area must still feel like part of the same scene.`,
-    "The promotion concept must drive the visual storytelling. For delivery promotions, show a tasteful local-delivery cue such as a branded-looking delivery bag, parcel, scooter, or store-to-door moment appropriate to the retail category, without adding text.",
-    "Make it look like a real premium ecommerce campaign photographed or art-directed by a professional advertising agency: strong focal point, clean depth, polished lighting, expensive composition, no clutter.",
+    `Create a premium commercial campaign background for a ${args.businessType || "local retail"} storefront in Jordan.`,
+    `Visual concept: ${args.visualConcept}`,
+    `Brand palette reference only: primary ${args.primary || "not specified"}, accent ${args.accent || "not specified"}.`,
+    "Darik will render the retailer's real logo and exact promotion text as responsive HTML on top of this image afterward.",
+    "DO NOT render the retailer name, store name, logo, promotion wording, prices, numbers, letters, captions, badges, labels, watermarks, UI, or readable packaging text inside the image.",
+    "Avoid storefront fascia signs, signboards, menu boards, price boards, license plates, or any surface that invites fake readable text. If an exterior is shown, crop or angle it so signage is absent or naturally out of focus.",
+    "Use ONE cohesive full-bleed photographic advertising scene across the entire canvas. No split screen, no blank half, no text panel, no template mockup.",
+    `Keep the main photographic subject in the ${subjectSide} safe zone, while the ${copySide} side has calm natural image detail suitable for a responsive text overlay.`,
+    "Keep all essential photographic subjects inside the central 50% of the canvas so the image remains strong when a mobile storefront crops the wide image toward a square.",
+    "Premium agency art direction: believable Jordan-appropriate retail environment, cinematic but realistic lighting, crisp product detail, clean depth, no clutter, no stock-photo cheesiness.",
     args.heroSize === "compact"
-      ? "COMPACT HERO: use a bold simple focal subject and mobile-safe composition that remains attractive under tighter responsive crops."
-      : "DEFAULT HERO: use a rich cinematic wide composition while keeping the main subject and natural copy area balanced.",
-    "Wide 2:1 website hero banner composition. No important subject should touch the outer 8% edges.",
+      ? "COMPACT HERO: simple bold composition, fewer objects, strong center-safe focal subject, excellent under a short wide mobile crop."
+      : "DEFAULT HERO: rich premium composition that still survives a centered near-square mobile crop without losing the focal subject.",
+    "Wide 2:1 source image. Edge-to-edge photography only.",
   ].join(" ");
 }
 
@@ -437,27 +456,16 @@ export async function POST(request: NextRequest) {
 
   const heroSize: "default" | "compact" = storefront.direct_hero_size === "compact" ? "compact" : "default";
   const rtl = isArabic(bannerText);
-  const logoUrl = text(storefront.logo_url, 3000);
-  let logoBytes: Uint8Array | null = null;
-
-  if (logoUrl) {
-    try {
-      logoBytes = (await fetchImageBytes(logoUrl, 25_000, MAX_IMAGE_BYTES)).bytes;
-    } catch (error) {
-      console.warn("Darik banner 274 could not download retailer logo:", safeMessage(error));
-      return json({ ok: false, error: "Your store logo could not be prepared for the banner. No AI credit was used." }, 502);
-    }
-  }
+  const businessType = text(retailer.direct_business_type || retailer.direct_business_type_other, 120);
+  const visualConcept = promotionVisualConcept(bannerText, businessType);
 
   const prompt = bannerPrompt({
-    message: bannerText,
-    storeName: text(storefront.display_name || storefront.display_name_ar || retailer.business_name, 180),
-    businessType: text(retailer.direct_business_type || retailer.direct_business_type_other, 120),
+    visualConcept,
+    businessType,
     heroSize,
     primary: text(storefront.primary_color, 40),
     accent: text(storefront.accent_color, 40),
     rtl,
-    hasLogo: Boolean(logoUrl),
   });
 
   const xaiController = new AbortController();
@@ -516,7 +524,9 @@ export async function POST(request: NextRequest) {
       .jpeg({ quality: 91 })
       .toBuffer();
 
-    const finalBuffer = await makeFinalBanner({ generatedBytes, logoBytes, message: bannerText, rtl, accent: text(storefront.accent_color, 40) });
+    // DARIK_280_BACKGROUND_ONLY_AI
+    // Exact logo + promotion copy are rendered responsively by the storefront UI.
+    const finalBuffer = Buffer.from(backgroundBuffer);
     const bannerId = crypto.randomUUID();
     const timestamp = Date.now();
     const backgroundPath = `${retailerId}/ai-banners/${timestamp}-${bannerId}-background.jpg`;
@@ -574,8 +584,9 @@ export async function POST(request: NextRequest) {
         slug: storefront.slug,
         hero_size: heroSize,
         display_name: storefront.display_name,
+        logo_url: storefront.logo_url || null,
       },
-      credits: { mode: "unlimited_testing", remaining: null, label: "Unlimited — Testing Mode" },
+      credits: { mode: "unlimited_testing", remaining: null, label: "Unlimited â€” Testing Mode" },
     });
   } catch (error) {
     console.error("Darik banner 274 persistence failed:", safeMessage(error));

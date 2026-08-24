@@ -6938,6 +6938,20 @@ export default function DarikDirectStorefrontPage() {
             alt={activeStoreBanner274.text || "Store promotion"}
             onError={() => setActiveStoreBanner274(null)}
           />
+          {/* DARIK_RESPONSIVE_BANNER_OVERLAY_280 */}
+          <div className={styles.storeBannerShade280} aria-hidden="true" />
+          <div
+            className={styles.storeBannerContent280}
+            dir={/[\u0600-\u06ff]/.test(activeStoreBanner274.text || "") ? "rtl" : "ltr"}
+          >
+            {storefront.logo_url ? (
+              <div className={styles.storeBannerLogo280}>
+                <img src={storefront.logo_url} alt="" />
+              </div>
+            ) : null}
+            <span className={styles.storeBannerKicker280}>STORE OFFER / عرض المتجر</span>
+            <h2 className={styles.storeBannerCopy280}>{activeStoreBanner274.text}</h2>
+          </div>
         </section>
       ) : (
       <section

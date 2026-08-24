@@ -26,7 +26,7 @@ export async function GET(request: NextRequest) {
 
   const { data: storefront, error: storefrontError } = await admin
     .from("retailer_storefronts")
-    .select("id,slug,direct_hero_size")
+    .select("id,slug,direct_hero_size,logo_url")
     .eq("slug", slug)
     .maybeSingle();
 
@@ -50,7 +50,9 @@ export async function GET(request: NextRequest) {
 
   return json({
     ok: true,
+    // DARIK_BANNER_PUBLIC_LOGO_280
     hero_size: storefront.direct_hero_size === "compact" ? "compact" : "default",
+    logo_url: storefront.logo_url || null,
     active_banner: active?.id
       ? {
           id: active.id,
