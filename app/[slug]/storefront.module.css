@@ -22323,3 +22323,20 @@
   margin-right: calc(50% - 50vw) !important;
   border-radius: 0 !important;
 }
+
+/* DARIK_COMPACT_FULL_BLEED_SPECIFICITY_FIX_268
+   Compact must outrank every field-specific hero rule.
+   Example field rule that previously won:
+   .page[data-theme-field="clothing"][data-hero] .hero
+*/
+.page[data-hero-size="compact"][data-theme-field][data-hero] .hero {
+  width: 100vw !important;
+  max-width: none !important;
+
+  margin-left: calc(50% - 50vw) !important;
+  margin-right: calc(50% - 50vw) !important;
+  margin-inline-start: calc(50% - 50vw) !important;
+  margin-inline-end: calc(50% - 50vw) !important;
+
+  border-radius: 0 !important;
+}
