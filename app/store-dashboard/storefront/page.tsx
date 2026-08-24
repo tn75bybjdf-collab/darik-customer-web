@@ -224,6 +224,15 @@ function contentPositioningWithHeroSize257(
   };
 }
 
+// DARIK_HERO_SIZE_PROVEN_SAVE_PATH_259
+// Hero Size uses the same retailer_storefronts.direct_content_positioning
+// column that the existing storefront save already writes successfully.
+function storefrontRawContentPositioning259(value: unknown) {
+  return value && typeof value === "object" && !Array.isArray(value)
+    ? (value as Record<string, unknown>)
+    : {};
+}
+
 function normalizeDesignDraft(value: unknown): Partial<StorefrontDesign> {
   if (!value || typeof value !== "object" || Array.isArray(value)) return {};
   const record = value as Record<string, unknown>;
@@ -1509,17 +1518,15 @@ export default function DarikDirectStorefrontSettingsPage() {
 
       // Force-save the two visual state objects that normally autosave.
       const [positionResult198, typographyResult198] = await Promise.all([
-        supabase.rpc(
-          "darik_direct_set_storefront_visual_v194",
-          {
-            p_storefront_id: storefront.id,
-            p_component: "content_positioning",
-            p_payload: contentPositioningWithHeroSize257(
+        supabase
+          .from("retailer_storefronts")
+          .update({
+            direct_content_positioning: contentPositioningWithHeroSize257(
               storefrontContentPositioning145,
               heroSize254
             ),
-          }
-        ),
+          })
+          .eq("id", storefront.id),
         supabase.rpc(
           "darik_direct_set_storefront_visual_v194",
           {
@@ -1663,7 +1670,10 @@ export default function DarikDirectStorefrontSettingsPage() {
       tagline: liveBuilderDraftValue("tagline"),
       tagline_ar: liveBuilderDraftValue("taglineAr", "tagline_ar"),
       direct_typography: storefrontTypographyDraft,
-      direct_content_positioning: storefrontContentPositioning145,
+      direct_content_positioning: contentPositioningWithHeroSize257(
+        storefrontContentPositioning145,
+        heroSize254
+      ),
       logo_url: liveBuilderDraftValue("logoUrl", "logo_url"),
       hero_image_url: liveBuilderDraftValue("heroImageUrl", "hero_image_url"),
       business_phone: liveBuilderDraftValue("phone", "businessPhone", "business_phone"),
@@ -1826,14 +1836,12 @@ export default function DarikDirectStorefrontSettingsPage() {
       void (async () => {
         setPreviewPositionSaveState145("saving");
 
-        const result = await supabase.rpc(
-          "darik_direct_set_storefront_visual_v194",
-          {
-            p_storefront_id: storefront.id,
-            p_component: "content_positioning",
-            p_payload: snapshot,
-          }
-        );
+        const result = await supabase
+          .from("retailer_storefronts")
+          .update({
+            direct_content_positioning: snapshot,
+          })
+          .eq("id", storefront.id);
 
         if (revision !== positioningRevisionRef145.current) return;
 
@@ -6774,150 +6782,172 @@ export default function DarikDirectStorefrontSettingsPage() {
   ]);
 
   useEffect(() => {
-    const retailerId254 = selectedStore?.retailer_id || "";
-    const pendingKey254 = retailerId254
-      ? `darik-pending-hero-size-${retailerId254}`
+    const retailerId259 = selectedStore?.retailer_id || "";
+    const pendingKey259 = retailerId259
+      ? `darik-pending-hero-size-${retailerId259}`
       : "";
 
+    const rawStorefront259 = (
+      storefront as unknown as {
+        direct_content_positioning?: unknown;
+      } | null
+    )?.direct_content_positioning;
+
+    const saved259 = heroSizeFromVisual257(rawStorefront259);
+
     if (!storefront?.id) {
-      if (pendingKey254) {
-        const pending254 = window.localStorage.getItem(pendingKey254);
-        if (pending254 === "compact" || pending254 === "default") {
-          setHeroSize254(pending254);
-        }
-      }
+      const pending259 = pendingKey259
+        ? window.localStorage.getItem(pendingKey259)
+        : null;
+
+      setHeroSize254(
+        pending259 === "compact" || pending259 === "default"
+          ? pending259
+          : saved259
+      );
+      setHeroSizeSaveState254("idle");
       return;
     }
 
-    let cancelled254 = false;
+    const pending259 = pendingKey259
+      ? window.localStorage.getItem(pendingKey259)
+      : null;
 
-    void (async () => {
-      if (pendingKey254) {
-        const pending254 = window.localStorage.getItem(pendingKey254);
-        if (pending254 === "compact" || pending254 === "default") {
-          setHeroSize254(pending254);
-          setHeroSizeSaveState254("saving");
+    if (pending259 === "compact" || pending259 === "default") {
+      setHeroSize254(pending259);
+      setHeroSizeSaveState254("saving");
 
-          const pendingSave254 = await supabase.rpc(
-            "darik_direct_set_storefront_visual_v194",
-            {
-              p_storefront_id: storefront.id,
-              p_component: "content_positioning",
-              p_payload: contentPositioningWithHeroSize257(
-                storefrontContentPositioning145,
-                pending254
-              ),
-            }
+      const pendingPayload259 = contentPositioningWithHeroSize257(
+        storefrontContentPositioning145,
+        pending259
+      );
+
+      void (async () => {
+        const pendingResult259 = await supabase
+          .from("retailer_storefronts")
+          .update({
+            direct_content_positioning: pendingPayload259,
+          })
+          .eq("id", storefront.id);
+
+        if (pendingResult259.error) {
+          setHeroSize254(saved259);
+          setHeroSizeSaveState254("error");
+          setError(
+            `Could not save hero size: ${pendingResult259.error.message} / تعذر حفظ حجم الواجهة`
           );
-
-          if (cancelled254) return;
-
-          if (pendingSave254.error) {
-            setHeroSizeSaveState254("error");
-            return;
-          }
-
-          window.localStorage.removeItem(pendingKey254);
-          setHeroSizeSaveState254("saved");
-          refreshActualLiveStoreEditor196(100);
-          window.setTimeout(() => {
-            setHeroSizeSaveState254((current254) =>
-              current254 === "saved" ? "idle" : current254
-            );
-          }, 1400);
+          window.alert(
+            `Hero size could not save: ${pendingResult259.error.message}`
+          );
           return;
         }
-      }
 
-      const result254 = await supabase.rpc(
-        "darik_direct_get_storefront_visual_v194",
-        { p_storefront_id: storefront.id }
-      );
+        if (pendingKey259) {
+          window.localStorage.removeItem(pendingKey259);
+        }
 
-      if (cancelled254) return;
+        setStorefront((current259) =>
+          current259
+            ? ({
+                ...current259,
+                direct_content_positioning: pendingPayload259,
+              } as StorefrontSettings)
+            : current259
+        );
 
-      if (result254.error) {
-        setHeroSizeSaveState254("error");
-        return;
-      }
+        setHeroSizeSaveState254("saved");
+        refreshActualLiveStoreEditor196(100);
 
-      const visual254 =
-        result254.data &&
-        typeof result254.data === "object" &&
-        !Array.isArray(result254.data)
-          ? (result254.data as { content_positioning?: unknown })
-          : null;
+        window.setTimeout(() => {
+          setHeroSizeSaveState254((current259) =>
+            current259 === "saved" ? "idle" : current259
+          );
+        }, 1400);
+      })();
 
-      setHeroSize254(
-        heroSizeFromVisual257(visual254?.content_positioning)
-      );
-      setHeroSizeSaveState254("idle");
-    })();
+      return;
+    }
 
-    return () => {
-      cancelled254 = true;
-    };
+    setHeroSize254(saved259);
+    setHeroSizeSaveState254("idle");
   }, [selectedStore?.retailer_id, storefront?.id]);
 
   async function saveHeroSize254(next254: HeroSize254) {
     const previous254 = heroSize254;
+
     setHeroSize254(next254);
     setHeroSizeSaveState254("saving");
     setError("");
 
-    // Cancel any older delayed position save that captured the previous
-    // Hero Size before this click.
     positioningRevisionRef145.current += 1;
 
-    const retailerId254 = selectedStore?.retailer_id || "";
-    const pendingKey254 = retailerId254
-      ? `darik-pending-hero-size-${retailerId254}`
+    const retailerId259 = selectedStore?.retailer_id || "";
+    const pendingKey259 = retailerId259
+      ? `darik-pending-hero-size-${retailerId259}`
       : "";
 
     if (!storefront?.id) {
-      if (pendingKey254) {
-        window.localStorage.setItem(pendingKey254, next254);
+      if (pendingKey259) {
+        window.localStorage.setItem(pendingKey259, next254);
       }
+
       setHeroSizeSaveState254("saved");
+
       window.setTimeout(() => {
-        setHeroSizeSaveState254((current254) =>
-          current254 === "saved" ? "idle" : current254
+        setHeroSizeSaveState254((current259) =>
+          current259 === "saved" ? "idle" : current259
         );
       }, 1200);
+
       return;
     }
 
-    const result254 = await supabase.rpc(
-      "darik_direct_set_storefront_visual_v194",
-      {
-        p_storefront_id: storefront.id,
-        p_component: "content_positioning",
-        p_payload: contentPositioningWithHeroSize257(
-          storefrontContentPositioning145,
-          next254
-        ),
-      }
+    const payload259 = contentPositioningWithHeroSize257(
+      storefrontContentPositioning145,
+      next254
     );
 
-    if (result254.error) {
+    const result259 = await supabase
+      .from("retailer_storefronts")
+      .update({
+        direct_content_positioning: payload259,
+      })
+      .eq("id", storefront.id);
+
+    if (result259.error) {
       setHeroSize254(previous254);
       setHeroSizeSaveState254("error");
-      setError(
-        `Could not save hero size: ${result254.error.message} / تعذر حفظ حجم الواجهة`
+
+      const message259 =
+        `Could not save hero size: ${result259.error.message} / تعذر حفظ حجم الواجهة`;
+
+      setError(message259);
+      window.alert(
+        `Hero size could not save: ${result259.error.message}`
       );
       return;
     }
 
-    if (pendingKey254) {
-      window.localStorage.removeItem(pendingKey254);
+    if (pendingKey259) {
+      window.localStorage.removeItem(pendingKey259);
     }
 
+    setStorefront((current259) =>
+      current259
+        ? ({
+            ...current259,
+            direct_content_positioning: payload259,
+          } as StorefrontSettings)
+        : current259
+    );
+
+    setHeroSize254(next254);
     setHeroSizeSaveState254("saved");
     refreshActualLiveStoreEditor196(100);
 
     window.setTimeout(() => {
-      setHeroSizeSaveState254((current254) =>
-        current254 === "saved" ? "idle" : current254
+      setHeroSizeSaveState254((current259) =>
+        current259 === "saved" ? "idle" : current259
       );
     }, 1400);
   }
@@ -10899,7 +10929,10 @@ await saveStorefront(undefined, "manual");
         ])
       ),
       operating_hours_ar: {},
-      direct_content_positioning: storefrontContentPositioning145,
+      direct_content_positioning: contentPositioningWithHeroSize257(
+        storefrontContentPositioning145,
+        heroSize254
+      ),
       design_draft: {
         ...designFromForm(setupForm),
         primaryColor: setupForm.primaryColor,

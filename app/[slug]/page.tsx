@@ -2109,6 +2109,10 @@ export default function DarikDirectStorefrontPage() {
       storefrontDefaultContentPositioning145()
     );
 
+  // DARIK_HERO_SIZE_PROVEN_SAVE_PATH_259
+  const [savedHeroSize259, setSavedHeroSize259] =
+    useState<HeroSize254>("default");
+
   const [builderSelectedPosition145, setBuilderSelectedPosition145] =
     useState<StorefrontPositionKey145 | null>(null);
 
@@ -2169,6 +2173,7 @@ export default function DarikDirectStorefrontPage() {
       setSavedContentPositioning145(
         storefrontDefaultContentPositioning145()
       );
+      setSavedHeroSize259("default");
       return;
     }
 
@@ -2181,6 +2186,10 @@ export default function DarikDirectStorefrontPage() {
       );
 
       if (cancelled || result.error) return;
+
+      setSavedHeroSize259(
+        heroSizeFromVisual257(result.data)
+      );
 
       setSavedContentPositioning145(
         normalizeStorefrontContentPositioning145(result.data)
@@ -6378,9 +6387,26 @@ export default function DarikDirectStorefrontPage() {
     );
   }
 
-  const heroSize254 = heroSizeFromVisual257(
-    darikStorefrontVisualTruth194?.content_positioning
-  );
+  const storefrontRawContentPositioning259 = (
+    storefront as unknown as {
+      direct_content_positioning?: unknown;
+    } | null
+  )?.direct_content_positioning;
+
+  const heroSizeFromStorefront259 =
+    heroSizeFromVisual257(storefrontRawContentPositioning259);
+
+  const heroSizeFromVisualTruth259 =
+    heroSizeFromVisual257(
+      darikStorefrontVisualTruth194?.content_positioning
+    );
+
+  const heroSize254: HeroSize254 =
+    heroSizeFromStorefront259 === "compact"
+      ? "compact"
+      : heroSizeFromVisualTruth259 === "compact"
+        ? "compact"
+        : savedHeroSize259;
 
   const hasActiveVehicleFilter =
     selectedVehicleMake !== "all" ||
