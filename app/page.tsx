@@ -17,7 +17,7 @@ import DarikCustomerAccountHub175 from "./components/DarikCustomerAccountHub175"
 // DARIK_MARKETPLACE_REDESIGN_CHECKPOINT4_STORE_PREVIEW_246D
 // DARIK_MARKETPLACE_REDESIGN_CHECKPOINT5_FINAL_POLISH_246E
 // DARIK_MARKETPLACE_RESTORE_FULL_SITE_SHELL_246F
-import { FormEvent, useEffect, useMemo, useState } from "react";
+import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
 import { supabase } from "@/lib/supabaseBrowser";
 import styles from "./home.module.css";
 
@@ -85,6 +85,12 @@ type DarikHomeSpecialDelivery186 = {
   enabled: boolean;
   maxKm: number;
   minimumQualifyingJod: number;
+};
+
+// DARIK_HOME_STORE_CARD_BESTSELLER_VISUALS_249
+type DarikHomeBestSellerProduct249 = {
+  id: string;
+  imageUrl: string;
 };
 
 type IconName =
@@ -557,14 +563,129 @@ function normalizeHomeSpecialDelivery186(
   return { enabled: true, maxKm, minimumQualifyingJod: threshold };
 }
 
+async function loadHomeBestSellerProducts249(
+  slug: string
+): Promise<DarikHomeBestSellerProduct249[]> {
+  const normalizedSlug249 = slug.trim().toLowerCase();
+  if (!normalizedSlug249) return [];
+
+  const selected249: DarikHomeBestSellerProduct249[] = [];
+  const selectedIds249 = new Set<string>();
+
+  function absorbProduct249(raw249: unknown) {
+    if (!raw249 || typeof raw249 !== "object" || selected249.length >= 4) return;
+    const row249 = raw249 as Record<string, unknown>;
+    const id249 = String(row249.id ?? "").trim();
+    if (!id249 || selectedIds249.has(id249)) return;
+
+    const image249 =
+      safeImageUrl(String(row249.official_product_thumbnail_url ?? "")) ||
+      safeImageUrl(String(row249.official_product_photo_url ?? ""));
+
+    if (!image249) return;
+
+    selectedIds249.add(id249);
+    selected249.push({ id: id249, imageUrl: image249 });
+  }
+
+  // Use the exact same real sales source already used by each retailer storefront.
+  const salesResult249 = await supabase.rpc(
+    "darik_direct_public_bestseller_sales_v186",
+    { p_slug: normalizedSlug249 }
+  );
+
+  const unitsByProduct249 = new Map<string, number>();
+
+  if (!salesResult249.error) {
+    for (const raw249 of Array.isArray(salesResult249.data)
+      ? salesResult249.data
+      : []) {
+      if (!raw249 || typeof raw249 !== "object") continue;
+      const row249 = raw249 as Record<string, unknown>;
+      const productId249 = String(row249.product_id ?? "").trim();
+      const units249 = Number(row249.units_sold ?? 0);
+
+      if (
+        productId249 &&
+        Number.isFinite(units249) &&
+        units249 > 0
+      ) {
+        unitsByProduct249.set(productId249, units249);
+      }
+    }
+  }
+
+  const rankedIds249 = Array.from(unitsByProduct249.entries())
+    .sort((a249, b249) => b249[1] - a249[1])
+    .map(([productId249]) => productId249)
+    .slice(0, 12);
+
+  if (rankedIds249.length > 0) {
+    const rankedProducts249 = await supabase
+      .from("public_storefront_products")
+      .select(
+        "id,official_product_thumbnail_url,official_product_photo_url"
+      )
+      .eq("storefront_slug", normalizedSlug249)
+      .in("id", rankedIds249);
+
+    if (!rankedProducts249.error) {
+      const rowsById249 = new Map<string, unknown>();
+
+      for (const row249 of Array.isArray(rankedProducts249.data)
+        ? rankedProducts249.data
+        : []) {
+        if (!row249 || typeof row249 !== "object") continue;
+        const id249 = String(
+          (row249 as Record<string, unknown>).id ?? ""
+        ).trim();
+        if (id249) rowsById249.set(id249, row249);
+      }
+
+      for (const productId249 of rankedIds249) {
+        absorbProduct249(rowsById249.get(productId249));
+        if (selected249.length >= 4) break;
+      }
+    }
+  }
+
+  // New stores may not have sales history yet. Fill remaining visual slots using
+  // the same public storefront order the store itself uses.
+  if (selected249.length < 4) {
+    const fallbackProducts249 = await supabase
+      .from("public_storefront_products")
+      .select(
+        "id,official_product_thumbnail_url,official_product_photo_url,storefront_featured,storefront_sort_order,created_at"
+      )
+      .eq("storefront_slug", normalizedSlug249)
+      .order("storefront_featured", { ascending: false })
+      .order("storefront_sort_order", { ascending: true })
+      .order("created_at", { ascending: false })
+      .limit(12);
+
+    if (!fallbackProducts249.error) {
+      for (const row249 of Array.isArray(fallbackProducts249.data)
+        ? fallbackProducts249.data
+        : []) {
+        absorbProduct249(row249);
+        if (selected249.length >= 4) break;
+      }
+    }
+  }
+
+  return selected249.slice(0, 4);
+}
+
 function HomeStoreCard186({
   store,
   language,
   special,
+  bestSellers249,
 }: {
   store: NearbyStore;
   language: Language;
   special: DarikHomeSpecialDelivery186 | null;
+  bestSellers249: DarikHomeBestSellerProduct249[] | undefined;
 }) {
   const t = copy[language];
   const distance = Number(store.distance_km || 0);
@@ -695,6 +816,30 @@ function HomeStoreCard186({
       <span className="darikHomeStoreArrow246B" aria-hidden="true">
         <Icon name="chevron" size={18} />
       </span>
+
+      {bestSellers249 === undefined ? (
+        <div
+          className="darikHomeStoreProducts249 darikHomeStoreProductsLoading249"
+          aria-hidden="true"
+        >
+          {[0, 1, 2, 3].map((slot249) => (
+            <span key={`product-loading-${slot249}`} />
+          ))}
+        </div>
+      ) : bestSellers249.length > 0 ? (
+        <div className="darikHomeStoreProducts249" aria-hidden="true">
+          {bestSellers249.map((product249) => (
+            <span key={product249.id}>
+              <img
+                src={product249.imageUrl}
+                alt=""
+                loading="lazy"
+                decoding="async"
+              />
+            </span>
+          ))}
+        </div>
+      ) : null}
     </a>
   );
 }
@@ -726,6 +871,10 @@ export default function DarikDiscoveryHome() {
   const [specialDeliveryBySlug186, setSpecialDeliveryBySlug186] = useState<
     Record<string, DarikHomeSpecialDelivery186>
   >({});
+
+  const [bestSellerProductsBySlug249, setBestSellerProductsBySlug249] =
+    useState<Record<string, DarikHomeBestSellerProduct249[]>>({});
+  const bestSellerRequestedSlugs249 = useRef<Set<string>>(new Set());
   const [storeShelfState186, setStoreShelfState186] = useState<
     Record<string, { canGoBack: boolean; canGoForward: boolean }>
   >({});
@@ -1085,6 +1234,57 @@ export default function DarikDiscoveryHome() {
     openOnly246E,
     freeDeliveryOnly246E,
   ]);
+
+  useEffect(() => {
+    const slugs249 = Array.from(
+      new Set(
+        visibleStores246B
+          .map((store249) => store249.slug.trim().toLowerCase())
+          .filter(Boolean)
+      )
+    ).filter(
+      (slug249) => !bestSellerRequestedSlugs249.current.has(slug249)
+    );
+
+    if (slugs249.length === 0) return;
+
+    for (const slug249 of slugs249) {
+      bestSellerRequestedSlugs249.current.add(slug249);
+    }
+
+    let cursor249 = 0;
+
+    async function worker249() {
+      while (cursor249 < slugs249.length) {
+        const index249 = cursor249;
+        cursor249 += 1;
+        const slug249 = slugs249[index249];
+        if (!slug249) continue;
+
+        try {
+          const products249 = await loadHomeBestSellerProducts249(slug249);
+          setBestSellerProductsBySlug249((current249) => ({
+            ...current249,
+            [slug249]: products249,
+          }));
+        } catch (error249) {
+          console.warn(
+            `Darik homepage bestseller visuals unavailable for ${slug249}:`,
+            error249
+          );
+          setBestSellerProductsBySlug249((current249) => ({
+            ...current249,
+            [slug249]: [],
+          }));
+        }
+      }
+    }
+
+    const workerCount249 = Math.min(4, slugs249.length);
+    void Promise.all(
+      Array.from({ length: workerCount249 }, () => worker249())
+    );
+  }, [visibleStores246B]);
 
   // DARIK_HOME_STORE_SHELVES_TRUE_BESTSELLERS_186
   const groupedStores = useMemo(() => {
@@ -1760,6 +1960,11 @@ export default function DarikDiscoveryHome() {
                   language={language}
                   special={
                     specialDeliveryBySlug186[store.slug.toLowerCase()] ?? null
+                  }
+                  bestSellers249={
+                    bestSellerProductsBySlug249[
+                      store.slug.trim().toLowerCase()
+                    ]
                   }
                 />
               ))}

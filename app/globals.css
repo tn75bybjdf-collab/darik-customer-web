@@ -13234,3 +13234,82 @@ main[dir="rtl"] .darikHomeStoreArrow246B svg {
     font-size: 12px;
   }
 }
+
+
+/* DARIK_HOME_STORE_CARD_BESTSELLER_VISUALS_249 */
+.darikMarketplaceStoreList246B .darikHomeStoreProducts249 {
+  grid-column: 1 / -1;
+  width: 100%;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 88px));
+  justify-content: start;
+  gap: 8px;
+  padding-top: 8px;
+  border-top: 1px solid #eef1f4;
+}
+
+.darikMarketplaceStoreList246B .darikHomeStoreProducts249 > span {
+  aspect-ratio: 1 / 1;
+  overflow: hidden;
+  display: block;
+  border: 1px solid #e7e9ee;
+  border-radius: 12px;
+  background: #f5f6f8;
+}
+
+.darikMarketplaceStoreList246B .darikHomeStoreProducts249 img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+  object-position: center;
+  transition: transform 180ms ease;
+}
+
+.darikMarketplaceStoreList246B
+  .darikHomeStoreCard186:hover
+  .darikHomeStoreProducts249 img {
+  transform: scale(1.025);
+}
+
+.darikMarketplaceStoreList246B
+  .darikHomeStoreProductsLoading249
+  > span {
+  background:
+    linear-gradient(
+      110deg,
+      #f2f4f7 8%,
+      #fafafa 18%,
+      #f2f4f7 33%
+    );
+  background-size: 200% 100%;
+  animation: darikHomeProductLoading249 1.2s linear infinite;
+}
+
+@keyframes darikHomeProductLoading249 {
+  to {
+    background-position-x: -200%;
+  }
+}
+
+@media (max-width: 760px) {
+  .darikMarketplaceStoreList246B .darikHomeStoreProducts249 {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 6px;
+    padding-top: 7px;
+  }
+
+  .darikMarketplaceStoreList246B .darikHomeStoreProducts249 > span {
+    border-radius: 10px;
+  }
+}
+
+@media (max-width: 350px) {
+  .darikMarketplaceStoreList246B .darikHomeStoreProducts249 {
+    gap: 5px;
+  }
+
+  .darikMarketplaceStoreList246B .darikHomeStoreProducts249 > span {
+    border-radius: 9px;
+  }
+}
