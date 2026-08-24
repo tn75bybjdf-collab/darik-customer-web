@@ -22304,3 +22304,15 @@
     min-height: 31px !important;
   }
 }
+
+/* DARIK_COMPACT_FULL_BLEED_SQUARE_266_V4
+   Compact only.
+   Final override intentionally lives at EOF so it wins over all earlier
+   desktop/mobile Compact hero rules without modifying Default. */
+.page[data-hero-size="compact"] .hero {
+  width: 100vw !important;
+  max-width: none !important;
+  margin-left: calc(50% - 50vw) !important;
+  margin-right: calc(50% - 50vw) !important;
+  border-radius: 0 !important;
+}
