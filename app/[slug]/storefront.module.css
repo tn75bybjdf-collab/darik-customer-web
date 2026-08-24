@@ -22340,3 +22340,25 @@
 
   border-radius: 0 !important;
 }
+
+/* DARIK_COMPACT_HEADER_FULL_BLEED_FLUSH_269
+   Compact-only header + hero join.
+   Header escapes portfolio width constraint.
+   Hero starts immediately under header.
+*/
+.page[data-hero-size="compact"][data-theme-field][data-hero] .header {
+  width: 100vw !important;
+  max-width: none !important;
+
+  margin-left: calc(50% - 50vw) !important;
+  margin-right: calc(50% - 50vw) !important;
+  margin-inline-start: calc(50% - 50vw) !important;
+  margin-inline-end: calc(50% - 50vw) !important;
+
+  border-radius: 0 !important;
+  box-sizing: border-box !important;
+}
+
+.page[data-hero-size="compact"][data-theme-field][data-hero] .hero {
+  margin-top: 0 !important;
+}
