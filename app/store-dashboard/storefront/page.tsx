@@ -11901,7 +11901,25 @@ await saveStorefront(undefined, "manual");
                       >
                         Close preview / إغلاق المعاينة
                       </button>
-                    </div>
+
+                      {/* DARIK_SIMPLE_HERO_SIZE_TOGGLE_256 */}
+                      <button
+                        type="button"
+                        className={designStyles.heroSizeToggle256}
+                        disabled={heroSizeSaveState254 === "saving"}
+                        onClick={() =>
+                          void saveHeroSize254(
+                            heroSize254 === "compact" ? "default" : "compact"
+                          )
+                        }
+                      >
+                        {heroSizeSaveState254 === "saving"
+                          ? "Saving... / جارٍ الحفظ"
+                          : heroSize254 === "compact"
+                            ? "Hero size: Default / حجم الواجهة: افتراضي"
+                            : "Hero size: Compact / حجم الواجهة: مدمج"}
+                      </button>
+</div>
                   </div>
 
 
@@ -12331,79 +12349,6 @@ await saveStorefront(undefined, "manual");
                     ) : null}
 
 
-                      {/* DARIK_HERO_SIZE_ALWAYS_VISIBLE_255 */}
-                      <div className={designStyles.heroSizeControl254}>
-                        <div className={designStyles.heroSizeHeading254}>
-                          <div>
-                            <span>STOREFRONT HERO SIZE / حجم واجهة المتجر</span>
-                            <strong>Choose the size of the top section customers see</strong>
-                            <small>
-                              Default keeps the current large hero. Compact keeps the same design and content with less vertical bulk.
-                              {" / الافتراضي يحافظ على الحجم الحالي، والمدمج يحافظ على نفس التصميم والمحتوى بحجم أصغر."}
-                            </small>
-                          </div>
-                          <em
-                            data-state={heroSizeSaveState254}
-                            className={designStyles.heroSizeSaveState254}
-                          >
-                            {heroSizeSaveState254 === "saving"
-                              ? "Saving... / جارٍ الحفظ"
-                              : heroSizeSaveState254 === "saved"
-                                ? "Saved ✓ / تم الحفظ"
-                                : heroSizeSaveState254 === "error"
-                                  ? "Save failed / فشل الحفظ"
-                                  : ""}
-                          </em>
-                        </div>
-
-                        <div className={designStyles.heroSizeOptions254}>
-                          <button
-                            type="button"
-                            aria-pressed={heroSize254 === "default"}
-                            className={`${designStyles.heroSizeOption254} ${
-                              heroSize254 === "default"
-                                ? designStyles.heroSizeOptionSelected254
-                                : ""
-                            }`}
-                            disabled={heroSizeSaveState254 === "saving"}
-                            onClick={() => void saveHeroSize254("default")}
-                          >
-                            <span
-                              className={`${designStyles.heroSizeMockup254} ${designStyles.heroSizeMockupDefault254}`}
-                              aria-hidden="true"
-                            >
-                              <i />
-                              <b />
-                              <em />
-                            </span>
-                            <strong>Default / افتراضي</strong>
-                            <small>Current full-size hero</small>
-                          </button>
-
-                          <button
-                            type="button"
-                            aria-pressed={heroSize254 === "compact"}
-                            className={`${designStyles.heroSizeOption254} ${
-                              heroSize254 === "compact"
-                                ? designStyles.heroSizeOptionSelected254
-                                : ""
-                            }`}
-                            disabled={heroSizeSaveState254 === "saving"}
-                            onClick={() => void saveHeroSize254("compact")}
-                          >
-                            <span
-                              className={`${designStyles.heroSizeMockup254} ${designStyles.heroSizeMockupCompact254}`}
-                              aria-hidden="true"
-                            >
-                              <i />
-                              <b />
-                              <em />
-                            </span>
-                            <strong>Compact / مدمج</strong>
-                            <small>Same hero, less vertical space</small>
-                          </button>
-                        </div>
-                      </div>
 
                       {/* DARIK_EXACT_STOREFRONT_WIZARD_109_V6 */}
                 <div className={designStyles.exactWizardStage109V5}>

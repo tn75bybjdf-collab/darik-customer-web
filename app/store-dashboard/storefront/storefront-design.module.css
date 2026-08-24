@@ -4072,3 +4072,46 @@
     height: 56px;
   }
 }
+
+
+/* DARIK_SIMPLE_HERO_SIZE_TOGGLE_256 */
+.heroSizeToggle256 {
+  appearance: none;
+  min-height: 72px;
+  padding: 10px 14px;
+  border: 1px solid rgba(255, 255, 255, 0.20);
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.055);
+  color: #ffffff;
+  font: inherit;
+  font-size: 0.88rem;
+  font-weight: 850;
+  line-height: 1.22;
+  text-align: center;
+  cursor: pointer;
+  transition:
+    transform 140ms ease,
+    border-color 140ms ease,
+    background 140ms ease,
+    opacity 140ms ease;
+}
+
+.heroSizeToggle256:hover:not(:disabled) {
+  transform: translateY(-1px);
+  border-color: rgba(255, 255, 255, 0.34);
+  background: rgba(255, 255, 255, 0.09);
+}
+
+.heroSizeToggle256:disabled {
+  opacity: 0.60;
+  cursor: wait;
+}
+
+@media (max-width: 600px) {
+  .heroSizeToggle256 {
+    min-height: 72px;
+    padding: 9px 10px;
+    border-radius: 19px;
+    font-size: 0.82rem;
+  }
+}
