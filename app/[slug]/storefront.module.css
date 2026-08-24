@@ -22059,7 +22059,11 @@
    are visually clamped into a safe editing area. */
 
 .page[data-hero-size="compact"] .hero {
-  width: min(1320px, calc(100% - 40px)) !important;
+  /* DARIK_COMPACT_TRUE_EDGE_TO_EDGE_DIRECT_266_V5 */
+  width: 100vw !important;
+  max-width: none !important;
+  margin-left: calc(50% - 50vw) !important;
+  margin-right: calc(50% - 50vw) !important;
   height: clamp(300px, 31vw, 410px) !important;
   min-height: 0 !important;
   margin-top: 16px !important;
@@ -22067,7 +22071,7 @@
   align-items: center !important;
   grid-template-columns: none !important;
   gap: 0 !important;
-  border-radius: 28px !important;
+  border-radius: 0 !important;
   padding: clamp(24px, 3.2vw, 38px) !important;
   background-size: cover !important;
   overflow: hidden !important;
@@ -22187,11 +22191,14 @@
 
 @media (max-width: 780px) {
   .page[data-hero-size="compact"] .hero {
-    width: calc(100% - 24px) !important;
+    width: 100vw !important;
+    max-width: none !important;
+    margin-left: calc(50% - 50vw) !important;
+    margin-right: calc(50% - 50vw) !important;
     height: clamp(205px, 54vw, 235px) !important;
     min-height: 0 !important;
     margin-top: 9px !important;
-    border-radius: 22px !important;
+    border-radius: 0 !important;
     padding: 14px 14px !important;
     background-position: center !important;
   }
@@ -22271,7 +22278,7 @@
   .page[data-hero-size="compact"] .hero {
     height: clamp(198px, 52vw, 220px) !important;
     padding: 12px 12px !important;
-    border-radius: 20px !important;
+    border-radius: 0 !important;
   }
 
   .page[data-hero-size="compact"] .heroContent {
