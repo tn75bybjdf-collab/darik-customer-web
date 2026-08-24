@@ -908,6 +908,88 @@ const DARIK_TYPOGRAPHY_FONT_STYLESHEET_105_V5 =
 
 function useDarikTypographyFontLibrary105V5() {
   // DARIK_STICKY_SEARCH_288
+  // DARIK_BANNER_SEARCH_STACK_289
+  useEffect(() => {
+    let frame289 = 0;
+    let observer289: MutationObserver | null = null;
+
+    const updateSearchTop289 = () => {
+      if (frame289) window.cancelAnimationFrame(frame289);
+
+      frame289 = window.requestAnimationFrame(() => {
+        const search289 = document.querySelector<HTMLElement>(
+          '[data-darik-sticky-search="288"]'
+        );
+
+        if (!search289) return;
+
+        const bannerSelectors289 = [
+          '[data-darik-sticky-banner="287"]',
+          '[data-darik-sticky-banner="286"]',
+          '[data-darik-sticky-banner="283"]',
+        ];
+
+        let bannerBottom289 = 0;
+
+        for (const selector289 of bannerSelectors289) {
+          const banner289 = document.querySelector<HTMLElement>(selector289);
+          if (!banner289) continue;
+
+          const rect289 = banner289.getBoundingClientRect();
+          const style289 = window.getComputedStyle(banner289);
+          const ariaHidden289 = banner289.getAttribute("aria-hidden") === "true";
+          const opacity289 = Number(style289.opacity || "1");
+
+          const visible289 =
+            !ariaHidden289 &&
+            style289.display !== "none" &&
+            style289.visibility !== "hidden" &&
+            opacity289 > 0.05 &&
+            rect289.height > 1 &&
+            rect289.bottom > 0;
+
+          if (visible289) {
+            bannerBottom289 = Math.max(
+              bannerBottom289,
+              Math.round(rect289.bottom)
+            );
+          }
+        }
+
+        search289.style.setProperty(
+          "--darik-search-top-289",
+          `${Math.max(0, bannerBottom289)}px`
+        );
+      });
+    };
+
+    updateSearchTop289();
+
+    window.addEventListener("scroll", updateSearchTop289, { passive: true });
+    window.addEventListener("resize", updateSearchTop289);
+
+    observer289 = new MutationObserver(() => updateSearchTop289());
+    observer289.observe(document.body, {
+      childList: true,
+      subtree: true,
+      attributes: true,
+      attributeFilter: ["class", "style", "aria-hidden"],
+    });
+
+    return () => {
+      if (frame289) window.cancelAnimationFrame(frame289);
+      observer289?.disconnect();
+      window.removeEventListener("scroll", updateSearchTop289);
+      window.removeEventListener("resize", updateSearchTop289);
+
+      document
+        .querySelectorAll<HTMLElement>('[data-darik-sticky-search="288"]')
+        .forEach((search289) =>
+          search289.style.removeProperty("--darik-search-top-289")
+        );
+    };
+  }, []);
+
   useEffect(() => {
     let observer288: MutationObserver | null = null;
     let frame288 = 0;

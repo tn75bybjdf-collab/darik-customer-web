@@ -22819,3 +22819,22 @@
     padding-right: 10px !important;
   }
 }
+
+/* DARIK_BANNER_SEARCH_STACK_289
+   If a Darik banner is visible, Search sits flush under it.
+   Without a banner, the variable is 0px and Search sticks to viewport top. */
+:global([data-darik-sticky-search="288"]) {
+  top: var(--darik-search-top-289, 0px) !important;
+  transition: top 160ms ease-out;
+}
+
+/* Search should visually touch the banner with no accidental top gap. */
+:global([data-darik-sticky-search="288"]) {
+  margin-top: 0 !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :global([data-darik-sticky-search="288"]) {
+    transition: none !important;
+  }
+}
