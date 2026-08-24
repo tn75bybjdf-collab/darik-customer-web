@@ -22554,3 +22554,73 @@
 
 /* DARIK_MANUAL_BANNER_IMAGE_ONLY_282
    Retailer uploads finished artwork. No Darik text/logo/AI overlay. */
+
+/* DARIK_STICKY_SCROLL_BANNER_283
+   Hero stays mounted and naturally scrolls away.
+   Uploaded banner becomes a separate half-height fixed promotion bar. */
+.stickyBanner283 {
+  position: fixed;
+  left: 0;
+  right: 0;
+  z-index: 38;
+  display: flex;
+  justify-content: center;
+  padding: 0;
+  pointer-events: none;
+  opacity: 0;
+  visibility: hidden;
+  transform: translate3d(0, -14px, 0);
+  transition:
+    opacity 190ms ease,
+    transform 220ms cubic-bezier(.22,.75,.22,1),
+    visibility 0s linear 220ms;
+  will-change: opacity, transform;
+}
+
+.stickyBannerVisible283 {
+  opacity: 1;
+  visibility: visible;
+  transform: translate3d(0, 0, 0);
+  transition:
+    opacity 190ms ease,
+    transform 220ms cubic-bezier(.22,.75,.22,1),
+    visibility 0s linear 0s;
+}
+
+.stickyBannerInner283 {
+  width: min(100%, 1440px);
+  height: clamp(130px, 50vw, 360px);
+  overflow: hidden;
+  background: #0b1118;
+  box-shadow: 0 10px 28px rgba(0,0,0,.20);
+}
+
+.stickyBannerImage283 {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+  object-position: center;
+}
+
+.page[data-hero-size="compact"] .stickyBannerInner283 {
+  height: clamp(78px, 28.125vw, 190px);
+}
+
+@media (min-width: 900px) {
+  .stickyBannerInner283 {
+    height: min(300px, 25vw);
+  }
+
+  .page[data-hero-size="compact"] .stickyBannerInner283 {
+    height: min(180px, 14.0625vw);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .stickyBanner283,
+  .stickyBannerVisible283 {
+    transition: none;
+    transform: none;
+  }
+}

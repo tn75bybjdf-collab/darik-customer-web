@@ -2079,6 +2079,89 @@ export default function DarikDirectStorefrontPage() {
   // DARIK_PUBLIC_HERO_BANNER_ROTATION_274
   const [activeStoreBanner274, setActiveStoreBanner274] =
     useState<ActiveStoreBanner274 | null>(null);
+  // DARIK_STICKY_SCROLL_BANNER_283
+  const [showStickyBanner283, setShowStickyBanner283] = useState(false);
+  const [stickyBannerTop283, setStickyBannerTop283] = useState(0);
+
+  useEffect(() => {
+    if (!activeStoreBanner274?.image_url) {
+      setShowStickyBanner283(false);
+      return;
+    }
+
+    let frame283 = 0;
+
+    const updateStickyBanner283 = () => {
+      if (frame283) window.cancelAnimationFrame(frame283);
+
+      frame283 = window.requestAnimationFrame(() => {
+        const pageRoot283 = document.querySelector('[data-hero-size]');
+        const mode283 =
+          pageRoot283?.getAttribute("data-hero-size") === "compact"
+            ? "compact"
+            : "default";
+
+        const header283 = document.querySelector("header");
+        const headerRect283 = header283?.getBoundingClientRect();
+        const headerBottom283 =
+          headerRect283 && headerRect283.bottom > 0 && headerRect283.top <= 8
+            ? Math.max(0, Math.round(headerRect283.bottom))
+            : 0;
+
+        setStickyBannerTop283(headerBottom283);
+
+        const heroCandidates283 = Array.from(
+          document.querySelectorAll<HTMLElement>('[class*="hero"], [class*="Hero"]')
+        )
+          .filter((element283) => {
+            if (element283.closest('[data-darik-sticky-banner="283"]')) return false;
+            const rect283 = element283.getBoundingClientRect();
+            return (
+              rect283.height >= 140 &&
+              rect283.width >= Math.min(280, window.innerWidth * 0.7) &&
+              rect283.top < Math.max(420, window.innerHeight * 0.55)
+            );
+          })
+          .sort((a283, b283) => {
+            const aRect283 = a283.getBoundingClientRect();
+            const bRect283 = b283.getBoundingClientRect();
+            const aScore283 = Math.abs(aRect283.top) - aRect283.height * 0.05;
+            const bScore283 = Math.abs(bRect283.top) - bRect283.height * 0.05;
+            return aScore283 - bScore283;
+          });
+
+        const hero283 = heroCandidates283[0];
+        let shouldShow283 = false;
+
+        if (hero283) {
+          shouldShow283 =
+            hero283.getBoundingClientRect().bottom <= headerBottom283 + 6;
+        } else {
+          // Safe fallback if a future CSS-module rename removes "hero" from
+          // generated class names.
+          const estimatedHeroHeight283 =
+            mode283 === "compact"
+              ? window.innerWidth * 0.5625
+              : window.innerWidth;
+          shouldShow283 =
+            window.scrollY >
+            Math.max(180, estimatedHeroHeight283 + headerBottom283 - 24);
+        }
+
+        setShowStickyBanner283(shouldShow283);
+      });
+    };
+
+    updateStickyBanner283();
+    window.addEventListener("scroll", updateStickyBanner283, { passive: true });
+    window.addEventListener("resize", updateStickyBanner283);
+
+    return () => {
+      if (frame283) window.cancelAnimationFrame(frame283);
+      window.removeEventListener("scroll", updateStickyBanner283);
+      window.removeEventListener("resize", updateStickyBanner283);
+    };
+  }, [activeStoreBanner274?.image_url]);
   const [showStoreBanner274, setShowStoreBanner274] = useState(false);
 
   useEffect(() => {
@@ -2116,16 +2199,8 @@ export default function DarikDirectStorefrontPage() {
     };
   }, [slug]);
 
-  useEffect(() => {
-    setShowStoreBanner274(false);
-    if (!activeStoreBanner274?.image_url) return;
+  /* DARIK_283_ROTATION_REMOVED: Hero never auto-swaps with Banner. */
 
-    const timer274 = window.setInterval(() => {
-      setShowStoreBanner274((current274) => !current274);
-    }, 6000);
-
-    return () => window.clearInterval(timer274);
-  }, [activeStoreBanner274?.image_url]);
 
   // DARIK_RETAILER_THEME_GALLERY_102
   const [savedThemeField, setSavedThemeField] = useState("");
@@ -6544,6 +6619,26 @@ export default function DarikDirectStorefrontPage() {
       data-category-count={String(visibleCategories.length)}
       data-direct-purchase={hasDirectPurchaseProducts ? "yes" : "no"}
     >
+      {activeStoreBanner274?.image_url ? (
+        <div
+          data-darik-sticky-banner="283"
+          className={`${styles.stickyBanner283} ${
+            showStickyBanner283 ? styles.stickyBannerVisible283 : ""
+          }`}
+          style={{ top: stickyBannerTop283 }}
+          aria-hidden={!showStickyBanner283}
+        >
+          <div className={styles.stickyBannerInner283}>
+            <img
+              className={styles.stickyBannerImage283}
+              src={activeStoreBanner274.image_url}
+              alt="Store promotion banner"
+              onError={() => setActiveStoreBanner274(null)}
+            />
+          </div>
+        </div>
+      ) : null}
+
       {/* DARIK_SHARED_PERSISTENT_CUSTOMER_ACCOUNT_HUB_175_V2 */}
       {!isBuilderPositionPreview145 &&
       slug !== "_darik-private-store-preview" ? (
