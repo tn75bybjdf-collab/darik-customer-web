@@ -208,24 +208,51 @@ async function renderPangoText(args: {
 }
 
 // DARIK_BANNER_RESPONSIVE_HTML_OVERLAY_280
+// DARIK_AI_AD_CREATIVE_ENGINE_281
 function promotionVisualConcept(message: string, businessType: string) {
   const lower = message.toLowerCase();
   const category = businessType || "local retail";
 
-  if (/deliver|delivery|طھظˆطµظٹظ„|طھظˆطµظٹظ„ط©|طھظˆطµظٹظ„ظ‡/.test(lower)) {
-    return `A premium ${category} order handoff and local last-mile delivery moment in Jordan: a professional courier with an unbranded delivery bag or parcel, a tasteful scooter or delivery cue, real products from the retail category, and a warm trustworthy store-to-customer feeling.`;
-  }
-  if (/discount|sale|off|ط®طµظ…|طھظ†ط²ظٹظ„|ط¹ط±ط¶/.test(lower)) {
-    return `A premium ${category} promotional shopping scene with desirable products, energetic but elegant retail styling, and a clear sense of a limited special offer without showing any written sale signage.`;
-  }
-  if (/new|arrival|just in|ط¬ط¯ظٹط¯|ظˆطµظ„|طھط´ظƒظٹظ„ط©/.test(lower)) {
-    return `A premium ${category} new-arrival campaign scene with freshly presented products, refined merchandising, beautiful lighting, and a sense of discovery.`;
-  }
-  if (/buy|free|gift|ظ‡ط¯ظٹط©|ظ…ط¬ط§ظ†ط§|ظ…ط¬ط§ظ†ط§ظ‹/.test(lower)) {
-    return `A premium ${category} value-promotion scene with a tasteful product bundle or customer order, polished ecommerce advertising energy, and no written offer graphics.`;
+  if (/deliver|delivery|توصيل|توصيلة|توصيله/.test(lower)) {
+    return [
+      `HIGH-IMPACT DELIVERY ADVERTISEMENT for ${category}.`,
+      "Hero object: a premium unbranded delivery parcel / shopping order / category-relevant product bundle, treated like a luxury 3D campaign object rather than a documentary photo.",
+      "Supporting visual language: speed streaks, glowing route arcs, subtle location-pin geometry, circular light rings, directional motion, polished ecommerce delivery energy.",
+      "If products help explain the retail category, stage a small curated product selection around the hero package.",
+      "Avoid making a courier/person the dominant subject. The campaign object and graphic design must be the star.",
+    ].join(" ");
   }
 
-  return `A premium ${category} ecommerce campaign scene in Jordan, professionally art-directed around the retailer's current promotion with attractive products, natural human context where appropriate, polished commercial lighting, and no written promotional graphics.`;
+  if (/discount|sale|off|خصم|تنزيل|عرض/.test(lower)) {
+    return [
+      `HIGH-IMPACT SALE ADVERTISEMENT for ${category}.`,
+      "Hero object: premium category products on a dramatic retail podium or floating product composition.",
+      "Supporting visual language: energetic geometric frames, glow, depth, premium sale-campaign lighting, dynamic diagonals and graphic accents.",
+      "The composition should feel expensive and urgent without rendering any written sale text.",
+    ].join(" ");
+  }
+
+  if (/new|arrival|just in|جديد|وصل|تشكيلة/.test(lower)) {
+    return [
+      `HIGH-IMPACT NEW-ARRIVAL ADVERTISEMENT for ${category}.`,
+      "Hero object: one or several desirable new products shown like a launch campaign.",
+      "Supporting visual language: premium podium, rim lighting, controlled glow, floating graphic elements, reveal energy, modern ecommerce launch aesthetic.",
+    ].join(" ");
+  }
+
+  if (/gift|هدية|مجانا|مجاناً|free/.test(lower)) {
+    return [
+      `HIGH-IMPACT VALUE / FREE-OFFER ADVERTISEMENT for ${category}.`,
+      "Hero object: an elegant package, gift-like bundle, shopping bag, delivery box, or category-relevant product grouping.",
+      "Supporting visual language: graphic ribbons made from light, energetic brand-color trails, premium 3D presentation, celebratory but sophisticated campaign styling.",
+    ].join(" ");
+  }
+
+  return [
+    `HIGH-IMPACT RETAIL CAMPAIGN ADVERTISEMENT for ${category}.`,
+    "Create a strong hero object based on the retail category and promotion intent.",
+    "Use premium 3D-commercial styling, graphic framing, lighting effects, depth, motion accents, and polished ecommerce campaign composition.",
+  ].join(" ");
 }
 
 function bannerPrompt(args: {
@@ -237,22 +264,29 @@ function bannerPrompt(args: {
   rtl: boolean;
 }) {
   const copySide = args.rtl ? "RIGHT" : "LEFT";
-  const subjectSide = args.rtl ? "LEFT-CENTER" : "RIGHT-CENTER";
+  const heroSide = args.rtl ? "LEFT" : "RIGHT";
+
   return [
-    `Create a premium commercial campaign background for a ${args.businessType || "local retail"} storefront in Jordan.`,
-    `Visual concept: ${args.visualConcept}`,
-    `Brand palette reference only: primary ${args.primary || "not specified"}, accent ${args.accent || "not specified"}.`,
-    "Darik will render the retailer's real logo and exact promotion text as responsive HTML on top of this image afterward.",
-    "DO NOT render the retailer name, store name, logo, promotion wording, prices, numbers, letters, captions, badges, labels, watermarks, UI, or readable packaging text inside the image.",
-    "Avoid storefront fascia signs, signboards, menu boards, price boards, license plates, or any surface that invites fake readable text. If an exterior is shown, crop or angle it so signage is absent or naturally out of focus.",
-    "Use ONE cohesive full-bleed photographic advertising scene across the entire canvas. No split screen, no blank half, no text panel, no template mockup.",
-    `Keep the main photographic subject in the ${subjectSide} safe zone, while the ${copySide} side has calm natural image detail suitable for a responsive text overlay.`,
-    "Keep all essential photographic subjects inside the central 50% of the canvas so the image remains strong when a mobile storefront crops the wide image toward a square.",
-    "Premium agency art direction: believable Jordan-appropriate retail environment, cinematic but realistic lighting, crisp product detail, clean depth, no clutter, no stock-photo cheesiness.",
+    "Create a FINISHED HIGH-END DIGITAL ADVERTISING KEY VISUAL, not a stock photograph and not a documentary lifestyle photo.",
+    `Retail category: ${args.businessType || "local retail"} in Jordan.`,
+    `Campaign concept: ${args.visualConcept}`,
+    `Brand palette: use primary ${args.primary || "#111827"} and accent ${args.accent || "#FACC15"} as dominant campaign colors, supported by black/white/neutrals where useful.`,
+    "Think like an elite ecommerce advertising art director: photorealistic 3D hero object + graphic design + dramatic lighting + intentional campaign composition.",
+    "Use visual devices such as speed trails, luminous rings, route arcs, premium gradients, geometric frames, glow, particles, podiums, floating retail props, controlled reflections, or motion lines where they fit the promotion.",
+    `Place the MAIN HERO OBJECT predominantly on the ${heroSide} half. Build rich designed visual energy across the whole canvas; the opposite side must NOT be a dead blank panel.`,
+    `Keep the ${copySide} text-safe area lower in visual complexity but still visually designed with gradients, light streaks, subtle geometry, atmosphere, and depth.`,
+    "The finished background should already look like a premium ad campaign even before Darik adds the wording.",
+    "Darik will add the retailer's exact logo and exact promotion wording afterward as live responsive typography.",
+    "ABSOLUTELY NO readable text anywhere in the generated art: no store names, fake logos, captions, numbers, prices, labels, packaging words, storefront signs, watermarks, UI, badges, or letters.",
+    "If a box/package is used, keep it premium and UNBRANDED with clean surfaces. If a storefront appears at all, it must have no readable signage.",
+    "Avoid generic smiling-courier stock photography. Avoid a random person simply holding a bag in front of a store.",
+    "Avoid boring realistic street scenes unless transformed into a clearly designed advertising composition.",
+    "No split-screen template. No plain solid-color text panel. No giant empty half.",
+    "Keep all important hero objects and graphic effects center-safe so the 2:1 source remains impressive under a centered near-square mobile crop.",
     args.heroSize === "compact"
-      ? "COMPACT HERO: simple bold composition, fewer objects, strong center-safe focal subject, excellent under a short wide mobile crop."
-      : "DEFAULT HERO: rich premium composition that still survives a centered near-square mobile crop without losing the focal subject.",
-    "Wide 2:1 source image. Edge-to-edge photography only.",
+      ? "COMPACT HERO: fewer objects, very bold silhouette, simple premium geometry, strong center-safe composition."
+      : "DEFAULT HERO: rich campaign artwork with a strong central hero and enough designed detail to look premium in the taller mobile crop.",
+    "Wide 2:1 commercial advertising artwork, ultra-polished, sharp, premium, agency-level.",
   ].join(" ");
 }
 

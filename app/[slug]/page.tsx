@@ -6940,18 +6940,104 @@ export default function DarikDirectStorefrontPage() {
           />
           {/* DARIK_RESPONSIVE_BANNER_OVERLAY_280 */}
           <div className={styles.storeBannerShade280} aria-hidden="true" />
-          <div
-            className={styles.storeBannerContent280}
-            dir={/[\u0600-\u06ff]/.test(activeStoreBanner274.text || "") ? "rtl" : "ltr"}
-          >
-            {storefront.logo_url ? (
-              <div className={styles.storeBannerLogo280}>
-                <img src={storefront.logo_url} alt="" />
+          {/* DARIK_AD_COPY_HIERARCHY_281 */}
+          {(() => {
+            const raw281 = String(activeStoreBanner274.text || "").replace(/\s+/g, " ").trim();
+            const rtl281 = /[\u0600-\u06ff]/.test(raw281);
+            let working281 = raw281;
+            let badge281 = "";
+
+            if (!rtl281) {
+              const badgeMatch281 = working281.match(/\b([A-Za-z][A-Za-z.'’-]*(?:\s+[A-Za-z][A-Za-z.'’-]*){0,2})\s+only\s*$/i);
+              if (badgeMatch281) {
+                badge281 = badgeMatch281[0].trim();
+                working281 = working281.slice(0, Math.max(0, working281.length - badge281.length)).trim();
+              }
+            } else {
+              const badgeMatch281 = working281.match(/([\u0600-\u06ff]+(?:\s+[\u0600-\u06ff]+){0,2})\s+فقط\s*$/);
+              if (badgeMatch281) {
+                badge281 = badgeMatch281[0].trim();
+                working281 = working281.slice(0, Math.max(0, working281.length - badge281.length)).trim();
+              }
+            }
+
+            let headline281 = working281;
+            let detail281 = "";
+
+            if (!rtl281) {
+              const freeDelivery281 = working281.match(/^(free\s+delivery)\b/i);
+              if (freeDelivery281) {
+                headline281 = working281.slice(0, freeDelivery281[0].length).trim();
+                detail281 = working281.slice(freeDelivery281[0].length).trim();
+              } else {
+                const words281 = working281.split(/\s+/).filter(Boolean);
+                if (words281.length > 3) {
+                  headline281 = words281.slice(0, Math.min(3, words281.length)).join(" ");
+                  detail281 = words281.slice(Math.min(3, words281.length)).join(" ");
+                }
+              }
+            } else {
+              const words281 = working281.split(/\s+/).filter(Boolean);
+              if (words281.length > 4) {
+                headline281 = words281.slice(0, 3).join(" ");
+                detail281 = words281.slice(3).join(" ");
+              }
+            }
+
+            const render281 = (value: string) =>
+              value.split(/(\b\d+(?:[.,]\d+)?\s*(?:JOD|JD|%|دينار)?\b)/gi).map((part281, index281) =>
+                /\d/.test(part281) ? (
+                  <strong
+                    key={`n-${index281}`}
+                    className={styles.storeBannerNumber281}
+                    style={{ color: storefront.accent_color || undefined }}
+                  >
+                    {part281}
+                  </strong>
+                ) : (
+                  <span key={`t-${index281}`}>{part281}</span>
+                )
+              );
+
+            return (
+              <div
+                className={styles.storeBannerContent280}
+                dir={rtl281 ? "rtl" : "ltr"}
+              >
+                <div className={styles.storeBannerBrand281}>
+                  {storefront.logo_url ? (
+                    <div className={styles.storeBannerLogo280}>
+                      <img src={storefront.logo_url} alt="" />
+                    </div>
+                  ) : null}
+                </div>
+
+                <div className={styles.storeBannerCopyStack281}>
+                  {badge281 ? (
+                    <span
+                      className={styles.storeBannerBadge281}
+                      style={{
+                        borderColor: storefront.accent_color || undefined,
+                        color: storefront.accent_color || undefined,
+                      }}
+                    >
+                      {badge281}
+                    </span>
+                  ) : null}
+
+                  <h2 className={styles.storeBannerHeadline281}>
+                    {render281(headline281)}
+                  </h2>
+
+                  {detail281 ? (
+                    <div className={styles.storeBannerDetail281}>
+                      {render281(detail281)}
+                    </div>
+                  ) : null}
+                </div>
               </div>
-            ) : null}
-            <span className={styles.storeBannerKicker280}>STORE OFFER / عرض المتجر</span>
-            <h2 className={styles.storeBannerCopy280}>{activeStoreBanner274.text}</h2>
-          </div>
+            );
+          })()}
         </section>
       ) : (
       <section
