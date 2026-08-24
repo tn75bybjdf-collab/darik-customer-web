@@ -22168,23 +22168,9 @@
   font-size: 11px !important;
 }
 
-/* Existing saved Default offsets can be very large. Compact visually clamps
-   them so every movable hero item remains reachable without destroying the
-   retailer's Default-mode positions. */
-.page[data-hero-size="compact"] .hero .builderPositionTarget145 {
-  translate:
-    clamp(
-      -120px,
-      var(--darik-position-desktop-x-145),
-      120px
-    )
-    clamp(
-      -78px,
-      var(--darik-position-desktop-y-145),
-      78px
-    ) !important;
-}
-
+/* DARIK_HERO_DRAG_SAVE_RACE_RIGHT_BOUND_FIX_265
+   Compact canonical positions are bounded by the real hero rectangle at drop
+   time. No arbitrary +/- pixel clamp is applied here. */
 .page[data-hero-size="compact"] .quickInfoStrip {
   margin-top: 10px !important;
 }
@@ -22276,22 +22262,7 @@
     width: 13px !important;
     height: 13px !important;
   }
-
-  .page[data-hero-size="compact"] .hero .builderPositionTarget145 {
-    translate:
-      clamp(
-        -48px,
-        var(--darik-position-mobile-x-145),
-        48px
-      )
-      clamp(
-        -38px,
-        var(--darik-position-mobile-y-145),
-        38px
-      ) !important;
-  }
-
-  .page[data-hero-size="compact"] .quickInfoStrip {
+.page[data-hero-size="compact"] .quickInfoStrip {
     margin-top: 8px !important;
   }
 }

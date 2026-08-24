@@ -1765,21 +1765,13 @@ export default function DarikDirectStorefrontSettingsPage() {
     positioningRevisionRef145.current += 1;
     setPreviewPositionSaveState145(storefront?.id ? "waiting" : "idle");
 
-    const compactHeroTarget262 =
-      heroSize254 === "compact" &&
-      isCompactHeroPositionTarget262(key);
-
     setStorefrontContentPositioning145((current) => ({
       ...current,
       [key]: {
         ...current[key],
         [device]: {
-          x: compactHeroTarget262
-            ? clampCompactHeroPosition262(nextX, "x", device)
-            : clampStorefrontPosition145(nextX),
-          y: compactHeroTarget262
-            ? clampCompactHeroPosition262(nextY, "y", device)
-            : clampStorefrontPosition145(nextY),
+          x: clampStorefrontPosition145(nextX),
+          y: clampStorefrontPosition145(nextY),
         },
       },
     }));
@@ -1842,6 +1834,13 @@ export default function DarikDirectStorefrontSettingsPage() {
 
         if (result.error) {
           setPreviewPositionSaveState145("error");
+          console.error(
+            "Darik canonical hero position save failed:",
+            result.error.message
+          );
+          window.alert(
+            `Darik could not save that hero position: ${result.error.message}`
+          );
           return;
         }
 
@@ -1852,7 +1851,7 @@ export default function DarikDirectStorefrontSettingsPage() {
     }, 350);
 
     return () => window.clearTimeout(timer);
-  }, [storefrontContentPositioning145, storefront?.id, heroSize254]);
+  }, [storefrontContentPositioning145, storefront?.id]);
 
   // DARIK_STOREFRONT_VISUAL_TRUTH_194
   // Preview and live storefront now persist/read the exact same visual JSON.
@@ -2479,6 +2478,88 @@ export default function DarikDirectStorefrontSettingsPage() {
       }
 
       return null;
+    }
+
+    // DARIK_HERO_DRAG_SAVE_RACE_RIGHT_BOUND_FIX_265
+    function boundCanonicalHeroPoint265(
+      target265: Element,
+      rawX265: number,
+      rawY265: number
+    ) {
+      const canonical265 =
+        canonicalPositionKey202(target265);
+
+      if (!canonical265 || canonical265 === "shop") {
+        return {
+          x: clamp150D(rawX265),
+          y: clamp150D(rawY265),
+        };
+      }
+
+      const hero265 =
+        target265.closest("section");
+
+      if (!hero265) {
+        return {
+          x: clamp150D(rawX265),
+          y: clamp150D(rawY265),
+        };
+      }
+
+      const targetRect265 =
+        target265.getBoundingClientRect();
+
+      const heroRect265 =
+        hero265.getBoundingClientRect();
+
+      // Small breathing room so drag handles remain reachable.
+      const padding265 = 8;
+
+      let correctionX265 = 0;
+      let correctionY265 = 0;
+
+      if (
+        targetRect265.left <
+        heroRect265.left + padding265
+      ) {
+        correctionX265 +=
+          heroRect265.left +
+          padding265 -
+          targetRect265.left;
+      }
+
+      if (
+        targetRect265.right >
+        heroRect265.right - padding265
+      ) {
+        correctionX265 -=
+          targetRect265.right -
+          (heroRect265.right - padding265);
+      }
+
+      if (
+        targetRect265.top <
+        heroRect265.top + padding265
+      ) {
+        correctionY265 +=
+          heroRect265.top +
+          padding265 -
+          targetRect265.top;
+      }
+
+      if (
+        targetRect265.bottom >
+        heroRect265.bottom - padding265
+      ) {
+        correctionY265 -=
+          targetRect265.bottom -
+          (heroRect265.bottom - padding265);
+      }
+
+      return {
+        x: clamp150D(rawX265 + correctionX265),
+        y: clamp150D(rawY265 + correctionY265),
+      };
     }
 
     async function saveLayout150D() {
@@ -6065,8 +6146,14 @@ export default function DarikDirectStorefrontSettingsPage() {
               );
 
             if (canonicalKey202) {
-              // Remove any old freeform offset for this same target so the
-              // canonical position is the only source of movement.
+              // Remove an OLD freeform offset only if one actually exists.
+              // Do not refresh the iframe on every canonical hero drag.
+              const hadLegacyFreeform265 =
+                Object.prototype.hasOwnProperty.call(
+                  nextDevice150D,
+                  locatorKey150D
+                );
+
               delete nextDevice150D[locatorKey150D];
 
               savedLayout150D = {
@@ -6075,14 +6162,33 @@ export default function DarikDirectStorefrontSettingsPage() {
                   nextDevice150D,
               };
 
+              const bounded265 =
+                boundCanonicalHeroPoint265(
+                  completed150A.target,
+                  x150D,
+                  y150D
+                );
+
+              // If the drop went outside the hero, visibly snap it to the
+              // real hero edge before saving the exact bounded point.
+              (
+                completed150A.target as HTMLElement
+              ).style.setProperty(
+                "translate",
+                `${Math.round(bounded265.x)}px ${Math.round(bounded265.y)}px`,
+                "important"
+              );
+
               updatePreviewPosition145(
                 canonicalKey202,
                 currentDevice150D,
-                x150D,
-                y150D
+                bounded265.x,
+                bounded265.y
               );
 
-              void saveLayout150D();
+              if (hadLegacyFreeform265) {
+                void saveLayout150D();
+              }
             } else {
               const priorPoint151 =
                 nextDevice150D[
