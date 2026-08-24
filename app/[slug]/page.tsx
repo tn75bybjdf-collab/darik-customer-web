@@ -84,6 +84,7 @@ type Storefront = {
   product_card_style: "standard" | "image_first" | "compact" | null;
   corner_style: "rounded" | "soft" | "square" | null;
   hero_layout: "centered" | "split" | "immersive" | null;
+  direct_hero_size?: "default" | "compact" | null;
   section_order: Array<"categories" | "catalog" | "story"> | null;
   show_prices: boolean | null;
   show_ordering: boolean | null;
@@ -2063,43 +2064,9 @@ export default function DarikDirectStorefrontPage() {
     useState<DarikStorefrontVisualTruth194 | null>(null);
 
   // DARIK_REAL_HERO_SIZE_COLUMN_260
+  // DARIK_REAL_COMPACT_BANNER_HERO_261
   const [heroSize260, setHeroSize260] =
     useState<HeroSize254>("default");
-
-  useEffect(() => {
-    if (!slug || slug === "_darik-private-store-preview") {
-      setHeroSize260("default");
-      return;
-    }
-
-    let cancelled260 = false;
-
-    void (async () => {
-      const result260 = await supabase.rpc(
-        "darik_direct_public_hero_size_v260",
-        { p_slug: slug }
-      );
-
-      if (cancelled260) return;
-
-      if (result260.error) {
-        console.warn(
-          "Darik hero size could not load:",
-          result260.error.message
-        );
-        setHeroSize260("default");
-        return;
-      }
-
-      setHeroSize260(
-        result260.data === "compact" ? "compact" : "default"
-      );
-    })();
-
-    return () => {
-      cancelled260 = true;
-    };
-  }, [slug]);
 
   // DARIK_RETAILER_THEME_GALLERY_102
   const [savedThemeField, setSavedThemeField] = useState("");
@@ -2264,6 +2231,80 @@ export default function DarikDirectStorefrontPage() {
   }, []);
 
   const [storefront, setStorefront] = useState<Storefront | null>(null);
+
+  useEffect(() => {
+    if (!slug) {
+      setHeroSize260("default");
+      return;
+    }
+
+    let cancelled261 = false;
+
+    void (async () => {
+      if (slug === "_darik-private-store-preview") {
+        const embedded261 = storefront?.direct_hero_size;
+
+        if (embedded261 === "compact" || embedded261 === "default") {
+          setHeroSize260(embedded261);
+          return;
+        }
+
+        if (!storefront?.id) {
+          setHeroSize260("default");
+          return;
+        }
+
+        const privateResult261 = await supabase
+          .from("retailer_storefronts")
+          .select("direct_hero_size")
+          .eq("id", storefront.id)
+          .maybeSingle();
+
+        if (cancelled261) return;
+
+        if (privateResult261.error) {
+          console.warn(
+            "Darik private-preview Hero Size could not load:",
+            privateResult261.error.message
+          );
+          setHeroSize260("default");
+          return;
+        }
+
+        setHeroSize260(
+          privateResult261.data?.direct_hero_size === "compact"
+            ? "compact"
+            : "default"
+        );
+        return;
+      }
+
+      const result261 = await supabase.rpc(
+        "darik_direct_public_hero_size_v260",
+        { p_slug: slug }
+      );
+
+      if (cancelled261) return;
+
+      if (result261.error) {
+        console.warn(
+          "Darik Hero Size could not load:",
+          result261.error.message
+        );
+        setHeroSize260("default");
+        return;
+      }
+
+      setHeroSize260(
+        result261.data === "compact" ? "compact" : "default"
+      );
+    })();
+
+    return () => {
+      cancelled261 = true;
+    };
+  }, [slug, storefront?.id, storefront?.direct_hero_size]);
+
   const [publicStatus, setPublicStatus] = useState<PublicStoreStatus | null>(null);
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
