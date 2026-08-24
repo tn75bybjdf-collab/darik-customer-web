@@ -97,6 +97,14 @@ type Storefront = {
 
 type HeroSize254 = "default" | "compact";
 
+// DARIK_PUBLIC_HERO_BANNER_ROTATION_274
+type ActiveStoreBanner274 = {
+  id: string;
+  text: string;
+  image_url: string;
+  hero_size_generated_for: HeroSize254;
+};
+
 function normalizeHeroSize254(value: unknown): HeroSize254 {
   const candidate =
     value && typeof value === "object" && !Array.isArray(value)
@@ -2067,6 +2075,57 @@ export default function DarikDirectStorefrontPage() {
   // DARIK_REAL_COMPACT_BANNER_HERO_261
   const [heroSize260, setHeroSize260] =
     useState<HeroSize254>("default");
+
+  // DARIK_PUBLIC_HERO_BANNER_ROTATION_274
+  const [activeStoreBanner274, setActiveStoreBanner274] =
+    useState<ActiveStoreBanner274 | null>(null);
+  const [showStoreBanner274, setShowStoreBanner274] = useState(false);
+
+  useEffect(() => {
+    if (!slug || slug === "_darik-private-store-preview") {
+      setActiveStoreBanner274(null);
+      setShowStoreBanner274(false);
+      return;
+    }
+
+    let cancelled274 = false;
+
+    void (async () => {
+      try {
+        const response274 = await fetch(
+          `/api/darik-direct/store-banner?slug=${encodeURIComponent(slug)}`,
+          { cache: "no-store" }
+        );
+        const payload274 = (await response274.json().catch(() => ({}))) as {
+          ok?: boolean;
+          active_banner?: ActiveStoreBanner274 | null;
+        };
+        if (cancelled274) return;
+        setActiveStoreBanner274(
+          response274.ok && payload274.ok && payload274.active_banner?.image_url
+            ? payload274.active_banner
+            : null
+        );
+      } catch {
+        if (!cancelled274) setActiveStoreBanner274(null);
+      }
+    })();
+
+    return () => {
+      cancelled274 = true;
+    };
+  }, [slug]);
+
+  useEffect(() => {
+    setShowStoreBanner274(false);
+    if (!activeStoreBanner274?.image_url) return;
+
+    const timer274 = window.setInterval(() => {
+      setShowStoreBanner274((current274) => !current274);
+    }, 6000);
+
+    return () => window.clearInterval(timer274);
+  }, [activeStoreBanner274?.image_url]);
 
   // DARIK_RETAILER_THEME_GALLERY_102
   const [savedThemeField, setSavedThemeField] = useState("");
@@ -6475,6 +6534,7 @@ export default function DarikDirectStorefrontPage() {
       data-corners={cornerStyle}
       data-hero={heroLayout}
       data-hero-size={heroSize254}
+      data-banner-active={activeStoreBanner274?.image_url ? "yes" : "no"}
       data-business={effectiveBusinessType}
       data-theme-field={effectiveThemeField}
       data-darik-page-font={effectiveStorefrontTypography.page.font}
@@ -6867,6 +6927,19 @@ export default function DarikDirectStorefrontPage() {
         </nav>
       </header>
 
+      {activeStoreBanner274?.image_url && showStoreBanner274 ? (
+        <section
+          className={`${styles.hero} ${portfolioStyles.heroPolish} ${styles.storeBannerHero274}`}
+          aria-label="Store promotion / عرض المتجر"
+        >
+          <img
+            className={styles.storeBannerImage274}
+            src={activeStoreBanner274.image_url}
+            alt={activeStoreBanner274.text || "Store promotion"}
+            onError={() => setActiveStoreBanner274(null)}
+          />
+        </section>
+      ) : (
       <section
         className={`${styles.hero} ${portfolioStyles.heroPolish} ${
           storefront.hero_image_url ? styles.heroWithImage : styles.heroWithoutImage
@@ -7170,6 +7243,24 @@ style={{
           ) : null}
         </aside>
       </section>
+      )}
+
+      {activeStoreBanner274 ? (
+        <div className={styles.storeBannerDots274} aria-label="Hero slides">
+          <button
+            type="button"
+            className={!showStoreBanner274 ? styles.storeBannerDotActive274 : ""}
+            onClick={() => setShowStoreBanner274(false)}
+            aria-label="Show storefront hero"
+          />
+          <button
+            type="button"
+            className={showStoreBanner274 ? styles.storeBannerDotActive274 : ""}
+            onClick={() => setShowStoreBanner274(true)}
+            aria-label="Show store promotion"
+          />
+        </div>
+      ) : null}
 
       {/* DARIK_MOBILE_DELIVERY_PROMISE_FEE_185 */}
       {showOrdering && deliveryEnabled && !selectedPickup ? (
