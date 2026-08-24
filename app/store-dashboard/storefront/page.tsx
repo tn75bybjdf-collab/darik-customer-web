@@ -12331,21 +12331,12 @@ await saveStorefront(undefined, "manual");
                     ) : null}
 
 
-{/* DARIK_EXACT_STOREFRONT_WIZARD_109_V6 */}
-                <div className={designStyles.exactWizardStage109V5}>
-                  {storefrontSetupVisibleStep109 === 1 ? (
-                    <section data-darik-exact-step="1" className={designStyles.exactWizardPanel109V5}>
-                      <div className={designStyles.exactWizardHeading109V5}>
-                        <span>STEP 1 / الخطوة ١</span>
-                        <h3>Choose a theme / اختر القالب</h3>
-                        <p>Select the storefront design you want. To change it later, simply select a different theme here.</p>
-                      </div>
-
+                      {/* DARIK_HERO_SIZE_ALWAYS_VISIBLE_255 */}
                       <div className={designStyles.heroSizeControl254}>
                         <div className={designStyles.heroSizeHeading254}>
                           <div>
-                            <span>HERO SIZE / حجم الواجهة</span>
-                            <strong>Choose how much space the hero uses</strong>
+                            <span>STOREFRONT HERO SIZE / حجم واجهة المتجر</span>
+                            <strong>Choose the size of the top section customers see</strong>
                             <small>
                               Default keeps the current large hero. Compact keeps the same design and content with less vertical bulk.
                               {" / الافتراضي يحافظ على الحجم الحالي، والمدمج يحافظ على نفس التصميم والمحتوى بحجم أصغر."}
@@ -12412,6 +12403,16 @@ await saveStorefront(undefined, "manual");
                             <small>Same hero, less vertical space</small>
                           </button>
                         </div>
+                      </div>
+
+                      {/* DARIK_EXACT_STOREFRONT_WIZARD_109_V6 */}
+                <div className={designStyles.exactWizardStage109V5}>
+                  {storefrontSetupVisibleStep109 === 1 ? (
+                    <section data-darik-exact-step="1" className={designStyles.exactWizardPanel109V5}>
+                      <div className={designStyles.exactWizardHeading109V5}>
+                        <span>STEP 1 / الخطوة ١</span>
+                        <h3>Choose a theme / اختر القالب</h3>
+                        <p>Select the storefront design you want. To change it later, simply select a different theme here.</p>
                       </div>
 
                       <div
