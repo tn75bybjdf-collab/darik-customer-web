@@ -105,6 +105,16 @@ function normalizeHeroSize254(value: unknown): HeroSize254 {
   return candidate === "compact" ? "compact" : "default";
 }
 
+// DARIK_HERO_SIZE_PERSISTENCE_FIX_257
+function heroSizeFromVisual257(value: unknown): HeroSize254 {
+  const raw =
+    value && typeof value === "object" && !Array.isArray(value)
+      ? (value as Record<string, unknown>)
+      : {};
+
+  return normalizeHeroSize254(raw["__darik_hero_size_254"]);
+}
+
 type PublicStoreStatus = {
   slug: string;
   display_name: string;
@@ -2056,7 +2066,6 @@ export default function DarikDirectStorefrontPage() {
     freeform_layout?: unknown;
     typography?: unknown;
     content_positioning?: unknown;
-    hero_size?: unknown;
     updated_at?: unknown;
   };
 
@@ -6369,11 +6378,9 @@ export default function DarikDirectStorefrontPage() {
     );
   }
 
-  const rawHeroSize254 = darikStorefrontVisualTruth194?.hero_size;
-  const heroSize254 =
-    normalizeHeroSize254(rawHeroSize254) === "compact"
-      ? "compact"
-      : "default";
+  const heroSize254 = heroSizeFromVisual257(
+    darikStorefrontVisualTruth194?.content_positioning
+  );
 
   const hasActiveVehicleFilter =
     selectedVehicleMake !== "all" ||

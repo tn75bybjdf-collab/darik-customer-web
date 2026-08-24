@@ -197,6 +197,33 @@ function normalizeHeroSize254(value: unknown): HeroSize254 {
   return candidate === "compact" ? "compact" : "default";
 }
 
+// DARIK_HERO_SIZE_PERSISTENCE_FIX_257
+// Hero Size is persisted inside the already-supported content_positioning
+// visual component. No new DB component or migration is required.
+function heroSizeFromVisual257(value: unknown): HeroSize254 {
+  const raw =
+    value && typeof value === "object" && !Array.isArray(value)
+      ? (value as Record<string, unknown>)
+      : {};
+
+  return normalizeHeroSize254(raw["__darik_hero_size_254"]);
+}
+
+function contentPositioningWithHeroSize257(
+  positioning: unknown,
+  heroSize: HeroSize254
+) {
+  const raw =
+    positioning && typeof positioning === "object" && !Array.isArray(positioning)
+      ? (positioning as Record<string, unknown>)
+      : {};
+
+  return {
+    ...raw,
+    __darik_hero_size_254: heroSize,
+  };
+}
+
 function normalizeDesignDraft(value: unknown): Partial<StorefrontDesign> {
   if (!value || typeof value !== "object" || Array.isArray(value)) return {};
   const record = value as Record<string, unknown>;
@@ -1487,7 +1514,10 @@ export default function DarikDirectStorefrontSettingsPage() {
           {
             p_storefront_id: storefront.id,
             p_component: "content_positioning",
-            p_payload: storefrontContentPositioning145,
+            p_payload: contentPositioningWithHeroSize257(
+              storefrontContentPositioning145,
+              heroSize254
+            ),
           }
         ),
         supabase.rpc(
@@ -1787,7 +1817,10 @@ export default function DarikDirectStorefrontSettingsPage() {
     if (!storefront?.id || !positioningDirtyRef145.current) return;
 
     const revision = positioningRevisionRef145.current;
-    const snapshot = storefrontContentPositioning145;
+    const snapshot = contentPositioningWithHeroSize257(
+      storefrontContentPositioning145,
+      heroSize254
+    );
 
     const timer = window.setTimeout(() => {
       void (async () => {
@@ -1816,7 +1849,7 @@ export default function DarikDirectStorefrontSettingsPage() {
     }, 350);
 
     return () => window.clearTimeout(timer);
-  }, [storefrontContentPositioning145, storefront?.id]);
+  }, [storefrontContentPositioning145, storefront?.id, heroSize254]);
 
   // DARIK_STOREFRONT_VISUAL_TRUTH_194
   // Preview and live storefront now persist/read the exact same visual JSON.
@@ -6769,8 +6802,11 @@ export default function DarikDirectStorefrontSettingsPage() {
             "darik_direct_set_storefront_visual_v194",
             {
               p_storefront_id: storefront.id,
-              p_component: "hero_size",
-              p_payload: { size: pending254 },
+              p_component: "content_positioning",
+              p_payload: contentPositioningWithHeroSize257(
+                storefrontContentPositioning145,
+                pending254
+              ),
             }
           );
 
@@ -6805,14 +6841,16 @@ export default function DarikDirectStorefrontSettingsPage() {
         return;
       }
 
-      const raw254 =
+      const visual254 =
         result254.data &&
         typeof result254.data === "object" &&
         !Array.isArray(result254.data)
-          ? (result254.data as { hero_size?: unknown }).hero_size
-          : undefined;
+          ? (result254.data as { content_positioning?: unknown })
+          : null;
 
-      setHeroSize254(normalizeHeroSize254(raw254));
+      setHeroSize254(
+        heroSizeFromVisual257(visual254?.content_positioning)
+      );
       setHeroSizeSaveState254("idle");
     })();
 
@@ -6826,6 +6864,10 @@ export default function DarikDirectStorefrontSettingsPage() {
     setHeroSize254(next254);
     setHeroSizeSaveState254("saving");
     setError("");
+
+    // Cancel any older delayed position save that captured the previous
+    // Hero Size before this click.
+    positioningRevisionRef145.current += 1;
 
     const retailerId254 = selectedStore?.retailer_id || "";
     const pendingKey254 = retailerId254
@@ -6849,8 +6891,11 @@ export default function DarikDirectStorefrontSettingsPage() {
       "darik_direct_set_storefront_visual_v194",
       {
         p_storefront_id: storefront.id,
-        p_component: "hero_size",
-        p_payload: { size: next254 },
+        p_component: "content_positioning",
+        p_payload: contentPositioningWithHeroSize257(
+          storefrontContentPositioning145,
+          next254
+        ),
       }
     );
 
