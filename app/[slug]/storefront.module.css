@@ -22773,3 +22773,49 @@
     transform: none !important;
   }
 }
+
+/* DARIK_STICKY_SEARCH_288
+   Search stays in normal document flow until its natural position reaches
+   the viewport top, then CSS sticky locks it there. */
+:global([data-darik-sticky-search="288"]) {
+  position: sticky !important;
+  top: 0 !important;
+  z-index: 60 !important;
+
+  width: 100vw !important;
+  max-width: none !important;
+  margin-left: calc(50% - 50vw) !important;
+  margin-right: calc(50% - 50vw) !important;
+
+  padding-left: 12px !important;
+  padding-right: 12px !important;
+  padding-top: 8px !important;
+  padding-bottom: 8px !important;
+
+  border-radius: 0 !important;
+  background: #ffffff !important;
+  box-shadow: 0 5px 16px rgba(15, 23, 42, .10) !important;
+}
+
+:global([data-darik-sticky-search="288"] *) {
+  box-sizing: border-box;
+}
+
+:global([data-darik-sticky-search-input="288"]) {
+  width: 100% !important;
+  max-width: none !important;
+  border-radius: 0 !important;
+}
+
+/* Square the visible search-field shell too when icon/input are wrapped. */
+:global([data-darik-sticky-search="288"] [class*="search"]),
+:global([data-darik-sticky-search="288"] [class*="Search"]) {
+  border-radius: 0 !important;
+}
+
+@media (max-width: 560px) {
+  :global([data-darik-sticky-search="288"]) {
+    padding-left: 10px !important;
+    padding-right: 10px !important;
+  }
+}

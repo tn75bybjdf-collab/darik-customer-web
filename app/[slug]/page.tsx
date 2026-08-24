@@ -907,6 +907,90 @@ const DARIK_TYPOGRAPHY_FONT_STYLESHEET_105_V5 =
   'https://fonts.googleapis.com/css2?family=Playfair+Display&family=Cormorant+Garamond&family=DM+Serif+Display&family=Bodoni+Moda&family=Prata&family=Cinzel&family=Marcellus&family=Libre+Baskerville&family=Lora&family=EB+Garamond&family=Fraunces&family=Spectral&family=Crimson+Pro&family=Yeseva+One&family=Abril+Fatface&family=Inter&family=Manrope&family=Montserrat&family=Poppins&family=Raleway&family=Outfit&family=Plus+Jakarta+Sans&family=Urbanist&family=Space+Grotesk&family=Work+Sans&family=Nunito+Sans&family=Roboto&family=Quicksand&family=Josefin+Sans&family=Sora&family=Oswald&family=Bebas+Neue&family=Anton&family=Barlow+Condensed&family=Archivo+Black&family=League+Spartan&family=Dancing+Script&family=Great+Vibes&family=Allura&family=Sacramento&family=Parisienne&family=Caveat&family=Pacifico&family=Cairo&family=Tajawal&family=Almarai&family=Changa&family=El+Messiri&family=Amiri&family=Noto+Kufi+Arabic&family=Noto+Naskh+Arabic&family=IBM+Plex+Sans+Arabic&family=Reem+Kufi&family=Aref+Ruqaa&family=Lateef&family=Scheherazade+New&family=Markazi+Text&family=Lemonada&display=swap';
 
 function useDarikTypographyFontLibrary105V5() {
+  // DARIK_STICKY_SEARCH_288
+  useEffect(() => {
+    let observer288: MutationObserver | null = null;
+    let frame288 = 0;
+
+    const installStickySearch288 = () => {
+      if (frame288) window.cancelAnimationFrame(frame288);
+
+      frame288 = window.requestAnimationFrame(() => {
+        const inputs288 = Array.from(
+          document.querySelectorAll<HTMLInputElement>("input")
+        );
+
+        const searchInput288 =
+          inputs288.find((input288) => input288.type === "search") ||
+          inputs288.find((input288) =>
+            /search|ابحث|بحث/i.test(
+              `${input288.placeholder || ""} ${input288.getAttribute("aria-label") || ""}`
+            )
+          );
+
+        if (!searchInput288) return;
+
+        let wrapper288: HTMLElement | null =
+          searchInput288.closest<HTMLElement>(
+            '[class*="search"], [class*="Search"]'
+          );
+
+        // If the CSS-module search class lives directly on the input, use its
+        // immediate structural parent so the sticky background spans full width.
+        if (!wrapper288 || wrapper288 === searchInput288) {
+          wrapper288 = searchInput288.parentElement;
+        }
+
+        // Prefer a compact wrapper around the field/icon/button, not the entire
+        // catalog section. Avoid climbing more than two levels.
+        if (
+          wrapper288 &&
+          wrapper288.parentElement &&
+          wrapper288.getBoundingClientRect().height < 34
+        ) {
+          wrapper288 = wrapper288.parentElement;
+        }
+
+        if (!wrapper288) return;
+
+        document
+          .querySelectorAll<HTMLElement>('[data-darik-sticky-search="288"]')
+          .forEach((node288) => {
+            if (node288 !== wrapper288) {
+              node288.removeAttribute("data-darik-sticky-search");
+            }
+          });
+
+        wrapper288.setAttribute("data-darik-sticky-search", "288");
+        searchInput288.setAttribute("data-darik-sticky-search-input", "288");
+      });
+    };
+
+    installStickySearch288();
+
+    observer288 = new MutationObserver(() => installStickySearch288());
+    observer288.observe(document.body, {
+      childList: true,
+      subtree: true,
+    });
+
+    window.addEventListener("resize", installStickySearch288);
+
+    return () => {
+      if (frame288) window.cancelAnimationFrame(frame288);
+      observer288?.disconnect();
+      window.removeEventListener("resize", installStickySearch288);
+      document
+        .querySelectorAll<HTMLElement>('[data-darik-sticky-search="288"]')
+        .forEach((node288) => node288.removeAttribute("data-darik-sticky-search"));
+      document
+        .querySelectorAll<HTMLElement>('[data-darik-sticky-search-input="288"]')
+        .forEach((node288) =>
+          node288.removeAttribute("data-darik-sticky-search-input")
+        );
+    };
+  }, []);
+
   useEffect(() => {
     const linkId = "darik-typography-font-library-105-v5";
     if (document.getElementById(linkId)) return;
