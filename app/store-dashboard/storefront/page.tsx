@@ -96,6 +96,8 @@ type AppearanceMode = "light" | "dark";
 type ProductCardStyle = "standard" | "image_first" | "compact";
 type CornerStyle = "rounded" | "soft" | "square";
 type HeroLayout = "centered" | "split" | "immersive";
+// DARIK_STOREFRONT_HERO_SIZE_OPTION_254
+type HeroSize254 = "default" | "compact";
 type StorefrontSection = "categories" | "catalog" | "story";
 
 type StorefrontDesign = {
@@ -184,6 +186,15 @@ const storefrontThemeOptions = [
   );
   for (const item of allowed) if (!next.includes(item)) next.push(item);
   return next;
+}
+
+function normalizeHeroSize254(value: unknown): HeroSize254 {
+  const candidate =
+    value && typeof value === "object" && !Array.isArray(value)
+      ? String((value as Record<string, unknown>).size ?? "").trim()
+      : String(value ?? "").trim();
+
+  return candidate === "compact" ? "compact" : "default";
 }
 
 function normalizeDesignDraft(value: unknown): Partial<StorefrontDesign> {
@@ -1324,6 +1335,11 @@ function isStorefrontPositionKey145(
 }
 
 export default function DarikDirectStorefrontSettingsPage() {
+  const [heroSize254, setHeroSize254] = useState<HeroSize254>("default");
+  const [heroSizeSaveState254, setHeroSizeSaveState254] = useState<
+    "idle" | "saving" | "saved" | "error"
+  >("idle");
+
   useDarikTypographyFontLibrary105V5();
   const [session, setSession] = useState<Session | null>(null);
   const [authReady, setAuthReady] = useState(false);
@@ -6723,6 +6739,143 @@ export default function DarikDirectStorefrontSettingsPage() {
     storefront?.id,
     storefront?.slug,
   ]);
+
+  useEffect(() => {
+    const retailerId254 = selectedStore?.retailer_id || "";
+    const pendingKey254 = retailerId254
+      ? `darik-pending-hero-size-${retailerId254}`
+      : "";
+
+    if (!storefront?.id) {
+      if (pendingKey254) {
+        const pending254 = window.localStorage.getItem(pendingKey254);
+        if (pending254 === "compact" || pending254 === "default") {
+          setHeroSize254(pending254);
+        }
+      }
+      return;
+    }
+
+    let cancelled254 = false;
+
+    void (async () => {
+      if (pendingKey254) {
+        const pending254 = window.localStorage.getItem(pendingKey254);
+        if (pending254 === "compact" || pending254 === "default") {
+          setHeroSize254(pending254);
+          setHeroSizeSaveState254("saving");
+
+          const pendingSave254 = await supabase.rpc(
+            "darik_direct_set_storefront_visual_v194",
+            {
+              p_storefront_id: storefront.id,
+              p_component: "hero_size",
+              p_payload: { size: pending254 },
+            }
+          );
+
+          if (cancelled254) return;
+
+          if (pendingSave254.error) {
+            setHeroSizeSaveState254("error");
+            return;
+          }
+
+          window.localStorage.removeItem(pendingKey254);
+          setHeroSizeSaveState254("saved");
+          refreshActualLiveStoreEditor196(100);
+          window.setTimeout(() => {
+            setHeroSizeSaveState254((current254) =>
+              current254 === "saved" ? "idle" : current254
+            );
+          }, 1400);
+          return;
+        }
+      }
+
+      const result254 = await supabase.rpc(
+        "darik_direct_get_storefront_visual_v194",
+        { p_storefront_id: storefront.id }
+      );
+
+      if (cancelled254) return;
+
+      if (result254.error) {
+        setHeroSizeSaveState254("error");
+        return;
+      }
+
+      const raw254 =
+        result254.data &&
+        typeof result254.data === "object" &&
+        !Array.isArray(result254.data)
+          ? (result254.data as { hero_size?: unknown }).hero_size
+          : undefined;
+
+      setHeroSize254(normalizeHeroSize254(raw254));
+      setHeroSizeSaveState254("idle");
+    })();
+
+    return () => {
+      cancelled254 = true;
+    };
+  }, [selectedStore?.retailer_id, storefront?.id]);
+
+  async function saveHeroSize254(next254: HeroSize254) {
+    const previous254 = heroSize254;
+    setHeroSize254(next254);
+    setHeroSizeSaveState254("saving");
+    setError("");
+
+    const retailerId254 = selectedStore?.retailer_id || "";
+    const pendingKey254 = retailerId254
+      ? `darik-pending-hero-size-${retailerId254}`
+      : "";
+
+    if (!storefront?.id) {
+      if (pendingKey254) {
+        window.localStorage.setItem(pendingKey254, next254);
+      }
+      setHeroSizeSaveState254("saved");
+      window.setTimeout(() => {
+        setHeroSizeSaveState254((current254) =>
+          current254 === "saved" ? "idle" : current254
+        );
+      }, 1200);
+      return;
+    }
+
+    const result254 = await supabase.rpc(
+      "darik_direct_set_storefront_visual_v194",
+      {
+        p_storefront_id: storefront.id,
+        p_component: "hero_size",
+        p_payload: { size: next254 },
+      }
+    );
+
+    if (result254.error) {
+      setHeroSize254(previous254);
+      setHeroSizeSaveState254("error");
+      setError(
+        `Could not save hero size: ${result254.error.message} / تعذر حفظ حجم الواجهة`
+      );
+      return;
+    }
+
+    if (pendingKey254) {
+      window.localStorage.removeItem(pendingKey254);
+    }
+
+    setHeroSizeSaveState254("saved");
+    refreshActualLiveStoreEditor196(100);
+
+    window.setTimeout(() => {
+      setHeroSizeSaveState254((current254) =>
+        current254 === "saved" ? "idle" : current254
+      );
+    }, 1400);
+  }
 
   useEffect(() => {
     const retailerId = selectedStore?.retailer_id;
@@ -12186,6 +12339,79 @@ await saveStorefront(undefined, "manual");
                         <span>STEP 1 / الخطوة ١</span>
                         <h3>Choose a theme / اختر القالب</h3>
                         <p>Select the storefront design you want. To change it later, simply select a different theme here.</p>
+                      </div>
+
+                      <div className={designStyles.heroSizeControl254}>
+                        <div className={designStyles.heroSizeHeading254}>
+                          <div>
+                            <span>HERO SIZE / حجم الواجهة</span>
+                            <strong>Choose how much space the hero uses</strong>
+                            <small>
+                              Default keeps the current large hero. Compact keeps the same design and content with less vertical bulk.
+                              {" / الافتراضي يحافظ على الحجم الحالي، والمدمج يحافظ على نفس التصميم والمحتوى بحجم أصغر."}
+                            </small>
+                          </div>
+                          <em
+                            data-state={heroSizeSaveState254}
+                            className={designStyles.heroSizeSaveState254}
+                          >
+                            {heroSizeSaveState254 === "saving"
+                              ? "Saving... / جارٍ الحفظ"
+                              : heroSizeSaveState254 === "saved"
+                                ? "Saved ✓ / تم الحفظ"
+                                : heroSizeSaveState254 === "error"
+                                  ? "Save failed / فشل الحفظ"
+                                  : ""}
+                          </em>
+                        </div>
+
+                        <div className={designStyles.heroSizeOptions254}>
+                          <button
+                            type="button"
+                            aria-pressed={heroSize254 === "default"}
+                            className={`${designStyles.heroSizeOption254} ${
+                              heroSize254 === "default"
+                                ? designStyles.heroSizeOptionSelected254
+                                : ""
+                            }`}
+                            disabled={heroSizeSaveState254 === "saving"}
+                            onClick={() => void saveHeroSize254("default")}
+                          >
+                            <span
+                              className={`${designStyles.heroSizeMockup254} ${designStyles.heroSizeMockupDefault254}`}
+                              aria-hidden="true"
+                            >
+                              <i />
+                              <b />
+                              <em />
+                            </span>
+                            <strong>Default / افتراضي</strong>
+                            <small>Current full-size hero</small>
+                          </button>
+
+                          <button
+                            type="button"
+                            aria-pressed={heroSize254 === "compact"}
+                            className={`${designStyles.heroSizeOption254} ${
+                              heroSize254 === "compact"
+                                ? designStyles.heroSizeOptionSelected254
+                                : ""
+                            }`}
+                            disabled={heroSizeSaveState254 === "saving"}
+                            onClick={() => void saveHeroSize254("compact")}
+                          >
+                            <span
+                              className={`${designStyles.heroSizeMockup254} ${designStyles.heroSizeMockupCompact254}`}
+                              aria-hidden="true"
+                            >
+                              <i />
+                              <b />
+                              <em />
+                            </span>
+                            <strong>Compact / مدمج</strong>
+                            <small>Same hero, less vertical space</small>
+                          </button>
+                        </div>
                       </div>
 
                       <div

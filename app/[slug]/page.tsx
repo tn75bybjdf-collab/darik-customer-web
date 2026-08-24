@@ -94,6 +94,17 @@ type Storefront = {
   business_type: string | null;
 };
 
+type HeroSize254 = "default" | "compact";
+
+function normalizeHeroSize254(value: unknown): HeroSize254 {
+  const candidate =
+    value && typeof value === "object" && !Array.isArray(value)
+      ? String((value as Record<string, unknown>).size ?? "").trim()
+      : String(value ?? "").trim();
+
+  return candidate === "compact" ? "compact" : "default";
+}
+
 type PublicStoreStatus = {
   slug: string;
   display_name: string;
@@ -2045,6 +2056,7 @@ export default function DarikDirectStorefrontPage() {
     freeform_layout?: unknown;
     typography?: unknown;
     content_positioning?: unknown;
+    hero_size?: unknown;
     updated_at?: unknown;
   };
 
@@ -6357,6 +6369,12 @@ export default function DarikDirectStorefrontPage() {
     );
   }
 
+  const rawHeroSize254 = darikStorefrontVisualTruth194?.hero_size;
+  const heroSize254 =
+    normalizeHeroSize254(rawHeroSize254) === "compact"
+      ? "compact"
+      : "default";
+
   const hasActiveVehicleFilter =
     selectedVehicleMake !== "all" ||
     selectedVehicleModel !== "all" ||
@@ -6377,6 +6395,7 @@ export default function DarikDirectStorefrontPage() {
       data-card-style={productCardStyle}
       data-corners={cornerStyle}
       data-hero={heroLayout}
+      data-hero-size={heroSize254}
       data-business={effectiveBusinessType}
       data-theme-field={effectiveThemeField}
       data-darik-page-font={effectiveStorefrontTypography.page.font}

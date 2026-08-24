@@ -22047,3 +22047,170 @@
   font: inherit;
   font-weight: 950;
 }
+
+
+/* DARIK_STOREFRONT_HERO_SIZE_OPTION_254
+   Default is intentionally untouched. Compact only overrides hero scale. */
+.page[data-hero-size="compact"] .hero {
+  min-height: 330px !important;
+  margin-top: 14px !important;
+  gap: 24px !important;
+  border-radius: 28px !important;
+  padding: 30px 32px !important;
+  grid-template-columns: minmax(0, 1fr) minmax(260px, 0.34fr) !important;
+}
+
+.page[data-hero-size="compact"] .heroContent {
+  gap: 16px !important;
+}
+
+.page[data-hero-size="compact"] .heroLogo {
+  width: 86px !important;
+  height: 86px !important;
+  border-width: 5px !important;
+  border-radius: 23px !important;
+  font-size: 32px !important;
+}
+
+.page[data-hero-size="compact"] .heroLabel {
+  margin-bottom: 8px !important;
+  padding: 5px 9px !important;
+  font-size: 9px !important;
+}
+
+.page[data-hero-size="compact"] .hero h1,
+.page[data-hero-size="compact"] .heroCopy h1 {
+  font-size: clamp(34px, 4.4vw, 58px) !important;
+  line-height: .94 !important;
+}
+
+.page[data-hero-size="compact"] .arabicName {
+  margin-top: 8px !important;
+  font-size: clamp(16px, 2vw, 22px) !important;
+}
+
+.page[data-hero-size="compact"] .tagline {
+  margin-top: 10px !important;
+  font-size: clamp(13px, 1.25vw, 16px) !important;
+  line-height: 1.45 !important;
+}
+
+.page[data-hero-size="compact"] .arabicTagline {
+  margin-top: 4px !important;
+  font-size: 12px !important;
+}
+
+.page[data-hero-size="compact"] .heroButtons {
+  gap: 7px !important;
+  margin-top: 14px !important;
+}
+
+.page[data-hero-size="compact"] .primaryHeroButton,
+.page[data-hero-size="compact"] .secondaryHeroButton {
+  min-height: 40px !important;
+  border-radius: 12px !important;
+  padding-inline: 14px !important;
+  font-size: 11px !important;
+}
+
+.page[data-hero-size="compact"] .orderSnapshot {
+  border-radius: 19px !important;
+}
+
+.page[data-hero-size="compact"] .snapshotStatus {
+  min-height: 52px !important;
+  padding: 10px 13px !important;
+}
+
+.page[data-hero-size="compact"] .snapshotStatus span {
+  font-size: 9px !important;
+}
+
+.page[data-hero-size="compact"] .snapshotStatus strong {
+  font-size: 12px !important;
+}
+
+.page[data-hero-size="compact"] .snapshotGrid > div {
+  min-height: 76px !important;
+  gap: 4px !important;
+  padding: 10px 12px !important;
+}
+
+.page[data-hero-size="compact"] .snapshotGrid svg {
+  width: 16px !important;
+  height: 16px !important;
+  margin-bottom: 2px !important;
+}
+
+.page[data-hero-size="compact"] .snapshotGrid span {
+  font-size: 8px !important;
+}
+
+.page[data-hero-size="compact"] .snapshotGrid strong {
+  font-size: 11px !important;
+}
+
+.page[data-hero-size="compact"] .quickInfoStrip {
+  margin-top: -15px !important;
+}
+
+@media (max-width: 780px) {
+  .page[data-hero-size="compact"] .hero {
+    width: calc(100% - 24px) !important;
+    min-height: 390px !important;
+    margin-top: 10px !important;
+    grid-template-columns: 1fr !important;
+    gap: 16px !important;
+    border-radius: 23px !important;
+    padding: 21px 18px !important;
+  }
+
+  .page[data-hero-size="compact"] .heroContent {
+    gap: 12px !important;
+  }
+
+  .page[data-hero-size="compact"] .heroLogo {
+    width: 66px !important;
+    height: 66px !important;
+    border-width: 4px !important;
+    border-radius: 18px !important;
+    font-size: 26px !important;
+  }
+
+  .page[data-hero-size="compact"] .hero h1,
+  .page[data-hero-size="compact"] .heroCopy h1 {
+    font-size: clamp(32px, 10vw, 46px) !important;
+  }
+
+  .page[data-hero-size="compact"] .tagline {
+    font-size: 13px !important;
+  }
+
+  .page[data-hero-size="compact"] .orderSnapshot {
+    width: 100% !important;
+  }
+
+  .page[data-hero-size="compact"] .snapshotGrid > div {
+    min-height: 66px !important;
+    padding: 8px 10px !important;
+  }
+
+  .page[data-hero-size="compact"] .quickInfoStrip {
+    margin-top: -12px !important;
+  }
+}
+
+@media (max-width: 500px) {
+  .page[data-hero-size="compact"] .hero {
+    min-height: 365px !important;
+    padding: 18px 16px !important;
+  }
+
+  .page[data-hero-size="compact"] .heroButtons {
+    margin-top: 11px !important;
+  }
+
+  .page[data-hero-size="compact"] .snapshotGrid > div {
+    min-height: 62px !important;
+  }
+}
