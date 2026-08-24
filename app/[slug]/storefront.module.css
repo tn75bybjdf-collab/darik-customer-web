@@ -22697,3 +22697,79 @@
     transform: none !important;
   }
 }
+
+/* DARIK_BANNER_PRODUCT_LINKS_287
+   Customer sees artwork only. Product linking adds click behavior, not badges,
+   dots, arrows or any other visual carousel indicator. */
+.storeBannerDots274 {
+  display: none !important;
+}
+
+.stickyBanner287 {
+  position: fixed;
+  left: 0;
+  right: 0;
+  z-index: 38;
+  display: flex;
+  justify-content: center;
+  pointer-events: none;
+  opacity: 0;
+  visibility: hidden;
+  transform: translate3d(0, -10px, 0);
+  transition:
+    opacity 180ms ease,
+    transform 210ms cubic-bezier(.22,.75,.22,1),
+    visibility 0s linear 210ms;
+}
+
+.stickyBannerVisible287 {
+  opacity: 1;
+  visibility: visible;
+  transform: translate3d(0, 0, 0);
+  transition:
+    opacity 180ms ease,
+    transform 210ms cubic-bezier(.22,.75,.22,1),
+    visibility 0s linear 0s;
+}
+
+.stickyBannerInner287 {
+  width: min(100%, 1600px);
+  height: clamp(78px, 28.125vw, 225px);
+  overflow: hidden;
+  background: #0b1118;
+  box-shadow: 0 10px 28px rgba(0,0,0,.18);
+  pointer-events: none;
+}
+
+.stickyBannerLinked287 {
+  cursor: pointer;
+  pointer-events: auto !important;
+}
+
+.stickyBannerImage287,
+.stickyBannerImage286,
+.stickyBannerImage283 {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+  object-position: center;
+  animation: darikBanner287Crossfade 360ms ease-out both;
+}
+
+@keyframes darikBanner287Crossfade {
+  from { opacity: .18; transform: scale(1.006); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .stickyBanner287,
+  .stickyBannerVisible287,
+  .stickyBannerImage287,
+  .stickyBannerImage286,
+  .stickyBannerImage283 {
+    transition: none !important;
+    animation: none !important;
+    transform: none !important;
+  }
+}

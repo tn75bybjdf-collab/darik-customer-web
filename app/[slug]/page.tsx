@@ -103,6 +103,7 @@ type ActiveStoreBanner274 = {
   text: string;
   image_url: string;
   hero_size_generated_for: HeroSize254;
+  product_id?: string | null;
 };
 
 function normalizeHeroSize254(value: unknown): HeroSize254 {
@@ -6682,7 +6683,32 @@ export default function DarikDirectStorefrontPage() {
           style={{ top: stickyBannerTop283 }}
           aria-hidden={!showStickyBanner283}
         >
-          <div className={styles.stickyBannerInner283}>
+          <div
+              className={`${styles.stickyBannerInner283} ${
+                activeStoreBanner274.product_id ? styles.stickyBannerLinked287 : ""
+              }`}
+              role={activeStoreBanner274.product_id ? "link" : undefined}
+              tabIndex={activeStoreBanner274.product_id ? 0 : undefined}
+              aria-label={activeStoreBanner274.product_id ? "Open featured product" : undefined}
+              onClick={() => {
+                if (!activeStoreBanner274.product_id) return;
+                window.location.assign(
+                  `/${storefront.slug}?product=${encodeURIComponent(
+                    activeStoreBanner274.product_id
+                  )}#catalog`
+                );
+              }}
+              onKeyDown={(event) => {
+                if (!activeStoreBanner274.product_id) return;
+                if (event.key !== "Enter" && event.key !== " ") return;
+                event.preventDefault();
+                window.location.assign(
+                  `/${storefront.slug}?product=${encodeURIComponent(
+                    activeStoreBanner274.product_id
+                  )}#catalog`
+                );
+              }}
+            >
             <img
               key={activeStoreBanner274.id}
               className={styles.stickyBannerImage283}

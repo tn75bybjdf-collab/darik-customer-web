@@ -1,44 +1,52 @@
-// DARIK_THREE_REVOLVING_BANNER_UPLOAD_286
+// DARIK_BANNER_PRODUCT_LINKS_UPLOAD_287
 import { createClient } from "@supabase/supabase-js";
 import { NextRequest, NextResponse } from "next/server";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-const PRODUCT_BUCKET_286 = "darik-direct-products";
-const BANNER_LIMIT_286 = 3;
+const PRODUCT_BUCKET_287 = "darik-direct-products";
+const BANNER_LIMIT_287 = 3;
+const PRODUCT_LINK_PREFIX_287 = "banner-product:";
 
-type UploadBody286 = {
+type UploadBody287 = {
   retailer_id?: unknown;
   image_url?: unknown;
   image_width?: unknown;
   image_height?: unknown;
 };
 
-function json286(payload: Record<string, unknown>, status = 200) {
+function json287(payload: Record<string, unknown>, status = 200) {
   return NextResponse.json(payload, {
     status,
     headers: { "Cache-Control": "no-store, max-age=0" },
   });
 }
 
-function text286(value: unknown, max = 1000) {
+function text287(value: unknown, max = 1000) {
   return String(value ?? "").trim().slice(0, max);
 }
 
-function validUuid286(value: string) {
+function validUuid287(value: string) {
   return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(
     value
   );
 }
 
-function bearerToken286(request: NextRequest) {
+function productIdFromPrompt287(value: unknown) {
+  const prompt = String(value || "").trim();
+  if (!prompt.startsWith(PRODUCT_LINK_PREFIX_287)) return null;
+  const id = prompt.slice(PRODUCT_LINK_PREFIX_287.length).trim();
+  return validUuid287(id) ? id : null;
+}
+
+function bearerToken287(request: NextRequest) {
   return (request.headers.get("authorization") || "")
     .replace(/^Bearer\s+/i, "")
     .trim();
 }
 
-function mapBanner286(row: any) {
+function mapBanner287(row: any) {
   return {
     id: String(row.id || ""),
     text: String(row.banner_text || "Uploaded storefront banner"),
@@ -46,6 +54,7 @@ function mapBanner286(row: any) {
     hero_size_generated_for: "compact" as const,
     status: String(row.status || ""),
     created_at: row.created_at || null,
+    product_id: productIdFromPrompt287(row.ai_prompt),
   };
 }
 
@@ -57,26 +66,26 @@ export async function POST(request: NextRequest) {
     "";
 
   if (!supabaseUrl || !serviceRoleKey) {
-    return json286(
+    return json287(
       { ok: false, error: "Darik banner upload is temporarily unavailable." },
       503
     );
   }
 
-  let body: UploadBody286;
+  let body: UploadBody287;
   try {
-    body = (await request.json()) as UploadBody286;
+    body = (await request.json()) as UploadBody287;
   } catch {
-    return json286({ ok: false, error: "Invalid banner upload." }, 400);
+    return json287({ ok: false, error: "Invalid banner upload." }, 400);
   }
 
-  const retailerId = text286(body.retailer_id, 80);
-  const imageUrl = text286(body.image_url, 1600);
+  const retailerId = text287(body.retailer_id, 80);
+  const imageUrl = text287(body.image_url, 1600);
   const imageWidth = Number(body.image_width);
   const imageHeight = Number(body.image_height);
 
-  if (!validUuid286(retailerId)) {
-    return json286({ ok: false, error: "Invalid Darik retailer." }, 400);
+  if (!validUuid287(retailerId)) {
+    return json287({ ok: false, error: "Invalid Darik retailer." }, 400);
   }
 
   if (
@@ -84,14 +93,14 @@ export async function POST(request: NextRequest) {
     !Number.isFinite(imageWidth) ||
     !Number.isFinite(imageHeight)
   ) {
-    return json286(
+    return json287(
       { ok: false, error: "Banner image information is incomplete." },
       400
     );
   }
 
   if (imageWidth !== 1600 || imageHeight !== 450) {
-    return json286(
+    return json287(
       {
         ok: false,
         error:
@@ -101,9 +110,9 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const token = bearerToken286(request);
+  const token = bearerToken287(request);
   if (!token) {
-    return json286({ ok: false, error: "Retailer login required." }, 401);
+    return json287({ ok: false, error: "Retailer login required." }, 401);
   }
 
   const admin = createClient(supabaseUrl, serviceRoleKey, {
@@ -116,7 +125,7 @@ export async function POST(request: NextRequest) {
 
   const { data: userData, error: userError } = await admin.auth.getUser(token);
   if (userError || !userData.user?.id) {
-    return json286(
+    return json287(
       { ok: false, error: "Retailer session is invalid or expired." },
       401
     );
@@ -129,24 +138,24 @@ export async function POST(request: NextRequest) {
     .maybeSingle();
 
   if (retailerError || !retailer?.id) {
-    return json286(
+    return json287(
       { ok: false, error: "Could not verify this Darik store." },
       retailerError ? 500 : 404
     );
   }
 
   if (retailer.account_restricted === true) {
-    return json286(
+    return json287(
       { ok: false, error: "This Darik account is currently restricted." },
       403
     );
   }
 
   if (
-    text286(retailer.email, 320).toLowerCase() !==
-    text286(userData.user.email, 320).toLowerCase()
+    text287(retailer.email, 320).toLowerCase() !==
+    text287(userData.user.email, 320).toLowerCase()
   ) {
-    return json286(
+    return json287(
       {
         ok: false,
         error: "Only the Darik store owner can upload storefront banners.",
@@ -162,7 +171,7 @@ export async function POST(request: NextRequest) {
     .maybeSingle();
 
   if (storefrontError || !storefront?.id) {
-    return json286(
+    return json287(
       {
         ok: false,
         error: "This retailer does not have a Darik storefront yet.",
@@ -173,10 +182,10 @@ export async function POST(request: NextRequest) {
 
   const publicBase =
     `${supabaseUrl.replace(/\/+$/, "")}/storage/v1/object/public/` +
-    `${PRODUCT_BUCKET_286}/${retailerId}/storefront-banners/`;
+    `${PRODUCT_BUCKET_287}/${retailerId}/storefront-banners/`;
 
   if (!imageUrl.startsWith(publicBase)) {
-    return json286(
+    return json287(
       {
         ok: false,
         error: "This banner image was not uploaded by your Darik store.",
@@ -192,18 +201,18 @@ export async function POST(request: NextRequest) {
     .eq("banner_text", "Uploaded storefront banner")
     .in("status", ["active", "draft"])
     .order("created_at", { ascending: true })
-    .limit(BANNER_LIMIT_286);
+    .limit(BANNER_LIMIT_287);
 
   if (currentError) {
-    return json286(
+    return json287(
       { ok: false, error: "Could not read the current storefront banners." },
       500
     );
   }
 
   const currentLive = current || [];
-  if (currentLive.length >= BANNER_LIMIT_286) {
-    return json286(
+  if (currentLive.length >= BANNER_LIMIT_287) {
+    return json287(
       {
         ok: false,
         error:
@@ -234,13 +243,13 @@ export async function POST(request: NextRequest) {
       updated_at: now,
     })
     .select(
-      "id,banner_text,hero_size_generated_for,final_banner_image_url,status,created_at"
+      "id,banner_text,hero_size_generated_for,final_banner_image_url,status,created_at,ai_prompt"
     )
     .single();
 
   if (createError || !created?.id) {
-    console.error("Darik banner 286 insert:", createError?.message);
-    return json286(
+    console.error("Darik banner 287 insert:", createError?.message);
+    return json287(
       { ok: false, error: "Could not save this storefront banner." },
       500
     );
@@ -249,35 +258,23 @@ export async function POST(request: NextRequest) {
   const { data: refreshed, error: refreshedError } = await admin
     .from("retailer_storefront_banners")
     .select(
-      "id,banner_text,hero_size_generated_for,final_banner_image_url,status,created_at"
+      "id,banner_text,hero_size_generated_for,final_banner_image_url,status,created_at,ai_prompt"
     )
     .eq("storefront_id", storefront.id)
     .eq("banner_text", "Uploaded storefront banner")
     .in("status", ["active", "draft"])
     .order("created_at", { ascending: true })
-    .limit(BANNER_LIMIT_286);
+    .limit(BANNER_LIMIT_287);
 
-  if (refreshedError) {
-    return json286(
-      {
-        ok: true,
-        active_banner: mapBanner286(created),
-        active_banners: [mapBanner286(created)],
-        banner_limit: BANNER_LIMIT_286,
-        hero_size: "compact",
-        slug: storefront.slug,
-      },
-      200
-    );
-  }
+  const activeBanners = refreshedError
+    ? [mapBanner287(created)]
+    : (refreshed || []).map(mapBanner287);
 
-  const activeBanners = (refreshed || []).map(mapBanner286);
-
-  return json286({
+  return json287({
     ok: true,
     active_banner: activeBanners[0] || null,
     active_banners: activeBanners,
-    banner_limit: BANNER_LIMIT_286,
+    banner_limit: BANNER_LIMIT_287,
     hero_size: "compact",
     slug: storefront.slug,
   });
