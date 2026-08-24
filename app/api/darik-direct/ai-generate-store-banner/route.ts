@@ -279,7 +279,7 @@ export async function POST(request: NextRequest) {
 
   const { data: retailer, error: retailerError } = await admin
     .from("retailers")
-    .select("id,email,account_restricted")
+    .select("id,email,account_restricted,business_name,direct_business_type,direct_business_type_other")
     .eq("id", retailerId)
     .maybeSingle();
 
@@ -291,12 +291,17 @@ export async function POST(request: NextRequest) {
 
   const { data: storefront, error: storefrontError } = await admin
     .from("retailer_storefronts")
-    .select("id,retailer_id,slug,display_name,display_name_ar,logo_url,direct_hero_size,primary_color,accent_color,background_color,business_type")
+    .select("id,retailer_id,slug,display_name,display_name_ar,logo_url,direct_hero_size,primary_color,accent_color,background_color")
     .eq("retailer_id", retailerId)
     .maybeSingle();
 
-  if (storefrontError || !storefront?.id) {
-    return json({ ok: false, error: "This retailer does not have a Darik storefront yet." }, storefrontError ? 500 : 404);
+  // DARIK_BANNER_STOREFRONT_LOOKUP_FIX_278
+  if (storefrontError) {
+    console.error("Darik banner 278 storefront lookup failed:", storefrontError.message);
+    return json({ ok: false, error: "Darik could not load this storefront right now." }, 500);
+  }
+  if (!storefront?.id) {
+    return json({ ok: false, error: "This retailer does not have a Darik storefront yet." }, 404);
   }
 
   const heroSize: "default" | "compact" = storefront.direct_hero_size === "compact" ? "compact" : "default";
@@ -315,8 +320,8 @@ export async function POST(request: NextRequest) {
 
   const prompt = bannerPrompt({
     message: bannerText,
-    storeName: text(storefront.display_name || storefront.display_name_ar, 180),
-    businessType: text(storefront.business_type, 120),
+    storeName: text(storefront.display_name || storefront.display_name_ar || retailer.business_name, 180),
+    businessType: text(retailer.direct_business_type || retailer.direct_business_type_other, 120),
     heroSize,
     primary: text(storefront.primary_color, 40),
     accent: text(storefront.accent_color, 40),
