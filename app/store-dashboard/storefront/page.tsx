@@ -1257,6 +1257,36 @@ function clampStorefrontPosition145(value: unknown) {
   return Math.max(-1200, Math.min(1200, Math.round(numeric)));
 }
 
+// DARIK_COMPACT_HERO_SAFE_POSITIONS_262
+function clampCompactHeroPosition262(
+  value: unknown,
+  axis: "x" | "y",
+  device: StorefrontPositionDevice145
+) {
+  const numeric = Number(value);
+  if (!Number.isFinite(numeric)) return 0;
+
+  const limit =
+    device === "mobile"
+      ? axis === "x"
+        ? 48
+        : 38
+      : axis === "x"
+        ? 120
+        : 78;
+
+  return Math.max(
+    -limit,
+    Math.min(limit, Math.round(numeric))
+  );
+}
+
+function isCompactHeroPositionTarget262(
+  key: StorefrontPositionKey145
+) {
+  return key !== "shop";
+}
+
 function storefrontDefaultContentPositioning145(): StorefrontContentPositioning145 {
   return {
     display_name: {
@@ -1735,13 +1765,21 @@ export default function DarikDirectStorefrontSettingsPage() {
     positioningRevisionRef145.current += 1;
     setPreviewPositionSaveState145(storefront?.id ? "waiting" : "idle");
 
+    const compactHeroTarget262 =
+      heroSize254 === "compact" &&
+      isCompactHeroPositionTarget262(key);
+
     setStorefrontContentPositioning145((current) => ({
       ...current,
       [key]: {
         ...current[key],
         [device]: {
-          x: clampStorefrontPosition145(nextX),
-          y: clampStorefrontPosition145(nextY),
+          x: compactHeroTarget262
+            ? clampCompactHeroPosition262(nextX, "x", device)
+            : clampStorefrontPosition145(nextX),
+          y: compactHeroTarget262
+            ? clampCompactHeroPosition262(nextY, "y", device)
+            : clampStorefrontPosition145(nextY),
         },
       },
     }));
@@ -5106,6 +5144,12 @@ export default function DarikDirectStorefrontSettingsPage() {
         pinchCurrentScale151 = 1;
 
         savedLayout150D = defaultLayout150D();
+
+        // DARIK_COMPACT_HERO_SAFE_POSITIONS_262
+        // Also reset the canonical hero/text positions. Without this,
+        // Reset layout can visually reset the old freeform layer while the
+        // real saved hero offsets remain off-screen.
+        resetAllPreviewPositions145();
 
         document150A
           .querySelectorAll(
