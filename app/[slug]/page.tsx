@@ -2164,40 +2164,94 @@ export default function DarikDirectStorefrontPage() {
   }, [activeStoreBanner274?.image_url]);
   const [showStoreBanner274, setShowStoreBanner274] = useState(false);
 
+  // DARIK_THREE_BANNER_ROTATION_286
+  const [activeStoreBanners286, setActiveStoreBanners286] =
+    useState<ActiveStoreBanner274[]>([]);
+  const [activeStoreBannerIndex286, setActiveStoreBannerIndex286] =
+    useState(0);
   useEffect(() => {
     if (!slug || slug === "_darik-private-store-preview") {
+      setActiveStoreBanners286([]);
+      setActiveStoreBannerIndex286(0);
       setActiveStoreBanner274(null);
       setShowStoreBanner274(false);
       return;
     }
 
-    let cancelled274 = false;
+    let cancelled286 = false;
 
     void (async () => {
       try {
-        const response274 = await fetch(
+        const response286 = await fetch(
           `/api/darik-direct/store-banner?slug=${encodeURIComponent(slug)}`,
           { cache: "no-store" }
         );
-        const payload274 = (await response274.json().catch(() => ({}))) as {
+
+        const payload286 = (await response286.json().catch(() => ({}))) as {
           ok?: boolean;
           active_banner?: ActiveStoreBanner274 | null;
+          active_banners?: ActiveStoreBanner274[];
         };
-        if (cancelled274) return;
-        setActiveStoreBanner274(
-          response274.ok && payload274.ok && payload274.active_banner?.image_url
-            ? payload274.active_banner
-            : null
-        );
+
+        if (cancelled286) return;
+
+        const list286 =
+          response286.ok && payload286.ok
+            ? Array.isArray(payload286.active_banners)
+              ? payload286.active_banners
+                  .filter((banner286) => Boolean(banner286?.image_url))
+                  .slice(0, 3)
+              : payload286.active_banner?.image_url
+                ? [payload286.active_banner]
+                : []
+            : [];
+
+        setActiveStoreBanners286(list286);
+        setActiveStoreBannerIndex286(0);
+        setActiveStoreBanner274(list286[0] || null);
+        // Hero NEVER participates in the rotation.
+        setShowStoreBanner274(false);
       } catch {
-        if (!cancelled274) setActiveStoreBanner274(null);
+        if (!cancelled286) {
+          setActiveStoreBanners286([]);
+          setActiveStoreBannerIndex286(0);
+          setActiveStoreBanner274(null);
+          setShowStoreBanner274(false);
+        }
       }
     })();
 
     return () => {
-      cancelled274 = true;
+      cancelled286 = true;
     };
   }, [slug]);
+
+  useEffect(() => {
+    if (!activeStoreBanners286.length) {
+      setActiveStoreBanner274(null);
+      setActiveStoreBannerIndex286(0);
+      return;
+    }
+
+    const safeIndex286 =
+      activeStoreBannerIndex286 % activeStoreBanners286.length;
+
+    setActiveStoreBanner274(
+      activeStoreBanners286[safeIndex286] || activeStoreBanners286[0] || null
+    );
+  }, [activeStoreBanners286, activeStoreBannerIndex286]);
+
+  useEffect(() => {
+    if (activeStoreBanners286.length <= 1) return;
+
+    const timer286 = window.setInterval(() => {
+      setActiveStoreBannerIndex286(
+        (current286) => (current286 + 1) % activeStoreBanners286.length
+      );
+    }, 6000);
+
+    return () => window.clearInterval(timer286);
+  }, [activeStoreBanners286.length]);
 
   /* DARIK_283_ROTATION_REMOVED: Hero never auto-swaps with Banner. */
 
@@ -6609,7 +6663,7 @@ export default function DarikDirectStorefrontPage() {
       data-corners={cornerStyle}
       data-hero={heroLayout}
       data-hero-size={heroSize254}
-      data-banner-active={activeStoreBanner274?.image_url ? "yes" : "no"}
+      data-banner-active="no"
       data-business={effectiveBusinessType}
       data-theme-field={effectiveThemeField}
       data-darik-page-font={effectiveStorefrontTypography.page.font}
@@ -6630,6 +6684,7 @@ export default function DarikDirectStorefrontPage() {
         >
           <div className={styles.stickyBannerInner283}>
             <img
+              key={activeStoreBanner274.id}
               className={styles.stickyBannerImage283}
               src={activeStoreBanner274.image_url}
               alt="Store promotion banner"
@@ -7341,22 +7396,7 @@ style={{
       </section>
       )}
 
-      {activeStoreBanner274 ? (
-        <div className={styles.storeBannerDots274} aria-label="Hero slides">
-          <button
-            type="button"
-            className={!showStoreBanner274 ? styles.storeBannerDotActive274 : ""}
-            onClick={() => setShowStoreBanner274(false)}
-            aria-label="Show storefront hero"
-          />
-          <button
-            type="button"
-            className={showStoreBanner274 ? styles.storeBannerDotActive274 : ""}
-            onClick={() => setShowStoreBanner274(true)}
-            aria-label="Show store promotion"
-          />
-        </div>
-      ) : null}
+      {/* DARIK_286_NO_BANNER_INDICATORS */}
 
       {/* DARIK_MOBILE_DELIVERY_PROMISE_FEE_185 */}
       {showOrdering && deliveryEnabled && !selectedPickup ? (

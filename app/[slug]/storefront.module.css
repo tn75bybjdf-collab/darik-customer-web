@@ -22624,3 +22624,76 @@
     transform: none;
   }
 }
+
+/* DARIK_THREE_BANNER_ROTATION_286
+   No dots, arrows, counters or customer-facing carousel indicators. */
+.storeBannerDots274 {
+  display: none !important;
+}
+
+.stickyBanner286 {
+  position: fixed;
+  left: 0;
+  right: 0;
+  z-index: 38;
+  display: flex;
+  justify-content: center;
+  pointer-events: none;
+  opacity: 0;
+  visibility: hidden;
+  transform: translate3d(0, -10px, 0);
+  transition:
+    opacity 180ms ease,
+    transform 210ms cubic-bezier(.22,.75,.22,1),
+    visibility 0s linear 210ms;
+}
+
+.stickyBannerVisible286 {
+  opacity: 1;
+  visibility: visible;
+  transform: translate3d(0, 0, 0);
+  transition:
+    opacity 180ms ease,
+    transform 210ms cubic-bezier(.22,.75,.22,1),
+    visibility 0s linear 0s;
+}
+
+.stickyBannerInner286 {
+  width: min(100%, 1600px);
+  height: clamp(78px, 28.125vw, 225px);
+  overflow: hidden;
+  background: #0b1118;
+  box-shadow: 0 10px 28px rgba(0,0,0,.18);
+}
+
+.stickyBannerImage286,
+.stickyBannerImage283 {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+  object-position: center;
+  animation: darikBannerRevolve286 360ms ease-out both;
+}
+
+@keyframes darikBannerRevolve286 {
+  from {
+    opacity: .20;
+    transform: scale(1.008);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .stickyBanner286,
+  .stickyBannerVisible286,
+  .stickyBannerImage286,
+  .stickyBannerImage283 {
+    transition: none !important;
+    animation: none !important;
+    transform: none !important;
+  }
+}

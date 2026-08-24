@@ -1,38 +1,52 @@
-// DARIK_MANUAL_STOREFRONT_BANNER_UPLOAD_282
+// DARIK_THREE_REVOLVING_BANNER_UPLOAD_286
 import { createClient } from "@supabase/supabase-js";
 import { NextRequest, NextResponse } from "next/server";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-const PRODUCT_BUCKET_282 = "darik-direct-products";
+const PRODUCT_BUCKET_286 = "darik-direct-products";
+const BANNER_LIMIT_286 = 3;
 
-type UploadBody282 = {
+type UploadBody286 = {
   retailer_id?: unknown;
   image_url?: unknown;
   image_width?: unknown;
   image_height?: unknown;
 };
 
-function json282(payload: Record<string, unknown>, status = 200) {
+function json286(payload: Record<string, unknown>, status = 200) {
   return NextResponse.json(payload, {
     status,
     headers: { "Cache-Control": "no-store, max-age=0" },
   });
 }
 
-function text282(value: unknown, max = 1000) {
+function text286(value: unknown, max = 1000) {
   return String(value ?? "").trim().slice(0, max);
 }
 
-function validUuid282(value: string) {
-  return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value);
+function validUuid286(value: string) {
+  return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(
+    value
+  );
 }
 
-function bearerToken282(request: NextRequest) {
+function bearerToken286(request: NextRequest) {
   return (request.headers.get("authorization") || "")
     .replace(/^Bearer\s+/i, "")
     .trim();
+}
+
+function mapBanner286(row: any) {
+  return {
+    id: String(row.id || ""),
+    text: String(row.banner_text || "Uploaded storefront banner"),
+    image_url: String(row.final_banner_image_url || ""),
+    hero_size_generated_for: "compact" as const,
+    status: String(row.status || ""),
+    created_at: row.created_at || null,
+  };
 }
 
 export async function POST(request: NextRequest) {
@@ -43,34 +57,53 @@ export async function POST(request: NextRequest) {
     "";
 
   if (!supabaseUrl || !serviceRoleKey) {
-    return json282(
+    return json286(
       { ok: false, error: "Darik banner upload is temporarily unavailable." },
       503
     );
   }
 
-  let body: UploadBody282;
+  let body: UploadBody286;
   try {
-    body = (await request.json()) as UploadBody282;
+    body = (await request.json()) as UploadBody286;
   } catch {
-    return json282({ ok: false, error: "Invalid banner upload." }, 400);
+    return json286({ ok: false, error: "Invalid banner upload." }, 400);
   }
 
-  const retailerId = text282(body.retailer_id, 80);
-  const imageUrl = text282(body.image_url, 1600);
+  const retailerId = text286(body.retailer_id, 80);
+  const imageUrl = text286(body.image_url, 1600);
   const imageWidth = Number(body.image_width);
   const imageHeight = Number(body.image_height);
 
-  if (!validUuid282(retailerId)) {
-    return json282({ ok: false, error: "Invalid Darik retailer." }, 400);
-  }
-  if (!imageUrl || !Number.isFinite(imageWidth) || !Number.isFinite(imageHeight)) {
-    return json282({ ok: false, error: "Banner image information is incomplete." }, 400);
+  if (!validUuid286(retailerId)) {
+    return json286({ ok: false, error: "Invalid Darik retailer." }, 400);
   }
 
-  const token = bearerToken282(request);
+  if (
+    !imageUrl ||
+    !Number.isFinite(imageWidth) ||
+    !Number.isFinite(imageHeight)
+  ) {
+    return json286(
+      { ok: false, error: "Banner image information is incomplete." },
+      400
+    );
+  }
+
+  if (imageWidth !== 1600 || imageHeight !== 450) {
+    return json286(
+      {
+        ok: false,
+        error:
+          "Darik must receive the final auto-fitted banner at exactly 1600 × 450 px.",
+      },
+      400
+    );
+  }
+
+  const token = bearerToken286(request);
   if (!token) {
-    return json282({ ok: false, error: "Retailer login required." }, 401);
+    return json286({ ok: false, error: "Retailer login required." }, 401);
   }
 
   const admin = createClient(supabaseUrl, serviceRoleKey, {
@@ -83,7 +116,7 @@ export async function POST(request: NextRequest) {
 
   const { data: userData, error: userError } = await admin.auth.getUser(token);
   if (userError || !userData.user?.id) {
-    return json282(
+    return json286(
       { ok: false, error: "Retailer session is invalid or expired." },
       401
     );
@@ -96,90 +129,94 @@ export async function POST(request: NextRequest) {
     .maybeSingle();
 
   if (retailerError || !retailer?.id) {
-    return json282(
+    return json286(
       { ok: false, error: "Could not verify this Darik store." },
       retailerError ? 500 : 404
     );
   }
 
   if (retailer.account_restricted === true) {
-    return json282(
+    return json286(
       { ok: false, error: "This Darik account is currently restricted." },
       403
     );
   }
 
   if (
-    text282(retailer.email, 320).toLowerCase() !==
-    text282(userData.user.email, 320).toLowerCase()
+    text286(retailer.email, 320).toLowerCase() !==
+    text286(userData.user.email, 320).toLowerCase()
   ) {
-    return json282(
-      { ok: false, error: "Only the Darik store owner can upload storefront banners." },
+    return json286(
+      {
+        ok: false,
+        error: "Only the Darik store owner can upload storefront banners.",
+      },
       403
     );
   }
 
   const { data: storefront, error: storefrontError } = await admin
     .from("retailer_storefronts")
-    .select("id,retailer_id,slug,direct_hero_size")
+    .select("id,retailer_id,slug")
     .eq("retailer_id", retailerId)
     .maybeSingle();
 
-  if (storefrontError) {
-    console.error("Darik manual banner 282 storefront lookup:", storefrontError.message);
-    return json282(
-      { ok: false, error: "Darik could not load this storefront right now." },
-      500
-    );
-  }
-
-  if (!storefront?.id) {
-    return json282(
-      { ok: false, error: "This retailer does not have a Darik storefront yet." },
-      404
-    );
-  }
-
-  // DARIK_HALF_COMPACT_BANNER_284
-  // Compact Hero is 1600x900. Banner is always the same width at exactly
-  // half the Hero height: 1600x450. Legacy direct_hero_size values are ignored.
-  const heroSize = "compact";
-  const expected = { width: 1600, height: 450 };
-
-  if (imageWidth !== expected.width || imageHeight !== expected.height) {
-    return json282(
+  if (storefrontError || !storefront?.id) {
+    return json286(
       {
         ok: false,
-        error: `Your Compact Hero is 1600 × 900 px. Upload a half-height ${expected.width} × ${expected.height} px banner.`,
+        error: "This retailer does not have a Darik storefront yet.",
       },
-      400
+      storefrontError ? 500 : 404
     );
   }
 
   const publicBase =
     `${supabaseUrl.replace(/\/+$/, "")}/storage/v1/object/public/` +
-    `${PRODUCT_BUCKET_282}/${retailerId}/storefront-banners/`;
+    `${PRODUCT_BUCKET_286}/${retailerId}/storefront-banners/`;
 
   if (!imageUrl.startsWith(publicBase)) {
-    return json282(
-      { ok: false, error: "This banner image was not uploaded by your Darik store." },
+    return json286(
+      {
+        ok: false,
+        error: "This banner image was not uploaded by your Darik store.",
+      },
       400
     );
   }
 
-  const now = new Date().toISOString();
-
-  const { data: previousActive, error: previousError } = await admin
+  const { data: current, error: currentError } = await admin
     .from("retailer_storefront_banners")
-    .select("id")
+    .select("id,status,created_at")
     .eq("storefront_id", storefront.id)
-    .eq("status", "active")
-    .limit(1)
-    .maybeSingle();
+    .eq("banner_text", "Uploaded storefront banner")
+    .in("status", ["active", "draft"])
+    .order("created_at", { ascending: true })
+    .limit(BANNER_LIMIT_286);
 
-  if (previousError) {
-    return json282({ ok: false, error: "Could not read the current storefront banner." }, 500);
+  if (currentError) {
+    return json286(
+      { ok: false, error: "Could not read the current storefront banners." },
+      500
+    );
   }
+
+  const currentLive = current || [];
+  if (currentLive.length >= BANNER_LIMIT_286) {
+    return json286(
+      {
+        ok: false,
+        error:
+          "This store already has 3 banners. Remove one before adding another.",
+      },
+      409
+    );
+  }
+
+  const now = new Date().toISOString();
+  const status = currentLive.some((row) => row.status === "active")
+    ? "draft"
+    : "active";
 
   const { data: created, error: createError } = await admin
     .from("retailer_storefront_banners")
@@ -188,64 +225,60 @@ export async function POST(request: NextRequest) {
       retailer_id: retailerId,
       banner_text: "Uploaded storefront banner",
       ai_prompt: null,
-      hero_size_generated_for: heroSize,
+      hero_size_generated_for: "compact",
       background_image_url: imageUrl,
       final_banner_image_url: imageUrl,
-      status: "draft",
+      status,
       credits_charged: 0,
       created_at: now,
       updated_at: now,
     })
-    .select("id,banner_text,hero_size_generated_for,final_banner_image_url,status,created_at")
+    .select(
+      "id,banner_text,hero_size_generated_for,final_banner_image_url,status,created_at"
+    )
     .single();
 
   if (createError || !created?.id) {
-    console.error("Darik manual banner 282 insert:", createError?.message);
-    return json282({ ok: false, error: "Could not save this storefront banner." }, 500);
+    console.error("Darik banner 286 insert:", createError?.message);
+    return json286(
+      { ok: false, error: "Could not save this storefront banner." },
+      500
+    );
   }
 
-  if (previousActive?.id) {
-    const archive = await admin
-      .from("retailer_storefront_banners")
-      .update({ status: "archived", updated_at: now })
-      .eq("id", previousActive.id);
-
-    if (archive.error) {
-      await admin.from("retailer_storefront_banners").delete().eq("id", created.id);
-      return json282({ ok: false, error: "Could not replace the current storefront banner." }, 500);
-    }
-  }
-
-  const { data: activated, error: activateError } = await admin
+  const { data: refreshed, error: refreshedError } = await admin
     .from("retailer_storefront_banners")
-    .update({ status: "active", updated_at: now })
-    .eq("id", created.id)
-    .select("id,banner_text,hero_size_generated_for,final_banner_image_url,status,created_at")
-    .single();
+    .select(
+      "id,banner_text,hero_size_generated_for,final_banner_image_url,status,created_at"
+    )
+    .eq("storefront_id", storefront.id)
+    .eq("banner_text", "Uploaded storefront banner")
+    .in("status", ["active", "draft"])
+    .order("created_at", { ascending: true })
+    .limit(BANNER_LIMIT_286);
 
-  if (activateError || !activated?.id) {
-    if (previousActive?.id) {
-      await admin
-        .from("retailer_storefront_banners")
-        .update({ status: "active", updated_at: new Date().toISOString() })
-        .eq("id", previousActive.id);
-    }
-    await admin.from("retailer_storefront_banners").delete().eq("id", created.id);
-    return json282({ ok: false, error: "Could not activate this storefront banner." }, 500);
+  if (refreshedError) {
+    return json286(
+      {
+        ok: true,
+        active_banner: mapBanner286(created),
+        active_banners: [mapBanner286(created)],
+        banner_limit: BANNER_LIMIT_286,
+        hero_size: "compact",
+        slug: storefront.slug,
+      },
+      200
+    );
   }
 
-  return json282({
+  const activeBanners = (refreshed || []).map(mapBanner286);
+
+  return json286({
     ok: true,
-    active_banner: {
-      id: activated.id,
-      text: activated.banner_text,
-      image_url: activated.final_banner_image_url,
-      hero_size_generated_for: activated.hero_size_generated_for,
-      status: activated.status,
-      created_at: activated.created_at,
-    },
-    hero_size: heroSize,
+    active_banner: activeBanners[0] || null,
+    active_banners: activeBanners,
+    banner_limit: BANNER_LIMIT_286,
+    hero_size: "compact",
     slug: storefront.slug,
-    required_size: expected,
   });
 }
