@@ -6813,7 +6813,93 @@ export default function DarikDirectStorefrontPage() {
     );
   }
 
-  function renderProductCard(product: Product) {
+
+  // DARIK_QUICK_ADD_REQUIRED_OPTIONS_293B
+  function productRequiresRequiredChoice293B(product293B: Product) {
+    const record293B =
+      product293B as unknown as Record<string, unknown>;
+
+    const hasValues293B = (value293B: unknown): boolean => {
+      if (value293B == null) return false;
+
+      if (Array.isArray(value293B)) {
+        return value293B.filter(Boolean).length > 0;
+      }
+
+      if (typeof value293B === "string") {
+        const clean293B = value293B.trim();
+
+        if (!clean293B) return false;
+
+        if (
+          ["[]", "{}", "null", "none", "n/a", "na"].includes(
+            clean293B.toLowerCase()
+          )
+        ) {
+          return false;
+        }
+
+        if (
+          clean293B.startsWith("[") ||
+          clean293B.startsWith("{")
+        ) {
+          try {
+            return hasValues293B(JSON.parse(clean293B));
+          } catch {
+            return true;
+          }
+        }
+
+        return true;
+      }
+
+      if (typeof value293B === "object") {
+        const obj293B =
+          value293B as Record<string, unknown>;
+
+        for (const nested293B of [
+          "values",
+          "sizes",
+          "options",
+          "choices",
+          "available",
+        ]) {
+          if (hasValues293B(obj293B[nested293B])) {
+            return true;
+          }
+        }
+
+        return false;
+      }
+
+      return false;
+    };
+
+    return (
+      hasValues293B(record293B.direct_size_options) ||
+      hasValues293B(record293B.direct_shoe_sizes)
+    );
+  }
+
+  function quickAddProduct293B(
+    product293B: Product,
+    addNow293B: () => void
+  ) {
+    if (productRequiresRequiredChoice293B(product293B)) {
+      window.location.assign(
+        "/" +
+          storefront.slug +
+          "?product=" +
+          encodeURIComponent(product293B.id) +
+          "#catalog"
+      );
+      return;
+    }
+
+    addNow293B();
+  }
+
+function renderProductCard(product: Product) {
     const name = productName(product);
     const photo = productPhoto(product);
     const thumbnailPhoto = productThumbnailPhotoUrl(photo);
@@ -7014,7 +7100,9 @@ export default function DarikDirectStorefrontPage() {
                     : `${name} is out of stock`
                 }
                 disabled={!effectiveAcceptingOrders || !productAvailable}
-                onClick={() => addToCart(product)}
+                onClick={() =>
+      quickAddProduct293B(product, () => addToCart(product))
+    }
               >
                 {productAvailable ? <Icon name="plus" size={19} /> : null}
                 <span>{productAvailable ? "Add" : "Out of stock"}</span>
