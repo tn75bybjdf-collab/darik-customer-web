@@ -1,5 +1,6 @@
 "use client";
 
+import DarikJordanDirectorySearch295 from "./components/DarikJordanDirectorySearch295";
 // DARIK_PAYMENT_FIRST_YEARLY_PLANS_CATALOG_GATE_190
 
 
@@ -1523,15 +1524,9 @@ export default function DarikDiscoveryHome() {
           </button>
 
           <div className={styles.discoverySearchRow246}>
-            <label className={styles.discoverySearch246}>
-              <Icon name="search" size={22} />
-              <input
-                value={storeSearch}
-                onChange={(event) => setStoreSearch(event.target.value)}
-                placeholder={t.searchPlaceholder}
-                disabled={!location}
+            <DarikJordanDirectorySearch295
+                className={styles.discoverySearch246}
               />
-            </label>
 
             <button
               className={[

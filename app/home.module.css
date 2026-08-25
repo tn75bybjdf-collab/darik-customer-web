@@ -2418,3 +2418,352 @@
     padding: 42px 18px 22px;
   }
 }
+
+/* DARIK_JORDAN_DIRECTORY_SEARCH_295
+   Homepage search is now a Jordan-wide product + store directory.
+   It is intentionally independent of delivery-location selection. */
+
+.darikDirectorySearchWrap295 {
+  position: relative;
+  flex: 1 1 auto;
+  min-width: 0;
+  width: 100%;
+  z-index: 180;
+}
+
+.darikDirectorySearchInput295 {
+  width: 100%;
+}
+
+.darikDirectorySearchInput295 input {
+  width: 100%;
+}
+
+.darikDirectorySpinner295 {
+  width: 17px;
+  height: 17px;
+  flex: 0 0 17px;
+  border: 2px solid rgba(15, 23, 42, 0.18);
+  border-top-color: currentColor;
+  border-radius: 999px;
+  animation: darikDirectorySpin295 0.72s linear infinite;
+}
+
+@keyframes darikDirectorySpin295 {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.darikDirectoryResults295 {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: calc(100% + 9px);
+  z-index: 250;
+  max-height: min(72vh, 680px);
+  overflow: auto;
+  overscroll-behavior: contain;
+  border: 1px solid rgba(15, 23, 42, 0.1);
+  border-radius: 18px;
+  background: #ffffff;
+  box-shadow:
+    0 26px 70px rgba(15, 23, 42, 0.18),
+    0 8px 22px rgba(15, 23, 42, 0.08);
+  padding: 10px;
+  color: #0f172a;
+}
+
+.darikDirectoryResultsTop295 {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 10px 11px 13px;
+  border-bottom: 1px solid rgba(15, 23, 42, 0.08);
+}
+
+.darikDirectoryResultsTop295 > div {
+  display: grid;
+  gap: 2px;
+}
+
+.darikDirectoryResultsTop295 strong {
+  font-size: 14px;
+  font-weight: 850;
+  letter-spacing: -0.01em;
+}
+
+.darikDirectoryResultsTop295 span,
+.darikDirectoryResultsTop295 small {
+  color: #64748b;
+  font-size: 11px;
+  font-weight: 650;
+}
+
+.darikDirectoryResultsTop295 small {
+  white-space: nowrap;
+  border-radius: 999px;
+  background: #f1f5f9;
+  padding: 6px 9px;
+}
+
+.darikDirectoryState295 {
+  display: grid;
+  gap: 4px;
+  padding: 24px 14px;
+  text-align: center;
+  color: #64748b;
+  font-size: 13px;
+}
+
+.darikDirectoryState295 strong {
+  color: #0f172a;
+  font-size: 14px;
+}
+
+.darikDirectorySection295 {
+  padding: 10px 0 2px;
+}
+
+.darikDirectorySectionTitle295 {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 4px 10px 8px;
+}
+
+.darikDirectorySectionTitle295 strong {
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: 0.01em;
+  color: #0f172a;
+}
+
+.darikDirectorySectionTitle295 span {
+  font-size: 11px;
+  color: #64748b;
+}
+
+.darikDirectoryStoreMatches295 {
+  display: grid;
+  gap: 5px;
+}
+
+.darikDirectoryStoreMatch295,
+.darikDirectoryProductStoreHead295,
+.darikDirectoryProductRow295 {
+  appearance: none;
+  width: 100%;
+  border: 0;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+  text-align: left;
+}
+
+.darikDirectoryStoreMatch295 {
+  display: grid;
+  grid-template-columns: 42px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 10px;
+  border-radius: 13px;
+  background: transparent;
+}
+
+.darikDirectoryStoreMatch295:hover {
+  background: #f8fafc;
+}
+
+.darikDirectoryStoreMatch295 > span:nth-child(2) {
+  display: grid;
+  gap: 1px;
+}
+
+.darikDirectoryStoreMatch295 strong {
+  font-size: 13px;
+  font-weight: 820;
+}
+
+.darikDirectoryStoreMatch295 small {
+  font-size: 10px;
+  color: #64748b;
+}
+
+.darikDirectoryStoreLogo295 {
+  width: 42px;
+  height: 42px;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  border: 1px solid rgba(15, 23, 42, 0.09);
+  border-radius: 11px;
+  background: #f8fafc;
+  color: #334155;
+  font-weight: 900;
+}
+
+.darikDirectoryStoreLogo295 img,
+.darikDirectoryProductImage295 img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.darikDirectoryProductStores295 {
+  display: grid;
+  gap: 8px;
+}
+
+.darikDirectoryProductStore295 {
+  overflow: hidden;
+  border: 1px solid rgba(15, 23, 42, 0.09);
+  border-radius: 15px;
+  background: #ffffff;
+}
+
+.darikDirectoryProductStoreHead295 {
+  display: grid;
+  grid-template-columns: 42px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 10px;
+  background: #f8fafc;
+}
+
+.darikDirectoryProductStoreHead295 > span:nth-child(2) {
+  display: grid;
+  gap: 1px;
+}
+
+.darikDirectoryProductStoreHead295 > span:nth-child(2) strong {
+  font-size: 13px;
+  font-weight: 850;
+}
+
+.darikDirectoryProductStoreHead295 > span:nth-child(2) small {
+  color: #64748b;
+  font-size: 10px;
+}
+
+.darikDirectoryProductStoreHead295 > span:last-child {
+  color: #475569;
+  font-size: 10px;
+  font-weight: 800;
+}
+
+.darikDirectoryProductRows295 {
+  display: grid;
+}
+
+.darikDirectoryProductRow295 {
+  display: grid;
+  grid-template-columns: 52px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 11px;
+  padding: 9px 10px;
+  background: #ffffff;
+  border-top: 1px solid rgba(15, 23, 42, 0.065);
+}
+
+.darikDirectoryProductRow295:hover {
+  background: #fbfdff;
+}
+
+.darikDirectoryProductImage295 {
+  width: 52px;
+  height: 52px;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  border-radius: 10px;
+  background: #f1f5f9;
+}
+
+.darikDirectoryProductImage295 svg {
+  width: 22px;
+  height: 22px;
+  fill: none;
+  stroke: #94a3b8;
+  stroke-width: 1.5;
+}
+
+.darikDirectoryProductCopy295 {
+  min-width: 0;
+  display: grid;
+  gap: 2px;
+}
+
+.darikDirectoryProductCopy295 strong {
+  overflow: hidden;
+  color: #0f172a;
+  font-size: 12px;
+  font-weight: 820;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.darikDirectoryProductCopy295 small {
+  overflow: hidden;
+  color: #64748b;
+  font-size: 10px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.darikDirectoryProductMeta295 {
+  display: grid;
+  justify-items: end;
+  gap: 2px;
+  white-space: nowrap;
+}
+
+.darikDirectoryProductMeta295 strong {
+  color: #0f172a;
+  font-size: 11px;
+  font-weight: 850;
+}
+
+.darikDirectoryProductMeta295 small {
+  color: #64748b;
+  font-size: 9px;
+  font-weight: 650;
+}
+
+@media (max-width: 720px) {
+  .darikDirectoryResults295 {
+    position: fixed;
+    left: 10px;
+    right: 10px;
+    top: auto;
+    bottom: 12px;
+    max-height: min(68vh, 620px);
+    border-radius: 20px;
+  }
+
+  .darikDirectoryResultsTop295 {
+    position: sticky;
+    top: -10px;
+    z-index: 2;
+    margin: -10px -10px 0;
+    padding: 14px 20px 12px;
+    background: rgba(255, 255, 255, 0.97);
+    backdrop-filter: blur(12px);
+  }
+
+  .darikDirectoryProductRow295 {
+    grid-template-columns: 48px minmax(0, 1fr);
+  }
+
+  .darikDirectoryProductImage295 {
+    width: 48px;
+    height: 48px;
+  }
+
+  .darikDirectoryProductMeta295 {
+    grid-column: 2;
+    justify-items: start;
+  }
+}
