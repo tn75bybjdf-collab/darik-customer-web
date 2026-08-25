@@ -22774,98 +22774,19 @@
   }
 }
 
-/* DARIK_STICKY_SEARCH_288
-   Search stays in normal document flow until its natural position reaches
-   the viewport top, then CSS sticky locks it there. */
-:global([data-darik-sticky-search="288"]) {
-  position: sticky !important;
-  top: 0 !important;
-  z-index: 60 !important;
+/* DARIK_STABLE_SEARCH_SENTINEL_291B
+   Single search-lock implementation.
+   The zero-height sentinel remains in normal flow and never moves when the
+   search bar becomes fixed, preventing lock/unlock feedback and screen shake. */
 
-  width: 100vw !important;
-  max-width: none !important;
-  margin-left: calc(50% - 50vw) !important;
-  margin-right: calc(50% - 50vw) !important;
-
-  padding-left: 12px !important;
-  padding-right: 12px !important;
-  padding-top: 8px !important;
-  padding-bottom: 8px !important;
-
-  border-radius: 0 !important;
-  background: #ffffff !important;
-  box-shadow: 0 5px 16px rgba(15, 23, 42, .10) !important;
-}
-
-:global([data-darik-sticky-search="288"] *) {
+:global([data-darik-search-shell="291B"]) {
   box-sizing: border-box;
 }
 
-:global([data-darik-sticky-search-input="288"]) {
-  width: 100% !important;
-  max-width: none !important;
-  border-radius: 0 !important;
-}
-
-/* Square the visible search-field shell too when icon/input are wrapped. */
-:global([data-darik-sticky-search="288"] [class*="search"]),
-:global([data-darik-sticky-search="288"] [class*="Search"]) {
-  border-radius: 0 !important;
-}
-
-@media (max-width: 560px) {
-  :global([data-darik-sticky-search="288"]) {
-    padding-left: 10px !important;
-    padding-right: 10px !important;
-  }
-}
-
-/* DARIK_BANNER_SEARCH_STACK_289
-   If a Darik banner is visible, Search sits flush under it.
-   Without a banner, the variable is 0px and Search sticks to viewport top. */
-:global([data-darik-sticky-search="288"]) {
-  top: var(--darik-search-top-289, 0px) !important;
-  transition: top 160ms ease-out;
-}
-
-/* Search should visually touch the banner with no accidental top gap. */
-:global([data-darik-sticky-search="288"]) {
-  margin-top: 0 !important;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  :global([data-darik-sticky-search="288"]) {
-    transition: none !important;
-  }
-}
-
-/* DARIK_HARD_SEARCH_LOCK_290B
-   Fixed positioning is used instead of CSS sticky so ancestor overflow,
-   transform, and layout rules cannot break the storefront search lock. */
-
-:global([data-darik-search-shell="290B"]) {
-  box-sizing: border-box;
-}
-
-/* Neutralize old 288/289 sticky rules once 290B finds the real shell. */
-:global([data-darik-search-shell="290B"][data-darik-sticky-search="288"]) {
-  position: static !important;
-  top: auto !important;
-  left: auto !important;
-  right: auto !important;
-
-  width: auto !important;
-  min-width: 0 !important;
-  max-width: none !important;
-
-  margin-left: 0 !important;
-  margin-right: 0 !important;
-}
-
-:global([data-darik-search-locked="290B"]) {
+:global([data-darik-search-locked="291B"]) {
   position: fixed !important;
 
-  top: var(--darik-search-fixed-top-290B, 0px) !important;
+  top: var(--darik-search-top-291B, 0px) !important;
   left: 0 !important;
   right: 0 !important;
 
@@ -22885,38 +22806,31 @@
   box-shadow: 0 5px 16px rgba(15, 23, 42, .11) !important;
 }
 
-:global([data-darik-search-locked="290B"] *),
-:global([data-darik-search-locked="290B"]::before),
-:global([data-darik-search-locked="290B"]::after) {
+:global([data-darik-search-locked="291B"] *),
+:global([data-darik-search-locked="291B"]::before),
+:global([data-darik-search-locked="291B"]::after) {
   box-sizing: border-box;
 }
 
-:global([data-darik-search-input="290B"]),
-:global([data-darik-search-locked="290B"] input),
-:global([data-darik-search-locked="290B"] [class*="search"]),
-:global([data-darik-search-locked="290B"] [class*="Search"]) {
+:global([data-darik-search-input="291B"]),
+:global([data-darik-search-locked="291B"] input),
+:global([data-darik-search-locked="291B"] [class*="search"]),
+:global([data-darik-search-locked="291B"] [class*="Search"]) {
   border-radius: 0 !important;
 }
 
-:global([data-darik-search-input="290B"]) {
+:global([data-darik-search-input="291B"]) {
   width: 100% !important;
   max-width: none !important;
 }
 
-:global([data-darik-search-placeholder="290B"]) {
-  pointer-events: none;
-}
-
-/* If 288 also tagged the exact same shell, fixed 290B always wins. */
-:global(
-  [data-darik-search-shell="290B"]
-  [data-darik-sticky-search="288"]
-) {
-  border-radius: 0 !important;
+:global([data-darik-search-sentinel="291B"]),
+:global([data-darik-search-placeholder="291B"]) {
+  pointer-events: none !important;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  :global([data-darik-search-locked="290B"]) {
+  :global([data-darik-search-locked="291B"]) {
     transition: none !important;
   }
 }

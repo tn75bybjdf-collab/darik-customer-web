@@ -906,446 +906,323 @@ const storefrontTypographyFontKeys: StorefrontTypographyFontKey[] = [
 const DARIK_TYPOGRAPHY_FONT_STYLESHEET_105_V5 =
   'https://fonts.googleapis.com/css2?family=Playfair+Display&family=Cormorant+Garamond&family=DM+Serif+Display&family=Bodoni+Moda&family=Prata&family=Cinzel&family=Marcellus&family=Libre+Baskerville&family=Lora&family=EB+Garamond&family=Fraunces&family=Spectral&family=Crimson+Pro&family=Yeseva+One&family=Abril+Fatface&family=Inter&family=Manrope&family=Montserrat&family=Poppins&family=Raleway&family=Outfit&family=Plus+Jakarta+Sans&family=Urbanist&family=Space+Grotesk&family=Work+Sans&family=Nunito+Sans&family=Roboto&family=Quicksand&family=Josefin+Sans&family=Sora&family=Oswald&family=Bebas+Neue&family=Anton&family=Barlow+Condensed&family=Archivo+Black&family=League+Spartan&family=Dancing+Script&family=Great+Vibes&family=Allura&family=Sacramento&family=Parisienne&family=Caveat&family=Pacifico&family=Cairo&family=Tajawal&family=Almarai&family=Changa&family=El+Messiri&family=Amiri&family=Noto+Kufi+Arabic&family=Noto+Naskh+Arabic&family=IBM+Plex+Sans+Arabic&family=Reem+Kufi&family=Aref+Ruqaa&family=Lateef&family=Scheherazade+New&family=Markazi+Text&family=Lemonada&display=swap';
 
-function useDarikTypographyFontLibrary105V5() {
-  // DARIK_STICKY_SEARCH_288
-  // DARIK_BANNER_SEARCH_STACK_289
-  // DARIK_HARD_SEARCH_LOCK_290B
+function useDarikTypographyFontLibrary105V5() {  /* DARIK_291B_OLD_SEARCH_EFFECT_REMOVED */
+
+
+  // DARIK_STABLE_SEARCH_SENTINEL_291B
   useEffect(() => {
-    let frame290B = 0;
-    let mutation290B: MutationObserver | null = null;
+    let frame291B = 0;
+    let retry291B = 0;
+    let mounted291B = true;
 
-    let shell290B: HTMLElement | null = null;
-    let input290B: HTMLInputElement | null = null;
-    let placeholder290B: HTMLDivElement | null = null;
+    let shell291B: HTMLElement | null = null;
+    let input291B: HTMLInputElement | null = null;
+    let sentinel291B: HTMLDivElement | null = null;
+    let placeholder291B: HTMLDivElement | null = null;
 
-    let shellInlineStyle290B = "";
-    let inputInlineStyle290B = "";
-    let locked290B = false;
+    let originalShellStyle291B = "";
+    let originalInputStyle291B = "";
+    let locked291B = false;
 
-    const bannerBottom290B = () => {
-      const selectors290B = [
+    const getBannerBottom291B = () => {
+      const selectors291B = [
         '[data-darik-sticky-banner="287"]',
         '[data-darik-sticky-banner="286"]',
         '[data-darik-sticky-banner="283"]'
       ];
 
-      let bottom290B = 0;
+      let bottom291B = 0;
 
-      for (const selector290B of selectors290B) {
-        const banner290B =
-          document.querySelector<HTMLElement>(selector290B);
+      for (const selector291B of selectors291B) {
+        const banner291B =
+          document.querySelector<HTMLElement>(selector291B);
 
-        if (!banner290B) continue;
+        if (!banner291B) continue;
 
-        const rect290B = banner290B.getBoundingClientRect();
-        const style290B = window.getComputedStyle(banner290B);
+        const rect291B = banner291B.getBoundingClientRect();
+        const style291B = window.getComputedStyle(banner291B);
 
-        const visible290B =
-          banner290B.getAttribute("aria-hidden") !== "true" &&
-          style290B.display !== "none" &&
-          style290B.visibility !== "hidden" &&
-          Number(style290B.opacity || "1") > 0.05 &&
-          rect290B.height > 1 &&
-          rect290B.bottom > 0;
+        const visible291B =
+          banner291B.getAttribute("aria-hidden") !== "true" &&
+          style291B.display !== "none" &&
+          style291B.visibility !== "hidden" &&
+          Number(style291B.opacity || "1") > 0.05 &&
+          rect291B.height > 1 &&
+          rect291B.bottom > 0;
 
-        if (visible290B) {
-          bottom290B = Math.max(
-            bottom290B,
-            Math.round(rect290B.bottom)
+        if (visible291B) {
+          bottom291B = Math.max(
+            bottom291B,
+            Math.round(rect291B.bottom)
           );
         }
       }
 
-      return Math.max(0, bottom290B);
+      return Math.max(0, bottom291B);
     };
 
-    const locate290B = () => {
-      const inputs290B = Array.from(
+    const findSearch291B = () => {
+      const inputs291B = Array.from(
         document.querySelectorAll<HTMLInputElement>("input")
       );
 
-      input290B =
-        inputs290B.find((element290B) => element290B.type === "search") ||
-        inputs290B.find((element290B) =>
+      input291B =
+        inputs291B.find((item291B) => item291B.type === "search") ||
+        inputs291B.find((item291B) =>
           /search/i.test(
-            (element290B.placeholder || "") +
+            (item291B.placeholder || "") +
               " " +
-              (element290B.getAttribute("aria-label") || "")
+              (item291B.getAttribute("aria-label") || "")
           )
         ) ||
         null;
 
-      if (!input290B) return false;
+      if (!input291B) return false;
 
-      const inputRect290B = input290B.getBoundingClientRect();
-      const possible290B: HTMLElement[] = [];
+      const inputRect291B = input291B.getBoundingClientRect();
 
-      const searchClass290B =
-        input290B.closest<HTMLElement>(
+      const rawCandidates291B = [
+        input291B.closest<HTMLElement>(
           '[class*="search"], [class*="Search"]'
-        );
-      const form290B = input290B.closest<HTMLElement>("form");
-      const parent290B = input290B.parentElement;
-      const grand290B = parent290B?.parentElement || null;
+        ),
+        input291B.closest<HTMLElement>("form"),
+        input291B.parentElement,
+        input291B.parentElement?.parentElement || null,
+      ].filter(Boolean) as HTMLElement[];
 
-      for (const node290B of [
-        searchClass290B,
-        form290B,
-        parent290B,
-        grand290B
-      ]) {
-        if (!node290B || possible290B.includes(node290B)) continue;
+      const candidates291B =
+        Array.from(new Set(rawCandidates291B))
+          .filter((node291B) => {
+            const rect291B = node291B.getBoundingClientRect();
 
-        const rect290B = node290B.getBoundingClientRect();
+            return (
+              rect291B.height >= inputRect291B.height &&
+              rect291B.height <=
+                Math.max(190, inputRect291B.height + 110) &&
+              rect291B.width >= inputRect291B.width * 0.72
+            );
+          })
+          .sort((a291B, b291B) => {
+            const ar291B = a291B.getBoundingClientRect();
+            const br291B = b291B.getBoundingClientRect();
 
-        if (
-          rect290B.height >= inputRect290B.height &&
-          rect290B.height <= Math.max(190, inputRect290B.height + 110) &&
-          rect290B.width >= inputRect290B.width * 0.75
-        ) {
-          possible290B.push(node290B);
-        }
+            return (
+              ar291B.width * ar291B.height -
+              br291B.width * br291B.height
+            );
+          });
+
+      shell291B =
+        candidates291B[0] ||
+        input291B.parentElement ||
+        input291B;
+
+      if (!shell291B || !shell291B.parentNode) {
+        shell291B = null;
+        input291B = null;
+        return false;
       }
 
-      possible290B.sort((a290B, b290B) => {
-        const aRect290B = a290B.getBoundingClientRect();
-        const bRect290B = b290B.getBoundingClientRect();
+      originalShellStyle291B =
+        shell291B.getAttribute("style") || "";
+      originalInputStyle291B =
+        input291B.getAttribute("style") || "";
 
-        return (
-          aRect290B.width * aRect290B.height -
-          bRect290B.width * bRect290B.height
-        );
-      });
+      shell291B.setAttribute(
+        "data-darik-search-shell",
+        "291B"
+      );
 
-      shell290B =
-        possible290B[0] ||
-        input290B.parentElement ||
-        input290B;
+      input291B.setAttribute(
+        "data-darik-search-input",
+        "291B"
+      );
 
-      if (!shell290B) return false;
+      sentinel291B = document.createElement("div");
+      sentinel291B.setAttribute(
+        "data-darik-search-sentinel",
+        "291B"
+      );
+      sentinel291B.setAttribute("aria-hidden", "true");
+      sentinel291B.style.cssText =
+        "display:block;width:100%;height:0;margin:0;padding:0;border:0;pointer-events:none;";
 
-      shellInlineStyle290B =
-        shell290B.getAttribute("style") || "";
-      inputInlineStyle290B =
-        input290B.getAttribute("style") || "";
+      placeholder291B = document.createElement("div");
+      placeholder291B.setAttribute(
+        "data-darik-search-placeholder",
+        "291B"
+      );
+      placeholder291B.setAttribute("aria-hidden", "true");
+      placeholder291B.style.cssText =
+        "display:none;width:100%;height:0;margin:0;padding:0;border:0;pointer-events:none;";
 
-      shell290B.setAttribute("data-darik-search-shell", "290B");
-      input290B.setAttribute("data-darik-search-input", "290B");
+      shell291B.parentNode.insertBefore(
+        sentinel291B,
+        shell291B
+      );
 
-      if (!placeholder290B) {
-        placeholder290B = document.createElement("div");
-        placeholder290B.setAttribute(
-          "data-darik-search-placeholder",
-          "290B"
-        );
-        placeholder290B.style.display = "none";
-        placeholder290B.style.width = "100%";
-        placeholder290B.style.margin = "0";
-        placeholder290B.style.padding = "0";
-        placeholder290B.style.pointerEvents = "none";
-      }
+      shell291B.parentNode.insertBefore(
+        placeholder291B,
+        shell291B
+      );
 
       return true;
     };
 
-    const restore290B = () => {
-      if (!shell290B || !input290B) return;
+    const unlock291B = () => {
+      if (!shell291B || !input291B) return;
 
-      locked290B = false;
+      locked291B = false;
 
-      shell290B.removeAttribute("data-darik-search-locked");
-      shell290B.style.cssText = shellInlineStyle290B;
-      input290B.style.cssText = inputInlineStyle290B;
+      shell291B.removeAttribute(
+        "data-darik-search-locked"
+      );
 
-      if (placeholder290B) {
-        placeholder290B.style.display = "none";
-        placeholder290B.style.height = "0px";
+      shell291B.style.cssText =
+        originalShellStyle291B;
+
+      input291B.style.cssText =
+        originalInputStyle291B;
+
+      if (placeholder291B) {
+        placeholder291B.style.display = "none";
+        placeholder291B.style.height = "0px";
       }
     };
 
-    const ensure290B = () => {
+    const update291B = () => {
       if (
-        shell290B &&
-        input290B &&
-        shell290B.isConnected &&
-        input290B.isConnected
+        !mounted291B ||
+        !shell291B ||
+        !input291B ||
+        !sentinel291B ||
+        !placeholder291B
       ) {
-        return true;
+        return;
       }
 
-      shell290B = null;
-      input290B = null;
-      return locate290B();
-    };
-
-    const update290B = () => {
-      if (frame290B) {
-        window.cancelAnimationFrame(frame290B);
+      if (frame291B) {
+        window.cancelAnimationFrame(frame291B);
       }
 
-      frame290B = window.requestAnimationFrame(() => {
-        if (!ensure290B() || !shell290B || !input290B) return;
-
+      frame291B = window.requestAnimationFrame(() => {
         if (
-          placeholder290B &&
-          !placeholder290B.isConnected &&
-          shell290B.parentNode
+          !shell291B ||
+          !input291B ||
+          !sentinel291B ||
+          !placeholder291B
         ) {
-          shell290B.parentNode.insertBefore(
-            placeholder290B,
-            shell290B
-          );
-        }
-
-        const top290B = bannerBottom290B();
-
-        const naturalRect290B =
-          placeholder290B &&
-          placeholder290B.style.display !== "none"
-            ? placeholder290B.getBoundingClientRect()
-            : shell290B.getBoundingClientRect();
-
-        const shouldLock290B =
-          naturalRect290B.top <= top290B + 1;
-
-        if (!shouldLock290B) {
-          if (locked290B) restore290B();
           return;
         }
 
-        let height290B = shell290B.getBoundingClientRect().height;
+        const bannerBottom291B =
+          getBannerBottom291B();
+
+        const sentinelTop291B =
+          sentinel291B.getBoundingClientRect().top;
+
+        // The sentinel never becomes fixed and never changes height.
+        // Moving the Search cannot alter this threshold.
+        const shouldLock291B =
+          sentinelTop291B <= bannerBottom291B;
+
+        if (!shouldLock291B) {
+          if (locked291B) unlock291B();
+          return;
+        }
+
+        let height291B =
+          shell291B.getBoundingClientRect().height;
 
         if (
-          locked290B &&
-          placeholder290B &&
-          placeholder290B.style.display !== "none"
+          locked291B &&
+          placeholder291B.style.display !== "none"
         ) {
-          height290B =
-            placeholder290B.getBoundingClientRect().height ||
-            height290B;
+          height291B =
+            placeholder291B.getBoundingClientRect().height ||
+            height291B;
         }
 
-        if (placeholder290B) {
-          placeholder290B.style.display = "block";
-          placeholder290B.style.height =
-            String(Math.max(1, Math.ceil(height290B))) + "px";
-        }
+        placeholder291B.style.display = "block";
+        placeholder291B.style.height =
+          String(Math.max(1, Math.ceil(height291B))) + "px";
 
-        locked290B = true;
-        shell290B.setAttribute(
+        locked291B = true;
+
+        shell291B.setAttribute(
           "data-darik-search-locked",
-          "290B"
+          "291B"
         );
 
-        shell290B.style.setProperty(
-          "--darik-search-fixed-top-290B",
-          String(top290B) + "px"
+        shell291B.style.setProperty(
+          "--darik-search-top-291B",
+          String(bannerBottom291B) + "px"
         );
       });
     };
 
-    update290B();
+    const setup291B = (attempt291B = 0) => {
+      if (!mounted291B) return;
 
-    window.addEventListener("scroll", update290B, {
+      if (findSearch291B()) {
+        update291B();
+        return;
+      }
+
+      if (attempt291B >= 40) return;
+
+      retry291B = window.setTimeout(
+        () => setup291B(attempt291B + 1),
+        100
+      );
+    };
+
+    setup291B();
+
+    window.addEventListener("scroll", update291B, {
       passive: true
     });
-    window.addEventListener("resize", update290B);
 
-    mutation290B = new MutationObserver(() => update290B());
-
-    mutation290B.observe(document.body, {
-      childList: true,
-      subtree: true,
-      attributes: true,
-      attributeFilter: ["class", "style", "aria-hidden"]
-    });
+    window.addEventListener("resize", update291B);
 
     return () => {
-      if (frame290B) {
-        window.cancelAnimationFrame(frame290B);
+      mounted291B = false;
+
+      if (frame291B) {
+        window.cancelAnimationFrame(frame291B);
       }
 
-      mutation290B?.disconnect();
-
-      window.removeEventListener("scroll", update290B);
-      window.removeEventListener("resize", update290B);
-
-      if (shell290B) {
-        shell290B.style.cssText = shellInlineStyle290B;
-        shell290B.removeAttribute("data-darik-search-shell");
-        shell290B.removeAttribute("data-darik-search-locked");
+      if (retry291B) {
+        window.clearTimeout(retry291B);
       }
 
-      if (input290B) {
-        input290B.style.cssText = inputInlineStyle290B;
-        input290B.removeAttribute("data-darik-search-input");
+      window.removeEventListener("scroll", update291B);
+      window.removeEventListener("resize", update291B);
+
+      if (shell291B) {
+        shell291B.style.cssText =
+          originalShellStyle291B;
+
+        shell291B.removeAttribute(
+          "data-darik-search-shell"
+        );
+
+        shell291B.removeAttribute(
+          "data-darik-search-locked"
+        );
       }
 
-      placeholder290B?.remove();
-    };
-  }, []);
+      if (input291B) {
+        input291B.style.cssText =
+          originalInputStyle291B;
 
-  useEffect(() => {
-    let frame289 = 0;
-    let observer289: MutationObserver | null = null;
-
-    const updateSearchTop289 = () => {
-      if (frame289) window.cancelAnimationFrame(frame289);
-
-      frame289 = window.requestAnimationFrame(() => {
-        const search289 = document.querySelector<HTMLElement>(
-          '[data-darik-sticky-search="288"]'
+        input291B.removeAttribute(
+          "data-darik-search-input"
         );
+      }
 
-        if (!search289) return;
-
-        const bannerSelectors289 = [
-          '[data-darik-sticky-banner="287"]',
-          '[data-darik-sticky-banner="286"]',
-          '[data-darik-sticky-banner="283"]',
-        ];
-
-        let bannerBottom289 = 0;
-
-        for (const selector289 of bannerSelectors289) {
-          const banner289 = document.querySelector<HTMLElement>(selector289);
-          if (!banner289) continue;
-
-          const rect289 = banner289.getBoundingClientRect();
-          const style289 = window.getComputedStyle(banner289);
-          const ariaHidden289 = banner289.getAttribute("aria-hidden") === "true";
-          const opacity289 = Number(style289.opacity || "1");
-
-          const visible289 =
-            !ariaHidden289 &&
-            style289.display !== "none" &&
-            style289.visibility !== "hidden" &&
-            opacity289 > 0.05 &&
-            rect289.height > 1 &&
-            rect289.bottom > 0;
-
-          if (visible289) {
-            bannerBottom289 = Math.max(
-              bannerBottom289,
-              Math.round(rect289.bottom)
-            );
-          }
-        }
-
-        search289.style.setProperty(
-          "--darik-search-top-289",
-          `${Math.max(0, bannerBottom289)}px`
-        );
-      });
-    };
-
-    updateSearchTop289();
-
-    window.addEventListener("scroll", updateSearchTop289, { passive: true });
-    window.addEventListener("resize", updateSearchTop289);
-
-    observer289 = new MutationObserver(() => updateSearchTop289());
-    observer289.observe(document.body, {
-      childList: true,
-      subtree: true,
-      attributes: true,
-      attributeFilter: ["class", "style", "aria-hidden"],
-    });
-
-    return () => {
-      if (frame289) window.cancelAnimationFrame(frame289);
-      observer289?.disconnect();
-      window.removeEventListener("scroll", updateSearchTop289);
-      window.removeEventListener("resize", updateSearchTop289);
-
-      document
-        .querySelectorAll<HTMLElement>('[data-darik-sticky-search="288"]')
-        .forEach((search289) =>
-          search289.style.removeProperty("--darik-search-top-289")
-        );
-    };
-  }, []);
-
-  useEffect(() => {
-    let observer288: MutationObserver | null = null;
-    let frame288 = 0;
-
-    const installStickySearch288 = () => {
-      if (frame288) window.cancelAnimationFrame(frame288);
-
-      frame288 = window.requestAnimationFrame(() => {
-        const inputs288 = Array.from(
-          document.querySelectorAll<HTMLInputElement>("input")
-        );
-
-        const searchInput288 =
-          inputs288.find((input288) => input288.type === "search") ||
-          inputs288.find((input288) =>
-            /search|ابحث|بحث/i.test(
-              `${input288.placeholder || ""} ${input288.getAttribute("aria-label") || ""}`
-            )
-          );
-
-        if (!searchInput288) return;
-
-        let wrapper288: HTMLElement | null =
-          searchInput288.closest<HTMLElement>(
-            '[class*="search"], [class*="Search"]'
-          );
-
-        // If the CSS-module search class lives directly on the input, use its
-        // immediate structural parent so the sticky background spans full width.
-        if (!wrapper288 || wrapper288 === searchInput288) {
-          wrapper288 = searchInput288.parentElement;
-        }
-
-        // Prefer a compact wrapper around the field/icon/button, not the entire
-        // catalog section. Avoid climbing more than two levels.
-        if (
-          wrapper288 &&
-          wrapper288.parentElement &&
-          wrapper288.getBoundingClientRect().height < 34
-        ) {
-          wrapper288 = wrapper288.parentElement;
-        }
-
-        if (!wrapper288) return;
-
-        document
-          .querySelectorAll<HTMLElement>('[data-darik-sticky-search="288"]')
-          .forEach((node288) => {
-            if (node288 !== wrapper288) {
-              node288.removeAttribute("data-darik-sticky-search");
-            }
-          });
-
-        wrapper288.setAttribute("data-darik-sticky-search", "288");
-        searchInput288.setAttribute("data-darik-sticky-search-input", "288");
-      });
-    };
-
-    installStickySearch288();
-
-    observer288 = new MutationObserver(() => installStickySearch288());
-    observer288.observe(document.body, {
-      childList: true,
-      subtree: true,
-    });
-
-    window.addEventListener("resize", installStickySearch288);
-
-    return () => {
-      if (frame288) window.cancelAnimationFrame(frame288);
-      observer288?.disconnect();
-      window.removeEventListener("resize", installStickySearch288);
-      document
-        .querySelectorAll<HTMLElement>('[data-darik-sticky-search="288"]')
-        .forEach((node288) => node288.removeAttribute("data-darik-sticky-search"));
-      document
-        .querySelectorAll<HTMLElement>('[data-darik-sticky-search-input="288"]')
-        .forEach((node288) =>
-          node288.removeAttribute("data-darik-sticky-search-input")
-        );
+      sentinel291B?.remove();
+      placeholder291B?.remove();
     };
   }, []);
 
