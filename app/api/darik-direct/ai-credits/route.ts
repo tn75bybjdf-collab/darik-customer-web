@@ -1,3 +1,4 @@
+// DARIK_AI_CREDIT_CLIQ_INFO_305
 // DARIK_REAL_AI_CREDITS_304
 import { createClient } from "@supabase/supabase-js";
 import { NextRequest, NextResponse } from "next/server";
@@ -224,6 +225,15 @@ export async function GET(request: NextRequest) {
     signup_promo_granted_at:
       current304?.signup_promo_granted_at ?? null,
     enhancement_cost: 1,
+    payment: {
+      method: "CliQ",
+      name:
+        process.env.NEXT_PUBLIC_DARIK_CLIQ_NAME ||
+        "DARIK",
+      alias:
+        process.env.NEXT_PUBLIC_DARIK_CLIQ_ALIAS ||
+        "",
+    },
     packs: PACKS_304,
   });
 }
