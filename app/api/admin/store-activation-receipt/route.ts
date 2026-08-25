@@ -18,9 +18,49 @@ export async function POST(request: Request) {
     }
 
     const admin = createClient(supabaseUrl, serviceRoleKey, { auth: { persistSession: false, autoRefreshToken: false } });
-    const allowed = await admin.rpc("darik_direct_admin_can_manage_activations", { p_session_token: sessionToken });
-    if (allowed.error || allowed.data !== true) {
-      return NextResponse.json({ error: "Admin session is invalid or expired." }, { status: 401 });
+    // DARIK_MOBILE_ADMIN_ACTIVATION_RECEIPT_AUTH_313B
+    const legacyAllowed313B = await admin.rpc(
+      "darik_direct_admin_can_manage_activations",
+      {
+        p_session_token: sessionToken,
+      },
+    );
+
+    let allowed313B =
+      !legacyAllowed313B.error &&
+      legacyAllowed313B.data === true;
+
+    if (!allowed313B) {
+      const mobileAdmin313B = await admin.rpc(
+        "darik_app_admin_session_me_v1",
+        {
+          p_session_token: sessionToken,
+        },
+      );
+
+      const mobileRow313B =
+        Array.isArray(mobileAdmin313B.data)
+          ? mobileAdmin313B.data[0]
+          : mobileAdmin313B.data;
+
+      allowed313B =
+        !mobileAdmin313B.error &&
+        Boolean(
+          mobileRow313B &&
+          mobileRow313B.is_admin === true,
+        );
+    }
+
+    if (!allowed313B) {
+      return NextResponse.json(
+        {
+          error:
+            "Admin session is invalid or expired.",
+        },
+        {
+          status: 401,
+        },
+      );
     }
 
     const signed = await admin.storage.from("darik-store-activation-receipts").createSignedUrl(receiptPath, 300);
