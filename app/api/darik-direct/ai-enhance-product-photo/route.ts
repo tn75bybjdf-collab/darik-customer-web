@@ -1,3 +1,4 @@
+// DARIK_REAL_AI_CREDIT_ENFORCEMENT_304
 // DARIK_GROK_AI_PRODUCT_PHOTO_BACKEND_231
 // DARIK_GROK_AI_STANDARD_IMAGE_MODEL_232
 // DARIK_GROK_TIMEOUT_CATALOG_STYLE_233
@@ -357,6 +358,146 @@ export async function POST(request: NextRequest) {
     );
   }
 
+  // DARIK_REAL_AI_CREDIT_ENFORCEMENT_304
+  const creditReference304 = crypto.randomUUID();
+
+  const creditSpend304 = await admin.rpc(
+    "darik_ai_credit_spend_v1",
+    {
+      p_retailer_id: retailerId,
+      p_reference: creditReference304,
+      p_amount: 1,
+    },
+  );
+
+  if (creditSpend304.error) {
+    console.error(
+      "Darik AI credit spend 304 failed:",
+      creditSpend304.error.message,
+    );
+
+    return json(
+      {
+        ok: false,
+        error: "Could not verify AI credit balance.",
+      },
+      500,
+    );
+  }
+
+  const creditRow304 =
+    Array.isArray(creditSpend304.data) &&
+    creditSpend304.data.length > 0
+      ? (creditSpend304.data[0] as {
+          ok?: unknown;
+          remaining?: unknown;
+          error_code?: unknown;
+        })
+      : null;
+
+  const creditOk304 = creditRow304?.ok === true;
+  let creditRemaining304 = Number(
+    creditRow304?.remaining ?? 0,
+  );
+
+  if (!creditOk304) {
+    return json(
+      {
+        ok: false,
+        error:
+          "You do not have enough AI credits. Buy more credits to continue.",
+        error_code:
+          String(
+            creditRow304?.error_code ||
+              "insufficient_credits",
+          ),
+        credits: {
+          mode: "metered",
+          remaining: creditRemaining304,
+          cost: 1,
+          packs: [
+            {
+              key: "credits_500",
+              credits: 500,
+              price_jod: 20,
+            },
+            {
+              key: "credits_1000",
+              credits: 1000,
+              price_jod: 35,
+            },
+            {
+              key: "credits_2000",
+              credits: 2000,
+              price_jod: 50,
+            },
+          ],
+        },
+      },
+      402,
+    );
+  }
+
+  let creditFinalized304 = false;
+  let creditRefunded304 = false;
+
+  const refundCredit304 = async () => {
+    if (
+      creditFinalized304 ||
+      creditRefunded304
+    ) {
+      return;
+    }
+
+    creditRefunded304 = true;
+
+    const refund304 = await admin.rpc(
+      "darik_ai_credit_refund_v1",
+      {
+        p_retailer_id: retailerId,
+        p_reference: creditReference304,
+        p_amount: 1,
+      },
+    );
+
+    if (refund304.error) {
+      console.error(
+        "Darik AI credit refund 304 failed:",
+        refund304.error.message,
+      );
+      return;
+    }
+
+    if (
+      Array.isArray(refund304.data) &&
+      refund304.data.length > 0
+    ) {
+      creditRemaining304 = Number(
+        refund304.data[0]?.remaining ??
+          creditRemaining304,
+      );
+    }
+  };
+
+  const failWithRefund304 = async (
+    payload304: Record<string, unknown>,
+    status304 = 500,
+  ) => {
+    await refundCredit304();
+
+    return await failWithRefund304(
+      {
+        ...payload304,
+        credits: {
+          mode: "metered",
+          remaining: creditRemaining304,
+          cost: 1,
+        },
+      },
+      status304,
+    );
+  };
+
   let xaiResponse: Response;
   let xaiPayload: XaiEditResponse = {};
   const xaiController = new AbortController();
@@ -392,7 +533,7 @@ export async function POST(request: NextRequest) {
       "Darik AI 236 xAI request failed:",
       timedOut ? "timeout" : safeMessage(error),
     );
-    return json(
+    return await failWithRefund304(
       {
         ok: false,
         error: timedOut
@@ -411,7 +552,7 @@ export async function POST(request: NextRequest) {
       xaiResponse.status,
       safeMessage(xaiPayload.error),
     );
-    return json(
+    return await failWithRefund304(
       {
         ok: false,
         error:
@@ -426,7 +567,7 @@ export async function POST(request: NextRequest) {
 
   if (!generatedUrl) {
     console.error("Darik AI 236 xAI response did not include an image URL.");
-    return json(
+    return await failWithRefund304(
       {
         ok: false,
         error:
@@ -440,7 +581,7 @@ export async function POST(request: NextRequest) {
   try {
     generatedUrlObject = new URL(generatedUrl);
   } catch {
-    return json(
+    return await failWithRefund304(
       {
         ok: false,
         error:
@@ -451,7 +592,7 @@ export async function POST(request: NextRequest) {
   }
 
   if (generatedUrlObject.protocol !== "https:") {
-    return json(
+    return await failWithRefund304(
       {
         ok: false,
         error:
@@ -517,14 +658,19 @@ export async function POST(request: NextRequest) {
 
     logStage("enhanced output saved", enhancedUrl);
 
+    creditFinalized304 = true;
+
     return json({
       ok: true,
       enhanced_url: enhancedUrl,
       staged_square_url: stagedSquareUrl,
       credits: {
-        mode: "unlimited_testing",
-        remaining: null,
-        label: "Unlimited â€” Testing Mode",
+        mode: "metered",
+        remaining: creditRemaining304,
+        cost: 1,
+        label:
+          String(creditRemaining304) +
+          " AI credits remaining",
       },
     });
   } catch (error) {
@@ -532,7 +678,7 @@ export async function POST(request: NextRequest) {
       "Darik AI 236 could not persist enhanced image:",
       safeMessage(error),
     );
-    return json(
+    return await failWithRefund304(
       {
         ok: false,
         error:
