@@ -22774,19 +22774,17 @@
   }
 }
 
-/* DARIK_STABLE_SEARCH_SENTINEL_291B
-   Single search-lock implementation.
-   The zero-height sentinel remains in normal flow and never moves when the
-   search bar becomes fixed, preventing lock/unlock feedback and screen shake. */
+/* DARIK_SMOOTH_SEARCH_LOCK_292
+   Hysteresis + frozen top offset removes small scroll bounce on mobile Safari. */
 
-:global([data-darik-search-shell="291B"]) {
+:global([data-darik-search-shell="292"]) {
   box-sizing: border-box;
 }
 
-:global([data-darik-search-locked="291B"]) {
+:global([data-darik-search-locked="292"]) {
   position: fixed !important;
 
-  top: var(--darik-search-top-291B, 0px) !important;
+  top: var(--darik-search-top-292, 0px) !important;
   left: 0 !important;
   right: 0 !important;
 
@@ -22800,37 +22798,43 @@
   z-index: 95 !important;
 
   border-radius: 0 !important;
-  transform: none !important;
+
+  transform: translate3d(0, 0, 0) !important;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
 
   background: #ffffff !important;
   box-shadow: 0 5px 16px rgba(15, 23, 42, .11) !important;
+
+  contain: layout paint;
+  will-change: transform;
 }
 
-:global([data-darik-search-locked="291B"] *),
-:global([data-darik-search-locked="291B"]::before),
-:global([data-darik-search-locked="291B"]::after) {
+:global([data-darik-search-locked="292"] *),
+:global([data-darik-search-locked="292"]::before),
+:global([data-darik-search-locked="292"]::after) {
   box-sizing: border-box;
 }
 
-:global([data-darik-search-input="291B"]),
-:global([data-darik-search-locked="291B"] input),
-:global([data-darik-search-locked="291B"] [class*="search"]),
-:global([data-darik-search-locked="291B"] [class*="Search"]) {
+:global([data-darik-search-input="292"]),
+:global([data-darik-search-locked="292"] input),
+:global([data-darik-search-locked="292"] [class*="search"]),
+:global([data-darik-search-locked="292"] [class*="Search"]) {
   border-radius: 0 !important;
 }
 
-:global([data-darik-search-input="291B"]) {
+:global([data-darik-search-input="292"]) {
   width: 100% !important;
   max-width: none !important;
 }
 
-:global([data-darik-search-sentinel="291B"]),
-:global([data-darik-search-placeholder="291B"]) {
+:global([data-darik-search-sentinel="292"]),
+:global([data-darik-search-placeholder="292"]) {
   pointer-events: none !important;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  :global([data-darik-search-locked="291B"]) {
+  :global([data-darik-search-locked="292"]) {
     transition: none !important;
   }
 }
