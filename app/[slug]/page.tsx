@@ -3309,7 +3309,68 @@ export default function DarikDirectStorefrontPage() {
       if (productResult.error) {
         setLoadError(productResult.error.message);
       } else {
-        setProducts((productResult.data ?? []) as unknown as Product[]);
+        // DARIK_PUBLIC_CARD_SIZE_OPTIONS_294
+        const baseProducts294 =
+          (productResult.data ?? []) as unknown as Product[];
+
+        const sizeResult294 = await supabase.rpc(
+          "darik_direct_public_product_required_options_v1",
+          { p_slug: slug }
+        );
+
+        if (cancelled) return;
+
+        if (sizeResult294.error) {
+          console.warn(
+            "Darik public product size options 294 could not load:",
+            sizeResult294.error.message
+          );
+
+          setProducts(baseProducts294);
+        } else {
+          const rows294 =
+            (sizeResult294.data ?? []) as Array<{
+              product_id?: string | null;
+              direct_size_options?: unknown;
+              direct_shoe_sizes?: unknown;
+            }>;
+
+          const optionsByProduct294 = new Map(
+            rows294
+              .filter((row294) =>
+                Boolean(String(row294.product_id || "").trim())
+              )
+              .map((row294) => [
+                String(row294.product_id),
+                {
+                  direct_size_options: Array.isArray(
+                    row294.direct_size_options
+                  )
+                    ? row294.direct_size_options
+                    : null,
+                  direct_shoe_sizes: Array.isArray(
+                    row294.direct_shoe_sizes
+                  )
+                    ? row294.direct_shoe_sizes
+                    : null,
+                },
+              ])
+          );
+
+          setProducts(
+            baseProducts294.map((product294) => {
+              const options294 =
+                optionsByProduct294.get(String(product294.id));
+
+              return options294
+                ? {
+                    ...product294,
+                    ...options294,
+                  }
+                : product294;
+            })
+          );
+        }
       }
 
       if (!categoryResult.error) {
@@ -6814,91 +6875,6 @@ export default function DarikDirectStorefrontPage() {
   }
 
 
-  // DARIK_QUICK_ADD_REQUIRED_OPTIONS_293B
-  function productRequiresRequiredChoice293B(product293B: Product) {
-    const record293B =
-      product293B as unknown as Record<string, unknown>;
-
-    const hasValues293B = (value293B: unknown): boolean => {
-      if (value293B == null) return false;
-
-      if (Array.isArray(value293B)) {
-        return value293B.filter(Boolean).length > 0;
-      }
-
-      if (typeof value293B === "string") {
-        const clean293B = value293B.trim();
-
-        if (!clean293B) return false;
-
-        if (
-          ["[]", "{}", "null", "none", "n/a", "na"].includes(
-            clean293B.toLowerCase()
-          )
-        ) {
-          return false;
-        }
-
-        if (
-          clean293B.startsWith("[") ||
-          clean293B.startsWith("{")
-        ) {
-          try {
-            return hasValues293B(JSON.parse(clean293B));
-          } catch {
-            return true;
-          }
-        }
-
-        return true;
-      }
-
-      if (typeof value293B === "object") {
-        const obj293B =
-          value293B as Record<string, unknown>;
-
-        for (const nested293B of [
-          "values",
-          "sizes",
-          "options",
-          "choices",
-          "available",
-        ]) {
-          if (hasValues293B(obj293B[nested293B])) {
-            return true;
-          }
-        }
-
-        return false;
-      }
-
-      return false;
-    };
-
-    return (
-      hasValues293B(record293B.direct_size_options) ||
-      hasValues293B(record293B.direct_shoe_sizes)
-    );
-  }
-
-  function quickAddProduct293B(
-    product293B: Product,
-    addNow293B: () => void
-  ) {
-    if (productRequiresRequiredChoice293B(product293B)) {
-      window.location.assign(
-        "/" +
-          storefront.slug +
-          "?product=" +
-          encodeURIComponent(product293B.id) +
-          "#catalog"
-      );
-      return;
-    }
-
-    addNow293B();
-  }
-
 function renderProductCard(product: Product) {
     const name = productName(product);
     const photo = productPhoto(product);
@@ -7100,9 +7076,7 @@ function renderProductCard(product: Product) {
                     : `${name} is out of stock`
                 }
                 disabled={!effectiveAcceptingOrders || !productAvailable}
-                onClick={() =>
-      quickAddProduct293B(product, () => addToCart(product))
-    }
+                onClick={() => addToCart(product)}
               >
                 {productAvailable ? <Icon name="plus" size={19} /> : null}
                 <span>{productAvailable ? "Add" : "Out of stock"}</span>
