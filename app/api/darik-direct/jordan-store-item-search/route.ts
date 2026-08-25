@@ -3,36 +3,19 @@ import { createClient } from "@supabase/supabase-js";
 
 export const dynamic = "force-dynamic";
 
-type DirectoryResult295 = {
-  result_type?: string;
-  storefront_slug?: string | null;
-  storefront_name?: string | null;
-  storefront_name_ar?: string | null;
-  storefront_logo_url?: string | null;
-  product_id?: string | null;
-  product_name?: string | null;
-  product_name_ar?: string | null;
-  product_image_url?: string | null;
-  price_text?: string | null;
-  pricing_mode?: string | null;
-  availability_status?: string | null;
-  category_name?: string | null;
-  score?: number | null;
-};
-
 export async function GET(request: NextRequest) {
-  const query295 = String(
+  const query296 = String(
     request.nextUrl.searchParams.get("q") || ""
   ).trim();
 
-  if (query295.length < 2) {
+  if (query296.length < 2) {
     return NextResponse.json({
       ok: true,
       results: [],
     });
   }
 
-  if (query295.length > 120) {
+  if (query296.length > 120) {
     return NextResponse.json(
       {
         ok: false,
@@ -42,13 +25,13 @@ export async function GET(request: NextRequest) {
     );
   }
 
-  const supabaseUrl295 =
+  const supabaseUrl296 =
     process.env.NEXT_PUBLIC_SUPABASE_URL;
 
-  const supabaseAnonKey295 =
+  const supabaseAnonKey296 =
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
-  if (!supabaseUrl295 || !supabaseAnonKey295) {
+  if (!supabaseUrl296 || !supabaseAnonKey296) {
     return NextResponse.json(
       {
         ok: false,
@@ -58,9 +41,9 @@ export async function GET(request: NextRequest) {
     );
   }
 
-  const supabase295 = createClient(
-    supabaseUrl295,
-    supabaseAnonKey295,
+  const supabase296 = createClient(
+    supabaseUrl296,
+    supabaseAnonKey296,
     {
       auth: {
         persistSession: false,
@@ -69,18 +52,18 @@ export async function GET(request: NextRequest) {
     }
   );
 
-  const result295 = await supabase295.rpc(
-    "darik_jordan_directory_search_v1",
+  const result296 = await supabase296.rpc(
+    "darik_jordan_store_item_search_v2",
     {
-      p_query: query295,
-      p_limit: 80,
+      p_query: query296,
+      p_limit: 60,
     }
   );
 
-  if (result295.error) {
+  if (result296.error) {
     console.error(
-      "Darik Jordan directory search 295 failed:",
-      result295.error.message
+      "Darik store item search 296 failed:",
+      result296.error.message
     );
 
     return NextResponse.json(
@@ -92,15 +75,13 @@ export async function GET(request: NextRequest) {
     );
   }
 
-  const rows295 = Array.isArray(result295.data)
-    ? (result295.data as DirectoryResult295[])
-    : [];
-
   return NextResponse.json(
     {
       ok: true,
-      query: query295,
-      results: rows295,
+      query: query296,
+      results: Array.isArray(result296.data)
+        ? result296.data
+        : [],
     },
     {
       headers: {
