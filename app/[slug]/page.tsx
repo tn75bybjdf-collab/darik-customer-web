@@ -909,6 +909,282 @@ const DARIK_TYPOGRAPHY_FONT_STYLESHEET_105_V5 =
 function useDarikTypographyFontLibrary105V5() {
   // DARIK_STICKY_SEARCH_288
   // DARIK_BANNER_SEARCH_STACK_289
+  // DARIK_HARD_SEARCH_LOCK_290B
+  useEffect(() => {
+    let frame290B = 0;
+    let mutation290B: MutationObserver | null = null;
+
+    let shell290B: HTMLElement | null = null;
+    let input290B: HTMLInputElement | null = null;
+    let placeholder290B: HTMLDivElement | null = null;
+
+    let shellInlineStyle290B = "";
+    let inputInlineStyle290B = "";
+    let locked290B = false;
+
+    const bannerBottom290B = () => {
+      const selectors290B = [
+        '[data-darik-sticky-banner="287"]',
+        '[data-darik-sticky-banner="286"]',
+        '[data-darik-sticky-banner="283"]'
+      ];
+
+      let bottom290B = 0;
+
+      for (const selector290B of selectors290B) {
+        const banner290B =
+          document.querySelector<HTMLElement>(selector290B);
+
+        if (!banner290B) continue;
+
+        const rect290B = banner290B.getBoundingClientRect();
+        const style290B = window.getComputedStyle(banner290B);
+
+        const visible290B =
+          banner290B.getAttribute("aria-hidden") !== "true" &&
+          style290B.display !== "none" &&
+          style290B.visibility !== "hidden" &&
+          Number(style290B.opacity || "1") > 0.05 &&
+          rect290B.height > 1 &&
+          rect290B.bottom > 0;
+
+        if (visible290B) {
+          bottom290B = Math.max(
+            bottom290B,
+            Math.round(rect290B.bottom)
+          );
+        }
+      }
+
+      return Math.max(0, bottom290B);
+    };
+
+    const locate290B = () => {
+      const inputs290B = Array.from(
+        document.querySelectorAll<HTMLInputElement>("input")
+      );
+
+      input290B =
+        inputs290B.find((element290B) => element290B.type === "search") ||
+        inputs290B.find((element290B) =>
+          /search/i.test(
+            (element290B.placeholder || "") +
+              " " +
+              (element290B.getAttribute("aria-label") || "")
+          )
+        ) ||
+        null;
+
+      if (!input290B) return false;
+
+      const inputRect290B = input290B.getBoundingClientRect();
+      const possible290B: HTMLElement[] = [];
+
+      const searchClass290B =
+        input290B.closest<HTMLElement>(
+          '[class*="search"], [class*="Search"]'
+        );
+      const form290B = input290B.closest<HTMLElement>("form");
+      const parent290B = input290B.parentElement;
+      const grand290B = parent290B?.parentElement || null;
+
+      for (const node290B of [
+        searchClass290B,
+        form290B,
+        parent290B,
+        grand290B
+      ]) {
+        if (!node290B || possible290B.includes(node290B)) continue;
+
+        const rect290B = node290B.getBoundingClientRect();
+
+        if (
+          rect290B.height >= inputRect290B.height &&
+          rect290B.height <= Math.max(190, inputRect290B.height + 110) &&
+          rect290B.width >= inputRect290B.width * 0.75
+        ) {
+          possible290B.push(node290B);
+        }
+      }
+
+      possible290B.sort((a290B, b290B) => {
+        const aRect290B = a290B.getBoundingClientRect();
+        const bRect290B = b290B.getBoundingClientRect();
+
+        return (
+          aRect290B.width * aRect290B.height -
+          bRect290B.width * bRect290B.height
+        );
+      });
+
+      shell290B =
+        possible290B[0] ||
+        input290B.parentElement ||
+        input290B;
+
+      if (!shell290B) return false;
+
+      shellInlineStyle290B =
+        shell290B.getAttribute("style") || "";
+      inputInlineStyle290B =
+        input290B.getAttribute("style") || "";
+
+      shell290B.setAttribute("data-darik-search-shell", "290B");
+      input290B.setAttribute("data-darik-search-input", "290B");
+
+      if (!placeholder290B) {
+        placeholder290B = document.createElement("div");
+        placeholder290B.setAttribute(
+          "data-darik-search-placeholder",
+          "290B"
+        );
+        placeholder290B.style.display = "none";
+        placeholder290B.style.width = "100%";
+        placeholder290B.style.margin = "0";
+        placeholder290B.style.padding = "0";
+        placeholder290B.style.pointerEvents = "none";
+      }
+
+      return true;
+    };
+
+    const restore290B = () => {
+      if (!shell290B || !input290B) return;
+
+      locked290B = false;
+
+      shell290B.removeAttribute("data-darik-search-locked");
+      shell290B.style.cssText = shellInlineStyle290B;
+      input290B.style.cssText = inputInlineStyle290B;
+
+      if (placeholder290B) {
+        placeholder290B.style.display = "none";
+        placeholder290B.style.height = "0px";
+      }
+    };
+
+    const ensure290B = () => {
+      if (
+        shell290B &&
+        input290B &&
+        shell290B.isConnected &&
+        input290B.isConnected
+      ) {
+        return true;
+      }
+
+      shell290B = null;
+      input290B = null;
+      return locate290B();
+    };
+
+    const update290B = () => {
+      if (frame290B) {
+        window.cancelAnimationFrame(frame290B);
+      }
+
+      frame290B = window.requestAnimationFrame(() => {
+        if (!ensure290B() || !shell290B || !input290B) return;
+
+        if (
+          placeholder290B &&
+          !placeholder290B.isConnected &&
+          shell290B.parentNode
+        ) {
+          shell290B.parentNode.insertBefore(
+            placeholder290B,
+            shell290B
+          );
+        }
+
+        const top290B = bannerBottom290B();
+
+        const naturalRect290B =
+          placeholder290B &&
+          placeholder290B.style.display !== "none"
+            ? placeholder290B.getBoundingClientRect()
+            : shell290B.getBoundingClientRect();
+
+        const shouldLock290B =
+          naturalRect290B.top <= top290B + 1;
+
+        if (!shouldLock290B) {
+          if (locked290B) restore290B();
+          return;
+        }
+
+        let height290B = shell290B.getBoundingClientRect().height;
+
+        if (
+          locked290B &&
+          placeholder290B &&
+          placeholder290B.style.display !== "none"
+        ) {
+          height290B =
+            placeholder290B.getBoundingClientRect().height ||
+            height290B;
+        }
+
+        if (placeholder290B) {
+          placeholder290B.style.display = "block";
+          placeholder290B.style.height =
+            String(Math.max(1, Math.ceil(height290B))) + "px";
+        }
+
+        locked290B = true;
+        shell290B.setAttribute(
+          "data-darik-search-locked",
+          "290B"
+        );
+
+        shell290B.style.setProperty(
+          "--darik-search-fixed-top-290B",
+          String(top290B) + "px"
+        );
+      });
+    };
+
+    update290B();
+
+    window.addEventListener("scroll", update290B, {
+      passive: true
+    });
+    window.addEventListener("resize", update290B);
+
+    mutation290B = new MutationObserver(() => update290B());
+
+    mutation290B.observe(document.body, {
+      childList: true,
+      subtree: true,
+      attributes: true,
+      attributeFilter: ["class", "style", "aria-hidden"]
+    });
+
+    return () => {
+      if (frame290B) {
+        window.cancelAnimationFrame(frame290B);
+      }
+
+      mutation290B?.disconnect();
+
+      window.removeEventListener("scroll", update290B);
+      window.removeEventListener("resize", update290B);
+
+      if (shell290B) {
+        shell290B.style.cssText = shellInlineStyle290B;
+        shell290B.removeAttribute("data-darik-search-shell");
+        shell290B.removeAttribute("data-darik-search-locked");
+      }
+
+      if (input290B) {
+        input290B.style.cssText = inputInlineStyle290B;
+        input290B.removeAttribute("data-darik-search-input");
+      }
+
+      placeholder290B?.remove();
+    };
+  }, []);
+
   useEffect(() => {
     let frame289 = 0;
     let observer289: MutationObserver | null = null;
