@@ -1,3 +1,4 @@
+// DARIK_OPTIONAL_CLIQ_REFERENCE_305G
 // DARIK_AI_CREDIT_CLIQ_PROOF_API_305
 import { createClient } from "@supabase/supabase-js";
 import { NextRequest, NextResponse } from "next/server";
@@ -261,16 +262,6 @@ export async function POST(request: NextRequest) {
       {
         ok: false,
         error: "Invalid AI credit pack.",
-      },
-      400,
-    );
-  }
-
-  if (!cliqReference305) {
-    return json305(
-      {
-        ok: false,
-        error: "CliQ reference number is required.",
       },
       400,
     );
