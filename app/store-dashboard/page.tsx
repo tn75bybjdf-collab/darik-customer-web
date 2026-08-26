@@ -926,7 +926,10 @@ export default function DarikDirectOverviewPage() {
             {catalogUnlocked190 ? "Categories" : "Categories 🔒"}
           </a>
           <a href="/store-dashboard/activation">Plan & payment</a>
-        </nav>
+                  <a href="/store-dashboard/ai-credits">
+            AI Credits / رصيد الذكاء الاصطناعي
+          </a>
+</nav>
         <div className={styles.sidebarFooter}>
           <div className={styles.sidebarAccount225}>
             <span className={styles.sidebarLogin225}>

@@ -367,7 +367,10 @@ export default function StoreActivationPage() {
           <a className={styles.active} href="/store-dashboard/activation">
             Plan & payment / الخطة والدفع
           </a>
-        </nav>
+                  <a href="/store-dashboard/ai-credits">
+            AI Credits / رصيد الذكاء الاصطناعي
+          </a>
+</nav>
         <div style={{ marginTop: "auto", paddingTop: 20 }}>
           <DashboardLogoutButton />
         </div>

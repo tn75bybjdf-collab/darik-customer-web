@@ -1,4 +1,5 @@
 // DARIK_REAL_AI_CREDIT_ENFORCEMENT_304
+// DARIK_XAI_EXPLICIT_CONSENT_TEMP_CLEANUP_325
 // DARIK_GROK_AI_PRODUCT_PHOTO_BACKEND_231
 // DARIK_GROK_AI_STANDARD_IMAGE_MODEL_232
 // DARIK_GROK_TIMEOUT_CATALOG_STYLE_233
@@ -53,6 +54,7 @@ const ENHANCEMENT_PROMPT = [
 type EnhanceRequestBody = {
   retailer_id?: unknown;
   image_url?: unknown;
+  consent_to_xai?: unknown;
 };
 
 type XaiEditResponse = {
@@ -259,6 +261,18 @@ export async function POST(request: NextRequest) {
     return json({ ok: false, error: "Source product photo is required." }, 400);
   }
 
+  if (body.consent_to_xai !== true) {
+    return json(
+      {
+        ok: false,
+        error:
+          "Explicit consent is required before the selected image can be sent to xAI for enhancement.",
+        error_code: "xai_consent_required",
+      },
+      400,
+    );
+  }
+
   const accessToken = bearerToken(request);
   if (!accessToken) {
     return json({ ok: false, error: "Retailer login required." }, 401);
@@ -317,14 +331,15 @@ export async function POST(request: NextRequest) {
   logStage("request accepted");
 
   let stagedSquareUrl = "";
+  let stagedSquarePath = "";
   try {
     logStage("source pre-pad start");
     const framed = await frameSourceToSquare(imageUrl);
-    const stagePath = `${retailerId}/${SOURCE_STAGE_PREFIX}/${Date.now()}-${crypto.randomUUID()}.png`;
+    stagedSquarePath = `${retailerId}/${SOURCE_STAGE_PREFIX}/${Date.now()}-${crypto.randomUUID()}.png`;
 
     const stageUpload = await admin.storage
       .from(PRODUCT_BUCKET)
-      .upload(stagePath, framed.bytes, {
+      .upload(stagedSquarePath, framed.bytes, {
         cacheControl: "3600",
         contentType: framed.mime,
         upsert: false,
@@ -344,6 +359,13 @@ export async function POST(request: NextRequest) {
 
     logStage("source pre-pad complete", stagedSquareUrl);
   } catch (error) {
+    if (stagedSquarePath) {
+      await admin.storage
+        .from(PRODUCT_BUCKET)
+        .remove([stagedSquarePath]);
+      stagedSquarePath = "";
+    }
+
     console.error(
       "Darik AI 236 could not pre-frame the source image:",
       safeMessage(error),
@@ -357,6 +379,26 @@ export async function POST(request: NextRequest) {
       502,
     );
   }
+
+  const cleanupStagedSquare325 = async () => {
+    if (!stagedSquarePath) {
+      return;
+    }
+
+    const cleanupResult = await admin.storage
+      .from(PRODUCT_BUCKET)
+      .remove([stagedSquarePath]);
+
+    if (cleanupResult.error) {
+      console.warn(
+        "Darik AI temporary source cleanup failed:",
+        cleanupResult.error.message,
+      );
+      return;
+    }
+
+    stagedSquarePath = "";
+  };
 
   // DARIK_REAL_AI_CREDIT_ENFORCEMENT_304
   const creditReference304 = crypto.randomUUID();
@@ -375,6 +417,8 @@ export async function POST(request: NextRequest) {
       "Darik AI credit spend 304 failed:",
       creditSpend304.error.message,
     );
+
+    await cleanupStagedSquare325();
 
     return json(
       {
@@ -401,11 +445,13 @@ export async function POST(request: NextRequest) {
   );
 
   if (!creditOk304) {
+    await cleanupStagedSquare325();
+
     return json(
       {
         ok: false,
         error:
-          "You do not have enough AI credits. Buy more credits to continue.",
+          "No AI credits are available for this account.",
         error_code:
           String(
             creditRow304?.error_code ||
@@ -415,23 +461,6 @@ export async function POST(request: NextRequest) {
           mode: "metered",
           remaining: creditRemaining304,
           cost: 1,
-          packs: [
-            {
-              key: "credits_500",
-              credits: 500,
-              price_jod: 20,
-            },
-            {
-              key: "credits_1000",
-              credits: 1000,
-              price_jod: 35,
-            },
-            {
-              key: "credits_2000",
-              credits: 2000,
-              price_jod: 50,
-            },
-          ],
         },
       },
       402,
@@ -485,7 +514,7 @@ export async function POST(request: NextRequest) {
   ) => {
     await refundCredit304();
 
-    return await failWithRefund304(
+    return json(
       {
         ...payload304,
         credits: {
@@ -544,6 +573,8 @@ export async function POST(request: NextRequest) {
     );
   } finally {
     clearTimeout(xaiTimeout);
+
+    await cleanupStagedSquare325();
   }
 
   if (!xaiResponse.ok) {
@@ -663,7 +694,6 @@ export async function POST(request: NextRequest) {
     return json({
       ok: true,
       enhanced_url: enhancedUrl,
-      staged_square_url: stagedSquareUrl,
       credits: {
         mode: "metered",
         remaining: creditRemaining304,

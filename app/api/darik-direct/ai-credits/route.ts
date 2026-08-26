@@ -1,3 +1,4 @@
+// DARIK_RETAILER_WEB_AI_CREDIT_HISTORY_327M
 // DARIK_AI_CREDIT_CLIQ_INFO_305
 // DARIK_REAL_AI_CREDITS_304
 import { createClient } from "@supabase/supabase-js";
@@ -206,6 +207,30 @@ export async function GET(request: NextRequest) {
 
   const current304 = row304(status304.data);
 
+  // DARIK_RETAILER_WEB_AI_CREDIT_HISTORY_327M
+  // Retailer-safe history only. Private storage paths are deliberately omitted.
+  let recentRequests304: Record<string, unknown>[] = [];
+
+  const history304 = await verified304.admin
+    .from("darik_ai_credit_purchase_requests")
+    .select(
+      "id,pack_key,credits,price_jod,status,cliq_reference_number,cliq_sender_name,cliq_sender_phone,submitted_amount_jod,proof_submitted_at,admin_note,approved_at,created_at,updated_at"
+    )
+    .eq("retailer_id", retailerId304)
+    .order("created_at", { ascending: false })
+    .limit(20);
+
+  if (history304.error) {
+    console.error(
+      "Darik AI credit retailer history 327M failed:",
+      history304.error.message,
+    );
+  } else {
+    recentRequests304 = Array.isArray(history304.data)
+      ? (history304.data as Record<string, unknown>[])
+      : [];
+  }
+
   return json304({
     ok: true,
     balance: Number(current304?.balance ?? 0),
@@ -235,6 +260,12 @@ export async function GET(request: NextRequest) {
         "",
     },
     packs: PACKS_304,
+    recent_requests: recentRequests304,
+    pending_request:
+      recentRequests304.find(
+        (request304) =>
+          String(request304.status || "").toLowerCase() === "pending",
+      ) ?? null,
   });
 }
 

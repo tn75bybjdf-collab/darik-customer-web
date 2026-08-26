@@ -11572,7 +11572,10 @@ await saveStorefront(undefined, "manual");
             {catalogUnlocked190 ? "Categories" : "Categories 🔒"}
           </a>
           <a href="/store-dashboard/activation">Plan & payment</a>
-        </nav>
+                  <a href="/store-dashboard/ai-credits">
+            AI Credits / رصيد الذكاء الاصطناعي
+          </a>
+</nav>
 
         <div className={styles.sidebarFooter}>
           <span>{session.user.user_metadata?.darik_retailer_username ? `@${session.user.user_metadata.darik_retailer_username}` : session.user.email}</span>

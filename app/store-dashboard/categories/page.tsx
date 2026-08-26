@@ -723,7 +723,10 @@ export default function DarikDirectCategoriesPage() {
             Categories / الأقسام
           </a>
           <a href="/store-dashboard/activation">Go live / تفعيل المتجر</a>
-        </nav>
+                  <a href="/store-dashboard/ai-credits">
+            AI Credits / رصيد الذكاء الاصطناعي
+          </a>
+</nav>
 
         <div className={styles.sidebarFooter}>
           <span>{session.user.email}</span>

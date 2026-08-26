@@ -464,7 +464,10 @@ export default function DarikDirectOrdersPage() {
           <a href="/store-dashboard/products">Products</a>
           <a href="/store-dashboard/categories">Categories</a>
           <a href="/store-dashboard/activation">Go live</a>
-        </nav>
+                  <a href="/store-dashboard/ai-credits">
+            AI Credits / رصيد الذكاء الاصطناعي
+          </a>
+</nav>
         <div className={styles.sidebarFooter}>
           <span>{session.user.email}</span>
           <DashboardLogoutButton />

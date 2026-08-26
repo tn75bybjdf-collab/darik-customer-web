@@ -8164,7 +8164,10 @@ export default function DarikDirectProductsPage() {
           </a>
           <a href="/store-dashboard/categories">Categories</a>
           <a href="/store-dashboard/mechanics-lab">Mechanics Lab / مختبر الخصائص</a>
-        </nav>
+                  <a href="/store-dashboard/ai-credits">
+            AI Credits / رصيد الذكاء الاصطناعي
+          </a>
+</nav>
 
         <div className={styles.sidebarFooter}>
           <span>{session.user.email}</span>
