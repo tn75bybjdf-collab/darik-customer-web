@@ -194,3 +194,47 @@
     width: 100%;
   }
 }
+
+
+/* DARIK_PUBLIC_APP_LEGAL_BILINGUAL_STACK_322 */
+.languageDivider {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin: 48px 0 24px;
+  color: #111827;
+  font-size: 22px;
+  font-weight: 900;
+}
+
+.languageDivider::before,
+.languageDivider::after {
+  content: "";
+  height: 1px;
+  flex: 1;
+  background: #d7dce2;
+}
+
+.languageDivider span {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 46px;
+  padding: 0 18px;
+  border-radius: 999px;
+  background: #111827;
+  color: #ffffff;
+}
+
+.arabicSection {
+  text-align: right;
+}
+
+.arabicSection .card ul {
+  padding-left: 0;
+  padding-right: 22px;
+}
+
+.arabicSection .grid > div {
+  text-align: right;
+}
