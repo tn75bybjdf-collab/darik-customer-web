@@ -1260,10 +1260,193 @@ export default function DarikDiscoveryHome() {
     freeDeliveryOnly246E,
   ]);
 
+  // DARIK_NEAREST_FOUR_PROGRESSIVE_STORES_318D
+  const STORE_BATCH_SIZE_318D = 4;
+
+  const nearestCategoryStores318D = useMemo(() => {
+    const categoryFiltered318D =
+      selectedCategory246 === "all"
+        ? visibleStores246B
+        : visibleStores246B.filter(
+            (store318D) =>
+              storeGroupKey(
+                store318D
+              ) ===
+              selectedCategory246
+          );
+
+    return [
+      ...categoryFiltered318D,
+    ].sort(
+      (a318D, b318D) => {
+        const distanceA318D =
+          Number(
+            a318D.distance_km
+          );
+
+        const distanceB318D =
+          Number(
+            b318D.distance_km
+          );
+
+        const safeDistanceA318D =
+          Number.isFinite(
+            distanceA318D
+          )
+            ? distanceA318D
+            : Number.POSITIVE_INFINITY;
+
+        const safeDistanceB318D =
+          Number.isFinite(
+            distanceB318D
+          )
+            ? distanceB318D
+            : Number.POSITIVE_INFINITY;
+
+        const difference318D =
+          safeDistanceA318D -
+          safeDistanceB318D;
+
+        if (
+          difference318D !== 0
+        ) {
+          return difference318D;
+        }
+
+        return String(
+          a318D.display_name ?? ""
+        ).localeCompare(
+          String(
+            b318D.display_name ?? ""
+          )
+        );
+      }
+    );
+  }, [
+    visibleStores246B,
+    selectedCategory246,
+  ]);
+
+  const [
+    visibleStoreCount318D,
+    setVisibleStoreCount318D,
+  ] = useState(
+    STORE_BATCH_SIZE_318D
+  );
+
+  const renderedStores318D = useMemo(
+    () =>
+      nearestCategoryStores318D.slice(
+        0,
+        visibleStoreCount318D
+      ),
+    [
+      nearestCategoryStores318D,
+      visibleStoreCount318D,
+    ]
+  );
+
+  const hasMoreStores318D =
+    renderedStores318D.length <
+    nearestCategoryStores318D.length;
+
+  useEffect(() => {
+    setVisibleStoreCount318D(
+      STORE_BATCH_SIZE_318D
+    );
+  }, [
+    selectedCategory246,
+    location?.latitude,
+    location?.longitude,
+    storeSearch,
+    openOnly246E,
+    freeDeliveryOnly246E,
+  ]);
+
+  useEffect(() => {
+    if (
+      !hasMoreStores318D
+    ) {
+      return;
+    }
+
+    let loadingMore318D =
+      false;
+
+    const onScroll318D = () => {
+      if (
+        loadingMore318D
+      ) {
+        return;
+      }
+
+      const list318D =
+        document.querySelector(
+          ".darikMarketplaceStoreList246B"
+        );
+
+      if (!list318D) {
+        return;
+      }
+
+      const bounds318D =
+        list318D.getBoundingClientRect();
+
+      const passedCurrentBatch318D =
+        bounds318D.bottom <=
+        window.innerHeight + 16;
+
+      if (
+        !passedCurrentBatch318D
+      ) {
+        return;
+      }
+
+      loadingMore318D =
+        true;
+
+      setVisibleStoreCount318D(
+        (current318D) =>
+          Math.min(
+            current318D +
+              STORE_BATCH_SIZE_318D,
+            nearestCategoryStores318D.length
+          )
+      );
+
+      window.setTimeout(
+        () => {
+          loadingMore318D =
+            false;
+        },
+        100
+      );
+    };
+
+    window.addEventListener(
+      "scroll",
+      onScroll318D,
+      {
+        passive: true,
+      }
+    );
+
+    return () => {
+      window.removeEventListener(
+        "scroll",
+        onScroll318D
+      );
+    };
+  }, [
+    hasMoreStores318D,
+    nearestCategoryStores318D.length,
+  ]);
+
+
   useEffect(() => {
     const slugs249 = Array.from(
       new Set(
-        visibleStores246B
+        renderedStores318D
           .map((store249) => store249.slug.trim().toLowerCase())
           .filter(Boolean)
       )
@@ -1309,7 +1492,7 @@ export default function DarikDiscoveryHome() {
     void Promise.all(
       Array.from({ length: workerCount249 }, () => worker249())
     );
-  }, [visibleStores246B]);
+  }, [renderedStores318D]);
 
   // DARIK_HOME_STORE_SHELVES_TRUE_BESTSELLERS_186
   const groupedStores = useMemo(() => {
@@ -1972,7 +2155,7 @@ export default function DarikDiscoveryHome() {
             </div>
           ) : visibleStores246B.length ? (
             <div className="darikMarketplaceStoreList246B">
-              {visibleStores246B.map((store) => (
+              {renderedStores318D.map((store) => (
                 <HomeStoreCard186
                   key={store.storefront_id}
                   store={store}
