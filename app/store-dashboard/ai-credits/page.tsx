@@ -1,6 +1,7 @@
 "use client";
 
 /* DARIK_RETAILER_WEB_AI_CREDITS_TAB_327M */
+/* DARIK_RETAILER_WEB_AI_CREDITS_SUBMIT_UX_327N */
 
 import type { Session } from "@supabase/supabase-js";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -96,6 +97,10 @@ export default function RetailerAiCreditsPage327M() {
   const [refreshing327M, setRefreshing327M] = useState(false);
   const [error327M, setError327M] = useState("");
   const [success327M, setSuccess327M] = useState("");
+  const [submittedProof327N, setSubmittedProof327N] = useState<{
+    credits: number;
+    price_jod: number;
+  } | null>(null);
 
   const [selectedPack327M, setSelectedPack327M] =
     useState<Pack327M["key"]>("credits_500");
@@ -134,6 +139,15 @@ export default function RetailerAiCreditsPage327M() {
         String(request327M.status || "").toLowerCase() === "pending",
     ) ?? null;
 
+  const effectivePending327N = pendingRequest327M
+    ? {
+        credits: Number(pendingRequest327M.credits ?? 0),
+        price_jod: Number(pendingRequest327M.price_jod ?? 0),
+      }
+    : submittedProof327N;
+
+  const hasPendingProof327N = Boolean(effectivePending327N);
+
   const loadCredits327M = useCallback(
     async (quiet327M = false) => {
       if (!session327M?.access_token || !retailerId327M) return;
@@ -171,6 +185,19 @@ export default function RetailerAiCreditsPage327M() {
 
         setCredits327M(payload327M);
 
+        const pendingAfterLoad327N =
+          Array.isArray(payload327M.recent_requests)
+            ? payload327M.recent_requests.find(
+                (request327N) =>
+                  String(request327N.status || "").toLowerCase() ===
+                  "pending",
+              )
+            : null;
+
+        if (submittedProof327N && !pendingAfterLoad327N) {
+          setSubmittedProof327N(null);
+        }
+
         const returnedPacks327M = Array.isArray(payload327M.packs)
           ? payload327M.packs
           : [];
@@ -194,7 +221,12 @@ export default function RetailerAiCreditsPage327M() {
         setRefreshing327M(false);
       }
     },
-    [retailerId327M, selectedPack327M, session327M?.access_token],
+    [
+      retailerId327M,
+      selectedPack327M,
+      session327M?.access_token,
+      submittedProof327N,
+    ],
   );
 
   useEffect(() => {
@@ -358,9 +390,15 @@ export default function RetailerAiCreditsPage327M() {
         );
       }
 
+      setSubmittedProof327N({
+        credits: pack327M.credits,
+        price_jod: pack327M.price_jod,
+      });
       setSuccess327M(
         "Payment proof submitted. Darik will add the credits after Admin approval. / تم إرسال إثبات الدفع، وسيتم إضافة الرصيد بعد موافقة الإدارة.",
       );
+      setSenderName327M("");
+      setSenderPhone327M("");
       setReceipt327M(null);
       setReference327M("");
       if (receiptInput327M.current) {
@@ -525,15 +563,15 @@ export default function RetailerAiCreditsPage327M() {
           </article>
         </section>
 
-        {pendingRequest327M ? (
+        {hasPendingProof327N && effectivePending327N ? (
           <section className={styles.pendingNotice}>
             <div>
               <span>PAYMENT UNDER REVIEW / الدفعة قيد المراجعة</span>
               <strong>
                 {Number(
-                  pendingRequest327M.credits ?? 0,
+                  effectivePending327N.credits ?? 0,
                 ).toLocaleString()}{" "}
-                credits · {money327M(pendingRequest327M.price_jod)}
+                credits · {money327M(effectivePending327N.price_jod)}
               </strong>
             </div>
             <p>
@@ -595,13 +633,25 @@ export default function RetailerAiCreditsPage327M() {
             </div>
 
             <dl className={styles.paymentDetails}>
-              <div>
-                <dt>Account name / اسم الحساب</dt>
-                <dd>{credits327M?.payment?.name || "DARIK"}</dd>
+              <div className={styles.paymentTargetRow327N}>
+                <dt>
+                  <span className={styles.sendToBadge327N}>
+                    SEND TO / أرسل إلى
+                  </span>
+                  Account name / اسم الحساب
+                </dt>
+                <dd className={styles.paymentTargetValue327N}>
+                  {credits327M?.payment?.name || "DARIK"}
+                </dd>
               </div>
-              <div>
-                <dt>CliQ alias / معرّف CliQ</dt>
-                <dd>
+              <div className={styles.paymentTargetRow327N}>
+                <dt>
+                  <span className={styles.sendToBadge327N}>
+                    SEND TO / أرسل إلى
+                  </span>
+                  CliQ alias / معرّف CliQ
+                </dt>
+                <dd className={styles.paymentTargetValue327N}>
                   {credits327M?.payment?.alias ||
                     "Contact Darik Support"}
                 </dd>
@@ -630,7 +680,23 @@ export default function RetailerAiCreditsPage327M() {
               </div>
             </div>
 
-            <div className={styles.formGrid}>
+            {hasPendingProof327N ? (
+              <div className={styles.submittedState327N}>
+                <span className={styles.submittedCheck327N}>✓</span>
+                <div>
+                  <strong>
+                    Payment proof submitted / تم إرسال إثبات الدفع
+                  </strong>
+                  <p>
+                    Your payment is now under Darik Admin review. The payment
+                    form has been cleared and hidden. / دفعتك الآن قيد مراجعة
+                    إدارة داريك وتم إخفاء نموذج الدفع بعد إرسال الطلب.
+                  </p>
+                </div>
+              </div>
+            ) : (
+              <>
+                <div className={styles.formGrid}>
               <label>
                 <span>Sender name / اسم المرسل</span>
                 <input
@@ -693,16 +759,18 @@ export default function RetailerAiCreditsPage327M() {
               </div>
             ) : null}
 
-            <button
-              type="button"
-              className={styles.submitButton}
-              disabled={submitting327M}
-              onClick={() => void submitProof327M()}
-            >
-              {submitting327M
-                ? "Submitting… / جار الإرسال…"
-                : `Submit ${pack327M.credits.toLocaleString()} credit payment proof / إرسال إثبات الدفع`}
-            </button>
+                <button
+                  type="button"
+                  className={styles.submitButton}
+                  disabled={submitting327M}
+                  onClick={() => void submitProof327M()}
+                >
+                  {submitting327M
+                    ? "Submitting… / جار الإرسال…"
+                    : `Submit ${pack327M.credits.toLocaleString()} credit payment proof / إرسال إثبات الدفع`}
+                </button>
+              </>
+            )}
           </article>
         </section>
 
