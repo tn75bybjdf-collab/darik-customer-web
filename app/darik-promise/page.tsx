@@ -187,6 +187,11 @@ const copy = {
     finalPrimary: "Contact Darik Support",
     finalSecondary: "Read Terms of Use",
     footer: "The Darik Promise is subject to eligibility, investigation, evidence, the Terms of Use, and applicable law.",
+    help: "Help",
+    termsLink: "Terms",
+    privacyLink: "Privacy",
+    promiseLink: "Darik Promise",
+    supportLink: "Contact / Support",
   },
   ar: {
     language: "English",
@@ -354,6 +359,11 @@ const copy = {
     finalPrimary: "تواصل مع دعم داريك",
     finalSecondary: "اقرأ شروط الاستخدام",
     footer: "وعد داريك يخضع للأهلية والتحقيق والأدلة وشروط الاستخدام والقانون المعمول به.",
+    help: "المساعدة",
+    termsLink: "الشروط",
+    privacyLink: "الخصوصية",
+    promiseLink: "وعد داريك",
+    supportLink: "التواصل / الدعم",
   },
 } as const;
 
@@ -749,6 +759,23 @@ export default function DarikPromisePage() {
           <p className={styles.footerNote}>{t.footer}</p>
         </div>
       </section>
+
+      <footer className={styles.helpFooter335}>
+        <div className={styles.shell}>
+          <div className={styles.helpFooterInner335}>
+            <Link href="/" className={styles.helpFooterBrand335}>
+              <img src="/darik_logo_final_v2.png" alt="Darik" />
+            </Link>
+            <div className={styles.helpFooterColumn335}>
+              <strong>{t.help}</strong>
+              <Link href="/terms">{t.termsLink}</Link>
+              <Link href="/privacy">{t.privacyLink}</Link>
+              <Link href="/darik-promise">{t.promiseLink}</Link>
+              <Link href="/support">{t.supportLink}</Link>
+            </div>
+          </div>
+        </div>
+      </footer>
     </main>
   );
 }

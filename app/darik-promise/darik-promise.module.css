@@ -1070,3 +1070,60 @@
     display: none;
   }
 }
+
+
+/* DARIK_HELP_FOOTER_PROMISE_CSS_335 */
+.helpFooter335 {
+  padding: 46px 0 30px;
+  border-top: 1px solid #e6ebed;
+  background: #fbfcfc;
+}
+
+.helpFooterInner335 {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: start;
+  gap: 60px;
+}
+
+.helpFooterBrand335 {
+  display: inline-flex;
+  align-items: center;
+  width: max-content;
+}
+
+.helpFooterBrand335 img {
+  width: 120px;
+  max-height: 42px;
+  object-fit: contain;
+}
+
+.helpFooterColumn335 {
+  min-width: 150px;
+  display: grid;
+  align-content: start;
+  gap: 10px;
+}
+
+.helpFooterColumn335 strong {
+  margin-bottom: 3px;
+  color: #26343d;
+  font-size: 11px;
+}
+
+.helpFooterColumn335 a {
+  color: #75828b;
+  font-size: 11px;
+  text-decoration: none;
+}
+
+.helpFooterColumn335 a:hover {
+  color: #0d7b6c;
+}
+
+@media (max-width: 640px) {
+  .helpFooterInner335 {
+    grid-template-columns: 1fr;
+    gap: 26px;
+  }
+}

@@ -1,5 +1,7 @@
 "use client";
 
+// DARIK_HELP_FOOTER_335
+
 // DARIK_PREMIUM_MARKETING_REDESIGN_332
 import { useEffect, useState } from "react";
 import styles from "../marketplace-info.module.css";
@@ -120,6 +122,11 @@ const copy = {
       "Darik connects customers with active retailers across Jordan through searchable storefronts, product discovery, and delivery-aware shopping.",
     platform: "Platform",
     retailers: "Retailers",
+    help: "Help",
+    termsLink: "Terms",
+    privacyLink: "Privacy",
+    promiseLink: "Darik Promise",
+    supportLink: "Contact / Support",
     rights: "Darik Technologies. All rights reserved.",
   },
   ar: {
@@ -223,6 +230,11 @@ const copy = {
       "داريك يربط الزبائن بالمتاجر الفعالة في الأردن من خلال واجهات قابلة للبحث واكتشاف المنتجات وتجربة تسوق تراعي نطاق التوصيل.",
     platform: "المنصة",
     retailers: "للتجار",
+    help: "المساعدة",
+    termsLink: "الشروط",
+    privacyLink: "الخصوصية",
+    promiseLink: "وعد داريك",
+    supportLink: "التواصل / الدعم",
     rights: "داريك تكنولوجيز. جميع الحقوق محفوظة.",
   },
 } as const;
@@ -396,7 +408,13 @@ function Footer({ language }: { language: Language }) {
               <strong>{t.retailers}</strong>
               <a href="/store-signup">{t.sell}</a>
               <a href="/store-dashboard">{t.dashboard}</a>
-              <a href="/support">Support</a>
+            </div>
+            <div>
+              <strong>{t.help}</strong>
+              <a href="/terms">{t.termsLink}</a>
+              <a href="/privacy">{t.privacyLink}</a>
+              <a href="/darik-promise">{t.promiseLink}</a>
+              <a href="/support">{t.supportLink}</a>
             </div>
           </div>
         </div>

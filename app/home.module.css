@@ -2887,3 +2887,21 @@
     font-size: 10px;
   }
 }
+
+/* DARIK_HELP_FOOTER_HOME_CSS_335 */
+.footerLinks {
+  flex-wrap: wrap;
+  gap: 56px;
+}
+
+@media (max-width: 900px) {
+  .footerLinks {
+    gap: 34px 44px;
+  }
+}
+
+@media (max-width: 560px) {
+  .footerLinks {
+    gap: 30px;
+  }
+}

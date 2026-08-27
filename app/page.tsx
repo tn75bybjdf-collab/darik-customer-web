@@ -1,5 +1,7 @@
 "use client";
 
+// DARIK_HELP_FOOTER_335
+
 import DarikJordanDirectorySearch295 from "./components/DarikJordanDirectorySearch295";
 // DARIK_JORDAN_DIRECTORY_ALL_ACTIVE_STORES_331
 // DARIK_PAYMENT_FIRST_YEARLY_PLANS_CATALOG_GATE_190
@@ -359,6 +361,11 @@ const copy = {
     footerBody: "Darik helps customers discover local stores across Jordan, find products, and see which stores deliver to them.",
     retailerLinks: "Retailers",
     platformLinks: "Platform",
+    helpLinks: "Help",
+    termsLink: "Terms",
+    privacyLink: "Privacy",
+    promiseLink: "Darik Promise",
+    supportLink: "Contact / Support",
     rights: "Darik Technologies. All rights reserved.",
     locationRequired: "Browse all stores",
     locationRequiredBody: "Browse every active Darik store now. Set a location anytime to move stores that deliver to you to the top.",
@@ -441,6 +448,11 @@ const copy = {
     footerBody: "داريك يساعد الزبائن على اكتشاف المتاجر في الأردن والعثور على المنتجات ومعرفة أي المتاجر توصل إليهم.",
     retailerLinks: "للتجار",
     platformLinks: "المنصة",
+    helpLinks: "المساعدة",
+    termsLink: "الشروط",
+    privacyLink: "الخصوصية",
+    promiseLink: "وعد داريك",
+    supportLink: "التواصل / الدعم",
     rights: "داريك تكنولوجيز. جميع الحقوق محفوظة.",
     locationRequired: "تصفح كل المتاجر",
     locationRequiredBody: "تصفح كل متاجر داريك الفعالة الآن. حدد موقعك بأي وقت حتى تظهر المتاجر التي توصل إليك أولاً.",
@@ -2408,6 +2420,7 @@ export default function DarikDiscoveryHome() {
           <div className={styles.footerLinks}>
             <div><strong>{t.platformLinks}</strong><a href="#stores">{t.stores}</a><a href="/how-it-works">{t.how}</a><a href="/pricing">{t.pricing}</a></div>
             <div><strong>{t.retailerLinks}</strong><a href="/store-signup">{t.retailerSignup}</a><a href="/store-dashboard">{t.dashboard}</a></div>
+            <div><strong>{t.helpLinks}</strong><a href="/terms">{t.termsLink}</a><a href="/privacy">{t.privacyLink}</a><a href="/darik-promise">{t.promiseLink}</a><a href="/support">{t.supportLink}</a></div>
           </div>
         </div>
         <div className={styles.footerBottom}><span>© {new Date().getFullYear()} {t.rights}</span><span>getdarik.com · Jordan</span></div>
