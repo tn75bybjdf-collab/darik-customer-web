@@ -1,78 +1,123 @@
 "use client";
 
-// DARIK_PAYMENT_FIRST_YEARLY_PLANS_CATALOG_GATE_190
-// DARIK_UTF8_CLEAN_REBUILD_029_V4
-
-// DARIK_HOW_IT_WORKS_026
+// DARIK_PREMIUM_MARKETING_REDESIGN_332
 import { useEffect, useState } from "react";
 import styles from "../marketplace-info.module.css";
 
 type Language = "en" | "ar";
+type IconName =
+  | "arrow"
+  | "check"
+  | "delivery"
+  | "directory"
+  | "search"
+  | "shop"
+  | "sparkle"
+  | "store"
+  | "location";
+
 const LANGUAGE_KEY = "darik_marketplace_language_v1";
 
-const content = {
+const copy = {
   en: {
     stores: "Stores",
     how: "How it works",
     pricing: "Pricing",
     dashboard: "Retailer dashboard",
     sell: "Sell on Darik",
-    kicker: "THE DARIK DELIVERY NETWORK",
-    titleA: "One location.",
-    titleB: "Every store that can reach it.",
-    lead: "Darik connects customers to local retailers based on the retailer’s real delivery range—not a random city list or a guessed neighborhood.",
-    findStores: "Find stores near me",
-    startStore: "Sign up today",
-    liveCheck: "Live delivery-zone check",
-    eligibleOnly: "Eligible stores only",
-    flowLocation: "Customer location",
-    flowLocationBody: "GPS or searched address",
-    flowMatch: "Delivery-range matching",
-    flowMatchBody: "Distance checked against each active store",
-    flowStore: "Retailer storefront",
-    flowStoreBody: "Customer shops directly from the selected store",
-    customerLabel: "FOR CUSTOMERS",
-    customerTitle: "From opening Darik to entering a store in four clear steps.",
-    customerBody: "The marketplace homepage handles discovery. Each retailer’s own storefront handles products, cart, checkout, and the final order.",
+    heroEyebrow: "JORDAN'S RETAIL DISCOVERY NETWORK",
+    heroTitle: "Search Jordan.",
+    heroTitleAccent: "Find the store.",
+    heroBody:
+      "Darik brings active local retailers into one searchable network. Find what you need, discover who sells it, and instantly see which stores can deliver to your location.",
+    browseStores: "Browse stores",
+    joinDarik: "Put your store on Darik",
+    trustOne: "Jordan-wide discovery",
+    trustTwo: "Delivery-aware ranking",
+    trustThree: "Direct store catalogs",
+    previewSearch: "Search Darik",
+    previewQuery: "Neta U mirror",
+    previewFound: "Stores carrying this item",
+    previewDelivery: "Delivers to your location",
+    previewNoDelivery: "No delivery to your location",
+    previewBrowse: "Browse catalog",
+    introEyebrow: "THE CUSTOMER EXPERIENCE",
+    introTitle: "One search. Three simple steps.",
+    introBody:
+      "The complicated work happens behind the scenes. Customers get a clean path from “I need this” to “I found the store.”",
     steps: [
-      ["01", "⌖", "Set the delivery location", "Allow browser location access or search for an address manually."],
-      ["02", "◎", "Darik checks every delivery zone", "Only active stores whose configured radius reaches the customer are eligible."],
-      ["03", "▦", "Browse by retail field", "Filter grocery, pharmacy, fashion, technology, automotive, food, and more."],
-      ["04", "→", "Enter the retailer’s storefront", "Open /[store-name], choose products, and complete the order directly with that business."],
+      {
+        number: "01",
+        icon: "search" as IconName,
+        title: "Search what you need",
+        body:
+          "Search a product, part, category, or store across active Darik retailers in Jordan.",
+      },
+      {
+        number: "02",
+        icon: "directory" as IconName,
+        title: "Discover who sells it",
+        body:
+          "See matching retailers and browse their real storefronts, catalogs, products, and business information.",
+      },
+      {
+        number: "03",
+        icon: "delivery" as IconName,
+        title: "Know your options",
+        body:
+          "Stores that deliver to your location appear first. Other active stores remain visible so you never lose a useful result.",
+      },
     ],
-    trustLabel: "DISCOVERY LOGIC",
-    trustTitle: "A store appears because it can actually deliver—not because it paid for a random listing.",
-    trustBody: "Darik uses the customer’s location as a matching input and returns only the public storefront information needed for discovery.",
-    checks: [
-      ["Published storefront", "Draft or private storefronts are not included in customer discovery."],
-      ["Active delivery radius", "The store must have a valid location and a positive configured delivery range."],
-      ["Distance eligibility", "The customer’s address must fall inside that store’s delivery radius."],
-      ["Retail-field organization", "Eligible stores are grouped into useful shopping fields instead of one crowded feed."],
+    directoryEyebrow: "MORE THAN DELIVERY",
+    directoryTitle: "A retail directory that stays useful everywhere.",
+    directoryBody:
+      "Darik does not disappear when a store is outside your delivery area. Every active retailer remains discoverable, which makes the platform useful for product research, store discovery, pickup, contact, and future purchases.",
+    directoryPoints: [
+      "Find products across stores, not just stores nearby.",
+      "See delivery matches first without hiding the rest of Jordan.",
+      "Open each retailer's own branded Darik storefront.",
+      "Use Darik as the place to answer: “Who sells this?”",
     ],
-    logicTitle: "Marketplace eligibility check",
-    active: "Active",
-    rowOne: ["Store is public", "Published storefront"],
-    rowTwo: ["Delivery range reaches customer", "Distance ≤ store radius"],
-    rowThree: ["Safe public data only", "No retailer coordinates returned"],
-    rowFour: ["Store opens directly", "Existing /[store-name] route"],
-    privateTitle: "Location privacy is built into discovery",
-    privateBody: "The public nearby-store result does not expose a retailer’s latitude or longitude. The customer’s exact location is not shown to a retailer just for browsing.",
-    retailerLabel: "FOR RETAILERS",
-    retailerTitle: "Build once. Get discovered automatically whenever a nearby customer qualifies.",
-    retailerBody: "Retailers control their storefront, catalog, delivery settings, and order availability from the existing Darik dashboard.",
-    retailerSteps: [
-      ["01", "Sign up", "Create the retailer login and choose the retail field."],
-      ["02", "Choose & pay", "Choose a yearly product limit, send CliQ, and upload the receipt."],
-      ["03", "Build the storefront", "While payment is reviewed, set branding, location, delivery, payment, and storefront design."],
-      ["04", "Approval unlocks commerce", "After Darik approves CliQ, products, categories, orders, and the public store unlock."],
+    directoryCardLabel: "DIRECTORY MODE",
+    directoryCardTitle: "100 active stores should look like 100 active stores.",
+    directoryCardBody:
+      "Location improves ranking. It never makes healthy marketplace inventory look empty.",
+    deliveryMatch: "Delivery match",
+    directoryListing: "Directory listing",
+    retailerEyebrow: "BUILT FOR LOCAL RETAILERS",
+    retailerTitle: "Your store becomes discoverable beyond your delivery radius.",
+    retailerBody:
+      "A Darik storefront is not just an ordering page. It is a searchable digital presence that helps customers find your business and the products you carry.",
+    retailerBenefits: [
+      {
+        icon: "store" as IconName,
+        title: "Your own storefront",
+        body: "A branded Darik page built around your business, catalog, and identity.",
+      },
+      {
+        icon: "search" as IconName,
+        title: "Product discovery",
+        body: "Your published products can lead customers directly to your store.",
+      },
+      {
+        icon: "location" as IconName,
+        title: "Smart delivery visibility",
+        body: "Customers instantly know when you deliver to their selected location.",
+      },
+      {
+        icon: "shop" as IconName,
+        title: "Stay discoverable",
+        body: "Customers can still find and browse you even when delivery is unavailable.",
+      },
     ],
-    retailerCta: "Sign up today",
-    ctaLabel: "READY TO USE DARIK?",
-    ctaTitle: "Choose your side of the marketplace.",
-    ctaBody: "Customers discover stores by delivery range. Retailers build their own storefront and become visible to nearby shoppers.",
-    customerCta: "Browse nearby stores",
-    dashboardCta: "Open retailer dashboard",
-    footerBody: "Darik connects customers with local stores that deliver to them.",
+    finalEyebrow: "READY TO GET DISCOVERED?",
+    finalTitle: "Put your business where Jordan searches.",
+    finalBody:
+      "Launch your Darik storefront, publish your catalog, define your delivery area, and become part of a growing retail discovery network.",
+    finalPrimary: "Create retailer account",
+    finalSecondary: "View pricing",
+    footerBody:
+      "Darik connects customers with active retailers across Jordan through searchable storefronts, product discovery, and delivery-aware shopping.",
     platform: "Platform",
     retailers: "Retailers",
     rights: "Darik Technologies. All rights reserved.",
@@ -83,123 +128,420 @@ const content = {
     pricing: "الأسعار",
     dashboard: "لوحة التاجر",
     sell: "بع على داريك",
-    kicker: "شبكة توصيل داريك",
-    titleA: "موقع واحد.",
-    titleB: "كل متجر يقدر يوصل له.",
-    lead: "يربط داريك الزبون بالمتاجر المحلية حسب نطاق التوصيل الحقيقي لكل متجر، وليس حسب قائمة عشوائية أو تخمين للمنطقة.",
-    findStores: "اعثر على متاجر قريبة",
-    startStore: "سجّل اليوم",
-    liveCheck: "فحص مباشر لنطاق التوصيل",
-    eligibleOnly: "متاجر مؤهلة فقط",
-    flowLocation: "موقع الزبون",
-    flowLocationBody: "GPS أو عنوان تم البحث عنه",
-    flowMatch: "مطابقة نطاق التوصيل",
-    flowMatchBody: "فحص المسافة مقابل كل متجر فعال",
-    flowStore: "واجهة متجر التاجر",
-    flowStoreBody: "يتسوق الزبون مباشرة من المتجر المختار",
-    customerLabel: "للزبائن",
-    customerTitle: "من فتح داريك إلى دخول المتجر بأربع خطوات واضحة.",
-    customerBody: "الصفحة الرئيسية تتولى اكتشاف المتاجر، وواجهة كل تاجر تتولى المنتجات والسلة والدفع والطلب النهائي.",
+    heroEyebrow: "شبكة داريك لاكتشاف المتاجر في الأردن",
+    heroTitle: "ابحث في الأردن.",
+    heroTitleAccent: "واعرف مين ببيع.",
+    heroBody:
+      "داريك يجمع المتاجر المحلية الفعالة ضمن شبكة واحدة قابلة للبحث. ابحث عن المنتج الذي تحتاجه، اعرف مين ببيعه، وشوف مباشرة أي متجر يقدر يوصل لموقعك.",
+    browseStores: "تصفح المتاجر",
+    joinDarik: "أضف متجرك على داريك",
+    trustOne: "اكتشاف على مستوى الأردن",
+    trustTwo: "ترتيب ذكي حسب التوصيل",
+    trustThree: "كتالوجات المتاجر مباشرة",
+    previewSearch: "ابحث في داريك",
+    previewQuery: "مراية نيتا U",
+    previewFound: "متاجر تبيع هذا المنتج",
+    previewDelivery: "يوصل إلى موقعك",
+    previewNoDelivery: "لا يوجد توصيل إلى موقعك",
+    previewBrowse: "تصفح الكتالوج",
+    introEyebrow: "تجربة الزبون",
+    introTitle: "بحث واحد. ثلاث خطوات بسيطة.",
+    introBody:
+      "الشغل المعقد يصير بالخلفية. الزبون يشوف طريق واضح من «بدي هذا المنتج» إلى «لقيت المتجر».",
     steps: [
-      ["01", "⌖", "حدد موقع التوصيل", "اسمح للموقع من المتصفح أو ابحث عن العنوان يدوياً."],
-      ["02", "◎", "داريك يفحص كل نطاقات التوصيل", "لا يظهر إلا المتجر الفعال الذي يصل نطاقه إلى موقع الزبون."],
-      ["03", "▦", "تصفح حسب مجال البيع", "فلتر البقالة والصيدليات والأزياء والتكنولوجيا والسيارات والطعام والمزيد."],
-      ["04", "←", "ادخل واجهة التاجر", "افتح رابط المتجر، اختر المنتجات وأكمل الطلب مباشرة مع ذلك النشاط."],
+      {
+        number: "01",
+        icon: "search" as IconName,
+        title: "ابحث عن اللي تحتاجه",
+        body:
+          "ابحث عن منتج أو قطعة أو فئة أو متجر ضمن متاجر داريك الفعالة في الأردن.",
+      },
+      {
+        number: "02",
+        icon: "directory" as IconName,
+        title: "اعرف مين ببيعه",
+        body:
+          "شاهد المتاجر المطابقة وتصفح واجهاتها الحقيقية وكتالوجاتها ومنتجاتها ومعلوماتها.",
+      },
+      {
+        number: "03",
+        icon: "delivery" as IconName,
+        title: "اعرف خياراتك",
+        body:
+          "المتاجر التي توصل إلى موقعك تظهر أولاً، وباقي المتاجر الفعالة تبقى ظاهرة حتى ما تخسر أي نتيجة مفيدة.",
+      },
     ],
-    trustLabel: "منطق الاكتشاف",
-    trustTitle: "يظهر المتجر لأنه فعلياً يقدر يوصل، وليس لأنه موجود ضمن قائمة عامة.",
-    trustBody: "يستخدم داريك موقع الزبون فقط للمطابقة ويعيد معلومات الواجهة العامة اللازمة لعرض المتجر.",
-    checks: [
-      ["واجهة منشورة", "المتاجر المسودة أو الخاصة لا تدخل ضمن اكتشاف الزبائن."],
-      ["نطاق توصيل فعال", "يجب أن يكون للمتجر موقع صحيح ونطاق توصيل أكبر من صفر."],
-      ["المسافة مؤهلة", "يجب أن يكون عنوان الزبون داخل نصف قطر توصيل المتجر."],
-      ["تنظيم حسب المجال", "يتم ترتيب المتاجر المؤهلة ضمن مجالات تسوق واضحة بدل قائمة مزدحمة."],
+    directoryEyebrow: "أكثر من مجرد توصيل",
+    directoryTitle: "دليل متاجر يظل مفيداً في كل مكان.",
+    directoryBody:
+      "داريك لا يخفي المتجر فقط لأنه خارج نطاق توصيلك. كل متجر فعال يبقى قابلاً للاكتشاف، حتى تستفيد من داريك للبحث عن المنتجات والمتاجر والاستلام والتواصل والشراء مستقبلاً.",
+    directoryPoints: [
+      "ابحث عن المنتجات بين المتاجر، وليس فقط عن المتاجر القريبة.",
+      "شاهد متاجر التوصيل أولاً بدون إخفاء باقي الأردن.",
+      "افتح واجهة داريك الخاصة بكل تاجر وتصفح كتالوجه.",
+      "استخدم داريك للإجابة على سؤال: «مين ببيع هذا؟»",
     ],
-    logicTitle: "فحص أهلية المتجر",
-    active: "فعال",
-    rowOne: ["المتجر عام", "واجهة منشورة"],
-    rowTwo: ["نطاق التوصيل يصل للزبون", "المسافة ≤ نطاق المتجر"],
-    rowThree: ["بيانات عامة آمنة فقط", "لا يتم إرجاع إحداثيات التاجر"],
-    rowFour: ["فتح المتجر مباشرة", "رابط واجهة المتجر الحالي"],
-    privateTitle: "خصوصية الموقع جزء من نظام الاكتشاف",
-    privateBody: "نتيجة المتاجر القريبة العامة لا تكشف خط العرض أو الطول الخاص بالتاجر، ولا يظهر موقع الزبون الدقيق للتاجر لمجرد التصفح.",
-    retailerLabel: "للتجار",
-    retailerTitle: "ابنِ متجرك مرة واحدة واظهر تلقائياً لكل زبون قريب مؤهل.",
-    retailerBody: "يتحكم التاجر بواجهته وكتالوجه وإعدادات التوصيل وحالة استقبال الطلبات من لوحة داريك الحالية.",
-    retailerSteps: [
-      ["01", "سجّل", "أنشئ حساب التاجر واختر مجال المتجر."],
-      ["02", "اختر وادفع", "اختر الحد السنوي للمنتجات وأرسل CliQ وارفع الإيصال."],
-      ["03", "ابنِ الواجهة", "أثناء مراجعة الدفع اضبط الهوية والموقع والتوصيل والدفع وتصميم الواجهة."],
-      ["04", "الموافقة تفتح التجارة", "بعد موافقة داريك على CliQ تفتح المنتجات والفئات والطلبات وينشر المتجر."],
+    directoryCardLabel: "وضع الدليل",
+    directoryCardTitle: "إذا عندك 100 متجر فعال، لازم الزبون يشوف 100 متجر فعال.",
+    directoryCardBody:
+      "الموقع يحسن ترتيب النتائج، لكنه لا يجعل المنصة تبدو فارغة.",
+    deliveryMatch: "يوصل لموقعك",
+    directoryListing: "مدرج في الدليل",
+    retailerEyebrow: "مصمم للتجار المحليين",
+    retailerTitle: "متجرك يظل قابلاً للاكتشاف حتى خارج نطاق التوصيل.",
+    retailerBody:
+      "واجهة داريك ليست فقط صفحة طلبات. هي وجود رقمي قابل للبحث يساعد الزبائن على العثور على متجرك والمنتجات التي تبيعها.",
+    retailerBenefits: [
+      {
+        icon: "store" as IconName,
+        title: "واجهة متجرك الخاصة",
+        body: "صفحة داريك بهوية متجرك وكتالوجك وشكلك الخاص.",
+      },
+      {
+        icon: "search" as IconName,
+        title: "اكتشاف المنتجات",
+        body: "منتجاتك المنشورة تساعد الزبائن على الوصول مباشرة إلى متجرك.",
+      },
+      {
+        icon: "location" as IconName,
+        title: "وضوح التوصيل",
+        body: "الزبون يعرف فوراً إذا متجرك يوصل إلى الموقع الذي حدده.",
+      },
+      {
+        icon: "shop" as IconName,
+        title: "ابقَ ظاهراً",
+        body: "الزبائن يقدروا يلاقوا متجرك ويتصفحوه حتى لو التوصيل غير متاح لهم.",
+      },
     ],
-    retailerCta: "سجّل اليوم",
-    ctaLabel: "جاهز تستخدم داريك؟",
-    ctaTitle: "اختر جانبك من السوق.",
-    ctaBody: "الزبائن يكتشفون المتاجر حسب نطاق التوصيل، والتجار يبنون واجهاتهم ويظهرون للمتسوقين القريبين.",
-    customerCta: "تصفح المتاجر القريبة",
-    dashboardCta: "افتح لوحة التاجر",
-    footerBody: "داريك يربط الزبائن بالمتاجر المحلية التي توصل إليهم.",
+    finalEyebrow: "جاهز تخلي الناس تلاقيك؟",
+    finalTitle: "حط متجرك بالمكان اللي الأردن يبحث فيه.",
+    finalBody:
+      "أطلق واجهة متجرك على داريك، انشر كتالوجك، حدد مناطق التوصيل، وكن جزءاً من شبكة اكتشاف التجزئة.",
+    finalPrimary: "أنشئ حساب تاجر",
+    finalSecondary: "شاهد الأسعار",
+    footerBody:
+      "داريك يربط الزبائن بالمتاجر الفعالة في الأردن من خلال واجهات قابلة للبحث واكتشاف المنتجات وتجربة تسوق تراعي نطاق التوصيل.",
     platform: "المنصة",
     retailers: "للتجار",
     rights: "داريك تكنولوجيز. جميع الحقوق محفوظة.",
   },
 } as const;
 
+function Icon({ name, size = 22 }: { name: IconName; size?: number }) {
+  const common = {
+    width: size,
+    height: size,
+    viewBox: "0 0 24 24",
+    fill: "none",
+    stroke: "currentColor",
+    strokeWidth: 1.9,
+    strokeLinecap: "round" as const,
+    strokeLinejoin: "round" as const,
+    "aria-hidden": true,
+  };
+
+  if (name === "arrow") {
+    return (
+      <svg {...common}>
+        <path d="M5 12h14" />
+        <path d="m14 7 5 5-5 5" />
+      </svg>
+    );
+  }
+
+  if (name === "check") {
+    return (
+      <svg {...common}>
+        <path d="m5 12 4 4L19 6" />
+      </svg>
+    );
+  }
+
+  if (name === "search") {
+    return (
+      <svg {...common}>
+        <circle cx="11" cy="11" r="6.5" />
+        <path d="m16 16 4 4" />
+      </svg>
+    );
+  }
+
+  if (name === "location") {
+    return (
+      <svg {...common}>
+        <path d="M20 10c0 5-8 11-8 11S4 15 4 10a8 8 0 1 1 16 0Z" />
+        <circle cx="12" cy="10" r="2.3" />
+      </svg>
+    );
+  }
+
+  if (name === "delivery") {
+    return (
+      <svg {...common}>
+        <path d="M3 6h11v10H3z" />
+        <path d="M14 9h3l4 4v3h-7z" />
+        <circle cx="7" cy="18" r="2" />
+        <circle cx="17" cy="18" r="2" />
+      </svg>
+    );
+  }
+
+  if (name === "store") {
+    return (
+      <svg {...common}>
+        <path d="M4 10v10h16V10" />
+        <path d="M3 10 5 4h14l2 6" />
+        <path d="M8 20v-6h8v6" />
+        <path d="M3 10c1.5 2 3.5 2 5 0 1.5 2 3.5 2 5 0 1.5 2 3.5 2 5 0 1 1.4 2 1.8 3 0" />
+      </svg>
+    );
+  }
+
+  if (name === "shop") {
+    return (
+      <svg {...common}>
+        <path d="M5 7h14l-1 13H6L5 7Z" />
+        <path d="M9 9V6a3 3 0 0 1 6 0v3" />
+      </svg>
+    );
+  }
+
+  if (name === "directory") {
+    return (
+      <svg {...common}>
+        <rect x="4" y="4" width="6" height="6" rx="1.5" />
+        <rect x="14" y="4" width="6" height="6" rx="1.5" />
+        <rect x="4" y="14" width="6" height="6" rx="1.5" />
+        <rect x="14" y="14" width="6" height="6" rx="1.5" />
+      </svg>
+    );
+  }
+
+  return (
+    <svg {...common}>
+      <path d="m12 3 1.7 4.4L18 9l-4.3 1.6L12 15l-1.7-4.4L6 9l4.3-1.6L12 3Z" />
+      <path d="m19 15 .8 2.2L22 18l-2.2.8L19 21l-.8-2.2L16 18l2.2-.8L19 15Z" />
+    </svg>
+  );
+}
+
+function Header({
+  language,
+  onToggle,
+}: {
+  language: Language;
+  onToggle: () => void;
+}) {
+  const t = copy[language];
+
+  return (
+    <header className={styles.siteHeader}>
+      <div className={styles.shell}>
+        <div className={styles.headerInner}>
+          <a className={styles.brand} href="/" aria-label="Darik home">
+            <img src="/darik_logo_final_v2.png" alt="Darik" />
+          </a>
+
+          <nav className={styles.nav} aria-label="Primary navigation">
+            <a href="/">{t.stores}</a>
+            <a className={styles.navActive} href="/how-it-works">
+              {t.how}
+            </a>
+            <a href="/pricing">{t.pricing}</a>
+          </nav>
+
+          <div className={styles.headerActions}>
+            <button
+              className={styles.languageButton}
+              type="button"
+              onClick={onToggle}
+            >
+              {language === "en" ? "العربية" : "English"}
+            </button>
+            <a className={styles.dashboardButton} href="/store-dashboard">
+              {t.dashboard}
+            </a>
+            <a className={styles.primaryHeaderButton} href="/store-signup">
+              {t.sell}
+            </a>
+          </div>
+        </div>
+      </div>
+    </header>
+  );
+}
+
+function Footer({ language }: { language: Language }) {
+  const t = copy[language];
+
+  return (
+    <footer className={styles.siteFooter}>
+      <div className={styles.shell}>
+        <div className={styles.footerTop}>
+          <div className={styles.footerBrand}>
+            <a className={styles.brand} href="/">
+              <img src="/darik_logo_final_v2.png" alt="Darik" />
+            </a>
+            <p>{t.footerBody}</p>
+          </div>
+
+          <div className={styles.footerColumns}>
+            <div>
+              <strong>{t.platform}</strong>
+              <a href="/">{t.stores}</a>
+              <a href="/how-it-works">{t.how}</a>
+              <a href="/pricing">{t.pricing}</a>
+            </div>
+            <div>
+              <strong>{t.retailers}</strong>
+              <a href="/store-signup">{t.sell}</a>
+              <a href="/store-dashboard">{t.dashboard}</a>
+              <a href="/support">Support</a>
+            </div>
+          </div>
+        </div>
+
+        <div className={styles.footerBottom}>
+          <span>© {new Date().getFullYear()} {t.rights}</span>
+          <span>getdarik.com · Jordan</span>
+        </div>
+      </div>
+    </footer>
+  );
+}
+
 export default function HowItWorksPage() {
   const [language, setLanguage] = useState<Language>("en");
 
   useEffect(() => {
-    const saved = window.localStorage.getItem(LANGUAGE_KEY);
-    if (saved === "ar" || saved === "en") setLanguage(saved);
+    const stored = window.localStorage.getItem(LANGUAGE_KEY);
+    if (stored === "ar" || stored === "en") {
+      setLanguage(stored);
+      return;
+    }
+
+    if (navigator.language.toLowerCase().startsWith("ar")) {
+      setLanguage("ar");
+    }
   }, []);
 
-  const t = content[language];
-  const toggleLanguage = () => {
+  function toggleLanguage() {
     const next: Language = language === "en" ? "ar" : "en";
     setLanguage(next);
     window.localStorage.setItem(LANGUAGE_KEY, next);
-  };
+  }
+
+  const t = copy[language];
 
   return (
-    <main className={styles.page} dir={language === "ar" ? "rtl" : "ltr"}>
-      <header className={styles.header}>
-        <div className={styles.headerInner}>
-          <a className={styles.logoLink} href="/" aria-label="Darik Marketplace home">
-            <img className={styles.logo} src="/darik_logo_final_v3.png" alt="Darik Marketplace" />
-          </a>
-          <nav className={styles.nav} aria-label="Primary navigation">
-            <a href="/">{t.stores}</a>
-            <a className={styles.active} href="/how-it-works">{t.how}</a>
-            <a href="/pricing">{t.pricing}</a>
-          </nav>
-          <div className={styles.actions}>
-            <button className={styles.language} type="button" onClick={toggleLanguage}>{language === "en" ? "العربية" : "English"}</button>
-            <a className={styles.dashboard} href="/store-dashboard">{t.dashboard}</a>
-            <a className={styles.sell} href="/store-signup">{t.sell}</a>
-          </div>
-        </div>
-      </header>
+    <main
+      className={styles.page}
+      dir={language === "ar" ? "rtl" : "ltr"}
+      data-page="how-it-works"
+    >
+      <Header language={language} onToggle={toggleLanguage} />
 
-      <section className={styles.hero}>
-        <div className={styles.heroInner}>
-          <div className={styles.heroCopy}>
-            <span className={styles.kicker}><i />{t.kicker}</span>
-            <h1>{t.titleA}<strong>{t.titleB}</strong></h1>
-            <p className={styles.heroLead}>{t.lead}</p>
-            <div className={styles.heroButtons}>
-              <a className={styles.primaryButton} href="/">{t.findStores} →</a>
-              <a className={styles.secondaryButton} href="/store-signup">{t.startStore}</a>
+      <section className={styles.howHero}>
+        <div className={styles.heroGlow} />
+        <div className={styles.shell}>
+          <div className={styles.howHeroGrid}>
+            <div className={styles.heroCopy}>
+              <div className={styles.eyebrow}>
+                <span />
+                {t.heroEyebrow}
+              </div>
+
+              <h1>
+                <span>{t.heroTitle}</span>
+                <strong>{t.heroTitleAccent}</strong>
+              </h1>
+
+              <p>{t.heroBody}</p>
+
+              <div className={styles.heroActions}>
+                <a className={styles.primaryCta} href="/">
+                  {t.browseStores}
+                  <Icon name="arrow" size={19} />
+                </a>
+                <a className={styles.secondaryCta} href="/store-signup">
+                  {t.joinDarik}
+                </a>
+              </div>
+
+              <div className={styles.heroProof}>
+                {[t.trustOne, t.trustTwo, t.trustThree].map((item) => (
+                  <span key={item}>
+                    <i>
+                      <Icon name="check" size={13} />
+                    </i>
+                    {item}
+                  </span>
+                ))}
+              </div>
             </div>
-          </div>
 
-          <div className={styles.heroPanel} aria-hidden="true">
-            <div className={styles.panelTop}><span><i />{t.liveCheck}</span><b>{t.eligibleOnly}</b></div>
-            <div className={styles.flow}>
-              <div className={styles.flowCard}><span>1</span><div><strong>{t.flowLocation}</strong><small>{t.flowLocationBody}</small></div><b>↓</b></div>
-              <div className={styles.flowLine} />
-              <div className={styles.flowCard}><span>2</span><div><strong>{t.flowMatch}</strong><small>{t.flowMatchBody}</small></div><b>↓</b></div>
-              <div className={styles.flowLine} />
-              <div className={styles.flowCard}><span>3</span><div><strong>{t.flowStore}</strong><small>{t.flowStoreBody}</small></div><b>✓</b></div>
+            <div className={styles.searchShowcase} aria-hidden="true">
+              <div className={styles.showcaseTop}>
+                <div className={styles.showcaseDots}>
+                  <span />
+                  <span />
+                  <span />
+                </div>
+                <strong>getdarik.com</strong>
+              </div>
+
+              <div className={styles.showcaseBody}>
+                <div className={styles.fakeSearch}>
+                  <Icon name="search" size={19} />
+                  <div>
+                    <small>{t.previewSearch}</small>
+                    <strong>{t.previewQuery}</strong>
+                  </div>
+                  <span>
+                    <Icon name="arrow" size={16} />
+                  </span>
+                </div>
+
+                <div className={styles.resultLabel}>{t.previewFound}</div>
+
+                <div className={styles.resultCard}>
+                  <div className={styles.fakeStoreLogo}>P</div>
+                  <div>
+                    <strong>Perfect City Auto Parts</strong>
+                    <span className={styles.deliveryYes}>
+                      <Icon name="delivery" size={13} />
+                      {t.previewDelivery}
+                    </span>
+                  </div>
+                  <b>
+                    <Icon name="arrow" size={15} />
+                  </b>
+                </div>
+
+                <div className={`${styles.resultCard} ${styles.resultCardMuted}`}>
+                  <div className={styles.fakeStoreLogo}>A</div>
+                  <div>
+                    <strong>Auto Parts Store</strong>
+                    <span className={styles.deliveryNo}>
+                      <Icon name="location" size={13} />
+                      {t.previewNoDelivery}
+                    </span>
+                  </div>
+                  <b>
+                    <Icon name="arrow" size={15} />
+                  </b>
+                </div>
+
+                <div className={styles.showcaseFooter}>
+                  <span>{t.previewBrowse}</span>
+                  <div>
+                    <i />
+                    <i />
+                    <i />
+                    <i />
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -208,57 +550,99 @@ export default function HowItWorksPage() {
       <section className={styles.section}>
         <div className={styles.shell}>
           <div className={styles.sectionHeading}>
-            <span className={styles.sectionLabel}>{t.customerLabel}</span>
-            <h2>{t.customerTitle}</h2>
-            <p>{t.customerBody}</p>
+            <div className={styles.eyebrow}>
+              <span />
+              {t.introEyebrow}
+            </div>
+            <h2>{t.introTitle}</h2>
+            <p>{t.introBody}</p>
           </div>
-          <div className={styles.steps}>
-            {t.steps.map(([number, icon, title, body]) => (
-              <article className={styles.step} key={number}>
-                <span className={styles.stepNumber}>{number}</span>
-                <span className={styles.stepIcon}>{icon}</span>
-                <h3>{title}</h3>
-                <p>{body}</p>
+
+          <div className={styles.stepsGrid}>
+            {t.steps.map((step) => (
+              <article className={styles.stepCard} key={step.number}>
+                <div className={styles.stepTop}>
+                  <span className={styles.stepNumber}>{step.number}</span>
+                  <span className={styles.iconTile}>
+                    <Icon name={step.icon} size={23} />
+                  </span>
+                </div>
+                <h3>{step.title}</h3>
+                <p>{step.body}</p>
               </article>
             ))}
           </div>
         </div>
       </section>
 
-      <section className={styles.sectionSoft}>
+      <section className={`${styles.section} ${styles.directorySection}`}>
         <div className={styles.shell}>
-          <div className={styles.split}>
-            <div className={styles.splitCopy}>
-              <span className={styles.sectionLabel}>{t.trustLabel}</span>
-              <h2>{t.trustTitle}</h2>
-              <p>{t.trustBody}</p>
-              <div className={styles.checks}>
-                {t.checks.map(([title, body]) => (
-                  <div className={styles.check} key={title}><span>✓</span><div><strong>{title}</strong><small>{body}</small></div></div>
+          <div className={styles.directoryGrid}>
+            <div className={styles.directoryCopy}>
+              <div className={styles.eyebrow}>
+                <span />
+                {t.directoryEyebrow}
+              </div>
+              <h2>{t.directoryTitle}</h2>
+              <p>{t.directoryBody}</p>
+
+              <div className={styles.checkList}>
+                {t.directoryPoints.map((point) => (
+                  <div key={point}>
+                    <span>
+                      <Icon name="check" size={15} />
+                    </span>
+                    <p>{point}</p>
+                  </div>
                 ))}
               </div>
             </div>
 
-            <div className={styles.logicPanel}>
-              <div className={styles.logicHeader}><strong>{t.logicTitle}</strong><span>{t.active}</span></div>
-              <div className={styles.logicRows}>
-                {[t.rowOne, t.rowTwo, t.rowThree, t.rowFour].map(([title, body]) => (
-                  <div className={styles.logicRow} key={title}><div><strong>{title}</strong><small>{body}</small></div><b>✓</b></div>
-                ))}
+            <div className={styles.directoryVisual}>
+              <div className={styles.directoryVisualHeader}>
+                <span>{t.directoryCardLabel}</span>
+                <div>
+                  <i />
+                  <i />
+                  <i />
+                </div>
               </div>
-              <div className={styles.privacyNote}><span>⌖</span><div><strong>{t.privateTitle}</strong><small>{t.privateBody}</small></div></div>
-            </div>
-          </div>
 
-          <div className={styles.retailerFlow}>
-            <div className={styles.retailerFlowTop}>
-              <div><span>{t.retailerLabel}</span><h3>{t.retailerTitle}</h3><p>{t.retailerBody}</p></div>
-              <a href="/store-signup">{t.retailerCta} →</a>
-            </div>
-            <div className={styles.retailerSteps}>
-              {t.retailerSteps.map(([number, title, body]) => (
-                <div className={styles.retailerStep} key={number}><span>{number}</span><strong>{title}</strong><small>{body}</small></div>
-              ))}
+              <h3>{t.directoryCardTitle}</h3>
+              <p>{t.directoryCardBody}</p>
+
+              <div className={styles.directoryMetrics}>
+                <div>
+                  <span className={styles.metricIconGood}>
+                    <Icon name="delivery" size={20} />
+                  </span>
+                  <div>
+                    <strong>{t.deliveryMatch}</strong>
+                    <small>Priority result</small>
+                  </div>
+                  <b>01</b>
+                </div>
+
+                <div>
+                  <span className={styles.metricIconNeutral}>
+                    <Icon name="directory" size={20} />
+                  </span>
+                  <div>
+                    <strong>{t.directoryListing}</strong>
+                    <small>Still discoverable</small>
+                  </div>
+                  <b>02+</b>
+                </div>
+              </div>
+
+              <div className={styles.directoryLine}>
+                <span />
+                <i />
+                <i />
+                <i />
+                <i />
+                <i />
+              </div>
             </div>
           </div>
         </div>
@@ -266,23 +650,53 @@ export default function HowItWorksPage() {
 
       <section className={styles.section}>
         <div className={styles.shell}>
-          <div className={styles.cta}>
-            <div><span>{t.ctaLabel}</span><h2>{t.ctaTitle}</h2><p>{t.ctaBody}</p></div>
-            <div className={styles.ctaActions}><a href="/">{t.customerCta}</a><a href="/store-dashboard">{t.dashboardCta}</a></div>
+          <div className={styles.sectionHeading}>
+            <div className={styles.eyebrow}>
+              <span />
+              {t.retailerEyebrow}
+            </div>
+            <h2>{t.retailerTitle}</h2>
+            <p>{t.retailerBody}</p>
+          </div>
+
+          <div className={styles.benefitGrid}>
+            {t.retailerBenefits.map((benefit) => (
+              <article className={styles.benefitCard} key={benefit.title}>
+                <span className={styles.iconTile}>
+                  <Icon name={benefit.icon} size={22} />
+                </span>
+                <h3>{benefit.title}</h3>
+                <p>{benefit.body}</p>
+              </article>
+            ))}
           </div>
         </div>
       </section>
 
-      <footer className={styles.footer}>
-        <div className={styles.footerInner}>
-          <div className={styles.footerBrand}><a className={styles.logoLink} href="/"><img className={styles.logo} src="/darik_logo_final_v3.png" alt="Darik Marketplace" /></a><p>{t.footerBody}</p></div>
-          <div className={styles.footerLinks}>
-            <div><strong>{t.platform}</strong><a href="/">{t.stores}</a><a href="/how-it-works">{t.how}</a><a href="/pricing">{t.pricing}</a></div>
-            <div><strong>{t.retailers}</strong><a href="/store-signup">{t.sell}</a><a href="/store-dashboard">{t.dashboard}</a></div>
+      <section className={styles.finalCtaSection}>
+        <div className={styles.shell}>
+          <div className={styles.finalCta}>
+            <div>
+              <div className={styles.eyebrowLight}>
+                <span />
+                {t.finalEyebrow}
+              </div>
+              <h2>{t.finalTitle}</h2>
+              <p>{t.finalBody}</p>
+            </div>
+
+            <div className={styles.finalCtaActions}>
+              <a href="/store-signup">
+                {t.finalPrimary}
+                <Icon name="arrow" size={18} />
+              </a>
+              <a href="/pricing">{t.finalSecondary}</a>
+            </div>
           </div>
         </div>
-        <div className={styles.footerBottom}><span>© {new Date().getFullYear()} {t.rights}</span><span>getdarik.com · Jordan</span></div>
-      </footer>
+      </section>
+
+      <Footer language={language} />
     </main>
   );
 }
