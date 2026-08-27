@@ -1527,14 +1527,7 @@ export default function DarikDirectStorefrontSettingsPage() {
             direct_content_positioning: storefrontContentPositioning145,
           })
           .eq("id", storefront.id),
-        supabase.rpc(
-          "darik_direct_set_storefront_visual_v194",
-          {
-            p_storefront_id: storefront.id,
-            p_component: "typography",
-            p_payload: storefrontTypographyDraft,
-          }
-        ),
+        persistStorefrontTypography353B(storefrontTypographyDraft),
       ]);
 
       if (positionResult198.error) {
@@ -1641,6 +1634,36 @@ export default function DarikDirectStorefrontSettingsPage() {
 
   function resetStorefrontTypography(key: StorefrontTypographyKey) {
     updateStorefrontTypography(key, { font: "theme", size: 0 });
+  }
+
+  // DARIK_FRONTEND_353B_TYPOGRAPHY_PERSIST_AND_STORE_SIGNIN_SCOPE_CRLF_SAFE
+  // Persist typography to the canonical validated storefront field so a real
+  // page refresh cannot fall back to default size. Keep visual truth synchronized
+  // because the live drag/editor renderer still consumes the v194 visual payload.
+  async function persistStorefrontTypography353B(
+    payload353B: StorefrontTypographyState
+  ) {
+    if (!storefront?.id) {
+      return { error: { message: "Storefront is not ready." } };
+    }
+
+    const canonical353B = await supabase.rpc(
+      "darik_direct_set_storefront_typography",
+      {
+        p_storefront_id: storefront.id,
+        p_typography: payload353B,
+      }
+    );
+
+    if (canonical353B.error) {
+      return canonical353B;
+    }
+
+    return supabase.rpc("darik_direct_set_storefront_visual_v194", {
+      p_storefront_id: storefront.id,
+      p_component: "typography",
+      p_payload: payload353B,
+    });
   }
 
 
@@ -4236,14 +4259,7 @@ export default function DarikDirectStorefrontSettingsPage() {
         }
 
         const typographyResult152 =
-          await supabase.rpc(
-            "darik_direct_set_storefront_visual_v194",
-            {
-              p_storefront_id: storefront.id,
-              p_component: "typography",
-              p_payload: nextTypography152,
-            }
-          );
+          await persistStorefrontTypography353B(nextTypography152);
 
         if (
           typographyResult152.error
@@ -7070,14 +7086,7 @@ export default function DarikDirectStorefrontSettingsPage() {
       setTypographySaveState("saving");
 
       void (async () => {
-        const result = await supabase.rpc(
-          "darik_direct_set_storefront_visual_v194",
-          {
-            p_storefront_id: storefront.id,
-            p_component: "typography",
-            p_payload: storefrontTypographyDraft,
-          }
-        );
+        const result = await persistStorefrontTypography353B(storefrontTypographyDraft);
 
         if (result.error) {
           setTypographySaveState("error");

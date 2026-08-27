@@ -1,11 +1,7 @@
 "use client";
 
 // DARIK_GLOBAL_SIZE_SELECTION_AVAILABILITY_245
-// DARIK_FURNITURE_IKEA_COLOR_VARIANTS_216
-
-
-import DarikCustomerAccountHub339 from "../components/DarikCustomerAccountHub339";
-// DARIK_REAL_PRIVATE_PREVIEW_ALIAS_143
+// DARIK_FURNITURE_IKEA_COLOR_VARIANTS_216// DARIK_REAL_PRIVATE_PREVIEW_ALIAS_143
 
 
 
@@ -2653,12 +2649,17 @@ export default function DarikDirectStorefrontPage() {
   // DARIK_INDEPENDENT_STOREFRONT_TYPOGRAPHY_105
   const [savedStorefrontTypography, setSavedStorefrontTypography] =
     useState<StorefrontTypographyState>(() => storefrontTypographyDefaultState());
+  const [savedStorefrontTypographyLoaded353B, setSavedStorefrontTypographyLoaded353B] =
+    useState(false);
 
   useEffect(() => {
     if (!slug) {
       setSavedStorefrontTypography(storefrontTypographyDefaultState());
+      setSavedStorefrontTypographyLoaded353B(false);
       return;
     }
+
+    setSavedStorefrontTypographyLoaded353B(false);
 
     let cancelled = false;
 
@@ -2671,6 +2672,13 @@ export default function DarikDirectStorefrontPage() {
 
       setSavedStorefrontTypography(
         normalizeStorefrontTypography(result.data)
+      );
+      setSavedStorefrontTypographyLoaded353B(
+        Boolean(
+          result.data &&
+            typeof result.data === "object" &&
+            Object.keys(result.data as Record<string, unknown>).length > 0
+        )
       );
     })();
 
@@ -6665,10 +6673,18 @@ export default function DarikDirectStorefrontPage() {
     );
   }
 
+  // DARIK_FRONTEND_353B_TYPOGRAPHY_PERSIST_AND_STORE_SIGNIN_SCOPE_CRLF_SAFE
+  // Canonical saved typography wins after it is hydrated. Before hydration,
+  // visual truth remains available so live/private preview does not flash defaults.
+  const persistedDirectTypography353B =
+    (storefront as unknown as { direct_typography?: unknown }).direct_typography;
+
   const effectiveStorefrontTypography =
     normalizeStorefrontTypography(
-      darikStorefrontVisualTruth194?.typography ??
-        (storefront as unknown as { direct_typography?: unknown }).direct_typography ??
+      persistedDirectTypography353B ??
+        (savedStorefrontTypographyLoaded353B
+          ? savedStorefrontTypography
+          : darikStorefrontVisualTruth194?.typography) ??
         savedStorefrontTypography
     );
 
@@ -7223,14 +7239,7 @@ function renderProductCard(product: Product) {
         </div>
       ) : null}
 
-      {/* DARIK_SHARED_PERSISTENT_CUSTOMER_ACCOUNT_HUB_175_V2 */}
-      {!isBuilderPositionPreview145 &&
-      slug !== "_darik-private-store-preview" ? (
-        <DarikCustomerAccountHub339
-          scope="store"
-          retailerId={storefront?.retailer_id ?? null}
-        />
-      ) : null}
+      {/* DARIK_FRONTEND_353B_TYPOGRAPHY_PERSIST_AND_STORE_SIGNIN_SCOPE_CRLF_SAFE: customer sign-in/account launcher belongs on getdarik.com only. */}
 
       {/* DARIK_LIVE_EDITOR_LOCATION_INTERACTION_ZONE_197 */}
       {/* DARIK_DIRECT_OBJECT_DRAG_SAVE_TO_LIVE_198 */}
