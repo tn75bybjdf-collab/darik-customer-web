@@ -1397,7 +1397,10 @@ export default function DarikDiscoveryHome() {
   ]);
 
   // DARIK_NEAREST_FOUR_PROGRESSIVE_STORES_318D
+  // DARIK_STORE_AUTO_25_THEN_MANUAL_10_338
   const STORE_BATCH_SIZE_318D = 4;
+  const STORE_AUTO_SCROLL_LIMIT_338 = 25;
+  const STORE_MANUAL_BATCH_SIZE_338 = 10;
 
   const nearestCategoryStores318D = useMemo(() => {
     const categoryFiltered318D =
@@ -1508,6 +1511,13 @@ export default function DarikDiscoveryHome() {
     renderedStores318D.length <
     nearestCategoryStores318D.length;
 
+  const hasMoreAutoScrollStores338 =
+    visibleStoreCount318D <
+    Math.min(
+      STORE_AUTO_SCROLL_LIMIT_338,
+      nearestCategoryStores318D.length
+    );
+
   useEffect(() => {
     setVisibleStoreCount318D(
       STORE_BATCH_SIZE_318D
@@ -1523,7 +1533,7 @@ export default function DarikDiscoveryHome() {
 
   useEffect(() => {
     if (
-      !hasMoreStores318D
+      !hasMoreAutoScrollStores338
     ) {
       return;
     }
@@ -1568,6 +1578,7 @@ export default function DarikDiscoveryHome() {
           Math.min(
             current318D +
               STORE_BATCH_SIZE_318D,
+            STORE_AUTO_SCROLL_LIMIT_338,
             nearestCategoryStores318D.length
           )
       );
@@ -1596,9 +1607,21 @@ export default function DarikDiscoveryHome() {
       );
     };
   }, [
-    hasMoreStores318D,
+    hasMoreAutoScrollStores338,
     nearestCategoryStores318D.length,
   ]);
+
+
+  const loadTenMoreStores338 = () => {
+    setVisibleStoreCount318D(
+      (current338) =>
+        Math.min(
+          current338 +
+            STORE_MANUAL_BATCH_SIZE_338,
+          nearestCategoryStores318D.length
+        )
+    );
+  };
 
 
   useEffect(() => {
@@ -2356,6 +2379,23 @@ export default function DarikDiscoveryHome() {
                   </div>
                 );
               })}
+              {hasMoreStores318D &&
+              visibleStoreCount318D >=
+                Math.min(
+                  STORE_AUTO_SCROLL_LIMIT_338,
+                  nearestCategoryStores318D.length
+                ) ? (
+                <div className={styles.loadMoreStores338}>
+                  <button
+                    type="button"
+                    onClick={loadTenMoreStores338}
+                  >
+                    {language === "ar"
+                      ? "تحميل 10 متاجر إضافية"
+                      : "Load 10 more stores"}
+                  </button>
+                </div>
+              ) : null}
             </div>
           ) : (
             <div className={styles.noStoresState}>

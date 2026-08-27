@@ -2905,3 +2905,57 @@
     gap: 30px;
   }
 }
+
+/* DARIK_STORE_AUTO_25_THEN_MANUAL_10_CSS_338 */
+.loadMoreStores338 {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  padding: 16px 0 6px;
+}
+
+.loadMoreStores338 button {
+  min-width: 210px;
+  min-height: 46px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #d8e1e1;
+  border-radius: 999px;
+  padding: 0 22px;
+  background: #ffffff;
+  color: #16242d;
+  box-shadow: 0 8px 22px rgba(15, 23, 42, 0.055);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 900;
+  cursor: pointer;
+  transition:
+    transform 160ms ease,
+    border-color 160ms ease,
+    box-shadow 160ms ease,
+    background 160ms ease;
+}
+
+.loadMoreStores338 button:hover {
+  transform: translateY(-1px);
+  border-color: #9fc9c1;
+  background: #f7fbfa;
+  box-shadow: 0 11px 26px rgba(15, 23, 42, 0.075);
+}
+
+.loadMoreStores338 button:focus-visible {
+  outline: 3px solid rgba(13, 123, 108, 0.2);
+  outline-offset: 3px;
+}
+
+@media (max-width: 560px) {
+  .loadMoreStores338 {
+    padding-top: 13px;
+  }
+
+  .loadMoreStores338 button {
+    width: 100%;
+    min-width: 0;
+  }
+}
