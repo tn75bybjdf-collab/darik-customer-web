@@ -3,6 +3,7 @@
 // DARIK_PAYMENT_FIRST_YEARLY_PLANS_CATALOG_GATE_190
 
 // DARIK_FRONTEND_ADMIN_MEMBERSHIP_CONTROL_CENTER_133
+// DARIK_ADMIN_DELETE_EXPIRED_STORE_RELEASE_LINK_344
 
 import {
   CSSProperties,
@@ -312,7 +313,7 @@ export default function StoreActivationsAdminPage() {
       setError("");
 
       const result = await supabase.rpc(
-        "darik_direct_admin_list_store_memberships_v1",
+        "darik_direct_admin_list_store_memberships_v344",
         {
           p_session_token: sessionToken,
           p_filter: nextFilter,
@@ -648,6 +649,92 @@ export default function StoreActivationsAdminPage() {
       note: "Membership ended immediately from Darik activation admin.",
       successMessage: `${row.store_name || row.business_name} expired now.`,
     });
+  }
+
+  async function deleteExpiredMember344(row: MembershipRow) {
+    if (!admin) return;
+
+    if (row.effective_status !== "expired") {
+      setError("Only expired retailer accounts can be deleted.");
+      return;
+    }
+
+    const exactSlug = String(row.slug || "").trim().toLowerCase();
+    if (!exactSlug) {
+      setError("This expired account is missing its store link.");
+      return;
+    }
+
+    const typed = window.prompt(
+      [
+        "DELETE EXPIRED DARIK ACCOUNT",
+        "",
+        `Store: ${row.store_name || row.business_name}`,
+        `Link: getdarik.com/${exactSlug}`,
+        "",
+        "This permanently removes normal retailer access and releases this store link so another business can claim it.",
+        "Historical order/accounting records are preserved.",
+        "",
+        `Type the exact store link to continue: ${exactSlug}`,
+      ].join("\n")
+    );
+
+    if (typed === null) return;
+
+    if (typed.trim().toLowerCase() !== exactSlug) {
+      setError("Store link did not match. Nothing was deleted.");
+      return;
+    }
+
+    const confirmed = window.confirm(
+      [
+        "FINAL CONFIRMATION",
+        "",
+        `Delete expired account: ${row.store_name || row.business_name}?`,
+        "",
+        `getdarik.com/${exactSlug} will become available for another business to claim immediately.`,
+        "The old business will no longer control that link.",
+        "Historical Darik order/accounting records will remain preserved.",
+        "",
+        "This cannot be undone through the normal renewal controls.",
+      ].join("\n")
+    );
+
+    if (!confirmed) return;
+
+    setBusyId(row.storefront_id);
+    setError("");
+    setMessage("");
+
+    const result = await supabase.rpc(
+      "darik_direct_admin_delete_expired_store_v344",
+      {
+        p_session_token: admin.session_token,
+        p_storefront_id: row.storefront_id,
+        p_confirm_slug: exactSlug,
+      }
+    );
+
+    setBusyId("");
+
+    if (result.error) {
+      setError(result.error.message);
+      return;
+    }
+
+    const payload = (result.data || {}) as {
+      released_slug?: string;
+      link_available_for_reuse?: boolean;
+    };
+
+    const releasedSlug =
+      String(payload.released_slug || exactSlug).trim() || exactSlug;
+
+    setMessage(
+      `${row.store_name || row.business_name} deleted. getdarik.com/${releasedSlug} is now available for another business.`
+    );
+
+    await loadMembers(admin.session_token, memberFilter);
   }
 
   async function restrictMember(row: MembershipRow) {
@@ -1432,6 +1519,35 @@ export default function StoreActivationsAdminPage() {
                             </>
                           )}
                         </section>
+
+                        {row.effective_status === "expired" ? (
+                          <section className={styles.memberDeletePanel344}>
+                            <div>
+                              <span className={styles.memberDeleteKicker344}>
+                                EXPIRED ACCOUNT
+                              </span>
+                              <h3>Delete expired account</h3>
+                              <p>
+                                Removes retailer access and releases{" "}
+                                <strong>getdarik.com/{row.slug}</strong> so
+                                another business can claim that exact link.
+                                Historical order and accounting records stay
+                                preserved.
+                              </p>
+                            </div>
+
+                            <button
+                              type="button"
+                              className={styles.memberDeleteButton344}
+                              disabled={isBusy}
+                              onClick={() => void deleteExpiredMember344(row)}
+                            >
+                              {isBusy
+                                ? "Deleting..."
+                                : "Delete account & release link"}
+                            </button>
+                          </section>
+                        ) : null}
                       </div>
                     </article>
                   );

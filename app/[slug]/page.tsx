@@ -8782,9 +8782,11 @@ style={{
 
       {cartOpen ? (
         <div className={styles.cartOverlay} onClick={() => setCartOpen(false)}>
+          {/* DARIK_CHECKOUT_DEFAULT_SYSTEM_FONT_343 */}
           <aside
             className={styles.cartDrawer}
             onClick={(event) => event.stopPropagation()}
+          data-darik-checkout-default-font={onlineCheckoutOpen ? "true" : undefined}
           >
             <div className={styles.cartHeader}>
               <div>

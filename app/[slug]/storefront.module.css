@@ -22838,3 +22838,32 @@
     transition: none !important;
   }
 }
+
+/* DARIK_CHECKOUT_DEFAULT_SYSTEM_FONT_CSS_343 */
+.cartDrawer[data-darik-checkout-default-font="true"],
+.cartDrawer[data-darik-checkout-default-font="true"] * {
+  font-family:
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    Roboto,
+    Arial,
+    Helvetica,
+    sans-serif !important;
+}
+
+.cartDrawer[data-darik-checkout-default-font="true"] input,
+.cartDrawer[data-darik-checkout-default-font="true"] textarea,
+.cartDrawer[data-darik-checkout-default-font="true"] select,
+.cartDrawer[data-darik-checkout-default-font="true"] button {
+  font-family:
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    Roboto,
+    Arial,
+    Helvetica,
+    sans-serif !important;
+}

@@ -592,3 +592,80 @@
     grid-template-columns: 95px minmax(0, 1fr);
   }
 }
+
+/* DARIK_ADMIN_DELETE_EXPIRED_STORE_RELEASE_LINK_CSS_344 */
+.memberDeletePanel344 {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 22px;
+  border: 1px solid #f3a7a7;
+  border-radius: 17px;
+  padding: 17px;
+  background:
+    linear-gradient(135deg, rgba(254, 242, 242, 0.98), rgba(255, 255, 255, 0.98));
+}
+
+.memberDeletePanel344 > div {
+  min-width: 0;
+}
+
+.memberDeletePanel344 h3 {
+  margin: 4px 0 6px;
+  color: #7f1d1d;
+  font-size: 16px;
+}
+
+.memberDeletePanel344 p {
+  max-width: 760px;
+  margin: 0;
+  color: #8f3535;
+  font-size: 12px;
+  line-height: 1.55;
+}
+
+.memberDeletePanel344 p strong {
+  overflow-wrap: anywhere;
+  color: #7f1d1d;
+}
+
+.memberDeleteKicker344 {
+  color: #b91c1c;
+  font-size: 10px;
+  font-weight: 950;
+  letter-spacing: .08em;
+}
+
+.memberDeleteButton344 {
+  flex: 0 0 auto;
+  border: 0;
+  border-radius: 11px;
+  padding: 12px 15px;
+  background: #991b1b;
+  color: #fff;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 950;
+  cursor: pointer;
+}
+
+.memberDeleteButton344:hover {
+  background: #7f1d1d;
+}
+
+.memberDeleteButton344:disabled {
+  cursor: wait;
+  opacity: .58;
+}
+
+@media (max-width: 720px) {
+  .memberDeletePanel344 {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .memberDeleteButton344 {
+    width: 100%;
+  }
+}
