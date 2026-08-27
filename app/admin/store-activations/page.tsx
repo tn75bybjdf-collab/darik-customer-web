@@ -651,6 +651,7 @@ export default function StoreActivationsAdminPage() {
     });
   }
 
+  // DARIK_ADMIN_DELETE_EXPIRED_PROCESSING_FIX_345
   async function deleteExpiredMember344(row: MembershipRow) {
     if (!admin) return;
 
@@ -672,7 +673,7 @@ export default function StoreActivationsAdminPage() {
         `Store: ${row.store_name || row.business_name}`,
         `Link: getdarik.com/${exactSlug}`,
         "",
-        "This permanently removes normal retailer access and releases this store link so another business can claim it.",
+        "This removes normal retailer access and releases this store link so another business can claim it.",
         "Historical order/accounting records are preserved.",
         "",
         `Type the exact store link to continue: ${exactSlug}`,
@@ -692,11 +693,8 @@ export default function StoreActivationsAdminPage() {
         "",
         `Delete expired account: ${row.store_name || row.business_name}?`,
         "",
-        `getdarik.com/${exactSlug} will become available for another business to claim immediately.`,
-        "The old business will no longer control that link.",
+        `getdarik.com/${exactSlug} will become available for another business immediately.`,
         "Historical Darik order/accounting records will remain preserved.",
-        "",
-        "This cannot be undone through the normal renewal controls.",
       ].join("\n")
     );
 
@@ -706,35 +704,74 @@ export default function StoreActivationsAdminPage() {
     setError("");
     setMessage("");
 
-    const result = await supabase.rpc(
-      "darik_direct_admin_delete_expired_store_v344",
-      {
-        p_session_token: admin.session_token,
-        p_storefront_id: row.storefront_id,
-        p_confirm_slug: exactSlug,
+    let timeoutId345: number | null = null;
+
+    try {
+      const rpcResult = await Promise.race([
+        supabase.rpc(
+          "darik_direct_admin_delete_expired_store_v344",
+          {
+            p_session_token: admin.session_token,
+            p_storefront_id: row.storefront_id,
+            p_confirm_slug: exactSlug,
+          }
+        ),
+        new Promise<never>((_resolve, reject) => {
+          timeoutId345 = window.setTimeout(() => {
+            reject(
+              new Error(
+                "The delete request timed out. Nothing was confirmed as deleted. Refresh and try again."
+              )
+            );
+          }, 20000);
+        }),
+      ]);
+
+      if (rpcResult.error) {
+        setError(`Delete failed: ${rpcResult.error.message}`);
+        return;
       }
-    );
 
-    setBusyId("");
+      const payload = (rpcResult.data || {}) as {
+        ok?: boolean;
+        deleted?: boolean;
+        released_slug?: string;
+        link_available_for_reuse?: boolean;
+        backend_version?: number;
+      };
 
-    if (result.error) {
-      setError(result.error.message);
-      return;
+      if (
+        payload.ok !== true ||
+        payload.deleted !== true ||
+        payload.link_available_for_reuse !== true
+      ) {
+        setError(
+          "Delete did not return a confirmed link-release result. Refresh before trying again."
+        );
+        return;
+      }
+
+      const releasedSlug =
+        String(payload.released_slug || exactSlug).trim() || exactSlug;
+
+      setMessage(
+        `${row.store_name || row.business_name} deleted. getdarik.com/${releasedSlug} is now available for another business.`
+      );
+
+      await loadMembers(admin.session_token, memberFilter);
+    } catch (cause) {
+      const message =
+        cause instanceof Error
+          ? cause.message
+          : "The delete request failed unexpectedly.";
+
+      setError(`Delete failed: ${message}`);
+    } finally {
+      if (timeoutId345 !== null) {
+        window.clearTimeout(timeoutId345);
+      }
+      setBusyId("");
     }
-
-    const payload = (result.data || {}) as {
-      released_slug?: string;
-      link_available_for_reuse?: boolean;
-    };
-
-    const releasedSlug =
-      String(payload.released_slug || exactSlug).trim() || exactSlug;
-
-    setMessage(
-      `${row.store_name || row.business_name} deleted. getdarik.com/${releasedSlug} is now available for another business.`
-    );
-
-    await loadMembers(admin.session_token, memberFilter);
   }
 
   async function restrictMember(row: MembershipRow) {
