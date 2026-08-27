@@ -1,6 +1,7 @@
 "use client";
 
 /* DARIK_CUSTOMER_SIGNIN_GLOBAL_AND_STORE_SCOPED_HISTORY_339 */
+/* DARIK_CUSTOMER_CLICKABLE_ORDER_DETAILS_340 */
 
 import { useEffect, useMemo, useState } from "react";
 import type { Session } from "@supabase/supabase-js";
@@ -8,7 +9,7 @@ import { supabase } from "@/lib/supabaseBrowser";
 import styles from "./darikCustomerAccountHub339.module.css";
 
 type DarikAccountScope339 = "all" | "store";
-type DarikAccountView339 = "signin" | "menu" | "orders" | "details" | "password";
+type DarikAccountView339 = "signin" | "menu" | "orders" | "order-details" | "details" | "password";
 type DarikLanguage339 = "en" | "ar";
 
 type DarikCustomerProfile339 = {
@@ -19,14 +20,35 @@ type DarikCustomerProfile339 = {
   phone: string | null;
 };
 
+type DarikCustomerOrderItem340 = {
+  id: string;
+  product_id?: string | null;
+  product_name?: string | null;
+  quantity?: number | string | null;
+  app_price?: number | string | null;
+  line_total?: number | string | null;
+};
+
 type DarikCustomerOrder339 = {
   id: string;
   order_number?: string | number | null;
   order_status?: string | null;
   total?: number | string | null;
+  subtotal?: number | string | null;
+  delivery_fee?: number | string | null;
   created_at?: string | null;
   storefront_retailer_id?: string | null;
   storefront_name_snapshot?: string | null;
+  customer_name?: string | null;
+  customer_phone?: string | null;
+  payment_method?: string | null;
+  payment_status?: string | null;
+  direct_fulfillment_method?: string | null;
+  delivery_address_details?: string | null;
+  delivery_note?: string | null;
+  direct_building_number?: string | null;
+  direct_apartment_number?: string | null;
+  items?: DarikCustomerOrderItem340[];
 };
 
 type DarikCustomerAccountHub339Props = {
@@ -64,6 +86,32 @@ const copy339 = {
     noAllOrders: "No past Darik orders yet.",
     noStoreOrders: "No past orders from this store yet.",
     loadingOrders: "Loading orders...",
+    viewOrder: "View order",
+    loadingOrder: "Loading order details...",
+    orderDetailsTitle: "Order details",
+    orderDetailsSubtitle: "Everything recorded for this Darik order.",
+    backOrders: "← Order history",
+    store: "Store",
+    orderNumber: "Order",
+    status: "Status",
+    placed: "Placed",
+    products: "Products",
+    quantity: "Qty",
+    each: "each",
+    subtotal: "Products subtotal",
+    deliveryFee: "Delivery fee",
+    totalLabel: "Order total",
+    payment: "Payment",
+    paymentStatus: "Payment status",
+    fulfillment: "Fulfillment",
+    delivery: "Delivery",
+    pickup: "Store pickup",
+    deliveryAddress: "Delivery address",
+    building: "Building",
+    apartment: "Apartment",
+    deliveryNote: "Delivery note",
+    noItems: "No product lines were returned for this order.",
+    orderDetailsUnavailable: "Order details could not be loaded.",
     backAccount: "← Account",
     detailsTitle: "Account details",
     detailsBody: "Your Darik customer information.",
@@ -106,6 +154,32 @@ const copy339 = {
     noAllOrders: "لا يوجد لديك طلبات سابقة على داريك.",
     noStoreOrders: "لا يوجد لديك طلبات سابقة من هذا المتجر.",
     loadingOrders: "جاري تحميل الطلبات...",
+    viewOrder: "عرض الطلب",
+    loadingOrder: "جاري تحميل تفاصيل الطلب...",
+    orderDetailsTitle: "تفاصيل الطلب",
+    orderDetailsSubtitle: "كل التفاصيل المسجلة لهذا الطلب على داريك.",
+    backOrders: "سجل الطلبات →",
+    store: "المتجر",
+    orderNumber: "الطلب",
+    status: "الحالة",
+    placed: "تاريخ الطلب",
+    products: "المنتجات",
+    quantity: "الكمية",
+    each: "للوحدة",
+    subtotal: "مجموع المنتجات",
+    deliveryFee: "رسوم التوصيل",
+    totalLabel: "إجمالي الطلب",
+    payment: "الدفع",
+    paymentStatus: "حالة الدفع",
+    fulfillment: "طريقة الاستلام",
+    delivery: "توصيل",
+    pickup: "استلام من المتجر",
+    deliveryAddress: "عنوان التوصيل",
+    building: "المبنى",
+    apartment: "الشقة",
+    deliveryNote: "ملاحظات التوصيل",
+    noItems: "لم يتم إرجاع تفاصيل المنتجات لهذا الطلب.",
+    orderDetailsUnavailable: "تعذر تحميل تفاصيل الطلب.",
     backAccount: "الحساب →",
     detailsTitle: "بيانات الحساب",
     detailsBody: "معلومات حساب العميل على داريك.",
@@ -139,6 +213,19 @@ function orderStatusLabel339(status: string | null | undefined) {
     .replace(/\b\w/g, (letter) => letter.toUpperCase());
 }
 
+
+function paymentLabel340(value: string | null | undefined) {
+  const normalized = String(value ?? "").trim().toLowerCase();
+  if (normalized === "cliq") return "CliQ";
+  if (normalized === "cash") return "Cash / نقدي";
+  return normalized ? normalized.replaceAll("_", " ") : "—";
+}
+
+function money340(value: number | string | null | undefined) {
+  const amount = Number(value ?? 0);
+  return `${Number.isFinite(amount) ? amount.toFixed(2) : "0.00"} JOD`;
+}
+
 export default function DarikCustomerAccountHub339({
   scope,
   retailerId = null,
@@ -152,6 +239,9 @@ export default function DarikCustomerAccountHub339({
   const [view, setView] = useState<DarikAccountView339>("signin");
   const [orders, setOrders] = useState<DarikCustomerOrder339[]>([]);
   const [ordersBusy, setOrdersBusy] = useState(false);
+  const [selectedOrder340, setSelectedOrder340] =
+    useState<DarikCustomerOrder339 | null>(null);
+  const [orderDetailBusy340, setOrderDetailBusy340] = useState(false);
   const [message, setMessage] = useState("");
 
   const [authEmail, setAuthEmail] = useState("");
@@ -348,6 +438,52 @@ export default function DarikCustomerAccountHub339({
     }
   }
 
+  async function openOrderDetails340(order: DarikCustomerOrder339) {
+    if (!profile?.id) return;
+
+    setOrderDetailBusy340(true);
+    setSelectedOrder340({
+      ...order,
+      items: [],
+    });
+    setView("order-details");
+    setMessage("");
+
+    try {
+      const orderResult = await supabase
+        .from("orders")
+        .select(
+          "id,order_number,order_status,total,subtotal,delivery_fee,created_at,storefront_retailer_id,storefront_name_snapshot,customer_name,customer_phone,payment_method,payment_status,direct_fulfillment_method,delivery_address_details,delivery_note,direct_building_number,direct_apartment_number"
+        )
+        .eq("id", order.id)
+        .eq("customer_id", profile.id)
+        .maybeSingle();
+
+      if (orderResult.error || !orderResult.data) {
+        setMessage(orderResult.error?.message || t.orderDetailsUnavailable);
+        return;
+      }
+
+      const itemResult = await supabase
+        .from("order_items")
+        .select("id,product_id,product_name,quantity,app_price,line_total")
+        .eq("order_id", order.id)
+        .order("id", { ascending: true });
+
+      if (itemResult.error) {
+        setMessage(itemResult.error.message);
+        return;
+      }
+
+      setSelectedOrder340({
+        ...(orderResult.data as DarikCustomerOrder339),
+        items: (itemResult.data ?? []) as DarikCustomerOrderItem340[],
+      });
+    } finally {
+      setOrderDetailBusy340(false);
+    }
+  }
+
   async function signOut339() {
     setMessage("");
 
@@ -360,6 +496,7 @@ export default function DarikCustomerAccountHub339({
     setProfile(null);
     setSession(null);
     setOrders([]);
+    setSelectedOrder340(null);
     setView("signin");
     setOpen(false);
     setAuthPassword("");
@@ -594,7 +731,12 @@ export default function DarikCustomerAccountHub339({
               ) : (
                 <div className={styles.darikOrderList339}>
                   {orders.map((order) => (
-                    <article key={order.id}>
+                    <button
+                      type="button"
+                      className={styles.darikOrderCard340}
+                      key={order.id}
+                      onClick={() => void openOrderDetails340(order)}
+                    >
                       <div>
                         <span>
                           #{String(order.order_number ?? order.id.slice(0, 8))}
@@ -608,17 +750,181 @@ export default function DarikCustomerAccountHub339({
                         </small>
                       ) : null}
 
-                      <small>
-                        {Number(order.total ?? 0).toFixed(2)} JOD
-                        {order.created_at
-                          ? ` · ${new Date(order.created_at).toLocaleDateString(
-                              language === "ar" ? "ar-JO" : "en-JO"
-                            )}`
-                          : ""}
-                      </small>
-                    </article>
+                      <div className={styles.darikOrderCardBottom340}>
+                        <small>
+                          {Number(order.total ?? 0).toFixed(2)} JOD
+                          {order.created_at
+                            ? ` · ${new Date(order.created_at).toLocaleDateString(
+                                language === "ar" ? "ar-JO" : "en-JO"
+                              )}`
+                            : ""}
+                        </small>
+                        <b>{t.viewOrder} →</b>
+                      </div>
+                    </button>
                   ))}
                 </div>
+              )}
+            </div>
+          ) : null}
+
+          {view === "order-details" && profile ? (
+            <div className={styles.darikAccountView339}>
+              <button
+                type="button"
+                className={styles.darikBack339}
+                onClick={() => {
+                  setMessage("");
+                  setView("orders");
+                }}
+              >
+                {t.backOrders}
+              </button>
+
+              <div className={styles.darikViewHeading339}>
+                <h4>{t.orderDetailsTitle}</h4>
+                <p>{t.orderDetailsSubtitle}</p>
+              </div>
+
+              {orderDetailBusy340 ? (
+                <p className={styles.darikMuted339}>{t.loadingOrder}</p>
+              ) : selectedOrder340 ? (
+                <div className={styles.darikOrderDetails340}>
+                  <section className={styles.darikOrderHero340}>
+                    <div>
+                      <small>{t.orderNumber}</small>
+                      <strong>
+                        #
+                        {String(
+                          selectedOrder340.order_number ??
+                            selectedOrder340.id.slice(0, 8)
+                        )}
+                      </strong>
+                    </div>
+                    <span>{orderStatusLabel339(selectedOrder340.order_status)}</span>
+                  </section>
+
+                  <div className={styles.darikOrderMetaGrid340}>
+                    {selectedOrder340.storefront_name_snapshot ? (
+                      <label>
+                        <span>{t.store}</span>
+                        <strong>{selectedOrder340.storefront_name_snapshot}</strong>
+                      </label>
+                    ) : null}
+
+                    <label>
+                      <span>{t.placed}</span>
+                      <strong>
+                        {selectedOrder340.created_at
+                          ? new Date(selectedOrder340.created_at).toLocaleString(
+                              language === "ar" ? "ar-JO" : "en-JO"
+                            )
+                          : "—"}
+                      </strong>
+                    </label>
+
+                    <label>
+                      <span>{t.payment}</span>
+                      <strong>
+                        {paymentLabel340(selectedOrder340.payment_method)}
+                      </strong>
+                    </label>
+
+                    <label>
+                      <span>{t.paymentStatus}</span>
+                      <strong>
+                        {orderStatusLabel339(selectedOrder340.payment_status)}
+                      </strong>
+                    </label>
+
+                    <label>
+                      <span>{t.fulfillment}</span>
+                      <strong>
+                        {String(
+                          selectedOrder340.direct_fulfillment_method ?? "delivery"
+                        ).toLowerCase() === "pickup"
+                          ? t.pickup
+                          : t.delivery}
+                      </strong>
+                    </label>
+                  </div>
+
+                  <section className={styles.darikOrderProducts340}>
+                    <div className={styles.darikOrderSectionHead340}>
+                      <strong>{t.products}</strong>
+                      <span>{selectedOrder340.items?.length ?? 0}</span>
+                    </div>
+
+                    {(selectedOrder340.items ?? []).length > 0 ? (
+                      <div className={styles.darikOrderItems340}>
+                        {(selectedOrder340.items ?? []).map((item) => (
+                          <article key={item.id}>
+                            <div>
+                              <strong>{item.product_name || "Product"}</strong>
+                              <small>
+                                {t.quantity}: {Number(item.quantity ?? 0)}
+                                {item.app_price != null
+                                  ? ` · ${money340(item.app_price)} ${t.each}`
+                                  : ""}
+                              </small>
+                            </div>
+                            <b>{money340(item.line_total)}</b>
+                          </article>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className={styles.darikMuted339}>{t.noItems}</p>
+                    )}
+                  </section>
+
+                  <section className={styles.darikOrderTotals340}>
+                    <div>
+                      <span>{t.subtotal}</span>
+                      <strong>{money340(selectedOrder340.subtotal)}</strong>
+                    </div>
+                    <div>
+                      <span>{t.deliveryFee}</span>
+                      <strong>{money340(selectedOrder340.delivery_fee)}</strong>
+                    </div>
+                    <div className={styles.darikOrderGrandTotal340}>
+                      <span>{t.totalLabel}</span>
+                      <strong>{money340(selectedOrder340.total)}</strong>
+                    </div>
+                  </section>
+
+                  {String(
+                    selectedOrder340.direct_fulfillment_method ?? "delivery"
+                  ).toLowerCase() !== "pickup" ? (
+                    <section className={styles.darikOrderDelivery340}>
+                      <strong>{t.deliveryAddress}</strong>
+
+                      {selectedOrder340.delivery_address_details ? (
+                        <p>{selectedOrder340.delivery_address_details}</p>
+                      ) : null}
+
+                      <div>
+                        <span>
+                          {t.building}:{" "}
+                          <b>{selectedOrder340.direct_building_number || "—"}</b>
+                        </span>
+                        <span>
+                          {t.apartment}:{" "}
+                          <b>{selectedOrder340.direct_apartment_number || "—"}</b>
+                        </span>
+                      </div>
+
+                      {selectedOrder340.delivery_note ? (
+                        <small>
+                          {t.deliveryNote}: {selectedOrder340.delivery_note}
+                        </small>
+                      ) : null}
+                    </section>
+                  ) : null}
+                </div>
+              ) : (
+                <p className={styles.darikMuted339}>
+                  {t.orderDetailsUnavailable}
+                </p>
               )}
             </div>
           ) : null}
