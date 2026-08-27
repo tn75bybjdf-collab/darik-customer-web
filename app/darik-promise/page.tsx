@@ -1,6 +1,7 @@
 "use client";
 
 /* DARIK_PROMISE_BUYER_PROTECTION_PAGE_334 */
+/* DARIK_PROMISE_CLAIM_ESCALATION_GATE_337 */
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
@@ -28,7 +29,7 @@ const copy = {
     heroAccent: "Shop local with confidence.",
     heroBody:
       "If something goes wrong with an eligible Darik order, you are not left alone. Darik will hear both sides, review the evidence, and work toward a fair resolution.",
-    fileClaim: "Report a problem",
+    fileClaim: "Begin a claim",
     readTerms: "Read full Promise terms",
     proofOne: "Both sides are heard",
     proofTwo: "Evidence-based decisions",
@@ -187,6 +188,17 @@ const copy = {
     finalPrimary: "Contact Darik Support",
     finalSecondary: "Read Terms of Use",
     footer: "The Darik Promise is subject to eligibility, investigation, evidence, the Terms of Use, and applicable law.",
+    claimGateTitle: "Have you tried contacting the business you ordered from yet?",
+    claimGateBody: "The Darik Promise is designed as an escalation process. The business should get the first opportunity to resolve the problem directly with you.",
+    claimYes: "Yes, I contacted them",
+    claimNo: "No, not yet",
+    claimProceedTitle: "You can proceed with a Darik claim",
+    claimProceedBody: "Have your Order information, messages, photos, payment proof, and any response from the business ready. Darik will review both sides before making a decision.",
+    claimProceed: "Continue to Darik Support",
+    claimContactFirstTitle: "Please contact the business first",
+    claimContactFirstBody: "Please contact the business you ordered from and give them a reasonable opportunity to resolve the problem. If the business cannot resolve your problem, or refuses to help, Darik can investigate further under the Darik Promise.",
+    claimClose: "Got it",
+    claimBack: "Back",
     help: "Help",
     termsLink: "Terms",
     privacyLink: "Privacy",
@@ -200,7 +212,7 @@ const copy = {
     heroAccent: "تسوق محلي بثقة.",
     heroBody:
       "إذا صار خطأ في طلب مؤهل على داريك، ما بنتركك لحالك. داريك تسمع من الطرفين، تراجع الأدلة، وتعمل للوصول إلى حل عادل.",
-    fileClaim: "بلّغ عن مشكلة",
+    fileClaim: "ابدأ مطالبة",
     readTerms: "اقرأ شروط الوعد كاملة",
     proofOne: "نسمع من الطرفين",
     proofTwo: "القرار مبني على الأدلة",
@@ -359,6 +371,17 @@ const copy = {
     finalPrimary: "تواصل مع دعم داريك",
     finalSecondary: "اقرأ شروط الاستخدام",
     footer: "وعد داريك يخضع للأهلية والتحقيق والأدلة وشروط الاستخدام والقانون المعمول به.",
+    claimGateTitle: "هل حاولت التواصل مع المتجر الذي طلبت منه؟",
+    claimGateBody: "وعد داريك مصمم كمرحلة تصعيد بعد محاولة الحل مع المتجر. لازم نعطي المتجر أول فرصة يحل المشكلة معك مباشرة.",
+    claimYes: "نعم، تواصلت معهم",
+    claimNo: "لا، لسه",
+    claimProceedTitle: "تقدر تكمل مطالبة داريك",
+    claimProceedBody: "جهز معلومات الطلب والرسائل والصور وإثبات الدفع وأي رد من المتجر. داريك تراجع الطرفين قبل اتخاذ القرار.",
+    claimProceed: "متابعة إلى دعم داريك",
+    claimContactFirstTitle: "تواصل مع المتجر أولاً",
+    claimContactFirstBody: "يرجى التواصل مع المتجر الذي طلبت منه وإعطاؤه فرصة معقولة لحل المشكلة. إذا المتجر ما قدر يحل مشكلتك أو رفض يساعدك، داريك تقدر تحقق أكثر ضمن وعد داريك.",
+    claimClose: "تمام",
+    claimBack: "رجوع",
     help: "المساعدة",
     termsLink: "الشروط",
     privacyLink: "الخصوصية",
@@ -459,6 +482,8 @@ function Icon({ name, size = 22 }: { name: IconName; size?: number }) {
 
 export default function DarikPromisePage() {
   const [language, setLanguage] = useState<Language>("en");
+  const [claimGateOpen337, setClaimGateOpen337] = useState(false);
+  const [claimGateStep337, setClaimGateStep337] = useState<"question" | "contact-first">("question");
 
   useEffect(() => {
     const stored = window.localStorage.getItem(LANGUAGE_KEY);
@@ -522,10 +547,17 @@ export default function DarikPromisePage() {
               </h1>
               <p>{t.heroBody}</p>
               <div className={styles.heroActions}>
-                <Link className={styles.primary} href="/support">
+                <button
+                  className={styles.primary}
+                  type="button"
+                  onClick={() => {
+                    setClaimGateStep337("question");
+                    setClaimGateOpen337(true);
+                  }}
+                >
                   {t.fileClaim}
                   <Icon name="arrow" size={18} />
-                </Link>
+                </button>
                 <Link className={styles.secondary} href="/terms#en-darik-promise">
                   {t.readTerms}
                 </Link>
@@ -749,16 +781,109 @@ export default function DarikPromisePage() {
               <p>{t.finalBody}</p>
             </div>
             <div>
-              <Link href="/support">
-                {t.finalPrimary}
+              <button
+                type="button"
+                onClick={() => {
+                  setClaimGateStep337("question");
+                  setClaimGateOpen337(true);
+                }}
+              >
+                {t.fileClaim}
                 <Icon name="arrow" size={17} />
-              </Link>
+              </button>
               <Link href="/terms#en-darik-promise">{t.finalSecondary}</Link>
             </div>
           </div>
           <p className={styles.footerNote}>{t.footer}</p>
         </div>
       </section>
+
+      {claimGateOpen337 ? (
+        <div
+          className={styles.claimGateBackdrop337}
+          role="presentation"
+          onMouseDown={(event) => {
+            if (event.currentTarget === event.target) {
+              setClaimGateOpen337(false);
+            }
+          }}
+        >
+          <section
+            className={styles.claimGateModal337}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="darik-claim-gate-title-337"
+          >
+            <button
+              className={styles.claimGateClose337}
+              type="button"
+              aria-label={language === "ar" ? "إغلاق" : "Close"}
+              onClick={() => setClaimGateOpen337(false)}
+            >
+              ×
+            </button>
+
+            <div className={styles.claimGateIcon337}>
+              <Icon
+                name={claimGateStep337 === "question" ? "balance" : "store"}
+                size={27}
+              />
+            </div>
+
+            {claimGateStep337 === "question" ? (
+              <>
+                <span className={styles.claimGateLabel337}>DARIK PROMISE</span>
+                <h2 id="darik-claim-gate-title-337">{t.claimGateTitle}</h2>
+                <p>{t.claimGateBody}</p>
+
+                <div className={styles.claimGateChoices337}>
+                  <button
+                    type="button"
+                    className={styles.claimGateYes337}
+                    onClick={() => {
+                      setClaimGateOpen337(false);
+                      window.location.href = "/support";
+                    }}
+                  >
+                    {t.claimYes}
+                    <Icon name="arrow" size={16} />
+                  </button>
+                  <button
+                    type="button"
+                    className={styles.claimGateNo337}
+                    onClick={() => setClaimGateStep337("contact-first")}
+                  >
+                    {t.claimNo}
+                  </button>
+                </div>
+              </>
+            ) : (
+              <>
+                <span className={styles.claimGateLabel337}>DARIK PROMISE</span>
+                <h2 id="darik-claim-gate-title-337">{t.claimContactFirstTitle}</h2>
+                <p>{t.claimContactFirstBody}</p>
+
+                <div className={styles.claimGateChoices337}>
+                  <button
+                    type="button"
+                    className={styles.claimGateYes337}
+                    onClick={() => setClaimGateOpen337(false)}
+                  >
+                    {t.claimClose}
+                  </button>
+                  <button
+                    type="button"
+                    className={styles.claimGateNo337}
+                    onClick={() => setClaimGateStep337("question")}
+                  >
+                    {t.claimBack}
+                  </button>
+                </div>
+              </>
+            )}
+          </section>
+        </div>
+      ) : null}
 
       <footer className={styles.helpFooter335}>
         <div className={styles.shell}>
