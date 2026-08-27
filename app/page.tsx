@@ -1,6 +1,7 @@
 "use client";
 
 import DarikJordanDirectorySearch295 from "./components/DarikJordanDirectorySearch295";
+// DARIK_JORDAN_DIRECTORY_ALL_ACTIVE_STORES_331
 // DARIK_PAYMENT_FIRST_YEARLY_PLANS_CATALOG_GATE_190
 
 
@@ -78,7 +79,8 @@ type NearbyStore = {
   cliq_enabled: boolean | null;
   card_enabled: boolean | null;
   pickup_enabled: boolean | null;
-  distance_km: number | string;
+  distance_km: number | string | null;
+  delivers_to_location: boolean | null;
 };
 
 // DARIK_HOME_STORE_SHELVES_TRUE_BESTSELLERS_186
@@ -289,16 +291,16 @@ const copy = {
     retailerSignup: "Sell on Darik",
     dashboard: "Retailer dashboard",
     eyebrow: "LOCAL SHOPPING, FINALLY CONNECTED",
-    heroTitleA: "Everything nearby.",
-    heroTitleB: "Delivered.",
-    heroBody: "Discover local stores that actually deliver to your address—groceries, pharmacies, fashion, electronics, auto parts, and more.",
+    heroTitleA: "Every Darik store.",
+    heroTitleB: "One directory.",
+    heroBody: "Browse active stores across Jordan and search what they sell. Set your location and stores that deliver to you move to the top—without hiding the rest.",
     useLocation: "Use my location",
     changeLocation: "Change",
     searchPlaceholder: "Search stores near you",
-    locationNeeded: "Set your delivery location to see stores that can reach you.",
-    deliveringTo: "Delivering to",
-    nearbyStores: "Stores delivering to you",
-    nearbyBody: "Only retailers whose configured delivery zone reaches your location are shown.",
+    locationNeeded: "Set your location to prioritize stores that deliver to you.",
+    deliveringTo: "Delivery priority for",
+    nearbyStores: "All active Darik stores",
+    nearbyBody: "Stores that deliver to your location appear first. Other active stores stay visible so you can browse their catalogs and find who carries what you need.",
     store: "store",
     storesCount: "stores",
     seeAll: "See all",
@@ -313,11 +315,11 @@ const copy = {
     minimum: "minimum",
     away: "away",
     shopStore: "Shop store",
-    noStoresTitle: "No stores are reaching this location yet",
-    noStoresBody: "Try another nearby address, or check back as more local retailers join Darik.",
+    noStoresTitle: "No active stores found",
+    noStoresBody: "Try another category or search, or check back as more retailers join Darik.",
     setLocation: "Set delivery location",
     locationTitle: "Where should we deliver?",
-    locationBody: "Darik uses your location only to show stores whose delivery range reaches you.",
+    locationBody: "Darik uses your location to prioritize stores that can deliver to you. Every active store remains discoverable.",
     currentLocation: "Use current location",
     locating: "Finding your location…",
     orSearch: "or search for an address",
@@ -328,8 +330,8 @@ const copy = {
     close: "Close",
     invalidLocation: "We could not determine that location. Try searching for your address.",
     browserDenied: "Location access was not granted. Search for your address instead.",
-    discovery: "One address. Every store that can reach it.",
-    discoveryBody: "Darik checks each retailer’s delivery radius, then organizes eligible stores into simple shopping fields.",
+    discovery: "Every active store. Delivery matches first.",
+    discoveryBody: "Darik lists the full active-store directory and uses your location only to rank delivery-capable stores first.",
     stepOne: "Share your location",
     stepOneBody: "Use GPS or search for an address anywhere in the retailer’s service area.",
     stepTwo: "Choose a retail field",
@@ -354,14 +356,14 @@ const copy = {
     basicFeatures: "Storefront, delivery, dashboard, and catalog after approval",
     premiumFeatures: "Yearly plans differ only by product limit",
     choosePlan: "Sign up today",
-    footerBody: "Darik connects customers with local stores that deliver to them.",
+    footerBody: "Darik helps customers discover local stores across Jordan, find products, and see which stores deliver to them.",
     retailerLinks: "Retailers",
     platformLinks: "Platform",
     rights: "Darik Technologies. All rights reserved.",
-    locationRequired: "Location required",
-    locationRequiredBody: "Darik never guesses. We show a store only when your address is inside that retailer’s configured delivery range.",
-    loadingStores: "Checking delivery zones near you…",
-    loadError: "We could not load nearby stores right now.",
+    locationRequired: "Browse all stores",
+    locationRequiredBody: "Browse every active Darik store now. Set a location anytime to move stores that deliver to you to the top.",
+    loadingStores: "Loading active Darik stores…",
+    loadError: "We could not load the Darik store directory right now.",
     retry: "Try again",
   },
   ar: {
@@ -371,16 +373,16 @@ const copy = {
     retailerSignup: "بع على داريك",
     dashboard: "لوحة التاجر",
     eyebrow: "التسوق المحلي صار أسهل",
-    heroTitleA: "كل شيء قريب منك.",
-    heroTitleB: "يوصل لعندك.",
-    heroBody: "اكتشف المتاجر المحلية التي توصل فعلياً إلى عنوانك—بقالة، صيدليات، أزياء، إلكترونيات، قطع سيارات والمزيد.",
+    heroTitleA: "كل متاجر داريك.",
+    heroTitleB: "بدليل واحد.",
+    heroBody: "تصفح المتاجر الفعالة في كل الأردن وابحث عن المنتجات التي تبيعها. حدد موقعك لتظهر المتاجر التي توصل إليك أولاً، بدون إخفاء باقي المتاجر.",
     useLocation: "استخدم موقعي",
     changeLocation: "تغيير",
     searchPlaceholder: "ابحث عن متجر قريب",
-    locationNeeded: "حدد موقع التوصيل حتى نعرض المتاجر التي تصل إليك.",
-    deliveringTo: "التوصيل إلى",
-    nearbyStores: "متاجر توصل إلى موقعك",
-    nearbyBody: "نعرض فقط المتاجر التي تشمل منطقتك ضمن نطاق التوصيل المحدد لديها.",
+    locationNeeded: "حدد موقعك لترتيب المتاجر التي توصل إليك أولاً.",
+    deliveringTo: "أولوية التوصيل إلى",
+    nearbyStores: "كل متاجر داريك الفعالة",
+    nearbyBody: "المتاجر التي توصل إلى موقعك تظهر أولاً، وبعدها تبقى باقي المتاجر الفعالة ظاهرة حتى تتصفح كتالوجاتها وتعرف مين عنده المنتج الذي تحتاجه.",
     store: "متجر",
     storesCount: "متاجر",
     seeAll: "عرض الكل",
@@ -395,11 +397,11 @@ const copy = {
     minimum: "حد أدنى",
     away: "منك",
     shopStore: "تسوق من المتجر",
-    noStoresTitle: "لا توجد متاجر توصل إلى هذا الموقع حالياً",
-    noStoresBody: "جرّب عنواناً قريباً أو ارجع لاحقاً مع انضمام المزيد من المتاجر المحلية إلى داريك.",
+    noStoresTitle: "لا توجد متاجر فعالة حالياً",
+    noStoresBody: "جرّب فئة أو بحثاً مختلفاً، أو ارجع لاحقاً مع انضمام المزيد من المتاجر إلى داريك.",
     setLocation: "حدد موقع التوصيل",
     locationTitle: "وين بدك التوصيل؟",
-    locationBody: "يستخدم داريك موقعك فقط لعرض المتاجر التي يصل نطاق توصيلها إليك.",
+    locationBody: "يستخدم داريك موقعك لترتيب المتاجر التي تستطيع التوصيل إليك أولاً، وتبقى كل المتاجر الفعالة قابلة للاكتشاف.",
     currentLocation: "استخدم موقعي الحالي",
     locating: "جاري تحديد موقعك…",
     orSearch: "أو ابحث عن عنوان",
@@ -410,8 +412,8 @@ const copy = {
     close: "إغلاق",
     invalidLocation: "تعذر تحديد الموقع. ابحث عن عنوانك يدوياً.",
     browserDenied: "لم يتم السماح بالوصول للموقع. ابحث عن عنوانك بدلاً من ذلك.",
-    discovery: "عنوان واحد. كل متجر يقدر يوصل له.",
-    discoveryBody: "يفحص داريك نطاق توصيل كل متجر، ثم يرتب المتاجر المؤهلة ضمن مجالات تسوق واضحة.",
+    discovery: "كل متجر فعال. ومتاجر التوصيل أولاً.",
+    discoveryBody: "يعرض داريك دليل المتاجر الفعالة بالكامل ويستخدم موقعك فقط لترتيب المتاجر القادرة على التوصيل إليك أولاً.",
     stepOne: "شارك موقعك",
     stepOneBody: "استخدم GPS أو ابحث عن عنوان داخل منطقة خدمة المتجر.",
     stepTwo: "اختر مجال التسوق",
@@ -436,14 +438,14 @@ const copy = {
     basicFeatures: "واجهة وتوصيل ولوحة وكتالوج بعد الموافقة",
     premiumFeatures: "الخطط السنوية تختلف فقط بحد المنتجات",
     choosePlan: "سجّل اليوم",
-    footerBody: "داريك يربط الزبائن بالمتاجر المحلية التي توصل إليهم.",
+    footerBody: "داريك يساعد الزبائن على اكتشاف المتاجر في الأردن والعثور على المنتجات ومعرفة أي المتاجر توصل إليهم.",
     retailerLinks: "للتجار",
     platformLinks: "المنصة",
     rights: "داريك تكنولوجيز. جميع الحقوق محفوظة.",
-    locationRequired: "الموقع مطلوب",
-    locationRequiredBody: "داريك لا يخمّن. لا يظهر المتجر إلا عندما يكون عنوانك داخل نطاق التوصيل الذي حدده التاجر.",
-    loadingStores: "جاري فحص نطاقات التوصيل القريبة…",
-    loadError: "تعذر تحميل المتاجر القريبة حالياً.",
+    locationRequired: "تصفح كل المتاجر",
+    locationRequiredBody: "تصفح كل متاجر داريك الفعالة الآن. حدد موقعك بأي وقت حتى تظهر المتاجر التي توصل إليك أولاً.",
+    loadingStores: "جاري تحميل متاجر داريك الفعالة…",
+    loadError: "تعذر تحميل دليل متاجر داريك حالياً.",
     retry: "إعادة المحاولة",
   },
 } as const;
@@ -696,14 +698,15 @@ function HomeStoreCard186({
   const heroImageUrl = safeImageUrl(store.hero_image_url);
   const logoUrl = safeImageUrl(store.logo_url);
   const specialAtLocation = Boolean(
-    special?.enabled &&
+    store.delivers_to_location === true &&
+      special?.enabled &&
       Number.isFinite(distance) &&
       distance <= special.maxKm + 0.0001
   );
 
   return (
     <a
-      className="darikHomeStoreCard186"
+      className={`darikHomeStoreCard186 ${store.delivers_to_location === false ? "darikHomeStoreCardNoDelivery331" : ""}`}
       href={`/${store.slug}`}
       aria-label={`${t.shopStore}: ${displayStoreName(store, language)}`}
       onClick={(event) => {
@@ -800,34 +803,76 @@ function HomeStoreCard186({
 
         <h3>{displayStoreName(store, language)}</h3>
 
-        <strong className="darikHomeStoreFee186">
-          {deliveryFee <= 0
-            ? "Free delivery"
-            : `${money(deliveryFee)} JOD delivery`}
-        </strong>
-
-        {specialAtLocation && deliveryFee > 0 ? (
-          <span className="darikHomeStoreSpecial186">
-            Free delivery over {money(special!.minimumQualifyingJod)} JOD
-          </span>
-        ) : null}
-
-        <div className="darikHomeStoreMeta246B">
-          <small className="darikHomeStoreDistance186">
-            {distance < 1
-              ? `${Math.max(1, Math.round(distance * 1000))} m away`
-              : `${distance.toFixed(1)} km away`}
-          </small>
-
-          {Number(store.estimated_delivery_minutes || 0) > 0 ? (
-            <>
-              <span aria-hidden="true">•</span>
+        {store.delivers_to_location === false ? (
+          <>
+            <strong className="darikHomeNoDelivery331">
+              <Icon name="location" size={13} />
+              {language === "ar"
+                ? "لا يوجد توصيل إلى موقعك"
+                : "No delivery to your location"}
+            </strong>
+            <div className="darikHomeStoreMeta246B">
               <small>
-                ~{Math.round(Number(store.estimated_delivery_minutes))} min
+                {language === "ar"
+                  ? store.public_address_ar || store.public_address || "تصفح كتالوج المتجر"
+                  : store.public_address || store.public_address_ar || "Browse this store's catalog"}
               </small>
-            </>
-          ) : null}
-        </div>
+            </div>
+          </>
+        ) : store.delivers_to_location === null ? (
+          <>
+            <strong className="darikHomeDeliveryUnknown331">
+              <Icon name="location" size={13} />
+              {language === "ar"
+                ? "حدد موقعك لمعرفة التوصيل"
+                : "Set location to check delivery"}
+            </strong>
+            <div className="darikHomeStoreMeta246B">
+              <small>
+                {language === "ar"
+                  ? store.public_address_ar || store.public_address || "متجر فعال على داريك"
+                  : store.public_address || store.public_address_ar || "Active Darik store"}
+              </small>
+            </div>
+          </>
+        ) : (
+          <>
+            <strong className="darikHomeStoreFee186">
+              {deliveryFee <= 0
+                ? language === "ar"
+                  ? "توصيل مجاني"
+                  : "Free delivery"
+                : language === "ar"
+                  ? `${money(deliveryFee)} دينار توصيل`
+                  : `${money(deliveryFee)} JOD delivery`}
+            </strong>
+
+            {specialAtLocation && deliveryFee > 0 ? (
+              <span className="darikHomeStoreSpecial186">
+                {language === "ar"
+                  ? `توصيل مجاني فوق ${money(special!.minimumQualifyingJod)} دينار`
+                  : `Free delivery over ${money(special!.minimumQualifyingJod)} JOD`}
+              </span>
+            ) : null}
+
+            <div className="darikHomeStoreMeta246B">
+              <small className="darikHomeStoreDistance186">
+                {distance < 1
+                  ? `${Math.max(1, Math.round(distance * 1000))} m away`
+                  : `${distance.toFixed(1)} km away`}
+              </small>
+
+              {Number(store.estimated_delivery_minutes || 0) > 0 ? (
+                <>
+                  <span aria-hidden="true">•</span>
+                  <small>
+                    ~{Math.round(Number(store.estimated_delivery_minutes))} min
+                  </small>
+                </>
+              ) : null}
+            </div>
+          </>
+        )}
       </div>
 
       <span className="darikHomeStoreArrow246B" aria-hidden="true">
@@ -872,7 +917,7 @@ export default function DarikDiscoveryHome() {
   const [language, setLanguage] = useState<Language>("en");
   const [locationReady, setLocationReady] = useState(false);
   const [location, setLocation] = useState<CustomerLocation | null>(null);
-  const [locationDialogOpen, setLocationDialogOpen] = useState(true);
+  const [locationDialogOpen, setLocationDialogOpen] = useState(false);
   const [locating, setLocating] = useState(false);
   const [locationError, setLocationError] = useState("");
   const [placeQuery, setPlaceQuery] = useState("");
@@ -959,9 +1004,9 @@ export default function DarikDiscoveryHome() {
   }, []);
 
   useEffect(() => {
-    if (!location) return;
-    void loadNearbyStores(location);
-  }, [location]);
+    if (!locationReady) return;
+    void loadDirectoryStores331(location);
+  }, [location, locationReady]);
 
   function toggleLanguage() {
     const next = language === "en" ? "ar" : "en";
@@ -969,24 +1014,91 @@ export default function DarikDiscoveryHome() {
     window.localStorage.setItem(STORAGE_LANGUAGE_KEY, next);
   }
 
-  async function loadNearbyStores(point: CustomerLocation) {
+  type DirectoryStoreRow331 = {
+    storefront?: Record<string, unknown> | null;
+    delivers_to_location?: boolean | null;
+    delivery_match?: Record<string, unknown> | null;
+  };
+
+  function normalizeDirectoryStore331(row331: DirectoryStoreRow331): NearbyStore | null {
+    const storefront331 =
+      row331.storefront && typeof row331.storefront === "object"
+        ? row331.storefront
+        : {};
+
+    const deliveryMatch331 =
+      row331.delivery_match && typeof row331.delivery_match === "object"
+        ? row331.delivery_match
+        : {};
+
+    const merged331 = {
+      ...storefront331,
+      ...deliveryMatch331,
+    } as Record<string, unknown>;
+
+    const slug331 = String(merged331.slug ?? "").trim();
+    if (!slug331) return null;
+
+    const storefrontId331 = String(
+      merged331.storefront_id ?? merged331.id ?? slug331
+    );
+
+    const displayName331 = String(
+      merged331.display_name ??
+        merged331.business_name ??
+        slug331
+    );
+
+    return {
+      ...(merged331 as unknown as NearbyStore),
+      storefront_id: storefrontId331,
+      slug: slug331,
+      display_name: displayName331,
+      display_name_ar:
+        merged331.display_name_ar == null
+          ? null
+          : String(merged331.display_name_ar),
+      distance_km:
+        row331.delivers_to_location === true
+          ? ((deliveryMatch331.distance_km ?? null) as number | string | null)
+          : null,
+      delivers_to_location:
+        typeof row331.delivers_to_location === "boolean"
+          ? row331.delivers_to_location
+          : null,
+    };
+  }
+
+  async function loadDirectoryStores331(point: CustomerLocation | null) {
     setStoresLoading(true);
     setStoresError("");
 
-    const result = await supabase.rpc("darik_direct_nearby_storefronts", {
-      p_latitude: point.latitude,
-      p_longitude: point.longitude,
-      p_limit: 180,
-    });
+    const result331 = await supabase.rpc(
+      "darik_direct_directory_storefronts_v331",
+      {
+        p_latitude: point?.latitude ?? null,
+        p_longitude: point?.longitude ?? null,
+        p_limit: 500,
+      }
+    );
 
-    if (result.error) {
-      console.error("Darik nearby-store lookup failed", result.error);
+    if (result331.error) {
+      console.error("Darik directory-store lookup failed", result331.error);
       setStores([]);
-      setStoresError(result.error.message || t.loadError);
-    } else {
-      setStores(Array.isArray(result.data) ? (result.data as NearbyStore[]) : []);
+      setStoresError(result331.error.message || t.loadError);
+      setStoresLoading(false);
+      return;
     }
 
+    const rows331 = Array.isArray(result331.data)
+      ? (result331.data as DirectoryStoreRow331[])
+      : [];
+
+    const normalized331 = rows331
+      .map(normalizeDirectoryStore331)
+      .filter((store331): store331 is NearbyStore => Boolean(store331));
+
+    setStores(normalized331);
     setStoresLoading(false);
   }
 
@@ -1201,7 +1313,10 @@ export default function DarikDiscoveryHome() {
 
       if (
         freeDeliveryOnly246E &&
-        storeDeliveryFee186(store) > 0
+        (
+          store.delivers_to_location !== true ||
+          storeDeliveryFee186(store) > 0
+        )
       ) {
         return false;
       }
@@ -1210,6 +1325,14 @@ export default function DarikDiscoveryHome() {
     });
 
     return [...filtered246E].sort((a, b) => {
+      if (location) {
+        const deliveryPriority331 =
+          Number(b.delivers_to_location === true) -
+          Number(a.delivers_to_location === true);
+
+        if (deliveryPriority331 !== 0) return deliveryPriority331;
+      }
+
       if (sortMode246E === "nearest") {
         const distanceDifference246E =
           Number(a.distance_km ?? 0) - Number(b.distance_km ?? 0);
@@ -1258,6 +1381,7 @@ export default function DarikDiscoveryHome() {
     sortMode246E,
     openOnly246E,
     freeDeliveryOnly246E,
+    location,
   ]);
 
   // DARIK_NEAREST_FOUR_PROGRESSIVE_STORES_318D
@@ -1279,6 +1403,26 @@ export default function DarikDiscoveryHome() {
       ...categoryFiltered318D,
     ].sort(
       (a318D, b318D) => {
+        if (location) {
+          const deliveryPriority331 =
+            Number(b318D.delivers_to_location === true) -
+            Number(a318D.delivers_to_location === true);
+
+          if (deliveryPriority331 !== 0) {
+            return deliveryPriority331;
+          }
+
+          if (
+            a318D.delivers_to_location === false &&
+            b318D.delivers_to_location === false
+          ) {
+            return displayStoreName(a318D, language).localeCompare(
+              displayStoreName(b318D, language),
+              language === "ar" ? "ar" : "en"
+            );
+          }
+        }
+
         const distanceA318D =
           Number(
             a318D.distance_km
@@ -1325,6 +1469,8 @@ export default function DarikDiscoveryHome() {
   }, [
     visibleStores246B,
     selectedCategory246,
+    location,
+    language,
   ]);
 
   const [
@@ -2041,7 +2187,7 @@ export default function DarikDiscoveryHome() {
                   <span><Icon name={group.icon} size={19} /></span>
                   <div>
                     <strong>{categoryLabel(group, language)}</strong>
-                    <small>{location ? `${count} ${count === 1 ? t.store : t.storesCount}` : t.locationRequired}</small>
+                    <small>{`${count} ${count === 1 ? t.store : t.storesCount}`}</small>
                   </div>
                 </div>
               ))}
@@ -2064,16 +2210,13 @@ export default function DarikDiscoveryHome() {
               <p>{location ? t.nearbyBody : t.locationRequiredBody}</p>
             </div>
 
-            {location ? (
-              <strong className={styles.storeCount246B}>
-                {visibleStores246B.length}{" "}
-                {visibleStores246B.length === 1 ? t.store : t.storesCount}
-              </strong>
-            ) : null}
+            <strong className={styles.storeCount246B}>
+              {visibleStores246B.length}{" "}
+              {visibleStores246B.length === 1 ? t.store : t.storesCount}
+            </strong>
           </div>
 
-          {location ? (
-            <div className={styles.categoryTabs246B} aria-label="Store categories">
+          <div className={styles.categoryTabs246B} aria-label="Store categories">
               {categoryGroups.map((group) => {
                 const active246B = selectedCategory246 === group.key;
                 const count246B = storeCounts.get(group.key) || 0;
@@ -2099,10 +2242,8 @@ export default function DarikDiscoveryHome() {
               })}
 
             </div>
-          ) : null}
 
-          {location ? (
-            <button
+          <button
               type="button"
               className={styles.categoryBrowseStandalone246C4}
               onClick={() => setCategoryBrowserOpen246C(true)}
@@ -2126,23 +2267,29 @@ export default function DarikDiscoveryHome() {
                 <Icon name="chevron" size={16} />
               </span>
             </button>
-          ) : null}
 
           {!location ? (
-            <div className={styles.locationEmptyState}>
-              <div className={styles.emptyIllustration}>
-                <span className={styles.emptyPin}><Icon name="location" size={30} /></span>
-                <span className={styles.emptyOrbitOne} />
-                <span className={styles.emptyOrbitTwo} />
-              </div>
+            <div className={styles.directoryLocationHint331}>
+              <span><Icon name="location" size={18} /></span>
               <div>
-                <span>{t.locationRequired}</span>
-                <h3>{t.discovery}</h3>
-                <p>{t.locationRequiredBody}</p>
+                <strong>
+                  {language === "ar"
+                    ? "أنت تتصفح كل متاجر داريك"
+                    : "You are browsing all Darik stores"}
+                </strong>
+                <small>
+                  {language === "ar"
+                    ? "حدد موقعك حتى تظهر المتاجر التي توصل إليك أولاً."
+                    : "Set your location to move stores that deliver to you to the top."}
+                </small>
               </div>
-              <button type="button" onClick={() => setLocationDialogOpen(true)}>{t.setLocation}<Icon name="arrow" size={18} /></button>
+              <button type="button" onClick={() => setLocationDialogOpen(true)}>
+                {language === "ar" ? "حدد الموقع" : "Set location"}
+              </button>
             </div>
-          ) : storesLoading ? (
+          ) : null}
+
+          {storesLoading ? (
             <div className={styles.loadingState}>
               <div className={styles.loadingRing} />
               <strong>{t.loadingStores}</strong>
@@ -2151,25 +2298,52 @@ export default function DarikDiscoveryHome() {
             <div className={styles.errorState}>
               <span>!</span>
               <div><h3>{t.loadError}</h3><p>{storesError}</p></div>
-              <button type="button" onClick={() => location && void loadNearbyStores(location)}>{t.retry}</button>
+              <button type="button" onClick={() => void loadDirectoryStores331(location)}>{t.retry}</button>
             </div>
           ) : visibleStores246B.length ? (
             <div className="darikMarketplaceStoreList246B">
-              {renderedStores318D.map((store) => (
-                <HomeStoreCard186
-                  key={store.storefront_id}
-                  store={store}
-                  language={language}
-                  special={
-                    specialDeliveryBySlug186[store.slug.toLowerCase()] ?? null
-                  }
-                  bestSellers249={
-                    bestSellerProductsBySlug249[
-                      store.slug.trim().toLowerCase()
-                    ]
-                  }
-                />
-              ))}
+              {renderedStores318D.map((store, index331) => {
+                const previous331 =
+                  index331 > 0 ? renderedStores318D[index331 - 1] : null;
+
+                const showNoDeliveryDivider331 = Boolean(
+                  location &&
+                    store.delivers_to_location === false &&
+                    previous331?.delivers_to_location !== false
+                );
+
+                return (
+                  <div
+                    className="darikDirectoryStoreSlot331"
+                    key={store.storefront_id}
+                  >
+                    {showNoDeliveryDivider331 ? (
+                      <div className="darikNoDeliveryDivider331">
+                        <span />
+                        <strong>
+                          {language === "ar"
+                            ? "متاجر فعالة أخرى — لا يوجد توصيل إلى موقعك"
+                            : "Other active stores — no delivery to your location"}
+                        </strong>
+                        <span />
+                      </div>
+                    ) : null}
+
+                    <HomeStoreCard186
+                      store={store}
+                      language={language}
+                      special={
+                        specialDeliveryBySlug186[store.slug.toLowerCase()] ?? null
+                      }
+                      bestSellers249={
+                        bestSellerProductsBySlug249[
+                          store.slug.trim().toLowerCase()
+                        ]
+                      }
+                    />
+                  </div>
+                );
+              })}
             </div>
           ) : (
             <div className={styles.noStoresState}>
