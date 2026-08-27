@@ -4,7 +4,7 @@
 // DARIK_FURNITURE_IKEA_COLOR_VARIANTS_216
 
 
-import DarikCustomerAccountHub175 from "../components/DarikCustomerAccountHub175";
+import DarikCustomerAccountHub339 from "../components/DarikCustomerAccountHub339";
 // DARIK_REAL_PRIVATE_PREVIEW_ALIAS_143
 
 
@@ -4806,6 +4806,7 @@ export default function DarikDirectStorefrontPage() {
     setDarikAuthMessage121("");
 
     // DARIK_SHARED_PERSISTENT_CUSTOMER_ACCOUNT_HUB_175_V2: guest checkout does not destroy the remembered Darik login.
+    // DARIK_CUSTOMER_SIGNIN_GLOBAL_AND_STORE_SCOPED_HISTORY_339: guest checkout preserves the shared customer session.
     setDarikCheckoutIdentity121("guest");
   }
 
@@ -7175,7 +7176,7 @@ function renderProductCard(product: Product) {
       {/* DARIK_SHARED_PERSISTENT_CUSTOMER_ACCOUNT_HUB_175_V2 */}
       {!isBuilderPositionPreview145 &&
       slug !== "_darik-private-store-preview" ? (
-        <DarikCustomerAccountHub175
+        <DarikCustomerAccountHub339
           scope="store"
           retailerId={storefront?.retailer_id ?? null}
         />

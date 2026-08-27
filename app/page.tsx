@@ -7,7 +7,7 @@ import DarikJordanDirectorySearch295 from "./components/DarikJordanDirectorySear
 // DARIK_PAYMENT_FIRST_YEARLY_PLANS_CATALOG_GATE_190
 
 
-import DarikCustomerAccountHub175 from "./components/DarikCustomerAccountHub175";
+import DarikCustomerAccountHub339 from "./components/DarikCustomerAccountHub339";
 // DARIK_FRONTEND_132_HOME_FREE_RETAILER_ACCOUNT_CTA
 
 // DARIK_ROOT_LINKS_027
@@ -1810,8 +1810,8 @@ export default function DarikDiscoveryHome() {
       dir={language === "ar" ? "rtl" : "ltr"}
       data-location-selected={location ? "true" : "false"}
     >
-      {/* DARIK_SHARED_PERSISTENT_CUSTOMER_ACCOUNT_HUB_175_V2 */}
-      <DarikCustomerAccountHub175 scope="all" />
+            {/* DARIK_CUSTOMER_SIGNIN_GLOBAL_AND_STORE_SCOPED_HISTORY_339 */}
+      <DarikCustomerAccountHub339 scope="all" />
 
       {/* DARIK_REAL_LOGO_POPUP_AND_HOME_174 */}
       <header className={styles.header}>
