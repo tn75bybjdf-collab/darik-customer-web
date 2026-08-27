@@ -1,5 +1,7 @@
 "use client";
 
+
+/* DARIK_RETAILER_DASHBOARD_HIDE_MECHANICS_TAB_347 */
 // DARIK_PAYMENT_FIRST_YEARLY_PLANS_CATALOG_GATE_190
 // DARIK_MECHANICS_LAB_048
 // DARIK_GROCERY_WEIGHT_3_PHOTO_049
@@ -8163,7 +8165,7 @@ export default function DarikDirectProductsPage() {
             Products
           </a>
           <a href="/store-dashboard/categories">Categories</a>
-          <a href="/store-dashboard/mechanics-lab">Mechanics Lab / مختبر الخصائص</a>
+
                   <a href="/store-dashboard/ai-credits">
             AI Credits / رصيد الذكاء الاصطناعي
           </a>

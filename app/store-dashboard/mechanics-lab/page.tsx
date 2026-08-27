@@ -1,5 +1,7 @@
 "use client";
 
+
+/* DARIK_RETAILER_DASHBOARD_HIDE_MECHANICS_TAB_347 */
 // DARIK_EYEGLASSES_RETAIL_FIELD_MECHANICS_135
 
 // DARIK_SHOE_CATEGORY_SIZE_GROUPS_053
@@ -215,9 +217,7 @@ export default function DarikMechanicsLabPage() {
           <a href="/store-dashboard/storefront">Storefront / واجهة المتجر</a>
           <a href="/store-dashboard/products">Products / المنتجات</a>
           <a href="/store-dashboard/categories">Categories / الأقسام</a>
-          <a className={styles.activeNav} href="/store-dashboard/mechanics-lab">
-            Mechanics Lab / مختبر الخصائص
-          </a>
+
         </nav>
         <div className={styles.sidebarFooter}>
           <span>{session.user.email}</span>

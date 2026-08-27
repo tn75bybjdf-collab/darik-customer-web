@@ -1,5 +1,7 @@
 "use client";
 
+
+/* DARIK_RETAILER_DASHBOARD_HIDE_MECHANICS_TAB_347 */
 // DARIK_PAYMENT_FIRST_YEARLY_PLANS_CATALOG_GATE_190
 
 // DARIK_RETAIL_FIELDS_SMOKE_SHOP_050
@@ -715,7 +717,7 @@ export default function DarikDirectCategoriesPage() {
           <a href="/store-dashboard/storefront">Storefront / واجهة المتجر</a>
           <a href="/store-dashboard/orders">Orders / الطلبات</a>
           <a href="/store-dashboard/products">Products / المنتجات</a>
-          <a href="/store-dashboard/mechanics-lab">Mechanics Lab / مختبر الخصائص</a>
+
           <a
             className={styles.activeNav}
             href="/store-dashboard/categories"
