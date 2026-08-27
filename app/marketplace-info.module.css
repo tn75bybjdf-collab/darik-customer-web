@@ -458,3 +458,123 @@
   border-color: #0b5f54 !important;
   -webkit-text-fill-color: #ffffff !important;
 }
+
+/* DARIK_PRICING_HALF_OFF_CUSTOM_DOMAIN_CSS_330 */
+.priceSaleRow330 {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin: 10px 0 2px;
+}
+
+.discountBadge330 {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 28px;
+  padding: 5px 10px;
+  border-radius: 999px;
+  background: #0f7b6c;
+  color: #ffffff;
+  font-size: 0.76rem;
+  font-weight: 900;
+  letter-spacing: 0.04em;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.regularPrice330 {
+  color: #8b919a;
+  font-size: 0.95rem;
+  font-weight: 800;
+  text-decoration: line-through;
+  text-decoration-thickness: 2px;
+  text-decoration-color: #c34d4d;
+}
+
+.domainOffer330 {
+  margin-top: 24px;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 18px;
+  padding: 20px 22px;
+  border: 1px solid rgba(15, 123, 108, 0.24);
+  border-radius: 22px;
+  background: linear-gradient(135deg, rgba(15, 123, 108, 0.08), rgba(255, 255, 255, 0.94));
+  box-shadow: 0 14px 38px rgba(17, 31, 45, 0.07);
+}
+
+.domainOfferIcon330 {
+  display: grid;
+  place-items: center;
+  width: 58px;
+  height: 58px;
+  border-radius: 17px;
+  background: #0f7b6c;
+  color: #ffffff;
+  font-size: 0.88rem;
+  font-weight: 900;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.domainOfferCopy330 {
+  min-width: 0;
+}
+
+.domainOfferCopy330 strong {
+  display: block;
+  color: #13222d;
+  font-size: 1.08rem;
+  font-weight: 900;
+}
+
+.domainOfferCopy330 p {
+  margin: 5px 0 0;
+  color: #66717b;
+  font-size: 0.93rem;
+  line-height: 1.5;
+}
+
+.domainOfferPrice330 {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 3px;
+  min-width: 120px;
+}
+
+[dir="rtl"] .domainOfferPrice330 {
+  align-items: flex-start;
+}
+
+.domainOfferPrice330 strong {
+  color: #0f7b6c;
+  font-size: 1.45rem;
+  font-weight: 950;
+  white-space: nowrap;
+}
+
+.domainOfferPrice330 span {
+  color: #75808a;
+  font-size: 0.78rem;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+@media (max-width: 700px) {
+  .domainOffer330 {
+    grid-template-columns: auto 1fr;
+    gap: 14px;
+    padding: 18px;
+  }
+
+  .domainOfferPrice330,
+  [dir="rtl"] .domainOfferPrice330 {
+    grid-column: 1 / -1;
+    align-items: flex-start;
+    padding-inline-start: 72px;
+  }
+}

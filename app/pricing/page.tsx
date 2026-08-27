@@ -1,5 +1,6 @@
 "use client";
 
+// DARIK_PRICING_HALF_OFF_CUSTOM_DOMAIN_330
 // DARIK_PAYMENT_FIRST_YEARLY_PLANS_CATALOG_GATE_190
 
 // DARIK_FRONTEND_PRICING_FREE_SETUP_FIRST_129
@@ -34,13 +35,17 @@ const content = {
       ["04", "Approval", "Darik approves the receipt, unlocks the catalog, and publishes the store", "Live"],
     ],
     activationFoot: "Pending or rejected payments never unlock catalog creation. This keeps abandoned accounts from filling Darik with unused products.",
-    plansLabel: "YEARLY ONLY · NO MONTHLY PLANS",
+    plansLabel: "50% OFF YEARLY PLANS · NO MONTHLY PLANS",
     plansTitle: "Choose the catalog size your business needs.",
-    plansBody: "All three plans include the Darik Direct storefront, delivery configuration, marketplace discovery, retailer dashboard, and order workflow. The difference is the number of products your catalog can hold.",
+    plansBody: "All three plans are currently 50% off. Every plan includes the Darik Direct storefront, delivery configuration, marketplace discovery, retailer dashboard, and order workflow. The difference is the number of products your catalog can hold.",
+    domainTitle: "Use your own domain",
+    domainPrice: "100 JOD",
+    domainSuffix: "one-time fee",
+    domainBody: "Connect your own domain to your Darik storefront for a one-time 100 JOD setup fee.",
     plans: [
-      { name: "Up to 1,000 items", price: "300", suffix: "per year · paid up front", badge: "", featured: false, premium: false },
-      { name: "Up to 3,000 items", price: "400", suffix: "per year · paid up front", badge: "Most flexible", featured: true, premium: false },
-      { name: "Up to 10,000 items", price: "500", suffix: "per year · paid up front", badge: "Largest catalog", featured: false, premium: false },
+      { name: "Up to 1,000 items", regularPrice: "600", price: "300", discount: "50% OFF", suffix: "per year · paid up front", badge: "", featured: false, premium: false },
+      { name: "Up to 3,000 items", regularPrice: "800", price: "400", discount: "50% OFF", suffix: "per year · paid up front", badge: "Most flexible", featured: true, premium: false },
+      { name: "Up to 10,000 items", regularPrice: "1000", price: "500", discount: "50% OFF", suffix: "per year · paid up front", badge: "Largest catalog", featured: false, premium: false },
     ],
     standardFeatures: [
       "Branded Darik Direct storefront",
@@ -106,13 +111,17 @@ const content = {
       ["04", "الموافقة", "توافق داريك على الإيصال وتفتح الكتالوج وتنشر المتجر", "مباشر"],
     ],
     activationFoot: "الدفعة المعلقة أو المرفوضة لا تفتح إنشاء الكتالوج، حتى لا تمتلئ داريك بمنتجات لحسابات متروكة.",
-    plansLabel: "سنوي فقط · لا توجد خطط شهرية",
+    plansLabel: "خصم 50% على الخطط السنوية · لا توجد خطط شهرية",
     plansTitle: "اختر حجم الكتالوج الذي يحتاجه نشاطك.",
-    plansBody: "الخطط الثلاث تشمل واجهة داريك دايركت وإعدادات التوصيل والاكتشاف في السوق ولوحة التاجر ومسار الطلبات. الفرق هو عدد المنتجات المسموح به.",
+    plansBody: "جميع الخطط الثلاث عليها خصم 50% حالياً. وتشمل كل خطة واجهة داريك دايركت وإعدادات التوصيل والاكتشاف في السوق ولوحة التاجر ومسار الطلبات. الفرق هو عدد المنتجات المسموح به.",
+    domainTitle: "استخدم نطاقك الخاص",
+    domainPrice: "100 دينار",
+    domainSuffix: "رسوم لمرة واحدة",
+    domainBody: "اربط نطاقك الخاص بواجهة متجرك على داريك مقابل رسوم إعداد 100 دينار تدفع لمرة واحدة.",
     plans: [
-      { name: "حتى 1,000 منتج", price: "300", suffix: "سنوياً · الدفع مقدماً", badge: "", featured: false, premium: false },
-      { name: "حتى 3,000 منتج", price: "400", suffix: "سنوياً · الدفع مقدماً", badge: "الأكثر مرونة", featured: true, premium: false },
-      { name: "حتى 10,000 منتج", price: "500", suffix: "سنوياً · الدفع مقدماً", badge: "أكبر كتالوج", featured: false, premium: false },
+      { name: "حتى 1,000 منتج", regularPrice: "600", price: "300", discount: "خصم 50%", suffix: "سنوياً · الدفع مقدماً", badge: "", featured: false, premium: false },
+      { name: "حتى 3,000 منتج", regularPrice: "800", price: "400", discount: "خصم 50%", suffix: "سنوياً · الدفع مقدماً", badge: "الأكثر مرونة", featured: true, premium: false },
+      { name: "حتى 10,000 منتج", regularPrice: "1000", price: "500", discount: "خصم 50%", suffix: "سنوياً · الدفع مقدماً", badge: "أكبر كتالوج", featured: false, premium: false },
     ],
     standardFeatures: [
       "واجهة داريك دايركت باسم المتجر",
@@ -179,7 +188,7 @@ export default function PricingPage() {
       <header className={styles.header}>
         <div className={styles.headerInner}>
           <a className={styles.logoLink} href="/" aria-label="Darik Marketplace home">
-            <img className={styles.logo} src="/darik_logo_final_v3.png" alt="Darik Marketplace" />
+            <img className={styles.logo} src="/darik_logo_final_v2.png" alt="Darik Marketplace" />
           </a>
           <nav className={styles.nav} aria-label="Primary navigation">
             <a href="/">{t.stores}</a>
@@ -231,6 +240,10 @@ export default function PricingPage() {
               <article className={`${styles.priceCard} ${plan.featured ? styles.featured : ""} ${plan.premium ? styles.premium : ""}`} key={plan.name}>
                 {plan.badge ? <span className={styles.priceBadge}>{plan.badge}</span> : null}
                 <p className={styles.planName}>{plan.name}</p>
+                <div className={styles.priceSaleRow330}>
+                  <span className={styles.discountBadge330}>{plan.discount}</span>
+                  <span className={styles.regularPrice330}>JOD {plan.regularPrice}</span>
+                </div>
                 <div className={styles.planPrice}><span>JOD</span><strong>{plan.price}</strong></div>
                 <div className={styles.planSuffix}>{plan.suffix}</div>
                 <div className={styles.planRule} />
@@ -241,6 +254,18 @@ export default function PricingPage() {
                 <a className={styles.planButton} href="/store-signup">{t.choose}</a>
               </article>
             ))}
+          </div>
+
+          <div className={styles.domainOffer330}>
+            <div className={styles.domainOfferIcon330}>www</div>
+            <div className={styles.domainOfferCopy330}>
+              <strong>{t.domainTitle}</strong>
+              <p>{t.domainBody}</p>
+            </div>
+            <div className={styles.domainOfferPrice330}>
+              <strong>{t.domainPrice}</strong>
+              <span>{t.domainSuffix}</span>
+            </div>
           </div>
         </div>
       </section>
@@ -285,7 +310,7 @@ export default function PricingPage() {
 
       <footer className={styles.footer}>
         <div className={styles.footerInner}>
-          <div className={styles.footerBrand}><a className={styles.logoLink} href="/"><img className={styles.logo} src="/darik_logo_final_v3.png" alt="Darik Marketplace" /></a><p>{t.footerBody}</p></div>
+          <div className={styles.footerBrand}><a className={styles.logoLink} href="/"><img className={styles.logo} src="/darik_logo_final_v2.png" alt="Darik Marketplace" /></a><p>{t.footerBody}</p></div>
           <div className={styles.footerLinks}>
             <div><strong>{t.platform}</strong><a href="/">{t.stores}</a><a href="/how-it-works">{t.how}</a><a href="/pricing">{t.pricing}</a></div>
             <div><strong>{t.retailers}</strong><a href="/store-signup">{t.sell}</a><a href="/store-dashboard">{t.dashboard}</a></div>
