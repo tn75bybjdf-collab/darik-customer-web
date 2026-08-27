@@ -1,5 +1,5 @@
-/* DARIK_PLATFORM_INTERMEDIARY_TERMS_333 */
-/* DARIK_PLATFORM_INTERMEDIARY_TERMS_BILINGUAL_333 */
+/* DARIK_PLATFORM_INTERMEDIARY_TERMS_334 */
+/* DARIK_PLATFORM_INTERMEDIARY_TERMS_BILINGUAL_334 */
 
 import Link from "next/link";
 import styles from "../legal.module.css";
@@ -405,8 +405,39 @@ const englishSections: readonly TermsSection[] = [
     ],
   },
   {
+    id: "darik-promise",
+    title: "39. The Darik Promise — Buyer Protection Program",
+    paragraphs: [
+      "Darik may offer the “Darik Promise,” a marketplace customer-service and dispute-resolution program intended to protect Customers in eligible Retail Transactions while treating both Customers and Retailers fairly. The Darik Promise does not automatically presume that either party is right or wrong.",
+      "The Darik Promise is a voluntary Platform program. It is not insurance, an insurance contract, escrow, a bank account, a payment service, a money-transfer service, a warranty issued by Darik on Retailer Products, or a guarantee that every transaction or claim will result in reimbursement.",
+      "A claim will ordinarily be eligible for review only when it relates to a genuine Retail Transaction placed through Darik and the Customer provides enough information for Darik to reasonably identify the Order, Retailer, Product, payment, and issue. Darik may also consider later claims involving latent defects, safety issues, suspected fraud, warranty matters, or other circumstances where applicable law or fairness reasonably warrants review.",
+      "Customers should ordinarily submit a Darik Promise claim within fourteen (14) calendar days after delivery or the expected delivery date. Missing that period does not eliminate any mandatory legal right, and Darik may accept a later claim in appropriate circumstances.",
+      "The Customer must cooperate honestly with the investigation and provide reasonably requested evidence, which may include order records, photographs, videos, messages, payment proof, delivery information, product packaging, return attempts, or other relevant material.",
+      "Darik will give the Retailer a fair opportunity to respond and provide evidence. The normal response period is three (3) business days after Darik requests a response, although Darik may shorten or extend that period where urgency, product safety, suspected fraud, technical issues, or other circumstances justify doing so.",
+      "Darik may review Platform logs, storefront information, product descriptions, payment-proof submissions, customer and retailer communications, delivery records, photographs, video, documents, and other evidence reasonably relevant to the claim.",
+      "Darik will decide eligibility under the Darik Promise based on the balance and credibility of the available evidence. If Darik determines that the Retailer acted properly or that the evidence does not support the Customer’s claim, the claim may be denied and no adverse action will be taken against the Retailer solely because the Customer filed that claim.",
+      "If Darik determines that the Customer is entitled to a remedy under the Darik Promise, Darik may first require or request that the Retailer make the Customer whole through an appropriate refund, replacement, correction, completion of delivery, return, or other remedy.",
+      "If the Retailer refuses, ignores, or fails to provide the required remedy within the time Darik specifies, Darik may, in its discretion, use Darik’s own funds to make the Customer whole for the eligible loss. Unless mandatory law requires more, the maximum voluntary Darik Promise payment for a claim is the verified amount actually paid for the affected Product or affected portion of the Order, plus any Retailer-charged delivery fee reasonably attributable to that affected Order, minus refunds, credits, chargebacks, replacements, insurance proceeds, or other amounts already recovered by the Customer.",
+      "The Darik Promise does not reimburse indirect, consequential, exemplary, punitive, emotional-distress, lost-profit, lost-opportunity, travel, time, financing, interest, professional-fee, or other collateral losses unless Darik expressly agrees otherwise or applicable law requires otherwise.",
+      "If Darik pays a Customer because the Retailer failed or refused to perform a responsibility that Darik determined belonged to that Retailer, the Retailer immediately owes Darik a “Darik Promise Reimbursement Balance” equal to the amount Darik actually paid on the Retailer’s behalf. That balance is reimbursement of Darik’s actual loss and is not intended to be a penalty or arbitrary reactivation fee.",
+      "Darik may suspend or deactivate the Retailer until the Darik Promise Reimbursement Balance is paid in full. Payment of the balance does not create an automatic right to reactivation. Darik may permanently remove a Retailer for repeated substantiated claims, fraud, counterfeit goods, safety violations, intentional deception, falsified evidence, abusive conduct, refusal to cooperate, or other serious Platform-integrity concerns.",
+      "If the Retailer cooperates with a valid Darik Promise decision and provides the required remedy, Darik will not impose a suspension solely because the Retailer lost that individual claim, unless separate misconduct, repeated violations, safety concerns, fraud, or another independent basis for Platform action exists.",
+      "A Customer who knowingly submits a false, manipulated, duplicate, or fraudulent Darik Promise claim may have the claim denied, may be required to return any improperly obtained Darik Promise payment, and may be restricted or removed from the Platform.",
+      "A Customer may not obtain duplicate recovery for the same loss. Darik may reduce or deny a Darik Promise payment to reflect refunds, chargebacks, replacement goods, compensation from the Retailer, insurance payments, bank reversals, or other recovery already received.",
+      "Darik’s decision is final only for determining benefits, reimbursement obligations, account status, and other actions under the Darik Promise or Platform. It is not a court judgment, arbitration award, governmental decision, or waiver of either party’s right to use courts, regulators, consumer-protection authorities, or other remedies available under applicable law.",
+      "Darik may modify, limit, suspend, or discontinue the Darik Promise prospectively to address fraud, legal requirements, abuse, financial sustainability, or changes to the Platform. Darik will not use a later policy change to unlawfully eliminate mandatory rights that already accrued under applicable law.",
+    ],
+    bullets: [
+      "Examples that may qualify include non-delivery after payment, a materially wrong item, materially missing paid items, significant damage present at delivery, a Product materially inconsistent with the Retailer’s listing, credible evidence of counterfeit or unauthorized merchandise, or a refund/remedy that the Retailer is legally or contractually obligated to provide but refuses to provide.",
+      "Examples that ordinarily do not qualify include simple change of mind where no return right exists, damage caused after delivery by the Customer, misuse or unauthorized modification, a transaction completed entirely outside Darik with no verifiable Darik Order, indirect losses, duplicate recovery, or a claim Darik cannot reasonably verify.",
+      "Nothing in the Darik Promise reduces a Customer’s mandatory rights against the Retailer under applicable law.",
+    ],
+    note:
+      "Darik investigates both sides. If the evidence supports the Retailer, no punishment follows from the claim. If the evidence supports the Customer and the Retailer refuses a required remedy, Darik may protect the Customer, then recover from the responsible Retailer the exact amount Darik paid on that Retailer’s behalf.",
+  },
+  {
     id: "changes",
-    title: "39. Changes to these Terms",
+    title: "40. Changes to these Terms",
     paragraphs: [
       "Darik may update these Terms to reflect changes in law, Platform functionality, business models, security practices, third-party services, or risk allocation.",
       "Updated Terms will be posted on the Platform with a revised effective or last-updated date. Where applicable law requires additional notice or consent for a material change, Darik will provide it.",
@@ -415,7 +446,7 @@ const englishSections: readonly TermsSection[] = [
   },
   {
     id: "governing-law",
-    title: "40. Governing law and disputes",
+    title: "41. Governing law and disputes",
     paragraphs: [
       "These Terms and disputes relating to the Platform are governed by the laws of the Hashemite Kingdom of Jordan, without prejudice to mandatory legal protections that apply regardless of contractual choice.",
       "Before commencing formal proceedings, the parties are encouraged, where practical, to contact Darik Support and attempt good-faith resolution. This informal step does not prevent a person from seeking urgent relief, contacting a regulator or consumer-protection authority, or exercising a legal right that cannot be delayed or waived.",
@@ -424,7 +455,7 @@ const englishSections: readonly TermsSection[] = [
   },
   {
     id: "misc",
-    title: "41. Miscellaneous legal terms",
+    title: "42. Miscellaneous legal terms",
     paragraphs: [
       "If any provision of these Terms is held invalid or unenforceable, that provision will be enforced to the maximum lawful extent or severed if necessary, and the remaining provisions will remain effective.",
       "Darik’s failure to enforce a provision immediately is not a waiver of that provision or any later breach.",
@@ -435,7 +466,7 @@ const englishSections: readonly TermsSection[] = [
   },
   {
     id: "language",
-    title: "42. English and Arabic versions",
+    title: "43. English and Arabic versions",
     paragraphs: [
       "Darik may provide these Terms in English and Arabic for accessibility. Both versions are intended to communicate the same agreement.",
       "If there is an inconsistency between language versions, the Arabic version will prevail to the extent permitted by applicable law, unless a mandatory rule requires otherwise.",
@@ -443,7 +474,7 @@ const englishSections: readonly TermsSection[] = [
   },
   {
     id: "contact",
-    title: "43. Contact and legal notices",
+    title: "44. Contact and legal notices",
     paragraphs: [
       "Questions, complaints, legal notices, privacy requests, or reports concerning these Terms may be submitted through the Darik Support page or Darik’s published support channels.",
       "Current primary support channel: WhatsApp +962 79 300 9420.",
@@ -839,8 +870,39 @@ const arabicSections: readonly TermsSection[] = [
     ],
   },
   {
+    id: "darik-promise",
+    title: "39. وعد داريك — برنامج حماية المشتري",
+    paragraphs: [
+      "يجوز لداريك تقديم «وعد داريك»، وهو برنامج لخدمة العملاء وتسوية النزاعات داخل المنصة يهدف إلى حماية العملاء في معاملات البيع المؤهلة مع معاملة العميل والتاجر بعدالة. ولا يفترض وعد داريك تلقائياً أن أحد الطرفين محق أو مخطئ.",
+      "وعد داريك برنامج اختياري تابع للمنصة، وليس تأميناً أو عقد تأمين أو حساب ضمان أو خدمة مصرفية أو خدمة دفع أو تحويل أموال أو ضماناً صادراً عن داريك لمنتجات التجار، ولا يضمن أن كل معاملة أو مطالبة ستؤدي إلى تعويض.",
+      "تكون المطالبة مؤهلة للمراجعة عادة عندما تتعلق بمعاملة بيع حقيقية تمت من خلال داريك ويقدم العميل معلومات كافية تمكّن داريك بصورة معقولة من تحديد الطلب والتاجر والمنتج والدفع والمشكلة. ويجوز لداريك أيضاً مراجعة مطالبات لاحقة تتعلق بعيوب خفية أو مشكلات سلامة أو احتيال مشتبه به أو ضمان أو ظروف أخرى يبرر فيها القانون أو الإنصاف المراجعة.",
+      "ينبغي للعميل عادة تقديم مطالبة وعد داريك خلال أربعة عشر (14) يوماً تقويمياً من تاريخ التسليم أو تاريخ التسليم المتوقع. وعدم الالتزام بهذه المدة لا يلغي أي حق قانوني آمر، ويجوز لداريك قبول مطالبة متأخرة في الظروف المناسبة.",
+      "يجب على العميل التعاون بصدق مع التحقيق وتقديم الأدلة المعقولة المطلوبة، وقد تشمل سجلات الطلب والصور والفيديو والرسائل وإثبات الدفع ومعلومات التوصيل وتغليف المنتج ومحاولات الإرجاع وأي مواد أخرى ذات صلة.",
+      "ستمنح داريك التاجر فرصة عادلة للرد وتقديم الأدلة. وتكون مدة الرد العادية ثلاثة (3) أيام عمل بعد طلب داريك للرد، ويجوز تقصير أو تمديد هذه المدة عندما تبرر ذلك حالة عاجلة أو سلامة منتج أو احتيال مشتبه به أو مشكلة تقنية أو ظروف أخرى.",
+      "يجوز لداريك مراجعة سجلات المنصة ومعلومات واجهة المتجر ووصف المنتج وإثباتات الدفع ورسائل العميل والتاجر وسجلات التوصيل والصور والفيديو والمستندات وأي أدلة أخرى مرتبطة بالمطالبة بصورة معقولة.",
+      "تحدد داريك الأهلية ضمن وعد داريك بناءً على وزن ومصداقية الأدلة المتوفرة. وإذا قررت داريك أن التاجر تصرف بصورة صحيحة أو أن الأدلة لا تدعم مطالبة العميل، يجوز رفض المطالبة ولا يتخذ أي إجراء سلبي ضد التاجر لمجرد أن العميل قدم تلك المطالبة.",
+      "إذا قررت داريك أن العميل يستحق معالجة ضمن وعد داريك، فيجوز لداريك أولاً مطالبة التاجر أو طلبها منه بأن يعيد العميل إلى وضعه الصحيح من خلال استرداد أو استبدال أو تصحيح أو إكمال التوصيل أو الإرجاع أو أي معالجة مناسبة أخرى.",
+      "إذا رفض التاجر أو تجاهل أو فشل في تقديم المعالجة المطلوبة خلال المدة التي تحددها داريك، فيجوز لداريك، وفق تقديرها، استخدام أموالها الخاصة لتعويض العميل عن الخسارة المؤهلة. وما لم يفرض القانون الآمر أكثر من ذلك، فإن الحد الأقصى للدفع الاختياري ضمن وعد داريك هو المبلغ المثبت الذي دفعه العميل فعلياً للمنتج المتأثر أو الجزء المتأثر من الطلب، مضافاً إليه رسوم التوصيل التي فرضها التاجر والمرتبطة بصورة معقولة بالطلب المتأثر، بعد خصم أي مبالغ مستردة أو أرصدة أو اعتراضات دفع أو بدائل أو تعويضات أو مبالغ أخرى سبق أن استعادها العميل.",
+      "لا يشمل وعد داريك الخسائر غير المباشرة أو التبعية أو النموذجية أو العقابية أو الأضرار المعنوية أو الأرباح أو الفرص الضائعة أو تكاليف السفر أو الوقت أو التمويل أو الفوائد أو الأتعاب المهنية أو أي خسائر جانبية أخرى، إلا إذا وافقت داريك صراحة أو فرض القانون خلاف ذلك.",
+      "إذا دفعت داريك للعميل لأن التاجر فشل أو رفض تنفيذ مسؤولية قررت داريك أنها تقع على ذلك التاجر، يصبح على التاجر فوراً «رصيد تعويض وعد داريك» مساوياً تماماً للمبلغ الذي دفعته داريك فعلياً نيابة عنه. وهذا الرصيد هو استرداد لخسارة داريك الفعلية وليس غرامة أو رسم إعادة تفعيل تعسفي.",
+      "يجوز لداريك تعليق أو تعطيل التاجر حتى يتم دفع رصيد تعويض وعد داريك بالكامل. ولا يمنح دفع الرصيد حقاً تلقائياً في إعادة التفعيل. ويجوز لداريك إزالة التاجر نهائياً بسبب المطالبات المثبتة المتكررة أو الاحتيال أو البضائع المقلدة أو مخالفات السلامة أو الخداع المتعمد أو تزوير الأدلة أو السلوك المسيء أو رفض التعاون أو أي مخاوف خطيرة تتعلق بسلامة المنصة.",
+      "إذا تعاون التاجر مع قرار صحيح ضمن وعد داريك وقدم المعالجة المطلوبة، فلن تفرض داريك تعليقاً لمجرد خسارته تلك المطالبة الفردية، ما لم يوجد سوء سلوك منفصل أو مخالفات متكررة أو مخاوف سلامة أو احتيال أو سبب مستقل آخر لاتخاذ إجراء.",
+      "إذا قدم العميل عمداً مطالبة كاذبة أو معدلة أو مكررة أو احتيالية، فيجوز رفض المطالبة ومطالبته بإعادة أي مبلغ حصل عليه بصورة غير صحيحة وتقييد أو إنهاء استخدامه للمنصة.",
+      "لا يجوز للعميل الحصول على تعويض مزدوج عن الخسارة نفسها. ويجوز لداريك تخفيض أو رفض الدفع ليعكس أي استرداد أو اعتراض دفع أو منتج بديل أو تعويض من التاجر أو دفعة تأمين أو عكس بنكي أو أي مبلغ آخر تم استرداده.",
+      "قرار داريك نهائي فقط لغايات تحديد الاستفادة ورصيد التعويض وحالة الحساب والإجراءات الأخرى ضمن وعد داريك أو المنصة. ولا يعتبر حكماً قضائياً أو قرار تحكيم أو قراراً حكومياً ولا يمنع أي طرف من اللجوء إلى المحاكم أو الجهات التنظيمية أو حماية المستهلك أو أي حق آخر متاح قانوناً.",
+      "يجوز لداريك تعديل أو تقييد أو تعليق أو إيقاف وعد داريك مستقبلاً لمعالجة الاحتيال أو المتطلبات القانونية أو إساءة الاستخدام أو الاستدامة المالية أو تغييرات المنصة. ولا تستخدم داريك تغييراً لاحقاً لإلغاء حقوق آمرة نشأت بالفعل بصورة تخالف القانون.",
+    ],
+    bullets: [
+      "من الأمثلة التي قد تكون مؤهلة: عدم التوصيل بعد الدفع، استلام منتج مختلف بصورة جوهرية، نقص منتجات مدفوعة، ضرر جوهري موجود عند التسليم، منتج مختلف جوهرياً عن وصف التاجر، أدلة موثوقة على منتج مقلد أو غير مصرح به، أو رفض التاجر معالجة أو استرداداً ملزماً به قانوناً أو تعاقدياً.",
+      "ومن الأمثلة التي لا تكون مؤهلة عادة: تغيير الرأي فقط عندما لا يوجد حق إرجاع، ضرر سببه العميل بعد التسليم، سوء الاستخدام أو التعديل غير المصرح به، معاملة تمت بالكامل خارج داريك دون طلب يمكن التحقق منه، الخسائر غير المباشرة، التعويض المكرر، أو مطالبة لا يمكن لداريك التحقق منها بصورة معقولة.",
+      "لا يقلل وعد داريك من أي حق آمر للعميل تجاه التاجر بموجب القانون.",
+    ],
+    note:
+      "داريك تحقق مع الطرفين. إذا دعمت الأدلة موقف التاجر فلا توجد عقوبة بسبب المطالبة. وإذا دعمت الأدلة موقف العميل ورفض التاجر المعالجة المطلوبة، يجوز لداريك حماية العميل ثم استرداد المبلغ الفعلي الذي دفعته نيابة عن التاجر المسؤول.",
+  },
+  {
     id: "changes",
-    title: "39. تعديل هذه الشروط",
+    title: "40. تعديل هذه الشروط",
     paragraphs: [
       "يجوز لداريك تحديث هذه الشروط لتعكس تغييرات القانون أو وظائف المنصة أو نماذج الأعمال أو ممارسات الأمان أو خدمات الأطراف الأخرى أو توزيع المخاطر.",
       "تنشر الشروط المحدثة على المنصة مع تاريخ تحديث أو نفاذ جديد. وعندما يفرض القانون إشعاراً أو موافقة إضافية لتغيير جوهري، ستقوم داريك بذلك.",
@@ -849,7 +911,7 @@ const arabicSections: readonly TermsSection[] = [
   },
   {
     id: "governing-law",
-    title: "40. القانون الواجب التطبيق والنزاعات",
+    title: "41. القانون الواجب التطبيق والنزاعات",
     paragraphs: [
       "تخضع هذه الشروط والنزاعات المتعلقة بالمنصة لقوانين المملكة الأردنية الهاشمية، دون الإخلال بالحمايات القانونية الآمرة التي تنطبق بغض النظر عن اختيار القانون.",
       "قبل بدء إجراءات رسمية، يشجع الأطراف عندما يكون ذلك عملياً على التواصل مع دعم داريك ومحاولة الحل بحسن نية. ولا تمنع هذه الخطوة شخصاً من طلب حماية عاجلة أو التواصل مع جهة تنظيمية أو حماية المستهلك أو ممارسة حق قانوني لا يجوز تأخيره أو التنازل عنه.",
@@ -858,7 +920,7 @@ const arabicSections: readonly TermsSection[] = [
   },
   {
     id: "misc",
-    title: "41. أحكام قانونية متنوعة",
+    title: "42. أحكام قانونية متنوعة",
     paragraphs: [
       "إذا اعتبر حكم من هذه الشروط باطلاً أو غير قابل للتنفيذ، فيطبق إلى أقصى حد قانوني أو يتم فصله عند الحاجة وتبقى الأحكام الأخرى نافذة.",
       "عدم قيام داريك بتطبيق حكم فوراً لا يعتبر تنازلاً عنه أو عن أي مخالفة لاحقة.",
@@ -869,7 +931,7 @@ const arabicSections: readonly TermsSection[] = [
   },
   {
     id: "language",
-    title: "42. النسختان العربية والإنجليزية",
+    title: "43. النسختان العربية والإنجليزية",
     paragraphs: [
       "قد توفر داريك هذه الشروط بالعربية والإنجليزية لتسهيل الوصول، ويقصد من النسختين التعبير عن الاتفاق ذاته.",
       "في حال وجود تعارض بين النسختين، تسود النسخة العربية بالقدر الذي يسمح به القانون، ما لم تفرض قاعدة قانونية آمرة خلاف ذلك.",
@@ -877,7 +939,7 @@ const arabicSections: readonly TermsSection[] = [
   },
   {
     id: "contact",
-    title: "43. التواصل والإشعارات القانونية",
+    title: "44. التواصل والإشعارات القانونية",
     paragraphs: [
       "يمكن إرسال الأسئلة والشكاوى والإشعارات القانونية وطلبات الخصوصية أو البلاغات المتعلقة بهذه الشروط من خلال صفحة دعم داريك أو قنوات الدعم المنشورة.",
       "قناة الدعم الأساسية الحالية: WhatsApp على الرقم +962 79 300 9420.",
@@ -911,7 +973,7 @@ function TermsLanguage({
       <header className={`${styles.hero} ${styles.termsHero333}`}>
         <div className={styles.termsHeroTop333}>
           <p className={styles.eyebrow}>{updated}</p>
-          <span className={styles.termsVersion333}>VERSION 333</span>
+          <span className={styles.termsVersion333}>VERSION 334</span>
         </div>
         <h1>{title}</h1>
         <p>{subtitle}</p>
@@ -1029,7 +1091,7 @@ export default function DarikTermsPage() {
         <div className={styles.termsLawyerNotice333}>
           <strong>Legal review / مراجعة قانونية</strong>
           <p>
-            These Terms are a comprehensive platform draft designed for Darik’s
+            These Terms are a comprehensive platform and buyer-protection draft designed for Darik’s
             operating model. Darik should have Jordanian commercial/e-commerce
             counsel review the final deployed version for entity details,
             enforceability, tax treatment, consumer-law requirements, and any
@@ -1037,7 +1099,7 @@ export default function DarikTermsPage() {
             advice.
           </p>
           <p dir="rtl">
-            هذه الشروط مسودة شاملة مصممة لنموذج عمل داريك. وينبغي مراجعة النسخة
+            هذه الشروط مسودة شاملة للمنصة وحماية المشتري ومصممة لنموذج عمل داريك. وينبغي مراجعة النسخة
             النهائية من محامٍ أردني مختص بالقانون التجاري والتجارة الإلكترونية
             للتحقق من بيانات الكيان وقابلية التنفيذ والضرائب ومتطلبات حماية
             المستهلك وأي فئات منتجات منظمة قبل الاعتماد عليها كمشورة قانونية
@@ -1048,6 +1110,7 @@ export default function DarikTermsPage() {
         <nav className={styles.footerLinks} aria-label="Legal links">
           <Link href="/privacy">Privacy / الخصوصية</Link>
           <Link href="/support">Support / الدعم</Link>
+          <Link href="/darik-promise">Darik Promise / وعد داريك</Link>
           <Link href="/how-it-works">How it works / كيف تعمل</Link>
           <Link href="/">GetDarik.com</Link>
         </nav>

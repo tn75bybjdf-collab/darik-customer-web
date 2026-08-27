@@ -595,3 +595,32 @@
     font-size: 12px;
   }
 }
+/* DARIK_PROMISE_TERMS_CSS_334 */
+.legalSection333[id$="-darik-promise"] {
+  border-color: #b9dad3;
+  background:
+    radial-gradient(circle at 96% 0%, rgba(13, 123, 108, 0.08), transparent 28%),
+    rgba(255, 255, 255, 0.99);
+}
+
+.legalSection333[id$="-darik-promise"] h2 {
+  color: #075f53;
+}
+
+.legalSection333[id$="-darik-promise"]::before {
+  content: "DARIK PROMISE";
+  display: inline-flex;
+  margin-bottom: 12px;
+  border-radius: 999px;
+  padding: 6px 9px;
+  background: #e7f5f1;
+  color: #0d7163;
+  font-size: 9px;
+  font-weight: 950;
+  letter-spacing: 0.08em;
+}
+
+.arabicSection .legalSection333[id$="-darik-promise"]::before {
+  content: "وعد داريك";
+  letter-spacing: 0;
+}
