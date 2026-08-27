@@ -3564,7 +3564,7 @@ export default function DarikDirectStorefrontPage() {
   const filteredProducts = useMemo(() => {
     const cleanSearch = search.trim().toLowerCase();
 
-    return products.filter((product) => {
+    const matchingProducts350 = products.filter((product) => {
       if (
         selectedCategoryId !== "BestSellers" &&
         selectedCategoryId !== "all" &&
@@ -3608,6 +3608,56 @@ export default function DarikDirectStorefrontPage() {
       ]
         .filter(Boolean)
         .some((value) => String(value).toLowerCase().includes(cleanSearch));
+    });
+
+    // DARIK_STOREFRONT_CATEGORY_BRAND_ALPHA_SORT_350
+    // Normal categories and All: brand A-Z, then product name A-Z.
+    // Best Sellers intentionally keeps its sales-ranking mechanics.
+    if (selectedCategoryId === "BestSellers") {
+      return matchingProducts350;
+    }
+
+    return [...matchingProducts350].sort((left, right) => {
+      const leftName350 = String(
+        left.official_marketplace_name || left.name || ""
+      ).trim();
+      const rightName350 = String(
+        right.official_marketplace_name || right.name || ""
+      ).trim();
+
+      const leftBrand350 = String(left.brand_name || "").trim();
+      const rightBrand350 = String(right.brand_name || "").trim();
+
+      const leftPrimary350 = leftBrand350 || leftName350;
+      const rightPrimary350 = rightBrand350 || rightName350;
+
+      const brandCompare350 = leftPrimary350.localeCompare(
+        rightPrimary350,
+        undefined,
+        {
+          sensitivity: "base",
+          numeric: true,
+        }
+      );
+
+      if (brandCompare350 !== 0) {
+        return brandCompare350;
+      }
+
+      const productCompare350 = leftName350.localeCompare(
+        rightName350,
+        undefined,
+        {
+          sensitivity: "base",
+          numeric: true,
+        }
+      );
+
+      if (productCompare350 !== 0) {
+        return productCompare350;
+      }
+
+      return String(left.id).localeCompare(String(right.id));
     });
   }, [
     products,
