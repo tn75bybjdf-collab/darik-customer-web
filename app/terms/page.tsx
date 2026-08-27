@@ -1,4 +1,4 @@
-/* DARIK_PLATFORM_INTERMEDIARY_TERMS_334 */
+/* DARIK_PLATFORM_INTERMEDIARY_TERMS_336 */
 /* DARIK_PLATFORM_INTERMEDIARY_TERMS_BILINGUAL_334 */
 
 import Link from "next/link";
@@ -1115,6 +1115,14 @@ export default function DarikTermsPage() {
           <Link href="/">GetDarik.com</Link>
         </nav>
       </article>
+
+      <a
+        href="#ar"
+        className={styles.arabicJumpTab336}
+        aria-label="Jump to Arabic Terms"
+      >
+        عربي
+      </a>
     </main>
   );
 }
