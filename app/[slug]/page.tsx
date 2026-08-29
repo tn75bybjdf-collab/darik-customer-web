@@ -6740,18 +6740,19 @@ export default function DarikDirectStorefrontPage() {
   // DARIK_FRONTEND_357_PUBLIC_RENDER_PARITY
   // React inline fontSize cannot beat theme CSS that uses !important.
   // Emit customer-selected hero text sizes as !important public CSS.
+  // DARIK_FRONTEND_358B_STABLE_HERO_TYPOGRAPHY_CLASS_RENDER
   const customerFacingTypographySizeCss357 = [
     effectiveStorefrontTypography.display_name.size > 0
       ? `#darik-customer-facing-store-name-144 { font-size: ${effectiveStorefrontTypography.display_name.size}px !important; }`
       : "",
     effectiveStorefrontTypography.display_name_ar.size > 0
-      ? `.darikSemanticDisplayNameAr150E { font-size: ${effectiveStorefrontTypography.display_name_ar.size}px !important; }`
+      ? `.${styles.arabicName} { font-size: ${effectiveStorefrontTypography.display_name_ar.size}px !important; }`
       : "",
     effectiveStorefrontTypography.tagline.size > 0
-      ? `.darikSemanticTagline150E { font-size: ${effectiveStorefrontTypography.tagline.size}px !important; }`
+      ? `.${styles.tagline} { font-size: ${effectiveStorefrontTypography.tagline.size}px !important; }`
       : "",
     effectiveStorefrontTypography.tagline_ar.size > 0
-      ? `.darikSemanticTaglineAr150E { font-size: ${effectiveStorefrontTypography.tagline_ar.size}px !important; }`
+      ? `.${styles.arabicTagline} { font-size: ${effectiveStorefrontTypography.tagline_ar.size}px !important; }`
       : "",
   ]
     .filter(Boolean)
