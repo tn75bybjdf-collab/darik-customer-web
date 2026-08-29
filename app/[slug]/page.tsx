@@ -6508,7 +6508,7 @@ export default function DarikDirectStorefrontPage() {
         if (
           savedHumanLabel357 &&
           canonicalHeroLabelText357 &&
-          savedHumanLabel357 === canonicalHeroLabelText357
+          (savedHumanLabel357 === canonicalHeroLabelText357 || savedHumanLabel357.endsWith(canonicalHeroLabelText357))
         ) {
           target = canonicalHeroLabel357;
         }
@@ -6741,18 +6741,19 @@ export default function DarikDirectStorefrontPage() {
   // React inline fontSize cannot beat theme CSS that uses !important.
   // Emit customer-selected hero text sizes as !important public CSS.
   // DARIK_FRONTEND_358B_STABLE_HERO_TYPOGRAPHY_CLASS_RENDER
+  // DARIK_FRONTEND_359_HERO_IDS_AND_STABLE_FREEFORM_LOCATORS
   const customerFacingTypographySizeCss357 = [
     effectiveStorefrontTypography.display_name.size > 0
       ? `#darik-customer-facing-store-name-144 { font-size: ${effectiveStorefrontTypography.display_name.size}px !important; }`
       : "",
     effectiveStorefrontTypography.display_name_ar.size > 0
-      ? `.${styles.arabicName} { font-size: ${effectiveStorefrontTypography.display_name_ar.size}px !important; }`
+      ? `#darik-customer-facing-store-name-ar-359 { font-size: ${effectiveStorefrontTypography.display_name_ar.size}px !important; }`
       : "",
     effectiveStorefrontTypography.tagline.size > 0
-      ? `.${styles.tagline} { font-size: ${effectiveStorefrontTypography.tagline.size}px !important; }`
+      ? `#darik-customer-facing-tagline-359 { font-size: ${effectiveStorefrontTypography.tagline.size}px !important; }`
       : "",
     effectiveStorefrontTypography.tagline_ar.size > 0
-      ? `.${styles.arabicTagline} { font-size: ${effectiveStorefrontTypography.tagline_ar.size}px !important; }`
+      ? `#darik-customer-facing-tagline-ar-359 { font-size: ${effectiveStorefrontTypography.tagline_ar.size}px !important; }`
       : "",
   ]
     .filter(Boolean)
@@ -7788,7 +7789,7 @@ style={{
               {storefront.display_name}
             </h1>
             {storefront.display_name_ar ? (
-              <p
+              <p id="darik-customer-facing-store-name-ar-359"
               onClick={(event) =>
                 selectBuilderPositionTarget145(event, "display_name_ar")
               }
@@ -7813,7 +7814,7 @@ style={{
                 {storefront.display_name_ar}
               </p>
             ) : null}
-            <p
+            <p id="darik-customer-facing-tagline-359"
               onClick={(event) =>
                 selectBuilderPositionTarget145(event, "tagline")
               }
@@ -7837,7 +7838,7 @@ style={{
               {storefront.tagline || (pickupOnly ? "Browse online and collect from this local store." : isGroceryStore ? "Fresh groceries and daily essentials from your neighborhood market." : "Everything you need, delivered from a local store.")}
             </p>
             {storefront.tagline_ar ? (
-              <p
+              <p id="darik-customer-facing-tagline-ar-359"
               onClick={(event) =>
                 selectBuilderPositionTarget145(event, "tagline_ar")
               }

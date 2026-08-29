@@ -2305,6 +2305,21 @@ export default function DarikDirectStorefrontSettingsPage() {
       root150E: Element,
       target150E: Element
     ) {
+  // DARIK_FRONTEND_359_HERO_IDS_AND_STABLE_FREEFORM_LOCATORS
+  // A real DOM ID is the canonical persistence locator. Never normalize it
+  // back into a generated darikPersist/semantic class.
+  const stableId359 = target150E.getAttribute("id")?.trim() ?? "";
+  if (/^[A-Za-z][A-Za-z0-9_-]{0,100}$/.test(stableId359)) {
+    const stableLocator359 = `#${stableId359}`;
+    try {
+      if (root150E.querySelectorAll(stableLocator359).length === 1) {
+        return stableLocator359;
+      }
+    } catch {
+      // Fall through to existing semantic/generated selector logic.
+    }
+  }
+
       const className150E = Array.from(
         target150E.classList
       ).find(
