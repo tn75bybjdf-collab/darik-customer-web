@@ -1,6 +1,6 @@
 "use client";
 
-// DARIK_WEIGHTED_PURCHASE_CUSTOMER_360E
+// DARIK_WEIGHTED_PURCHASE_CUSTOMER_360E\n// DARIK_WEIGHT_DROPDOWN_2KG_360L
 
 import DarikCustomerAccountHub339 from "../components/DarikCustomerAccountHub339";
 import DarikCustomerAccountMenuLauncher354 from "../components/DarikCustomerAccountMenuLauncher354";
@@ -6024,8 +6024,19 @@ export default function DarikDirectStorefrontPage() {
       return;
     }
 
+    const maxWeightSteps360 = Math.max(
+      1,
+      Math.min(99, Math.floor(2 / weightStep360 + 1e-9))
+    );
+
     const selectedWeightSteps360 = soldByWeight360
-      ? Math.max(1, Math.min(5, Math.round(Number(weightSteps360 ?? 1))))
+      ? Math.max(
+          1,
+          Math.min(
+            maxWeightSteps360,
+            Math.round(Number(weightSteps360 ?? 1))
+          )
+        )
       : 1;
 
     // Cart price remains "price per cart quantity step".
@@ -6111,7 +6122,18 @@ export default function DarikDirectStorefrontPage() {
           return {
             ...line,
             quantity: line.soldByWeight
-              ? Math.min(5, nextQuantity360)
+              ? Math.min(
+                  Math.max(
+                    1,
+                    Math.min(
+                      99,
+                      Math.floor(
+                        2 / (line.weightStep || 0.25) + 1e-9
+                      )
+                    )
+                  ),
+                  nextQuantity360
+                )
               : nextQuantity360,
           };
         })

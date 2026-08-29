@@ -1,6 +1,6 @@
 "use client";
 
-// DARIK_WEIGHTED_PURCHASE_CUSTOMER_360E
+// DARIK_WEIGHTED_PURCHASE_CUSTOMER_360E\n// DARIK_WEIGHT_DROPDOWN_2KG_360L
 
 // DARIK_CUSTOMER_APP_PRODUCT_EXPERIENCE_PARITY_178
 
@@ -721,7 +721,7 @@ export default function ProductDetailExperience({
 
     const requestedWeightSteps360 = soldByWeight360
       ? selectedInCart216 > 0
-        ? Math.min(5, selectedInCart216 + 1)
+        ? Math.min(maxWeightSteps360, selectedInCart216 + 1)
         : selectedWeightSteps360
       : null;
 
@@ -1305,11 +1305,23 @@ export default function ProductDetailExperience({
       ? rawWeightStep360
       : 0.25;
   const weightUnitPrice360 = Number(product.app_price ?? 0);
+  const maxWeightSteps360 = soldByWeight360
+    ? Math.max(
+        1,
+        Math.min(99, Math.floor(2 / weightStep360 + 1e-9))
+      )
+    : 1;
   const weightOptions360 = soldByWeight360
-    ? [1, 2, 3, 4, 5].map((steps360) => ({
-        steps: steps360,
-        weight: steps360 * weightStep360,
-      }))
+    ? Array.from(
+        { length: maxWeightSteps360 },
+        (_, index360) => {
+          const steps360 = index360 + 1;
+          return {
+            steps: steps360,
+            weight: steps360 * weightStep360,
+          };
+        }
+      )
     : [];
 
   const name = productName(product);
@@ -2309,25 +2321,26 @@ export default function ProductDetailExperience({
                     display: "flex",
                     flexDirection: "column",
                     alignItems: "stretch",
-                    gap: 14,
+                    gap: 10,
                     width: "100%",
-                    padding: 18,
                   }}
                 >
-                  {/* DARIK_WEIGHTED_SELECTOR_UI_360K */}
+                  {/* DARIK_WEIGHT_DROPDOWN_2KG_360L */}
                   <div
                     style={{
                       display: "flex",
-                      flexDirection: "column",
-                      gap: 3,
+                      justifyContent: "space-between",
+                      alignItems: "baseline",
+                      gap: 12,
+                      flexWrap: "wrap",
                     }}
                   >
-                    <span style={{ fontWeight: 800 }}>
-                      {"Choose weight / \u0627\u062e\u062a\u0631 \u0627\u0644\u0648\u0632\u0646"}
-                    </span>
-                    <small style={{ opacity: 0.72 }}>
+                    <strong>
+                      {"Weight / \u0627\u0644\u0648\u0632\u0646"}
+                    </strong>
+                    <span style={{ opacity: 0.72, fontSize: 13 }}>
                       {money(weightUnitPrice360)} / {weightUnit360}
-                    </small>
+                    </span>
                   </div>
 
                   {selectedInCart216 > 0 ? (
@@ -2335,126 +2348,91 @@ export default function ProductDetailExperience({
                       style={{
                         display: "flex",
                         flexDirection: "column",
-                        gap: 8,
+                        gap: 4,
                       }}
                     >
-                      <strong style={{ fontSize: 18 }}>
+                      <strong>
                         {"In bag / \u0641\u064a \u0627\u0644\u0633\u0644\u0629"}:{" "}
                         {formatWeight360(
                           selectedInCart216 * weightStep360
                         )}{" "}
                         {weightUnit360}
                       </strong>
-                      <small
-                        style={{
-                          display: "block",
-                          lineHeight: 1.45,
-                          opacity: 0.75,
-                        }}
-                      >
-                        {"Use \u2212 / + to change by "}
-                        {formatWeight360(weightStep360)} {weightUnit360}
+                      <small style={{ opacity: 0.72 }}>
+                        {"Use \u2212 / + below to change the weight."}
                       </small>
                     </div>
                   ) : (
                     <>
-                      <div
-                        style={{
-                          display: "grid",
-                          gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
-                          gap: 10,
-                          width: "100%",
-                        }}
-                      >
-                        {weightOptions360.map((option360) => {
-                          const selected360 =
-                            selectedWeightSteps360 === option360.steps;
-
-                          return (
-                            <button
-                              key={option360.steps}
-                              type="button"
-                              onClick={() =>
-                                setSelectedWeightSteps360(
-                                  option360.steps
-                                )
-                              }
-                              aria-pressed={selected360}
-                              style={{
-                                width: "100%",
-                                minWidth: 0,
-                                minHeight: 82,
-                                borderRadius: 14,
-                                border: selected360
-                                  ? "2px solid " + primaryColor
-                                  : "1px solid rgba(127,127,127,.28)",
-                                background: selected360
-                                  ? "rgba(127,127,127,.12)"
-                                  : "rgba(255,255,255,.72)",
-                                color: "inherit",
-                                padding: "12px 10px",
-                                cursor: "pointer",
-                                display: "flex",
-                                flexDirection: "column",
-                                justifyContent: "center",
-                                alignItems: "center",
-                                gap: 5,
-                                textAlign: "center",
-                                boxShadow: selected360
-                                  ? "0 6px 18px rgba(0,0,0,.08)"
-                                  : "none",
-                              }}
-                            >
-                              <strong
-                                style={{
-                                  display: "block",
-                                  fontSize: 17,
-                                  lineHeight: 1.15,
-                                  whiteSpace: "nowrap",
-                                }}
-                              >
-                                {formatWeight360(option360.weight)}{" "}
-                                {weightUnit360}
-                              </strong>
-                              <small
-                                style={{
-                                  display: "block",
-                                  fontSize: 13,
-                                  lineHeight: 1.15,
-                                  opacity: 0.76,
-                                  whiteSpace: "nowrap",
-                                }}
-                              >
-                                {money(
-                                  weightUnitPrice360 *
-                                    option360.weight
-                                )}
-                              </small>
-                            </button>
+                      <select
+                        value={selectedWeightSteps360 ?? ""}
+                        onChange={(event360) => {
+                          const nextSteps360 = Number(
+                            event360.target.value
                           );
-                        })}
-                      </div>
-
-                      <div
+                          setSelectedWeightSteps360(
+                            Number.isFinite(nextSteps360) &&
+                              nextSteps360 > 0
+                              ? nextSteps360
+                              : null
+                          );
+                        }}
+                        aria-label={"Weight / \u0627\u0644\u0648\u0632\u0646"}
                         style={{
-                          minHeight: 22,
-                          display: "flex",
-                          alignItems: "center",
-                          flexWrap: "wrap",
-                          gap: 4,
-                          lineHeight: 1.4,
-                          fontSize: 13,
+                          width: "100%",
+                          minHeight: 48,
+                          borderRadius: 12,
+                          border:
+                            "1px solid rgba(127,127,127,.35)",
+                          background: "white",
+                          color: "inherit",
+                          padding: "0 12px",
+                          fontSize: 16,
+                          fontWeight: 700,
+                          cursor: "pointer",
                         }}
                       >
-                        {selectedWeightSteps360 == null ? (
-                          <small style={{ opacity: 0.72 }}>
-                            {"Choose a weight before adding to bag / \u0627\u062e\u062a\u0631 \u0627\u0644\u0648\u0632\u0646 \u0642\u0628\u0644 \u0627\u0644\u0625\u0636\u0627\u0641\u0629 \u0644\u0644\u0633\u0644\u0629"}
-                          </small>
-                        ) : (
-                          <>
-                            <span>
-                              {"Selected / \u0627\u0644\u0645\u062e\u062a\u0627\u0631:"}
-                            </span>
+                        <option value="">
+                          {"Choose weight / \u0627\u062e\u062a\u0631 \u0627\u0644\u0648\u0632\u0646"}
+                        </option>
+
+                        {weightOptions360.map((option360) => (
+                          <option
+                            key={option360.steps}
+                            value={option360.steps}
+                          >
+                            {formatWeight360(option360.weight)}{" "}
+                            {weightUnit360} â€”{" "}
+                            {money(
+                              weightUnitPrice360 *
+                                option360.weight
+                            )}
+                          </option>
+                        ))}
+                      </select>
+
+                      {selectedWeightSteps360 == null ? (
+                        <small
+                          style={{
+                            display: "block",
+                            opacity: 0.68,
+                            lineHeight: 1.4,
+                          }}
+                        >
+                          {"Select a weight to add this item / \u0627\u062e\u062a\u0631 \u0627\u0644\u0648\u0632\u0646 \u0644\u0625\u0636\u0627\u0641\u0629 \u0627\u0644\u0645\u0646\u062a\u062c"}
+                        </small>
+                      ) : (
+                        <div
+                          style={{
+                            display: "flex",
+                            justifyContent: "space-between",
+                            gap: 10,
+                            flexWrap: "wrap",
+                            fontSize: 13,
+                          }}
+                        >
+                          <span>
+                            {"Selected / \u0627\u0644\u0645\u062e\u062a\u0627\u0631"}:{" "}
                             <strong>
                               {formatWeight360(
                                 selectedWeightSteps360 *
@@ -2462,17 +2440,16 @@ export default function ProductDetailExperience({
                               )}{" "}
                               {weightUnit360}
                             </strong>
-                            <span>{"\u2014"}</span>
-                            <strong>
-                              {money(
-                                weightUnitPrice360 *
-                                  selectedWeightSteps360 *
-                                  weightStep360
-                              )}
-                            </strong>
-                          </>
-                        )}
-                      </div>
+                          </span>
+                          <strong>
+                            {money(
+                              weightUnitPrice360 *
+                                selectedWeightSteps360 *
+                                weightStep360
+                            )}
+                          </strong>
+                        </div>
+                      )}
                     </>
                   )}
                 </section>
@@ -2608,7 +2585,7 @@ export default function ProductDetailExperience({
                         <button
                           type="button"
                           onClick={handleAddToCart119}
-                          disabled={!acceptingOrders || !available || !furnitureColorsReady216 || Boolean(furnitureColorsError216) || !sizeChoicesReady245 || Boolean(sizeChoicesError245) || !selectedSizeReady245 || (soldByWeight360 && selectedInCart216 >= 5)}
+                          disabled={!acceptingOrders || !available || !furnitureColorsReady216 || Boolean(furnitureColorsError216) || !sizeChoicesReady245 || Boolean(sizeChoicesError245) || !selectedSizeReady245 || (soldByWeight360 && selectedInCart216 >= maxWeightSteps360)}
                           aria-label="Add one more to cart"
                         >
                           <span aria-hidden="true">+</span>
