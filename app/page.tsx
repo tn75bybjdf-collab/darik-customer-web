@@ -8,6 +8,7 @@ import DarikJordanDirectorySearch295 from "./components/DarikJordanDirectorySear
 
 
 import DarikCustomerAccountHub339 from "./components/DarikCustomerAccountHub339";
+import DarikCustomerAccountMenuLauncher354 from "./components/DarikCustomerAccountMenuLauncher354";
 // DARIK_FRONTEND_132_HOME_FREE_RETAILER_ACCOUNT_CTA
 
 // DARIK_ROOT_LINKS_027
@@ -1841,6 +1842,8 @@ export default function DarikDiscoveryHome() {
           </nav>
 
           <div className={styles.headerActions}>
+            {/* DARIK_FRONTEND_355_ACCOUNT_MENU_EVERYWHERE */}
+            <DarikCustomerAccountMenuLauncher354 />
             <button className={styles.languageButton} type="button" onClick={toggleLanguage} aria-label="Change language">
               <Icon name="language" size={18} />
               <span>{language === "en" ? "العربية" : "English"}</span>

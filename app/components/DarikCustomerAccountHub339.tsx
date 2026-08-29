@@ -253,6 +253,60 @@ export default function DarikCustomerAccountHub339({
   const [passwordBusy, setPasswordBusy] = useState(false);
 
   const t = copy339[language];
+  // DARIK_FRONTEND_355_ACCOUNT_MENU_EVERYWHERE
+  // Header launchers open the existing account hub. The legacy floating trigger
+  // is suppressed everywhere so there is only one customer-account entry point.
+  useEffect(() => {
+    const legacyTriggerLabels355 = new Set([
+      "Customer sign in",
+      "Account",
+      "طھط³ط¬ظٹظ„ ط¯ط®ظˆظ„ ط§ظ„ط¹ظ…ظٹظ„",
+      "ط§ظ„ط­ط³ط§ط¨",
+    ]);
+
+    const hideLegacyFloatingTrigger355 = () => {
+      document
+        .querySelectorAll<HTMLButtonElement>("button[aria-label]")
+        .forEach((button) => {
+          if (button.dataset.darikAccountMenuLauncher354 === "true") return;
+
+          const label = (button.getAttribute("aria-label") || "").trim();
+          if (!legacyTriggerLabels355.has(label)) return;
+
+          button.dataset.darikLegacyFloatingAccountTrigger355 = "true";
+          button.style.setProperty("display", "none", "important");
+        });
+    };
+
+    const openFromHeader355 = () => {
+      setMessage("");
+      setView(session?.user ? "menu" : "signin");
+      setOpen(true);
+    };
+
+    hideLegacyFloatingTrigger355();
+
+    const observer355 = new MutationObserver(hideLegacyFloatingTrigger355);
+    observer355.observe(document.body, {
+      childList: true,
+      subtree: true,
+      attributes: true,
+      attributeFilter: ["aria-label"],
+    });
+
+    window.addEventListener(
+      "darik-customer-account-open-354",
+      openFromHeader355 as EventListener
+    );
+
+    return () => {
+      observer355.disconnect();
+      window.removeEventListener(
+        "darik-customer-account-open-354",
+        openFromHeader355 as EventListener
+      );
+    };
+  }, [session?.user?.id]);
 
   useEffect(() => {
     const saved = window.localStorage.getItem(LANGUAGE_KEY_339);

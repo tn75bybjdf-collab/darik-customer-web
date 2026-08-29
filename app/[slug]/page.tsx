@@ -1,5 +1,8 @@
 "use client";
 
+import DarikCustomerAccountHub339 from "../components/DarikCustomerAccountHub339";
+import DarikCustomerAccountMenuLauncher354 from "../components/DarikCustomerAccountMenuLauncher354";
+
 // DARIK_GLOBAL_SIZE_SELECTION_AVAILABILITY_245
 // DARIK_FURNITURE_IKEA_COLOR_VARIANTS_216// DARIK_REAL_PRIVATE_PREVIEW_ALIAS_143
 
@@ -7239,7 +7242,8 @@ function renderProductCard(product: Product) {
         </div>
       ) : null}
 
-      {/* DARIK_FRONTEND_353B_TYPOGRAPHY_PERSIST_AND_STORE_SIGNIN_SCOPE_CRLF_SAFE: customer sign-in/account launcher belongs on getdarik.com only. */}
+      {/* DARIK_FRONTEND_355_ACCOUNT_MENU_EVERYWHERE: shared customer account controller; floating trigger is suppressed. */}
+      <DarikCustomerAccountHub339 scope="all" />
 
       {/* DARIK_LIVE_EDITOR_LOCATION_INTERACTION_ZONE_197 */}
       {/* DARIK_DIRECT_OBJECT_DRAG_SAVE_TO_LIVE_198 */}
@@ -7593,6 +7597,8 @@ function renderProductCard(product: Product) {
             <Icon name="info" size={18} />
             <span>Store info</span>
           </button>
+          {/* DARIK_FRONTEND_355_ACCOUNT_MENU_EVERYWHERE: account/settings menu directly beside Store info. */}
+          <DarikCustomerAccountMenuLauncher354 />
           {isAutoParts && !hasDirectPurchaseProducts && partsHelpWhatsappHref ? (
             <a
               className={styles.headerWhatsappButton}
