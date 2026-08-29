@@ -2339,6 +2339,25 @@ export default function DarikDirectStorefrontSettingsPage() {
     ) {
       if (target150D === root150D) return "";
 
+      // DARIK_FRONTEND_357_PUBLIC_RENDER_PARITY
+      // Stable IDs must win over generated semantic/hash selectors.
+      const stableId357 =
+        target150D.getAttribute("id")?.trim() ?? "";
+
+      if (/^[A-Za-z][A-Za-z0-9_-]{0,100}$/.test(stableId357)) {
+        const stableIdLocator357 = `#${stableId357}`;
+
+        try {
+          if (
+            root150D.querySelectorAll(stableIdLocator357).length === 1
+          ) {
+            return stableIdLocator357;
+          }
+        } catch {
+          // Fall through to semantic/path locator logic.
+        }
+      }
+
       const semanticSelector150E =
         semanticLocator150E(
           root150D,

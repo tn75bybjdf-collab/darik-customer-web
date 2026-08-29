@@ -6486,8 +6486,35 @@ export default function DarikDirectStorefrontPage() {
 
         let target: Element | null = null;
 
+        // DARIK_FRONTEND_357_PUBLIC_RENDER_PARITY
+        // Legacy preview saves can point at a generated selector that is not
+        // stable after public reload. Match the saved human label to the
+        // permanent hero-label ID first.
+        const savedHumanLabel357 = String(point.label ?? "")
+          .replace(/^.*?آ·\s*/, "")
+          .replace(/\s+/g, " ")
+          .trim();
+
+        const canonicalHeroLabel357 = root.querySelector(
+          "#darik-layout-hero-label-202"
+        );
+
+        const canonicalHeroLabelText357 = String(
+          canonicalHeroLabel357?.textContent ?? ""
+        )
+          .replace(/\s+/g, " ")
+          .trim();
+
+        if (
+          savedHumanLabel357 &&
+          canonicalHeroLabelText357 &&
+          savedHumanLabel357 === canonicalHeroLabelText357
+        ) {
+          target = canonicalHeroLabel357;
+        }
+
         try {
-          target = root.querySelector(locator);
+          if (!target) target = root.querySelector(locator);
         } catch {
           target = null;
         }
@@ -6709,6 +6736,26 @@ export default function DarikDirectStorefrontPage() {
         font-family: ${customerFacingNameFontFamily144} !important;
       }`
     : "";
+
+  // DARIK_FRONTEND_357_PUBLIC_RENDER_PARITY
+  // React inline fontSize cannot beat theme CSS that uses !important.
+  // Emit customer-selected hero text sizes as !important public CSS.
+  const customerFacingTypographySizeCss357 = [
+    effectiveStorefrontTypography.display_name.size > 0
+      ? `#darik-customer-facing-store-name-144 { font-size: ${effectiveStorefrontTypography.display_name.size}px !important; }`
+      : "",
+    effectiveStorefrontTypography.display_name_ar.size > 0
+      ? `.darikSemanticDisplayNameAr150E { font-size: ${effectiveStorefrontTypography.display_name_ar.size}px !important; }`
+      : "",
+    effectiveStorefrontTypography.tagline.size > 0
+      ? `.darikSemanticTagline150E { font-size: ${effectiveStorefrontTypography.tagline.size}px !important; }`
+      : "",
+    effectiveStorefrontTypography.tagline_ar.size > 0
+      ? `.darikSemanticTaglineAr150E { font-size: ${effectiveStorefrontTypography.tagline_ar.size}px !important; }`
+      : "",
+  ]
+    .filter(Boolean)
+    .join("\n");
 
   const effectiveContentPositioning145 =
     normalizeStorefrontContentPositioning145(
@@ -7461,6 +7508,7 @@ function renderProductCard(product: Product) {
       ) : null}
       <style>{darikGlobalTypographyCss106}</style>
       <style>{customerFacingNameCss144}</style>
+      <style>{customerFacingTypographySizeCss357}</style>
       <ProductDetailExperience
         open={Boolean(activeProduct)}
         product={
