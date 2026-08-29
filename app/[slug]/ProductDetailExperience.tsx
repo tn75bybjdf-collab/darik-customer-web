@@ -2401,8 +2401,9 @@ export default function ProductDetailExperience({
                             key={option360.steps}
                             value={option360.steps}
                           >
+                            {/* DARIK_WEIGHT_ASCII_SEPARATOR_360P */}
                             {formatWeight360(option360.weight)}{" "}
-                            {weightUnit360} â€”{" "}
+                            {weightUnit360}{" - "}
                             {money(
                               weightUnitPrice360 *
                                 option360.weight
