@@ -2303,24 +2303,57 @@ export default function ProductDetailExperience({
               ) : null}
 
               {soldByWeight360 ? (
-                <section className={styles.weightCard}>
-                  <span>Choose weight / ط§ط®طھط± ط§ظ„ظˆط²ظ†</span>
-                  <strong>
-                    {money(weightUnitPrice360)} / {weightUnit360}
-                  </strong>
+                <section
+                  className={styles.weightCard}
+                  style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "stretch",
+                    gap: 14,
+                    width: "100%",
+                    padding: 18,
+                  }}
+                >
+                  {/* DARIK_WEIGHTED_SELECTOR_UI_360K */}
+                  <div
+                    style={{
+                      display: "flex",
+                      flexDirection: "column",
+                      gap: 3,
+                    }}
+                  >
+                    <span style={{ fontWeight: 800 }}>
+                      {"Choose weight / \u0627\u062e\u062a\u0631 \u0627\u0644\u0648\u0632\u0646"}
+                    </span>
+                    <small style={{ opacity: 0.72 }}>
+                      {money(weightUnitPrice360)} / {weightUnit360}
+                    </small>
+                  </div>
 
                   {selectedInCart216 > 0 ? (
-                    <div>
-                      <strong>
-                        In bag / ظپظٹ ط§ظ„ط³ظ„ط©:{" "}
+                    <div
+                      style={{
+                        display: "flex",
+                        flexDirection: "column",
+                        gap: 8,
+                      }}
+                    >
+                      <strong style={{ fontSize: 18 }}>
+                        {"In bag / \u0641\u064a \u0627\u0644\u0633\u0644\u0629"}:{" "}
                         {formatWeight360(
                           selectedInCart216 * weightStep360
                         )}{" "}
                         {weightUnit360}
                       </strong>
-                      <small>
-                        Use âˆ’ / + below to change by{" "}
-                        {formatWeight360(weightStep360)} {weightUnit360}.
+                      <small
+                        style={{
+                          display: "block",
+                          lineHeight: 1.45,
+                          opacity: 0.75,
+                        }}
+                      >
+                        {"Use \u2212 / + to change by "}
+                        {formatWeight360(weightStep360)} {weightUnit360}
                       </small>
                     </div>
                   ) : (
@@ -2328,11 +2361,9 @@ export default function ProductDetailExperience({
                       <div
                         style={{
                           display: "grid",
-                          gridTemplateColumns:
-                            "repeat(5, minmax(0, 1fr))",
-                          gap: 8,
+                          gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
+                          gap: 10,
                           width: "100%",
-                          marginTop: 8,
                         }}
                       >
                         {weightOptions360.map((option360) => {
@@ -2350,23 +2381,36 @@ export default function ProductDetailExperience({
                               }
                               aria-pressed={selected360}
                               style={{
+                                width: "100%",
                                 minWidth: 0,
-                                borderRadius: 12,
+                                minHeight: 82,
+                                borderRadius: 14,
                                 border: selected360
-                                  ? `2px solid ${primaryColor}`
-                                  : "1px solid rgba(127,127,127,.35)",
+                                  ? "2px solid " + primaryColor
+                                  : "1px solid rgba(127,127,127,.28)",
                                 background: selected360
                                   ? "rgba(127,127,127,.12)"
-                                  : "transparent",
+                                  : "rgba(255,255,255,.72)",
                                 color: "inherit",
-                                padding: "10px 4px",
+                                padding: "12px 10px",
                                 cursor: "pointer",
+                                display: "flex",
+                                flexDirection: "column",
+                                justifyContent: "center",
+                                alignItems: "center",
+                                gap: 5,
+                                textAlign: "center",
+                                boxShadow: selected360
+                                  ? "0 6px 18px rgba(0,0,0,.08)"
+                                  : "none",
                               }}
                             >
                               <strong
                                 style={{
                                   display: "block",
-                                  fontSize: 13,
+                                  fontSize: 17,
+                                  lineHeight: 1.15,
+                                  whiteSpace: "nowrap",
                                 }}
                               >
                                 {formatWeight360(option360.weight)}{" "}
@@ -2375,9 +2419,10 @@ export default function ProductDetailExperience({
                               <small
                                 style={{
                                   display: "block",
-                                  marginTop: 3,
-                                  fontSize: 10,
-                                  opacity: 0.75,
+                                  fontSize: 13,
+                                  lineHeight: 1.15,
+                                  opacity: 0.76,
+                                  whiteSpace: "nowrap",
                                 }}
                               >
                                 {money(
@@ -2390,18 +2435,44 @@ export default function ProductDetailExperience({
                         })}
                       </div>
 
-                      <small>
-                        {selectedWeightSteps360 == null
-                          ? "Choose a weight before adding to bag / ط§ط®طھط± ط§ظ„ظˆط²ظ† ظ‚ط¨ظ„ ط§ظ„ط¥ط¶ط§ظپط© ظ„ظ„ط³ظ„ط©"
-                          : `Selected / ط§ظ„ظ…ط®طھط§ط±: ${formatWeight360(
-                              selectedWeightSteps360 *
-                                weightStep360
-                            )} ${weightUnit360} آ· ${money(
-                              weightUnitPrice360 *
+                      <div
+                        style={{
+                          minHeight: 22,
+                          display: "flex",
+                          alignItems: "center",
+                          flexWrap: "wrap",
+                          gap: 4,
+                          lineHeight: 1.4,
+                          fontSize: 13,
+                        }}
+                      >
+                        {selectedWeightSteps360 == null ? (
+                          <small style={{ opacity: 0.72 }}>
+                            {"Choose a weight before adding to bag / \u0627\u062e\u062a\u0631 \u0627\u0644\u0648\u0632\u0646 \u0642\u0628\u0644 \u0627\u0644\u0625\u0636\u0627\u0641\u0629 \u0644\u0644\u0633\u0644\u0629"}
+                          </small>
+                        ) : (
+                          <>
+                            <span>
+                              {"Selected / \u0627\u0644\u0645\u062e\u062a\u0627\u0631:"}
+                            </span>
+                            <strong>
+                              {formatWeight360(
                                 selectedWeightSteps360 *
-                                weightStep360
-                            )}`}
-                      </small>
+                                  weightStep360
+                              )}{" "}
+                              {weightUnit360}
+                            </strong>
+                            <span>{"\u2014"}</span>
+                            <strong>
+                              {money(
+                                weightUnitPrice360 *
+                                  selectedWeightSteps360 *
+                                  weightStep360
+                              )}
+                            </strong>
+                          </>
+                        )}
+                      </div>
                     </>
                   )}
                 </section>
