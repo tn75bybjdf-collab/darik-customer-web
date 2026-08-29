@@ -1,5 +1,7 @@
 "use client";
 
+// DARIK_WEIGHTED_PURCHASE_CUSTOMER_360E
+
 // DARIK_CUSTOMER_APP_PRODUCT_EXPERIENCE_PARITY_178
 
 // DARIK_CUSTOMER_PRODUCT_DETAIL_BEAUTY_079
@@ -106,7 +108,8 @@ type ProductDetailExperienceProps = {
   onClose: () => void;
   onAddToCart: (
     color: FurnitureColorSelection216 | null,
-    size: ProductSizeSelection245 | null
+    size: ProductSizeSelection245 | null,
+    weightSteps360: number | null
   ) => void;
   onDecreaseCart: (
     color: FurnitureColorSelection216 | null,
@@ -126,6 +129,12 @@ function clean(value: unknown) {
 function money(value: number | string | null | undefined) {
   const amount = Number(value ?? 0);
   return `${Number.isFinite(amount) ? amount.toFixed(2) : "0.00"} JOD`;
+}
+
+function formatWeight360(value: unknown) {
+  const numeric = Number(value ?? 0);
+  if (!Number.isFinite(numeric) || numeric <= 0) return "0";
+  return Number(numeric.toFixed(3)).toString();
 }
 
 function whatsappDigits(value: string | null | undefined) {
@@ -455,6 +464,12 @@ export default function ProductDetailExperience({
   const [sizeChoicesReady245, setSizeChoicesReady245] = useState(false);
   const [sizeChoicesError245, setSizeChoicesError245] = useState("");
   const [productHasSizes245, setProductHasSizes245] = useState(false);
+  const [selectedWeightSteps360, setSelectedWeightSteps360] =
+    useState<number | null>(null);
+
+  useEffect(() => {
+    setSelectedWeightSteps360(null);
+  }, [product?.id]);
 
   const [furnitureColors216, setFurnitureColors216] = useState<FurnitureColorSelection216[]>([]);
   const [furniturePrimaryPhotos216, setFurniturePrimaryPhotos216] = useState<string[]>([]);
@@ -693,7 +708,28 @@ export default function ProductDetailExperience({
     if (!furnitureColorsReady216 || furnitureColorsError216) return;
     if (!sizeChoicesReady245 || sizeChoicesError245) return;
     if (!selectedSizeReady245) return;
-    onAddToCart(selectedFurnitureColor216, selectedSize245);
+
+    const soldByWeight360 = product?.direct_sold_by_weight === true;
+
+    if (
+      soldByWeight360 &&
+      selectedInCart216 <= 0 &&
+      selectedWeightSteps360 == null
+    ) {
+      return;
+    }
+
+    const requestedWeightSteps360 = soldByWeight360
+      ? selectedInCart216 > 0
+        ? Math.min(5, selectedInCart216 + 1)
+        : selectedWeightSteps360
+      : null;
+
+    onAddToCart(
+      selectedFurnitureColor216,
+      selectedSize245,
+      requestedWeightSteps360
+    );
   }
   // DARIK_PRODUCT_RETURN_SCROLL_POSITION_179_V2
   useEffect(() => {
@@ -1259,6 +1295,22 @@ export default function ProductDetailExperience({
   ]);
 
   if (!open || !product) return null;
+
+  const soldByWeight360 = product.direct_sold_by_weight === true;
+  const weightUnit360 =
+    clean(product.direct_weight_unit) || "kg";
+  const rawWeightStep360 = Number(product.direct_weight_step ?? 0.25);
+  const weightStep360 =
+    Number.isFinite(rawWeightStep360) && rawWeightStep360 > 0
+      ? rawWeightStep360
+      : 0.25;
+  const weightUnitPrice360 = Number(product.app_price ?? 0);
+  const weightOptions360 = soldByWeight360
+    ? [1, 2, 3, 4, 5].map((steps360) => ({
+        steps: steps360,
+        weight: steps360 * weightStep360,
+      }))
+    : [];
 
   const name = productName(product);
   const arabicName = clean(product.official_marketplace_name_ar);
@@ -2109,7 +2161,9 @@ export default function ProductDetailExperience({
                     {contactPricing
                       ? "Price on request"
                       : showPrices
-                        ? money(product.app_price)
+                        ? soldByWeight360
+                          ? `${money(product.app_price)} / ${weightUnit360}`
+                          : money(product.app_price)
                         : "Contact for price"}
                   </strong>
                 </div>
@@ -2248,13 +2302,108 @@ export default function ProductDetailExperience({
                 </section>
               ) : null}
 
-              {product.direct_sold_by_weight ? (
+              {soldByWeight360 ? (
                 <section className={styles.weightCard}>
-                  <span>Sold by weight</span>
+                  <span>Choose weight / ط§ط®طھط± ط§ظ„ظˆط²ظ†</span>
                   <strong>
-                    {clean(product.direct_weight_step) || "Flexible amount"}
-                    {clean(product.direct_weight_unit) ? ` ${clean(product.direct_weight_unit)}` : ""}
+                    {money(weightUnitPrice360)} / {weightUnit360}
                   </strong>
+
+                  {selectedInCart216 > 0 ? (
+                    <div>
+                      <strong>
+                        In bag / ظپظٹ ط§ظ„ط³ظ„ط©:{" "}
+                        {formatWeight360(
+                          selectedInCart216 * weightStep360
+                        )}{" "}
+                        {weightUnit360}
+                      </strong>
+                      <small>
+                        Use âˆ’ / + below to change by{" "}
+                        {formatWeight360(weightStep360)} {weightUnit360}.
+                      </small>
+                    </div>
+                  ) : (
+                    <>
+                      <div
+                        style={{
+                          display: "grid",
+                          gridTemplateColumns:
+                            "repeat(5, minmax(0, 1fr))",
+                          gap: 8,
+                          width: "100%",
+                          marginTop: 8,
+                        }}
+                      >
+                        {weightOptions360.map((option360) => {
+                          const selected360 =
+                            selectedWeightSteps360 === option360.steps;
+
+                          return (
+                            <button
+                              key={option360.steps}
+                              type="button"
+                              onClick={() =>
+                                setSelectedWeightSteps360(
+                                  option360.steps
+                                )
+                              }
+                              aria-pressed={selected360}
+                              style={{
+                                minWidth: 0,
+                                borderRadius: 12,
+                                border: selected360
+                                  ? `2px solid ${primaryColor}`
+                                  : "1px solid rgba(127,127,127,.35)",
+                                background: selected360
+                                  ? "rgba(127,127,127,.12)"
+                                  : "transparent",
+                                color: "inherit",
+                                padding: "10px 4px",
+                                cursor: "pointer",
+                              }}
+                            >
+                              <strong
+                                style={{
+                                  display: "block",
+                                  fontSize: 13,
+                                }}
+                              >
+                                {formatWeight360(option360.weight)}{" "}
+                                {weightUnit360}
+                              </strong>
+                              <small
+                                style={{
+                                  display: "block",
+                                  marginTop: 3,
+                                  fontSize: 10,
+                                  opacity: 0.75,
+                                }}
+                              >
+                                {money(
+                                  weightUnitPrice360 *
+                                    option360.weight
+                                )}
+                              </small>
+                            </button>
+                          );
+                        })}
+                      </div>
+
+                      <small>
+                        {selectedWeightSteps360 == null
+                          ? "Choose a weight before adding to bag / ط§ط®طھط± ط§ظ„ظˆط²ظ† ظ‚ط¨ظ„ ط§ظ„ط¥ط¶ط§ظپط© ظ„ظ„ط³ظ„ط©"
+                          : `Selected / ط§ظ„ظ…ط®طھط§ط±: ${formatWeight360(
+                              selectedWeightSteps360 *
+                                weightStep360
+                            )} ${weightUnit360} آ· ${money(
+                              weightUnitPrice360 *
+                                selectedWeightSteps360 *
+                                weightStep360
+                            )}`}
+                      </small>
+                    </>
+                  )}
                 </section>
               ) : null}
 
@@ -2352,7 +2501,13 @@ export default function ProductDetailExperience({
                 <div className={styles.purchaseRow}>
                   <div className={styles.purchaseMeta}>
                     <strong>
-                      {selectedInCart216 > 0 ? `${selectedInCart216} in your bag` : "Ready when you are"}
+                      {selectedInCart216 > 0
+                        ? soldByWeight360
+                          ? `${formatWeight360(
+                              selectedInCart216 * weightStep360
+                            )} ${weightUnit360} in your bag`
+                          : `${selectedInCart216} in your bag`
+                        : "Ready when you are"}
                     </strong>
                     <small>{acceptingOrders ? "Store is accepting orders" : "Ordering is paused"}</small>
                   </div>
@@ -2372,11 +2527,17 @@ export default function ProductDetailExperience({
                         >
                           <span aria-hidden="true">−</span>
                         </button>
-                        <strong aria-live="polite">{inCart}</strong>
+                        <strong aria-live="polite">
+                          {soldByWeight360
+                            ? `${formatWeight360(
+                                selectedInCart216 * weightStep360
+                              )} ${weightUnit360}`
+                            : inCart}
+                        </strong>
                         <button
                           type="button"
                           onClick={handleAddToCart119}
-                          disabled={!acceptingOrders || !available || !furnitureColorsReady216 || Boolean(furnitureColorsError216) || !sizeChoicesReady245 || Boolean(sizeChoicesError245) || !selectedSizeReady245}
+                          disabled={!acceptingOrders || !available || !furnitureColorsReady216 || Boolean(furnitureColorsError216) || !sizeChoicesReady245 || Boolean(sizeChoicesError245) || !selectedSizeReady245 || (soldByWeight360 && selectedInCart216 >= 5)}
                           aria-label="Add one more to cart"
                         >
                           <span aria-hidden="true">+</span>
@@ -2396,7 +2557,7 @@ export default function ProductDetailExperience({
                       type="button"
                       className={styles.primaryAction}
                       onClick={handleAddToCart119}
-                      disabled={!acceptingOrders || !available || !furnitureColorsReady216 || Boolean(furnitureColorsError216) || !sizeChoicesReady245 || Boolean(sizeChoicesError245) || !selectedSizeReady245}
+                      disabled={!acceptingOrders || !available || !furnitureColorsReady216 || Boolean(furnitureColorsError216) || !sizeChoicesReady245 || Boolean(sizeChoicesError245) || !selectedSizeReady245 || (soldByWeight360 && selectedWeightSteps360 == null)}
                     >
                       <BagIcon />
                       <span>{available ? "Add to bag" : "Out of stock"}</span>

@@ -1,5 +1,7 @@
 "use client";
 
+// DARIK_WEIGHTED_PURCHASE_CUSTOMER_360E
+
 import DarikCustomerAccountHub339 from "../components/DarikCustomerAccountHub339";
 import DarikCustomerAccountMenuLauncher354 from "../components/DarikCustomerAccountMenuLauncher354";
 
@@ -197,6 +199,10 @@ type CartLine = {
   colorNameAr: string | null;
   sizeKey: string | null;
   sizeLabel: string | null;
+  soldByWeight: boolean;
+  weightUnit: string | null;
+  weightStep: number | null;
+  weightUnitPrice: number | null;
 };
 
 type OnlineCheckoutForm = {
@@ -3085,6 +3091,21 @@ export default function DarikDirectStorefrontPage() {
                   colorNameAr: typeof line.colorNameAr === "string" ? line.colorNameAr : null,
                   sizeKey: typeof line.sizeKey === "string" ? line.sizeKey : null,
                   sizeLabel: typeof line.sizeLabel === "string" ? line.sizeLabel : null,
+                  soldByWeight: line.soldByWeight === true,
+                  weightUnit:
+                    typeof line.weightUnit === "string" && line.weightUnit.trim()
+                      ? line.weightUnit.trim()
+                      : null,
+                  weightStep:
+                    Number.isFinite(Number(line.weightStep)) &&
+                    Number(line.weightStep) > 0
+                      ? Number(line.weightStep)
+                      : null,
+                  weightUnitPrice:
+                    Number.isFinite(Number(line.weightUnitPrice)) &&
+                    Number(line.weightUnitPrice) > 0
+                      ? Number(line.weightUnitPrice)
+                      : null,
                 };
               })
           );
@@ -3851,7 +3872,11 @@ export default function DarikDirectStorefrontPage() {
   }, [marketplaceBestSellerGroups, selectedCategoryId]);
 
   const cartCount = useMemo(
-    () => cart.reduce((total, line) => total + line.quantity, 0),
+    () =>
+      cart.reduce(
+        (total, line) => total + (line.soldByWeight ? 1 : line.quantity),
+        0
+      ),
     [cart]
   );
 
@@ -5945,6 +5970,12 @@ export default function DarikDirectStorefrontPage() {
     }
   }
 
+  function formatWeight360(value: unknown) {
+    const numeric = Number(value ?? 0);
+    if (!Number.isFinite(numeric) || numeric <= 0) return "0";
+    return Number(numeric.toFixed(3)).toString();
+  }
+
   function cartLineId216(
     productId: string,
     colorVariantId: string | null | undefined,
@@ -5966,7 +5997,8 @@ export default function DarikDirectStorefrontPage() {
   function addToCart(
     product: Product,
     colorVariant216: FurnitureColorSelection216 | null = null,
-    sizeSelection245: { key: string; label: string } | null = null
+    sizeSelection245: { key: string; label: string } | null = null,
+    weightSteps360: number | null = null
   ) {
     setOrderConfirmation(null);
     if ((product.direct_pricing_mode || "price") !== "price") return;
@@ -5977,6 +6009,31 @@ export default function DarikDirectStorefrontPage() {
     ) return;
     const price = Number(product.app_price ?? 0);
     if (!Number.isFinite(price) || price <= 0) return;
+
+    const soldByWeight360 = product.direct_sold_by_weight === true;
+    const weightUnit360 =
+      String(product.direct_weight_unit || "kg").trim() || "kg";
+    const rawWeightStep360 = Number(product.direct_weight_step ?? 0.25);
+    const weightStep360 =
+      Number.isFinite(rawWeightStep360) && rawWeightStep360 > 0
+        ? rawWeightStep360
+        : 0.25;
+
+    if (soldByWeight360 && weightSteps360 == null) {
+      setActiveProductId(product.id);
+      return;
+    }
+
+    const selectedWeightSteps360 = soldByWeight360
+      ? Math.max(1, Math.min(5, Math.round(Number(weightSteps360 ?? 1))))
+      : 1;
+
+    // Cart price remains "price per cart quantity step".
+    // Normal products: one step = one item.
+    // Weighted products: one step = configured kg step (normally 0.25 kg).
+    const cartStepPrice360 = soldByWeight360
+      ? price * weightStep360
+      : price;
 
     const hasSizes245 =
       (Array.isArray(product.direct_size_options) &&
@@ -6005,7 +6062,17 @@ export default function DarikDirectStorefrontPage() {
       if (existing) {
         return current.map((line) =>
           line.lineId === lineId216
-            ? { ...line, quantity: line.quantity + 1 }
+            ? soldByWeight360
+              ? {
+                  ...line,
+                  quantity: selectedWeightSteps360,
+                  price: cartStepPrice360,
+                  soldByWeight: true,
+                  weightUnit: weightUnit360,
+                  weightStep: weightStep360,
+                  weightUnitPrice: price,
+                }
+              : { ...line, quantity: line.quantity + 1 }
             : line
         );
       }
@@ -6016,14 +6083,18 @@ export default function DarikDirectStorefrontPage() {
           lineId: lineId216,
           productId: product.id,
           name: productName(product),
-          price,
-          quantity: 1,
+          price: cartStepPrice360,
+          quantity: soldByWeight360 ? selectedWeightSteps360 : 1,
           photoUrl: colorVariant216?.photoUrl || productPhoto(product),
           colorVariantId: colorVariant216?.id || null,
           colorName: colorVariant216?.name || null,
           colorNameAr: colorVariant216?.nameAr || null,
           sizeKey: sizeSelection245?.key || null,
           sizeLabel: sizeSelection245?.label || null,
+          soldByWeight: soldByWeight360,
+          weightUnit: soldByWeight360 ? weightUnit360 : null,
+          weightStep: soldByWeight360 ? weightStep360 : null,
+          weightUnitPrice: soldByWeight360 ? price : null,
         },
       ];
     });
@@ -6032,11 +6103,18 @@ export default function DarikDirectStorefrontPage() {
   function changeQuantity(lineId: string, change: number) {
     setCart((current) =>
       current
-        .map((line) =>
-          line.lineId === lineId
-            ? { ...line, quantity: line.quantity + change }
-            : line
-        )
+        .map((line) => {
+          if (line.lineId !== lineId) return line;
+
+          const nextQuantity360 = line.quantity + change;
+
+          return {
+            ...line,
+            quantity: line.soldByWeight
+              ? Math.min(5, nextQuantity360)
+              : nextQuantity360,
+          };
+        })
         .filter((line) => line.quantity > 0)
     );
   }
@@ -6230,6 +6308,13 @@ export default function DarikDirectStorefrontPage() {
         p_items: cart.map((line) => ({
           product_id: line.productId,
           quantity: line.quantity,
+          weight_quantity:
+            line.soldByWeight && line.weightStep
+              ? line.quantity * line.weightStep
+              : null,
+          weight_unit: line.soldByWeight
+            ? line.weightUnit || "kg"
+            : null,
           color_variant_id: line.colorVariantId,
           size_key: line.sizeKey,
         })),
@@ -6933,7 +7018,7 @@ export default function DarikDirectStorefrontPage() {
     "",
     ...cart.map(
       (line) =>
-        `${line.quantity} × ${line.name}${line.colorName ? ` — ${line.colorName}${line.colorNameAr ? ` / ${line.colorNameAr}` : ""}` : ""}${line.sizeLabel ? ` — Size: ${line.sizeLabel}` : ""} — ${money(line.price * line.quantity)}`
+        `${line.soldByWeight ? `${formatWeight360(line.quantity * (line.weightStep || 0.25))} ${line.weightUnit || "kg"}` : line.quantity} × ${line.name}${line.colorName ? ` — ${line.colorName}${line.colorNameAr ? ` / ${line.colorNameAr}` : ""}` : ""}${line.sizeLabel ? ` — Size: ${line.sizeLabel}` : ""} — ${money(line.price * line.quantity)}`
     ),
     "",
     `Fulfillment: ${pickupOnly ? "Local pickup" : "Delivery"}`,
@@ -7049,7 +7134,11 @@ function renderProductCard(product: Product) {
       pricingMode === "call_whatsapp"
         ? "Price on request / \u0627\u0644\u0633\u0639\u0631 \u0639\u0646\u062f \u0627\u0644\u0637\u0644\u0628"
         : showPrices
-          ? money(product.app_price)
+          ? product.direct_sold_by_weight
+            ? `${money(product.app_price)} / ${String(
+                product.direct_weight_unit || "kg"
+              ).trim() || "kg"}`
+            : money(product.app_price)
           : "Contact for price / \u062a\u0648\u0627\u0635\u0644 \u0644\u0644\u0633\u0639\u0631";
     return (
       <article
@@ -7557,9 +7646,14 @@ function renderProductCard(product: Product) {
         }
         cartCount={cartCount}
         onClose={closeProductDetail}
-        onAddToCart={(colorVariant216, sizeSelection245) => {
+        onAddToCart={(colorVariant216, sizeSelection245, weightSteps360) => {
           if (!activeProduct) return;
-          addToCart(activeProduct, colorVariant216, sizeSelection245);
+          addToCart(
+            activeProduct,
+            colorVariant216,
+            sizeSelection245,
+            weightSteps360
+          );
         }}
         onDecreaseCart={(colorVariant216, sizeSelection245) => {
           if (!activeProduct) return;
@@ -9029,7 +9123,11 @@ style={{
                               Size / المقاس: <strong>{line.sizeLabel}</strong>
                             </small>
                           ) : null}
-                          <p>{money(line.price)}</p>
+                          <p>
+                            {line.soldByWeight && line.weightUnitPrice
+                              ? `${money(line.weightUnitPrice)} / ${line.weightUnit || "kg"}`
+                              : money(line.price)}
+                          </p>
                         </div>
                         <div className={styles.quantity}>
                           <button
@@ -9037,7 +9135,13 @@ style={{
                           >
                             <Icon name="minus" size={15} />
                           </button>
-                          <span>{line.quantity}</span>
+                          <span>
+                            {line.soldByWeight
+                              ? `${formatWeight360(
+                                  line.quantity * (line.weightStep || 0.25)
+                                )} ${line.weightUnit || "kg"}`
+                              : line.quantity}
+                          </span>
                           <button
                             onClick={() => changeQuantity(line.lineId, 1)}
                           >
