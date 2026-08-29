@@ -4640,16 +4640,26 @@ export default function DarikDirectStorefrontSettingsPage() {
               previewColor154
             );
 
+                    // DARIK_FRONTEND_356_PREVIEW_TYPOGRAPHY_AUTOSAVE
+          // Preview changes must become real saved storefront typography.
+          // Only mark dirty when typography actually changed; ordinary text typing
+          // should not create unnecessary typography writes.
+          const typographyChanged356 =
+            JSON.stringify(nextPreview153) !==
+            JSON.stringify(inlineTypography152);
+
           inlineTypography152 =
             nextPreview153;
 
-          // This state change is PREVIEW ONLY. We intentionally do not
-          // mark typography dirty or call the persistence RPC here.
-          // The existing live-builder bridge pushes the draft to the
-          // actual private storefront iframe immediately.
           setStorefrontTypographyDraft(
             nextPreview153
           );
+
+          if (typographyChanged356) {
+            typographyDirtyRef.current = true;
+            setTypographyDirty(true);
+            setTypographySaveState("waiting");
+          }
 
           target152.textContent =
             input152.value;
@@ -4681,17 +4691,29 @@ export default function DarikDirectStorefrontSettingsPage() {
           }
 
           showToolbarStatus152(
-            "Preview — tap 💾 to save"
+            "Auto-saving typography…"
           );
         }
 
         textEditorDiscard153 = () => {
+                    // DARIK_FRONTEND_356_PREVIEW_TYPOGRAPHY_AUTOSAVE: Cancel must also restore the saved typography if autosave
+          // already persisted the previewed value.
+          const typographyChangedBeforeDiscard356 =
+            JSON.stringify(inlineTypography152) !==
+            JSON.stringify(originalTypography153);
+
           inlineTypography152 =
             originalTypography153;
 
           setStorefrontTypographyDraft(
             originalTypography153
           );
+
+          if (typographyChangedBeforeDiscard356) {
+            typographyDirtyRef.current = true;
+            setTypographyDirty(true);
+            setTypographySaveState("waiting");
+          }
 
           target152.textContent =
             originalText153;
@@ -4805,7 +4827,7 @@ export default function DarikDirectStorefrontSettingsPage() {
           );
 
         helper152.textContent =
-          "Pick a font or color and this box closes automatically. Tap ✏️ to reopen. The visible 💾 saves what you are seeing.";
+          "Font, size and color changes save automatically. Text edits can still be saved with the visible 💾.";
 
         Object.assign(
           helper152.style,
