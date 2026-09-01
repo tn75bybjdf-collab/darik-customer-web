@@ -9299,6 +9299,8 @@ export default function DarikDirectProductsPage() {
 
 
 
+                        {renderRestaurantPriceChoices362()}
+
                         {cosmeticsSubcategoryPanel240}
 
                         {clothingSubcategoryPanel244}
@@ -10354,8 +10356,6 @@ export default function DarikDirectProductsPage() {
                             </p>
                           </div>
                         </div>
-
-                        {renderRestaurantPriceChoices362()}
 
                         {isAutoParts ? (
                           <label className={styles.shoeWizardField}>
