@@ -131,6 +131,34 @@
   gap: 7px;
 }
 
+/* DARIK_MAIN_STOREFRONT_SOCIAL_ICONS_369L */
+.headerActions .headerSocialIcon369L {
+  width: 42px;
+  height: 42px;
+  min-width: 42px;
+  display: inline-grid;
+  place-items: center;
+  flex: 0 0 auto;
+  padding: 0;
+  border: 1px solid #e2e8f0;
+  border-radius: 13px;
+  background: #ffffff;
+  color: #334155;
+  text-decoration: none;
+  transition: 150ms ease;
+}
+
+.headerActions .headerSocialIcon369L:hover {
+  border-color: color-mix(in srgb, var(--store-accent) 50%, #dbe3ed);
+  color: var(--store-primary);
+  transform: translateY(-1px);
+}
+
+.headerActions .headerSocialIcon369L:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--store-accent) 35%, transparent);
+  outline-offset: 2px;
+}
+
 .headerActions button {
   min-height: 42px;
   display: inline-flex;

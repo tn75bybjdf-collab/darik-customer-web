@@ -8385,6 +8385,33 @@ function renderProductCard(product: Product) {
         </a>
 
         <nav className={styles.headerActions}>
+          {/* DARIK_MAIN_STOREFRONT_SOCIAL_ICONS_369L */}
+          {normalizeExternalUrl(storefront.facebook_url) ? (
+            <a
+              className={styles.headerSocialIcon369L}
+              href={normalizeExternalUrl(storefront.facebook_url) || undefined}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Facebook"
+              title="Facebook"
+              data-darik-main-social="facebook"
+            >
+              <Icon name="facebook" size={19} />
+            </a>
+          ) : null}
+          {normalizeExternalUrl(storefront.instagram_url) ? (
+            <a
+              className={styles.headerSocialIcon369L}
+              href={normalizeExternalUrl(storefront.instagram_url) || undefined}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Instagram"
+              title="Instagram"
+              data-darik-main-social="instagram"
+            >
+              <Icon name="instagram" size={19} />
+            </a>
+          ) : null}
           <button
             className={[
               styles.builderPositionTarget145,
