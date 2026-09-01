@@ -70,9 +70,11 @@ export type RestaurantModifierGroup364 = {
   options: RestaurantModifierOption364[];
 };
 
+// DARIK_RESTAURANT_ADDON_QUANTITY_371B
 export type RestaurantModifierSelection364 = {
   groupId: string;
   optionIds: string[];
+  optionQuantities?: Record<string, number>;
 };
 
 type FurnitureColorApi216 = {
@@ -509,10 +511,16 @@ export default function ProductDetailExperience({
   const [selectedRestaurantModifiers364, setSelectedRestaurantModifiers364] =
     useState<Record<string, string[]>>({});
 
+  const [
+    selectedRestaurantModifierQuantities371B,
+    setSelectedRestaurantModifierQuantities371B,
+  ] = useState<Record<string, Record<string, number>>>({});
+
   useEffect(() => {
     setSelectedWeightSteps360(null);
     setSelectedRestaurantOptionId362("");
     setSelectedRestaurantModifiers364({});
+    setSelectedRestaurantModifierQuantities371B({});
   }, [product?.id]);
 
   const [furnitureColors216, setFurnitureColors216] = useState<FurnitureColorSelection216[]>([]);
@@ -1045,19 +1053,56 @@ export default function ProductDetailExperience({
   const restaurantModifierSelections364 = useMemo<RestaurantModifierSelection364[]>(
     () =>
       restaurantModifierGroups364
-        .map((group364) => ({
-          groupId: group364.id,
-          optionIds: (selectedRestaurantModifiers364[group364.id] || [])
+        .map((group364) => {
+          const optionIds364 = (selectedRestaurantModifiers364[group364.id] || [])
             .filter((optionId364) =>
               group364.options.some(
                 (option364) =>
                   option364.id === optionId364 && option364.available
               )
             )
-            .sort(),
-        }))
+            .sort();
+
+          const optionQuantities371B: Record<string, number> = {};
+          for (const optionId364 of optionIds364) {
+            const option364 = group364.options.find(
+              (candidate364) => candidate364.id === optionId364
+            );
+            if (
+              !group364.required &&
+              option364 &&
+              Number(option364.priceDelta || 0) > 0
+            ) {
+              optionQuantities371B[optionId364] = Math.max(
+                1,
+                Math.min(
+                  99,
+                  Math.floor(
+                    Number(
+                      selectedRestaurantModifierQuantities371B[group364.id]?.[
+                        optionId364
+                      ] || 1
+                    )
+                  )
+                )
+              );
+            }
+          }
+
+          return {
+            groupId: group364.id,
+            optionIds: optionIds364,
+            ...(Object.keys(optionQuantities371B).length > 0
+              ? { optionQuantities: optionQuantities371B }
+              : {}),
+          };
+        })
         .filter((selection364) => selection364.optionIds.length > 0),
-    [restaurantModifierGroups364, selectedRestaurantModifiers364]
+    [
+      restaurantModifierGroups364,
+      selectedRestaurantModifiers364,
+      selectedRestaurantModifierQuantities371B,
+    ]
   );
 
   const restaurantModifiersReady364 = useMemo(
@@ -1088,25 +1133,57 @@ export default function ProductDetailExperience({
         const selectedIds364 = selectedRestaurantModifiers364[group364.id] || [];
         return (
           total364 +
-          group364.options.reduce(
-            (groupTotal364, option364) =>
-              selectedIds364.includes(option364.id) && option364.available
-                ? groupTotal364 + Number(option364.priceDelta || 0)
-                : groupTotal364,
-            0
-          )
+          group364.options.reduce((groupTotal364, option364) => {
+            if (
+              !selectedIds364.includes(option364.id) ||
+              !option364.available
+            ) {
+              return groupTotal364;
+            }
+
+            const quantity371B =
+              !group364.required && Number(option364.priceDelta || 0) > 0
+                ? Math.max(
+                    1,
+                    Math.min(
+                      99,
+                      Math.floor(
+                        Number(
+                          selectedRestaurantModifierQuantities371B[group364.id]?.[
+                            option364.id
+                          ] || 1
+                        )
+                      )
+                    )
+                  )
+                : 1;
+
+            return (
+              groupTotal364 +
+              Number(option364.priceDelta || 0) * quantity371B
+            );
+          }, 0)
         );
       }, 0),
-    [restaurantModifierGroups364, selectedRestaurantModifiers364]
+    [
+      restaurantModifierGroups364,
+      selectedRestaurantModifiers364,
+      selectedRestaurantModifierQuantities371B,
+    ]
   );
 
   const restaurantModifierKey364 = useMemo(
     () =>
       restaurantModifierSelections364
-        .map(
-          (selection364) =>
-            `${selection364.groupId}:${selection364.optionIds.join(",")}`
-        )
+        .map((selection364) => {
+          const quantityKey371B = Object.entries(
+            selection364.optionQuantities || {}
+          )
+            .sort(([a371B], [b371B]) => a371B.localeCompare(b371B))
+            .map(([id371B, quantity371B]) => `${id371B}x${quantity371B}`)
+            .join(",");
+          return `${selection364.groupId}:${selection364.optionIds.join(",")}:${quantityKey371B}`;
+        })
         .sort()
         .join("|") || "default",
     [restaurantModifierSelections364]
@@ -1117,15 +1194,77 @@ export default function ProductDetailExperience({
     option364: RestaurantModifierOption364
   ) {
     if (!option364.available) return;
+
     setSelectedRestaurantModifiers364((current364) => {
       const selected364 = current364[group364.id] || [];
+      const selectedNow371B = selected364.includes(option364.id);
       const next364 =
         group364.selectionMode === "single"
           ? [option364.id]
-          : selected364.includes(option364.id)
+          : selectedNow371B
             ? selected364.filter((id364) => id364 !== option364.id)
             : [...selected364, option364.id];
+
+      if (!group364.required && Number(option364.priceDelta || 0) > 0) {
+        setSelectedRestaurantModifierQuantities371B((current371B) => {
+          const groupQuantities371B = {
+            ...(current371B[group364.id] || {}),
+          };
+
+          if (selectedNow371B) {
+            delete groupQuantities371B[option364.id];
+          } else {
+            groupQuantities371B[option364.id] = Math.max(
+              1,
+              groupQuantities371B[option364.id] || 1
+            );
+          }
+
+          return {
+            ...current371B,
+            [group364.id]: groupQuantities371B,
+          };
+        });
+      }
+
       return { ...current364, [group364.id]: next364 };
+    });
+  }
+
+  function changeRestaurantModifierQuantity371B(
+    group364: RestaurantModifierGroup364,
+    option364: RestaurantModifierOption364,
+    delta371B: number
+  ) {
+    if (
+      group364.required ||
+      Number(option364.priceDelta || 0) <= 0 ||
+      !(selectedRestaurantModifiers364[group364.id] || []).includes(option364.id)
+    ) {
+      return;
+    }
+
+    setSelectedRestaurantModifierQuantities371B((current371B) => {
+      const groupQuantities371B = {
+        ...(current371B[group364.id] || {}),
+      };
+      const currentQuantity371B = Math.max(
+        1,
+        Math.min(
+          99,
+          Math.floor(Number(groupQuantities371B[option364.id] || 1))
+        )
+      );
+      const nextQuantity371B = Math.max(
+        1,
+        Math.min(99, currentQuantity371B + delta371B)
+      );
+
+      groupQuantities371B[option364.id] = nextQuantity371B;
+      return {
+        ...current371B,
+        [group364.id]: groupQuantities371B,
+      };
     });
   }
 
@@ -2484,36 +2623,145 @@ export default function ProductDetailExperience({
                     <div className={styles.sizeChoices245}>
                       {group364.options.map((option364) => {
                         const selected364 = selectedIds364.includes(option364.id);
+                        const quantityEnabled371B =
+                          selected364 &&
+                          !group364.required &&
+                          Number(option364.priceDelta || 0) > 0;
+                        const quantity371B = quantityEnabled371B
+                          ? Math.max(
+                              1,
+                              Math.min(
+                                99,
+                                Math.floor(
+                                  Number(
+                                    selectedRestaurantModifierQuantities371B[
+                                      group364.id
+                                    ]?.[option364.id] || 1
+                                  )
+                                )
+                              )
+                            )
+                          : 1;
+
                         return (
-                          <button
-                            type="button"
+                          <div
                             key={option364.id}
-                            disabled={!option364.available}
-                            className={[
-                              selected364 ? styles.sizeChoiceSelected245 : "",
-                              !option364.available
-                                ? styles.sizeChoiceUnavailable245
-                                : "",
-                            ]
-                              .filter(Boolean)
-                              .join(" ")}
-                            onClick={() =>
-                              toggleRestaurantModifier364(group364, option364)
-                            }
-                            aria-pressed={selected364}
+                            style={{
+                              display: "grid",
+                              gap: 8,
+                              minWidth: 0,
+                            }}
                           >
-                            <strong>
-                              {option364.name}
-                              <span dir="rtl"> / {option364.nameAr}</span>
-                            </strong>
-                            <small>
-                              {!option364.available
-                                ? "Out / غير متوفر"
-                                : Number(option364.priceDelta || 0) > 0
-                                  ? `+${money(option364.priceDelta)}`
-                                  : "Included / مشمول"}
-                            </small>
-                          </button>
+                            <button
+                              type="button"
+                              disabled={!option364.available}
+                              className={[
+                                selected364 ? styles.sizeChoiceSelected245 : "",
+                                !option364.available
+                                  ? styles.sizeChoiceUnavailable245
+                                  : "",
+                              ]
+                                .filter(Boolean)
+                                .join(" ")}
+                              onClick={() =>
+                                toggleRestaurantModifier364(group364, option364)
+                              }
+                              aria-pressed={selected364}
+                            >
+                              <strong>
+                                {option364.name}
+                                <span dir="rtl"> / {option364.nameAr}</span>
+                              </strong>
+                              <small>
+                                {!option364.available
+                                  ? "Out / غير متوفر"
+                                  : Number(option364.priceDelta || 0) > 0
+                                    ? `+${money(option364.priceDelta)} each / للحبة`
+                                    : "Included / مشمول"}
+                              </small>
+                            </button>
+
+                            {quantityEnabled371B ? (
+                              <div
+                                aria-label={`Choose quantity for ${option364.name}`}
+                                style={{
+                                  minHeight: 42,
+                                  display: "grid",
+                                  gridTemplateColumns:
+                                    "42px minmax(58px, 1fr) 42px",
+                                  alignItems: "center",
+                                  overflow: "hidden",
+                                  border:
+                                    "1px solid rgba(148,163,184,.32)",
+                                  borderRadius: 13,
+                                  background: "rgba(255,255,255,.96)",
+                                }}
+                              >
+                                <button
+                                  type="button"
+                                  onClick={() =>
+                                    changeRestaurantModifierQuantity371B(
+                                      group364,
+                                      option364,
+                                      -1
+                                    )
+                                  }
+                                  disabled={quantity371B <= 1}
+                                  aria-label={`Decrease ${option364.name} quantity`}
+                                  style={{
+                                    minHeight: 42,
+                                    border: 0,
+                                    background: "transparent",
+                                    fontSize: 22,
+                                    fontWeight: 900,
+                                    cursor:
+                                      quantity371B <= 1
+                                        ? "not-allowed"
+                                        : "pointer",
+                                  }}
+                                >
+                                  −
+                                </button>
+
+                                <strong
+                                  aria-live="polite"
+                                  style={{
+                                    textAlign: "center",
+                                    fontSize: 12,
+                                    whiteSpace: "nowrap",
+                                  }}
+                                >
+                                  Qty {quantity371B} / الكمية {quantity371B}
+                                </strong>
+
+                                <button
+                                  type="button"
+                                  onClick={() =>
+                                    changeRestaurantModifierQuantity371B(
+                                      group364,
+                                      option364,
+                                      1
+                                    )
+                                  }
+                                  disabled={quantity371B >= 99}
+                                  aria-label={`Increase ${option364.name} quantity`}
+                                  style={{
+                                    minHeight: 42,
+                                    border: 0,
+                                    background: "transparent",
+                                    fontSize: 22,
+                                    fontWeight: 900,
+                                    cursor:
+                                      quantity371B >= 99
+                                        ? "not-allowed"
+                                        : "pointer",
+                                  }}
+                                >
+                                  +
+                                </button>
+                              </div>
+                            ) : null}
+                          </div>
                         );
                       })}
                     </div>

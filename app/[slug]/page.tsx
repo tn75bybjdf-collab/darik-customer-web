@@ -212,9 +212,11 @@ type RestaurantModifierGroup364 = {
   options: RestaurantModifierOption364[];
 };
 
+// DARIK_RESTAURANT_ADDON_QUANTITY_371B
 type RestaurantModifierSelection364 = {
   groupId: string;
   optionIds: string[];
+  optionQuantities?: Record<string, number>;
 };
 
 type CartRestaurantModifierSelection364 = {
@@ -222,6 +224,7 @@ type CartRestaurantModifierSelection364 = {
   groupName: string;
   groupNameAr: string;
   optionIds: string[];
+  optionQuantities: Record<string, number>;
   optionNames: string[];
   optionNamesAr: string[];
   priceDelta: number;
@@ -3368,28 +3371,78 @@ export default function DarikDirectStorefrontPage() {
                   )
                     ? (line.restaurantModifierSelections as unknown[])
                         .map((raw364) => {
-                          const value364 = raw364 as Partial<CartRestaurantModifierSelection364>;
-                          const groupId364 = String(value364.groupId || "").trim();
+                          const value364 =
+                            raw364 as Partial<CartRestaurantModifierSelection364>;
+                          const groupId364 = String(
+                            value364.groupId || ""
+                          ).trim();
                           const optionIds364 = Array.isArray(value364.optionIds)
                             ? value364.optionIds.map(String).filter(Boolean)
                             : [];
-                          if (!groupId364 || optionIds364.length === 0) return null;
+
+                          if (!groupId364 || optionIds364.length === 0) {
+                            return null;
+                          }
+
+                          const optionQuantities371B =
+                            value364.optionQuantities &&
+                            typeof value364.optionQuantities === "object"
+                              ? Object.fromEntries(
+                                  Object.entries(
+                                    value364.optionQuantities
+                                  )
+                                    .filter(([id371B]) =>
+                                      optionIds364.includes(String(id371B))
+                                    )
+                                    .map(
+                                      ([id371B, quantity371B]) => [
+                                        String(id371B),
+                                        Math.max(
+                                          1,
+                                          Math.min(
+                                            99,
+                                            Math.floor(
+                                              Number(quantity371B || 1)
+                                            )
+                                          )
+                                        ),
+                                      ]
+                                    )
+                                )
+                              : {};
+
                           return {
                             groupId: groupId364,
-                            groupName: String(value364.groupName || "Additional choice"),
-                            groupNameAr: String(value364.groupNameAr || value364.groupName || "خيار إضافي"),
+                            groupName: String(
+                              value364.groupName || "Additional choice"
+                            ),
+                            groupNameAr: String(
+                              value364.groupNameAr ||
+                                value364.groupName ||
+                                "خيار إضافي"
+                            ),
                             optionIds: optionIds364,
-                            optionNames: Array.isArray(value364.optionNames)
+                            optionQuantities: optionQuantities371B,
+                            optionNames: Array.isArray(
+                              value364.optionNames
+                            )
                               ? value364.optionNames.map(String)
                               : [],
-                            optionNamesAr: Array.isArray(value364.optionNamesAr)
+                            optionNamesAr: Array.isArray(
+                              value364.optionNamesAr
+                            )
                               ? value364.optionNamesAr.map(String)
                               : [],
-                            priceDelta: Math.max(0, Number(value364.priceDelta || 0)),
+                            priceDelta: Math.max(
+                              0,
+                              Number(value364.priceDelta || 0)
+                            ),
                           } satisfies CartRestaurantModifierSelection364;
                         })
                         .filter(
-                          (value364): value364 is CartRestaurantModifierSelection364 =>
+                          (
+                            value364
+                          ): value364 is CartRestaurantModifierSelection364 =>
                             value364 !== null
                         )
                     : [],
@@ -3487,53 +3540,117 @@ export default function DarikDirectStorefrontPage() {
 
     setCart((current) => {
       let changed364 = false;
+
       const next364 = current.map((line) => {
         if (!line.restaurantModifierSelections.length) return line;
-        const groups364 = restaurantModifierGroupsByProduct364[line.productId];
+
+        const groups364 =
+          restaurantModifierGroupsByProduct364[line.productId];
         if (!groups364) return line;
 
         const refreshed364: CartRestaurantModifierSelection364[] = [];
+
         for (const saved364 of line.restaurantModifierSelections) {
-          const group364 = groups364.find((item364) => item364.id === saved364.groupId);
+          const group364 = groups364.find(
+            (item364) => item364.id === saved364.groupId
+          );
           if (!group364) continue;
+
           const selectedOptions364 = saved364.optionIds
-            .map((id364) => group364.options.find((option364) => option364.id === id364))
+            .map((id364) =>
+              group364.options.find(
+                (option364) => option364.id === id364
+              )
+            )
             .filter(
-              (option364): option364 is RestaurantModifierOption364 =>
+              (
+                option364
+              ): option364 is RestaurantModifierOption364 =>
                 Boolean(option364?.available)
             );
+
           if (selectedOptions364.length === 0) continue;
+
+          const optionQuantities371B = Object.fromEntries(
+            selectedOptions364
+              .filter(
+                (option364) =>
+                  !group364.required &&
+                  Number(option364.priceDelta || 0) > 0
+              )
+              .map((option364) => [
+                option364.id,
+                Math.max(
+                  1,
+                  Math.min(
+                    99,
+                    Math.floor(
+                      Number(
+                        saved364.optionQuantities?.[option364.id] || 1
+                      )
+                    )
+                  )
+                ),
+              ])
+          );
+
           refreshed364.push({
             groupId: group364.id,
             groupName: group364.name,
             groupNameAr: group364.nameAr,
-            optionIds: selectedOptions364.map((option364) => option364.id).sort(),
-            optionNames: selectedOptions364.map((option364) => option364.name),
-            optionNamesAr: selectedOptions364.map((option364) => option364.nameAr),
+            optionIds: selectedOptions364
+              .map((option364) => option364.id)
+              .sort(),
+            optionQuantities: optionQuantities371B,
+            optionNames: selectedOptions364.map((option364) => {
+              const quantity371B =
+                optionQuantities371B[option364.id] || 1;
+              return `${option364.name}${quantity371B > 1 ? ` ×${quantity371B}` : ""}`;
+            }),
+            optionNamesAr: selectedOptions364.map((option364) => {
+              const quantity371B =
+                optionQuantities371B[option364.id] || 1;
+              return `${option364.nameAr}${quantity371B > 1 ? ` ×${quantity371B}` : ""}`;
+            }),
             priceDelta: selectedOptions364.reduce(
-              (total364, option364) => total364 + option364.priceDelta,
+              (total364, option364) => {
+                const quantity371B =
+                  optionQuantities371B[option364.id] || 1;
+                return (
+                  total364 +
+                  option364.priceDelta * quantity371B
+                );
+              },
               0
             ),
           });
         }
 
-        const summary364 = refreshed364
-          .map((selection364) =>
-            `${selection364.groupName}: ${selection364.optionNames.join(", ")}`
-          )
-          .join(" · ") || null;
-        const summaryAr364 = refreshed364
-          .map((selection364) =>
-            `${selection364.groupNameAr}: ${selection364.optionNamesAr.join("، ")}`
-          )
-          .join(" · ") || null;
+        const summary364 =
+          refreshed364
+            .map(
+              (selection364) =>
+                `${selection364.groupName}: ${selection364.optionNames.join(", ")}`
+            )
+            .join(" · ") || null;
+
+        const summaryAr364 =
+          refreshed364
+            .map(
+              (selection364) =>
+                `${selection364.groupNameAr}: ${selection364.optionNamesAr.join("، ")}`
+            )
+            .join(" · ") || null;
+
         const delta364 = refreshed364.reduce(
-          (total364, selection364) => total364 + selection364.priceDelta,
+          (total364, selection364) =>
+            total364 + selection364.priceDelta,
           0
         );
 
         if (
-          JSON.stringify(refreshed364) === JSON.stringify(line.restaurantModifierSelections) &&
+          JSON.stringify(refreshed364) ===
+            JSON.stringify(line.restaurantModifierSelections) &&
           summary364 === line.restaurantModifierSummary &&
           summaryAr364 === line.restaurantModifierSummaryAr &&
           delta364 === line.restaurantModifierPriceDelta
@@ -6419,20 +6536,60 @@ export default function DarikDirectStorefrontPage() {
       RestaurantModifierSelection364 | CartRestaurantModifierSelection364
     >
   ) {
-    return (selections364 || [])
-      .map((selection364) => ({
-        groupId: String(selection364.groupId || "").trim(),
-        optionIds: Array.isArray(selection364.optionIds)
-          ? selection364.optionIds.map(String).filter(Boolean).sort()
-          : [],
-      }))
-      .filter((selection364) => selection364.groupId && selection364.optionIds.length > 0)
-      .sort((a364, b364) => a364.groupId.localeCompare(b364.groupId))
-      .map(
-        (selection364) =>
-          `${selection364.groupId}:${selection364.optionIds.join(",")}`
-      )
-      .join("|") || "default";
+    return (
+      (selections364 || [])
+        .map((selection364) => {
+          const optionIds364 = Array.isArray(selection364.optionIds)
+            ? selection364.optionIds.map(String).filter(Boolean).sort()
+            : [];
+
+          const optionQuantities371B =
+            selection364.optionQuantities &&
+            typeof selection364.optionQuantities === "object"
+              ? Object.fromEntries(
+                  Object.entries(selection364.optionQuantities)
+                    .filter(([id371B]) => optionIds364.includes(String(id371B)))
+                    .map(([id371B, quantity371B]) => [
+                      String(id371B),
+                      Math.max(
+                        1,
+                        Math.min(
+                          99,
+                          Math.floor(Number(quantity371B || 1))
+                        )
+                      ),
+                    ])
+                    .sort(([a371B], [b371B]) =>
+                      String(a371B).localeCompare(String(b371B))
+                    )
+                )
+              : {};
+
+          return {
+            groupId: String(selection364.groupId || "").trim(),
+            optionIds: optionIds364,
+            optionQuantities: optionQuantities371B,
+          };
+        })
+        .filter(
+          (selection364) =>
+            selection364.groupId && selection364.optionIds.length > 0
+        )
+        .sort((a364, b364) => a364.groupId.localeCompare(b364.groupId))
+        .map((selection364) => {
+          const quantityKey371B = Object.entries(
+            selection364.optionQuantities
+          )
+            .map(
+              ([id371B, quantity371B]) =>
+                `${id371B}x${quantity371B}`
+            )
+            .join(",");
+
+          return `${selection364.groupId}:${selection364.optionIds.join(",")}:${quantityKey371B}`;
+        })
+        .join("|") || "default"
+    );
   }
 
   function restaurantCartLineTotal364(line: CartLine) {
@@ -6496,20 +6653,32 @@ export default function DarikDirectStorefrontPage() {
 
     const modifierGroups364 =
       restaurantModifierGroupsByProduct364[product.id] || [];
-    const modifierSelectionMap364 = new Map(
-      restaurantModifierSelections364.map((selection364) => [
-        selection364.groupId,
-        selection364.optionIds,
-      ])
-    );
-    const validatedModifierSelections364: CartRestaurantModifierSelection364[] = [];
+
+    const validatedModifierSelections364: CartRestaurantModifierSelection364[] =
+      [];
 
     for (const group364 of modifierGroups364) {
-      const requestedIds364 = modifierSelectionMap364.get(group364.id) || [];
+      const requestedSelection364 =
+        restaurantModifierSelections364.find(
+          (selection364) =>
+            selection364.groupId === group364.id
+        );
+
+      const requestedIds364 =
+        requestedSelection364?.optionIds || [];
+      const requestedQuantities371B =
+        requestedSelection364?.optionQuantities || {};
+
       const selectedOptions364 = requestedIds364
-        .map((id364) => group364.options.find((option364) => option364.id === id364))
+        .map((id364) =>
+          group364.options.find(
+            (option364) => option364.id === id364
+          )
+        )
         .filter(
-          (option364): option364 is RestaurantModifierOption364 =>
+          (
+            option364
+          ): option364 is RestaurantModifierOption364 =>
             Boolean(option364?.available)
         );
 
@@ -6517,30 +6686,79 @@ export default function DarikDirectStorefrontPage() {
         setActiveProductId(product.id);
         return;
       }
-      if (group364.selectionMode === "single" && selectedOptions364.length > 1) {
+
+      if (
+        group364.selectionMode === "single" &&
+        selectedOptions364.length > 1
+      ) {
         setActiveProductId(product.id);
         return;
       }
+
       if (selectedOptions364.length === 0) continue;
+
+      const optionQuantities371B = Object.fromEntries(
+        selectedOptions364
+          .filter(
+            (option364) =>
+              !group364.required &&
+              Number(option364.priceDelta || 0) > 0
+          )
+          .map((option364) => [
+            option364.id,
+            Math.max(
+              1,
+              Math.min(
+                99,
+                Math.floor(
+                  Number(
+                    requestedQuantities371B[option364.id] || 1
+                  )
+                )
+              )
+            ),
+          ])
+      );
 
       validatedModifierSelections364.push({
         groupId: group364.id,
         groupName: group364.name,
         groupNameAr: group364.nameAr,
-        optionIds: selectedOptions364.map((option364) => option364.id).sort(),
-        optionNames: selectedOptions364.map((option364) => option364.name),
-        optionNamesAr: selectedOptions364.map((option364) => option364.nameAr),
+        optionIds: selectedOptions364
+          .map((option364) => option364.id)
+          .sort(),
+        optionQuantities: optionQuantities371B,
+        optionNames: selectedOptions364.map((option364) => {
+          const quantity371B =
+            optionQuantities371B[option364.id] || 1;
+          return `${option364.name}${quantity371B > 1 ? ` ×${quantity371B}` : ""}`;
+        }),
+        optionNamesAr: selectedOptions364.map((option364) => {
+          const quantity371B =
+            optionQuantities371B[option364.id] || 1;
+          return `${option364.nameAr}${quantity371B > 1 ? ` ×${quantity371B}` : ""}`;
+        }),
         priceDelta: selectedOptions364.reduce(
-          (total364, option364) => total364 + option364.priceDelta,
+          (total364, option364) => {
+            const quantity371B =
+              optionQuantities371B[option364.id] || 1;
+            return (
+              total364 +
+              option364.priceDelta * quantity371B
+            );
+          },
           0
         ),
       });
     }
 
-    const modifierPriceDelta364 = validatedModifierSelections364.reduce(
-      (total364, selection364) => total364 + selection364.priceDelta,
-      0
-    );
+    const modifierPriceDelta364 =
+      validatedModifierSelections364.reduce(
+        (total364, selection364) =>
+          total364 + selection364.priceDelta,
+        0
+      );
+
     const modifierSummary364 =
       validatedModifierSelections364
         .map(
@@ -6548,6 +6766,7 @@ export default function DarikDirectStorefrontPage() {
             `${selection364.groupName}: ${selection364.optionNames.join(", ")}`
         )
         .join(" · ") || null;
+
     const modifierSummaryAr364 =
       validatedModifierSelections364
         .map(
@@ -6555,9 +6774,11 @@ export default function DarikDirectStorefrontPage() {
             `${selection364.groupNameAr}: ${selection364.optionNamesAr.join("، ")}`
         )
         .join(" · ") || null;
-    const modifierKey364 = restaurantModifierSelectionKey364(
-      validatedModifierSelections364
-    );
+
+    const modifierKey364 =
+      restaurantModifierSelectionKey364(
+        validatedModifierSelections364
+      );
 
     const price = validatedRestaurantOption362?.price ?? basePrice362;
     if (!Number.isFinite(price) || price <= 0) return;
@@ -6909,6 +7130,7 @@ export default function DarikDirectStorefrontPage() {
             (selection364) => ({
               group_id: selection364.groupId,
               option_ids: selection364.optionIds,
+              option_quantities: selection364.optionQuantities,
             })
           ),
         })),
