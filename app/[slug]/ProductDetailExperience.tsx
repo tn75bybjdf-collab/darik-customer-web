@@ -45,6 +45,14 @@ export type FurnitureColorSelection216 = {
   isPrimary: boolean;
 };
 
+export type RestaurantPriceOption362 = {
+  id: string;
+  name: string;
+  nameAr: string;
+  price: number;
+  available: boolean;
+};
+
 type FurnitureColorApi216 = {
   id?: string | null;
   name?: string | null;
@@ -104,16 +112,19 @@ type ProductDetailExperienceProps = {
   deliveryPromiseLabel?: string;
   inCart: number;
   cartQuantitiesByVariant216: Record<string, number>;
+  restaurantPriceOptions362: RestaurantPriceOption362[];
   cartCount: number;
   onClose: () => void;
   onAddToCart: (
     color: FurnitureColorSelection216 | null,
     size: ProductSizeSelection245 | null,
+    restaurantOption362: RestaurantPriceOption362 | null,
     weightSteps360: number | null
   ) => void;
   onDecreaseCart: (
     color: FurnitureColorSelection216 | null,
-    size: ProductSizeSelection245 | null
+    size: ProductSizeSelection245 | null,
+    restaurantOption362: RestaurantPriceOption362 | null
   ) => void;
   onOpenCart: () => void;
 };
@@ -448,6 +459,7 @@ export default function ProductDetailExperience({
   deliveryPromiseLabel,
   inCart,
   cartQuantitiesByVariant216,
+  restaurantPriceOptions362,
   cartCount,
   onClose,
   onAddToCart,
@@ -466,9 +478,12 @@ export default function ProductDetailExperience({
   const [productHasSizes245, setProductHasSizes245] = useState(false);
   const [selectedWeightSteps360, setSelectedWeightSteps360] =
     useState<number | null>(null);
+  const [selectedRestaurantOptionId362, setSelectedRestaurantOptionId362] =
+    useState("");
 
   useEffect(() => {
     setSelectedWeightSteps360(null);
+    setSelectedRestaurantOptionId362("");
   }, [product?.id]);
 
   const [furnitureColors216, setFurnitureColors216] = useState<FurnitureColorSelection216[]>([]);
@@ -708,6 +723,7 @@ export default function ProductDetailExperience({
     if (!furnitureColorsReady216 || furnitureColorsError216) return;
     if (!sizeChoicesReady245 || sizeChoicesError245) return;
     if (!selectedSizeReady245) return;
+    if (!selectedRestaurantOptionReady362) return;
 
     const soldByWeight360 = product?.direct_sold_by_weight === true;
 
@@ -728,6 +744,7 @@ export default function ProductDetailExperience({
     onAddToCart(
       selectedFurnitureColor216,
       selectedSize245,
+      selectedRestaurantOption362,
       requestedWeightSteps360
     );
   }
@@ -969,6 +986,31 @@ export default function ProductDetailExperience({
     !sizeRequired245 ||
     (Boolean(selectedSize245) && selectedSize245?.available !== false);
 
+  const selectedRestaurantOption362 = useMemo(
+    () =>
+      restaurantPriceOptions362.find(
+        (option362) => option362.id === selectedRestaurantOptionId362
+      ) || null,
+    [restaurantPriceOptions362, selectedRestaurantOptionId362]
+  );
+
+  const restaurantOptionRequired362 = restaurantPriceOptions362.length > 0;
+  const selectedRestaurantOptionReady362 =
+    !restaurantOptionRequired362 ||
+    (Boolean(selectedRestaurantOption362) &&
+      selectedRestaurantOption362?.available !== false);
+
+  const restaurantMinimumPrice362 = useMemo(() => {
+    const availablePrices362 = restaurantPriceOptions362
+      .filter((option362) => option362.available)
+      .map((option362) => Number(option362.price))
+      .filter((price362) => Number.isFinite(price362) && price362 > 0);
+
+    return availablePrices362.length > 0
+      ? Math.min(...availablePrices362)
+      : null;
+  }, [restaurantPriceOptions362]);
+
   const selectedFurnitureColor216 = useMemo(
     () =>
       furnitureColors216.find(
@@ -1017,13 +1059,17 @@ export default function ProductDetailExperience({
     selectedFurnitureColor216?.id || "default";
 
   const selectedCartKey245 =
-    `${selectedColorCartKey216}|${selectedSize245?.key || "default"}`;
+    `${selectedColorCartKey216}|${selectedSize245?.key || "default"}|${selectedRestaurantOption362?.id || "default"}`;
 
   const selectedInCart216 = Math.max(
     0,
     Number(
       cartQuantitiesByVariant216[selectedCartKey245] ??
-        (!selectedFurnitureColor216 && !sizeRequired245 ? inCart : 0) ??
+        (!selectedFurnitureColor216 &&
+        !sizeRequired245 &&
+        !restaurantOptionRequired362
+          ? inCart
+          : 0) ??
         0
     ) || 0
   );
@@ -1337,6 +1383,8 @@ export default function ProductDetailExperience({
     (!product.direct_inventory_tracking_enabled || stock > 0);
   const compareAt = Number(product.direct_compare_at_price ?? 0);
   const price = Number(product.app_price ?? 0);
+  const displayRestaurantPrice362 =
+    selectedRestaurantOption362?.price ?? restaurantMinimumPrice362;
   // DARIK_COMPARE_AT_PRICE_PUBLIC_171
   const hasCompareAt =
     !contactPricing &&
@@ -2173,9 +2221,14 @@ export default function ProductDetailExperience({
                     {contactPricing
                       ? "Price on request"
                       : showPrices
-                        ? soldByWeight360
-                          ? `${money(product.app_price)} / ${weightUnit360}`
-                          : money(product.app_price)
+                        ? restaurantOptionRequired362 &&
+                          displayRestaurantPrice362 !== null
+                          ? selectedRestaurantOption362
+                            ? money(displayRestaurantPrice362)
+                            : `From ${money(displayRestaurantPrice362)} / يبدأ من ${money(displayRestaurantPrice362)}`
+                          : soldByWeight360
+                            ? `${money(product.app_price)} / ${weightUnit360}`
+                            : money(product.app_price)
                         : "Contact for price"}
                   </strong>
                 </div>
@@ -2229,6 +2282,58 @@ export default function ProductDetailExperience({
                 <p className={styles.furnitureColorError216}>
                   {furnitureColorsError216}
                 </p>
+              ) : null}
+
+              {restaurantOptionRequired362 ? (
+                <section className={styles.sizeSelector245}>
+                  <div className={styles.sizeSelectorHeading245}>
+                    <span>Choose your portion / choice / اختر الحصة أو الخيار</span>
+                    {selectedRestaurantOption362 ? (
+                      <strong>
+                        {selectedRestaurantOption362.name}
+                        <span dir="rtl"> / {selectedRestaurantOption362.nameAr}</span>
+                      </strong>
+                    ) : (
+                      <small>Required before adding to bag / مطلوب قبل الإضافة للسلة</small>
+                    )}
+                  </div>
+                  <div className={styles.sizeChoices245}>
+                    {restaurantPriceOptions362.map((option362) => {
+                      const selected362 =
+                        option362.id === selectedRestaurantOptionId362;
+                      return (
+                        <button
+                          type="button"
+                          key={option362.id}
+                          disabled={!option362.available}
+                          className={[
+                            selected362 ? styles.sizeChoiceSelected245 : "",
+                            !option362.available
+                              ? styles.sizeChoiceUnavailable245
+                              : "",
+                          ]
+                            .filter(Boolean)
+                            .join(" ")}
+                          onClick={() => {
+                            if (!option362.available) return;
+                            setSelectedRestaurantOptionId362(option362.id);
+                          }}
+                          aria-pressed={selected362}
+                        >
+                          <strong>
+                            {option362.name}
+                            <span dir="rtl"> / {option362.nameAr}</span>
+                          </strong>
+                          <small>
+                            {option362.available
+                              ? money(option362.price)
+                              : "Out / غير متوفر"}
+                          </small>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </section>
               ) : null}
 
               {sizeRequired245 ? (
@@ -2569,7 +2674,8 @@ export default function ProductDetailExperience({
                           onClick={() =>
                             onDecreaseCart(
                               selectedFurnitureColor216,
-                              selectedSize245
+                              selectedSize245,
+                              selectedRestaurantOption362
                             )
                           }
                           aria-label="Remove one from cart"
@@ -2581,12 +2687,12 @@ export default function ProductDetailExperience({
                             ? `${formatWeight360(
                                 selectedInCart216 * weightStep360
                               )} ${weightUnit360}`
-                            : inCart}
+                            : selectedInCart216}
                         </strong>
                         <button
                           type="button"
                           onClick={handleAddToCart119}
-                          disabled={!acceptingOrders || !available || !furnitureColorsReady216 || Boolean(furnitureColorsError216) || !sizeChoicesReady245 || Boolean(sizeChoicesError245) || !selectedSizeReady245 || (soldByWeight360 && selectedInCart216 >= maxWeightSteps360)}
+                          disabled={!acceptingOrders || !available || !furnitureColorsReady216 || Boolean(furnitureColorsError216) || !sizeChoicesReady245 || Boolean(sizeChoicesError245) || !selectedSizeReady245 || !selectedRestaurantOptionReady362 || (soldByWeight360 && selectedInCart216 >= maxWeightSteps360)}
                           aria-label="Add one more to cart"
                         >
                           <span aria-hidden="true">+</span>
@@ -2606,7 +2712,7 @@ export default function ProductDetailExperience({
                       type="button"
                       className={styles.primaryAction}
                       onClick={handleAddToCart119}
-                      disabled={!acceptingOrders || !available || !furnitureColorsReady216 || Boolean(furnitureColorsError216) || !sizeChoicesReady245 || Boolean(sizeChoicesError245) || !selectedSizeReady245 || (soldByWeight360 && selectedWeightSteps360 == null)}
+                      disabled={!acceptingOrders || !available || !furnitureColorsReady216 || Boolean(furnitureColorsError216) || !sizeChoicesReady245 || Boolean(sizeChoicesError245) || !selectedSizeReady245 || !selectedRestaurantOptionReady362 || (soldByWeight360 && selectedWeightSteps360 == null)}
                     >
                       <BagIcon />
                       <span>{available ? "Add to bag" : "Out of stock"}</span>

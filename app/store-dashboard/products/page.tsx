@@ -42,6 +42,7 @@
 // DARIK_PHOTO_PRELOAD_READY_STATE_077
 // DARIK_DUAL_SIZE_PRODUCT_PHOTOS_078
 // DARIK_SNAP_VIDEO_COMPRESSION_078
+// DARIK_RESTAURANT_PRICED_CHOICES_PC_362B
 
 // DARIK_AUTOPARTS_FITMENT_FILTERS_033
 // Mobile-safe bilingual product form with automatic retail categories.
@@ -2952,6 +2953,23 @@ type EyewearColorOption = {
   hex: string;
 };
 
+type RestaurantPriceChoiceStored362 = {
+  id?: string | null;
+  name?: string | null;
+  name_ar?: string | null;
+  price?: number | string | null;
+  available?: boolean | null;
+  sort_order?: number | string | null;
+};
+
+type RestaurantPriceChoiceForm362 = {
+  id: string;
+  name: string;
+  nameAr: string;
+  price: string;
+  available: boolean;
+};
+
 type DirectProduct = {
   id: string;
   retailer_id: string;
@@ -2983,6 +3001,7 @@ type DirectProduct = {
   direct_description: string | null;
   direct_price: number | string | null;
   direct_compare_at_price: number | string | null;
+  direct_restaurant_price_options: RestaurantPriceChoiceStored362[] | null;
   direct_pricing_mode: "price" | "call" | "whatsapp" | "call_whatsapp" | null;
   direct_availability_status: "available" | "out_of_stock" | null;
   direct_vehicle_year_from: number | string | null;
@@ -3450,6 +3469,11 @@ export default function DarikDirectProductsPage() {
   const [shoeWizardErrors, setShoeWizardErrors] = useState<Record<string, string>>({});
   const [shoeWizardPhotoSlots, setShoeWizardPhotoSlots] = useState(1);
   const [form, setForm] = useState<ProductForm>(emptyForm);
+  const [restaurantPriceChoicesEnabled362, setRestaurantPriceChoicesEnabled362] =
+    useState(false);
+  const [restaurantPriceChoices362, setRestaurantPriceChoices362] = useState<
+    RestaurantPriceChoiceForm362[]
+  >([]);
   const [sizeAvailability245, setSizeAvailability245] = useState<Record<string, boolean>>({});
 
   function genericSizeKey245(label: string) {
@@ -3674,6 +3698,7 @@ export default function DarikDirectProductsPage() {
             "direct_description",
             "direct_price",
             "direct_compare_at_price",
+            "direct_restaurant_price_options",
             "direct_pricing_mode",
             "direct_availability_status",
             "direct_vehicle_year_from",
@@ -3888,6 +3913,380 @@ export default function DarikDirectProductsPage() {
     .replace(/[\s-]+/g, "_");
   const supportsWeightSelling =
     WEIGHT_MECHANICS_FIELDS.has(effectiveWeightBusinessType247);
+  const isActualRestaurant362 = actualBusinessType === "restaurant";
+
+  function restaurantChoiceId362() {
+    if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
+      return crypto.randomUUID();
+    }
+    return `restaurant-choice-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+  }
+
+  function blankRestaurantChoice362(): RestaurantPriceChoiceForm362 {
+    return {
+      id: restaurantChoiceId362(),
+      name: "",
+      nameAr: "",
+      price: "",
+      available: true,
+    };
+  }
+
+  function setRestaurantPriceChoicesMode362(enabled: boolean) {
+    setRestaurantPriceChoicesEnabled362(enabled);
+    if (enabled) {
+      setRestaurantPriceChoices362((current) =>
+        current.length >= 2
+          ? current
+          : [blankRestaurantChoice362(), blankRestaurantChoice362()]
+      );
+    } else {
+      setRestaurantPriceChoices362([]);
+    }
+    setShoeWizardErrors((current) => {
+      if (!current.restaurantChoices362) return current;
+      const next = { ...current };
+      delete next.restaurantChoices362;
+      return next;
+    });
+  }
+
+  function updateRestaurantChoice362<K extends keyof RestaurantPriceChoiceForm362>(
+    id: string,
+    key: K,
+    value: RestaurantPriceChoiceForm362[K]
+  ) {
+    setRestaurantPriceChoices362((current) =>
+      current.map((choice) =>
+        choice.id === id ? { ...choice, [key]: value } : choice
+      )
+    );
+    setShoeWizardErrors((current) => {
+      if (!current.restaurantChoices362) return current;
+      const next = { ...current };
+      delete next.restaurantChoices362;
+      return next;
+    });
+  }
+
+  function restaurantChoicesForSave362() {
+    return restaurantPriceChoices362.map((choice, index) => ({
+      id: choice.id,
+      name: choice.name.trim(),
+      name_ar: choice.nameAr.trim(),
+      price: Number(choice.price),
+      available: choice.available,
+      sort_order: (index + 1) * 100,
+    }));
+  }
+
+  function restaurantChoicesError362() {
+    if (!isActualRestaurant362 || !restaurantPriceChoicesEnabled362) return "";
+
+    const choices = restaurantChoicesForSave362();
+    if (choices.length < 2) {
+      return "Add at least two choices / أضف خيارين على الأقل.";
+    }
+    if (choices.some((choice) => !choice.name || !choice.name_ar)) {
+      return "Every choice needs English and Arabic names / كل خيار يحتاج اسمًا بالإنجليزية والعربية.";
+    }
+    if (
+      choices.some(
+        (choice) => !Number.isFinite(choice.price) || Number(choice.price) <= 0
+      )
+    ) {
+      return "Every choice needs a valid price above zero / كل خيار يحتاج سعرًا صحيحًا أكبر من صفر.";
+    }
+    if (!choices.some((choice) => choice.available)) {
+      return "At least one choice must be available / يجب أن يكون خيار واحد على الأقل متوفرًا.";
+    }
+
+    const enNames = choices.map((choice) => choice.name.toLowerCase());
+    const arNames = choices.map((choice) => choice.name_ar.toLowerCase());
+    if (
+      new Set(enNames).size !== enNames.length ||
+      new Set(arNames).size !== arNames.length
+    ) {
+      return "Choice names cannot be duplicated / لا يمكن تكرار أسماء الخيارات.";
+    }
+
+    return "";
+  }
+
+  const restaurantLowestAvailablePrice362 = useMemo(() => {
+    if (!isActualRestaurant362 || !restaurantPriceChoicesEnabled362) return null;
+    const prices = restaurantPriceChoices362
+      .filter((choice) => choice.available)
+      .map((choice) => Number(choice.price))
+      .filter((price) => Number.isFinite(price) && price > 0);
+    return prices.length > 0 ? Math.min(...prices) : null;
+  }, [
+    isActualRestaurant362,
+    restaurantPriceChoicesEnabled362,
+    restaurantPriceChoices362,
+  ]);
+
+  useEffect(() => {
+    if (!isActualRestaurant362 || !restaurantPriceChoicesEnabled362) return;
+    setForm((current) => {
+      const nextPrice =
+        restaurantLowestAvailablePrice362 == null
+          ? current.price
+          : String(restaurantLowestAvailablePrice362);
+      if (current.price === nextPrice && current.compareAtPrice === "") {
+        return current;
+      }
+      return {
+        ...current,
+        price: nextPrice,
+        compareAtPrice: "",
+        pricingMode: "price",
+      };
+    });
+  }, [
+    isActualRestaurant362,
+    restaurantPriceChoicesEnabled362,
+    restaurantLowestAvailablePrice362,
+  ]);
+
+  function renderRestaurantPriceChoices362() {
+    if (!isActualRestaurant362) return null;
+
+    return (
+      <section
+        style={{
+          border: "1px solid #d7dde7",
+          borderRadius: "14px",
+          padding: "1rem",
+          marginBottom: "1rem",
+          background: "#fff",
+        }}
+      >
+        <div style={{ display: "grid", gap: "0.35rem", marginBottom: "0.8rem" }}>
+          <strong>
+            Different portions / choices with different prices? /
+            خيارات أو حصص بأسعار مختلفة؟
+          </strong>
+          <small style={{ color: "#596579" }}>
+            Example: Half Chicken, Full Chicken, 1½ Chickens. The customer must
+            choose one before adding the item to the bag. /
+            مثال: نصف جاجة، جاجة كاملة، جاجة ونصف. يجب على العميل اختيار خيار قبل الإضافة للسلة.
+          </small>
+        </div>
+
+        <div
+          style={{
+            display: "flex",
+            gap: "0.6rem",
+            flexWrap: "wrap",
+            marginBottom: restaurantPriceChoicesEnabled362 ? "1rem" : 0,
+          }}
+        >
+          <button
+            type="button"
+            aria-pressed={restaurantPriceChoicesEnabled362}
+            onClick={() => setRestaurantPriceChoicesMode362(true)}
+            style={{
+              border: restaurantPriceChoicesEnabled362
+                ? "2px solid #111827"
+                : "1px solid #cbd5e1",
+              borderRadius: "10px",
+              padding: "0.65rem 1rem",
+              background: restaurantPriceChoicesEnabled362 ? "#111827" : "#fff",
+              color: restaurantPriceChoicesEnabled362 ? "#fff" : "#111827",
+              fontWeight: 800,
+              cursor: "pointer",
+            }}
+          >
+            Yes / نعم
+          </button>
+          <button
+            type="button"
+            aria-pressed={!restaurantPriceChoicesEnabled362}
+            onClick={() => setRestaurantPriceChoicesMode362(false)}
+            style={{
+              border: !restaurantPriceChoicesEnabled362
+                ? "2px solid #111827"
+                : "1px solid #cbd5e1",
+              borderRadius: "10px",
+              padding: "0.65rem 1rem",
+              background: !restaurantPriceChoicesEnabled362 ? "#111827" : "#fff",
+              color: !restaurantPriceChoicesEnabled362 ? "#fff" : "#111827",
+              fontWeight: 800,
+              cursor: "pointer",
+            }}
+          >
+            No / لا
+          </button>
+        </div>
+
+        {restaurantPriceChoicesEnabled362 ? (
+          <div style={{ display: "grid", gap: "0.8rem" }}>
+            {restaurantPriceChoices362.map((choice, index) => (
+              <div
+                key={choice.id}
+                style={{
+                  display: "grid",
+                  gap: "0.65rem",
+                  border: "1px solid #e5e7eb",
+                  borderRadius: "12px",
+                  padding: "0.8rem",
+                  background: "#f8fafc",
+                }}
+              >
+                <strong>
+                  Choice {index + 1} / الخيار {index + 1}
+                </strong>
+                <div
+                  style={{
+                    display: "grid",
+                    gridTemplateColumns:
+                      "repeat(auto-fit, minmax(170px, 1fr))",
+                    gap: "0.65rem",
+                  }}
+                >
+                  <label style={{ display: "grid", gap: "0.3rem" }}>
+                    <span>English choice name / اسم الخيار بالإنجليزية</span>
+                    <input
+                      value={choice.name}
+                      onChange={(event) =>
+                        updateRestaurantChoice362(
+                          choice.id,
+                          "name",
+                          event.target.value
+                        )
+                      }
+                      placeholder="Half Chicken"
+                    />
+                  </label>
+
+                  <label style={{ display: "grid", gap: "0.3rem" }}>
+                    <span>Arabic choice name / اسم الخيار بالعربية</span>
+                    <input
+                      dir="rtl"
+                      value={choice.nameAr}
+                      onChange={(event) =>
+                        updateRestaurantChoice362(
+                          choice.id,
+                          "nameAr",
+                          event.target.value
+                        )
+                      }
+                      placeholder="نصف جاجة"
+                    />
+                  </label>
+
+                  <label style={{ display: "grid", gap: "0.3rem" }}>
+                    <span>Final price / السعر النهائي</span>
+                    <input
+                      type="number"
+                      inputMode="decimal"
+                      min="0.01"
+                      step="0.01"
+                      value={choice.price}
+                      onChange={(event) =>
+                        updateRestaurantChoice362(
+                          choice.id,
+                          "price",
+                          event.target.value
+                        )
+                      }
+                      placeholder="4.50"
+                    />
+                  </label>
+
+                  <label style={{ display: "grid", gap: "0.3rem" }}>
+                    <span>Availability / التوفر</span>
+                    <select
+                      value={choice.available ? "available" : "unavailable"}
+                      onChange={(event) =>
+                        updateRestaurantChoice362(
+                          choice.id,
+                          "available",
+                          event.target.value === "available"
+                        )
+                      }
+                    >
+                      <option value="available">Available / متوفر</option>
+                      <option value="unavailable">Unavailable / غير متوفر</option>
+                    </select>
+                  </label>
+                </div>
+
+                {restaurantPriceChoices362.length > 2 ? (
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setRestaurantPriceChoices362((current) =>
+                        current.filter((item) => item.id !== choice.id)
+                      )
+                    }
+                    style={{
+                      justifySelf: "start",
+                      border: "1px solid #fecaca",
+                      borderRadius: "8px",
+                      padding: "0.45rem 0.7rem",
+                      background: "#fff",
+                      color: "#b91c1c",
+                      fontWeight: 800,
+                      cursor: "pointer",
+                    }}
+                  >
+                    Remove choice / حذف الخيار
+                  </button>
+                ) : null}
+              </div>
+            ))}
+
+            <button
+              type="button"
+              onClick={() =>
+                setRestaurantPriceChoices362((current) => [
+                  ...current,
+                  blankRestaurantChoice362(),
+                ])
+              }
+              style={{
+                justifySelf: "start",
+                border: "1px solid #cbd5e1",
+                borderRadius: "9px",
+                padding: "0.6rem 0.85rem",
+                background: "#fff",
+                fontWeight: 800,
+                cursor: "pointer",
+              }}
+            >
+              + Add another choice / إضافة خيار آخر
+            </button>
+
+            <div
+              style={{
+                borderRadius: "10px",
+                padding: "0.7rem 0.8rem",
+                background: "#eef6ff",
+                color: "#123c69",
+                fontWeight: 700,
+              }}
+            >
+              {restaurantLowestAvailablePrice362 == null
+                ? "Enter the choice prices. The storefront base price will be calculated automatically. / أدخل أسعار الخيارات وسيتم احتساب السعر الأساسي تلقائيًا."
+                : `Storefront will show From ${restaurantLowestAvailablePrice362.toFixed(
+                    2
+                  )} JOD / سيظهر للعميل يبدأ من ${restaurantLowestAvailablePrice362.toFixed(
+                    2
+                  )} د.أ`}
+            </div>
+
+            {shoeWizardErrors.restaurantChoices362 ? (
+              <p style={{ margin: 0, color: "#b91c1c", fontWeight: 800 }}>
+                {shoeWizardErrors.restaurantChoices362}
+              </p>
+            ) : null}
+          </div>
+        ) : null}
+      </section>
+    );
+  }
 
   const mechanicsPresetCategories = useMemo(() => {
     if (!mechanicsTestField) return [] as MechanicsPresetCategory[];
@@ -4661,13 +5060,22 @@ export default function DarikDirectProductsPage() {
       const quantity = Number(form.quantity);
       const effectiveTrackInventory =
         form.soldByWeight ? false : form.trackInventory;
+      const restaurantChoiceError362 = restaurantChoicesError362();
 
-      if (!form.price.trim() || !Number.isFinite(price) || price <= 0) {
+      if (restaurantChoiceError362) {
+        errors.restaurantChoices362 = restaurantChoiceError362;
+      }
+
+      if (
+        !restaurantPriceChoicesEnabled362 &&
+        (!form.price.trim() || !Number.isFinite(price) || price <= 0)
+      ) {
         errors.price =
           "Please enter a valid selling price / يرجى إدخال سعر بيع صحيح";
       }
 
       if (
+        !restaurantPriceChoicesEnabled362 &&
         compareAt !== null &&
         (!Number.isFinite(compareAt) || compareAt < price)
       ) {
@@ -6335,6 +6743,8 @@ export default function DarikDirectProductsPage() {
     setShoeWizardErrors({});
     setShoeWizardPhotoSlots(1);
     setEditingProductId(null);
+    setRestaurantPriceChoicesEnabled362(false);
+    setRestaurantPriceChoices362([]);
     setForm(emptyForm);
     setError("");
     setMessage("");
@@ -6410,6 +6820,31 @@ export default function DarikDirectProductsPage() {
         String(product.direct_clothing_subcategory_ar || "").trim()
       );
     }
+
+    const savedRestaurantChoices362 = Array.isArray(
+      product.direct_restaurant_price_options
+    )
+      ? product.direct_restaurant_price_options
+          .map((choice, index) => ({
+            id:
+              String(choice?.id || "").trim() ||
+              restaurantChoiceId362(),
+            name: String(choice?.name || ""),
+            nameAr: String(choice?.name_ar || ""),
+            price:
+              choice?.price == null
+                ? ""
+                : String(choice.price),
+            available: choice?.available !== false,
+            sortOrder: Number(choice?.sort_order ?? (index + 1) * 100),
+          }))
+          .sort((a, b) => a.sortOrder - b.sortOrder)
+          .map(({ sortOrder: _sortOrder, ...choice }) => choice)
+      : [];
+    setRestaurantPriceChoicesEnabled362(
+      isActualRestaurant362 && savedRestaurantChoices362.length > 0
+    );
+    setRestaurantPriceChoices362(savedRestaurantChoices362);
 
     setEditingProductId(product.id);
     setForm({
@@ -7345,10 +7780,26 @@ export default function DarikDirectProductsPage() {
     if (!selectedRetailerId) return;
 
     const name = form.name.trim();
-    const price = Number(form.price);
-    const compareAtPrice = form.compareAtPrice
+    let price = Number(form.price);
+    let compareAtPrice = form.compareAtPrice
       ? Number(form.compareAtPrice)
       : null;
+    const restaurantChoicesForSave = restaurantChoicesForSave362();
+    const restaurantChoiceError = restaurantChoicesError362();
+
+    if (restaurantChoiceError) {
+      setError(restaurantChoiceError);
+      return;
+    }
+
+    if (isActualRestaurant362 && restaurantPriceChoicesEnabled362) {
+      const availableChoicePrices = restaurantChoicesForSave
+        .filter((choice) => choice.available)
+        .map((choice) => Number(choice.price))
+        .filter((choicePrice) => Number.isFinite(choicePrice) && choicePrice > 0);
+      price = Math.min(...availableChoicePrices);
+      compareAtPrice = null;
+    }
     const effectiveTrackInventory = form.soldByWeight ? false : form.trackInventory;
     const quantity = effectiveTrackInventory ? Number(form.quantity) : 0;
     const sortOrder = Number(form.sortOrder || 1000);
@@ -7368,7 +7819,10 @@ export default function DarikDirectProductsPage() {
       return;
     }
 
-    if (!Number.isFinite(price) || price <= 0) {
+    if (
+      !restaurantPriceChoicesEnabled362 &&
+      (!Number.isFinite(price) || price <= 0)
+    ) {
       setError("Enter a valid selling price / أدخل سعر بيع صحيحًا.");
       return;
     }
@@ -7410,6 +7864,7 @@ export default function DarikDirectProductsPage() {
     }
 
     if (
+      !restaurantPriceChoicesEnabled362 &&
       compareAtPrice != null &&
       (!Number.isFinite(compareAtPrice) || compareAtPrice < price)
     ) {
@@ -7710,6 +8165,27 @@ export default function DarikDirectProductsPage() {
       );
       await loadCatalog();
       return;
+    }
+
+    if (isActualRestaurant362) {
+      const restaurantChoiceResult362 = await supabase.rpc(
+        "darik_direct_set_product_restaurant_price_options_v1",
+        {
+          p_product_id: savedProductId,
+          p_options: restaurantPriceChoicesEnabled362
+            ? restaurantChoicesForSave
+            : [],
+        }
+      );
+
+      if (restaurantChoiceResult362.error) {
+        setSaving(false);
+        setError(
+          `The product was saved, but its restaurant choices failed. / تم حفظ المنتج، لكن تعذر حفظ خيارات المطعم. ${restaurantChoiceResult362.error.message}`
+        );
+        await loadCatalog();
+        return;
+      }
     }
 
     const photoResult = await supabase.rpc(
@@ -8055,6 +8531,8 @@ export default function DarikDirectProductsPage() {
     setSaving(false);
     setFormOpen(false);
     setEditingProductId(null);
+    setRestaurantPriceChoicesEnabled362(false);
+    setRestaurantPriceChoices362([]);
     setForm(emptyForm);
     setMessage(
       editingProductId
@@ -9877,6 +10355,8 @@ export default function DarikDirectProductsPage() {
                           </div>
                         </div>
 
+                        {renderRestaurantPriceChoices362()}
+
                         {isAutoParts ? (
                           <label className={styles.shoeWizardField}>
                             <BilingualLabel
@@ -9918,16 +10398,20 @@ export default function DarikDirectProductsPage() {
                               en={
                                 form.soldByWeight
                                   ? "Price per kilogram"
-                                  : isAutoParts && form.pricingMode !== "price"
-                                    ? "Internal selling price"
-                                    : "Selling price"
+                                  : isActualRestaurant362 && restaurantPriceChoicesEnabled362
+                                    ? "Base price (automatic)"
+                                    : isAutoParts && form.pricingMode !== "price"
+                                      ? "Internal selling price"
+                                      : "Selling price"
                               }
                               ar={
                                 form.soldByWeight
                                   ? "السعر لكل كيلو"
-                                  : isAutoParts && form.pricingMode !== "price"
-                                    ? "سعر البيع الداخلي"
-                                    : "سعر البيع"
+                                  : isActualRestaurant362 && restaurantPriceChoicesEnabled362
+                                    ? "السعر الأساسي (تلقائي)"
+                                    : isAutoParts && form.pricingMode !== "price"
+                                      ? "سعر البيع الداخلي"
+                                      : "سعر البيع"
                               }
                             />
                             <input
@@ -9935,6 +10419,10 @@ export default function DarikDirectProductsPage() {
                               min="0"
                               step="0.01"
                               value={form.price}
+                              disabled={
+                                isActualRestaurant362 &&
+                                restaurantPriceChoicesEnabled362
+                              }
                               onChange={(event) => {
                                 updateForm(
                                   "price",
@@ -9969,6 +10457,10 @@ export default function DarikDirectProductsPage() {
                               min="0"
                               step="0.01"
                               value={form.compareAtPrice}
+                              disabled={
+                                isActualRestaurant362 &&
+                                restaurantPriceChoicesEnabled362
+                              }
                               onChange={(event) => {
                                 updateForm(
                                   "compareAtPrice",
@@ -11674,6 +12166,8 @@ export default function DarikDirectProductsPage() {
                   </section>
                 ) : null}
 
+                {renderRestaurantPriceChoices362()}
+
                 {supportsWeightSelling ? (
                   <section className={styles.weightMechanicPanel}>
                     <label className={styles.weightMechanicToggle}>
@@ -11709,8 +12203,24 @@ export default function DarikDirectProductsPage() {
                 <div className={styles.threeColumns}>
                   <label>
                     <BilingualLabel
-                      en={form.soldByWeight ? "Price per kilogram" : isAutoParts && form.pricingMode !== "price" ? "Internal selling price" : "Selling price"}
-                      ar={form.soldByWeight ? "السعر لكل كيلو" : isAutoParts && form.pricingMode !== "price" ? "سعر البيع الداخلي" : "سعر البيع"}
+                      en={
+                        form.soldByWeight
+                          ? "Price per kilogram"
+                          : isActualRestaurant362 && restaurantPriceChoicesEnabled362
+                            ? "Base price (automatic)"
+                            : isAutoParts && form.pricingMode !== "price"
+                              ? "Internal selling price"
+                              : "Selling price"
+                      }
+                      ar={
+                        form.soldByWeight
+                          ? "السعر لكل كيلو"
+                          : isActualRestaurant362 && restaurantPriceChoicesEnabled362
+                            ? "السعر الأساسي (تلقائي)"
+                            : isAutoParts && form.pricingMode !== "price"
+                              ? "سعر البيع الداخلي"
+                              : "سعر البيع"
+                      }
                     />
                     <div className={styles.moneyInput}>
                       <input
@@ -11719,10 +12229,19 @@ export default function DarikDirectProductsPage() {
                         min="0.01"
                         step="0.01"
                         value={form.price}
+                        disabled={
+                          isActualRestaurant362 &&
+                          restaurantPriceChoicesEnabled362
+                        }
                         onChange={(event) =>
                           updateForm("price", event.target.value)
                         }
-                        required
+                        required={
+                          !(
+                            isActualRestaurant362 &&
+                            restaurantPriceChoicesEnabled362
+                          )
+                        }
                       />
                       <span>{form.soldByWeight ? "JOD / kg" : "JOD"}</span>
                     </div>
@@ -11740,6 +12259,10 @@ export default function DarikDirectProductsPage() {
                         min="0"
                         step="0.01"
                         value={form.compareAtPrice}
+                        disabled={
+                          isActualRestaurant362 &&
+                          restaurantPriceChoicesEnabled362
+                        }
                         onChange={(event) =>
                           updateForm("compareAtPrice", event.target.value)
                         }
