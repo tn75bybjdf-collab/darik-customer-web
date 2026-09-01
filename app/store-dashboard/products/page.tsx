@@ -3004,6 +3004,24 @@ type RestaurantModifierGroupForm364 = {
   options: RestaurantModifierOptionForm364[];
 };
 
+type RestaurantModifierPreset365 = {
+  id: string;
+  name: string;
+  name_ar: string;
+  required: boolean;
+  selection_mode: "single" | "multiple";
+  options: Array<{
+    id?: string | null;
+    name?: string | null;
+    name_ar?: string | null;
+    price_delta?: number | string | null;
+    available?: boolean | null;
+    sort_order?: number | string | null;
+  }>;
+  use_count?: number | null;
+  last_used_at?: string | null;
+};
+
 type DirectProduct = {
   id: string;
   retailer_id: string;
@@ -3512,6 +3530,11 @@ export default function DarikDirectProductsPage() {
   const [restaurantModifierGroups364, setRestaurantModifierGroups364] = useState<
     RestaurantModifierGroupForm364[]
   >([]);
+  const [restaurantModifierPresets365, setRestaurantModifierPresets365] = useState<
+    RestaurantModifierPreset365[]
+  >([]);
+  const [restaurantModifierPresetSelection365, setRestaurantModifierPresetSelection365] =
+    useState("");
   const [sizeAvailability245, setSizeAvailability245] = useState<Record<string, boolean>>({});
 
   function genericSizeKey245(label: string) {
@@ -3701,7 +3724,7 @@ export default function DarikDirectProductsPage() {
       );
     }
 
-    const [productResult, categoryResult] = await Promise.all([
+    const [productResult, categoryResult, restaurantPresetResult365] = await Promise.all([
       supabase
         .from("products")
         .select(
@@ -3790,6 +3813,9 @@ export default function DarikDirectProductsPage() {
         .neq("category_status", "archived")
         .order("sort_order", { ascending: true })
         .order("name", { ascending: true }),
+      supabase.rpc("darik_direct_get_restaurant_modifier_presets_v1", {
+        p_retailer_id: selectedRetailerId,
+      }),
     ]);
 
     if (productResult.error) {
@@ -3801,6 +3827,16 @@ export default function DarikDirectProductsPage() {
 
     if (!categoryResult.error) {
       setCategories((categoryResult.data ?? []) as unknown as Category[]);
+    }
+
+    if (!restaurantPresetResult365.error) {
+      setRestaurantModifierPresets365(
+        Array.isArray(restaurantPresetResult365.data)
+          ? (restaurantPresetResult365.data as RestaurantModifierPreset365[])
+          : []
+      );
+    } else {
+      setRestaurantModifierPresets365([]);
     }
 
     setLoading(false);
@@ -4401,6 +4437,54 @@ export default function DarikDirectProductsPage() {
     };
   }
 
+  function restaurantModifierGroupFromPreset365(
+    preset: RestaurantModifierPreset365
+  ): RestaurantModifierGroupForm364 {
+    return {
+      id: restaurantModifierId364(),
+      name: String(preset.name || ""),
+      nameAr: String(preset.name_ar || ""),
+      required: preset.required === true,
+      selectionMode: preset.selection_mode === "multiple" ? "multiple" : "single",
+      options: (Array.isArray(preset.options) ? preset.options : []).map((option) => ({
+        id: restaurantModifierId364(),
+        name: String(option?.name || ""),
+        nameAr: String(option?.name_ar || ""),
+        priceDelta: String(option?.price_delta ?? "0"),
+        available: option?.available !== false,
+      })),
+    };
+  }
+
+  function applyRestaurantModifierPreset365(presetId: string) {
+    setRestaurantModifierPresetSelection365(presetId);
+    if (!presetId) return;
+    const preset = restaurantModifierPresets365.find((entry) => entry.id === presetId);
+    if (!preset) {
+      setRestaurantModifierPresetSelection365("");
+      return;
+    }
+    const nextGroup = restaurantModifierGroupFromPreset365(preset);
+    setRestaurantModifierGroups364((current) => {
+      const existingIndex = current.findIndex(
+        (group) =>
+          group.name.trim().toLowerCase() === nextGroup.name.trim().toLowerCase() ||
+          group.nameAr.trim() === nextGroup.nameAr.trim()
+      );
+      if (existingIndex < 0) return [...current, nextGroup];
+      return current.map((group, index) =>
+        index === existingIndex ? { ...nextGroup, id: group.id } : group
+      );
+    });
+    setRestaurantModifierPresetSelection365("");
+    setShoeWizardErrors((current) => {
+      if (!current.restaurantModifiers364) return current;
+      const next = { ...current };
+      delete next.restaurantModifiers364;
+      return next;
+    });
+  }
+
   function restaurantModifierGroupsForSave364() {
     return restaurantModifierGroups364.map((group, groupIndex) => ({
       id: group.id,
@@ -4484,6 +4568,37 @@ export default function DarikDirectProductsPage() {
             أضف خيارات مطلوبة مثل نوع الدجاج، أو إضافات اختيارية مدفوعة مثل قطعة كباب.
           </small>
         </div>
+
+        {restaurantModifierPresets365.length > 0 ? (
+          <label
+            style={{
+              display: "grid",
+              gap: "0.35rem",
+              marginBottom: "0.85rem",
+              padding: "0.75rem",
+              border: "1px solid #bfdbfe",
+              borderRadius: "10px",
+              background: "#eff6ff",
+            }}
+          >
+            <strong>Saved choices / الخيارات المحفوظة</strong>
+            <small style={{ color: "#526173" }}>
+              Reuse a choice group from this restaurant. Darik remembers groups automatically when products are saved. /
+              أعد استخدام مجموعة خيارات سابقة. يقوم داريك بحفظ خيارات المطعم تلقائياً.
+            </small>
+            <select
+              value={restaurantModifierPresetSelection365}
+              onChange={(event) => applyRestaurantModifierPreset365(event.target.value)}
+            >
+              <option value="">Select saved choice / اختر خياراً محفوظاً</option>
+              {restaurantModifierPresets365.map((preset) => (
+                <option key={preset.id} value={preset.id}>
+                  {preset.name} / {preset.name_ar}
+                </option>
+              ))}
+            </select>
+          </label>
+        ) : null}
 
         <div style={{ display: "grid", gap: "0.9rem" }}>
           {restaurantModifierGroups364.map((group, groupIndex) => (
