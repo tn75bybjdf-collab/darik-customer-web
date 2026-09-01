@@ -1,7 +1,5 @@
 "use client";
 
-
-/* DARIK_RETAILER_DASHBOARD_HIDE_MECHANICS_TAB_347 */
 // DARIK_PAYMENT_FIRST_YEARLY_PLANS_CATALOG_GATE_190
 // DARIK_MECHANICS_LAB_048
 // DARIK_GROCERY_WEIGHT_3_PHOTO_049
@@ -2970,6 +2968,42 @@ type RestaurantPriceChoiceForm362 = {
   available: boolean;
 };
 
+type RestaurantModifierOptionStored364 = {
+  id?: string | null;
+  name?: string | null;
+  name_ar?: string | null;
+  price_delta?: number | string | null;
+  available?: boolean | null;
+  sort_order?: number | string | null;
+};
+
+type RestaurantModifierGroupStored364 = {
+  id?: string | null;
+  name?: string | null;
+  name_ar?: string | null;
+  required?: boolean | null;
+  selection_mode?: "single" | "multiple" | string | null;
+  sort_order?: number | string | null;
+  options?: RestaurantModifierOptionStored364[] | null;
+};
+
+type RestaurantModifierOptionForm364 = {
+  id: string;
+  name: string;
+  nameAr: string;
+  priceDelta: string;
+  available: boolean;
+};
+
+type RestaurantModifierGroupForm364 = {
+  id: string;
+  name: string;
+  nameAr: string;
+  required: boolean;
+  selectionMode: "single" | "multiple";
+  options: RestaurantModifierOptionForm364[];
+};
+
 type DirectProduct = {
   id: string;
   retailer_id: string;
@@ -3002,6 +3036,7 @@ type DirectProduct = {
   direct_price: number | string | null;
   direct_compare_at_price: number | string | null;
   direct_restaurant_price_options: RestaurantPriceChoiceStored362[] | null;
+  direct_restaurant_modifier_groups: RestaurantModifierGroupStored364[] | null;
   direct_pricing_mode: "price" | "call" | "whatsapp" | "call_whatsapp" | null;
   direct_availability_status: "available" | "out_of_stock" | null;
   direct_vehicle_year_from: number | string | null;
@@ -3474,6 +3509,9 @@ export default function DarikDirectProductsPage() {
   const [restaurantPriceChoices362, setRestaurantPriceChoices362] = useState<
     RestaurantPriceChoiceForm362[]
   >([]);
+  const [restaurantModifierGroups364, setRestaurantModifierGroups364] = useState<
+    RestaurantModifierGroupForm364[]
+  >([]);
   const [sizeAvailability245, setSizeAvailability245] = useState<Record<string, boolean>>({});
 
   function genericSizeKey245(label: string) {
@@ -3699,6 +3737,7 @@ export default function DarikDirectProductsPage() {
             "direct_price",
             "direct_compare_at_price",
             "direct_restaurant_price_options",
+            "direct_restaurant_modifier_groups",
             "direct_pricing_mode",
             "direct_availability_status",
             "direct_vehicle_year_from",
@@ -4330,6 +4369,419 @@ export default function DarikDirectProductsPage() {
       ).length,
     };
   }, [products]);
+
+  function restaurantModifierId364() {
+    return typeof crypto !== "undefined" && typeof crypto.randomUUID === "function"
+      ? crypto.randomUUID()
+      : `xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx`.replace(/[xy]/g, (character) => {
+          const random = Math.floor(Math.random() * 16);
+          const value = character === "x" ? random : (random & 0x3) | 0x8;
+          return value.toString(16);
+        });
+  }
+
+  function blankRestaurantModifierOption364(): RestaurantModifierOptionForm364 {
+    return {
+      id: restaurantModifierId364(),
+      name: "",
+      nameAr: "",
+      priceDelta: "0",
+      available: true,
+    };
+  }
+
+  function blankRestaurantModifierGroup364(): RestaurantModifierGroupForm364 {
+    return {
+      id: restaurantModifierId364(),
+      name: "",
+      nameAr: "",
+      required: false,
+      selectionMode: "single",
+      options: [blankRestaurantModifierOption364()],
+    };
+  }
+
+  function restaurantModifierGroupsForSave364() {
+    return restaurantModifierGroups364.map((group, groupIndex) => ({
+      id: group.id,
+      name: group.name.trim(),
+      name_ar: group.nameAr.trim(),
+      required: group.required,
+      selection_mode: group.selectionMode,
+      sort_order: (groupIndex + 1) * 100,
+      options: group.options.map((option, optionIndex) => ({
+        id: option.id,
+        name: option.name.trim(),
+        name_ar: option.nameAr.trim(),
+        price_delta: Number(option.priceDelta || 0),
+        available: option.available,
+        sort_order: (optionIndex + 1) * 100,
+      })),
+    }));
+  }
+
+  function restaurantModifierGroupsError364() {
+    if (!isActualRestaurant362 || restaurantModifierGroups364.length === 0) return "";
+
+    const groups = restaurantModifierGroupsForSave364();
+    if (groups.some((group) => !group.name || !group.name_ar)) {
+      return "Every additional-choice group needs English and Arabic names / كل مجموعة خيارات إضافية تحتاج اسمًا بالإنجليزية والعربية.";
+    }
+    if (
+      new Set(groups.map((group) => group.name.toLowerCase())).size !== groups.length ||
+      new Set(groups.map((group) => group.name_ar.toLowerCase())).size !== groups.length
+    ) {
+      return "Additional-choice group names cannot be duplicated / لا يمكن تكرار أسماء مجموعات الخيارات الإضافية.";
+    }
+
+    for (const group of groups) {
+      if (group.options.length < 1) {
+        return "Each additional-choice group needs at least one option / كل مجموعة خيارات إضافية تحتاج خيارًا واحدًا على الأقل.";
+      }
+      if (group.options.some((option) => !option.name || !option.name_ar)) {
+        return "Every additional option needs English and Arabic names / كل خيار إضافي يحتاج اسمًا بالإنجليزية والعربية.";
+      }
+      if (
+        group.options.some(
+          (option) =>
+            !Number.isFinite(option.price_delta) || Number(option.price_delta) < 0
+        )
+      ) {
+        return "Add-on price adjustments must be zero or higher / سعر الإضافة يجب أن يكون صفرًا أو أكثر.";
+      }
+      if (!group.options.some((option) => option.available)) {
+        return "Each additional-choice group needs at least one available option / يجب أن تحتوي كل مجموعة إضافية على خيار متوفر واحد على الأقل.";
+      }
+      if (
+        new Set(group.options.map((option) => option.name.toLowerCase())).size !==
+          group.options.length ||
+        new Set(group.options.map((option) => option.name_ar.toLowerCase())).size !==
+          group.options.length
+      ) {
+        return "Additional option names cannot be duplicated inside a group / لا يمكن تكرار أسماء الخيارات داخل المجموعة.";
+      }
+    }
+    return "";
+  }
+
+  function renderRestaurantModifierGroups364() {
+    if (!isActualRestaurant362) return null;
+
+    return (
+      <section
+        style={{
+          border: "1px solid #d7dde7",
+          borderRadius: "14px",
+          padding: "1rem",
+          marginBottom: "1rem",
+          background: "#fff",
+        }}
+      >
+        <div style={{ display: "grid", gap: "0.35rem", marginBottom: "0.8rem" }}>
+          <strong>Additional choices & add-ons / خيارات إضافية وإضافات</strong>
+          <small style={{ color: "#596579" }}>
+            Add required choices such as Chicken Type, or optional paid add-ons such as a kebab piece. /
+            أضف خيارات مطلوبة مثل نوع الدجاج، أو إضافات اختيارية مدفوعة مثل قطعة كباب.
+          </small>
+        </div>
+
+        <div style={{ display: "grid", gap: "0.9rem" }}>
+          {restaurantModifierGroups364.map((group, groupIndex) => (
+            <div
+              key={group.id}
+              style={{
+                border: "1px solid #e5e7eb",
+                borderRadius: "12px",
+                padding: "0.85rem",
+                background: "#f8fafc",
+                display: "grid",
+                gap: "0.75rem",
+              }}
+            >
+              <div style={{ display: "flex", justifyContent: "space-between", gap: "0.75rem", flexWrap: "wrap" }}>
+                <strong>Group {groupIndex + 1} / المجموعة {groupIndex + 1}</strong>
+                <button
+                  type="button"
+                  onClick={() =>
+                    setRestaurantModifierGroups364((current) =>
+                      current.filter((item) => item.id !== group.id)
+                    )
+                  }
+                  style={{
+                    border: "1px solid #fecaca",
+                    borderRadius: "8px",
+                    padding: "0.4rem 0.65rem",
+                    background: "#fff",
+                    color: "#b91c1c",
+                    fontWeight: 800,
+                    cursor: "pointer",
+                  }}
+                >
+                  Remove group / حذف المجموعة
+                </button>
+              </div>
+
+              <div
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))",
+                  gap: "0.65rem",
+                }}
+              >
+                <label style={{ display: "grid", gap: "0.3rem" }}>
+                  <span>Group name (English) / اسم المجموعة بالإنجليزية</span>
+                  <input
+                    value={group.name}
+                    placeholder="Chicken Type"
+                    onChange={(event) =>
+                      setRestaurantModifierGroups364((current) =>
+                        current.map((item) =>
+                          item.id === group.id ? { ...item, name: event.target.value } : item
+                        )
+                      )
+                    }
+                  />
+                </label>
+                <label style={{ display: "grid", gap: "0.3rem" }}>
+                  <span>Group name (Arabic) / اسم المجموعة بالعربية</span>
+                  <input
+                    dir="rtl"
+                    value={group.nameAr}
+                    placeholder="نوع الدجاج"
+                    onChange={(event) =>
+                      setRestaurantModifierGroups364((current) =>
+                        current.map((item) =>
+                          item.id === group.id ? { ...item, nameAr: event.target.value } : item
+                        )
+                      )
+                    }
+                  />
+                </label>
+                <label style={{ display: "grid", gap: "0.3rem" }}>
+                  <span>Customer selection / اختيار العميل</span>
+                  <select
+                    value={group.selectionMode}
+                    onChange={(event) =>
+                      setRestaurantModifierGroups364((current) =>
+                        current.map((item) =>
+                          item.id === group.id
+                            ? {
+                                ...item,
+                                selectionMode: event.target.value as "single" | "multiple",
+                              }
+                            : item
+                        )
+                      )
+                    }
+                  >
+                    <option value="single">Choose one / اختر واحد</option>
+                    <option value="multiple">Choose multiple / اختر عدة خيارات</option>
+                  </select>
+                </label>
+                <label style={{ display: "grid", gap: "0.3rem" }}>
+                  <span>Required? / مطلوب؟</span>
+                  <select
+                    value={group.required ? "yes" : "no"}
+                    onChange={(event) =>
+                      setRestaurantModifierGroups364((current) =>
+                        current.map((item) =>
+                          item.id === group.id
+                            ? { ...item, required: event.target.value === "yes" }
+                            : item
+                        )
+                      )
+                    }
+                  >
+                    <option value="yes">Required / مطلوب</option>
+                    <option value="no">Optional / اختياري</option>
+                  </select>
+                </label>
+              </div>
+
+              <div style={{ display: "grid", gap: "0.6rem" }}>
+                {group.options.map((option, optionIndex) => (
+                  <div
+                    key={option.id}
+                    style={{
+                      display: "grid",
+                      gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))",
+                      gap: "0.55rem",
+                      alignItems: "end",
+                      borderTop: optionIndex === 0 ? "none" : "1px solid #e5e7eb",
+                      paddingTop: optionIndex === 0 ? 0 : "0.65rem",
+                    }}
+                  >
+                    <label style={{ display: "grid", gap: "0.3rem" }}>
+                      <span>Option (English) / الخيار بالإنجليزية</span>
+                      <input
+                        value={option.name}
+                        placeholder={group.selectionMode === "multiple" ? "Kebab piece" : "Rotisserie"}
+                        onChange={(event) =>
+                          setRestaurantModifierGroups364((current) =>
+                            current.map((item) =>
+                              item.id !== group.id
+                                ? item
+                                : {
+                                    ...item,
+                                    options: item.options.map((entry) =>
+                                      entry.id === option.id
+                                        ? { ...entry, name: event.target.value }
+                                        : entry
+                                    ),
+                                  }
+                            )
+                          )
+                        }
+                      />
+                    </label>
+                    <label style={{ display: "grid", gap: "0.3rem" }}>
+                      <span>Option (Arabic) / الخيار بالعربية</span>
+                      <input
+                        dir="rtl"
+                        value={option.nameAr}
+                        placeholder={group.selectionMode === "multiple" ? "قطعة كباب" : "شواية"}
+                        onChange={(event) =>
+                          setRestaurantModifierGroups364((current) =>
+                            current.map((item) =>
+                              item.id !== group.id
+                                ? item
+                                : {
+                                    ...item,
+                                    options: item.options.map((entry) =>
+                                      entry.id === option.id
+                                        ? { ...entry, nameAr: event.target.value }
+                                        : entry
+                                    ),
+                                  }
+                            )
+                          )
+                        }
+                      />
+                    </label>
+                    <label style={{ display: "grid", gap: "0.3rem" }}>
+                      <span>Extra price (+JOD) / السعر الإضافي</span>
+                      <input
+                        type="number"
+                        min="0"
+                        step="0.01"
+                        inputMode="decimal"
+                        value={option.priceDelta}
+                        onChange={(event) =>
+                          setRestaurantModifierGroups364((current) =>
+                            current.map((item) =>
+                              item.id !== group.id
+                                ? item
+                                : {
+                                    ...item,
+                                    options: item.options.map((entry) =>
+                                      entry.id === option.id
+                                        ? { ...entry, priceDelta: event.target.value }
+                                        : entry
+                                    ),
+                                  }
+                            )
+                          )
+                        }
+                      />
+                    </label>
+                    <label style={{ display: "grid", gap: "0.3rem" }}>
+                      <span>Availability / التوفر</span>
+                      <select
+                        value={option.available ? "available" : "unavailable"}
+                        onChange={(event) =>
+                          setRestaurantModifierGroups364((current) =>
+                            current.map((item) =>
+                              item.id !== group.id
+                                ? item
+                                : {
+                                    ...item,
+                                    options: item.options.map((entry) =>
+                                      entry.id === option.id
+                                        ? {
+                                            ...entry,
+                                            available: event.target.value === "available",
+                                          }
+                                        : entry
+                                    ),
+                                  }
+                            )
+                          )
+                        }
+                      >
+                        <option value="available">Available / متوفر</option>
+                        <option value="unavailable">Unavailable / غير متوفر</option>
+                      </select>
+                    </label>
+                    <button
+                      type="button"
+                      disabled={group.options.length <= 1}
+                      onClick={() =>
+                        setRestaurantModifierGroups364((current) =>
+                          current.map((item) =>
+                            item.id !== group.id
+                              ? item
+                              : {
+                                  ...item,
+                                  options: item.options.filter(
+                                    (entry) => entry.id !== option.id
+                                  ),
+                                }
+                          )
+                        )
+                      }
+                    >
+                      Remove option / حذف الخيار
+                    </button>
+                  </div>
+                ))}
+              </div>
+
+              <button
+                type="button"
+                onClick={() =>
+                  setRestaurantModifierGroups364((current) =>
+                    current.map((item) =>
+                      item.id === group.id
+                        ? {
+                            ...item,
+                            options: [
+                              ...item.options,
+                              blankRestaurantModifierOption364(),
+                            ],
+                          }
+                        : item
+                    )
+                  )
+                }
+                style={{ justifySelf: "start" }}
+              >
+                + Add option / إضافة خيار
+              </button>
+            </div>
+          ))}
+
+          <button
+            type="button"
+            onClick={() =>
+              setRestaurantModifierGroups364((current) => [
+                ...current,
+                blankRestaurantModifierGroup364(),
+              ])
+            }
+            style={{ justifySelf: "start", fontWeight: 800 }}
+          >
+            + Add choice group / إضافة مجموعة خيارات
+          </button>
+        </div>
+
+        {shoeWizardErrors.restaurantModifiers364 ? (
+          <p className={styles.shoeWizardFieldError}>
+            {shoeWizardErrors.restaurantModifiers364}
+          </p>
+        ) : null}
+      </section>
+    );
+  }
 
   function updateForm<K extends keyof ProductForm>(
     key: K,
@@ -5061,9 +5513,13 @@ export default function DarikDirectProductsPage() {
       const effectiveTrackInventory =
         form.soldByWeight ? false : form.trackInventory;
       const restaurantChoiceError362 = restaurantChoicesError362();
+      const restaurantModifierError364 = restaurantModifierGroupsError364();
 
       if (restaurantChoiceError362) {
         errors.restaurantChoices362 = restaurantChoiceError362;
+      }
+      if (restaurantModifierError364) {
+        errors.restaurantModifiers364 = restaurantModifierError364;
       }
 
       if (
@@ -6745,6 +7201,7 @@ export default function DarikDirectProductsPage() {
     setEditingProductId(null);
     setRestaurantPriceChoicesEnabled362(false);
     setRestaurantPriceChoices362([]);
+    setRestaurantModifierGroups364([]);
     setForm(emptyForm);
     setError("");
     setMessage("");
@@ -6845,6 +7302,40 @@ export default function DarikDirectProductsPage() {
       isActualRestaurant362 && savedRestaurantChoices362.length > 0
     );
     setRestaurantPriceChoices362(savedRestaurantChoices362);
+
+    const savedRestaurantModifierGroups364 = Array.isArray(
+      product.direct_restaurant_modifier_groups
+    )
+      ? product.direct_restaurant_modifier_groups
+          .map((group, groupIndex) => ({
+            id: String(group?.id || "").trim() || restaurantModifierId364(),
+            name: String(group?.name || ""),
+            nameAr: String(group?.name_ar || ""),
+            required: group?.required === true,
+            selectionMode:
+              group?.selection_mode === "multiple" ? "multiple" as const : "single" as const,
+            sortOrder: Number(group?.sort_order ?? (groupIndex + 1) * 100),
+            options: Array.isArray(group?.options)
+              ? group.options
+                  .map((option, optionIndex) => ({
+                    id: String(option?.id || "").trim() || restaurantModifierId364(),
+                    name: String(option?.name || ""),
+                    nameAr: String(option?.name_ar || ""),
+                    priceDelta:
+                      option?.price_delta == null ? "0" : String(option.price_delta),
+                    available: option?.available !== false,
+                    sortOrder: Number(option?.sort_order ?? (optionIndex + 1) * 100),
+                  }))
+                  .sort((a, b) => a.sortOrder - b.sortOrder)
+                  .map(({ sortOrder: _sortOrder, ...option }) => option)
+              : [],
+          }))
+          .sort((a, b) => a.sortOrder - b.sortOrder)
+          .map(({ sortOrder: _sortOrder, ...group }) => group)
+      : [];
+    setRestaurantModifierGroups364(
+      isActualRestaurant362 ? savedRestaurantModifierGroups364 : []
+    );
 
     setEditingProductId(product.id);
     setForm({
@@ -7786,9 +8277,15 @@ export default function DarikDirectProductsPage() {
       : null;
     const restaurantChoicesForSave = restaurantChoicesForSave362();
     const restaurantChoiceError = restaurantChoicesError362();
+    const restaurantModifierGroupsForSave = restaurantModifierGroupsForSave364();
+    const restaurantModifierError = restaurantModifierGroupsError364();
 
     if (restaurantChoiceError) {
       setError(restaurantChoiceError);
+      return;
+    }
+    if (restaurantModifierError) {
+      setError(restaurantModifierError);
       return;
     }
 
@@ -8186,6 +8683,23 @@ export default function DarikDirectProductsPage() {
         await loadCatalog();
         return;
       }
+
+      const restaurantModifierResult364 = await supabase.rpc(
+        "darik_direct_set_product_restaurant_modifier_groups_v1",
+        {
+          p_product_id: savedProductId,
+          p_groups: restaurantModifierGroupsForSave,
+        }
+      );
+
+      if (restaurantModifierResult364.error) {
+        setSaving(false);
+        setError(
+          `The product was saved, but its additional choices/add-ons failed. / تم حفظ المنتج، لكن تعذر حفظ الخيارات الإضافية والإضافات. ${restaurantModifierResult364.error.message}`
+        );
+        await loadCatalog();
+        return;
+      }
     }
 
     const photoResult = await supabase.rpc(
@@ -8533,6 +9047,7 @@ export default function DarikDirectProductsPage() {
     setEditingProductId(null);
     setRestaurantPriceChoicesEnabled362(false);
     setRestaurantPriceChoices362([]);
+    setRestaurantModifierGroups364([]);
     setForm(emptyForm);
     setMessage(
       editingProductId
@@ -8643,11 +9158,8 @@ export default function DarikDirectProductsPage() {
             Products
           </a>
           <a href="/store-dashboard/categories">Categories</a>
-
-                  <a href="/store-dashboard/ai-credits">
-            AI Credits / رصيد الذكاء الاصطناعي
-          </a>
-</nav>
+          <a href="/store-dashboard/mechanics-lab">Mechanics Lab / مختبر الخصائص</a>
+        </nav>
 
         <div className={styles.sidebarFooter}>
           <span>{session.user.email}</span>
@@ -9300,6 +9812,8 @@ export default function DarikDirectProductsPage() {
 
 
                         {renderRestaurantPriceChoices362()}
+
+                        {renderRestaurantModifierGroups364()}
 
                         {cosmeticsSubcategoryPanel240}
 
@@ -10356,6 +10870,8 @@ export default function DarikDirectProductsPage() {
                             </p>
                           </div>
                         </div>
+
+
 
                         {isAutoParts ? (
                           <label className={styles.shoeWizardField}>
@@ -12167,6 +12683,8 @@ export default function DarikDirectProductsPage() {
                 ) : null}
 
                 {renderRestaurantPriceChoices362()}
+
+                {renderRestaurantModifierGroups364()}
 
                 {supportsWeightSelling ? (
                   <section className={styles.weightMechanicPanel}>

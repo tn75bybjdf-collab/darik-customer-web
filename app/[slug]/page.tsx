@@ -195,6 +195,38 @@ type RestaurantPriceOption362 = {
   available: boolean;
 };
 
+type RestaurantModifierOption364 = {
+  id: string;
+  name: string;
+  nameAr: string;
+  priceDelta: number;
+  available: boolean;
+};
+
+type RestaurantModifierGroup364 = {
+  id: string;
+  name: string;
+  nameAr: string;
+  required: boolean;
+  selectionMode: "single" | "multiple";
+  options: RestaurantModifierOption364[];
+};
+
+type RestaurantModifierSelection364 = {
+  groupId: string;
+  optionIds: string[];
+};
+
+type CartRestaurantModifierSelection364 = {
+  groupId: string;
+  groupName: string;
+  groupNameAr: string;
+  optionIds: string[];
+  optionNames: string[];
+  optionNamesAr: string[];
+  priceDelta: number;
+};
+
 type CartLine = {
   lineId: string;
   productId: string;
@@ -210,6 +242,10 @@ type CartLine = {
   restaurantOptionId: string | null;
   restaurantOptionName: string | null;
   restaurantOptionNameAr: string | null;
+  restaurantModifierSelections: CartRestaurantModifierSelection364[];
+  restaurantModifierSummary: string | null;
+  restaurantModifierSummaryAr: string | null;
+  restaurantModifierPriceDelta: number;
   soldByWeight: boolean;
   weightUnit: string | null;
   weightStep: number | null;
@@ -2550,6 +2586,120 @@ export default function DarikDirectStorefrontPage() {
     };
   }, [slug]);
 
+  // DARIK_RESTAURANT_MODIFIERS_364
+  const [restaurantModifierGroupsByProduct364, setRestaurantModifierGroupsByProduct364] =
+    useState<Record<string, RestaurantModifierGroup364[]>>({});
+
+  useEffect(() => {
+    let cancelled364 = false;
+
+    if (!slug || slug === "_darik-private-store-preview") {
+      setRestaurantModifierGroupsByProduct364({});
+      return () => {
+        cancelled364 = true;
+      };
+    }
+
+    void (async () => {
+      const result364 = await supabase.rpc(
+        "darik_direct_public_restaurant_modifier_groups_v1",
+        { p_storefront_slug: slug }
+      );
+
+      if (cancelled364) return;
+      if (result364.error) {
+        setRestaurantModifierGroupsByProduct364({});
+        return;
+      }
+
+      const next364: Record<string, RestaurantModifierGroup364[]> = {};
+
+      for (const rawProduct364 of Array.isArray(result364.data)
+        ? result364.data
+        : []) {
+        const row364 = rawProduct364 as { product_id?: unknown; groups?: unknown };
+        const productId364 = String(row364.product_id ?? "").trim();
+        if (!productId364 || !Array.isArray(row364.groups)) continue;
+
+        const groups364 = row364.groups
+          .map((rawGroup364) => {
+            const group364 = rawGroup364 as {
+              id?: unknown;
+              name?: unknown;
+              name_ar?: unknown;
+              required?: unknown;
+              selection_mode?: unknown;
+              options?: unknown;
+            };
+            const id364 = String(group364.id ?? "").trim();
+            const name364 = String(group364.name ?? "").trim();
+            const nameAr364 = String(group364.name_ar ?? "").trim();
+            if (!id364 || !name364 || !nameAr364 || !Array.isArray(group364.options)) {
+              return null;
+            }
+
+            const options364 = group364.options
+              .map((rawOption364) => {
+                const option364 = rawOption364 as {
+                  id?: unknown;
+                  name?: unknown;
+                  name_ar?: unknown;
+                  price_delta?: unknown;
+                  available?: unknown;
+                };
+                const optionId364 = String(option364.id ?? "").trim();
+                const optionName364 = String(option364.name ?? "").trim();
+                const optionNameAr364 = String(option364.name_ar ?? "").trim();
+                const priceDelta364 = Number(option364.price_delta ?? 0);
+                if (
+                  !optionId364 ||
+                  !optionName364 ||
+                  !optionNameAr364 ||
+                  !Number.isFinite(priceDelta364) ||
+                  priceDelta364 < 0
+                ) {
+                  return null;
+                }
+                return {
+                  id: optionId364,
+                  name: optionName364,
+                  nameAr: optionNameAr364,
+                  priceDelta: priceDelta364,
+                  available: option364.available !== false,
+                } satisfies RestaurantModifierOption364;
+              })
+              .filter(
+                (option364): option364 is RestaurantModifierOption364 =>
+                  option364 !== null
+              );
+
+            if (options364.length === 0) return null;
+            return {
+              id: id364,
+              name: name364,
+              nameAr: nameAr364,
+              required: group364.required === true,
+              selectionMode:
+                group364.selection_mode === "multiple" ? "multiple" : "single",
+              options: options364,
+            } satisfies RestaurantModifierGroup364;
+          })
+          .filter(
+            (group364): group364 is RestaurantModifierGroup364 =>
+              group364 !== null
+          );
+
+        if (groups364.length > 0) next364[productId364] = groups364;
+      }
+
+      setRestaurantModifierGroupsByProduct364(next364);
+    })();
+
+    return () => {
+      cancelled364 = true;
+    };
+  }, [slug]);
+
   const [previewRetailField, setPreviewRetailField] = useState("");
   useEffect(() => {
     const field = new URLSearchParams(window.location.search)
@@ -3184,7 +3334,12 @@ export default function DarikDirectStorefrontPage() {
                           typeof line.sizeKey === "string" ? line.sizeKey : null,
                           typeof line.restaurantOptionId === "string"
                             ? line.restaurantOptionId
-                            : null
+                            : null,
+                          restaurantModifierSelectionKey364(
+                            Array.isArray(line.restaurantModifierSelections)
+                              ? (line.restaurantModifierSelections as CartRestaurantModifierSelection364[])
+                              : []
+                          )
                         ),
                   productId: productId216,
                   name: String(line.name || "Product"),
@@ -3208,6 +3363,48 @@ export default function DarikDirectStorefrontPage() {
                     typeof line.restaurantOptionNameAr === "string"
                       ? line.restaurantOptionNameAr
                       : null,
+                  restaurantModifierSelections: Array.isArray(
+                    line.restaurantModifierSelections
+                  )
+                    ? (line.restaurantModifierSelections as unknown[])
+                        .map((raw364) => {
+                          const value364 = raw364 as Partial<CartRestaurantModifierSelection364>;
+                          const groupId364 = String(value364.groupId || "").trim();
+                          const optionIds364 = Array.isArray(value364.optionIds)
+                            ? value364.optionIds.map(String).filter(Boolean)
+                            : [];
+                          if (!groupId364 || optionIds364.length === 0) return null;
+                          return {
+                            groupId: groupId364,
+                            groupName: String(value364.groupName || "Additional choice"),
+                            groupNameAr: String(value364.groupNameAr || value364.groupName || "خيار إضافي"),
+                            optionIds: optionIds364,
+                            optionNames: Array.isArray(value364.optionNames)
+                              ? value364.optionNames.map(String)
+                              : [],
+                            optionNamesAr: Array.isArray(value364.optionNamesAr)
+                              ? value364.optionNamesAr.map(String)
+                              : [],
+                            priceDelta: Math.max(0, Number(value364.priceDelta || 0)),
+                          } satisfies CartRestaurantModifierSelection364;
+                        })
+                        .filter(
+                          (value364): value364 is CartRestaurantModifierSelection364 =>
+                            value364 !== null
+                        )
+                    : [],
+                  restaurantModifierSummary:
+                    typeof line.restaurantModifierSummary === "string"
+                      ? line.restaurantModifierSummary
+                      : null,
+                  restaurantModifierSummaryAr:
+                    typeof line.restaurantModifierSummaryAr === "string"
+                      ? line.restaurantModifierSummaryAr
+                      : null,
+                  restaurantModifierPriceDelta: Math.max(
+                    0,
+                    Number(line.restaurantModifierPriceDelta || 0)
+                  ),
                   soldByWeight: line.soldByWeight === true,
                   weightUnit:
                     typeof line.weightUnit === "string" && line.weightUnit.trim()
@@ -3283,6 +3480,87 @@ export default function DarikDirectStorefrontPage() {
       return changed362 ? next362 : current;
     });
   }, [cart.length, restaurantOptionsByProduct362]);
+
+  useEffect(() => {
+    if (cart.length === 0) return;
+    if (Object.keys(restaurantModifierGroupsByProduct364).length === 0) return;
+
+    setCart((current) => {
+      let changed364 = false;
+      const next364 = current.map((line) => {
+        if (!line.restaurantModifierSelections.length) return line;
+        const groups364 = restaurantModifierGroupsByProduct364[line.productId];
+        if (!groups364) return line;
+
+        const refreshed364: CartRestaurantModifierSelection364[] = [];
+        for (const saved364 of line.restaurantModifierSelections) {
+          const group364 = groups364.find((item364) => item364.id === saved364.groupId);
+          if (!group364) continue;
+          const selectedOptions364 = saved364.optionIds
+            .map((id364) => group364.options.find((option364) => option364.id === id364))
+            .filter(
+              (option364): option364 is RestaurantModifierOption364 =>
+                Boolean(option364?.available)
+            );
+          if (selectedOptions364.length === 0) continue;
+          refreshed364.push({
+            groupId: group364.id,
+            groupName: group364.name,
+            groupNameAr: group364.nameAr,
+            optionIds: selectedOptions364.map((option364) => option364.id).sort(),
+            optionNames: selectedOptions364.map((option364) => option364.name),
+            optionNamesAr: selectedOptions364.map((option364) => option364.nameAr),
+            priceDelta: selectedOptions364.reduce(
+              (total364, option364) => total364 + option364.priceDelta,
+              0
+            ),
+          });
+        }
+
+        const summary364 = refreshed364
+          .map((selection364) =>
+            `${selection364.groupName}: ${selection364.optionNames.join(", ")}`
+          )
+          .join(" · ") || null;
+        const summaryAr364 = refreshed364
+          .map((selection364) =>
+            `${selection364.groupNameAr}: ${selection364.optionNamesAr.join("، ")}`
+          )
+          .join(" · ") || null;
+        const delta364 = refreshed364.reduce(
+          (total364, selection364) => total364 + selection364.priceDelta,
+          0
+        );
+
+        if (
+          JSON.stringify(refreshed364) === JSON.stringify(line.restaurantModifierSelections) &&
+          summary364 === line.restaurantModifierSummary &&
+          summaryAr364 === line.restaurantModifierSummaryAr &&
+          delta364 === line.restaurantModifierPriceDelta
+        ) {
+          return line;
+        }
+
+        changed364 = true;
+        return {
+          ...line,
+          restaurantModifierSelections: refreshed364,
+          restaurantModifierSummary: summary364,
+          restaurantModifierSummaryAr: summaryAr364,
+          restaurantModifierPriceDelta: delta364,
+          lineId: cartLineId216(
+            line.productId,
+            line.colorVariantId,
+            line.sizeKey,
+            line.restaurantOptionId,
+            restaurantModifierSelectionKey364(refreshed364)
+          ),
+        };
+      });
+
+      return changed364 ? next364 : current;
+    });
+  }, [cart.length, restaurantModifierGroupsByProduct364]);
 
   useEffect(() => {
     if (!storefront) return;
@@ -4037,7 +4315,11 @@ export default function DarikDirectStorefrontPage() {
   );
 
   const cartSubtotal = useMemo(
-    () => cart.reduce((total, line) => total + line.price * line.quantity, 0),
+    () =>
+      cart.reduce(
+        (total, line) => total + restaurantCartLineTotal364(line),
+        0
+      ),
     [cart]
   );
 
@@ -6132,20 +6414,50 @@ export default function DarikDirectStorefrontPage() {
     return Number(numeric.toFixed(3)).toString();
   }
 
+  function restaurantModifierSelectionKey364(
+    selections364: Array<
+      RestaurantModifierSelection364 | CartRestaurantModifierSelection364
+    >
+  ) {
+    return (selections364 || [])
+      .map((selection364) => ({
+        groupId: String(selection364.groupId || "").trim(),
+        optionIds: Array.isArray(selection364.optionIds)
+          ? selection364.optionIds.map(String).filter(Boolean).sort()
+          : [],
+      }))
+      .filter((selection364) => selection364.groupId && selection364.optionIds.length > 0)
+      .sort((a364, b364) => a364.groupId.localeCompare(b364.groupId))
+      .map(
+        (selection364) =>
+          `${selection364.groupId}:${selection364.optionIds.join(",")}`
+      )
+      .join("|") || "default";
+  }
+
+  function restaurantCartLineTotal364(line: CartLine) {
+    const base364 = line.price * line.quantity;
+    const delta364 = Math.max(0, Number(line.restaurantModifierPriceDelta || 0));
+    return line.soldByWeight
+      ? base364 + delta364
+      : base364 + delta364 * line.quantity;
+  }
+
   function cartLineId216(
     productId: string,
     colorVariantId: string | null | undefined,
     sizeKey245: string | null | undefined = null,
-    restaurantOptionId362: string | null | undefined = null
+    restaurantOptionId362: string | null | undefined = null,
+    restaurantModifierKey364: string | null | undefined = null
   ) {
-    return `${productId}:${colorVariantId || "default"}:${sizeKey245 || "default"}:${restaurantOptionId362 || "default"}`;
+    return `${productId}:${colorVariantId || "default"}:${sizeKey245 || "default"}:${restaurantOptionId362 || "default"}:${restaurantModifierKey364 || "default"}`;
   }
 
   function productCartQuantities216(productId: string) {
     return cart.reduce<Record<string, number>>((result, line) => {
       if (line.productId !== productId) return result;
       const key216 =
-        `${line.colorVariantId || "default"}|${line.sizeKey || "default"}|${line.restaurantOptionId || "default"}`;
+        `${line.colorVariantId || "default"}|${line.sizeKey || "default"}|${line.restaurantOptionId || "default"}|${restaurantModifierSelectionKey364(line.restaurantModifierSelections)}`;
       result[key216] = (result[key216] || 0) + line.quantity;
       return result;
     }, {});
@@ -6156,6 +6468,7 @@ export default function DarikDirectStorefrontPage() {
     colorVariant216: FurnitureColorSelection216 | null = null,
     sizeSelection245: { key: string; label: string } | null = null,
     restaurantOption362: RestaurantPriceOption362 | null = null,
+    restaurantModifierSelections364: RestaurantModifierSelection364[] = [],
     weightSteps360: number | null = null
   ) {
     setOrderConfirmation(null);
@@ -6180,6 +6493,71 @@ export default function DarikDirectStorefrontPage() {
       setActiveProductId(product.id);
       return;
     }
+
+    const modifierGroups364 =
+      restaurantModifierGroupsByProduct364[product.id] || [];
+    const modifierSelectionMap364 = new Map(
+      restaurantModifierSelections364.map((selection364) => [
+        selection364.groupId,
+        selection364.optionIds,
+      ])
+    );
+    const validatedModifierSelections364: CartRestaurantModifierSelection364[] = [];
+
+    for (const group364 of modifierGroups364) {
+      const requestedIds364 = modifierSelectionMap364.get(group364.id) || [];
+      const selectedOptions364 = requestedIds364
+        .map((id364) => group364.options.find((option364) => option364.id === id364))
+        .filter(
+          (option364): option364 is RestaurantModifierOption364 =>
+            Boolean(option364?.available)
+        );
+
+      if (group364.required && selectedOptions364.length === 0) {
+        setActiveProductId(product.id);
+        return;
+      }
+      if (group364.selectionMode === "single" && selectedOptions364.length > 1) {
+        setActiveProductId(product.id);
+        return;
+      }
+      if (selectedOptions364.length === 0) continue;
+
+      validatedModifierSelections364.push({
+        groupId: group364.id,
+        groupName: group364.name,
+        groupNameAr: group364.nameAr,
+        optionIds: selectedOptions364.map((option364) => option364.id).sort(),
+        optionNames: selectedOptions364.map((option364) => option364.name),
+        optionNamesAr: selectedOptions364.map((option364) => option364.nameAr),
+        priceDelta: selectedOptions364.reduce(
+          (total364, option364) => total364 + option364.priceDelta,
+          0
+        ),
+      });
+    }
+
+    const modifierPriceDelta364 = validatedModifierSelections364.reduce(
+      (total364, selection364) => total364 + selection364.priceDelta,
+      0
+    );
+    const modifierSummary364 =
+      validatedModifierSelections364
+        .map(
+          (selection364) =>
+            `${selection364.groupName}: ${selection364.optionNames.join(", ")}`
+        )
+        .join(" · ") || null;
+    const modifierSummaryAr364 =
+      validatedModifierSelections364
+        .map(
+          (selection364) =>
+            `${selection364.groupNameAr}: ${selection364.optionNamesAr.join("، ")}`
+        )
+        .join(" · ") || null;
+    const modifierKey364 = restaurantModifierSelectionKey364(
+      validatedModifierSelections364
+    );
 
     const price = validatedRestaurantOption362?.price ?? basePrice362;
     if (!Number.isFinite(price) || price <= 0) return;
@@ -6239,7 +6617,8 @@ export default function DarikDirectStorefrontPage() {
       product.id,
       colorVariant216?.id || null,
       sizeSelection245?.key || null,
-      validatedRestaurantOption362?.id || null
+      validatedRestaurantOption362?.id || null,
+      modifierKey364
     );
 
     setCart((current) => {
@@ -6257,6 +6636,10 @@ export default function DarikDirectStorefrontPage() {
                   weightUnit: weightUnit360,
                   weightStep: weightStep360,
                   weightUnitPrice: price,
+                  restaurantModifierSelections: validatedModifierSelections364,
+                  restaurantModifierSummary: modifierSummary364,
+                  restaurantModifierSummaryAr: modifierSummaryAr364,
+                  restaurantModifierPriceDelta: modifierPriceDelta364,
                 }
               : { ...line, quantity: line.quantity + 1 }
             : line
@@ -6280,6 +6663,10 @@ export default function DarikDirectStorefrontPage() {
           restaurantOptionId: validatedRestaurantOption362?.id || null,
           restaurantOptionName: validatedRestaurantOption362?.name || null,
           restaurantOptionNameAr: validatedRestaurantOption362?.nameAr || null,
+          restaurantModifierSelections: validatedModifierSelections364,
+          restaurantModifierSummary: modifierSummary364,
+          restaurantModifierSummaryAr: modifierSummaryAr364,
+          restaurantModifierPriceDelta: modifierPriceDelta364,
           soldByWeight: soldByWeight360,
           weightUnit: soldByWeight360 ? weightUnit360 : null,
           weightStep: soldByWeight360 ? weightStep360 : null,
@@ -6498,7 +6885,7 @@ export default function DarikDirectStorefrontPage() {
           ? await uploadCliqReceipt()
           : null;
 
-      const result = await supabase.rpc("darik_direct_place_online_order_v6", {
+      const result = await supabase.rpc("darik_direct_place_online_order_v7", {
         p_storefront_slug: storefront.slug,
         p_customer_name: customerName,
         p_customer_phone: customerPhone,
@@ -6518,6 +6905,12 @@ export default function DarikDirectStorefrontPage() {
           color_variant_id: line.colorVariantId,
           size_key: line.sizeKey,
           restaurant_option_id: line.restaurantOptionId,
+          restaurant_modifier_selections: line.restaurantModifierSelections.map(
+            (selection364) => ({
+              group_id: selection364.groupId,
+              option_ids: selection364.optionIds,
+            })
+          ),
         })),
         p_payment_method: checkoutForm.paymentMethod,
         p_cliq_receipt_path: receiptPath,
@@ -7256,7 +7649,7 @@ export default function DarikDirectStorefrontPage() {
     "",
     ...cart.map(
       (line) =>
-        `${line.soldByWeight ? `${formatWeight360(line.quantity * (line.weightStep || 0.25))} ${line.weightUnit || "kg"}` : line.quantity} × ${line.name}${line.restaurantOptionName ? ` — ${line.restaurantOptionName}${line.restaurantOptionNameAr ? ` / ${line.restaurantOptionNameAr}` : ""}` : ""}${line.colorName ? ` — ${line.colorName}${line.colorNameAr ? ` / ${line.colorNameAr}` : ""}` : ""}${line.sizeLabel ? ` — Size: ${line.sizeLabel}` : ""} — ${money(line.price * line.quantity)}`
+        `${line.soldByWeight ? `${formatWeight360(line.quantity * (line.weightStep || 0.25))} ${line.weightUnit || "kg"}` : line.quantity} × ${line.name}${line.restaurantOptionName ? ` — ${line.restaurantOptionName}${line.restaurantOptionNameAr ? ` / ${line.restaurantOptionNameAr}` : ""}` : ""}${line.restaurantModifierSummary ? ` — ${line.restaurantModifierSummary}${line.restaurantModifierSummaryAr ? ` / ${line.restaurantModifierSummaryAr}` : ""}` : ""}${line.colorName ? ` — ${line.colorName}${line.colorNameAr ? ` / ${line.colorNameAr}` : ""}` : ""}${line.sizeLabel ? ` — Size: ${line.sizeLabel}` : ""} — ${money(restaurantCartLineTotal364(line))}`
     ),
     "",
     `Fulfillment: ${pickupOnly ? "Local pickup" : "Delivery"}`,
@@ -7903,26 +8296,44 @@ function renderProductCard(product: Product) {
             ? restaurantOptionsByProduct362[activeProduct.id] || []
             : []
         }
+        restaurantModifierGroups364={
+          activeProduct
+            ? restaurantModifierGroupsByProduct364[activeProduct.id] || []
+            : []
+        }
         cartCount={cartCount}
         onClose={closeProductDetail}
-        onAddToCart={(colorVariant216, sizeSelection245, restaurantOption362, weightSteps360) => {
+        onAddToCart={(
+          colorVariant216,
+          sizeSelection245,
+          restaurantOption362,
+          restaurantModifierSelections364,
+          weightSteps360
+        ) => {
           if (!activeProduct) return;
           addToCart(
             activeProduct,
             colorVariant216,
             sizeSelection245,
             restaurantOption362,
+            restaurantModifierSelections364,
             weightSteps360
           );
         }}
-        onDecreaseCart={(colorVariant216, sizeSelection245, restaurantOption362) => {
+        onDecreaseCart={(
+          colorVariant216,
+          sizeSelection245,
+          restaurantOption362,
+          restaurantModifierSelections364
+        ) => {
           if (!activeProduct) return;
           changeQuantity(
             cartLineId216(
               activeProduct.id,
               colorVariant216?.id || null,
               sizeSelection245?.key || null,
-              restaurantOption362?.id || null
+              restaurantOption362?.id || null,
+              restaurantModifierSelectionKey364(restaurantModifierSelections364)
             ),
             -1
           );
@@ -9379,6 +9790,15 @@ style={{
                               ) : null}
                             </small>
                           ) : null}
+                          {line.restaurantModifierSummary ? (
+                            <small className={styles.cartSize245}>
+                              Additional choices / الخيارات الإضافية: {" "}
+                              <strong>{line.restaurantModifierSummary}</strong>
+                              {line.restaurantModifierSummaryAr ? (
+                                <span dir="rtl"> / {line.restaurantModifierSummaryAr}</span>
+                              ) : null}
+                            </small>
+                          ) : null}
                           {line.colorName ? (
                             <small className={styles.cartColor216}>
                               {line.colorName}
@@ -9394,8 +9814,10 @@ style={{
                           ) : null}
                           <p>
                             {line.soldByWeight && line.weightUnitPrice
-                              ? `${money(line.weightUnitPrice)} / ${line.weightUnit || "kg"}`
-                              : money(line.price)}
+                              ? `${money(line.weightUnitPrice)} / ${line.weightUnit || "kg"}${line.restaurantModifierPriceDelta > 0 ? ` + ${money(line.restaurantModifierPriceDelta)} add-ons` : ""}`
+                              : money(
+                                  line.price + line.restaurantModifierPriceDelta
+                                )}
                           </p>
                         </div>
                         <div className={styles.quantity}>
