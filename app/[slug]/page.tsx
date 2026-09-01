@@ -8385,33 +8385,6 @@ function renderProductCard(product: Product) {
         </a>
 
         <nav className={styles.headerActions}>
-          {/* DARIK_MAIN_STOREFRONT_SOCIAL_ICONS_369L */}
-          {normalizeExternalUrl(storefront.facebook_url) ? (
-            <a
-              className={styles.headerSocialIcon369L}
-              href={normalizeExternalUrl(storefront.facebook_url) || undefined}
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label="Facebook"
-              title="Facebook"
-              data-darik-main-social="facebook"
-            >
-              <Icon name="facebook" size={19} />
-            </a>
-          ) : null}
-          {normalizeExternalUrl(storefront.instagram_url) ? (
-            <a
-              className={styles.headerSocialIcon369L}
-              href={normalizeExternalUrl(storefront.instagram_url) || undefined}
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label="Instagram"
-              title="Instagram"
-              data-darik-main-social="instagram"
-            >
-              <Icon name="instagram" size={19} />
-            </a>
-          ) : null}
           <button
             className={[
               styles.builderPositionTarget145,
@@ -8853,14 +8826,21 @@ style={{
             </span>
           </a>
         ) : null}
-        {(isAutoParts || isGroceryStore
-          ? contactLinks
-              .filter((link) => link.icon === "call" || link.icon === "whatsapp")
-              .slice(0, 2)
-          : contactLinks.slice(0, 4)
-        ).map((link) => (
+        {/* DARIK_SOCIAL_BESIDE_CALL_WHATSAPP_369O */}
+        {contactLinks
+          .filter((link) =>
+            link.icon === "call" ||
+            link.icon === "whatsapp" ||
+            link.icon === "facebook" ||
+            link.icon === "instagram"
+          )
+          .map((link) => (
           <a
-            className={styles.contactQuickLink}
+            className={`${styles.contactQuickLink} ${
+              link.icon === "facebook" || link.icon === "instagram"
+                ? styles.socialQuickLink369O
+                : ""
+            }`}
             key={`quick-${link.label}-${link.href}`}
             href={link.href}
             target={link.href.startsWith("http") ? "_blank" : undefined}

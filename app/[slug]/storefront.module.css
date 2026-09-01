@@ -131,34 +131,6 @@
   gap: 7px;
 }
 
-/* DARIK_MAIN_STOREFRONT_SOCIAL_ICONS_369L */
-.headerActions .headerSocialIcon369L {
-  width: 42px;
-  height: 42px;
-  min-width: 42px;
-  display: inline-grid;
-  place-items: center;
-  flex: 0 0 auto;
-  padding: 0;
-  border: 1px solid #e2e8f0;
-  border-radius: 13px;
-  background: #ffffff;
-  color: #334155;
-  text-decoration: none;
-  transition: 150ms ease;
-}
-
-.headerActions .headerSocialIcon369L:hover {
-  border-color: color-mix(in srgb, var(--store-accent) 50%, #dbe3ed);
-  color: var(--store-primary);
-  transform: translateY(-1px);
-}
-
-.headerActions .headerSocialIcon369L:focus-visible {
-  outline: 3px solid color-mix(in srgb, var(--store-accent) 35%, transparent);
-  outline-offset: 2px;
-}
-
 .headerActions button {
   min-height: 42px;
   display: inline-flex;
@@ -22894,4 +22866,69 @@
     Arial,
     Helvetica,
     sans-serif !important;
+}
+
+
+/* DARIK_SOCIAL_BESIDE_CALL_WHATSAPP_369O */
+.quickInfoStrip:has(.socialQuickLink369O) {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.quickInfoStrip:has(.locationQuickLink):has(.socialQuickLink369O) {
+  grid-template-columns: minmax(220px, 1.35fr) repeat(4, minmax(0, 1fr));
+}
+
+.quickInfoStrip .socialQuickLink369O {
+  display: flex !important;
+  justify-content: center;
+}
+
+.quickInfoStrip .socialQuickLink369O > span:last-child {
+  display: none;
+}
+
+@media (max-width: 1120px) {
+  .quickInfoStrip:has(.socialQuickLink369O),
+  .quickInfoStrip:has(.locationQuickLink):has(.socialQuickLink369O) {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .quickInfoStrip:has(.socialQuickLink369O) .locationQuickLink {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 780px) {
+  .quickInfoStrip:has(.socialQuickLink369O),
+  .quickInfoStrip:has(.locationQuickLink):has(.socialQuickLink369O) {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .quickInfoStrip:has(.socialQuickLink369O) .locationQuickLink {
+    grid-column: 1 / -1;
+  }
+
+  .quickInfoStrip:has(.socialQuickLink369O) .contactQuickLink {
+    display: flex !important;
+    min-width: 0;
+    min-height: 58px;
+    justify-content: center;
+    padding: 8px 4px;
+    border-right: 1px solid #e8edf4;
+    border-bottom: 0;
+  }
+
+  .quickInfoStrip:has(.socialQuickLink369O) .contactQuickLink:last-child {
+    border-right: 0;
+  }
+
+  .quickInfoStrip:has(.socialQuickLink369O) .contactQuickLink > span:last-child {
+    display: none;
+  }
+
+  .quickInfoStrip:has(.socialQuickLink369O) .quickIcon {
+    width: 36px;
+    height: 36px;
+    margin: 0;
+  }
 }
