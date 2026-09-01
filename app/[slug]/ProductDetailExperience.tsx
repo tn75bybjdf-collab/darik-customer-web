@@ -2725,8 +2725,17 @@ export default function ProductDetailExperience({
                                   className={styles.restaurantAddonQuantityValue371C}
                                   aria-live="polite"
                                 >
-                                  Qty {quantity371B}
-                                  <span dir="rtl"> / كمية {quantity371B}</span>
+                                  {/* DARIK_RESTAURANT_QTY_BIDI_FIX_371D */}
+                                  <span
+                                    className={styles.restaurantAddonQuantityLabel371D}
+                                  >
+                                    Qty / <span dir="rtl">الكمية</span>
+                                  </span>
+                                  <span
+                                    className={styles.restaurantAddonQuantityNumber371D}
+                                  >
+                                    {quantity371B}
+                                  </span>
                                 </strong>
 
                                 <button

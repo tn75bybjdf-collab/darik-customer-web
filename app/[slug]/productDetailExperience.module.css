@@ -6155,17 +6155,35 @@
 
 .restaurantAddonQuantityValue371C {
   min-width: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 3px;
-  padding: 0 3px;
+  display: grid;
+  place-items: center;
+  gap: 1px;
+  padding: 3px 2px;
   color: #14532d;
-  font-size: 10.5px;
-  line-height: 1.1;
+  line-height: 1;
   font-weight: 900;
   text-align: center;
+}
+
+.restaurantAddonQuantityLabel371D {
+  display: block;
+  color: #4b6854;
+  font-size: 8.5px;
+  line-height: 1;
+  font-weight: 800;
   white-space: nowrap;
+  unicode-bidi: isolate;
+}
+
+.restaurantAddonQuantityNumber371D {
+  display: block;
+  color: #14532d;
+  font-size: 16px;
+  line-height: 1;
+  font-weight: 950;
+  font-variant-numeric: tabular-nums;
+  direction: ltr;
+  unicode-bidi: isolate;
 }
 
 @media (max-width: 430px) {
@@ -6204,9 +6222,6 @@
     grid-template-columns: 36px minmax(0, 1fr) 36px;
   }
 
-  .restaurantAddonQuantityValue371C {
-    font-size: 9.5px;
-  }
 }
 
 @media (max-width: 350px) {
