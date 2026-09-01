@@ -1,0 +1,716 @@
+/* DARIK_CUSTOMER_SIGNIN_GLOBAL_AND_STORE_SCOPED_HISTORY_CSS_339 */
+
+.darikAccountHub339 {
+  position: fixed;
+  top: max(14px, env(safe-area-inset-top));
+  right: 18px;
+  z-index: 2147482500;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: inherit;
+  color: #101828;
+}
+
+[dir="rtl"].darikAccountHub339 {
+  right: auto;
+  left: 18px;
+}
+
+.darikHello339 {
+  min-width: 0;
+  min-height: 42px;
+  max-width: 185px;
+  display: flex;
+  align-items: baseline;
+  gap: 5px;
+  border: 1px solid rgba(15, 23, 42, 0.11);
+  border-radius: 999px;
+  padding: 9px 12px;
+  background: rgba(255, 255, 255, 0.97);
+  box-shadow: 0 10px 28px rgba(15, 23, 42, 0.11);
+  backdrop-filter: blur(12px);
+}
+
+.darikHello339 span {
+  color: #667085;
+  font-size: 10px;
+  font-weight: 800;
+}
+
+.darikHello339 strong {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: #101828;
+  font-size: 13px;
+  font-weight: 950;
+  white-space: nowrap;
+}
+
+.darikCustomerSignIn339,
+.darikAccountIcon339 {
+  min-height: 42px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #111827;
+  background: #111827;
+  color: #ffffff;
+  box-shadow: 0 10px 28px rgba(15, 23, 42, 0.16);
+  cursor: pointer;
+}
+
+.darikCustomerSignIn339 {
+  gap: 8px;
+  border-radius: 999px;
+  padding: 0 15px;
+  font: inherit;
+  font-size: 11px;
+  font-weight: 900;
+}
+
+.darikCustomerSignIn339 svg {
+  color: #f6cf48;
+}
+
+.darikAccountIcon339 {
+  width: 42px;
+  border-radius: 50%;
+  padding: 0;
+  color: #f6cf48;
+}
+
+.darikAccountPopover339 {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  width: min(380px, calc(100vw - 24px));
+  max-height: min(680px, calc(100dvh - 82px));
+  overflow: auto;
+  border: 1px solid #e4e7ec;
+  border-radius: 22px;
+  padding: 15px;
+  background: #ffffff;
+  color: #101828;
+  box-shadow: 0 24px 70px rgba(15, 23, 42, 0.22);
+}
+
+[dir="rtl"].darikAccountHub339 .darikAccountPopover339 {
+  right: auto;
+  left: 0;
+}
+
+.darikAccountHeader339 {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 3px 3px 12px;
+  border-bottom: 1px solid #eaecf0;
+}
+
+.darikAccountHeader339 > div {
+  min-width: 0;
+  display: grid;
+  gap: 3px;
+}
+
+.darikAccountHeader339 small {
+  color: #0d7b6c;
+  font-size: 9px;
+  font-weight: 950;
+  letter-spacing: 0.12em;
+}
+
+.darikAccountHeader339 strong {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 17px;
+  white-space: nowrap;
+}
+
+.darikAccountHeader339 > button {
+  width: 32px;
+  height: 32px;
+  border: 0;
+  border-radius: 50%;
+  padding: 0;
+  background: #f2f4f7;
+  color: #344054;
+  font-size: 21px;
+  cursor: pointer;
+}
+
+.darikSignInView339,
+.darikAccountView339 {
+  display: grid;
+  gap: 12px;
+  padding-top: 14px;
+}
+
+.darikSignInView339 > p,
+.darikViewHeading339 p,
+.darikMuted339 {
+  margin: 0;
+  color: #667085;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1.5;
+}
+
+.darikSignInView339 label,
+.darikPasswordField339 {
+  display: grid;
+  gap: 6px;
+}
+
+.darikSignInView339 label > span,
+.darikPasswordField339 span {
+  color: #667085;
+  font-size: 10px;
+  font-weight: 850;
+}
+
+.darikSignInView339 input,
+.darikPasswordField339 input {
+  width: 100%;
+  min-height: 43px;
+  box-sizing: border-box;
+  border: 1px solid #d0d5dd;
+  border-radius: 12px;
+  padding: 9px 11px;
+  background: #ffffff;
+  color: #101828;
+  font: inherit;
+  outline: none;
+}
+
+.darikSignInView339 input:focus,
+.darikPasswordField339 input:focus {
+  border-color: #0d7b6c;
+  box-shadow: 0 0 0 3px rgba(13, 123, 108, 0.14);
+}
+
+.darikSignInSubmit339,
+.darikPasswordSave339 {
+  min-height: 44px;
+  border: 1px solid #111827;
+  border-radius: 13px;
+  background: #111827;
+  color: #ffffff;
+  font: inherit;
+  font-size: 11px;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.darikSignInSubmit339:disabled,
+.darikPasswordSave339:disabled {
+  cursor: wait;
+  opacity: 0.65;
+}
+
+.darikCreateNote339 {
+  color: #89949b;
+  font-size: 9px;
+  font-weight: 750;
+  line-height: 1.45;
+}
+
+.darikAccountMenu339 {
+  display: grid;
+  gap: 8px;
+  padding-top: 12px;
+}
+
+.darikAccountMenu339 > button {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  border: 1px solid #eaecf0;
+  border-radius: 15px;
+  padding: 11px;
+  background: #ffffff;
+  color: #101828;
+  text-align: start;
+  cursor: pointer;
+}
+
+.darikAccountMenu339 > button:hover {
+  background: #f9fafb;
+}
+
+.darikAccountMenu339 > button:disabled {
+  cursor: wait;
+  opacity: 0.6;
+}
+
+.darikAccountMenu339 > button > span {
+  flex: 0 0 auto;
+  width: 32px;
+  height: 32px;
+  display: grid;
+  place-items: center;
+  border-radius: 10px;
+  background: #e9f6f3;
+  color: #0d695c;
+  font-weight: 950;
+}
+
+.darikAccountMenu339 > button > div {
+  min-width: 0;
+  display: grid;
+  gap: 2px;
+}
+
+.darikAccountMenu339 strong {
+  font-size: 13px;
+  font-weight: 950;
+}
+
+.darikAccountMenu339 small {
+  color: #667085;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.darikSignOut339 {
+  border-color: #fecaca !important;
+  background: #fff7f7 !important;
+}
+
+.darikSignOut339 > span {
+  background: #fee2e2 !important;
+  color: #991b1b !important;
+}
+
+.darikBack339 {
+  width: fit-content;
+  border: 0;
+  padding: 0;
+  background: transparent;
+  color: #475467;
+  font: inherit;
+  font-size: 11px;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.darikViewHeading339 {
+  display: grid;
+  gap: 4px;
+}
+
+.darikViewHeading339 h4 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 950;
+}
+
+.darikOrderList339 {
+  display: grid;
+  gap: 8px;
+}
+
+.darikOrderList339 article {
+  display: grid;
+  gap: 4px;
+  border: 1px solid #eaecf0;
+  border-radius: 13px;
+  padding: 11px 12px;
+  background: #f9fafb;
+}
+
+.darikOrderList339 article > div {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.darikOrderList339 span {
+  color: #667085;
+  font-size: 10px;
+  font-weight: 850;
+}
+
+.darikOrderList339 strong {
+  color: #101828;
+  font-size: 12px;
+  font-weight: 950;
+}
+
+.darikOrderList339 small {
+  color: #475467;
+  font-size: 10px;
+  font-weight: 750;
+}
+
+.darikStoreName339 {
+  color: #0d695c !important;
+  font-weight: 900 !important;
+}
+
+.darikDetails339 {
+  display: grid;
+  gap: 8px;
+}
+
+.darikDetails339 label {
+  display: grid;
+  gap: 3px;
+  border: 1px solid #eaecf0;
+  border-radius: 13px;
+  padding: 11px 12px;
+  background: #f9fafb;
+}
+
+.darikDetails339 span {
+  color: #667085;
+  font-size: 10px;
+  font-weight: 850;
+}
+
+.darikDetails339 strong {
+  overflow-wrap: anywhere;
+  font-size: 12px;
+}
+
+.darikMessage339 {
+  margin: 12px 0 0;
+  border-radius: 11px;
+  padding: 9px 10px;
+  background: #fff8e8;
+  color: #7a5b00;
+  font-size: 10px;
+  font-weight: 800;
+  line-height: 1.45;
+}
+
+@media (max-width: 700px) {
+  .darikAccountHub339 {
+    top: max(9px, env(safe-area-inset-top));
+    right: 10px;
+  }
+
+  [dir="rtl"].darikAccountHub339 {
+    right: auto;
+    left: 10px;
+  }
+
+  .darikHello339 {
+    display: none;
+  }
+
+  .darikCustomerSignIn339 {
+    min-height: 38px;
+    padding: 0 12px;
+    font-size: 10px;
+  }
+
+  .darikAccountIcon339 {
+    width: 38px;
+    height: 38px;
+  }
+
+  .darikAccountPopover339 {
+    width: min(360px, calc(100vw - 20px));
+    max-height: calc(100dvh - 66px);
+    border-radius: 19px;
+    padding: 13px;
+  }
+}
+
+
+/* DARIK_CUSTOMER_CLICKABLE_ORDER_DETAILS_CSS_340 */
+.darikOrderCard340 {
+  width: 100%;
+  display: grid;
+  gap: 5px;
+  border: 1px solid #eaecf0;
+  border-radius: 13px;
+  padding: 11px 12px;
+  background: #f9fafb;
+  color: #101828;
+  font: inherit;
+  text-align: start;
+  cursor: pointer;
+  transition:
+    border-color 140ms ease,
+    background 140ms ease,
+    transform 140ms ease,
+    box-shadow 140ms ease;
+}
+
+.darikOrderCard340:hover {
+  transform: translateY(-1px);
+  border-color: #a8d6ce;
+  background: #f4fbf9;
+  box-shadow: 0 8px 20px rgba(15, 23, 42, 0.055);
+}
+
+.darikOrderCard340 > div:first-child,
+.darikOrderCardBottom340 {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.darikOrderCard340 span {
+  color: #667085;
+  font-size: 10px;
+  font-weight: 850;
+}
+
+.darikOrderCard340 strong {
+  color: #101828;
+  font-size: 12px;
+  font-weight: 950;
+}
+
+.darikOrderCard340 small {
+  color: #475467;
+  font-size: 10px;
+  font-weight: 750;
+}
+
+.darikOrderCardBottom340 b {
+  color: #0d695c;
+  font-size: 9px;
+  font-weight: 950;
+  white-space: nowrap;
+}
+
+.darikOrderDetails340 {
+  display: grid;
+  gap: 12px;
+}
+
+.darikOrderHero340 {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  border: 1px solid #cfe7e2;
+  border-radius: 16px;
+  padding: 14px;
+  background: #f2faf8;
+}
+
+.darikOrderHero340 > div {
+  min-width: 0;
+  display: grid;
+  gap: 2px;
+}
+
+.darikOrderHero340 small {
+  color: #667085;
+  font-size: 9px;
+  font-weight: 850;
+}
+
+.darikOrderHero340 strong {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: #101828;
+  font-size: 17px;
+  font-weight: 950;
+  white-space: nowrap;
+}
+
+.darikOrderHero340 > span {
+  flex: 0 0 auto;
+  border-radius: 999px;
+  padding: 6px 9px;
+  background: #dff4ef;
+  color: #0d695c;
+  font-size: 9px;
+  font-weight: 950;
+}
+
+.darikOrderMetaGrid340 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 7px;
+}
+
+.darikOrderMetaGrid340 label {
+  min-width: 0;
+  display: grid;
+  gap: 3px;
+  border: 1px solid #eaecf0;
+  border-radius: 12px;
+  padding: 10px;
+  background: #ffffff;
+}
+
+.darikOrderMetaGrid340 span {
+  color: #667085;
+  font-size: 9px;
+  font-weight: 850;
+}
+
+.darikOrderMetaGrid340 strong {
+  overflow-wrap: anywhere;
+  color: #101828;
+  font-size: 10px;
+  font-weight: 900;
+}
+
+.darikOrderProducts340,
+.darikOrderTotals340,
+.darikOrderDelivery340 {
+  border: 1px solid #eaecf0;
+  border-radius: 15px;
+  padding: 12px;
+  background: #ffffff;
+}
+
+.darikOrderSectionHead340 {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 9px;
+}
+
+.darikOrderSectionHead340 strong {
+  font-size: 12px;
+  font-weight: 950;
+}
+
+.darikOrderSectionHead340 span {
+  min-width: 25px;
+  min-height: 25px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  background: #e8f5f2;
+  color: #0d695c;
+  font-size: 9px;
+  font-weight: 950;
+}
+
+.darikOrderItems340 {
+  display: grid;
+}
+
+.darikOrderItems340 article {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 9px 0;
+  border-top: 1px solid #f0f2f4;
+}
+
+.darikOrderItems340 article > div {
+  min-width: 0;
+  display: grid;
+  gap: 3px;
+}
+
+.darikOrderItems340 article strong {
+  overflow-wrap: anywhere;
+  color: #101828;
+  font-size: 11px;
+  font-weight: 900;
+}
+
+.darikOrderItems340 article small {
+  color: #667085;
+  font-size: 9px;
+  font-weight: 750;
+}
+
+.darikOrderItems340 article > b {
+  flex: 0 0 auto;
+  color: #101828;
+  font-size: 10px;
+  font-weight: 950;
+}
+
+.darikOrderTotals340 {
+  display: grid;
+  gap: 7px;
+  background: #f9fafb;
+}
+
+.darikOrderTotals340 > div {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.darikOrderTotals340 span {
+  color: #667085;
+  font-size: 10px;
+  font-weight: 800;
+}
+
+.darikOrderTotals340 strong {
+  color: #101828;
+  font-size: 11px;
+  font-weight: 950;
+}
+
+.darikOrderGrandTotal340 {
+  margin-top: 3px;
+  border-top: 1px solid #dde3e6;
+  padding-top: 9px;
+}
+
+.darikOrderGrandTotal340 span,
+.darikOrderGrandTotal340 strong {
+  color: #0d695c;
+  font-size: 13px;
+  font-weight: 950;
+}
+
+.darikOrderDelivery340 {
+  display: grid;
+  gap: 7px;
+}
+
+.darikOrderDelivery340 > strong {
+  color: #101828;
+  font-size: 12px;
+  font-weight: 950;
+}
+
+.darikOrderDelivery340 p,
+.darikOrderDelivery340 small {
+  margin: 0;
+  color: #667085;
+  font-size: 10px;
+  font-weight: 750;
+  line-height: 1.5;
+}
+
+.darikOrderDelivery340 > div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 14px;
+  color: #667085;
+  font-size: 9px;
+  font-weight: 800;
+}
+
+.darikOrderDelivery340 b {
+  color: #101828;
+}
+
+@media (max-width: 520px) {
+  .darikOrderMetaGrid340 {
+    grid-template-columns: 1fr;
+  }
+
+  .darikOrderCardBottom340 {
+    align-items: flex-end;
+  }
+}
