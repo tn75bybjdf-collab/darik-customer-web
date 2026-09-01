@@ -4033,7 +4033,7 @@ export default function DarikDirectProductsPage() {
     .replace(/[\s-]+/g, "_");
   const supportsWeightSelling =
     WEIGHT_MECHANICS_FIELDS.has(effectiveWeightBusinessType247);
-  const isActualRestaurant362 = actualBusinessType === "restaurant";
+  const isActualRestaurant362 = effectiveBusinessType === "restaurant";
 
   function restaurantChoiceId362() {
     if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
@@ -10776,7 +10776,7 @@ export default function DarikDirectProductsPage() {
                               })}
                             </div>
                           </div>
-                        ) : (
+                        ) : isActualRestaurant362 ? null : (
                           <div className={styles.shoeWizardNoSize}>
                             <strong>
                               No size system required for this category /
