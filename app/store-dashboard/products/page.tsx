@@ -2968,6 +2968,21 @@ type RestaurantPriceChoiceForm362 = {
   available: boolean;
 };
 
+type RestaurantPriceChoicePreset366 = {
+  id: string;
+  name: string;
+  choices: Array<{
+    id?: string | null;
+    name?: string | null;
+    name_ar?: string | null;
+    price?: number | string | null;
+    available?: boolean | null;
+    sort_order?: number | string | null;
+  }>;
+  use_count?: number | null;
+  last_used_at?: string | null;
+};
+
 type RestaurantModifierOptionStored364 = {
   id?: string | null;
   name?: string | null;
@@ -3527,6 +3542,11 @@ export default function DarikDirectProductsPage() {
   const [restaurantPriceChoices362, setRestaurantPriceChoices362] = useState<
     RestaurantPriceChoiceForm362[]
   >([]);
+  const [restaurantPriceChoicePresets366, setRestaurantPriceChoicePresets366] = useState<
+    RestaurantPriceChoicePreset366[]
+  >([]);
+  const [restaurantPriceChoicePresetSelection366, setRestaurantPriceChoicePresetSelection366] =
+    useState("");
   const [restaurantModifierGroups364, setRestaurantModifierGroups364] = useState<
     RestaurantModifierGroupForm364[]
   >([]);
@@ -3724,7 +3744,12 @@ export default function DarikDirectProductsPage() {
       );
     }
 
-    const [productResult, categoryResult, restaurantPresetResult365] = await Promise.all([
+    const [
+      productResult,
+      categoryResult,
+      restaurantPresetResult365,
+      restaurantPricePresetResult366,
+    ] = await Promise.all([
       supabase
         .from("products")
         .select(
@@ -3816,6 +3841,9 @@ export default function DarikDirectProductsPage() {
       supabase.rpc("darik_direct_get_restaurant_modifier_presets_v1", {
         p_retailer_id: selectedRetailerId,
       }),
+      supabase.rpc("darik_direct_get_restaurant_price_choice_presets_v1", {
+        p_retailer_id: selectedRetailerId,
+      }),
     ]);
 
     if (productResult.error) {
@@ -3837,6 +3865,23 @@ export default function DarikDirectProductsPage() {
       );
     } else {
       setRestaurantModifierPresets365([]);
+    }
+
+    if (!restaurantPricePresetResult366.error) {
+      const rawPresets366 = Array.isArray(restaurantPricePresetResult366.data)
+        ? (restaurantPricePresetResult366.data as RestaurantPriceChoicePreset366[])
+        : [];
+      const seenPresetKeys366 = new Set<string>();
+      setRestaurantPriceChoicePresets366(
+        rawPresets366.filter((preset) => {
+          const key = restaurantPriceChoicePresetKey366(preset);
+          if (!key || seenPresetKeys366.has(key)) return false;
+          seenPresetKeys366.add(key);
+          return true;
+        })
+      );
+    } else {
+      setRestaurantPriceChoicePresets366([]);
     }
 
     setLoading(false);
@@ -4005,6 +4050,57 @@ export default function DarikDirectProductsPage() {
       price: "",
       available: true,
     };
+  }
+
+  function restaurantPriceChoicePresetKey366(preset: RestaurantPriceChoicePreset366) {
+    const choices = Array.isArray(preset.choices) ? preset.choices : [];
+    return choices
+      .map((choice) => {
+        const ar = String(choice?.name_ar || "").trim();
+        const price = Number(choice?.price ?? 0);
+        const priceKey = Number.isFinite(price) ? price.toFixed(3) : "0.000";
+        return `${ar}|${priceKey}|${choice?.available === false ? "0" : "1"}`;
+      })
+      .join("||");
+  }
+
+  function restaurantPriceChoicePresetLabel366(preset: RestaurantPriceChoicePreset366) {
+    const choices = Array.isArray(preset.choices) ? preset.choices : [];
+    if (choices.length === 0) return preset.name || "Saved portions";
+    const first = String(choices[0]?.name || choices[0]?.name_ar || preset.name || "Saved portions").trim();
+    return `${choices.length} choices · ${first}${choices.length > 1 ? "…" : ""}`;
+  }
+
+  function applyRestaurantPriceChoicePreset366(presetId: string) {
+    setRestaurantPriceChoicePresetSelection366(presetId);
+    if (!presetId) return;
+    const preset = restaurantPriceChoicePresets366.find((entry) => entry.id === presetId);
+    if (!preset) {
+      setRestaurantPriceChoicePresetSelection366("");
+      return;
+    }
+    const nextChoices = (Array.isArray(preset.choices) ? preset.choices : [])
+      .map((choice) => ({
+        id: restaurantChoiceId362(),
+        name: String(choice?.name || ""),
+        nameAr: String(choice?.name_ar || ""),
+        price: String(choice?.price ?? ""),
+        available: choice?.available !== false,
+      }))
+      .filter((choice) => choice.name.trim() && choice.nameAr.trim());
+    if (nextChoices.length < 2) {
+      setRestaurantPriceChoicePresetSelection366("");
+      return;
+    }
+    setRestaurantPriceChoicesEnabled362(true);
+    setRestaurantPriceChoices362(nextChoices);
+    setRestaurantPriceChoicePresetSelection366("");
+    setShoeWizardErrors((current) => {
+      if (!current.restaurantChoices362) return current;
+      const next = { ...current };
+      delete next.restaurantChoices362;
+      return next;
+    });
   }
 
   function setRestaurantPriceChoicesMode362(enabled: boolean) {
@@ -4194,6 +4290,37 @@ export default function DarikDirectProductsPage() {
             No / لا
           </button>
         </div>
+
+        {restaurantPriceChoicePresets366.length > 0 ? (
+          <label
+            style={{
+              display: "grid",
+              gap: "0.35rem",
+              marginBottom: "1rem",
+              padding: "0.75rem",
+              border: "1px solid #bfdbfe",
+              borderRadius: "10px",
+              background: "#eff6ff",
+            }}
+          >
+            <strong>Saved portions / الخيارات المحفوظة</strong>
+            <small style={{ color: "#526173" }}>
+              Load a complete set of portion names and prices already used by this restaurant. /
+              حمّل مجموعة كاملة من أسماء الحصص والأسعار التي استخدمها المطعم سابقاً.
+            </small>
+            <select
+              value={restaurantPriceChoicePresetSelection366}
+              onChange={(event) => applyRestaurantPriceChoicePreset366(event.target.value)}
+            >
+              <option value="">Select saved portions / اختر خيارات محفوظة</option>
+              {restaurantPriceChoicePresets366.map((preset) => (
+                <option key={preset.id} value={preset.id}>
+                  {restaurantPriceChoicePresetLabel366(preset)}
+                </option>
+              ))}
+            </select>
+          </label>
+        ) : null}
 
         {restaurantPriceChoicesEnabled362 ? (
           <div style={{ display: "grid", gap: "0.8rem" }}>
