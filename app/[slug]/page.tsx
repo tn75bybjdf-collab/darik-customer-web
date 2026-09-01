@@ -6639,6 +6639,43 @@ export default function DarikDirectStorefrontPage() {
     ]
   );
 
+  // DARIK_FRONTEND_363_PUBLIC_HIDDEN_LAYOUT_PARITY
+  // Saved freeform deletions must remain authoritative on the live storefront.
+  // The existing DOM effect continues to own x/y/scale. This CSS bridge only
+  // enforces display:none for elements whose saved layout says hidden:true.
+  const darikPublicHiddenCss363 = useMemo(() => {
+    function hiddenRules363(device363: "desktop" | "mobile") {
+      const layout363: DarikPublicLayoutDevice166 =
+        darikEffectivePublicLayout166[device363];
+
+      return Object.entries(layout363)
+        .filter(
+          ([locator363, point363]) =>
+            darikSafeLayoutLocator166(locator363) &&
+            point363.hidden === true
+        )
+        .map(
+          ([locator363]) =>
+            `[data-darik-position-builder145] ${locator363}{display:none!important;}`
+        )
+        .join("\n");
+    }
+
+    const desktop363 = hiddenRules363("desktop");
+    const mobile363 = hiddenRules363("mobile");
+
+    return [
+      desktop363
+        ? `@media (min-width:721px){${desktop363}}`
+        : "",
+      mobile363
+        ? `@media (max-width:720px){${mobile363}}`
+        : "",
+    ]
+      .filter(Boolean)
+      .join("\n");
+  }, [darikEffectivePublicLayout166]);
+
   useEffect(() => {
     if (
       (isBuilderPositionPreview145 &&
@@ -7545,6 +7582,12 @@ function renderProductCard(product: Product) {
       data-category-count={String(visibleCategories.length)}
       data-direct-purchase={hasDirectPurchaseProducts ? "yes" : "no"}
     >
+      {darikPublicHiddenCss363 ? (
+        <style
+          data-darik-public-hidden-layout363="true"
+          dangerouslySetInnerHTML={{ __html: darikPublicHiddenCss363 }}
+        />
+      ) : null}
       {activeStoreBanner274?.image_url ? (
         <div
           data-darik-sticky-banner="283"
