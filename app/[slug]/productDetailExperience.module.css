@@ -5995,3 +5995,223 @@
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }
+
+/* ==========================================================================
+   DARIK_RESTAURANT_CHOICE_UI_371C
+   Restaurant-specific choice cards. Do not reuse generic size-tab visuals.
+   ========================================================================== */
+
+.restaurantChoiceGrid371C,
+.restaurantModifierGrid371C {
+  width: 100%;
+  min-width: 0;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  overflow: visible;
+}
+
+.restaurantModifierOptionWrap371C {
+  width: 100%;
+  min-width: 0;
+  display: grid;
+  gap: 8px;
+}
+
+.restaurantChoiceCard371C {
+  position: relative;
+  width: 100%;
+  min-width: 0;
+  min-height: 82px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+  overflow: visible;
+  border: 1px solid rgba(100, 116, 139, 0.28);
+  border-radius: 16px;
+  padding: 14px 14px 12px;
+  background: rgba(255, 255, 255, 0.98);
+  color: #18181b !important;
+  text-align: left;
+  white-space: normal;
+  box-shadow:
+    0 7px 18px rgba(15, 23, 42, 0.055),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  transition:
+    border-color 150ms ease,
+    background 150ms ease,
+    box-shadow 150ms ease,
+    transform 150ms ease;
+}
+
+.restaurantChoiceCard371C:not(:disabled):active {
+  transform: scale(0.985);
+}
+
+.restaurantChoiceCard371C strong {
+  width: 100%;
+  min-width: 0;
+  color: #18181b !important;
+  font-size: 13.5px !important;
+  line-height: 1.2 !important;
+  font-weight: 850 !important;
+  white-space: normal !important;
+  overflow-wrap: anywhere;
+}
+
+.restaurantChoiceCard371C strong span {
+  color: inherit !important;
+}
+
+.restaurantChoiceCard371C small {
+  color: #667085 !important;
+  font-size: 10.5px !important;
+  line-height: 1.2 !important;
+  font-weight: 800 !important;
+  white-space: normal !important;
+}
+
+.restaurantChoiceSelected371C {
+  padding-right: 39px;
+  border-color: #22c55e !important;
+  background: #f0fdf4 !important;
+  color: #14532d !important;
+  box-shadow:
+    0 0 0 1px rgba(34, 197, 94, 0.12),
+    0 9px 22px rgba(22, 163, 74, 0.1) !important;
+}
+
+.restaurantChoiceSelected371C strong {
+  color: #14532d !important;
+}
+
+.restaurantChoiceSelected371C small {
+  color: #15803d !important;
+}
+
+.restaurantChoiceCheck371C {
+  position: absolute;
+  z-index: 2;
+  top: 8px;
+  right: 8px;
+  width: 18px;
+  height: 18px;
+  display: grid;
+  place-items: center;
+  border-radius: 999px;
+  background: #22c55e;
+  color: #ffffff !important;
+  font-size: 11px;
+  line-height: 1;
+  font-weight: 950;
+  box-shadow: 0 3px 8px rgba(22, 163, 74, 0.25);
+  pointer-events: none;
+}
+
+.restaurantAddonQuantity371C {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  min-height: 42px;
+  box-sizing: border-box;
+  display: grid;
+  grid-template-columns: 40px minmax(0, 1fr) 40px;
+  align-items: stretch;
+  overflow: hidden;
+  border: 1px solid rgba(34, 197, 94, 0.26);
+  border-radius: 13px;
+  background: #f7fef9;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.92);
+}
+
+.restaurantAddonQuantityButton371C {
+  min-width: 0;
+  min-height: 42px;
+  border: 0;
+  padding: 0;
+  background: transparent;
+  color: #166534;
+  font-size: 21px;
+  line-height: 1;
+  font-weight: 950;
+  cursor: pointer;
+}
+
+.restaurantAddonQuantityButton371C:first-child {
+  border-right: 1px solid rgba(34, 197, 94, 0.15);
+}
+
+.restaurantAddonQuantityButton371C:last-child {
+  border-left: 1px solid rgba(34, 197, 94, 0.15);
+}
+
+.restaurantAddonQuantityButton371C:disabled {
+  color: #a7b2aa;
+  cursor: not-allowed;
+}
+
+.restaurantAddonQuantityValue371C {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  padding: 0 3px;
+  color: #14532d;
+  font-size: 10.5px;
+  line-height: 1.1;
+  font-weight: 900;
+  text-align: center;
+  white-space: nowrap;
+}
+
+@media (max-width: 430px) {
+  .restaurantChoiceGrid371C,
+  .restaurantModifierGrid371C {
+    gap: 8px;
+  }
+
+  .restaurantChoiceCard371C {
+    min-height: 78px;
+    border-radius: 14px;
+    padding: 12px 11px 10px;
+  }
+
+  .restaurantChoiceSelected371C {
+    padding-right: 34px;
+  }
+
+  .restaurantChoiceCard371C strong {
+    font-size: 12px !important;
+  }
+
+  .restaurantChoiceCard371C small {
+    font-size: 9.5px !important;
+  }
+
+  .restaurantChoiceCheck371C {
+    top: 7px;
+    right: 7px;
+    width: 17px;
+    height: 17px;
+    font-size: 10px;
+  }
+
+  .restaurantAddonQuantity371C {
+    grid-template-columns: 36px minmax(0, 1fr) 36px;
+  }
+
+  .restaurantAddonQuantityValue371C {
+    font-size: 9.5px;
+  }
+}
+
+@media (max-width: 350px) {
+  .restaurantChoiceGrid371C,
+  .restaurantModifierGrid371C {
+    grid-template-columns: 1fr;
+  }
+}

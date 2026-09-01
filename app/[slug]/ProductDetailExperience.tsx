@@ -2561,7 +2561,8 @@ export default function ProductDetailExperience({
                       <small>Required before adding to bag / مطلوب قبل الإضافة للسلة</small>
                     )}
                   </div>
-                  <div className={styles.sizeChoices245}>
+                  <div className={styles.restaurantChoiceGrid371C}>
+                    {/* DARIK_RESTAURANT_CHOICE_UI_371C */}
                     {restaurantPriceOptions362.map((option362) => {
                       const selected362 =
                         option362.id === selectedRestaurantOptionId362;
@@ -2571,7 +2572,10 @@ export default function ProductDetailExperience({
                           key={option362.id}
                           disabled={!option362.available}
                           className={[
-                            selected362 ? styles.sizeChoiceSelected245 : "",
+                            styles.restaurantChoiceCard371C,
+                            selected362
+                              ? styles.restaurantChoiceSelected371C
+                              : "",
                             !option362.available
                               ? styles.sizeChoiceUnavailable245
                               : "",
@@ -2584,6 +2588,14 @@ export default function ProductDetailExperience({
                           }}
                           aria-pressed={selected362}
                         >
+                          {selected362 ? (
+                            <span
+                              className={styles.restaurantChoiceCheck371C}
+                              aria-hidden="true"
+                            >
+                              ✓
+                            </span>
+                          ) : null}
                           <strong>
                             {option362.name}
                             <span dir="rtl"> / {option362.nameAr}</span>
@@ -2620,7 +2632,7 @@ export default function ProductDetailExperience({
                           : "Choose any / اختر ما تريد"}
                       </small>
                     </div>
-                    <div className={styles.sizeChoices245}>
+                    <div className={styles.restaurantModifierGrid371C}>
                       {group364.options.map((option364) => {
                         const selected364 = selectedIds364.includes(option364.id);
                         const quantityEnabled371B =
@@ -2646,17 +2658,16 @@ export default function ProductDetailExperience({
                         return (
                           <div
                             key={option364.id}
-                            style={{
-                              display: "grid",
-                              gap: 8,
-                              minWidth: 0,
-                            }}
+                            className={styles.restaurantModifierOptionWrap371C}
                           >
                             <button
                               type="button"
                               disabled={!option364.available}
                               className={[
-                                selected364 ? styles.sizeChoiceSelected245 : "",
+                                styles.restaurantChoiceCard371C,
+                                selected364
+                                  ? styles.restaurantChoiceSelected371C
+                                  : "",
                                 !option364.available
                                   ? styles.sizeChoiceUnavailable245
                                   : "",
@@ -2668,6 +2679,14 @@ export default function ProductDetailExperience({
                               }
                               aria-pressed={selected364}
                             >
+                              {selected364 ? (
+                                <span
+                                  className={styles.restaurantChoiceCheck371C}
+                                  aria-hidden="true"
+                                >
+                                  ✓
+                                </span>
+                              ) : null}
                               <strong>
                                 {option364.name}
                                 <span dir="rtl"> / {option364.nameAr}</span>
@@ -2676,26 +2695,15 @@ export default function ProductDetailExperience({
                                 {!option364.available
                                   ? "Out / غير متوفر"
                                   : Number(option364.priceDelta || 0) > 0
-                                    ? `+${money(option364.priceDelta)} each / للحبة`
+                                    ? `+${money(option364.priceDelta)} / each`
                                     : "Included / مشمول"}
                               </small>
                             </button>
 
                             {quantityEnabled371B ? (
                               <div
+                                className={styles.restaurantAddonQuantity371C}
                                 aria-label={`Choose quantity for ${option364.name}`}
-                                style={{
-                                  minHeight: 42,
-                                  display: "grid",
-                                  gridTemplateColumns:
-                                    "42px minmax(58px, 1fr) 42px",
-                                  alignItems: "center",
-                                  overflow: "hidden",
-                                  border:
-                                    "1px solid rgba(148,163,184,.32)",
-                                  borderRadius: 13,
-                                  background: "rgba(255,255,255,.96)",
-                                }}
                               >
                                 <button
                                   type="button"
@@ -2708,30 +2716,17 @@ export default function ProductDetailExperience({
                                   }
                                   disabled={quantity371B <= 1}
                                   aria-label={`Decrease ${option364.name} quantity`}
-                                  style={{
-                                    minHeight: 42,
-                                    border: 0,
-                                    background: "transparent",
-                                    fontSize: 22,
-                                    fontWeight: 900,
-                                    cursor:
-                                      quantity371B <= 1
-                                        ? "not-allowed"
-                                        : "pointer",
-                                  }}
+                                  className={styles.restaurantAddonQuantityButton371C}
                                 >
                                   −
                                 </button>
 
                                 <strong
+                                  className={styles.restaurantAddonQuantityValue371C}
                                   aria-live="polite"
-                                  style={{
-                                    textAlign: "center",
-                                    fontSize: 12,
-                                    whiteSpace: "nowrap",
-                                  }}
                                 >
-                                  Qty {quantity371B} / الكمية {quantity371B}
+                                  Qty {quantity371B}
+                                  <span dir="rtl"> / كمية {quantity371B}</span>
                                 </strong>
 
                                 <button
@@ -2745,17 +2740,7 @@ export default function ProductDetailExperience({
                                   }
                                   disabled={quantity371B >= 99}
                                   aria-label={`Increase ${option364.name} quantity`}
-                                  style={{
-                                    minHeight: 42,
-                                    border: 0,
-                                    background: "transparent",
-                                    fontSize: 22,
-                                    fontWeight: 900,
-                                    cursor:
-                                      quantity371B >= 99
-                                        ? "not-allowed"
-                                        : "pointer",
-                                  }}
+                                  className={styles.restaurantAddonQuantityButton371C}
                                 >
                                   +
                                 </button>
