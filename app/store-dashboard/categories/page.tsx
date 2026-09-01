@@ -805,7 +805,6 @@ export default function DarikDirectCategoriesPage() {
                 field and existing saved categories are not changed.
               </small>
             </div>
-            <a href="/store-dashboard/mechanics-lab">Change field / تغيير النشاط</a>
           </section>
         ) : null}
         {error ? <p className={styles.errorBanner}>{error}</p> : null}

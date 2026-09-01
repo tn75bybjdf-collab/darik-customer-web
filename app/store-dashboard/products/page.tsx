@@ -9400,7 +9400,6 @@ export default function DarikDirectProductsPage() {
             Products
           </a>
           <a href="/store-dashboard/categories">Categories</a>
-          <a href="/store-dashboard/mechanics-lab">Mechanics Lab / مختبر الخصائص</a>
         </nav>
 
         <div className={styles.sidebarFooter}>
@@ -9466,7 +9465,6 @@ export default function DarikDirectProductsPage() {
                 to this test store; only the business mechanics are overridden.
               </small>
             </div>
-            <a href="/store-dashboard/mechanics-lab">Change field / تغيير النشاط</a>
           </section>
         ) : null}
         {error ? <p className={styles.errorBanner}>{error}</p> : null}

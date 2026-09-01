@@ -63,37 +63,54 @@ export function mechanicsFieldLabel(value: string | null | undefined) {
 }
 
 export function readMechanicsLabField() {
-  if (typeof window === "undefined") return "";
-  const fromUrl = normalizeMechanicsField(
-    new URLSearchParams(window.location.search).get("previewMechanicsField")
-  );
-  if (fromUrl) return fromUrl;
-  try {
-    return normalizeMechanicsField(
-      window.localStorage.getItem(DARIK_MECHANICS_LAB_STORAGE_KEY)
-    );
-  } catch {
-    return "";
+  // DARIK_MECHANICS_LAB_REMOVED_372
+  // Mechanics Lab is retired. Clear any stale browser state and ignore
+  // historical preview query parameters so retailer pages always use the
+  // store's real business field.
+  if (typeof window !== "undefined") {
+    try {
+      window.localStorage.removeItem(DARIK_MECHANICS_LAB_STORAGE_KEY);
+    } catch {}
+
+    try {
+      const url = new URL(window.location.href);
+      const hadPreview =
+        url.searchParams.has("previewMechanicsField") ||
+        url.searchParams.has("mechanicsLab");
+
+      if (hadPreview) {
+        url.searchParams.delete("previewMechanicsField");
+        url.searchParams.delete("mechanicsLab");
+        window.history.replaceState(
+          window.history.state,
+          "",
+          url.pathname + (url.search ? url.search : "") + url.hash
+        );
+      }
+    } catch {}
   }
+
+  return "";
 }
 
-export function writeMechanicsLabField(value: string) {
-  const normalized = normalizeMechanicsField(value);
-  if (!normalized || typeof window === "undefined") return "";
-  window.localStorage.setItem(DARIK_MECHANICS_LAB_STORAGE_KEY, normalized);
-  return normalized;
+export function writeMechanicsLabField(_value: string) {
+  // Mechanics Lab is retired; never persist an override.
+  if (typeof window !== "undefined") {
+    try {
+      window.localStorage.removeItem(DARIK_MECHANICS_LAB_STORAGE_KEY);
+    } catch {}
+  }
+  return "";
 }
 
 export function clearMechanicsLabField() {
   if (typeof window === "undefined") return;
-  window.localStorage.removeItem(DARIK_MECHANICS_LAB_STORAGE_KEY);
+  try {
+    window.localStorage.removeItem(DARIK_MECHANICS_LAB_STORAGE_KEY);
+  } catch {}
 }
 
-export function withMechanicsPreview(pathname: string, field: string) {
-  const normalized = normalizeMechanicsField(field);
-  if (!normalized) return pathname;
-  const separator = pathname.includes("?") ? "&" : "?";
-  return `${pathname}${separator}previewMechanicsField=${encodeURIComponent(
-    normalized
-  )}&mechanicsLab=1`;
+export function withMechanicsPreview(pathname: string, _field: string) {
+  // Mechanics Lab is retired; never append preview parameters.
+  return pathname;
 }
