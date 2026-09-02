@@ -5221,8 +5221,6 @@ export default function DarikDirectStorefrontPage() {
     useState<DarikSignupStep121>("details");
   const [darikPendingPhoneSession121, setDarikPendingPhoneSession121] =
     useState<any>(null);
-  const [darikGuestCheckoutNudgeOpen173, setDarikGuestCheckoutNudgeOpen173] =
-    useState(false);
 
   function normalizeDarikCustomerPhone121(rawPhone: string) {
     const digits = String(rawPhone ?? "").replace(/\D/g, "");
@@ -5412,37 +5410,10 @@ export default function DarikDirectStorefrontPage() {
   // DARIK_REAL_LOGO_POPUP_AND_HOME_174
   const darikBrandLogoSrc174 = "/darik_logo_final_v2.png";
 
+  // DARIK_REMOVE_SECOND_GUEST_SIGNIN_NUDGE_373
   function handleCheckoutWithAccountNudge173() {
-    if (darikCustomerProfile121) {
-      void placeOnlineOrder();
-      return;
-    }
-
-    if (darikCheckoutIdentity121 === "guest") {
-      setDarikGuestCheckoutNudgeOpen173(true);
-      return;
-    }
-
     void placeOnlineOrder();
   }
-
-  function continueGuestCheckoutAfterNudge173() {
-    setDarikGuestCheckoutNudgeOpen173(false);
-    void placeOnlineOrder();
-  }
-
-  function openDarikSignInFromCheckoutNudge173() {
-    setDarikGuestCheckoutNudgeOpen173(false);
-    setDarikAuthMessage121("");
-    setDarikCheckoutIdentity121("login");
-
-    window.requestAnimationFrame(() => {
-      document
-        .querySelector<HTMLElement>("[data-darik-customer-account='checkout']")
-        ?.scrollIntoView({ behavior: "smooth", block: "center" });
-    });
-  }
-
   async function chooseDarikGuestCheckout121() {
     setDarikAuthMessage121("");
 
@@ -10163,61 +10134,7 @@ style={{
                   minimumReached &&
                   storefront.is_accepting_orders ? (
                     <div className={styles.onlineCheckoutForm}>
-                {darikGuestCheckoutNudgeOpen173 ? (
-                  <div
-                    className={styles.darikGuestCheckoutNudgeOverlay173}
-                    role="dialog"
-                    aria-modal="true"
-                    aria-labelledby="darik-guest-nudge-title-173"
-                  >
-                    <div className={styles.darikGuestCheckoutNudgeCard173}>
-                      <div className={styles.darikGuestCheckoutNudgeLogoWrap174}>
-                        <img
-                          src={darikBrandLogoSrc174}
-                          alt="Darik"
-                          className={styles.darikGuestCheckoutNudgeLogo174}
-                        />
-                      </div>
-                      <div className={styles.darikGuestCheckoutNudgeHeading173}>
-                        <span>ONE QUICK THING</span>
-                        <h3 id="darik-guest-nudge-title-173">
-                          Are you sure you don’t want to sign in?
-                        </h3>
-                        <p>هل أنت متأكد أنك لا تريد تسجيل الدخول قبل إكمال الطلب؟</p>
-                      </div>
-
-                      <p className={styles.darikGuestCheckoutNudgeCopy173}>
-                        A Darik account makes every order easier. Sign in before checkout
-                        and keep your shopping history connected in one place.
-                      </p>
-
-                      <div className={styles.darikGuestCheckoutBenefits173}>
-                        <div><strong>✉</strong><span>Emailed receipts<small>إيصالات عبر البريد الإلكتروني</small></span></div>
-                        <div><strong>↺</strong><span>See past orders<small>عرض طلباتك السابقة</small></span></div>
-                        <div><strong>⌖</strong><span>Save locations<small>حفظ مواقع التوصيل</small></span></div>
-                        <div><strong>●</strong><span>Track orders<small>تتبع حالة الطلب</small></span></div>
-                      </div>
-
-                      <div className={styles.darikGuestCheckoutNudgeActions173}>
-                        <button
-                          type="button"
-                          className={styles.darikGuestCheckoutNudgeSignIn173}
-                          onClick={openDarikSignInFromCheckoutNudge173}
-                        >
-                          Sign in / تسجيل الدخول
-                        </button>
-                        <button
-                          type="button"
-                          className={styles.darikGuestCheckoutNudgeNoThanks173}
-                          onClick={continueGuestCheckoutAfterNudge173}
-                        >
-                          No thanks, checkout as guest / لا شكراً
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                ) : null}
-
+                {/* Second guest sign-in confirmation removed by 373. */}
               {!darikIsBuilderPreview120() ? (
                 <section
                   className={styles.darikCheckoutIdentity121}
