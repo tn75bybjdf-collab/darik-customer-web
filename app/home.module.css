@@ -2973,7 +2973,7 @@
     justify-self: start;
   }
 
-  .brand {
+  .header .brand {
     position: absolute !important;
     left: 50% !important;
     top: 50%;
@@ -3030,9 +3030,13 @@
 }
 
 @media (max-width: 380px) {
-  .brandLogo,
-  .page[data-location-selected="true"] .brandLogo {
+  .header .brandLogo,
+  .page[data-location-selected="true"] .header .brandLogo {
     width: 124px;
     height: 44px;
   }
 }
+
+/* DARIK_FRONTEND_387_DOUBLE_LOGO_SCOPE_FIX
+   385 is intentionally limited to the homepage header. The footer reuses the
+   .brand class and must remain in normal document flow. */
