@@ -67,7 +67,7 @@ const copy339 = {
     password: "Password",
     signingIn: "Signing in...",
     noAccount: "No customer account was found for this login.",
-    createNote: "New customer? You can create your Darik account during checkout.",
+    createNote: "New to Darik? Create your customer account now.",
     account: "Account",
     hello: "Hello",
     orderHistory: "Order history",
@@ -135,7 +135,7 @@ const copy339 = {
     password: "كلمة المرور",
     signingIn: "جاري تسجيل الدخول...",
     noAccount: "لم يتم العثور على حساب عميل مرتبط ببيانات الدخول هذه.",
-    createNote: "عميل جديد؟ تقدر تنشئ حساب داريك أثناء إتمام الطلب.",
+    createNote: "جديد على داريك؟ أنشئ حساب العميل الآن.",
     account: "الحساب",
     hello: "مرحباً",
     orderHistory: "سجل الطلبات",
@@ -703,6 +703,13 @@ export default function DarikCustomerAccountHub339({
               </button>
 
               <small className={styles.darikCreateNote339}>{t.createNote}</small>
+              {/* DARIK_CUSTOMER_CREATE_ACCOUNT_LINK_383 */}
+              <a
+                className={styles.darikCreateAccountLink383}
+                href="/create-account"
+              >
+                Create Account / إنشاء حساب
+              </a>
             </div>
           ) : null}
 
