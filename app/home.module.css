@@ -2959,3 +2959,80 @@
     min-width: 0;
   }
 }
+/* DARIK_FRONTEND_385_TRUE_CENTER_MOBILE_HEADER
+   Center the Darik logo against the viewport/header itself rather than the
+   asymmetric space left between one control on the left and two on the right. */
+@media (max-width: 980px) {
+  .headerInner {
+    position: relative;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+  }
+
+  .headerMenu246 {
+    grid-column: 1;
+    justify-self: start;
+  }
+
+  .brand {
+    position: absolute !important;
+    left: 50% !important;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    grid-column: auto !important;
+    justify-self: auto !important;
+    margin: 0 !important;
+    z-index: 3;
+  }
+
+  .headerActions {
+    grid-column: 3;
+    justify-self: end;
+    width: auto !important;
+    padding-inline-end: 0 !important;
+  }
+}
+
+@media (max-width: 720px) {
+  .headerInner {
+    width: calc(100% - 28px);
+    min-height: 68px;
+    gap: 8px;
+  }
+
+  .headerActions {
+    gap: 8px !important;
+  }
+
+  .page[data-location-selected="true"] .headerInner {
+    width: calc(100% - 28px);
+    min-height: 68px;
+    grid-template-columns: auto minmax(0, 1fr) auto !important;
+    gap: 8px;
+    position: relative;
+  }
+
+  .page[data-location-selected="true"] .brand {
+    position: absolute !important;
+    left: 50% !important;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    grid-column: auto !important;
+    justify-self: auto !important;
+  }
+
+  .page[data-location-selected="true"] .headerActions {
+    grid-column: 3;
+    justify-self: end;
+    width: auto !important;
+    padding-inline-end: 0 !important;
+    gap: 8px !important;
+  }
+}
+
+@media (max-width: 380px) {
+  .brandLogo,
+  .page[data-location-selected="true"] .brandLogo {
+    width: 124px;
+    height: 44px;
+  }
+}
