@@ -1798,12 +1798,6 @@ export default function DarikDiscoveryHome() {
       window.removeEventListener("resize", sync186);
     };
   }, [groupedStores]);
-  const heroCounts = useMemo(() => {
-    return ["groceries", "pharmacy", "fashion", "technology"].map((key) => {
-      const group = categoryGroups.find((item) => item.key === key)!;
-      return { group, count: storeCounts.get(group.key) || 0 };
-    });
-  }, [storeCounts]);
 
   return (
     <main
@@ -2193,51 +2187,6 @@ export default function DarikDiscoveryHome() {
           </section>
         </div>
       ) : null}
-
-      <section className={styles.heroSection}>
-        <div className={styles.heroGlowOne} />
-        <div className={styles.heroGlowTwo} />
-        <div className={styles.heroInner}>
-          <div className={styles.heroCopy}>
-            <div className={styles.eyebrow}><Icon name="sparkle" size={16} />{t.eyebrow}</div>
-            <h1><span>{t.heroTitleA}</span><strong>{t.heroTitleB}</strong></h1>
-            <p className={styles.heroBody}>{t.heroBody}</p>
-
-            <div className={styles.heroTrustRow}>
-              <span><Icon name="check" size={16} />{language === "ar" ? "فلترة حقيقية حسب نطاق التوصيل" : "Real delivery-range filtering"}</span>
-              <span><Icon name="check" size={16} />{language === "ar" ? "متاجر محلية مستقلة" : "Independent local stores"}</span>
-              <span><Icon name="check" size={16} />{language === "ar" ? "طلب مباشر من المتجر" : "Order directly from the retailer"}</span>
-            </div>
-          </div>
-
-          <div className={styles.heroVisual} aria-hidden="true">
-            <div className={styles.mapSurface}>
-              <div className={styles.mapRoadOne} />
-              <div className={styles.mapRoadTwo} />
-              <div className={styles.mapRoadThree} />
-              <div className={styles.deliveryRadius}>
-                <div className={styles.deliveryRadiusPulse} />
-                <div className={styles.customerPin}><Icon name="location" size={25} /></div>
-              </div>
-
-              {heroCounts.map(({ group, count }, index) => (
-                <div key={group.key} className={`${styles.floatingCategory} ${styles[`floatingCategory${index + 1}`]}`}>
-                  <span><Icon name={group.icon} size={19} /></span>
-                  <div>
-                    <strong>{categoryLabel(group, language)}</strong>
-                    <small>{`${count} ${count === 1 ? t.store : t.storesCount}`}</small>
-                  </div>
-                </div>
-              ))}
-
-              <div className={styles.mapCaption}>
-                <span><Icon name="sparkle" size={16} /></span>
-                <div><small>{language === "ar" ? "فلترة داريك الذكية" : "Darik smart matching"}</small><strong>{location ? t.discovery : t.locationRequiredBody}</strong></div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
 
       <section className={styles.marketSection} id="stores">
         <div className={styles.sectionShell}>
