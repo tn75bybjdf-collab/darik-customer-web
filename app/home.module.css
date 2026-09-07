@@ -2473,9 +2473,7 @@
   color: #334155;
 }
 
-:global(body.darik-directory-search-active-296 #stores) {
-  display: none !important;
-}
+/* DARIK_NEXT16_GLOBAL_PURITY_FIX_001B_HOME_296 - rule moved to app/globals.css */
 
 .darikDirectoryStoreResults296 {
   scroll-margin-top: 24px;

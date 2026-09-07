@@ -22775,69 +22775,7 @@
 }
 
 /* DARIK_SMOOTH_SEARCH_LOCK_292
-   Hysteresis + frozen top offset removes small scroll bounce on mobile Safari. */
-
-:global([data-darik-search-shell="292"]) {
-  box-sizing: border-box;
-}
-
-:global([data-darik-search-locked="292"]) {
-  position: fixed !important;
-
-  top: var(--darik-search-top-292, 0px) !important;
-  left: 0 !important;
-  right: 0 !important;
-
-  width: 100vw !important;
-  min-width: 100vw !important;
-  max-width: 100vw !important;
-
-  margin: 0 !important;
-  padding: 8px 10px !important;
-
-  z-index: 95 !important;
-
-  border-radius: 0 !important;
-
-  transform: translate3d(0, 0, 0) !important;
-  backface-visibility: hidden;
-  -webkit-backface-visibility: hidden;
-
-  background: #ffffff !important;
-  box-shadow: 0 5px 16px rgba(15, 23, 42, .11) !important;
-
-  contain: layout paint;
-  will-change: transform;
-}
-
-:global([data-darik-search-locked="292"] *),
-:global([data-darik-search-locked="292"]::before),
-:global([data-darik-search-locked="292"]::after) {
-  box-sizing: border-box;
-}
-
-:global([data-darik-search-input="292"]),
-:global([data-darik-search-locked="292"] input),
-:global([data-darik-search-locked="292"] [class*="search"]),
-:global([data-darik-search-locked="292"] [class*="Search"]) {
-  border-radius: 0 !important;
-}
-
-:global([data-darik-search-input="292"]) {
-  width: 100% !important;
-  max-width: none !important;
-}
-
-:global([data-darik-search-sentinel="292"]),
-:global([data-darik-search-placeholder="292"]) {
-  pointer-events: none !important;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  :global([data-darik-search-locked="292"]) {
-    transition: none !important;
-  }
-}
+   DARIK_NEXT16_GLOBAL_PURITY_FIX_001B_STOREFRONT_292 - rules moved to app/globals.css */
 
 /* DARIK_CHECKOUT_DEFAULT_SYSTEM_FONT_CSS_343 */
 .cartDrawer[data-darik-checkout-default-font="true"],

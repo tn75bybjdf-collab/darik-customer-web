@@ -13340,3 +13340,73 @@ main[dir="rtl"] .darikHomeStoreArrow246B svg {
   > span[data-darik-product-id249]:active::after {
   box-shadow: inset 0 0 0 3px rgba(255, 212, 59, 0.9);
 }
+/* DARIK_NEXT16_GLOBAL_PURITY_FIX_001B_HOME_296
+   Moved from app/home.module.css because Next 16 CSS Modules rejects
+   selectors that are entirely :global(...). Semantics are unchanged. */
+body.darik-directory-search-active-296 #stores {
+  display: none !important;
+}
+/* DARIK_NEXT16_GLOBAL_PURITY_FIX_001B_STOREFRONT_292
+   Exact DARIK_SMOOTH_SEARCH_LOCK_292 rules moved from the CSS Module
+   into global CSS for Next 16 CSS Modules purity compatibility. */
+[data-darik-search-shell="292"] {
+  box-sizing: border-box;
+}
+
+[data-darik-search-locked="292"] {
+  position: fixed !important;
+
+  top: var(--darik-search-top-292, 0px) !important;
+  left: 0 !important;
+  right: 0 !important;
+
+  width: 100vw !important;
+  min-width: 100vw !important;
+  max-width: 100vw !important;
+
+  margin: 0 !important;
+  padding: 8px 10px !important;
+
+  z-index: 95 !important;
+
+  border-radius: 0 !important;
+
+  transform: translate3d(0, 0, 0) !important;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+
+  background: #ffffff !important;
+  box-shadow: 0 5px 16px rgba(15, 23, 42, .11) !important;
+
+  contain: layout paint;
+  will-change: transform;
+}
+
+[data-darik-search-locked="292"] *,
+[data-darik-search-locked="292"]::before,
+[data-darik-search-locked="292"]::after {
+  box-sizing: border-box;
+}
+
+[data-darik-search-input="292"],
+[data-darik-search-locked="292"] input,
+[data-darik-search-locked="292"] [class*="search"],
+[data-darik-search-locked="292"] [class*="Search"] {
+  border-radius: 0 !important;
+}
+
+[data-darik-search-input="292"] {
+  width: 100% !important;
+  max-width: none !important;
+}
+
+[data-darik-search-sentinel="292"],
+[data-darik-search-placeholder="292"] {
+  pointer-events: none !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-darik-search-locked="292"] {
+    transition: none !important;
+  }
+}
