@@ -421,3 +421,36 @@
   .card383 { min-height: 0; }
   .centerState383 { min-height: 400px; }
 }
+
+/* DARIK_FRONTEND_388_CREATE_ACCOUNT_MAIN_LOGO_MATCH
+   Match /create-account branding to the main GetDarik homepage header.
+   The image asset was already correct; the old 46x46 dark-square styling made
+   the full Darik logo look like a different logo. */
+.brand383 img {
+  object-fit: contain;
+  object-position: center;
+  width: 164px;
+  height: 54px;
+  display: block;
+  background: transparent;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.brand383 span {
+  display: none;
+}
+
+@media (max-width: 560px) {
+  .brand383 img {
+    width: 148px;
+    height: 48px;
+  }
+}
+
+@media (max-width: 380px) {
+  .brand383 img {
+    width: 124px;
+    height: 44px;
+  }
+}
