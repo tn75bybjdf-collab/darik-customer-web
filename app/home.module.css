@@ -6174,3 +6174,73 @@
     opacity: 0 !important;
   }
 }
+
+/* DARIK_FOOTER_EXACT_SLOT_390R */
+/*
+  Mobile-only exact placement requested from the Sep 9 footer screenshot:
+  remove the footer logo/link from normal footer flow and paint ONE Darik logo
+  in the unused white space directly below the Retailers / Retailer dashboard
+  column. Nothing else in the footer is repositioned.
+*/
+@media (max-width: 720px) {
+  .footer {
+    position: relative !important;
+    isolation: isolate !important;
+    overflow: visible !important;
+  }
+
+  /*
+    Remove the physical footer logo node from the layout completely.
+    The brand copy remains exactly where it already is.
+  */
+  .footer .brand {
+    display: none !important;
+  }
+
+  .footer .brandLogo {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+  }
+
+  /*
+    The footer begins immediately below the trust strip.
+    On a two-column mobile footer, the Retailers column begins at 50%.
+    146px down lands in the intentionally empty area just below
+    "Retailer dashboard", matching the supplied iPhone screenshot.
+  */
+  .footer::after {
+    content: "" !important;
+    position: absolute !important;
+    left: 50% !important;
+    top: 146px !important;
+    width: 138px !important;
+    height: 42px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    pointer-events: none !important;
+    z-index: 2 !important;
+    background-image: url("/darik-approved-header-logo-390c.png") !important;
+    background-repeat: no-repeat !important;
+    background-position: left center !important;
+    background-size: contain !important;
+  }
+
+  /* Keep the previously fixed hero area completely logo-free. */
+  .homeHeroTrust390 img[src*="darik-approved-header-logo-390c"],
+  .homeHeroTrust390 img[src*="darik_logo_final_v2"],
+  .homeHero390 img[src*="darik-approved-header-logo-390c"],
+  .homeHero390 img[src*="darik_logo_final_v2"] {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+  }
+}
+
+@media (max-width: 380px) {
+  .footer::after {
+    top: 148px !important;
+    width: 130px !important;
+    height: 40px !important;
+  }
+}
