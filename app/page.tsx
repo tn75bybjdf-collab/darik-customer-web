@@ -1997,6 +1997,7 @@ export default function DarikDiscoveryHome() {
         ) : null}
       </header>
             {/* DARIK_APPROVED_EXACT_HOME_390 */}
+      {/* DARIK_DUPLICATE_LOGO_REMOVED_390O */}
       {/* DARIK_APPROVED_CLEANUP_390C */}
       <section className={styles.homeHero390} aria-label={language === "ar" ? "\u062f\u0627\u0631\u064a\u0643 \u0627\u0644\u0633\u0648\u0642 \u0627\u0644\u0645\u062d\u0644\u064a \u0641\u064a \u0627\u0644\u0623\u0631\u062f\u0646" : "Darik - Jordan's Local Marketplace"}>
         <div className={styles.homeHeroVisual390} aria-hidden="true" />
