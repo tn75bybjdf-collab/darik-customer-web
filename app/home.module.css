@@ -4973,3 +4973,353 @@
     background-position: 60% center !important;
   }
 }
+
+/* DARIK_APPROVED_LOCATION_MODAL_390G */
+/*
+  Approved second Darik location concept.
+  This is visual only: the existing GPS, Places search, predictions,
+  privacy behavior and 390F session/location logic remain in control.
+*/
+.modalBackdrop {
+  background: rgba(8, 18, 32, .54) !important;
+  -webkit-backdrop-filter: blur(15px) saturate(.88) !important;
+  backdrop-filter: blur(15px) saturate(.88) !important;
+  padding: 16px !important;
+}
+
+.locationModal {
+  position: relative !important;
+  width: min(620px, 100%) !important;
+  max-height: calc(100dvh - 32px) !important;
+  overflow-y: auto !important;
+  text-align: left !important;
+  background:
+    radial-gradient(circle at 86% 8%, rgba(12, 157, 119, .07), transparent 24%),
+    #fff !important;
+  border: 1px solid rgba(255, 255, 255, .85) !important;
+  border-radius: 32px !important;
+  padding: 26px 30px 26px !important;
+  box-shadow:
+    0 36px 110px rgba(0, 0, 0, .34),
+    0 2px 9px rgba(15, 23, 42, .08) !important;
+  scrollbar-width: thin;
+}
+
+.locationModal::before {
+  content: "" !important;
+  position: absolute !important;
+  z-index: 2 !important;
+  top: 24px !important;
+  left: 30px !important;
+  width: 208px !important;
+  height: 58px !important;
+  background: url("/darik-approved-header-logo-390c.png") left center / contain no-repeat !important;
+  pointer-events: none !important;
+}
+
+.modalClose {
+  z-index: 5 !important;
+  top: 22px !important;
+  right: 24px !important;
+  width: 42px !important;
+  height: 42px !important;
+  color: #667085 !important;
+  background: #f2f5f8 !important;
+  border: 0 !important;
+  border-radius: 999px !important;
+  font-size: 24px !important;
+  line-height: 1 !important;
+}
+
+.modalIcon {
+  width: 100% !important;
+  height: 232px !important;
+  margin: 68px 0 20px !important;
+  color: transparent !important;
+  background:
+    url("/darik-location-scene-390g.jpg") center center / cover no-repeat,
+    #eef9f6 !important;
+  border: 0 !important;
+  border-radius: 24px !important;
+  transform: none !important;
+  box-shadow: inset 0 0 0 1px rgba(16, 185, 129, .07) !important;
+  overflow: hidden !important;
+}
+
+.modalIcon svg {
+  display: none !important;
+}
+
+.modalKicker {
+  display: none !important;
+}
+
+.locationModal h2 {
+  color: #0b1b38 !important;
+  letter-spacing: -.046em !important;
+  margin: 0 !important;
+  font-size: clamp(32px, 5vw, 45px) !important;
+  font-weight: 1000 !important;
+  line-height: 1.02 !important;
+}
+
+.locationModal > p {
+  color: #667085 !important;
+  max-width: 530px !important;
+  margin: 13px 0 0 !important;
+  font-size: 14px !important;
+  font-weight: 600 !important;
+  line-height: 1.55 !important;
+}
+
+.gpsButton {
+  color: #fff !important;
+  background: linear-gradient(135deg, #0b9a76 0%, #008b6b 100%) !important;
+  border: 0 !important;
+  border-radius: 20px !important;
+  grid-template-columns: 48px minmax(0, 1fr) 28px !important;
+  gap: 12px !important;
+  width: 100% !important;
+  min-height: 68px !important;
+  margin-top: 22px !important;
+  padding: 8px 16px 8px 10px !important;
+  box-shadow: 0 14px 28px rgba(0, 139, 107, .19) !important;
+}
+
+.gpsButton:hover:not(:disabled) {
+  background: linear-gradient(135deg, #098e6d 0%, #00785c 100%) !important;
+  transform: translateY(-1px) !important;
+}
+
+.gpsButton > span {
+  width: 48px !important;
+  height: 48px !important;
+  color: #fff !important;
+  background: rgba(255, 255, 255, .13) !important;
+  border: 1px solid rgba(255, 255, 255, .18) !important;
+  border-radius: 15px !important;
+}
+
+.gpsButton strong {
+  color: #fff !important;
+  font-size: 15px !important;
+  font-weight: 950 !important;
+}
+
+.modalDivider {
+  color: #718096 !important;
+  letter-spacing: .11em !important;
+  margin: 22px 0 16px !important;
+  font-size: 10px !important;
+  font-weight: 950 !important;
+}
+
+.modalDivider::before {
+  border-top-color: #dfe5ec !important;
+}
+
+.addressForm {
+  grid-template-columns: 1fr !important;
+  gap: 10px !important;
+}
+
+.addressForm label {
+  color: #94a3b8 !important;
+  background: #fbfcfd !important;
+  border: 1px solid #dbe2ea !important;
+  border-radius: 18px !important;
+  min-height: 58px !important;
+  padding: 0 16px !important;
+}
+
+.addressForm label:focus-within {
+  background: #fff !important;
+  border-color: #0b9a76 !important;
+  box-shadow: 0 0 0 3px rgba(11, 154, 118, .12) !important;
+}
+
+.addressForm input {
+  color: #0b1b38 !important;
+  font-size: 13px !important;
+  font-weight: 750 !important;
+}
+
+.addressForm input::placeholder {
+  color: #98a2b3 !important;
+}
+
+.addressForm button {
+  color: #0b1b38 !important;
+  background: #ffd43b !important;
+  border: 1px solid #f0c629 !important;
+  border-radius: 18px !important;
+  min-height: 58px !important;
+  font-size: 14px !important;
+  font-weight: 950 !important;
+  box-shadow: 0 11px 23px rgba(194, 145, 0, .12) !important;
+}
+
+.addressForm button:hover:not(:disabled) {
+  background: #ffcf24 !important;
+  transform: translateY(-1px) !important;
+}
+
+.predictions {
+  border: 1px solid #e3e8ee !important;
+  border-radius: 17px !important;
+  margin-top: 10px !important;
+  box-shadow: 0 13px 28px rgba(15, 23, 42, .08) !important;
+}
+
+.privacyNote {
+  color: #667085 !important;
+  justify-content: flex-start !important;
+  text-align: left !important;
+  gap: 11px !important;
+  margin-top: 17px !important;
+  font-size: 10px !important;
+  font-weight: 700 !important;
+  line-height: 1.45 !important;
+}
+
+.privacyNote svg {
+  box-sizing: content-box !important;
+  flex: 0 0 auto !important;
+  width: 17px !important;
+  height: 17px !important;
+  color: #079572 !important;
+  background: #e7f7f2 !important;
+  border-radius: 999px !important;
+  padding: 9px !important;
+}
+
+[dir="rtl"] .locationModal {
+  text-align: right !important;
+}
+
+[dir="rtl"] .locationModal::before {
+  left: auto !important;
+  right: 30px !important;
+  background-position: right center !important;
+}
+
+[dir="rtl"] .modalClose {
+  left: 24px !important;
+  right: auto !important;
+}
+
+[dir="rtl"] .privacyNote {
+  text-align: right !important;
+}
+
+@media (max-width: 720px) {
+  .modalBackdrop {
+    padding: 10px !important;
+  }
+
+  .locationModal {
+    width: 100% !important;
+    max-height: calc(100dvh - 20px) !important;
+    border-radius: 30px !important;
+    padding: 18px 18px 20px !important;
+  }
+
+  .locationModal::before {
+    top: 18px !important;
+    left: 20px !important;
+    width: 178px !important;
+    height: 50px !important;
+  }
+
+  .modalClose {
+    top: 17px !important;
+    right: 18px !important;
+    width: 38px !important;
+    height: 38px !important;
+    font-size: 21px !important;
+  }
+
+  .modalIcon {
+    height: 174px !important;
+    margin: 58px 0 16px !important;
+    border-radius: 20px !important;
+    background-position: center center !important;
+  }
+
+  .locationModal h2 {
+    font-size: 30px !important;
+    line-height: 1.01 !important;
+  }
+
+  .locationModal > p {
+    margin-top: 10px !important;
+    font-size: 12.5px !important;
+    line-height: 1.48 !important;
+  }
+
+  .gpsButton {
+    min-height: 60px !important;
+    margin-top: 17px !important;
+    border-radius: 17px !important;
+    grid-template-columns: 43px minmax(0, 1fr) 24px !important;
+    padding: 7px 13px 7px 8px !important;
+  }
+
+  .gpsButton > span {
+    width: 43px !important;
+    height: 43px !important;
+    border-radius: 13px !important;
+  }
+
+  .gpsButton strong {
+    font-size: 13px !important;
+  }
+
+  .modalDivider {
+    margin: 17px 0 13px !important;
+    font-size: 9px !important;
+  }
+
+  .addressForm {
+    gap: 8px !important;
+  }
+
+  .addressForm label,
+  .addressForm button {
+    min-height: 53px !important;
+    border-radius: 16px !important;
+  }
+
+  .addressForm input {
+    font-size: 12px !important;
+  }
+
+  .privacyNote {
+    margin-top: 13px !important;
+    font-size: 9px !important;
+  }
+
+  [dir="rtl"] .locationModal::before {
+    left: auto !important;
+    right: 20px !important;
+  }
+
+  [dir="rtl"] .modalClose {
+    left: 18px !important;
+    right: auto !important;
+  }
+}
+
+@media (max-width: 390px) {
+  .modalIcon {
+    height: 160px !important;
+  }
+
+  .locationModal h2 {
+    font-size: 28px !important;
+  }
+
+  .locationModal > p {
+    font-size: 12px !important;
+  }
+}

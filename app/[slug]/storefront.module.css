@@ -22870,3 +22870,364 @@
     margin: 0;
   }
 }
+
+/* DARIK_APPROVED_STOREFRONT_LOCATION_390G */
+/*
+  Same approved second location concept on direct store entry.
+  Existing location calculation, session handoff, Google Places and pickup
+  logic are deliberately preserved.
+*/
+.customerLocationGate117 {
+  z-index: 2147481200 !important;
+  background: rgba(8, 18, 32, .54) !important;
+  -webkit-backdrop-filter: blur(15px) saturate(.88) !important;
+  backdrop-filter: blur(15px) saturate(.88) !important;
+  place-items: center !important;
+  padding: 16px !important;
+  overflow-y: auto !important;
+}
+
+.customerLocationCard117 {
+  position: relative !important;
+  width: min(620px, 100%) !important;
+  max-height: calc(100dvh - 32px) !important;
+  overflow-y: auto !important;
+  color: #0b1b38 !important;
+  text-align: left !important;
+  background:
+    radial-gradient(circle at 86% 8%, rgba(12, 157, 119, .07), transparent 24%),
+    #fff !important;
+  border: 1px solid rgba(255, 255, 255, .85) !important;
+  border-radius: 32px !important;
+  padding: 26px 30px 25px !important;
+  box-shadow:
+    0 36px 110px rgba(0, 0, 0, .34),
+    0 2px 9px rgba(15, 23, 42, .08) !important;
+  scrollbar-width: thin;
+}
+
+.customerLocationCard117::before {
+  content: "" !important;
+  position: absolute !important;
+  z-index: 3 !important;
+  top: 24px !important;
+  left: 30px !important;
+  width: 208px !important;
+  height: 58px !important;
+  background: url("/darik-approved-header-logo-390c.png") left center / contain no-repeat !important;
+  pointer-events: none !important;
+}
+
+.customerLocationBrand117 {
+  position: relative !important;
+  text-align: left !important;
+  padding-top: 320px !important;
+}
+
+.customerLocationBrand117::before {
+  content: "" !important;
+  position: absolute !important;
+  top: 68px !important;
+  left: 0 !important;
+  right: 0 !important;
+  height: 232px !important;
+  background:
+    url("/darik-location-scene-390g.jpg") center center / cover no-repeat,
+    #eef9f6 !important;
+  border: 1px solid rgba(16, 185, 129, .07) !important;
+  border-radius: 24px !important;
+  pointer-events: none !important;
+}
+
+.customerLocationBrand117 > span {
+  display: none !important;
+}
+
+.customerLocationBrand117 > strong {
+  color: #0b1b38 !important;
+  letter-spacing: -.046em !important;
+  margin: 0 !important;
+  font-size: clamp(32px, 5vw, 45px) !important;
+  font-weight: 1000 !important;
+  line-height: 1.02 !important;
+}
+
+.customerLocationBrand117 > p {
+  color: #667085 !important;
+  max-width: 530px !important;
+  margin: 13px 0 0 !important;
+  font-size: 14px !important;
+  font-weight: 600 !important;
+  line-height: 1.55 !important;
+}
+
+.customerLocationGps117 {
+  color: #fff !important;
+  background: linear-gradient(135deg, #0b9a76 0%, #008b6b 100%) !important;
+  border: 0 !important;
+  border-radius: 20px !important;
+  width: 100% !important;
+  min-height: 68px !important;
+  margin-top: 22px !important;
+  padding: 0 20px !important;
+  font-size: 15px !important;
+  font-weight: 950 !important;
+  box-shadow: 0 14px 28px rgba(0, 139, 107, .19) !important;
+}
+
+.customerLocationGps117:hover:not(:disabled) {
+  background: linear-gradient(135deg, #098e6d 0%, #00785c 100%) !important;
+  transform: translateY(-1px) !important;
+}
+
+.customerLocationDivider117 {
+  color: #718096 !important;
+  letter-spacing: .11em !important;
+  margin: 22px 0 16px !important;
+  font-size: 10px !important;
+  font-weight: 950 !important;
+}
+
+.customerLocationDivider117::before,
+.customerLocationDivider117::after {
+  border-color: #dfe5ec !important;
+  background: #dfe5ec !important;
+}
+
+.customerLocationSearch117 {
+  width: 100% !important;
+}
+
+.customerLocationSearch117 label {
+  gap: 8px !important;
+}
+
+.customerLocationSearch117 label > span {
+  display: none !important;
+}
+
+.customerLocationSearch117 label > div {
+  grid-template-columns: 1fr !important;
+  gap: 10px !important;
+  display: grid !important;
+}
+
+.customerLocationSearch117 input {
+  box-sizing: border-box !important;
+  width: 100% !important;
+  min-height: 58px !important;
+  color: #0b1b38 !important;
+  background: #fbfcfd !important;
+  border: 1px solid #dbe2ea !important;
+  border-radius: 18px !important;
+  outline: 0 !important;
+  padding: 0 17px !important;
+  font: inherit !important;
+  font-size: 13px !important;
+  font-weight: 750 !important;
+}
+
+.customerLocationSearch117 input:focus {
+  background: #fff !important;
+  border-color: #0b9a76 !important;
+  box-shadow: 0 0 0 3px rgba(11, 154, 118, .12) !important;
+}
+
+.customerLocationSearch117 input::placeholder {
+  color: #98a2b3 !important;
+}
+
+.customerLocationSearch117 label > div > button {
+  min-height: 58px !important;
+  color: #0b1b38 !important;
+  background: #ffd43b !important;
+  border: 1px solid #f0c629 !important;
+  border-radius: 18px !important;
+  font: inherit !important;
+  font-size: 14px !important;
+  font-weight: 950 !important;
+  box-shadow: 0 11px 23px rgba(194, 145, 0, .12) !important;
+}
+
+.customerLocationSearch117 label > div > button:hover:not(:disabled) {
+  background: #ffcf24 !important;
+  transform: translateY(-1px) !important;
+}
+
+.customerLocationResults117 {
+  border: 1px solid #e3e8ee !important;
+  border-radius: 17px !important;
+  margin-top: 10px !important;
+  overflow: hidden !important;
+  box-shadow: 0 13px 28px rgba(15, 23, 42, .08) !important;
+}
+
+.customerLocationError117 {
+  border-radius: 14px !important;
+  margin-top: 11px !important;
+}
+
+.customerLocationPickupBreak118 {
+  color: #8a94a6 !important;
+  letter-spacing: .1em !important;
+  margin: 18px 0 10px !important;
+  font-size: 9px !important;
+  font-weight: 900 !important;
+}
+
+.customerLocationPickupBrowse118 {
+  color: #0b1b38 !important;
+  text-align: left !important;
+  background: #f7fbfa !important;
+  border: 1px solid #d8ebe6 !important;
+  border-radius: 16px !important;
+  min-height: 58px !important;
+  padding: 11px 14px !important;
+  box-shadow: none !important;
+}
+
+.customerLocationPickupBrowse118:hover {
+  background: #f0f8f6 !important;
+  border-color: #b9ddd4 !important;
+}
+
+.customerLocationPickupBrowse118 strong {
+  color: #08775d !important;
+  font-size: 11px !important;
+  font-weight: 950 !important;
+}
+
+.customerLocationPickupBrowse118 span {
+  color: #667085 !important;
+  margin-top: 3px !important;
+  font-size: 9px !important;
+  line-height: 1.35 !important;
+}
+
+.customerLocationPrivacy117 {
+  color: #667085 !important;
+  text-align: left !important;
+  display: block !important;
+  margin-top: 14px !important;
+  padding-left: 45px !important;
+  min-height: 36px !important;
+  font-size: 10px !important;
+  font-weight: 700 !important;
+  line-height: 1.45 !important;
+  position: relative !important;
+}
+
+.customerLocationPrivacy117::before {
+  content: "\2713" !important;
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 34px !important;
+  height: 34px !important;
+  color: #079572 !important;
+  background: #e7f7f2 !important;
+  border-radius: 999px !important;
+  place-items: center !important;
+  display: grid !important;
+  font-size: 16px !important;
+  font-weight: 1000 !important;
+}
+
+@media (max-width: 720px) {
+  .customerLocationGate117 {
+    padding: 10px !important;
+  }
+
+  .customerLocationCard117 {
+    width: 100% !important;
+    max-height: calc(100dvh - 20px) !important;
+    border-radius: 30px !important;
+    padding: 18px 18px 20px !important;
+  }
+
+  .customerLocationCard117::before {
+    top: 18px !important;
+    left: 20px !important;
+    width: 178px !important;
+    height: 50px !important;
+  }
+
+  .customerLocationBrand117 {
+    padding-top: 250px !important;
+  }
+
+  .customerLocationBrand117::before {
+    top: 58px !important;
+    height: 174px !important;
+    border-radius: 20px !important;
+  }
+
+  .customerLocationBrand117 > strong {
+    font-size: 30px !important;
+    line-height: 1.01 !important;
+  }
+
+  .customerLocationBrand117 > p {
+    margin-top: 10px !important;
+    font-size: 12.5px !important;
+    line-height: 1.48 !important;
+  }
+
+  .customerLocationGps117 {
+    min-height: 60px !important;
+    margin-top: 17px !important;
+    border-radius: 17px !important;
+    font-size: 13px !important;
+  }
+
+  .customerLocationDivider117 {
+    margin: 17px 0 13px !important;
+    font-size: 9px !important;
+  }
+
+  .customerLocationSearch117 label > div {
+    gap: 8px !important;
+  }
+
+  .customerLocationSearch117 input,
+  .customerLocationSearch117 label > div > button {
+    min-height: 53px !important;
+    border-radius: 16px !important;
+  }
+
+  .customerLocationSearch117 input {
+    font-size: 12px !important;
+  }
+
+  .customerLocationPickupBreak118 {
+    margin-top: 14px !important;
+  }
+
+  .customerLocationPickupBrowse118 {
+    min-height: 54px !important;
+    border-radius: 14px !important;
+  }
+
+  .customerLocationPrivacy117 {
+    margin-top: 12px !important;
+    font-size: 9px !important;
+  }
+}
+
+@media (max-width: 390px) {
+  .customerLocationBrand117 {
+    padding-top: 236px !important;
+  }
+
+  .customerLocationBrand117::before {
+    height: 160px !important;
+  }
+
+  .customerLocationBrand117 > strong {
+    font-size: 28px !important;
+  }
+
+  .customerLocationBrand117 > p {
+    font-size: 12px !important;
+  }
+}
