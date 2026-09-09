@@ -13974,25 +13974,3 @@ main[dir="rtl"] .darikMarketplaceStoreList246B .darikHomeStoreLogoStage187 {
     z-index: 5 !important;
   }
 }
-
-/* DARIK_DUPLICATE_LOGO_GUARD_390O */
-/*
-  Mobile Safari duplicate-logo guard.
-  The approved 390L header intentionally renders its logo as the .brand
-  background. Therefore every matching <img> in the homepage body can be
-  suppressed on phones without removing the real centered header logo.
-  The premium location dialog uses a CSS background logo and is untouched.
-*/
-@media (max-width: 720px) {
-  body main img[src*="darik-approved-header-logo-390c.png"],
-  body main img[src*="darik_logo_final_v2.png"] {
-    display: none !important;
-    visibility: hidden !important;
-  }
-
-  body footer img[src*="darik-approved-header-logo-390c.png"],
-  body footer img[src*="darik_logo_final_v2.png"] {
-    display: block !important;
-    visibility: visible !important;
-  }
-}

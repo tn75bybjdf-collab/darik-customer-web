@@ -6073,3 +6073,76 @@
     font-size: 9.6px !important;
   }
 }
+
+/* DARIK_FOOTER_LOGO_CONTAINMENT_390P */
+/*
+  Live-production diagnosis:
+  - Header logo is intentionally rendered by the mobile .header .brand background.
+  - The real footer logo must remain physically contained inside .footer.
+  - Hide the footer's raw logo <img> on phones and render the same asset on the
+    footer brand wrapper itself. This makes it impossible for that <img> to be
+    painted over the hero/trust copy by Mobile Safari.
+*/
+@media (max-width: 720px) {
+  .header .brand {
+    contain: paint !important;
+    isolation: isolate !important;
+    overflow: hidden !important;
+  }
+
+  .footer {
+    position: relative !important;
+    isolation: isolate !important;
+  }
+
+  .footerInner,
+  .footerBrand {
+    position: relative !important;
+    inset: auto !important;
+    transform: none !important;
+  }
+
+  .footer .brand {
+    position: static !important;
+    inset: auto !important;
+    left: auto !important;
+    right: auto !important;
+    top: auto !important;
+    bottom: auto !important;
+    transform: none !important;
+    z-index: auto !important;
+
+    display: block !important;
+    width: 118px !important;
+    min-width: 118px !important;
+    max-width: 118px !important;
+    height: 38px !important;
+    min-height: 38px !important;
+    max-height: 38px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+
+    background: url("/darik-approved-header-logo-390c.png") left center / contain no-repeat !important;
+    contain: paint !important;
+    isolation: isolate !important;
+    overflow: hidden !important;
+  }
+
+  .footer .brandLogo {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    position: static !important;
+    inset: auto !important;
+    transform: none !important;
+  }
+
+  .homeHeroTrust390 img[src*="darik-approved-header-logo-390c"],
+  .homeHeroTrust390 img[src*="darik_logo_final_v2"],
+  .homeHero390 img[src*="darik-approved-header-logo-390c"],
+  .homeHero390 img[src*="darik_logo_final_v2"] {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+  }
+}
