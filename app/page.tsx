@@ -1828,6 +1828,23 @@ export default function DarikDiscoveryHome() {
     return output389;
   }, [renderedStores318D, bestSellerProductsBySlug249, language]);
 
+  // DARIK_MOBILE_HERO_LOCATION_390F
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const timer390F = window.setTimeout(() => {
+      try {
+        const saved390F = window.sessionStorage.getItem("darik_customer_location_session_120");
+        if (saved390F) return;
+      } catch {}
+
+      const trigger390F = document.querySelector('[data-darik-location-entry-390f="true"]') as HTMLButtonElement | null;
+      trigger390F?.click();
+    }, 260);
+
+    return () => window.clearTimeout(timer390F);
+  }, []);
+
   const seedMarketplaceSearch390 = (query390: string) => {
     const input390 = document.querySelector('input[aria-label="Search Darik stores by item"]') as HTMLInputElement | null;
     if (!input390) return;
@@ -1927,7 +1944,8 @@ export default function DarikDiscoveryHome() {
               <span>{language === "ar" ? "ط§ط¨ط­ط« ط¹ظ† ظ…ط·ط§ط¹ظ… ط£ظˆ ظ…ظ†طھط¬ط§طھ ط£ظˆ ظ…طھط§ط¬ط±..." : "Search for restaurants, products, or stores..."}</span>
             </button>
             <button
-            className={`${styles.discoveryLocation246} ${styles.headerLocation390}`}
+            data-darik-location-entry-390f="true"
+              className={`${styles.discoveryLocation246} ${styles.headerLocation390}`}
             type="button"
             onClick={() => setLocationDialogOpen(true)}
           >
@@ -2013,7 +2031,8 @@ export default function DarikDiscoveryHome() {
       <section className={styles.discoveryToolbar246}>
         <div className={styles.discoveryToolbarInner246}>
           <button
-            className={styles.discoveryLocation246}
+            data-darik-location-entry-390f="true"
+          className={styles.discoveryLocation246}
             type="button"
             onClick={() => setLocationDialogOpen(true)}
           >

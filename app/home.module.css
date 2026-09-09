@@ -4773,3 +4773,203 @@
 .viewProducts390 {
   display: none !important;
 }
+
+/* DARIK_MOBILE_HERO_CLEAN_390F */
+/*
+  Phone layout only. Desktop remains the approved 390 layout.
+  iOS Safari gets a normal-flow centered brand instead of an absolutely
+  positioned brand inside a sticky/backdrop-filter header. This avoids the
+  duplicated/ghost logo seen in the supplied iPhone screenshot.
+*/
+@media (max-width: 720px) {
+  .header {
+    position: relative !important;
+    top: auto !important;
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
+    background: #fff !important;
+  }
+
+  .headerInner {
+    grid-template-columns: 44px minmax(0, 1fr) 44px !important;
+    gap: 8px !important;
+    width: calc(100% - 24px) !important;
+    min-height: 68px !important;
+  }
+
+  .headerMenu246 {
+    grid-column: 1 !important;
+    justify-self: start !important;
+  }
+
+  .header .brand {
+    position: static !important;
+    left: auto !important;
+    right: auto !important;
+    top: auto !important;
+    transform: none !important;
+    grid-column: 2 !important;
+    justify-self: center !important;
+    margin: 0 !important;
+  }
+
+  .header .brandLogo {
+    width: 158px !important;
+    height: 46px !important;
+    object-fit: contain !important;
+    object-position: center !important;
+  }
+
+  .headerActions {
+    grid-column: 3 !important;
+    justify-self: end !important;
+    width: 44px !important;
+    gap: 0 !important;
+    padding: 0 !important;
+  }
+
+  /* Defensive rule: a Darik brand image may never render as a hero overlay. */
+  .homeHero390 img[src*="darik-approved-header-logo"],
+  .homeHero390 .brand {
+    display: none !important;
+  }
+
+  /* Clean phone hero: copy first, uninterrupted photo underneath. */
+  .homeHero390 {
+    height: 535px !important;
+    min-height: 535px !important;
+    background: #fff !important;
+    overflow: hidden !important;
+  }
+
+  .homeHeroInner390 {
+    width: calc(100% - 28px) !important;
+    height: auto !important;
+    margin: 0 auto !important;
+  }
+
+  .homeHeroCopy390 {
+    width: 100% !important;
+    padding-top: 22px !important;
+  }
+
+  .homeHeroCopy390 h1 {
+    max-width: 355px !important;
+    font-size: 35px !important;
+    line-height: .98 !important;
+    letter-spacing: -.048em !important;
+  }
+
+  .homeHeroCopy390 h2 {
+    max-width: 360px !important;
+    margin-top: 8px !important;
+    font-size: 30px !important;
+    line-height: 1.01 !important;
+    letter-spacing: -.045em !important;
+  }
+
+  .homeHeroCopy390 p {
+    max-width: 370px !important;
+    margin-top: 13px !important;
+    font-size: 13px !important;
+    line-height: 1.45 !important;
+  }
+
+  .homeHeroTrust390 {
+    display: grid !important;
+    grid-template-columns: max-content max-content !important;
+    align-items: center !important;
+    justify-content: start !important;
+    gap: 10px 20px !important;
+    margin-top: 15px !important;
+    max-width: 100% !important;
+  }
+
+  .homeHeroTrust390 span {
+    min-width: 0 !important;
+    font-size: 10px !important;
+    white-space: nowrap !important;
+  }
+
+  .homeHeroTrust390 .homeHeroHeart390 {
+    grid-column: 1 / -1 !important;
+  }
+
+  .homeHeroVisual390 {
+    inset: auto 0 0 !important;
+    width: 100% !important;
+    height: 220px !important;
+    opacity: 1 !important;
+    background-size: cover !important;
+    background-position: 61% center !important;
+  }
+
+  .homeHeroFade390 {
+    display: none !important;
+  }
+
+  /* Popular chips are useful on desktop but made the phone hero crowded. */
+  .homePopular390 {
+    display: none !important;
+  }
+
+  /* Search is a distinct block below the photo instead of covering the driver. */
+  .discoveryToolbar246 {
+    margin-top: 0 !important;
+    padding: 12px 12px 16px !important;
+    background: #fff !important;
+  }
+
+  .discoveryToolbarInner246 {
+    width: 100% !important;
+    margin: 0 auto !important;
+  }
+
+  .darikDirectoryForm296 {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) 92px !important;
+    gap: 8px !important;
+  }
+
+  .discoverySearch246 {
+    min-width: 0 !important;
+    min-height: 52px !important;
+    border-radius: 14px !important;
+    box-shadow: 0 5px 16px rgba(15, 23, 42, .06) !important;
+  }
+
+  .discoverySearch246 input {
+    min-width: 0 !important;
+    font-size: 13px !important;
+  }
+
+  .darikDirectorySubmit296 {
+    width: 92px !important;
+    min-width: 92px !important;
+    min-height: 52px !important;
+    padding: 0 8px !important;
+    border-radius: 14px !important;
+    font-size: 11px !important;
+  }
+
+  .marketSection {
+    padding-top: 4px !important;
+  }
+}
+
+@media (max-width: 410px) {
+  .homeHero390 {
+    height: 548px !important;
+    min-height: 548px !important;
+  }
+
+  .homeHeroCopy390 h1 { font-size: 33px !important; }
+  .homeHeroCopy390 h2 { font-size: 28px !important; }
+  .homeHeroCopy390 p { font-size: 12.5px !important; }
+  .homeHeroTrust390 { gap: 9px 13px !important; }
+  .homeHeroTrust390 span { font-size: 9px !important; }
+  .homeHeroVisual390 {
+    height: 218px !important;
+    background-position: 60% center !important;
+  }
+}
