@@ -1799,6 +1799,81 @@ export default function DarikDiscoveryHome() {
     };
   }, [groupedStores]);
 
+
+  const trendingProducts389 = useMemo(() => {
+    const output389: Array<{
+      id: string;
+      imageUrl: string;
+      slug: string;
+      storeName: string;
+    }> = [];
+
+    for (const store389 of renderedStores318D) {
+      const slug389 = String(store389.slug || "").trim().toLowerCase();
+      const products389 = bestSellerProductsBySlug249[slug389] || [];
+      const first389 = products389[0];
+
+      if (!first389?.id || !first389?.imageUrl) continue;
+
+      output389.push({
+        id: first389.id,
+        imageUrl: first389.imageUrl,
+        slug: store389.slug,
+        storeName: displayStoreName(store389, language),
+      });
+
+      if (output389.length >= 5) break;
+    }
+
+    return output389;
+  }, [renderedStores318D, bestSellerProductsBySlug249, language]);
+
+  const seedMarketplaceSearch390 = (query390: string) => {
+    const input390 = document.querySelector('input[aria-label="Search Darik stores by item"]') as HTMLInputElement | null;
+    if (!input390) return;
+
+    const nativeSetter390 = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, "value")?.set;
+    nativeSetter390?.call(input390, query390);
+    input390.dispatchEvent(new Event("input", { bubbles: true }));
+    input390.scrollIntoView({ behavior: "smooth", block: "center" });
+    window.setTimeout(() => input390.focus(), 250);
+  };
+
+  const approvedTrendingProducts390 = [
+    {
+      id: "7e21d4cf-f8c0-428f-8695-1dedc5989c98",
+      slug: "abuahmed",
+      name: "Kabab Wrap",
+      nameAr: "ساندويش كباب",
+      price: 1.0,
+      imageUrl: "https://aarpjcfsnlasclxefdqj.supabase.co/storage/v1/object/public/darik-direct-products/fde31d1d-4e2b-4db4-bf40-a77c5e0aed4f/1788268992301-8c076e58-0fed-41bb-9f71-2068c8a80ac6-full.png",
+    },
+    {
+      id: "db400dd7-86dc-4264-b5bb-05498d101c11",
+      slug: "testhardware",
+      name: "Dewalt Drill 18v",
+      nameAr: "درل شحن 18 فولت",
+      price: 155.0,
+      imageUrl: "https://aarpjcfsnlasclxefdqj.supabase.co/storage/v1/object/public/darik-direct-products/bc4c4633-ad09-4a7e-bcf3-522ed9204a17/1787478341407-ac656f66-bee3-44c6-a0dd-c9087bf81597-full.jpg",
+    },
+    {
+      id: "92166e5a-b31a-444d-b6b6-db22f85a47c8",
+      slug: "alsalam",
+      name: "Boom Boom",
+      nameAr: "بوم بوم",
+      price: 1.0,
+      imageUrl: "https://aarpjcfsnlasclxefdqj.supabase.co/storage/v1/object/public/darik-direct-products/4fc99655-b59c-49a7-95a5-7a92da02eaac/ai-enhanced/1787551958521-f93ed229-5794-4ebf-8010-9bc47938d9e9.jpg",
+    },
+    {
+      id: "5f4d5210-fd34-4408-b4e4-6a6c084859be",
+      slug: "testappliance",
+      name: "TCL 1 ton A/C wall unit",
+      nameAr: "مكيف TCL واحد طن",
+      price: 499.0,
+      imageUrl: "https://aarpjcfsnlasclxefdqj.supabase.co/storage/v1/object/public/darik-direct-products/a89675da-d72a-4b2c-8988-bfe6b0d0ab1e/1787150126793-qr8ry4al-full.jpg",
+    },
+  ] as const;
+
   return (
     <main
       className={styles.page}
@@ -1824,18 +1899,62 @@ export default function DarikDiscoveryHome() {
           <a className={styles.brand} href="/" aria-label="Darik Marketplace home">
             <img
               className={styles.brandLogo}
-              src="/darik_logo_final_v2.png"
+              src="/darik-approved-header-logo-390c.png"
               alt="Darik Marketplace"
             />
           </a>
 
           <nav className={styles.desktopNav} aria-label="Primary navigation">
-            <a href="#stores">{t.stores}</a>
-            <a href="/how-it-works">{t.how}</a>
-            <a href="/pricing">{t.pricing}</a>
+            <a className={styles.headerHomeActive390} href="/">{language === "ar" ? "\u0627\u0644\u0631\u0626\u064a\u0633\u064a\u0629" : "Home"}</a>
+            <a href="#stores">{language === "ar" ? "\u0643\u0644 \u0627\u0644\u0645\u062a\u0627\u062c\u0631" : "All Stores"}</a>
+            <a href="#categories">{language === "ar" ? "\u0627\u0644\u0641\u0626\u0627\u062a" : "Categories"}</a>
+            <a href="#about">{language === "ar" ? "\u0639\u0646 \u062f\u0627\u0631\u064a\u0643" : "About"}</a>
+            <a href="/store-signup">{language === "ar" ? "\u0644\u0644\u0623\u0639\u0645\u0627\u0644" : "For Business"}</a>
           </nav>
 
-          <div className={styles.headerActions}>
+                    <div className={styles.headerDiscovery390}>
+            <button
+              type="button"
+              className={styles.headerSearch390}
+              onClick={() => {
+                const input390 = document.querySelector('input[aria-label="Search Darik stores by item"]') as HTMLInputElement | null;
+                input390?.scrollIntoView({ behavior: "smooth", block: "center" });
+                window.setTimeout(() => input390?.focus(), 320);
+              }}
+              aria-label={language === "ar" ? "ط¨ط­ط« ظپظٹ ط¯ط§ط±ظٹظƒ" : "Search Darik"}
+            >
+              <Icon name="search" size={18} />
+              <span>{language === "ar" ? "ط§ط¨ط­ط« ط¹ظ† ظ…ط·ط§ط¹ظ… ط£ظˆ ظ…ظ†طھط¬ط§طھ ط£ظˆ ظ…طھط§ط¬ط±..." : "Search for restaurants, products, or stores..."}</span>
+            </button>
+            <button
+            className={`${styles.discoveryLocation246} ${styles.headerLocation390}`}
+            type="button"
+            onClick={() => setLocationDialogOpen(true)}
+          >
+            <span className={styles.discoveryLocationIcon246}>
+              <Icon name="location" size={24} />
+            </span>
+
+            <span className={styles.discoveryLocationText246}>
+              <small>
+                {location ? t.deliveringTo : t.locationRequired}
+              </small>
+              <strong>
+                {location?.label || t.useLocation}
+              </strong>
+            </span>
+
+            <span className={styles.discoveryLocationChange246}>
+              <strong>{t.changeLocation}</strong>
+              <small>{language === "ar" ? "تغيير الموقع" : "Change"}</small>
+            </span>
+          </button>
+            <a className={styles.headerCart390} href="#stores" aria-label={language === "ar" ? "ط§ظ„ط³ظ„ط©" : "Cart"}>
+              <Icon name="shop" size={21} />
+              <b>0</b>
+            </a>
+          </div>
+<div className={styles.headerActions}>
             {/* DARIK_FRONTEND_355_ACCOUNT_MENU_EVERYWHERE */}
             <DarikCustomerAccountMenuLauncher354 />
             <button className={styles.languageButton} type="button" onClick={toggleLanguage} aria-label="Change language">
@@ -1843,7 +1962,9 @@ export default function DarikDiscoveryHome() {
               <span>{language === "en" ? "العربية" : "English"}</span>
             </button>
             <a className={styles.dashboardLink} href="/store-dashboard"><Icon name="user" size={18} />{t.dashboard}</a>
-            <a className={styles.retailerButton} href="/store-signup">{t.retailerSignup}<Icon name="arrow" size={18} /></a>
+            <a className={styles.retailerButton} href="/create-account">
+              {language === "ar" ? "\u0625\u0646\u0634\u0627\u0621 \u062d\u0633\u0627\u0628" : "Sign Up"}
+            </a>
           </div>
         </div>
 
@@ -1857,6 +1978,37 @@ export default function DarikDiscoveryHome() {
           </nav>
         ) : null}
       </header>
+            {/* DARIK_APPROVED_EXACT_HOME_390 */}
+      {/* DARIK_APPROVED_CLEANUP_390C */}
+      <section className={styles.homeHero390} aria-label={language === "ar" ? "\u062f\u0627\u0631\u064a\u0643 \u0627\u0644\u0633\u0648\u0642 \u0627\u0644\u0645\u062d\u0644\u064a \u0641\u064a \u0627\u0644\u0623\u0631\u062f\u0646" : "Darik - Jordan's Local Marketplace"}>
+        <div className={styles.homeHeroVisual390} aria-hidden="true" />
+        <div className={styles.homeHeroFade390} aria-hidden="true" />
+        <div className={styles.homeHeroInner390}>
+          <div className={styles.homeHeroCopy390}>
+            <h1>{language === "ar" ? "\u0633\u0648\u0642 \u0627\u0644\u0623\u0631\u062f\u0646 \u0627\u0644\u0645\u062d\u0644\u064a" : "Jordan's Local Marketplace"}</h1>
+            <h2>
+              <strong>{language === "ar" ? "\u0643\u0644 \u0627\u0644\u0644\u064a \u062a\u062d\u062a\u0627\u062c\u0647\u060c" : "Everything You Need,"}</strong>{" "}
+              <span>{language === "ar" ? "\u0642\u0631\u064a\u0628 \u0645\u0646\u0643" : "Near You"}</span>
+            </h2>
+            <p>
+              {language === "ar"
+                ? "\u0627\u0643\u062a\u0634\u0641 \u0627\u0644\u0645\u062a\u0627\u062c\u0631 \u0627\u0644\u0645\u062d\u0644\u064a\u0629 \u0648\u0627\u0644\u0645\u0637\u0627\u0639\u0645 \u0648\u0627\u0644\u0628\u0642\u0627\u0644\u0629 \u0648\u0627\u0644\u0635\u064a\u062f\u0644\u064a\u0627\u062a \u0648\u0627\u0644\u0623\u0632\u064a\u0627\u0621 \u0648\u0627\u0644\u0625\u0644\u0643\u062a\u0631\u0648\u0646\u064a\u0627\u062a \u0648\u0627\u0644\u0645\u0646\u0632\u0644 \u0648\u0627\u0644\u0645\u0632\u064a\u062f - \u0643\u0644\u0647\u0627 \u0641\u064a \u0645\u0643\u0627\u0646 \u0648\u0627\u062d\u062f. \u0627\u062f\u0639\u0645 \u0627\u0644\u0645\u062d\u0644\u064a. \u062a\u0633\u0648\u0642 \u062f\u0627\u0631\u064a\u0643."
+                : "Discover real local stores, delicious food, groceries, pharmacy, fashion, electronics, home & more - all in one place. Support local. Shop Darik."}
+            </p>
+            <div className={styles.homeHeroTrust390}>
+              <span><Icon name="shop" size={17} />{language === "ar" ? "\u062a\u0648\u0635\u064a\u0644 \u0645\u062d\u0644\u064a \u0633\u0631\u064a\u0639" : "Fast local delivery"}</span>
+              <span><Icon name="check" size={17} />{language === "ar" ? "\u0645\u062a\u0627\u062c\u0631 \u0645\u062d\u0644\u064a\u0629 \u0645\u0648\u062b\u0648\u0642\u0629" : "Verified local stores"}</span>
+              <span className={styles.homeHeroHeart390}><Icon name="heart" size={17} />{language === "ar" ? "\u0627\u062f\u0639\u0645 \u0627\u0644\u0623\u0639\u0645\u0627\u0644 \u0627\u0644\u0623\u0631\u062f\u0646\u064a\u0629" : "Support Jordanian businesses"}</span>
+            </div>
+          </div>
+          <div className={styles.homePopular390}>
+            <b>{language === "ar" ? "\u0639\u0645\u0644\u064a\u0627\u062a \u0628\u062d\u062b \u0634\u0627\u0626\u0639\u0629:" : "Popular searches:"}</b>
+            {["Mansaf", "Groceries", "Pharmacy", "Mobile phones", "Car parts", "Home appliances"].map((query390) => (
+              <button key={query390} type="button" onClick={() => seedMarketplaceSearch390(query390)}>{query390}</button>
+            ))}
+          </div>
+        </div>
+      </section>
 
       <section className={styles.discoveryToolbar246}>
         <div className={styles.discoveryToolbarInner246}>
@@ -2193,17 +2345,16 @@ export default function DarikDiscoveryHome() {
           <div className={styles.marketHeadingRow}>
             <div>
               <span className={styles.sectionKicker}>{location ? t.deliveringTo : t.locationRequired}</span>
-              <h2>{t.nearbyStores}</h2>
-              <p>{location ? t.nearbyBody : t.locationRequiredBody}</p>
+              <h2>{language === "ar" ? "ط§ظ„ظ…طھط§ط¬ط± ط§ظ„ظ†ط´ط·ط© ط§ظ„ظ‚ط±ظٹط¨ط© ظ…ظ†ظƒ" : "Active stores near you"}</h2>
+              <p>{location ? (language === "ar" ? `ط§ط·ظ„ط¨ ظ…ظ† ط§ظ„ظ…طھط§ط¬ط± ط§ظ„ظ…ط­ظ„ظٹط© ط§ظ„طھظٹ طھظˆطµظ„ ط¥ظ„ظ‰ ${location.label}` : `Order from local stores delivering to ${location.label}`) : (language === "ar" ? "ط­ط¯ط¯ ظ…ظˆظ‚ط¹ظƒ ظ„طھط±طھظٹط¨ ط§ظ„ظ…طھط§ط¬ط± ط§ظ„طھظٹ طھظˆطµظ„ ط¥ظ„ظٹظƒ ط£ظˆظ„ط§ظ‹" : "Set your location to move stores that deliver to you to the top")}</p>
             </div>
 
-            <strong className={styles.storeCount246B}>
-              {visibleStores246B.length}{" "}
-              {visibleStores246B.length === 1 ? t.store : t.storesCount}
-            </strong>
+            <a className={styles.viewAllStores390} href="#stores">
+                {language === "ar" ? "ط¹ط±ط¶ ظƒظ„ ط§ظ„ظ…طھط§ط¬ط±" : "View all stores"} <Icon name="arrow" size={16} />
+              </a>
           </div>
 
-          <div className={styles.categoryTabs246B} aria-label="Store categories">
+          <div id="categories" className={styles.categoryTabs246B} aria-label="Store categories">
               {categoryGroups.map((group) => {
                 const active246B = selectedCategory246 === group.key;
                 const count246B = storeCounts.get(group.key) || 0;
@@ -2363,6 +2514,128 @@ export default function DarikDiscoveryHome() {
         </div>
       </section>
 
+
+      {trendingProducts389.length > 0 ? (
+        <section className={styles.trendingSection389} aria-label={language === "ar" ? "الرائج على داريك" : "Trending on Darik"}>
+          <div className={styles.sectionShell}>
+            <div className={styles.trendingHeading389}>
+              <div>
+                <span>{language === "ar" ? "🔥 رائج الآن" : "🔥 TRENDING NOW"}</span>
+                <h2>{language === "ar" ? "الرائج على داريك" : "Trending on Darik"}</h2>
+                <p>{language === "ar" ? "منتجات حقيقية من متاجر داريك." : "Real products from Darik stores."}</p>
+              </div>
+              <a href="#stores">{language === "ar" ? "عرض كل المتاجر" : "View all stores"} <Icon name="arrow" size={16} /></a>
+            </div>
+
+            <div className={styles.trendingGrid389}>
+              {trendingProducts389.map((product389) => (
+                <a
+                  key={`${product389.slug}-${product389.id}`}
+                  href={`/${product389.slug}?product=${encodeURIComponent(product389.id)}`}
+                  className={styles.trendingCard389}
+                >
+                  <img src={product389.imageUrl} alt="" loading="lazy" decoding="async" />
+                  <span>
+                    <small>{product389.storeName}</small>
+                    <strong>{language === "ar" ? "منتج شائع" : "Popular item"}</strong>
+                  </span>
+                  <i><Icon name="arrow" size={16} /></i>
+                </a>
+              ))}
+            </div>
+          </div>
+        </section>
+      ) : null}
+
+      <section className={styles.homePromo389}>
+        <div className={styles.sectionShell}>
+          <div className={styles.homePromoGrid389}>
+            <a className={styles.businessPromo389} href="/store-signup">
+              <span className={styles.promoIcon389}><Icon name="shop" size={24} /></span>
+              <span>
+                <small>{language === "ar" ? "هل تملك متجراً؟" : "Own a store?"}</small>
+                <strong>{language === "ar" ? "نمِّ عملك مع داريك." : "Grow your business with Darik."}</strong>
+                <em>{language === "ar" ? "اعرض متجرك وابدأ الوصول لعملاء أكثر." : "List your store and reach more local customers."}</em>
+              </span>
+              <i><Icon name="arrow" size={20} /></i>
+            </a>
+
+            <a className={styles.wholesalePromo389} href="/wholesale">
+              <span className={styles.promoIcon389}><Icon name="sparkle" size={24} /></span>
+              <span>
+                <small>{language === "ar" ? "للأعمال" : "FOR BUSINESSES"}</small>
+                <strong>{language === "ar" ? "داريك بالجملة" : "Darik Wholesale"}</strong>
+                <em>{language === "ar" ? "اجمع الطلبات واشترِ مباشرة بسعر أفضل." : "Pool orders. Buy direct. Unlock better pricing."}</em>
+              </span>
+              <i><Icon name="arrow" size={20} /></i>
+            </a>
+          </div>
+        </div>
+      </section>
+
+            {/* DARIK_STORE_BESTSELLERS_390E */}
+      <section className={styles.trendingSection390} aria-label={language === "ar" ? "\u0627\u0644\u0631\u0627\u0626\u062c \u0639\u0644\u0649 \u062f\u0627\u0631\u064a\u0643" : "Trending on Darik"}>
+        <div className={styles.sectionShell}>
+          <div className={styles.trendingLayout390}>
+            <div className={styles.trendingHeading390}>
+              <h2><span className={styles.trendingMark390} aria-hidden="true"><Icon name="sparkle" size={18} /></span>{language === "ar" ? "\u0627\u0644\u0631\u0627\u0626\u062c \u0639\u0644\u0649 \u062f\u0627\u0631\u064a\u0643" : "Trending on Darik"}</h2>
+              <p>{language === "ar" ? "\u0645\u0646\u062a\u062c\u0627\u062a \u0634\u0627\u0626\u0639\u0629 \u0645\u0646 \u0645\u062a\u0627\u062c\u0631 \u0645\u062d\u0644\u064a\u0629." : "Popular products from local stores."}</p>
+            </div>
+            <div className={styles.trendingGrid390}>
+              {approvedTrendingProducts390.map((product390) => (
+                <a
+                  key={product390.id}
+                  href={`/${product390.slug}?product=${encodeURIComponent(product390.id)}`}
+                  className={styles.trendingCard390}
+                >
+                  <img src={product390.imageUrl} alt="" loading="lazy" decoding="async" />
+                  <span>
+                    <strong>{language === "ar" ? product390.nameAr : product390.name}</strong>
+                    <b>{product390.price.toFixed(2)} JOD</b>
+                  </span>
+                  <i><Icon name="shop" size={16} /></i>
+                </a>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className={styles.appPromo390} aria-label={language === "ar" ? "\u062d\u0645\u0651\u0644 \u062a\u0637\u0628\u064a\u0642 \u062f\u0627\u0631\u064a\u0643" : "Get the Darik app"}>
+        <div className={styles.sectionShell}>
+          <div className={styles.appPromoInner390}>
+            <img className={styles.appPhone390} src="/darik-app-phone-390.jpg" alt="" aria-hidden="true" />
+            <div className={styles.appCopy390}>
+              <small>{language === "ar" ? "\u062a\u0633\u0648\u0642 \u0628\u0623\u064a \u0648\u0642\u062a \u0648\u0645\u0646 \u0623\u064a \u0645\u0643\u0627\u0646" : "Shop anytime, anywhere"}</small>
+              <h2>{language === "ar" ? "\u062d\u0645\u0651\u0644 \u062a\u0637\u0628\u064a\u0642 \u062f\u0627\u0631\u064a\u0643" : "Get the Darik app"}</h2>
+              <p>{language === "ar" ? "\u0637\u0644\u0628 \u0623\u0633\u0631\u0639. \u0639\u0631\u0648\u0636 \u062d\u0635\u0631\u064a\u0629. \u062f\u0639\u0645 \u0627\u0644\u0645\u062a\u0627\u062c\u0631 \u0627\u0644\u0645\u062d\u0644\u064a\u0629." : "Faster ordering. Exclusive offers. Support local stores."}</p>
+            </div>
+            <div className={styles.appBadges390} aria-label={language === "ar" ? "\u0645\u062a\u0627\u062c\u0631 \u0627\u0644\u062a\u0637\u0628\u064a\u0642\u0627\u062a" : "App stores"}>
+              <img src="/darik-approved-appstore-390c.png" alt="Download on the App Store" />
+              <img src="/darik-approved-googleplay-390c.png" alt="Get it on Google Play" />
+            </div>
+            <div className={styles.appBenefits390}>
+              <span><Icon name="shop" size={23} /><b>{language === "ar" ? "\u0646\u0641\u0633 \u0627\u0644\u0645\u062a\u0627\u062c\u0631 \u0627\u0644\u0645\u062d\u0644\u064a\u0629" : "Same local stores"}</b></span>
+              <span><Icon name="sparkle" size={23} /><b>{language === "ar" ? "\u0639\u0631\u0648\u0636 \u062d\u0635\u0631\u064a\u0629" : "Exclusive offers"}</b></span>
+              <span><Icon name="heart" size={23} /><b>{language === "ar" ? "\u0627\u062f\u0639\u0645 \u0627\u0644\u0623\u0639\u0645\u0627\u0644 \u0627\u0644\u0645\u062d\u0644\u064a\u0629" : "Support local business"}</b></span>
+            </div>
+            <div className={styles.appJordan390}>{language === "ar" ? "\u0623\u0631\u062f\u0646 \u0623\u0642\u0648\u0649 \u0645\u0639\u0627\u064b" : "A Stronger Jordan Together"}</div>
+          </div>
+        </div>
+      </section>
+
+      <section id="about" className={styles.trustStrip390} aria-label={language === "ar" ? "\u0648\u0639\u062f \u062f\u0627\u0631\u064a\u0643" : "Why Darik"}>
+        <div className={styles.sectionShell}>
+          <div className={styles.trustGrid390}>
+            <span><Icon name="shop" size={24} /><b>{language === "ar" ? "\u062a\u0648\u0635\u064a\u0644 \u0645\u062d\u0644\u064a \u0633\u0631\u064a\u0639" : "Fast local delivery"}</b><small>{language === "ar" ? "\u0645\u0646 \u0645\u0646\u0637\u0642\u062a\u0643" : "From your neighborhood"}</small></span>
+            <span><Icon name="check" size={24} /><b>{language === "ar" ? "\u0645\u062a\u0627\u062c\u0631 \u0645\u062d\u0644\u064a\u0629 \u0645\u0648\u062b\u0648\u0642\u0629" : "Verified local stores"}</b><small>{language === "ar" ? "\u0623\u0639\u0645\u0627\u0644 \u062d\u0642\u064a\u0642\u064a\u0629\u060c \u0646\u0627\u0633 \u062d\u0642\u064a\u0642\u064a\u0648\u0646" : "Real businesses, real people"}</small></span>
+            <span className={styles.trustHeart390}><Icon name="heart" size={24} /><b>{language === "ar" ? "\u0627\u062f\u0639\u0645 \u0627\u0644\u0623\u0639\u0645\u0627\u0644 \u0627\u0644\u0623\u0631\u062f\u0646\u064a\u0629" : "Support Jordanian businesses"}</b><small>{language === "ar" ? "\u062e\u0644\u0651\u064a \u0645\u062c\u062a\u0645\u0639\u0643 \u0623\u0642\u0648\u0649" : "Keep your community strong"}</small></span>
+            <span><Icon name="shop" size={24} /><b>{language === "ar" ? "\u0637\u0644\u0628 \u0633\u0647\u0644 \u0648\u0622\u0645\u0646" : "Easy & secure ordering"}</b><small>{language === "ar" ? "\u062e\u064a\u0627\u0631\u0627\u062a \u062f\u0641\u0639 \u0645\u062a\u0639\u062f\u062f\u0629" : "Multiple payment options"}</small></span>
+            <em>{language === "ar" ? "\u0627\u0644\u0645\u062a\u0627\u062c\u0631 \u0627\u0644\u0645\u062d\u0644\u064a\u0629\u060c \u0623\u0642\u0631\u0628 \u0625\u0644\u064a\u0643" : "Local Stores. Closer to You."}</em>
+          </div>
+        </div>
+      </section>
+
       <section className={styles.retailerSection}>
         <div className={styles.sectionShell}>
           <div className={styles.retailerPanel}>
@@ -2406,7 +2679,7 @@ export default function DarikDiscoveryHome() {
       <footer className={styles.footer}>
         <div className={styles.footerInner}>
           <div className={styles.footerBrand}>
-            <a className={styles.brand} href="/" aria-label="Darik Marketplace home"><img className={styles.brandLogo} src="/darik_logo_final_v2.png" alt="Darik Marketplace" /></a>
+            <a className={styles.brand} href="/" aria-label="Darik Marketplace home"><img className={styles.brandLogo} src="/darik-approved-header-logo-390c.png" alt="Darik Marketplace" /></a>
             <p>{t.footerBody}</p>
           </div>
           <div className={styles.footerLinks}>
