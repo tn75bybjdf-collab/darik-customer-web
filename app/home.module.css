@@ -4096,7 +4096,7 @@
   font-weight: 650;
 }
 
-.page[dir="rtl"] .categoryTabs246B > button:first-child::after { content: "طھطµظپط­ ظƒظ„ ظ…طھط¬ط± ظ†ط´ط·"; }
+.page[dir="rtl"] .categoryTabs246B > button:first-child::after { content: "ط·ع¾ط·آµط¸ظ¾ط·آ­ ط¸ئ’ط¸â€‍ ط¸â€¦ط·ع¾ط·آ¬ط·آ± ط¸â€ ط·آ´ط·آ·"; }
 
 .categoryTabs246B > button:nth-child(2) > span { background-image: url('/darik-cat-390-groceries.jpg') !important; }
 .categoryTabs246B > button:nth-child(3) > span { background-image: url('/darik-cat-390-food.jpg') !important; }
@@ -4109,7 +4109,7 @@
 .categoryTabs246B > button:nth-child(n+2):nth-child(-n+9) > span svg { opacity: 0 !important; }
 .categoryTabs246B > button:nth-child(10) > span svg { display: none !important; }
 .categoryTabs246B > button:nth-child(10) > span::after {
-  content: "â€¢â€¢â€¢";
+  content: "أ¢â‚¬آ¢أ¢â‚¬آ¢أ¢â‚¬آ¢";
   color: #071a38;
   letter-spacing: 4px;
   font-size: 15px;
@@ -5834,5 +5834,242 @@
     width: 78px !important;
     min-width: 78px !important;
     font-size: 10px !important;
+  }
+}
+
+/* DARIK_FINAL_MOBILE_CLEANUP_390L */
+@media (max-width: 720px) {
+  /*
+    Mobile header: render the Darik mark as a CSS background instead of the
+    <img>. This keeps it exactly viewport-centered and avoids the duplicate/
+    ghost image artifact seen in Mobile Safari.
+  */
+  .header {
+    min-height: 62px !important;
+    overflow: visible !important;
+  }
+
+  .headerInner {
+    position: relative !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-height: 62px !important;
+    margin: 0 !important;
+    padding: 0 14px !important;
+    box-sizing: border-box !important;
+    grid-template-columns: 44px minmax(0, 1fr) 44px !important;
+    align-items: center !important;
+    overflow: visible !important;
+  }
+
+  .headerMenu246 {
+    grid-column: 1 !important;
+    justify-self: start !important;
+    position: relative !important;
+    z-index: 5 !important;
+  }
+
+  .headerActions {
+    grid-column: 3 !important;
+    justify-self: end !important;
+    position: relative !important;
+    z-index: 5 !important;
+  }
+
+  .header .brand {
+    position: absolute !important;
+    left: 50% !important;
+    top: 50% !important;
+    transform: translate(-50%, -50%) !important;
+    width: 138px !important;
+    height: 42px !important;
+    min-width: 138px !important;
+    max-width: 138px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    display: block !important;
+    background: url("/darik-approved-header-logo-390c.png") center center / contain no-repeat !important;
+    z-index: 3 !important;
+  }
+
+  .header .brandLogo {
+    display: none !important;
+  }
+
+  /* Hero copy: keep the approved look, just remove excess mobile height. */
+  .homeHeroInner390 {
+    width: calc(100% - 30px) !important;
+    max-width: 520px !important;
+  }
+
+  .homeHeroCopy390 {
+    padding: 18px 0 12px !important;
+  }
+
+  .homeHeroCopy390 h1 {
+    max-width: 336px !important;
+    font-size: clamp(30px, 8vw, 33px) !important;
+    line-height: 1 !important;
+  }
+
+  .homeHeroCopy390 h2 {
+    max-width: 342px !important;
+    margin-top: 6px !important;
+    font-size: clamp(26px, 7.2vw, 29px) !important;
+    line-height: 1.025 !important;
+  }
+
+  .homeHeroCopy390 p {
+    max-width: 360px !important;
+    margin-top: 10px !important;
+    font-size: 12.8px !important;
+    line-height: 1.46 !important;
+  }
+
+  /* Three clean, full-width trust rows. */
+  .homeHeroTrust390 {
+    position: relative !important;
+    z-index: 4 !important;
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    gap: 9px !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 12px 0 0 !important;
+    padding: 0 !important;
+    overflow: visible !important;
+  }
+
+  .homeHeroTrust390 span,
+  .homeHeroTrust390 .homeHeroHeart390 {
+    grid-column: auto !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    padding: 0 !important;
+    color: #102945 !important;
+    font-size: 10.8px !important;
+    font-weight: 850 !important;
+    line-height: 1.25 !important;
+    white-space: normal !important;
+    overflow: visible !important;
+    text-overflow: clip !important;
+  }
+
+  .homeHeroTrust390 svg {
+    flex: 0 0 auto !important;
+  }
+
+  /*
+    Hero image crop:
+    enlarge slightly and bias right. This removes the chopped "Local People"
+    fragment on the left while preserving the driver, Jordan flag and almost
+    all of the Shop Local sign.
+  */
+  .homeHeroVisual390 {
+    width: calc(100% - 24px) !important;
+    max-width: 520px !important;
+    height: 152px !important;
+    min-height: 152px !important;
+    max-height: 152px !important;
+    flex-basis: 152px !important;
+    border-radius: 17px !important;
+    background-size: 120% auto !important;
+    background-position: 85% center !important;
+    background-repeat: no-repeat !important;
+  }
+
+  /* Search: slightly shorter, with more space given to the input. */
+  .discoveryToolbar246 {
+    margin-top: -13px !important;
+    padding: 0 12px 14px !important;
+  }
+
+  .discoveryToolbarInner246 {
+    max-width: 510px !important;
+    padding: 7px !important;
+    border-radius: 16px !important;
+    box-shadow: 0 12px 28px rgba(15, 23, 42, .10) !important;
+  }
+
+  .darikDirectoryForm296 {
+    grid-template-columns: minmax(0, 1fr) 76px !important;
+    gap: 7px !important;
+  }
+
+  .discoverySearch246 {
+    min-height: 48px !important;
+    height: 48px !important;
+    padding: 0 9px !important;
+    border-radius: 12px !important;
+  }
+
+  .discoverySearch246 input,
+  .discoverySearch246 input::placeholder {
+    font-size: 11.8px !important;
+  }
+
+  .darikDirectorySubmit296 {
+    width: 76px !important;
+    min-width: 76px !important;
+    min-height: 48px !important;
+    height: 48px !important;
+    padding: 0 5px !important;
+    border-radius: 12px !important;
+    font-size: 10px !important;
+    box-shadow: 0 6px 14px rgba(7, 135, 103, .16) !important;
+  }
+
+  .marketSection {
+    padding-top: 7px !important;
+  }
+}
+
+@media (max-width: 380px) {
+  .header .brand {
+    width: 130px !important;
+    min-width: 130px !important;
+    max-width: 130px !important;
+    height: 39px !important;
+  }
+
+  .homeHeroCopy390 h1 {
+    font-size: 29px !important;
+  }
+
+  .homeHeroCopy390 h2 {
+    font-size: 25px !important;
+  }
+
+  .homeHeroCopy390 p {
+    font-size: 12.3px !important;
+  }
+
+  .homeHeroTrust390 span,
+  .homeHeroTrust390 .homeHeroHeart390 {
+    font-size: 10.1px !important;
+  }
+
+  .homeHeroVisual390 {
+    height: 146px !important;
+    min-height: 146px !important;
+    max-height: 146px !important;
+    flex-basis: 146px !important;
+    background-size: 122% auto !important;
+    background-position: 86% center !important;
+  }
+
+  .darikDirectoryForm296 {
+    grid-template-columns: minmax(0, 1fr) 72px !important;
+    gap: 6px !important;
+  }
+
+  .darikDirectorySubmit296 {
+    width: 72px !important;
+    min-width: 72px !important;
+    font-size: 9.6px !important;
   }
 }
