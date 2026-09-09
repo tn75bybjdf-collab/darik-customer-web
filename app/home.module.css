@@ -5403,3 +5403,436 @@
     padding: 0 !important;
   }
 }
+
+/* DARIK_MOBILE_FINISH_ALL20_390J */
+/*
+  Final phone-only homepage composition.
+  This layer intentionally comes after 390H so it wins the cascade without
+  rewriting any approved desktop/source logic.
+*/
+@media (max-width: 720px) {
+  /* 01-04, 17-18: compact, balanced header with zero horizontal spill. */
+  .page {
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow-x: clip !important;
+  }
+
+  .header {
+    position: relative !important;
+    top: auto !important;
+    min-height: 64px !important;
+    background: #fff !important;
+    border-bottom: 1px solid #edf1f3 !important;
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
+    box-shadow: 0 1px 8px rgba(15, 23, 42, .035) !important;
+    overflow: visible !important;
+  }
+
+  .headerInner {
+    position: relative !important;
+    display: grid !important;
+    grid-template-columns: 44px minmax(0, 1fr) 44px !important;
+    align-items: center !important;
+    gap: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-height: 64px !important;
+    margin: 0 !important;
+    padding: 0 14px !important;
+    box-sizing: border-box !important;
+    overflow: visible !important;
+  }
+
+  .desktopNav,
+  .headerDiscovery390 {
+    display: none !important;
+  }
+
+  .headerMenu246 {
+    grid-column: 1 !important;
+    grid-row: 1 !important;
+    justify-self: start !important;
+    align-self: center !important;
+    position: relative !important;
+    inset: auto !important;
+    width: 44px !important;
+    min-width: 44px !important;
+    max-width: 44px !important;
+    height: 44px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    transform: none !important;
+    z-index: 4 !important;
+  }
+
+  /* Undo the 390H stretch that pushed the logo off the phone viewport. */
+  .header .brand {
+    grid-column: 2 !important;
+    grid-row: 1 !important;
+    justify-self: center !important;
+    align-self: center !important;
+    position: static !important;
+    inset: auto !important;
+    left: auto !important;
+    right: auto !important;
+    top: auto !important;
+    width: auto !important;
+    min-width: 0 !important;
+    max-width: 142px !important;
+    height: auto !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    transform: none !important;
+    display: block !important;
+    text-align: center !important;
+    overflow: visible !important;
+    z-index: 3 !important;
+  }
+
+  .header .brandLogo {
+    display: block !important;
+    width: 136px !important;
+    min-width: 0 !important;
+    max-width: 136px !important;
+    height: 40px !important;
+    margin: 0 auto !important;
+    padding: 0 !important;
+    object-fit: contain !important;
+    object-position: center center !important;
+    transform: none !important;
+  }
+
+  .headerActions {
+    grid-column: 3 !important;
+    grid-row: 1 !important;
+    justify-self: end !important;
+    align-self: center !important;
+    position: relative !important;
+    inset: auto !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-end !important;
+    width: 44px !important;
+    min-width: 44px !important;
+    max-width: 44px !important;
+    min-height: 44px !important;
+    gap: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    transform: none !important;
+    overflow: visible !important;
+    z-index: 4 !important;
+  }
+
+  /* The mobile menu handles anonymous auth; never let a wide Sign Up CTA
+     displace the centered logo on a 390px header. */
+  .headerActions .retailerButton {
+    display: none !important;
+  }
+
+  /* 05-06, 18: do NOT use broad img[src] selectors in this CSS module.
+     The apparent second logo on iPhone is handled by fixing the header itself:
+     non-sticky/non-blurred mobile header, normal-flow centered brand, constrained logo.
+     There is only one actual header-logo element in the homepage source. */
+
+  /* 07-16, 19-20: the phone hero is intentionally composed for a phone,
+     not a desktop hero squeezed into a narrow column. */
+  .homeHero390 {
+    position: relative !important;
+    display: flex !important;
+    flex-direction: column !important;
+    height: auto !important;
+    min-height: 0 !important;
+    margin: 0 !important;
+    padding: 0 0 14px !important;
+    background: #fff !important;
+    border-bottom: 0 !important;
+    overflow: hidden !important;
+  }
+
+  .homeHeroFade390 {
+    display: none !important;
+  }
+
+  .homeHeroInner390 {
+    order: 1 !important;
+    position: relative !important;
+    z-index: 2 !important;
+    width: calc(100% - 32px) !important;
+    max-width: 520px !important;
+    height: auto !important;
+    min-height: 0 !important;
+    margin: 0 auto !important;
+    padding: 0 !important;
+  }
+
+  .homeHeroCopy390 {
+    width: 100% !important;
+    max-width: none !important;
+    margin: 0 !important;
+    padding: 20px 0 16px !important;
+  }
+
+  .homeHeroCopy390 h1 {
+    width: 100% !important;
+    max-width: 350px !important;
+    margin: 0 !important;
+    color: #071a38 !important;
+    font-size: clamp(32px, 8.45vw, 35px) !important;
+    font-weight: 1000 !important;
+    line-height: 1.01 !important;
+    letter-spacing: -.045em !important;
+    text-wrap: balance !important;
+    overflow-wrap: normal !important;
+  }
+
+  .homeHeroCopy390 h2 {
+    width: 100% !important;
+    max-width: 360px !important;
+    margin: 8px 0 0 !important;
+    font-size: clamp(28px, 7.55vw, 31px) !important;
+    font-weight: 1000 !important;
+    line-height: 1.035 !important;
+    letter-spacing: -.043em !important;
+    text-wrap: pretty !important;
+  }
+
+  .homeHeroCopy390 h2 strong,
+  .homeHeroCopy390 h2 span {
+    display: block !important;
+    width: max-content !important;
+    max-width: 100% !important;
+  }
+
+  .homeHeroCopy390 p {
+    width: 100% !important;
+    max-width: 370px !important;
+    margin: 13px 0 0 !important;
+    color: #52647d !important;
+    font-size: 13.5px !important;
+    font-weight: 520 !important;
+    line-height: 1.5 !important;
+    letter-spacing: 0 !important;
+    overflow-wrap: normal !important;
+  }
+
+  .homeHeroTrust390 {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    align-items: start !important;
+    justify-content: stretch !important;
+    gap: 8px !important;
+    width: 100% !important;
+    max-width: 360px !important;
+    margin: 14px 0 0 !important;
+    padding: 0 !important;
+  }
+
+  .homeHeroTrust390 span,
+  .homeHeroTrust390 .homeHeroHeart390 {
+    grid-column: auto !important;
+    min-width: 0 !important;
+    width: 100% !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    color: #102945 !important;
+    font-size: 11px !important;
+    font-weight: 850 !important;
+    line-height: 1.25 !important;
+    white-space: normal !important;
+    overflow: visible !important;
+    text-overflow: clip !important;
+  }
+
+  .homeHeroTrust390 svg {
+    flex: 0 0 auto !important;
+  }
+
+  .homePopular390 {
+    display: none !important;
+  }
+
+  /* 11-12, 15-16: compact photo card. 75% horizontal position deliberately
+     removes the baked-in left-edge search fragment while preserving the flag,
+     driver and almost all of the Shop Local handwriting on the right. */
+  .homeHeroVisual390 {
+    order: 2 !important;
+    position: relative !important;
+    inset: auto !important;
+    align-self: center !important;
+    width: calc(100% - 24px) !important;
+    max-width: 520px !important;
+    height: 160px !important;
+    min-height: 160px !important;
+    max-height: 160px !important;
+    flex: 0 0 160px !important;
+    margin: 0 auto !important;
+    border: 1px solid #e7eeeb !important;
+    border-radius: 18px !important;
+    background-size: cover !important;
+    background-position: 75% center !important;
+    background-repeat: no-repeat !important;
+    opacity: 1 !important;
+    overflow: hidden !important;
+    box-shadow: 0 9px 24px rgba(15, 23, 42, .075) !important;
+  }
+
+  /* 09, 13, 19: search appears immediately after the compact image and
+     overlaps its lower edge only slightly, like an intentional floating card. */
+  .discoveryToolbar246 {
+    position: relative !important;
+    z-index: 18 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: -18px 0 0 !important;
+    padding: 0 14px 12px !important;
+    box-sizing: border-box !important;
+    background: transparent !important;
+  }
+
+  .discoveryToolbarInner246 {
+    width: 100% !important;
+    max-width: 520px !important;
+    margin: 0 auto !important;
+    padding: 8px !important;
+    box-sizing: border-box !important;
+    display: block !important;
+    background: rgba(255, 255, 255, .985) !important;
+    border: 1px solid #e3ebe8 !important;
+    border-radius: 18px !important;
+    box-shadow: 0 14px 32px rgba(15, 23, 42, .12) !important;
+  }
+
+  .discoveryToolbarInner246 > .discoveryLocation246 {
+    display: none !important;
+  }
+
+  .discoverySearchRow246 {
+    min-width: 0 !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+    gap: 0 !important;
+  }
+
+  .darikDirectoryForm296 {
+    width: 100% !important;
+    min-width: 0 !important;
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) 84px !important;
+    align-items: stretch !important;
+    gap: 8px !important;
+  }
+
+  .discoverySearch246 {
+    min-width: 0 !important;
+    min-height: 52px !important;
+    height: 52px !important;
+    padding: 0 11px !important;
+    background: #fff !important;
+    border: 1px solid #dce5e2 !important;
+    border-radius: 13px !important;
+    box-shadow: none !important;
+  }
+
+  .discoverySearch246 input {
+    min-width: 0 !important;
+    width: 100% !important;
+    font-size: 12.5px !important;
+    line-height: 1.2 !important;
+    text-overflow: ellipsis !important;
+  }
+
+  .darikDirectorySubmit296 {
+    width: 84px !important;
+    min-width: 84px !important;
+    min-height: 52px !important;
+    height: 52px !important;
+    margin: 0 !important;
+    padding: 0 7px !important;
+    border-radius: 13px !important;
+    font-size: 11px !important;
+    line-height: 1.15 !important;
+    white-space: nowrap !important;
+    box-shadow: 0 7px 16px rgba(7, 135, 103, .18) !important;
+  }
+
+  .darikDirectoryClear296 {
+    min-height: 52px !important;
+  }
+
+  .marketSection {
+    padding-top: 4px !important;
+  }
+}
+
+/* Narrow iPhones: preserve the same hierarchy without overflow. */
+@media (max-width: 380px) {
+  .headerInner {
+    padding-left: 11px !important;
+    padding-right: 11px !important;
+  }
+
+  .header .brand {
+    max-width: 130px !important;
+  }
+
+  .header .brandLogo {
+    width: 126px !important;
+    max-width: 126px !important;
+    height: 38px !important;
+  }
+
+  .homeHeroInner390 {
+    width: calc(100% - 28px) !important;
+  }
+
+  .homeHeroCopy390 {
+    padding-top: 18px !important;
+    padding-bottom: 14px !important;
+  }
+
+  .homeHeroCopy390 h1 {
+    font-size: 31px !important;
+  }
+
+  .homeHeroCopy390 h2 {
+    font-size: 27px !important;
+  }
+
+  .homeHeroCopy390 p {
+    font-size: 13px !important;
+  }
+
+  .homeHeroTrust390 span,
+  .homeHeroTrust390 .homeHeroHeart390 {
+    font-size: 10.5px !important;
+  }
+
+  .homeHeroVisual390 {
+    width: calc(100% - 20px) !important;
+    height: 150px !important;
+    min-height: 150px !important;
+    max-height: 150px !important;
+    flex-basis: 150px !important;
+    background-position: 76% center !important;
+    border-radius: 16px !important;
+  }
+
+  .discoveryToolbar246 {
+    padding-left: 10px !important;
+    padding-right: 10px !important;
+  }
+
+  .darikDirectoryForm296 {
+    grid-template-columns: minmax(0, 1fr) 78px !important;
+    gap: 6px !important;
+  }
+
+  .darikDirectorySubmit296 {
+    width: 78px !important;
+    min-width: 78px !important;
+    font-size: 10px !important;
+  }
+}
