@@ -850,22 +850,87 @@ export default function DarikDirectOverviewPage() {
 
   if (!session) {
     return (
-      <main className={styles.loginPage}>
-        <section className={styles.loginCard}>
-          <div className={styles.loginBrand}>
-            <span>Darik Direct</span>
-            <h1>Store dashboard / لوحة المتجر</h1>
-            <p>
-              Sign in with your username. Older retailer accounts can still use email.
-              <br />
-              سجل الدخول باسم المستخدم. الحسابات القديمة يمكنها الاستمرار باستخدام البريد الإلكتروني.
-            </p>
+      <main className={styles.loginPage396}>
+      <div className={styles.loginTopAccent396} />
+
+      <header className={styles.loginHeader396}>
+        <div className={styles.loginHeaderInner396}>
+          <a href="/" className={styles.loginHeaderLogoLink396} aria-label="Darik home">
+            <img
+              src="/darik-approved-header-logo-390c.png"
+              alt="Darik"
+              className={styles.loginHeaderLogo396}
+            />
+          </a>
+
+          <nav className={styles.loginNav396}>
+            <a href="/">Home</a>
+            <a href="/#all-stores">All Stores</a>
+            <a href="/#categories">Categories</a>
+            <a href="/#about">About</a>
+            <a href="/pricing" className={styles.loginActiveNav396}>For Business</a>
+          </nav>
+
+          <div className={styles.loginHeaderActions396}>
+            <button type="button" className={styles.loginLocation396}>
+              <span>●</span>
+              Amman, Jordan
+            </button>
+            <button type="button" className={styles.loginSearch396} aria-label="Search">
+              ⌕
+            </button>
+            <a href="/store-signup" className={styles.loginCreate396}>
+              <span>Create Storefront</span>
+              <small>إنشاء متجر</small>
+            </a>
           </div>
-          <form onSubmit={signIn} className={styles.loginForm}>
+
+          <div className={styles.loginMobileHeader396}>
+            <a href="/" aria-label="Darik home">
+              <img
+                src="/darik-approved-header-logo-390c.png"
+                alt="Darik"
+                className={styles.loginMobileLogo396}
+              />
+            </a>
+            <a href="/store-signup" className={styles.loginMobileCreate396}>
+              Create Store
+            </a>
+          </div>
+        </div>
+      </header>
+
+      <section className={styles.loginStage396}>
+        <div className={styles.loginVisual396}>
+          <img
+            src="/darik-dashboard-login-396-approved-left.jpg"
+            alt="Darik for retailers — Welcome Back"
+            className={styles.loginVisualImage396}
+          />
+        </div>
+
+        <div className={styles.loginCardWrap396}>
+          <section className={styles.loginCard396}>
+            <img
+              src="/darik-approved-header-logo-390c.png"
+              alt="Darik"
+              className={styles.loginCardLogo396}
+            />
+
+            <h1>Retailer Sign In</h1>
+            <h2 dir="rtl">تسجيل دخول التاجر</h2>
+
+            <p className={styles.loginCompat396}>
+              Sign in with your Darik username. Older retailer accounts can still use email.
+              <br />
+              <span dir="rtl">سجل الدخول باسم المستخدم. الحسابات القديمة يمكنها استخدام البريد الإلكتروني.</span>
+            </p>
+
+            <div className={styles.loginFormWrap396}>
+              <form onSubmit={signIn} className={styles.loginForm}>
             <label>
-              Username / Email / اسم المستخدم أو البريد الإلكتروني
-              <input
-                type="text"
+              Username / اسم المستخدم
+              <input type="text" placeholder="Enter your username / أدخل اسم المستخدم"
                 value={email}
                 onChange={(event) => setEmail(event.target.value)}
                 required
@@ -873,8 +938,7 @@ export default function DarikDirectOverviewPage() {
             </label>
             <label>
               Password / كلمة المرور
-              <input
-                type="password"
+              <input type="password" placeholder="Enter your password / أدخل كلمة المرور"
                 value={password}
                 onChange={(event) => setPassword(event.target.value)}
                 required
@@ -884,14 +948,73 @@ export default function DarikDirectOverviewPage() {
             {message ? <p className={styles.success}>{message}</p> : null}
             <button type="submit">Sign in / تسجيل الدخول</button>
           </form>
-          <a className={styles.marketplaceLink} href="/store-signup">
-            Sign up today / سجّل اليوم
-          </a>
-          <a className={styles.marketplaceLink} href="/">
-            Return to Darik Marketplace / العودة إلى داريك
-          </a>
-        </section>
-      </main>
+            </div>
+
+            <div className={styles.loginForgotRow396}>
+              <a href="/support">Forgot password? / نسيت كلمة المرور؟</a>
+            </div>
+
+            <div className={styles.loginDivider396}>
+              <span />
+              <b>or / أو</b>
+              <span />
+            </div>
+
+            <a href="/store-signup" className={styles.loginCreateAccount396}>
+              <span className={styles.loginCreateIcon396}>▣</span>
+              <span>
+                <strong>Don’t have an account? Create your store</strong>
+                <small dir="rtl">ليس لديك حساب؟ أنشئ متجرك</small>
+              </span>
+              <b>→</b>
+            </a>
+
+            <div className={styles.loginHelp396}>
+              <div className={styles.loginHelpIcon396}>◉</div>
+              <div>
+                <strong>Need help?</strong>
+                <b dir="rtl">تحتاج مساعدة؟</b>
+                <p>Contact our support team</p>
+                <small dir="rtl">تواصل مع فريق الدعم</small>
+              </div>
+              <a href="/support">
+                <strong>Contact Support</strong>
+                <small dir="rtl">تواصل معنا</small>
+              </a>
+            </div>
+          </section>
+        </div>
+      </section>
+
+      <footer className={styles.loginFooter396}>
+        <div className={styles.loginFooterInner396}>
+          <img
+            src="/darik-approved-header-logo-390c.png"
+            alt="Darik"
+            className={styles.loginFooterLogo396}
+          />
+
+          <div className={styles.loginFooterLinks396}>
+            <a href="/support">
+              <strong>Help Center</strong>
+              <small>مركز المساعدة</small>
+            </a>
+            <a href="/terms">
+              <strong>Terms of Service</strong>
+              <small>الشروط والأحكام</small>
+            </a>
+            <a href="/privacy">
+              <strong>Privacy Policy</strong>
+              <small>سياسة الخصوصية</small>
+            </a>
+          </div>
+
+          <span className={styles.loginFooterDomain396}>getdarik.com | Jordan</span>
+        </div>
+      </footer>
+
+      {/* DARIK_DASHBOARD_LOGIN_APPROVED_396 */}
+    </main>
     );
   }
 
