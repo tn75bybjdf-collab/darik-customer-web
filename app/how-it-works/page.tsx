@@ -1,720 +1,133 @@
-"use client";
+import Link from "next/link";
+import styles from "./how-it-works-approved-394.module.css";
 
-// DARIK_HELP_FOOTER_335
-
-// DARIK_PREMIUM_MARKETING_REDESIGN_332
-import { useEffect, useState } from "react";
-import styles from "../marketplace-info.module.css";
-
-type Language = "en" | "ar";
 type IconName =
-  | "arrow"
-  | "check"
-  | "delivery"
-  | "directory"
-  | "search"
-  | "shop"
-  | "sparkle"
+  | "pin"
+  | "truck"
   | "store"
-  | "location";
+  | "search"
+  | "signpost"
+  | "bars"
+  | "link"
+  | "people"
+  | "chart"
+  | "heart"
+  | "bag"
+  | "menu"
+  | "star";
 
-const LANGUAGE_KEY = "darik_marketplace_language_v1";
-
-const copy = {
-  en: {
-    stores: "Stores",
-    how: "How it works",
-    pricing: "Pricing",
-    dashboard: "Retailer dashboard",
-    sell: "Sell on Darik",
-    heroEyebrow: "JORDAN'S RETAIL DISCOVERY NETWORK",
-    heroTitle: "Search Jordan.",
-    heroTitleAccent: "Find the store.",
-    heroBody:
-      "Darik brings active local retailers into one searchable network. Find what you need, discover who sells it, and instantly see which stores can deliver to your location.",
-    browseStores: "Browse stores",
-    joinDarik: "Put your store on Darik",
-    trustOne: "Jordan-wide discovery",
-    trustTwo: "Delivery-aware ranking",
-    trustThree: "Direct store catalogs",
-    previewSearch: "Search Darik",
-    previewQuery: "Neta U mirror",
-    previewFound: "Stores carrying this item",
-    previewDelivery: "Delivers to your location",
-    previewNoDelivery: "No delivery to your location",
-    previewBrowse: "Browse catalog",
-    introEyebrow: "THE CUSTOMER EXPERIENCE",
-    introTitle: "One search. Three simple steps.",
-    introBody:
-      "The complicated work happens behind the scenes. Customers get a clean path from “I need this” to “I found the store.”",
-    steps: [
-      {
-        number: "01",
-        icon: "search" as IconName,
-        title: "Search what you need",
-        body:
-          "Search a product, part, category, or store across active Darik retailers in Jordan.",
-      },
-      {
-        number: "02",
-        icon: "directory" as IconName,
-        title: "Discover who sells it",
-        body:
-          "See matching retailers and browse their real storefronts, catalogs, products, and business information.",
-      },
-      {
-        number: "03",
-        icon: "delivery" as IconName,
-        title: "Know your options",
-        body:
-          "Stores that deliver to your location appear first. Other active stores remain visible so you never lose a useful result.",
-      },
-    ],
-    directoryEyebrow: "MORE THAN DELIVERY",
-    directoryTitle: "A retail directory that stays useful everywhere.",
-    directoryBody:
-      "Darik does not disappear when a store is outside your delivery area. Every active retailer remains discoverable, which makes the platform useful for product research, store discovery, pickup, contact, and future purchases.",
-    directoryPoints: [
-      "Find products across stores, not just stores nearby.",
-      "See delivery matches first without hiding the rest of Jordan.",
-      "Open each retailer's own branded Darik storefront.",
-      "Use Darik as the place to answer: “Who sells this?”",
-    ],
-    directoryCardLabel: "DIRECTORY MODE",
-    directoryCardTitle: "100 active stores should look like 100 active stores.",
-    directoryCardBody:
-      "Location improves ranking. It never makes healthy marketplace inventory look empty.",
-    deliveryMatch: "Delivery match",
-    directoryListing: "Directory listing",
-    retailerEyebrow: "BUILT FOR LOCAL RETAILERS",
-    retailerTitle: "Your store becomes discoverable beyond your delivery radius.",
-    retailerBody:
-      "A Darik storefront is not just an ordering page. It is a searchable digital presence that helps customers find your business and the products you carry.",
-    retailerBenefits: [
-      {
-        icon: "store" as IconName,
-        title: "Your own storefront",
-        body: "A branded Darik page built around your business, catalog, and identity.",
-      },
-      {
-        icon: "search" as IconName,
-        title: "Product discovery",
-        body: "Your published products can lead customers directly to your store.",
-      },
-      {
-        icon: "location" as IconName,
-        title: "Smart delivery visibility",
-        body: "Customers instantly know when you deliver to their selected location.",
-      },
-      {
-        icon: "shop" as IconName,
-        title: "Stay discoverable",
-        body: "Customers can still find and browse you even when delivery is unavailable.",
-      },
-    ],
-    finalEyebrow: "READY TO GET DISCOVERED?",
-    finalTitle: "Put your business where Jordan searches.",
-    finalBody:
-      "Launch your Darik storefront, publish your catalog, define your delivery area, and become part of a growing retail discovery network.",
-    finalPrimary: "Create retailer account",
-    finalSecondary: "View pricing",
-    footerBody:
-      "Darik connects customers with active retailers across Jordan through searchable storefronts, product discovery, and delivery-aware shopping.",
-    platform: "Platform",
-    retailers: "Retailers",
-    help: "Help",
-    termsLink: "Terms",
-    privacyLink: "Privacy",
-    promiseLink: "Darik Promise",
-    supportLink: "Contact / Support",
-    rights: "Darik Technologies. All rights reserved.",
-  },
-  ar: {
-    stores: "المتاجر",
-    how: "كيف تعمل",
-    pricing: "الأسعار",
-    dashboard: "لوحة التاجر",
-    sell: "بع على داريك",
-    heroEyebrow: "شبكة داريك لاكتشاف المتاجر في الأردن",
-    heroTitle: "ابحث في الأردن.",
-    heroTitleAccent: "واعرف مين ببيع.",
-    heroBody:
-      "داريك يجمع المتاجر المحلية الفعالة ضمن شبكة واحدة قابلة للبحث. ابحث عن المنتج الذي تحتاجه، اعرف مين ببيعه، وشوف مباشرة أي متجر يقدر يوصل لموقعك.",
-    browseStores: "تصفح المتاجر",
-    joinDarik: "أضف متجرك على داريك",
-    trustOne: "اكتشاف على مستوى الأردن",
-    trustTwo: "ترتيب ذكي حسب التوصيل",
-    trustThree: "كتالوجات المتاجر مباشرة",
-    previewSearch: "ابحث في داريك",
-    previewQuery: "مراية نيتا U",
-    previewFound: "متاجر تبيع هذا المنتج",
-    previewDelivery: "يوصل إلى موقعك",
-    previewNoDelivery: "لا يوجد توصيل إلى موقعك",
-    previewBrowse: "تصفح الكتالوج",
-    introEyebrow: "تجربة الزبون",
-    introTitle: "بحث واحد. ثلاث خطوات بسيطة.",
-    introBody:
-      "الشغل المعقد يصير بالخلفية. الزبون يشوف طريق واضح من «بدي هذا المنتج» إلى «لقيت المتجر».",
-    steps: [
-      {
-        number: "01",
-        icon: "search" as IconName,
-        title: "ابحث عن اللي تحتاجه",
-        body:
-          "ابحث عن منتج أو قطعة أو فئة أو متجر ضمن متاجر داريك الفعالة في الأردن.",
-      },
-      {
-        number: "02",
-        icon: "directory" as IconName,
-        title: "اعرف مين ببيعه",
-        body:
-          "شاهد المتاجر المطابقة وتصفح واجهاتها الحقيقية وكتالوجاتها ومنتجاتها ومعلوماتها.",
-      },
-      {
-        number: "03",
-        icon: "delivery" as IconName,
-        title: "اعرف خياراتك",
-        body:
-          "المتاجر التي توصل إلى موقعك تظهر أولاً، وباقي المتاجر الفعالة تبقى ظاهرة حتى ما تخسر أي نتيجة مفيدة.",
-      },
-    ],
-    directoryEyebrow: "أكثر من مجرد توصيل",
-    directoryTitle: "دليل متاجر يظل مفيداً في كل مكان.",
-    directoryBody:
-      "داريك لا يخفي المتجر فقط لأنه خارج نطاق توصيلك. كل متجر فعال يبقى قابلاً للاكتشاف، حتى تستفيد من داريك للبحث عن المنتجات والمتاجر والاستلام والتواصل والشراء مستقبلاً.",
-    directoryPoints: [
-      "ابحث عن المنتجات بين المتاجر، وليس فقط عن المتاجر القريبة.",
-      "شاهد متاجر التوصيل أولاً بدون إخفاء باقي الأردن.",
-      "افتح واجهة داريك الخاصة بكل تاجر وتصفح كتالوجه.",
-      "استخدم داريك للإجابة على سؤال: «مين ببيع هذا؟»",
-    ],
-    directoryCardLabel: "وضع الدليل",
-    directoryCardTitle: "إذا عندك 100 متجر فعال، لازم الزبون يشوف 100 متجر فعال.",
-    directoryCardBody:
-      "الموقع يحسن ترتيب النتائج، لكنه لا يجعل المنصة تبدو فارغة.",
-    deliveryMatch: "يوصل لموقعك",
-    directoryListing: "مدرج في الدليل",
-    retailerEyebrow: "مصمم للتجار المحليين",
-    retailerTitle: "متجرك يظل قابلاً للاكتشاف حتى خارج نطاق التوصيل.",
-    retailerBody:
-      "واجهة داريك ليست فقط صفحة طلبات. هي وجود رقمي قابل للبحث يساعد الزبائن على العثور على متجرك والمنتجات التي تبيعها.",
-    retailerBenefits: [
-      {
-        icon: "store" as IconName,
-        title: "واجهة متجرك الخاصة",
-        body: "صفحة داريك بهوية متجرك وكتالوجك وشكلك الخاص.",
-      },
-      {
-        icon: "search" as IconName,
-        title: "اكتشاف المنتجات",
-        body: "منتجاتك المنشورة تساعد الزبائن على الوصول مباشرة إلى متجرك.",
-      },
-      {
-        icon: "location" as IconName,
-        title: "وضوح التوصيل",
-        body: "الزبون يعرف فوراً إذا متجرك يوصل إلى الموقع الذي حدده.",
-      },
-      {
-        icon: "shop" as IconName,
-        title: "ابقَ ظاهراً",
-        body: "الزبائن يقدروا يلاقوا متجرك ويتصفحوه حتى لو التوصيل غير متاح لهم.",
-      },
-    ],
-    finalEyebrow: "جاهز تخلي الناس تلاقيك؟",
-    finalTitle: "حط متجرك بالمكان اللي الأردن يبحث فيه.",
-    finalBody:
-      "أطلق واجهة متجرك على داريك، انشر كتالوجك، حدد مناطق التوصيل، وكن جزءاً من شبكة اكتشاف التجزئة.",
-    finalPrimary: "أنشئ حساب تاجر",
-    finalSecondary: "شاهد الأسعار",
-    footerBody:
-      "داريك يربط الزبائن بالمتاجر الفعالة في الأردن من خلال واجهات قابلة للبحث واكتشاف المنتجات وتجربة تسوق تراعي نطاق التوصيل.",
-    platform: "المنصة",
-    retailers: "للتجار",
-    help: "المساعدة",
-    termsLink: "الشروط",
-    privacyLink: "الخصوصية",
-    promiseLink: "وعد داريك",
-    supportLink: "التواصل / الدعم",
-    rights: "داريك تكنولوجيز. جميع الحقوق محفوظة.",
-  },
-} as const;
-
-function Icon({ name, size = 22 }: { name: IconName; size?: number }) {
-  const common = {
-    width: size,
-    height: size,
-    viewBox: "0 0 24 24",
-    fill: "none",
-    stroke: "currentColor",
-    strokeWidth: 1.9,
-    strokeLinecap: "round" as const,
-    strokeLinejoin: "round" as const,
-    "aria-hidden": true,
-  };
-
-  if (name === "arrow") {
-    return (
-      <svg {...common}>
-        <path d="M5 12h14" />
-        <path d="m14 7 5 5-5 5" />
-      </svg>
-    );
+function Icon({ name, className }: { name: IconName; className?: string }) {
+  switch (name) {
+    case "pin":
+      return <svg viewBox="0 0 24 24" className={className} aria-hidden="true"><path d="M12 22s7-6.2 7-12a7 7 0 1 0-14 0c0 5.8 7 12 7 12Z" fill="currentColor"/><circle cx="12" cy="10" r="2.8" fill="white"/></svg>;
+    case "truck":
+      return <svg viewBox="0 0 24 24" className={className} aria-hidden="true"><path d="M3 6h10v8H3zM13 9h4l3 3v2h-7z" fill="currentColor"/><circle cx="8" cy="17.5" r="2" fill="currentColor"/><circle cx="18" cy="17.5" r="2" fill="currentColor"/></svg>;
+    case "store":
+      return <svg viewBox="0 0 24 24" className={className} aria-hidden="true"><path d="M4 10h16l-1.2 9H5.2L4 10Z" fill="currentColor"/><path d="M6 5h12l2 4H4l2-4Zm4 6v8m4-8v8" stroke="white" strokeWidth="1.8" strokeLinecap="round"/></svg>;
+    case "search":
+      return <svg viewBox="0 0 24 24" className={className} aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5" stroke="currentColor" strokeWidth="2" fill="none"/><path d="M15.5 15.5 20 20" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/></svg>;
+    case "signpost":
+      return <svg viewBox="0 0 24 24" className={className} aria-hidden="true"><path d="M12 4v16" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/><path d="M12 6h7l-2.4 3L19 12h-7V6Zm0 6H5l2.4 3L5 18h7v-6Z" fill="currentColor"/></svg>;
+    case "bars":
+      return <svg viewBox="0 0 24 24" className={className} aria-hidden="true"><path d="M5 19h3V9H5v10Zm5 0h3V5h-3v14Zm5 0h3v-7h-3v7Z" fill="currentColor"/></svg>;
+    case "link":
+      return <svg viewBox="0 0 24 24" className={className} aria-hidden="true"><path d="M10 14 8 16a3.5 3.5 0 1 1-5-5l3-3a3.5 3.5 0 0 1 5 0" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round"/><path d="M14 10l2-2a3.5 3.5 0 1 1 5 5l-3 3a3.5 3.5 0 0 1-5 0" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round"/><path d="m9 15 6-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/></svg>;
+    case "people":
+      return <svg viewBox="0 0 24 24" className={className} aria-hidden="true"><circle cx="9" cy="9" r="3" fill="currentColor"/><circle cx="17" cy="10" r="2.6" fill="currentColor" opacity=".8"/><path d="M4 19a5 5 0 0 1 10 0" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round"/><path d="M14 19a4 4 0 0 1 6 0" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round"/></svg>;
+    case "chart":
+      return <svg viewBox="0 0 24 24" className={className} aria-hidden="true"><path d="M4 18h16" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/><path d="M7 16V9m5 7V6m5 10v-4" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round"/></svg>;
+    case "heart":
+      return <svg viewBox="0 0 24 24" className={className} aria-hidden="true"><path d="M12 21s-7-4.4-9-9.2C1.8 8.7 4 5 7.8 5c2.1 0 3.4 1 4.2 2.2C12.8 6 14.1 5 16.2 5 20 5 22.2 8.7 21 11.8 19 16.6 12 21 12 21Z" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>;
+    case "bag":
+      return <svg viewBox="0 0 24 24" className={className} aria-hidden="true"><path d="M6 9h12l-1.1 11H7.1L6 9Z" fill="none" stroke="currentColor" strokeWidth="2" strokeLinejoin="round"/><path d="M9 9V7a3 3 0 0 1 6 0v2" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/></svg>;
+    case "menu":
+      return <svg viewBox="0 0 24 24" className={className} aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round"/></svg>;
+    default:
+      return <svg viewBox="0 0 24 24" className={className} aria-hidden="true"><path d="m12 3 2.8 5.6L21 9.5l-4.5 4.3 1 6.2L12 17.1 6.5 20l1-6.2L3 9.5l6.2-.9L12 3Z" fill="currentColor"/></svg>;
   }
-
-  if (name === "check") {
-    return (
-      <svg {...common}>
-        <path d="m5 12 4 4L19 6" />
-      </svg>
-    );
-  }
-
-  if (name === "search") {
-    return (
-      <svg {...common}>
-        <circle cx="11" cy="11" r="6.5" />
-        <path d="m16 16 4 4" />
-      </svg>
-    );
-  }
-
-  if (name === "location") {
-    return (
-      <svg {...common}>
-        <path d="M20 10c0 5-8 11-8 11S4 15 4 10a8 8 0 1 1 16 0Z" />
-        <circle cx="12" cy="10" r="2.3" />
-      </svg>
-    );
-  }
-
-  if (name === "delivery") {
-    return (
-      <svg {...common}>
-        <path d="M3 6h11v10H3z" />
-        <path d="M14 9h3l4 4v3h-7z" />
-        <circle cx="7" cy="18" r="2" />
-        <circle cx="17" cy="18" r="2" />
-      </svg>
-    );
-  }
-
-  if (name === "store") {
-    return (
-      <svg {...common}>
-        <path d="M4 10v10h16V10" />
-        <path d="M3 10 5 4h14l2 6" />
-        <path d="M8 20v-6h8v6" />
-        <path d="M3 10c1.5 2 3.5 2 5 0 1.5 2 3.5 2 5 0 1.5 2 3.5 2 5 0 1 1.4 2 1.8 3 0" />
-      </svg>
-    );
-  }
-
-  if (name === "shop") {
-    return (
-      <svg {...common}>
-        <path d="M5 7h14l-1 13H6L5 7Z" />
-        <path d="M9 9V6a3 3 0 0 1 6 0v3" />
-      </svg>
-    );
-  }
-
-  if (name === "directory") {
-    return (
-      <svg {...common}>
-        <rect x="4" y="4" width="6" height="6" rx="1.5" />
-        <rect x="14" y="4" width="6" height="6" rx="1.5" />
-        <rect x="4" y="14" width="6" height="6" rx="1.5" />
-        <rect x="14" y="14" width="6" height="6" rx="1.5" />
-      </svg>
-    );
-  }
-
-  return (
-    <svg {...common}>
-      <path d="m12 3 1.7 4.4L18 9l-4.3 1.6L12 15l-1.7-4.4L6 9l4.3-1.6L12 3Z" />
-      <path d="m19 15 .8 2.2L22 18l-2.2.8L19 21l-.8-2.2L16 18l2.2-.8L19 15Z" />
-    </svg>
-  );
 }
 
-function Header({
-  language,
-  onToggle,
-}: {
-  language: Language;
-  onToggle: () => void;
-}) {
-  const t = copy[language];
+const heroResults = [
+  { thumb: "/darik-how-394-thumb-toaster.jpg", store: "Appliance Hub", meta: "Home Appliances · Amman", rating: "4.8 (320)", badge: "Delivers to you", tone: "green", note: "Usually in 1–2 days" },
+  { thumb: "/darik-how-394-thumb-washer.jpg", store: "Al Salam Mall", meta: "Electronics · Amman", rating: "4.6 (512)", badge: "Pickup available", tone: "blue", note: "In-store pickup" },
+  { thumb: "/darik-how-394-thumb-ladder.jpg", store: "Al Bayt Al Mateen", meta: "Hardware & Tools · Amman", rating: "4.5 (189)", badge: "Delivers to you", tone: "green", note: "Usually in 1–3 days" },
+  { thumb: "/darik-how-394-thumb-airfryer.jpg", store: "Home Essentials", meta: "Home Goods · Amman", rating: "4.4 (267)", badge: "Discoverable across Jordan", tone: "muted", note: "Not in your delivery area" },
+];
 
-  return (
-    <header className={styles.siteHeader}>
-      <div className={styles.shell}>
-        <div className={styles.headerInner}>
-          <a className={styles.brand} href="/" aria-label="Darik home">
-            <img src="/darik_logo_final_v2.png" alt="Darik" />
-          </a>
+const steps = [
+  { number: "01", icon: "search" as IconName, title: "Search what you need", copy: "Type in a product, brand or category and set your location in Jordan." },
+  { number: "02", icon: "store" as IconName, title: "Discover who sells it", copy: "See a list of local stores that match your search, with stores that can deliver to you shown first." },
+  { number: "03", icon: "signpost" as IconName, title: "Know your options", copy: "Check delivery, pickup, or visit in person. Even if a store doesn’t deliver to you, you can still find and explore it." },
+];
 
-          <nav className={styles.nav} aria-label="Primary navigation">
-            <a href="/">{t.stores}</a>
-            <a className={styles.navActive} href="/how-it-works">
-              {t.how}
-            </a>
-            <a href="/pricing">{t.pricing}</a>
-          </nav>
+const retailerBenefits = [
+  { icon: "store" as IconName, title: "Your own storefront", copy: "Showcase your products, brand and story with a professional store page." },
+  { icon: "bars" as IconName, title: "Product discovery", copy: "Get found by new customers across Jordan, even if you don’t deliver to their area." },
+  { icon: "truck" as IconName, title: "Smart delivery visibility", copy: "Reach nearby customers with delivery and pickup options that fit your business." },
+  { icon: "link" as IconName, title: "Stay discoverable", copy: "Your store remains visible in search across Jordan, so people can always find and explore you." },
+];
 
-          <div className={styles.headerActions}>
-            <button
-              className={styles.languageButton}
-              type="button"
-              onClick={onToggle}
-            >
-              {language === "en" ? "العربية" : "English"}
-            </button>
-            <a className={styles.dashboardButton} href="/store-dashboard">
-              {t.dashboard}
-            </a>
-            <a className={styles.primaryHeaderButton} href="/store-signup">
-              {t.sell}
-            </a>
-          </div>
-        </div>
-      </div>
-    </header>
-  );
-}
-
-function Footer({ language }: { language: Language }) {
-  const t = copy[language];
-
-  return (
-    <footer className={styles.siteFooter}>
-      <div className={styles.shell}>
-        <div className={styles.footerTop}>
-          <div className={styles.footerBrand}>
-            <a className={styles.brand} href="/">
-              <img src="/darik_logo_final_v2.png" alt="Darik" />
-            </a>
-            <p>{t.footerBody}</p>
-          </div>
-
-          <div className={styles.footerColumns}>
-            <div>
-              <strong>{t.platform}</strong>
-              <a href="/">{t.stores}</a>
-              <a href="/how-it-works">{t.how}</a>
-              <a href="/pricing">{t.pricing}</a>
-            </div>
-            <div>
-              <strong>{t.retailers}</strong>
-              <a href="/store-signup">{t.sell}</a>
-              <a href="/store-dashboard">{t.dashboard}</a>
-            </div>
-            <div>
-              <strong>{t.help}</strong>
-              <a href="/terms">{t.termsLink}</a>
-              <a href="/privacy">{t.privacyLink}</a>
-              <a href="/darik-promise">{t.promiseLink}</a>
-              <a href="/support">{t.supportLink}</a>
-            </div>
-          </div>
-        </div>
-
-        <div className={styles.footerBottom}>
-          <span>© {new Date().getFullYear()} {t.rights}</span>
-          <span>getdarik.com · Jordan</span>
-        </div>
-      </div>
-    </footer>
-  );
+function Rating({ value }: { value: string }) {
+  return <div className={styles.ratingRow}><Icon name="star" className={styles.starIcon} /><span>{value}</span></div>;
 }
 
 export default function HowItWorksPage() {
-  const [language, setLanguage] = useState<Language>("en");
-
-  useEffect(() => {
-    const stored = window.localStorage.getItem(LANGUAGE_KEY);
-    if (stored === "ar" || stored === "en") {
-      setLanguage(stored);
-      return;
-    }
-
-    if (navigator.language.toLowerCase().startsWith("ar")) {
-      setLanguage("ar");
-    }
-  }, []);
-
-  function toggleLanguage() {
-    const next: Language = language === "en" ? "ar" : "en";
-    setLanguage(next);
-    window.localStorage.setItem(LANGUAGE_KEY, next);
-  }
-
-  const t = copy[language];
-
   return (
-    <main
-      className={styles.page}
-      dir={language === "ar" ? "rtl" : "ltr"}
-      data-page="how-it-works"
-    >
-      <Header language={language} onToggle={toggleLanguage} />
-
-      <section className={styles.howHero}>
-        <div className={styles.heroGlow} />
-        <div className={styles.shell}>
-          <div className={styles.howHeroGrid}>
-            <div className={styles.heroCopy}>
-              <div className={styles.eyebrow}>
-                <span />
-                {t.heroEyebrow}
-              </div>
-
-              <h1>
-                <span>{t.heroTitle}</span>
-                <strong>{t.heroTitleAccent}</strong>
-              </h1>
-
-              <p>{t.heroBody}</p>
-
-              <div className={styles.heroActions}>
-                <a className={styles.primaryCta} href="/">
-                  {t.browseStores}
-                  <Icon name="arrow" size={19} />
-                </a>
-                <a className={styles.secondaryCta} href="/store-signup">
-                  {t.joinDarik}
-                </a>
-              </div>
-
-              <div className={styles.heroProof}>
-                {[t.trustOne, t.trustTwo, t.trustThree].map((item) => (
-                  <span key={item}>
-                    <i>
-                      <Icon name="check" size={13} />
-                    </i>
-                    {item}
-                  </span>
-                ))}
-              </div>
+    <div className={styles.page}>
+      <div className={styles.topStrip} />
+      <header className={styles.headerWrap}>
+        <div className={styles.container}>
+          <div className={styles.header}>
+            <Link href="/" className={styles.logoLink} aria-label="Darik home"><img src="/darik-approved-header-logo-390c.png" alt="Darik" className={styles.logoImage} /></Link>
+            <nav className={styles.nav}>
+              <Link href="/">Home</Link><Link href="/#all-stores">All Stores</Link><Link href="/#categories">Categories</Link><Link href="/#about">About</Link><Link href="/pricing" className={styles.activeNav}>For Business</Link>
+            </nav>
+            <div className={styles.headerActions}>
+              <button className={styles.locationButton}><Icon name="pin" className={styles.actionIcon} />Amman, Jordan</button>
+              <button className={styles.iconButton} aria-label="Search"><Icon name="search" className={styles.actionIcon} /></button>
+              <Link href="/store-dashboard" className={styles.ghostButton}>Sign in</Link>
+              <Link href="/store-signup" className={styles.primaryButton}>Create storefront</Link>
             </div>
-
-            <div className={styles.searchShowcase} aria-hidden="true">
-              <div className={styles.showcaseTop}>
-                <div className={styles.showcaseDots}>
-                  <span />
-                  <span />
-                  <span />
-                </div>
-                <strong>getdarik.com</strong>
-              </div>
-
-              <div className={styles.showcaseBody}>
-                <div className={styles.fakeSearch}>
-                  <Icon name="search" size={19} />
-                  <div>
-                    <small>{t.previewSearch}</small>
-                    <strong>{t.previewQuery}</strong>
-                  </div>
-                  <span>
-                    <Icon name="arrow" size={16} />
-                  </span>
-                </div>
-
-                <div className={styles.resultLabel}>{t.previewFound}</div>
-
-                <div className={styles.resultCard}>
-                  <div className={styles.fakeStoreLogo}>P</div>
-                  <div>
-                    <strong>Perfect City Auto Parts</strong>
-                    <span className={styles.deliveryYes}>
-                      <Icon name="delivery" size={13} />
-                      {t.previewDelivery}
-                    </span>
-                  </div>
-                  <b>
-                    <Icon name="arrow" size={15} />
-                  </b>
-                </div>
-
-                <div className={`${styles.resultCard} ${styles.resultCardMuted}`}>
-                  <div className={styles.fakeStoreLogo}>A</div>
-                  <div>
-                    <strong>Auto Parts Store</strong>
-                    <span className={styles.deliveryNo}>
-                      <Icon name="location" size={13} />
-                      {t.previewNoDelivery}
-                    </span>
-                  </div>
-                  <b>
-                    <Icon name="arrow" size={15} />
-                  </b>
-                </div>
-
-                <div className={styles.showcaseFooter}>
-                  <span>{t.previewBrowse}</span>
-                  <div>
-                    <i />
-                    <i />
-                    <i />
-                    <i />
-                  </div>
-                </div>
-              </div>
+            <div className={styles.mobileHeaderActions}>
+              <button className={styles.mobileSquare} aria-label="Menu"><Icon name="menu" className={styles.actionIcon} /></button>
+              <img src="/darik-approved-header-logo-390c.png" alt="Darik" className={styles.mobileLogo} />
+              <button className={styles.mobileSquare} aria-label="Account"><Icon name="bag" className={styles.actionIcon} /></button>
             </div>
           </div>
         </div>
-      </section>
-
-      <section className={styles.section}>
-        <div className={styles.shell}>
-          <div className={styles.sectionHeading}>
-            <div className={styles.eyebrow}>
-              <span />
-              {t.introEyebrow}
-            </div>
-            <h2>{t.introTitle}</h2>
-            <p>{t.introBody}</p>
-          </div>
-
-          <div className={styles.stepsGrid}>
-            {t.steps.map((step) => (
-              <article className={styles.stepCard} key={step.number}>
-                <div className={styles.stepTop}>
-                  <span className={styles.stepNumber}>{step.number}</span>
-                  <span className={styles.iconTile}>
-                    <Icon name={step.icon} size={23} />
-                  </span>
-                </div>
-                <h3>{step.title}</h3>
-                <p>{step.body}</p>
-              </article>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <section className={`${styles.section} ${styles.directorySection}`}>
-        <div className={styles.shell}>
-          <div className={styles.directoryGrid}>
-            <div className={styles.directoryCopy}>
-              <div className={styles.eyebrow}>
-                <span />
-                {t.directoryEyebrow}
-              </div>
-              <h2>{t.directoryTitle}</h2>
-              <p>{t.directoryBody}</p>
-
-              <div className={styles.checkList}>
-                {t.directoryPoints.map((point) => (
-                  <div key={point}>
-                    <span>
-                      <Icon name="check" size={15} />
-                    </span>
-                    <p>{point}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div className={styles.directoryVisual}>
-              <div className={styles.directoryVisualHeader}>
-                <span>{t.directoryCardLabel}</span>
-                <div>
-                  <i />
-                  <i />
-                  <i />
+      </header>
+      <main>
+        <section className={styles.heroSection}>
+          <div className={styles.heroGlow} />
+          <div className={styles.heroSideScene}><img src="/darik-how-394-side-scene.jpg" alt="Jordanian ruins" /></div>
+          <div className={styles.container}>
+            <div className={styles.heroGrid}>
+              <div className={styles.heroCopy}>
+                <span className={styles.eyebrow}>HOW DARIK WORKS</span>
+                <h1 className={styles.heroTitle}><span>Search Jordan.</span><span className={styles.heroAccent}>Find the store.</span></h1>
+                <p className={styles.heroText}>Darik helps you search for products and stores across Jordan, shows the stores that can deliver to you first, and keeps other stores discoverable even when they don’t currently deliver to your area.</p>
+                <div className={styles.heroButtons}><Link href="/#all-stores" className={styles.primaryButton}>Browse all stores</Link><Link href="/store-signup" className={styles.secondaryButton}>Create your storefront</Link></div>
+                <div className={styles.heroFacts}>
+                  <div className={styles.heroFact}><Icon name="pin" className={styles.factIcon} /><span>Local stores<br />across Jordan</span></div>
+                  <div className={styles.heroFact}><Icon name="truck" className={styles.factIcon} /><span>Delivery &amp; pickup<br />options</span></div>
+                  <div className={styles.heroFact}><Icon name="store" className={styles.factIcon} /><span>Support local<br />businesses</span></div>
                 </div>
               </div>
-
-              <h3>{t.directoryCardTitle}</h3>
-              <p>{t.directoryCardBody}</p>
-
-              <div className={styles.directoryMetrics}>
-                <div>
-                  <span className={styles.metricIconGood}>
-                    <Icon name="delivery" size={20} />
-                  </span>
-                  <div>
-                    <strong>{t.deliveryMatch}</strong>
-                    <small>Priority result</small>
-                  </div>
-                  <b>01</b>
-                </div>
-
-                <div>
-                  <span className={styles.metricIconNeutral}>
-                    <Icon name="directory" size={20} />
-                  </span>
-                  <div>
-                    <strong>{t.directoryListing}</strong>
-                    <small>Still discoverable</small>
-                  </div>
-                  <b>02+</b>
-                </div>
-              </div>
-
-              <div className={styles.directoryLine}>
-                <span />
-                <i />
-                <i />
-                <i />
-                <i />
-                <i />
+              <div className={styles.heroCard}>
+                <div className={styles.heroCardBrand}>Darik</div>
+                <div className={styles.searchRow}><div className={styles.searchBox}><Icon name="search" className={styles.smallIcon} /><span>toaster</span></div><button className={styles.searchButton}>Search</button></div>
+                <div className={styles.filterPills}><span className={`${styles.pill} ${styles.pillActive}`}>All</span><span className={styles.pill}>Delivers to you</span><span className={styles.pill}>Pickup available</span><span className={styles.pill}>All Jordan</span></div>
+                <div className={styles.resultsList}>{heroResults.map((item) => <div className={styles.resultCard} key={item.store}><img src={item.thumb} alt={item.store} className={styles.productThumb} /><div className={styles.resultBody}><div className={styles.resultTopRow}><div><h3>{item.store}</h3><p>{item.meta}</p><Rating value={item.rating} /></div><div className={styles.resultRight}><span className={`${styles.statusBadge} ${styles[item.tone as keyof typeof styles] || ""}`}>{item.badge}</span><span className={styles.resultNote}>{item.note}</span></div></div></div></div>)}</div>
               </div>
             </div>
           </div>
-        </div>
-      </section>
-
-      <section className={styles.section}>
-        <div className={styles.shell}>
-          <div className={styles.sectionHeading}>
-            <div className={styles.eyebrow}>
-              <span />
-              {t.retailerEyebrow}
-            </div>
-            <h2>{t.retailerTitle}</h2>
-            <p>{t.retailerBody}</p>
-          </div>
-
-          <div className={styles.benefitGrid}>
-            {t.retailerBenefits.map((benefit) => (
-              <article className={styles.benefitCard} key={benefit.title}>
-                <span className={styles.iconTile}>
-                  <Icon name={benefit.icon} size={22} />
-                </span>
-                <h3>{benefit.title}</h3>
-                <p>{benefit.body}</p>
-              </article>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <section className={styles.finalCtaSection}>
-        <div className={styles.shell}>
-          <div className={styles.finalCta}>
-            <div>
-              <div className={styles.eyebrowLight}>
-                <span />
-                {t.finalEyebrow}
-              </div>
-              <h2>{t.finalTitle}</h2>
-              <p>{t.finalBody}</p>
-            </div>
-
-            <div className={styles.finalCtaActions}>
-              <a href="/store-signup">
-                {t.finalPrimary}
-                <Icon name="arrow" size={18} />
-              </a>
-              <a href="/pricing">{t.finalSecondary}</a>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <Footer language={language} />
-    </main>
+        </section>
+        <section className={styles.section}><div className={styles.container}><div className={styles.sectionHeading}><h2>One search. Three simple steps.</h2><p>From search to store, Darik makes it easy to find what you need in Jordan.</p></div><div className={styles.stepGrid}>{steps.map((step) => <article className={styles.stepCard} key={step.number}><div className={styles.stepTop}><div className={styles.stepNumber}>{step.number}</div><Icon name={step.icon} className={styles.stepIcon} /></div><h3>{step.title}</h3><p>{step.copy}</p></article>)}</div></div></section>
+        <section className={styles.sectionTight}><div className={styles.container}><div className={styles.discoveryGrid}><div className={styles.discoveryCopy}><h2>More than delivery</h2><h3>A delivery marketplace and a discovery directory.</h3><p>Stores that can deliver to your location are prioritized first, so you can get what you need, faster.</p><p>But Darik also keeps stores outside your delivery area searchable and visible, so you can still discover great products, compare options, and support local businesses across Jordan.</p><div className={styles.quoteBox}>“ Same search. More stores. A stronger Jordan. ”</div></div><div className={styles.discoveryShowcase}><div className={styles.discoveryToolbar}><div className={styles.searchBoxCompact}><Icon name="search" className={styles.smallIcon} /><span>toaster</span></div><div className={styles.locationChip}><Icon name="pin" className={styles.smallIcon} /><span>Amman, Jordan</span></div></div><div className={`${styles.listPanel} ${styles.deliveryPanel}`}><div className={styles.listPanelTitle}>Delivery match (shown first)</div><div className={styles.miniResult}><img src="/darik-how-394-thumb-toaster.jpg" alt="Toaster" className={styles.productThumb} /><div className={styles.miniBody}><h4>Appliance Hub</h4><p>Home Appliances · Amman</p><Rating value="4.8 (320)" /></div><div className={styles.resultRight}><span className={`${styles.statusBadge} ${styles.green}`}>Delivers to you</span><span className={styles.resultNote}>Usually in 1–2 days</span></div></div></div><div className={styles.listPanel}><div className={styles.listPanelTitle}>Directory listing (still visible)</div><div className={styles.miniResult}><img src="/darik-how-394-thumb-ladder.jpg" alt="Ladder" className={styles.productThumb} /><div className={styles.miniBody}><h4>Al Bayt Al Mateen</h4><p>Hardware &amp; Tools · Amman</p><Rating value="4.5 (189)" /></div><div className={styles.resultRight}><span className={`${styles.statusBadge} ${styles.muted}`}>Discoverable across Jordan</span><span className={styles.resultNote}>Not in your delivery area</span></div></div></div><div className={styles.discoveryAside}><div className={styles.discoveryAsideText}>Same search.<br />More local stores.<br />A stronger Jordan <span>♥</span></div><img src="/darik-how-394-side-scene.jpg" alt="Jordanian landmark" className={styles.discoveryAsideImage} /></div></div></div></div></section>
+        <section className={styles.section}><div className={styles.container}><div className={styles.sectionHeading}><h2>Why this matters for retailers</h2><p>More visibility. More customers. A stronger local economy.</p></div><div className={styles.retailerGrid}>{retailerBenefits.map((item) => <article className={styles.benefitCard} key={item.title}><Icon name={item.icon} className={styles.benefitIcon} /><h3>{item.title}</h3><p>{item.copy}</p></article>)}</div></div></section>
+        <section className={styles.ctaSection}><div className={styles.container}><div className={styles.ctaBand}><div className={styles.ctaImageWrap}><img src="/darik-how-394-cta-man.jpg" alt="Darik delivery representative" className={styles.ctaImage} /></div><div className={styles.ctaContent}><div><h2>Put your business where Jordan searches.</h2><p>Join Darik and be part of a growing local marketplace that connects customers with businesses across the Kingdom.</p></div><div className={styles.ctaButtons}><Link href="/store-signup" className={styles.primaryButton}>Start your storefront</Link><Link href="/pricing" className={styles.whiteButton}>See pricing</Link></div></div><div className={styles.ctaPoints}><div className={styles.ctaPoint}><Icon name="people" className={styles.pointIcon} /><span>Reach more customers across Jordan</span></div><div className={styles.ctaPoint}><Icon name="chart" className={styles.pointIcon} /><span>Grow your business online</span></div><div className={styles.ctaPoint}><Icon name="heart" className={styles.pointIcon} /><span>Be part of a stronger, more connected local economy</span></div></div></div></div></section>
+      </main>
+      <footer className={styles.footer}><div className={styles.container}><div className={styles.footerGrid}><div className={styles.footerBrand}><div className={styles.footerMarkRow}><div className={styles.footerMark}><span className={styles.footerMarkBack} /><span className={styles.footerMarkFront} /></div><div><div className={styles.footerBrandName}>Darik</div><div className={styles.footerBrandTag}>Local Stores. Closer to You.</div></div></div><p>Darik connects customers with active retailers across Jordan through searchable storefronts, product discovery, and delivery-aware shopping.</p></div><div className={styles.footerLinks}><h4>Platform</h4><a href="/">All Stores</a><a href="/">Categories</a><a href="/">About Darik</a><a href="/pricing">For Business</a></div><div className={styles.footerLinks}><h4>Retailers</h4><a href="/store-signup">Start Your Store</a><a href="/store-dashboard">Retailer Dashboard</a><a href="/pricing">Pricing</a><a href="/how-it-works">Success Stories</a></div><div className={styles.footerLinks}><h4>Help</h4><a href="/support">Help Center</a><a href="/support">Contact Us</a><a href="/terms">Terms of Service</a><a href="/privacy">Privacy Policy</a></div><div className={styles.footerSocial}><h4>Follow Us</h4><div className={styles.socialRow}><span>f</span><span>ig</span><span>in</span><span>yt</span></div></div></div><div className={styles.footerBottom}><span>© 2026 Darik Technologies. All rights reserved.</span><span>getdarik.com  |  Jordan</span></div></div></footer>
+    </div>
   );
 }
