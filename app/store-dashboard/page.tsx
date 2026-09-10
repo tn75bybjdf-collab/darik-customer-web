@@ -1028,7 +1028,7 @@ export default function DarikDirectOverviewPage() {
   }
 
   return (
-    <main className={styles.dashboardPage}>
+    <main className={styles.dashboardPage} data-darik-approved-dashboard397="true">
       <aside className={styles.sidebar}>
         <div>
           <p className={styles.brandEyebrow}>Darik</p>
@@ -1053,7 +1053,13 @@ export default function DarikDirectOverviewPage() {
             AI Credits / رصيد الذكاء الاصطناعي
           </a>
 </nav>
-        <div className={styles.sidebarFooter}>
+        <div className={styles.sidebarHelp397}>
+              <div className={styles.sidebarHelpIcon397}>◉</div>
+              <strong>Need Help?</strong>
+              <span>تحتاج مساعدة؟</span>
+              <a href="/support">Contact Support<small>تواصل معنا</small></a>
+            </div>
+            <div className={styles.sidebarFooter}>
           <div className={styles.sidebarAccount225}>
             <span className={styles.sidebarLogin225}>
               {session.user.user_metadata?.darik_retailer_username
@@ -1105,42 +1111,10 @@ export default function DarikDirectOverviewPage() {
           </section>
         ) : (
           <>
-            <header className={styles.commandHero}>
-              <div className={styles.commandIdentity}>
-                <div className={styles.commandLogo}>
-                  {storefront?.logo_url ? (
-                    <img src={storefront.logo_url} alt="Store logo" />
-                  ) : (
-                    (selectedStore.business_name || "D").slice(0, 1).toUpperCase()
-                  )}
-                </div>
-                <div className={styles.commandIdentityCopy}>
-                  <div className={styles.commandEyebrowRow}>
-                    <span>Store command center / مركز إدارة المتجر</span>
-                    <span
-                      className={`${styles.commandStatusBadge} ${
-                        isLive
-                          ? styles.commandStatusLive
-                          : styles.commandStatusDraft
-                      }`}
-                    >
-                      {activationLabel(activationStatus)}
-                    </span>
-                  </div>
-                  <h2>{selectedStore.business_name}</h2>
-                  <div className={styles.commandLinkRow}>
-                    <span>getdarik.com/</span>
-                    <strong>{storefront?.slug || selectedStore.storefront_slug || "store"}</strong>
-                    <span className={styles.commandLinkState}>
-                      {isLive
-                        ? "Public / منشور"
-                        : "Coming Soon / قريباً"}
-                    </span>
-                  </div>
-                </div>
-              </div>
-
-              <div className={styles.commandHeroControls}>
+            <div className={styles.dashboardTopbar397}>
+              <div className={styles.dashboardTopbarSpacer397} />
+              <div className={styles.dashboardTopbarActions397}>
+                <div className={styles.commandHeroControls}>
                 {context && context.stores.length > 1 ? (
                   <label className={styles.commandStoreSwitcher}>
                     Store / المتجر
@@ -1187,6 +1161,58 @@ export default function DarikDirectOverviewPage() {
                     : "Plan & payment / الخطة والدفع"}
                 </a>
               </div>
+                <div className={styles.dashboardNotice397} aria-label="Orders requiring action">
+                  <span>♟</span>
+                  <b>{loadingSummary ? "—" : openOrderCount}</b>
+                </div>
+                <div className={styles.dashboardProfile397}>
+                  <span className={styles.dashboardAvatar397}>
+                    {String(selectedStore.business_name || "D").slice(0, 2).toUpperCase()}
+                  </span>
+                  <span>
+                    <strong>{selectedStore.business_name}</strong>
+                    <small>الملف الشخصي</small>
+                  </span>
+                  <b>⌄</b>
+                </div>
+              </div>
+            </div>
+            <header className={styles.commandHero} style={storefront?.hero_image_url ? { backgroundImage: `linear-gradient(90deg, rgba(247,251,253,.98) 0%, rgba(247,251,253,.86) 38%, rgba(247,251,253,.16) 72%), url("${storefront.hero_image_url}")` } : undefined} data-darik-dashboard-hero397="true">
+              <div className={styles.commandIdentity}>
+                <div className={styles.commandLogo}>
+                  {storefront?.logo_url ? (
+                    <img src={storefront.logo_url} alt="Store logo" />
+                  ) : (
+                    (selectedStore.business_name || "D").slice(0, 1).toUpperCase()
+                  )}
+                </div>
+                <div className={styles.commandIdentityCopy}>
+                  <div className={styles.commandEyebrowRow}>
+                    <span>Store command center / مركز إدارة المتجر</span>
+                    <span
+                      className={`${styles.commandStatusBadge} ${
+                        isLive
+                          ? styles.commandStatusLive
+                          : styles.commandStatusDraft
+                      }`}
+                    >
+                      {activationLabel(activationStatus)}
+                    </span>
+                  </div>
+                  <h2>{selectedStore.business_name}</h2>
+                  <div className={styles.commandLinkRow}>
+                    <span>getdarik.com/</span>
+                    <strong>{storefront?.slug || selectedStore.storefront_slug || "store"}</strong>
+                    <span className={styles.commandLinkState}>
+                      {isLive
+                        ? "Public / منشور"
+                        : "Coming Soon / قريباً"}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+
             </header>
 
             <section className={styles.commandMetricGrid} aria-label="Store performance summary">
@@ -1236,7 +1262,58 @@ export default function DarikDirectOverviewPage() {
             </section>
 
 
-          <section className={styles.retailFieldOverviewCard}>
+          <section className={styles.overviewMiddleGrid397}><section className={styles.retailFieldOverviewCard}>
+              <div className={styles.storeInfoSummary397}>
+                <div className={styles.storeInfoTitle397}>
+                  <div>
+                    <strong>Store Information</strong>
+                    <span>معلومات المتجر</span>
+                  </div>
+                  <a href="/store-dashboard/storefront">✎ <b>Edit</b><small>تعديل</small></a>
+                </div>
+
+                <div className={styles.storeInfoIdentity397}>
+                  <div className={styles.commandLogo}>
+                  {storefront?.logo_url ? (
+                    <img src={storefront.logo_url} alt="Store logo" />
+                  ) : (
+                    (selectedStore.business_name || "D").slice(0, 1).toUpperCase()
+                  )}
+                </div>
+                  <div>
+                    <h3>{selectedStore.business_name}</h3>
+                    <p>Retailer storefront / واجهة المتجر</p>
+                  </div>
+                </div>
+
+                <div className={styles.storeInfoLine397}>
+                  <span className={styles.storeInfoGlyph397}>⌖</span>
+                  <div>
+                    <strong>{storefront?.address_text || storefront?.address_text_ar || "Amman, Jordan"}</strong>
+                    <small>عنوان المتجر</small>
+                  </div>
+                </div>
+
+                <div className={styles.storeInfoLine397}>
+                  <span className={styles.storeInfoGlyph397}>◇</span>
+                  <div className={styles.storeInfoRetail397}>
+                    <span className={styles.retailFieldCurrentBadge}>
+                Current: {retailFieldLabel134(
+                  retailFieldDrafts134[selectedStore.retailer_id] ??
+                    selectedStore.business_type
+                )}
+              </span>
+                  </div>
+                </div>
+
+                <div className={styles.storeInfoLine397}>
+                  <span className={styles.storeInfoGlyph397}>◎</span>
+                  <a href="/store-dashboard/storefront" className={styles.storeInfoLink397}>
+                    getdarik.com/<strong>{storefront?.slug || selectedStore.storefront_slug || "store"}</strong> ↗
+                  </a>
+                </div>
+              </div>
+
             <div className={styles.retailFieldOverviewHeader}>
               <div>
                 <span className={styles.retailFieldOverviewEyebrow}>
@@ -1442,9 +1519,9 @@ export default function DarikDirectOverviewPage() {
                   <small>{nextTask.action} →</small>
                 </a>
               </aside>
-            </section>
+            </section></section>
 
-            <section className={styles.commandActivityPanel}>
+            <section className={styles.overviewBottomGrid397}><section className={styles.commandActivityPanel}>
               <div className={styles.commandActivityHeader}>
                 <div>
                   <p>Recent activity / آخر النشاطات</p>
@@ -1513,7 +1590,25 @@ export default function DarikDirectOverviewPage() {
                   ))}
                 </div>
               )}
-            </section>
+            </section><aside className={styles.dashboardHelp397}>
+              <div className={styles.dashboardHelpArt397}>▣</div>
+              <div>
+                <strong>Need help adding products?</strong>
+                <b>تحتاج مساعدة في إضافة المنتجات؟</b>
+                <p>We can help you set up your store quickly.</p>
+                <span>يمكننا مساعدتك في إعداد متجرك بسرعة</span>
+              </div>
+              <a href="/support">Contact Support <small>تواصل معنا</small></a>
+            </aside></section><footer className={styles.dashboardFooter397}>
+              <img src="/darik-dashboard-logo-397.svg" alt="Darik" />
+              <nav>
+                <a href="/support"><strong>Help Center</strong><small>مركز المساعدة</small></a>
+                <a href="/terms"><strong>Terms of Service</strong><small>الشروط والأحكام</small></a>
+                <a href="/privacy"><strong>Privacy Policy</strong><small>سياسة الخصوصية</small></a>
+              </nav>
+              <span>getdarik.com | Jordan</span>
+            </footer>
+            {/* DARIK_DASHBOARD_OVERVIEW_APPROVED_397 */}
           </>
         )}
       </section>

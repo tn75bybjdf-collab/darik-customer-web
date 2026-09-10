@@ -4756,3 +4756,1172 @@ button.commandSecondaryButton:disabled {
     flex-wrap: wrap;
   }
 }
+
+
+/* DARIK_DASHBOARD_OVERVIEW_APPROVED_397
+   Visual-only authenticated Overview skin.
+   Every selector is scoped to the root overview marker so Storefront,
+   Orders, Products, Categories, Activation, AI Credits, and live preview
+   mechanics do not inherit these changes.
+*/
+
+.dashboardPage[data-darik-approved-dashboard397="true"] {
+  --d397-navy: #071e43;
+  --d397-navy2: #0b345b;
+  --d397-green: #08a878;
+  --d397-green2: #0bc28c;
+  --d397-blue: #126fd2;
+  --d397-purple: #6e46e8;
+  --d397-gold: #f3a824;
+  --d397-text: #0c244d;
+  --d397-muted: #617592;
+  --d397-border: #dce6ed;
+  --d397-bg: #f6fafc;
+  min-height: 100vh !important;
+  grid-template-columns: 242px minmax(0, 1fr) !important;
+  background: var(--d397-bg) !important;
+  color: var(--d397-text) !important;
+  font-family: Arial, "Segoe UI", sans-serif !important;
+}
+
+/* ---------------- SIDEBAR ---------------- */
+
+.dashboardPage[data-darik-approved-dashboard397="true"] .sidebar {
+  width: auto !important;
+  min-width: 0 !important;
+  height: 100vh !important;
+  min-height: 100vh !important;
+  position: sticky !important;
+  top: 0 !important;
+  align-self: start !important;
+  padding: 18px 9px 16px !important;
+  background:
+    radial-gradient(circle at 90% 10%, rgba(12, 172, 132, .11), transparent 28%),
+    linear-gradient(180deg, #062440 0%, #061c37 100%) !important;
+  border-right: 0 !important;
+  color: #ffffff !important;
+  box-shadow: 10px 0 28px rgba(7, 30, 67, .06) !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+}
+
+.dashboardPage[data-darik-approved-dashboard397="true"] .sidebar > div:first-child {
+  min-height: 80px !important;
+  margin: 0 12px 16px !important;
+  padding: 2px 0 0 !important;
+  background: url("/darik-dashboard-logo-397.svg") left top / 176px auto no-repeat !important;
+  position: relative !important;
+}
+
+.dashboardPage[data-darik-approved-dashboard397="true"] .sidebar > div:first-child::after {
+  content: "Retailer Dashboard\A لوحة التحكم بالتاجر";
+  position: absolute;
+  left: 73px;
+  top: 48px;
+  white-space: pre-line;
+  color: rgba(237, 247, 255, .84);
+  font-size: 10px;
+  line-height: 1.35;
+  font-weight: 700;
+}
+
+.dashboardPage[data-darik-approved-dashboard397="true"] .sidebar > div:first-child > * {
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
+.dashboardPage[data-darik-approved-dashboard397="true"] .sidebar nav {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 6px !important;
+}
+
+.dashboardPage[data-darik-approved-dashboard397="true"] .sidebar nav a {
+  min-height: 61px !important;
+  position: relative !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: flex-start !important;
+  justify-content: center !important;
+  gap: 3px !important;
+  padding: 9px 14px 9px 58px !important;
+  border: 0 !important;
+  border-radius: 10px !important;
+  background: transparent !important;
+  color: rgba(244, 250, 255, .92) !important;
+  font-size: 15px !important;
+  line-height: 1.1 !important;
+  font-weight: 700 !important;
+  text-decoration: none !important;
+}
+
+.dashboardPage[data-darik-approved-dashboard397="true"] .sidebar nav a::before {
+  position: absolute;
+  left: 21px;
+  top: 17px;
+  width: 24px;
+  color: #d2e4f1;
+  text-align: center;
+  font-size: 24px;
+  line-height: 1;
+  font-weight: 500;
+}
+
+.dashboardPage[data-darik-approved-dashboard397="true"] .sidebar nav a::after {
+  color: rgba(220, 233, 243, .73);
+  font-size: 11px;
+  line-height: 1.15;
+  font-weight: 500;
+}
+
+.dashboardPage[data-darik-approved-dashboard397="true"] .sidebar nav a[href="/store-dashboard"]::before { content: "⌂"; }
+.dashboardPage[data-darik-approved-dashboard397="true"] .sidebar nav a[href="/store-dashboard"]::after { content: "نظرة عامة"; }
+.dashboardPage[data-darik-approved-dashboard397="true"] .sidebar nav a[href="/store-dashboard/storefront"]::before { content: "▥"; }
+.dashboardPage[data-darik-approved-dashboard397="true"] .sidebar nav a[href="/store-dashboard/storefront"]::after { content: "متجري"; }
+.dashboardPage[data-darik-approved-dashboard397="true"] .sidebar nav a[href="/store-dashboard/orders"]::before { content: "⌑"; }
+.dashboardPage[data-darik-approved-dashboard397="true"] .sidebar nav a[href="/store-dashboard/orders"]::after { content: "الطلبات"; }
+.dashboardPage[data-darik-approved-dashboard397="true"] .sidebar nav a[href="/store-dashboard/products"]::before { content: "◇"; }
+.dashboardPage[data-darik-approved-dashboard397="true"] .sidebar nav a[href="/store-dashboard/products"]::after { content: "المنتجات"; }
+.dashboardPage[data-darik-approved-dashboard397="true"] .sidebar nav a[href="/store-dashboard/categories"]::before { content: "▦"; }
+.dashboardPage[data-darik-approved-dashboard397="true"] .sidebar nav a[href="/store-dashboard/categories"]::after { content: "الأقسام"; }
+.dashboardPage[data-darik-approved-dashboard397="true"] .sidebar nav a[href="/store-dashboard/activation"]::before { content: "▤"; }
+.dashboardPage[data-darik-approved-dashboard397="true"] .sidebar nav a[href="/store-dashboard/activation"]::after { content: "الخطة والدفع"; }
+.dashboardPage[data-darik-approved-dashboard397="true"] .sidebar nav a[href="/store-dashboard/ai-credits"]::before { content: "✦"; }
+.dashboardPage[data-darik-approved-dashboard397="true"] .sidebar nav a[href="/store-dashboard/ai-credits"]::after { content: "رصيد الذكاء الاصطناعي"; }
+
+.dashboardPage[data-darik-approved-dashboard397="true"] .sidebar nav a.activeNav {
+  background: linear-gradient(90deg, rgba(6, 174, 130, .22) 0%, rgba(5, 137, 112, .48) 100%) !important;
+  box-shadow: inset 3px 0 0 #09c18b !important;
+  color: #ffffff !important;
+}
+
+.dashboardPage[data-darik-approved-dashboard397="true"] .sidebar nav a.activeNav::before {
+  color: #7cf0d0 !important;
+}
+
+.dashboardPage[data-darik-approved-dashboard397="true"] .sidebarHelp397 {
+  margin: auto 13px 12px !important;
+  padding: 14px !important;
+  border-radius: 13px !important;
+  background: linear-gradient(180deg, rgba(28, 71, 105, .82) 0%, rgba(20, 54, 86, .9) 100%) !important;
+  border: 1px solid rgba(132, 184, 214, .12) !important;
+  text-align: center !important;
+  color: #ffffff !important;
+}
+
+.dashboardPage[data-darik-approved-dashboard397="true"] .sidebarHelpIcon397 {
+  width: 48px !important;
+  height: 48px !important;
+  margin: 0 auto 8px !important;
+  border-radius: 50% !important;
+  display: grid !important;
+  place-items: center !important;
+  color: #5ce5c3 !important;
+  font-size: 24px !important;
+}
+
+.dashboardPage[data-darik-approved-dashboard397="true"] .sidebarHelp397 strong,
+.dashboardPage[data-darik-approved-dashboard397="true"] .sidebarHelp397 span,
+.dashboardPage[data-darik-approved-dashboard397="true"] .sidebarHelp397 a,
+.dashboardPage[data-darik-approved-dashboard397="true"] .sidebarHelp397 small {
+  display: block !important;
+}
+
+.dashboardPage[data-darik-approved-dashboard397="true"] .sidebarHelp397 strong {
+  font-size: 13px !important;
+}
+
+.dashboardPage[data-darik-approved-dashboard397="true"] .sidebarHelp397 span {
+  margin-top: 3px !important;
+  color: #c6d9e7 !important;
+  font-size: 11px !important;
+}
+
+.dashboardPage[data-darik-approved-dashboard397="true"] .sidebarHelp397 a {
+  margin-top: 10px !important;
+  padding: 8px !important;
+  border: 1px solid rgba(200, 225, 240, .42) !important;
+  border-radius: 8px !important;
+  color: #ffffff !important;
+  text-decoration: none !important;
+  font-size: 12px !important;
+  font-weight: 800 !important;
+}
+
+.dashboardPage[data-darik-approved-dashboard397="true"] .sidebarHelp397 small {
+  margin-top: 2px !important;
+  color: #c6d9e7 !important;
+  font-size: 10px !important;
+}
+
+.dashboardPage[data-darik-approved-dashboard397="true"] .sidebarFooter {
+  margin: 0 13px !important;
+  padding: 10px 0 0 !important;
+  border-top: 1px solid rgba(255, 255, 255, .10) !important;
+  color: #dcebf5 !important;
+}
+
+/* ---------------- CONTENT + TOPBAR ---------------- */
+
+.dashboardPage[data-darik-approved-dashboard397="true"] .dashboardContent {
+  width: auto !important;
+  min-width: 0 !important;
+  max-width: none !important;
+  padding: 0 18px 0 20px !important;
+  background: #f7fafc !important;
+  overflow: visible !important;
+}
+
+.dashboardPage[data-darik-approved-dashboard397="true"] .dashboardTopbar397 {
+  min-height: 63px !important;
+  margin: 0 -18px 0 -20px !important;
+  padding: 8px 28px 8px 20px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: flex-end !important;
+  background: #ffffff !important;
+  border-bottom: 1px solid #e1e9ee !important;
+}
+
+.dashboardPage[data-darik-approved-dashboard397="true"] .dashboardTopbarSpacer397 {
+  flex: 1 1 auto !important;
+}
+
+.dashboardPage[data-darik-approved-dashboard397="true"] .dashboardTopbarActions397 {
+  display: flex !important;
+  align-items: center !important;
+  gap: 13px !important;
+}
+
+.dashboardPage[data-darik-approved-dashboard397="true"] .dashboardTopbarActions397 .commandHeroControls {
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+}
+
+.dashboardPage[data-darik-approved-dashboard397="true"] .dashboardTopbarActions397 .commandHeroControls > * {
+  min-height: 42px !important;
+  padding: 7px 13px !important;
+  border-radius: 10px !important;
+  border: 1px solid #d8e3ea !important;
+  background: #ffffff !important;
+  color: #12305b !important;
+  box-shadow: none !important;
+  font-size: 11px !important;
+  font-weight: 800 !important;
+}
+
+.dashboardPage[data-darik-approved-dashboard397="true"] .dashboardTopbarActions397 .commandHeroControls a:last-child {
+  background: #f7fbff !important;
+}
+
+.dashboardPage[data-darik-approved-dashboard397="true"] .dashboardNotice397 {
+  width: 38px !important;
+  height: 38px !important;
+  position: relative !important;
+  display: grid !important;
+  place-items: center !important;
+  color: #12305b !important;
+  font-size: 18px !important;
+}
+
+.dashboardPage[data-darik-approved-dashboard397="true"] .dashboardNotice397 b {
+  position: absolute !important;
+  right: -2px !important;
+  top: -4px !important;
+  min-width: 18px !important;
+  height: 18px !important;
+  padding: 0 4px !important;
+  border-radius: 999px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  background: #e84242 !important;
+  color: #ffffff !important;
+  font-size: 9px !important;
+  line-height: 1 !important;
+}
+
+.dashboardPage[data-darik-approved-dashboard397="true"] .dashboardProfile397 {
+  min-width: 168px !important;
+  display: grid !important;
+  grid-template-columns: 38px minmax(0, 1fr) auto !important;
+  gap: 10px !important;
+  align-items: center !important;
+}
+
+.dashboardPage[data-darik-approved-dashboard397="true"] .dashboardAvatar397 {
+  width: 38px !important;
+  height: 38px !important;
+  border-radius: 50% !important;
+  display: grid !important;
+  place-items: center !important;
+  background: #145183 !important;
+  color: #ffffff !important;
+  font-size: 12px !important;
+  font-weight: 900 !important;
+}
+
+.dashboardPage[data-darik-approved-dashboard397="true"] .dashboardProfile397 strong,
+.dashboardPage[data-darik-approved-dashboard397="true"] .dashboardProfile397 small {
+  display: block !important;
+}
+
+.dashboardPage[data-darik-approved-dashboard397="true"] .dashboardProfile397 strong {
+  color: #112b55 !important;
+  font-size: 12px !important;
+}
+
+.dashboardPage[data-darik-approved-dashboard397="true"] .dashboardProfile397 small {
+  margin-top: 2px !important;
+  color: #657a96 !important;
+  font-size: 10px !important;
+}
+
+/* ---------------- WELCOME HERO ---------------- */
+
+.dashboardPage[data-darik-approved-dashboard397="true"] .commandHero {
+  min-height: 187px !important;
+  margin: 6px 0 12px !important;
+  padding: 28px 34px !important;
+  border: 0 !important;
+  border-radius: 12px !important;
+  position: relative !important;
+  overflow: hidden !important;
+  display: flex !important;
+  align-items: center !important;
+  background:
+    linear-gradient(90deg, #eef7fb 0%, #f7fbfd 50%, #d9f5ed 100%) !important;
+  background-size: cover !important;
+  background-position: center !important;
+  box-shadow: inset 0 0 0 1px rgba(17, 62, 101, .03) !important;
+}
+
+.dashboardPage[data-darik-approved-dashboard397="true"] .commandHero[data-darik-dashboard-hero397="true"][style] {
+  background-size: cover !important;
+  background-position: center 52% !important;
+}
+
+.dashboardPage[data-darik-approved-dashboard397="true"] .commandHero::after {
+  content: "🇯🇴  Local Stores.\A Closer to You.\A المتاجر المحلية.\A أقرب إليك.";
+  position: absolute !important;
+  right: 38px !important;
+  top: 33px !important;
+  max-width: 170px !important;
+  white-space: pre-line !important;
+  text-align: left !important;
+  color: #062b43 !important;
+  font-size: 15px !important;
+  line-height: 1.28 !important;
+  font-weight: 900 !important;
+  text-shadow: 0 1px 12px rgba(255,255,255,.9) !important;
+}
+
+.dashboardPage[data-darik-approved-dashboard397="true"] .commandIdentity {
+  width: min(560px, 60%) !important;
+  display: block !important;
+  position: relative !important;
+  z-index: 2 !important;
+}
+
+.dashboardPage[data-darik-approved-dashboard397="true"] .commandIdentity .commandLogo,
+.dashboardPage[data-darik-approved-dashboard397="true"] .commandEyebrowRow,
+.dashboardPage[data-darik-approved-dashboard397="true"] .commandLinkRow {
+  display: none !important;
+}
+
+.dashboardPage[data-darik-approved-dashboard397="true"] .commandIdentityCopy {
+  display: block !important;
+}
+
+.dashboardPage[data-darik-approved-dashboard397="true"] .commandIdentityCopy h2 {
+  margin: 0 !important;
+  color: #09234d !important;
+  font-size: clamp(30px, 3vw, 39px) !important;
+  line-height: 1.04 !important;
+  letter-spacing: -.035em !important;
+  font-weight: 950 !important;
+  text-shadow: 0 1px 10px rgba(255,255,255,.78) !important;
+}
+
+.dashboardPage[data-darik-approved-dashboard397="true"] .commandIdentityCopy h2::before {
+  content: "Welcome back, " !important;
+}
+
+.dashboardPage[data-darik-approved-dashboard397="true"] .commandIdentityCopy h2::after {
+  content: "!" !important;
+}
+
+.dashboardPage[data-darik-approved-dashboard397="true"] .commandIdentityCopy::after {
+  content: "مرحباً بعودتك!\A Here's what's happening with your store today.\A إليك ما يحدث في متجرك اليوم";
+  margin-top: 8px !important;
+  display: block !important;
+  white-space: pre-line !important;
+  color: #314d73 !important;
+  font-size: 14px !important;
+  line-height: 1.55 !important;
+  font-weight: 600 !important;
+  text-shadow: 0 1px 10px rgba(255,255,255,.82) !important;
+}
+
+/* ---------------- METRICS ---------------- */
+
+.dashboardPage[data-darik-approved-dashboard397="true"] .commandMetricGrid {
+  margin: 0 0 13px !important;
+  display: grid !important;
+  grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+  gap: 14px !important;
+}
+
+.dashboardPage[data-darik-approved-dashboard397="true"] .commandMetricCard {
+  min-height: 150px !important;
+  padding: 18px !important;
+  border: 0 !important;
+  border-radius: 12px !important;
+  display: grid !important;
+  grid-template-columns: 56px minmax(0, 1fr) !important;
+  gap: 12px !important;
+  align-items: start !important;
+  background: linear-gradient(135deg, #eef6ff 0%, #e9f3ff 100%) !important;
+  box-shadow: inset 0 0 0 1px rgba(22, 111, 210, .04) !important;
+}
+
+.dashboardPage[data-darik-approved-dashboard397="true"] .commandMetricCard:nth-child(2) {
+  background: linear-gradient(135deg, #e8fbf4 0%, #e4f9f1 100%) !important;
+}
+
+.dashboardPage[data-darik-approved-dashboard397="true"] .commandMetricCard:nth-child(3) {
+  background: linear-gradient(135deg, #f3edff 0%, #f7f2ff 100%) !important;
+}
+
+.dashboardPage[data-darik-approved-dashboard397="true"] .commandMetricCard:nth-child(4) {
+  background: linear-gradient(135deg, #fff6e4 0%, #fff2dc 100%) !important;
+}
+
+.dashboardPage[data-darik-approved-dashboard397="true"] .commandMetricIcon {
+  width: 54px !important;
+  height: 54px !important;
+  border-radius: 13px !important;
+  display: grid !important;
+  place-items: center !important;
+  background: #dcebff !important;
+  color: #0a65c3 !important;
+  font-size: 26px !important;
+  font-weight: 900 !important;
+}
+
+.dashboardPage[data-darik-approved-dashboard397="true"] .commandMetricCard:nth-child(2) .commandMetricIcon {
+  background: #cef5e4 !important;
+  color: #05956a !important;
+}
+
+.dashboardPage[data-darik-approved-dashboard397="true"] .commandMetricCard:nth-child(3) .commandMetricIcon {
+  background: #e7ddff !important;
+  color: #6b43e3 !important;
+}
+
+.dashboardPage[data-darik-approved-dashboard397="true"] .commandMetricCard:nth-child(4) .commandMetricIcon {
+  background: #ffe7bd !important;
+  color: #e78a00 !important;
+}
+
+.dashboardPage[data-darik-approved-dashboard397="true"] .commandMetricCard > div:nth-child(2) {
+  min-width: 0 !important;
+}
+
+.dashboardPage[data-darik-approved-dashboard397="true"] .commandMetricCard > div:nth-child(2) > span {
+  color: #183966 !important;
+  font-size: 12px !important;
+  line-height: 1.25 !important;
+  font-weight: 700 !important;
+}
+
+.dashboardPage[data-darik-approved-dashboard397="true"] .commandMetricCard > div:nth-child(2) > strong {
+  margin-top: 3px !important;
+  display: block !important;
+  color: #09234d !important;
+  font-size: 28px !important;
+  line-height: 1 !important;
+  font-weight: 950 !important;
+}
+
+.dashboardPage[data-darik-approved-dashboard397="true"] .commandMetricCard > div:nth-child(2) > p {
+  margin: 4px 0 0 !important;
+  color: #4f6787 !important;
+  font-size: 10px !important;
+  line-height: 1.3 !important;
+}
+
+.dashboardPage[data-darik-approved-dashboard397="true"] .commandMetricCard > a {
+  grid-column: 1 / -1 !important;
+  align-self: end !important;
+  color: #0b5fb3 !important;
+  text-decoration: none !important;
+  font-size: 11px !important;
+  font-weight: 900 !important;
+}
+
+.dashboardPage[data-darik-approved-dashboard397="true"] .commandMetricCard:nth-child(2) > a {
+  color: #087d59 !important;
+}
+
+.dashboardPage[data-darik-approved-dashboard397="true"] .commandMetricCard:nth-child(3) > a {
+  color: #5a31d6 !important;
+}
+
+.dashboardPage[data-darik-approved-dashboard397="true"] .commandMetricCard:nth-child(4) > a {
+  color: #9b5a00 !important;
+}
+
+/* ---------------- STORE INFORMATION + READINESS + PULSE ---------------- */
+
+.dashboardPage[data-darik-approved-dashboard397="true"] .overviewMiddleGrid397 {
+  display: grid !important;
+  grid-template-columns: minmax(320px, .96fr) minmax(350px, 1.02fr) minmax(330px, .95fr) !important;
+  gap: 12px !important;
+  align-items: stretch !important;
+  margin-bottom: 12px !important;
+}
+
+.dashboardPage[data-darik-approved-dashboard397="true"] .overviewMiddleGrid397 > .commandMainGrid {
+  display: contents !important;
+}
+
+.dashboardPage[data-darik-approved-dashboard397="true"] .retailFieldOverviewCard,
+.dashboardPage[data-darik-approved-dashboard397="true"] .commandReadinessPanel,
+.dashboardPage[data-darik-approved-dashboard397="true"] .commandPulsePanel {
+  margin: 0 !important;
+  min-width: 0 !important;
+  min-height: 340px !important;
+  border-radius: 12px !important;
+}
+
+.dashboardPage[data-darik-approved-dashboard397="true"] .retailFieldOverviewCard,
+.dashboardPage[data-darik-approved-dashboard397="true"] .commandReadinessPanel {
+  padding: 18px !important;
+  border: 1px solid #dce6ed !important;
+  background: #ffffff !important;
+  box-shadow: 0 7px 24px rgba(19, 55, 90, .035) !important;
+}
+
+.dashboardPage[data-darik-approved-dashboard397="true"] .storeInfoSummary397 {
+  display: grid !important;
+  gap: 13px !important;
+}
+
+.dashboardPage[data-darik-approved-dashboard397="true"] .storeInfoTitle397 {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 12px !important;
+}
+
+.dashboardPage[data-darik-approved-dashboard397="true"] .storeInfoTitle397 > div {
+  display: flex !important;
+  align-items: baseline !important;
+  gap: 8px !important;
+}
+
+.dashboardPage[data-darik-approved-dashboard397="true"] .storeInfoTitle397 strong {
+  color: #0e2953 !important;
+  font-size: 14px !important;
+}
+
+.dashboardPage[data-darik-approved-dashboard397="true"] .storeInfoTitle397 span {
+  color: #526b88 !important;
+  font-size: 11px !important;
+}
+
+.dashboardPage[data-darik-approved-dashboard397="true"] .storeInfoTitle397 > a {
+  min-width: 66px !important;
+  min-height: 42px !important;
+  padding: 6px 10px !important;
+  border: 1px solid #d3dfe8 !important;
+  border-radius: 10px !important;
+  display: grid !important;
+  grid-template-columns: auto auto !important;
+  align-items: center !important;
+  color: #12305b !important;
+  text-decoration: none !important;
+  font-size: 12px !important;
+}
+
+.dashboardPage[data-darik-approved-dashboard397="true"] .storeInfoTitle397 > a small {
+  grid-column: 2 !important;
+  color: #657b97 !important;
+  font-size: 9px !important;
+}
+
+.dashboardPage[data-darik-approved-dashboard397="true"] .storeInfoIdentity397 {
+  display: grid !important;
+  grid-template-columns: 90px minmax(0, 1fr) !important;
+  gap: 14px !important;
+  align-items: center !important;
+}
+
+.dashboardPage[data-darik-approved-dashboard397="true"] .storeInfoIdentity397 .commandLogo {
+  width: 90px !important;
+  height: 90px !important;
+  border-radius: 12px !important;
+  overflow: hidden !important;
+  display: grid !important;
+  place-items: center !important;
+  background: #eef4f8 !important;
+  color: #17365f !important;
+  font-size: 30px !important;
+  font-weight: 900 !important;
+}
+
+.dashboardPage[data-darik-approved-dashboard397="true"] .storeInfoIdentity397 .commandLogo img {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+}
+
+.dashboardPage[data-darik-approved-dashboard397="true"] .storeInfoIdentity397 h3 {
+  margin: 0 !important;
+  color: #0b2852 !important;
+  font-size: 18px !important;
+  line-height: 1.1 !important;
+}
+
+.dashboardPage[data-darik-approved-dashboard397="true"] .storeInfoIdentity397 p {
+  margin: 5px 0 0 !important;
+  color: #405c7e !important;
+  font-size: 11px !important;
+}
+
+.dashboardPage[data-darik-approved-dashboard397="true"] .storeInfoLine397 {
+  display: grid !important;
+  grid-template-columns: 26px minmax(0, 1fr) !important;
+  gap: 9px !important;
+  align-items: center !important;
+}
+
+.dashboardPage[data-darik-approved-dashboard397="true"] .storeInfoGlyph397 {
+  color: #0b335d !important;
+  font-size: 20px !important;
+  text-align: center !important;
+}
+
+.dashboardPage[data-darik-approved-dashboard397="true"] .storeInfoLine397 strong,
+.dashboardPage[data-darik-approved-dashboard397="true"] .storeInfoLine397 small {
+  display: block !important;
+}
+
+.dashboardPage[data-darik-approved-dashboard397="true"] .storeInfoLine397 strong {
+  color: #17375f !important;
+  font-size: 12px !important;
+}
+
+.dashboardPage[data-darik-approved-dashboard397="true"] .storeInfoLine397 small {
+  margin-top: 2px !important;
+  color: #607694 !important;
+  font-size: 10px !important;
+}
+
+.dashboardPage[data-darik-approved-dashboard397="true"] .storeInfoRetail397 .retailFieldCurrentBadge {
+  display: inline-flex !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+  background: transparent !important;
+  color: #17375f !important;
+  font-size: 11px !important;
+  font-weight: 800 !important;
+}
+
+.dashboardPage[data-darik-approved-dashboard397="true"] .storeInfoLink397 {
+  overflow: hidden !important;
+  color: #0867c6 !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+  text-decoration: none !important;
+  font-size: 12px !important;
+}
+
+.dashboardPage[data-darik-approved-dashboard397="true"] .retailFieldOverviewHeader {
+  margin-top: 15px !important;
+  padding-top: 12px !important;
+  border-top: 1px solid #e5ebef !important;
+}
+
+.dashboardPage[data-darik-approved-dashboard397="true"] .retailFieldOverviewHeader > div > h3 {
+  margin: 0 !important;
+  color: #274867 !important;
+  font-size: 11px !important;
+}
+
+.dashboardPage[data-darik-approved-dashboard397="true"] .retailFieldOverviewHeader > div > p,
+.dashboardPage[data-darik-approved-dashboard397="true"] .retailFieldOverviewEyebrow,
+.dashboardPage[data-darik-approved-dashboard397="true"] .retailFieldOverviewHeader > .retailFieldCurrentBadge {
+  display: none !important;
+}
+
+.dashboardPage[data-darik-approved-dashboard397="true"] .retailFieldOverviewControls {
+  margin-top: 8px !important;
+  gap: 8px !important;
+}
+
+.dashboardPage[data-darik-approved-dashboard397="true"] .retailFieldOverviewControls label {
+  font-size: 10px !important;
+}
+
+.dashboardPage[data-darik-approved-dashboard397="true"] .retailFieldOverviewControls select,
+.dashboardPage[data-darik-approved-dashboard397="true"] .retailFieldOverviewControls input {
+  min-height: 36px !important;
+  border-radius: 8px !important;
+  font-size: 10px !important;
+}
+
+.dashboardPage[data-darik-approved-dashboard397="true"] .retailFieldOverviewWarning {
+  display: none !important;
+}
+
+.dashboardPage[data-darik-approved-dashboard397="true"] .retailFieldOverviewSave {
+  min-height: 36px !important;
+  padding: 0 11px !important;
+  border-radius: 8px !important;
+  font-size: 10px !important;
+}
+
+/* readiness */
+.dashboardPage[data-darik-approved-dashboard397="true"] .commandReadinessPanel .commandPanelHeader {
+  margin-bottom: 9px !important;
+}
+
+.dashboardPage[data-darik-approved-dashboard397="true"] .commandReadinessPanel .commandPanelHeader h3 {
+  margin: 0 !important;
+  color: #102b56 !important;
+  font-size: 14px !important;
+}
+
+.dashboardPage[data-darik-approved-dashboard397="true"] .commandReadinessPanel .commandPanelHeader p {
+  color: #536b87 !important;
+  font-size: 11px !important;
+}
+
+.dashboardPage[data-darik-approved-dashboard397="true"] .commandProgressRing {
+  width: 58px !important;
+  height: 58px !important;
+}
+
+.dashboardPage[data-darik-approved-dashboard397="true"] .commandTaskList {
+  gap: 0 !important;
+}
+
+.dashboardPage[data-darik-approved-dashboard397="true"] .commandTaskRow {
+  min-height: 41px !important;
+  padding: 7px 0 !important;
+  border-bottom: 1px solid #edf1f4 !important;
+}
+
+.dashboardPage[data-darik-approved-dashboard397="true"] .commandTaskState {
+  width: 24px !important;
+  height: 24px !important;
+  background: #0ca874 !important;
+  color: #ffffff !important;
+  font-size: 12px !important;
+}
+
+.dashboardPage[data-darik-approved-dashboard397="true"] .commandTaskCopy strong {
+  color: #17335d !important;
+  font-size: 11px !important;
+}
+
+.dashboardPage[data-darik-approved-dashboard397="true"] .commandTaskCopy small {
+  display: none !important;
+}
+
+.dashboardPage[data-darik-approved-dashboard397="true"] .commandTaskAction {
+  color: #59718f !important;
+  font-size: 9px !important;
+}
+
+/* pulse */
+.dashboardPage[data-darik-approved-dashboard397="true"] .commandPulsePanel {
+  padding: 18px !important;
+  border: 0 !important;
+  background:
+    radial-gradient(circle at 95% 5%, rgba(28, 164, 133, .14), transparent 36%),
+    linear-gradient(160deg, #082e52 0%, #061d3a 100%) !important;
+  color: #ffffff !important;
+  box-shadow: 0 12px 30px rgba(7, 30, 67, .10) !important;
+}
+
+.dashboardPage[data-darik-approved-dashboard397="true"] .commandPulsePanel .commandPanelHeaderCompact h3,
+.dashboardPage[data-darik-approved-dashboard397="true"] .commandPulsePanel .commandPanelHeaderCompact p {
+  color: #ffffff !important;
+}
+
+.dashboardPage[data-darik-approved-dashboard397="true"] .commandPulsePanel .commandPanelHeaderCompact h3 {
+  font-size: 15px !important;
+}
+
+.dashboardPage[data-darik-approved-dashboard397="true"] .commandPulsePanel .commandPanelHeaderCompact p {
+  color: #66dec0 !important;
+  font-size: 10px !important;
+}
+
+.dashboardPage[data-darik-approved-dashboard397="true"] .commandPulseLive {
+  background: transparent !important;
+  color: #f2fbff !important;
+}
+
+.dashboardPage[data-darik-approved-dashboard397="true"] .commandPulseLive::before {
+  content: "●";
+  margin-right: 7px;
+  color: #17d596;
+}
+
+.dashboardPage[data-darik-approved-dashboard397="true"] .commandPulseList {
+  margin-top: 11px !important;
+  gap: 0 !important;
+}
+
+.dashboardPage[data-darik-approved-dashboard397="true"] .commandPulseList > div {
+  min-height: 50px !important;
+  padding: 7px 0 !important;
+  border-bottom: 1px solid rgba(213, 232, 244, .10) !important;
+}
+
+.dashboardPage[data-darik-approved-dashboard397="true"] .commandPulseList span {
+  color: #d7e8f4 !important;
+  font-size: 10px !important;
+}
+
+.dashboardPage[data-darik-approved-dashboard397="true"] .commandPulseList strong {
+  color: #ffffff !important;
+  font-size: 11px !important;
+}
+
+.dashboardPage[data-darik-approved-dashboard397="true"] .commandPulseAction {
+  margin-top: 10px !important;
+  border-radius: 9px !important;
+  background: rgba(255,255,255,.07) !important;
+}
+
+/* ---------------- RECENT ACTIVITY + HELP ---------------- */
+
+.dashboardPage[data-darik-approved-dashboard397="true"] .overviewBottomGrid397 {
+  display: grid !important;
+  grid-template-columns: minmax(0, 2fr) minmax(330px, .95fr) !important;
+  gap: 12px !important;
+  align-items: stretch !important;
+}
+
+.dashboardPage[data-darik-approved-dashboard397="true"] .commandActivityPanel {
+  margin: 0 !important;
+  min-width: 0 !important;
+  padding: 14px 18px !important;
+  border: 1px solid #dce6ed !important;
+  border-radius: 12px !important;
+  background: #ffffff !important;
+  box-shadow: 0 7px 24px rgba(19,55,90,.035) !important;
+}
+
+.dashboardPage[data-darik-approved-dashboard397="true"] .commandActivityHeader {
+  margin-bottom: 8px !important;
+}
+
+.dashboardPage[data-darik-approved-dashboard397="true"] .commandActivityHeader h3 {
+  color: #102b56 !important;
+  font-size: 14px !important;
+}
+
+.dashboardPage[data-darik-approved-dashboard397="true"] .commandActivityHeader p,
+.dashboardPage[data-darik-approved-dashboard397="true"] .commandActivityHeader > div > span {
+  color: #536b87 !important;
+  font-size: 10px !important;
+}
+
+.dashboardPage[data-darik-approved-dashboard397="true"] .commandOrderRow {
+  min-height: 42px !important;
+  border-top: 1px solid #eef2f5 !important;
+}
+
+.dashboardPage[data-darik-approved-dashboard397="true"] .commandOrderNumber,
+.dashboardPage[data-darik-approved-dashboard397="true"] .commandOrderCustomer strong,
+.dashboardPage[data-darik-approved-dashboard397="true"] .commandOrderStatus,
+.dashboardPage[data-darik-approved-dashboard397="true"] .commandOrderTotal {
+  font-size: 10px !important;
+}
+
+.dashboardPage[data-darik-approved-dashboard397="true"] .dashboardHelp397 {
+  min-height: 155px !important;
+  padding: 18px !important;
+  border-radius: 12px !important;
+  border: 1px solid #dce9f2 !important;
+  display: grid !important;
+  grid-template-columns: 82px minmax(0,1fr) !important;
+  gap: 14px !important;
+  align-items: center !important;
+  background:
+    linear-gradient(135deg, #f0f7ff 0%, #eef8fb 65%, #e8f2fb 100%) !important;
+  color: #0d2953 !important;
+}
+
+.dashboardPage[data-darik-approved-dashboard397="true"] .dashboardHelpArt397 {
+  width: 76px !important;
+  height: 76px !important;
+  border-radius: 50% !important;
+  display: grid !important;
+  place-items: center !important;
+  background: #deeeff !important;
+  color: #075cb0 !important;
+  font-size: 38px !important;
+}
+
+.dashboardPage[data-darik-approved-dashboard397="true"] .dashboardHelp397 strong,
+.dashboardPage[data-darik-approved-dashboard397="true"] .dashboardHelp397 b,
+.dashboardPage[data-darik-approved-dashboard397="true"] .dashboardHelp397 p,
+.dashboardPage[data-darik-approved-dashboard397="true"] .dashboardHelp397 span {
+  display: block !important;
+}
+
+.dashboardPage[data-darik-approved-dashboard397="true"] .dashboardHelp397 strong {
+  font-size: 13px !important;
+}
+
+.dashboardPage[data-darik-approved-dashboard397="true"] .dashboardHelp397 b {
+  margin-top: 2px !important;
+  font-size: 11px !important;
+}
+
+.dashboardPage[data-darik-approved-dashboard397="true"] .dashboardHelp397 p,
+.dashboardPage[data-darik-approved-dashboard397="true"] .dashboardHelp397 span {
+  margin: 4px 0 0 !important;
+  color: #5a7190 !important;
+  font-size: 10px !important;
+  line-height: 1.4 !important;
+}
+
+.dashboardPage[data-darik-approved-dashboard397="true"] .dashboardHelp397 > a {
+  grid-column: 2 !important;
+  width: fit-content !important;
+  margin-top: -5px !important;
+  padding: 8px 13px !important;
+  border: 1px solid #8ba7c2 !important;
+  border-radius: 7px !important;
+  color: #12345f !important;
+  text-decoration: none !important;
+  background: rgba(255,255,255,.68) !important;
+  font-size: 10px !important;
+  font-weight: 900 !important;
+}
+
+.dashboardPage[data-darik-approved-dashboard397="true"] .dashboardHelp397 > a small {
+  margin-left: 8px !important;
+  font-size: 9px !important;
+}
+
+/* ---------------- FOOTER ---------------- */
+
+.dashboardPage[data-darik-approved-dashboard397="true"] .dashboardFooter397 {
+  min-height: 62px !important;
+  margin-top: 8px !important;
+  padding: 8px 6px 8px !important;
+  border-top: 1px solid #e0e8ed !important;
+  display: grid !important;
+  grid-template-columns: 250px 1fr auto !important;
+  gap: 24px !important;
+  align-items: center !important;
+  background: #ffffff !important;
+}
+
+.dashboardPage[data-darik-approved-dashboard397="true"] .dashboardFooter397 > img {
+  display: block !important;
+  width: 155px !important;
+  height: auto !important;
+  filter: none !important;
+}
+
+.dashboardPage[data-darik-approved-dashboard397="true"] .dashboardFooter397 nav {
+  display: flex !important;
+  justify-content: center !important;
+  gap: 44px !important;
+}
+
+.dashboardPage[data-darik-approved-dashboard397="true"] .dashboardFooter397 nav a {
+  display: flex !important;
+  flex-direction: column !important;
+  color: #17345d !important;
+  text-decoration: none !important;
+}
+
+.dashboardPage[data-darik-approved-dashboard397="true"] .dashboardFooter397 nav strong {
+  font-size: 10px !important;
+}
+
+.dashboardPage[data-darik-approved-dashboard397="true"] .dashboardFooter397 nav small {
+  margin-top: 2px !important;
+  color: #647995 !important;
+  font-size: 9px !important;
+}
+
+.dashboardPage[data-darik-approved-dashboard397="true"] .dashboardFooter397 > span {
+  color: #48627f !important;
+  font-size: 10px !important;
+  white-space: nowrap !important;
+}
+
+/* ---------------- RESPONSIVE ---------------- */
+
+@media (max-width: 1280px) {
+  .dashboardPage[data-darik-approved-dashboard397="true"] {
+    grid-template-columns: 220px minmax(0, 1fr) !important;
+  }
+
+  .dashboardPage[data-darik-approved-dashboard397="true"] .overviewMiddleGrid397 {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+
+  .dashboardPage[data-darik-approved-dashboard397="true"] .commandPulsePanel {
+    grid-column: 1 / -1 !important;
+    min-height: 260px !important;
+  }
+
+  .dashboardPage[data-darik-approved-dashboard397="true"] .dashboardProfile397 {
+    min-width: 120px !important;
+  }
+}
+
+@media (max-width: 1020px) {
+  .dashboardPage[data-darik-approved-dashboard397="true"] {
+    display: block !important;
+  }
+
+  .dashboardPage[data-darik-approved-dashboard397="true"] .sidebar {
+    width: 100% !important;
+    height: auto !important;
+    min-height: 0 !important;
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 30 !important;
+    padding: 8px 10px !important;
+  }
+
+  .dashboardPage[data-darik-approved-dashboard397="true"] .sidebar > div:first-child {
+    min-height: 47px !important;
+    margin: 0 8px 6px !important;
+    background-size: 138px auto !important;
+  }
+
+  .dashboardPage[data-darik-approved-dashboard397="true"] .sidebar > div:first-child::after {
+    display: none !important;
+  }
+
+  .dashboardPage[data-darik-approved-dashboard397="true"] .sidebar nav {
+    flex-direction: row !important;
+    overflow-x: auto !important;
+    padding-bottom: 2px !important;
+  }
+
+  .dashboardPage[data-darik-approved-dashboard397="true"] .sidebar nav a {
+    min-width: 128px !important;
+    min-height: 50px !important;
+    padding: 8px 10px 8px 38px !important;
+  }
+
+  .dashboardPage[data-darik-approved-dashboard397="true"] .sidebar nav a::before {
+    left: 11px !important;
+    top: 13px !important;
+    font-size: 20px !important;
+  }
+
+  .dashboardPage[data-darik-approved-dashboard397="true"] .sidebarHelp397,
+  .dashboardPage[data-darik-approved-dashboard397="true"] .sidebarFooter {
+    display: none !important;
+  }
+
+  .dashboardPage[data-darik-approved-dashboard397="true"] .dashboardContent {
+    padding: 0 12px !important;
+  }
+
+  .dashboardPage[data-darik-approved-dashboard397="true"] .dashboardTopbar397 {
+    margin: 0 -12px !important;
+    padding: 8px 12px !important;
+  }
+
+  .dashboardPage[data-darik-approved-dashboard397="true"] .dashboardProfile397 {
+    display: none !important;
+  }
+
+  .dashboardPage[data-darik-approved-dashboard397="true"] .commandMetricGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+
+  .dashboardPage[data-darik-approved-dashboard397="true"] .overviewBottomGrid397 {
+    grid-template-columns: 1fr !important;
+  }
+
+  .dashboardPage[data-darik-approved-dashboard397="true"] .dashboardFooter397 {
+    grid-template-columns: 1fr !important;
+  }
+
+  .dashboardPage[data-darik-approved-dashboard397="true"] .dashboardFooter397 nav {
+    justify-content: flex-start !important;
+    flex-wrap: wrap !important;
+    gap: 18px !important;
+  }
+}
+
+@media (max-width: 680px) {
+  .dashboardPage[data-darik-approved-dashboard397="true"] .dashboardTopbarActions397 .commandHeroControls {
+    max-width: calc(100vw - 90px) !important;
+    overflow-x: auto !important;
+  }
+
+  .dashboardPage[data-darik-approved-dashboard397="true"] .dashboardTopbarActions397 .commandHeroControls > * {
+    flex: 0 0 auto !important;
+  }
+
+  .dashboardPage[data-darik-approved-dashboard397="true"] .dashboardNotice397 {
+    display: none !important;
+  }
+
+  .dashboardPage[data-darik-approved-dashboard397="true"] .commandHero {
+    min-height: 220px !important;
+    padding: 25px 20px !important;
+    background-position: 60% center !important;
+  }
+
+  .dashboardPage[data-darik-approved-dashboard397="true"] .commandHero::after {
+    right: 18px !important;
+    top: auto !important;
+    bottom: 18px !important;
+    max-width: 145px !important;
+    font-size: 12px !important;
+  }
+
+  .dashboardPage[data-darik-approved-dashboard397="true"] .commandIdentity {
+    width: 76% !important;
+  }
+
+  .dashboardPage[data-darik-approved-dashboard397="true"] .commandIdentityCopy h2 {
+    font-size: 27px !important;
+  }
+
+  .dashboardPage[data-darik-approved-dashboard397="true"] .commandMetricGrid,
+  .dashboardPage[data-darik-approved-dashboard397="true"] .overviewMiddleGrid397 {
+    grid-template-columns: 1fr !important;
+  }
+
+  .dashboardPage[data-darik-approved-dashboard397="true"] .commandPulsePanel {
+    grid-column: auto !important;
+  }
+
+  .dashboardPage[data-darik-approved-dashboard397="true"] .commandMetricCard {
+    min-height: 125px !important;
+  }
+
+  .dashboardPage[data-darik-approved-dashboard397="true"] .dashboardHelp397 {
+    grid-template-columns: 58px minmax(0, 1fr) !important;
+  }
+
+  .dashboardPage[data-darik-approved-dashboard397="true"] .dashboardHelpArt397 {
+    width: 56px !important;
+    height: 56px !important;
+    font-size: 28px !important;
+  }
+}
