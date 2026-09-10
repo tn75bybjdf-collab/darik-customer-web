@@ -127,7 +127,58 @@ export default function HowItWorksPage() {
         <section className={styles.section}><div className={styles.container}><div className={styles.sectionHeading}><h2>Why this matters for retailers</h2><p>More visibility. More customers. A stronger local economy.</p></div><div className={styles.retailerGrid}>{retailerBenefits.map((item) => <article className={styles.benefitCard} key={item.title}><Icon name={item.icon} className={styles.benefitIcon} /><h3>{item.title}</h3><p>{item.copy}</p></article>)}</div></div></section>
         <section className={styles.ctaSection}><div className={styles.container}><div className={styles.ctaBand}><div className={styles.ctaImageWrap}><img src="/darik-how-394-cta-man.jpg" alt="Darik delivery representative" className={styles.ctaImage} /></div><div className={styles.ctaContent}><div><h2>Put your business where Jordan searches.</h2><p>Join Darik and be part of a growing local marketplace that connects customers with businesses across the Kingdom.</p></div><div className={styles.ctaButtons}><Link href="/store-signup" className={styles.primaryButton}>Start your storefront</Link><Link href="/pricing" className={styles.whiteButton}>See pricing</Link></div></div><div className={styles.ctaPoints}><div className={styles.ctaPoint}><Icon name="people" className={styles.pointIcon} /><span>Reach more customers across Jordan</span></div><div className={styles.ctaPoint}><Icon name="chart" className={styles.pointIcon} /><span>Grow your business online</span></div><div className={styles.ctaPoint}><Icon name="heart" className={styles.pointIcon} /><span>Be part of a stronger, more connected local economy</span></div></div></div></div></section>
       </main>
-      <footer className={styles.footer}><div className={styles.container}><div className={styles.footerGrid}><div className={styles.footerBrand}><div className={styles.footerMarkRow}><div className={styles.footerMark}><span className={styles.footerMarkBack} /><span className={styles.footerMarkFront} /></div><div><div className={styles.footerBrandName}>Darik</div><div className={styles.footerBrandTag}>Local Stores. Closer to You.</div></div></div><p>Darik connects customers with active retailers across Jordan through searchable storefronts, product discovery, and delivery-aware shopping.</p></div><div className={styles.footerLinks}><h4>Platform</h4><a href="/">All Stores</a><a href="/">Categories</a><a href="/">About Darik</a><a href="/pricing">For Business</a></div><div className={styles.footerLinks}><h4>Retailers</h4><a href="/store-signup">Start Your Store</a><a href="/store-dashboard">Retailer Dashboard</a><a href="/pricing">Pricing</a><a href="/how-it-works">Success Stories</a></div><div className={styles.footerLinks}><h4>Help</h4><a href="/support">Help Center</a><a href="/support">Contact Us</a><a href="/terms">Terms of Service</a><a href="/privacy">Privacy Policy</a></div><div className={styles.footerSocial}><h4>Follow Us</h4><div className={styles.socialRow}><span>f</span><span>ig</span><span>in</span><span>yt</span></div></div></div><div className={styles.footerBottom}><span>© 2026 Darik Technologies. All rights reserved.</span><span>getdarik.com  |  Jordan</span></div></div></footer>
+      <footer className={styles.footer}>
+        <div className={styles.container}>
+          <div className={styles.footerGrid}>
+            <div className={styles.footerBrand}>
+              <img
+                src="/darik-pricing-footer-logo-vector.svg"
+                alt="Darik"
+                className={styles.footerLogo}
+              />
+              <p>
+                Darik connects customers with active retailers across Jordan through
+                searchable storefronts, product discovery, and delivery-aware shopping.
+              </p>
+            </div>
+
+            <div className={styles.footerLinks}>
+              <h4>Platform</h4>
+              <Link href="/#all-stores">All Stores</Link>
+              <Link href="/#categories">Categories</Link>
+              <Link href="/#about">About Darik</Link>
+              <Link href="/pricing">For Business</Link>
+            </div>
+
+            <div className={styles.footerLinks}>
+              <h4>Retailers</h4>
+              <Link href="/store-signup">Start Your Store</Link>
+              <Link href="/store-dashboard">Retailer Dashboard</Link>
+              <Link href="/pricing">Pricing</Link>
+            </div>
+
+            <div className={styles.footerLinks}>
+              <h4>Help</h4>
+              <Link href="/support">Help Center</Link>
+              <Link href="/support">Contact Us</Link>
+              <Link href="/terms">Terms of Service</Link>
+              <Link href="/privacy">Privacy Policy</Link>
+            </div>
+
+            <div className={styles.footerSlogan} aria-label="A Stronger Jordan Together">
+              <span>A Stronger Jordan</span>
+              <span>Together <b>♥</b></span>
+            </div>
+          </div>
+
+          <div className={styles.footerBottom}>
+            <span>© 2026 Darik Technologies. All rights reserved.</span>
+            <span>getdarik.com · Jordan</span>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 }
+
+{/* DARIK_HOW_FOOTER_MATCH_PRICING_394C */}

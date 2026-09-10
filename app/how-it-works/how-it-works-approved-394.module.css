@@ -121,3 +121,174 @@
 @media (max-width: 1260px){ .discoveryAside { position: static; width: 180px; margin: 18px 0 0 auto; } }
 @media (max-width: 1100px){ .nav,.headerActions,.logoLink { display:none; } .mobileHeaderActions{display:flex;} .heroGrid,.discoveryGrid,.ctaBand,.footerGrid{grid-template-columns:1fr;} .heroSideScene{opacity:.28;width:200px;} .heroCard{max-width:680px;} .discoveryAside{width:220px;margin-left:auto;} .retailerGrid{grid-template-columns:repeat(2,minmax(0,1fr));} .ctaPoints,.ctaImageWrap{min-height:unset;} }
 @media (max-width: 760px){ .container{width:min(100% - 24px,100%);} .topStrip{height:10px;} .header{min-height:74px;} .mobileSquare{width:44px;height:44px;border-radius:14px;} .heroSection{padding:26px 0 22px;} .heroCopy{padding-top:2px;} .heroTitle{font-size:clamp(40px,12vw,56px);} .eyebrow{font-size:14px;margin-bottom:10px;} .heroText,.stepCard p,.benefitCard p,.discoveryCopy p,.ctaContent p,.footerBrand p{font-size:17px;} .heroButtons,.ctaButtons{flex-direction:column;} .heroButtons a,.ctaButtons a{width:100%;} .heroFacts{gap:14px;} .heroFact{width:calc(50% - 8px);font-size:14px;} .heroCard{padding:14px;border-radius:22px;} .searchRow,.discoveryToolbar{grid-template-columns:1fr;} .searchButton{width:100%;} .resultCard,.miniResult{align-items:flex-start;} .resultTopRow,.miniResult{flex-direction:column;} .resultRight{align-items:flex-start;text-align:left;} .section,.sectionTight,.ctaSection{padding:28px 0;} .sectionHeading{margin-bottom:18px;} .sectionHeading p{font-size:18px;} .stepGrid,.retailerGrid{grid-template-columns:1fr;gap:14px;} .stepCard,.benefitCard{padding:20px 18px;} .stepCard h3,.benefitCard h3{font-size:24px;} .quoteBox{display:block;padding:14px 16px;min-height:0;font-size:18px;} .discoveryAside{width:min(60vw,220px);} .ctaBand{border-radius:24px;} .ctaContent,.ctaPoints{padding:22px 18px;} .ctaImageWrap{max-height:220px;} .ctaImage{min-height:220px;} .ctaPoint{font-size:17px;} .footer{padding-top:26px;} .footerGrid{gap:22px;} .footerBrandName{font-size:30px;} .footerBottom{flex-direction:column;align-items:flex-start;} }
+
+/* DARIK_HOW_FOOTER_MATCH_PRICING_394C
+   Match the approved Darik Pricing footer system exactly in spirit:
+   dark navy footer, real transparent Darik vector logo, three navigation
+   columns, handwritten Jordan signature, compact legal row.
+*/
+.ctaSection {
+  padding-bottom: 0 !important;
+}
+
+.footer {
+  margin-top: 0 !important;
+  padding: 36px 0 22px !important;
+  background: linear-gradient(180deg, #082d5a 0%, #06264f 100%) !important;
+  color: #ffffff !important;
+}
+
+.footerGrid {
+  display: grid !important;
+  grid-template-columns: minmax(260px, 1.35fr) .72fr .82fr .86fr minmax(215px, 1fr) !important;
+  gap: 42px !important;
+  align-items: start !important;
+}
+
+.footerBrand {
+  max-width: 300px !important;
+}
+
+.footerLogo {
+  display: block !important;
+  width: 174px !important;
+  max-width: 100% !important;
+  height: auto !important;
+  margin: 0 0 16px !important;
+  object-fit: contain !important;
+  object-position: left center !important;
+  background: transparent !important;
+  filter: none !important;
+  opacity: 1 !important;
+}
+
+.footerBrand p {
+  margin: 0 !important;
+  color: rgba(232, 241, 255, .88) !important;
+  font-size: 14px !important;
+  line-height: 1.55 !important;
+}
+
+.footerLinks {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 9px !important;
+}
+
+.footerLinks h4 {
+  margin: 0 0 9px !important;
+  color: #ffffff !important;
+  font-size: 16px !important;
+  line-height: 1.2 !important;
+  font-weight: 900 !important;
+}
+
+.footerLinks a {
+  color: rgba(232, 241, 255, .9) !important;
+  text-decoration: none !important;
+  font-size: 14px !important;
+  line-height: 1.35 !important;
+}
+
+.footerLinks a:hover {
+  color: #64e4cf !important;
+}
+
+.footerSlogan {
+  justify-self: end !important;
+  align-self: start !important;
+  padding-top: 14px !important;
+  color: #57dfca !important;
+  text-align: center !important;
+  font-family: "Segoe Print", "Bradley Hand", "Comic Sans MS", cursive !important;
+  font-size: 27px !important;
+  line-height: 1.05 !important;
+  font-weight: 500 !important;
+  transform: rotate(-2deg) !important;
+  letter-spacing: .01em !important;
+}
+
+.footerSlogan span {
+  display: block !important;
+}
+
+.footerSlogan b {
+  color: #73ead8 !important;
+  font-weight: 700 !important;
+}
+
+.footerBottom {
+  margin-top: 26px !important;
+  padding-top: 17px !important;
+  border-top: 1px solid rgba(255, 255, 255, .13) !important;
+  display: flex !important;
+  justify-content: space-between !important;
+  gap: 20px !important;
+  color: rgba(232, 241, 255, .82) !important;
+  font-size: 12px !important;
+  line-height: 1.4 !important;
+}
+
+@media (max-width: 1050px) {
+  .footerGrid {
+    grid-template-columns: minmax(250px, 1.2fr) repeat(3, minmax(130px, 1fr)) !important;
+  }
+
+  .footerSlogan {
+    grid-column: 1 / -1 !important;
+    justify-self: end !important;
+    padding-top: 0 !important;
+  }
+}
+
+@media (max-width: 760px) {
+  .ctaSection {
+    padding-bottom: 0 !important;
+  }
+
+  .footer {
+    padding: 28px 0 20px !important;
+  }
+
+  .footerGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 24px 22px !important;
+  }
+
+  .footerBrand {
+    grid-column: 1 / -1 !important;
+    max-width: none !important;
+  }
+
+  .footerLogo {
+    width: 160px !important;
+    margin-bottom: 12px !important;
+  }
+
+  .footerBrand p {
+    max-width: 520px !important;
+    font-size: 13px !important;
+  }
+
+  .footerLinks h4 {
+    font-size: 15px !important;
+  }
+
+  .footerLinks a {
+    font-size: 13px !important;
+  }
+
+  .footerSlogan {
+    grid-column: 1 / -1 !important;
+    justify-self: end !important;
+    margin-top: 4px !important;
+    font-size: 22px !important;
+  }
+
+  .footerBottom {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 5px !important;
+    margin-top: 22px !important;
+  }
+}
