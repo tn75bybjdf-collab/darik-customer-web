@@ -850,7 +850,28 @@ export default function DarikDirectOrdersPage() {
                             <dd>{money(order.total)}</dd>
                           </div>
                         </dl>
-                      </section>
+
+        {order.payment_method?.toLowerCase() === "card" ? (
+          <div
+            role="status"
+            style={{
+              marginTop: 12,
+              padding: "12px 14px",
+              borderRadius: 14,
+              border: "2px solid #f59e0b",
+              background: "#fffbeb",
+              color: "#7c2d12",
+              fontWeight: 900,
+              lineHeight: 1.35,
+              textAlign: "center"
+            }}
+          >
+            💳 CARD MACHINE REQUIRED
+            <br />
+            <span dir="rtl">جهاز الدفع مطلوب مع الطلب</span>
+          </div>
+        ) : null}
+</section>
                     </div>
 
                     {order.payment_method === "cliq" ? (
@@ -946,3 +967,5 @@ export default function DarikDirectOrdersPage() {
     </main>
   );
 }
+
+/* DARIK_PHYSICAL_CARD_TERMINAL_392F */

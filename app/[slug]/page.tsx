@@ -261,7 +261,7 @@ type OnlineCheckoutForm = {
   buildingNumber: string;
   apartmentNumber: string;
   deliveryNote: string;
-  paymentMethod: "cash" | "cliq";
+  paymentMethod: "cash" | "card" | "cliq";
   fulfillmentMethod: "delivery" | "pickup";
   latitude: number | null;
   longitude: number | null;
@@ -3247,7 +3247,7 @@ export default function DarikDirectStorefrontPage() {
   const [orderConfirmation, setOrderConfirmation] = useState<{
     orderNumber: string;
     total: number;
-    paymentMethod: "cash" | "cliq";
+    paymentMethod: "cash" | "card" | "cliq";
     fulfillmentMethod: "delivery" | "pickup";
   } | null>(null);
   const [detailsOpen, setDetailsOpen] = useState(false);
@@ -3697,9 +3697,7 @@ export default function DarikDirectStorefrontPage() {
         ...current,
         paymentMethod: currentPaymentAllowed
           ? current.paymentMethod
-          : storefront.cash_on_delivery_enabled
-            ? "cash"
-            : "cliq",
+          : storefront.cash_on_delivery_enabled ? "cash" : storefront.card_enabled ? "card" : "cliq",
         fulfillmentMethod: currentFulfillmentAllowed
           ? current.fulfillmentMethod
           : deliveryEnabled
@@ -7040,6 +7038,13 @@ export default function DarikDirectStorefrontPage() {
       setCheckoutError("Cash is not available for this store. / الدفع النقدي غير متاح لهذا المتجر.");
       return;
     }
+if (
+      checkoutForm.paymentMethod === "card" &&
+      !storefront.card_enabled
+    ) {
+      setCheckoutError("Debit / Credit Card is not available for this store. / الدفع ببطاقة الخصم أو الائتمان غير متاح لهذا المتجر.");
+      return;
+    }
 
     if (checkoutForm.paymentMethod === "cliq") {
       if (!storefront.cliq_enabled) {
@@ -7118,7 +7123,7 @@ export default function DarikDirectStorefrontPage() {
         ok?: boolean;
         order_number?: string;
         total?: number | string;
-        payment_method?: "cash" | "cliq";
+        payment_method?: "cash" | "card" | "cliq";
         fulfillment_method?: "delivery" | "pickup";
       } | null;
 
@@ -7865,7 +7870,7 @@ export default function DarikDirectStorefrontPage() {
   const phoneOrderingEnabled =
     showOrdering && (orderSubmissionMode === "phone" || orderSubmissionMode === "both");
   const onlinePaymentAvailable =
-    storefront.cash_on_delivery_enabled || storefront.cliq_enabled;
+    storefront.cash_on_delivery_enabled || storefront.card_enabled || storefront.cliq_enabled;
   const onlineOrderingEnabled =
     showOrdering &&
     (orderSubmissionMode === "online" || orderSubmissionMode === "both") &&
@@ -10588,7 +10593,59 @@ style={{
                             </button>
                           ) : null}
                         </div>
-                      </div>
+<div className={styles.paymentMethodChoices}>
+                          {storefront.card_enabled ? (
+                            <button
+                              type="button"
+                              className={
+                                checkoutForm.paymentMethod === "card"
+                                  ? styles.activePaymentMethod
+                                  : ""
+                              }
+                              onClick={() =>
+                                updateCheckoutField("paymentMethod", "card")
+                              }
+                            >
+                              <strong>Debit / Credit Card / بطاقة خصم أو ائتمان</strong>
+                              <small>{selectedPickup ? "Pay by card at pickup / الدفع بالبطاقة عند الاستلام" : "Pay on the driver's card machine / الدفع بجهاز البطاقة عند التوصيل"}</small>
+                            </button>
+                          ) : null}
+
+                          {storefront.cliq_enabled ? (
+                            <button
+                              type="button"
+                              className={
+                                checkoutForm.paymentMethod === "cliq"
+                                  ? styles.activePaymentMethod
+                                  : ""
+                              }
+                              onClick={() =>
+                                updateCheckoutField("paymentMethod", "cliq")
+                              }
+                            >
+                              <strong>CliQ</strong>
+                              <small>Transfer before submitting / حوّل قبل إرسال الطلب</small>
+                            </button>
+                          ) : null}
+                        </div>
+
+        {styles.paymentMethod === "card" ? (
+          <div style={{
+            marginTop: 10,
+            padding: "12px 14px",
+            borderRadius: 14,
+            border: "1px solid #bbf7d0",
+            background: "#f0fdf4",
+            color: "#14532d",
+            fontWeight: 700,
+            lineHeight: 1.45
+          }}>
+            No card information is entered online. Payment is made on the store's wireless card machine at pickup or delivery.
+            <br />
+            <span dir="rtl">لا يتم إدخال أي معلومات للبطاقة أونلاين. يتم الدفع بجهاز البطاقة اللاسلكي الخاص بالمتجر عند الاستلام أو التوصيل.</span>
+          </div>
+        ) : null}
+</div>
 
                       {checkoutForm.paymentMethod === "cliq" ? (
                         <div className={styles.cliqPaymentPanel}>
@@ -11065,3 +11122,5 @@ style={{
 }
 
 /* DARIK_CART_CHECKOUT_BILINGUAL_391: customer cart and checkout are English / Arabic */
+
+/* DARIK_PHYSICAL_CARD_TERMINAL_392F */

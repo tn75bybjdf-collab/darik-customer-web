@@ -281,6 +281,7 @@ type StorefrontForm = {
   fulfillmentMode: FulfillmentMode;
   orderSubmissionMode: OrderSubmissionMode;
   acceptCash: boolean;
+  acceptCard: boolean;
   acceptCliq: boolean;
   cliqAccountName: string;
   cliqIdentifier: string;
@@ -444,6 +445,7 @@ type StorefrontSettings = {
   pickup_enabled: boolean | null;
   order_submission_mode: OrderSubmissionMode;
   cash_on_delivery_enabled: boolean;
+  card_enabled: boolean;
   cliq_enabled: boolean;
   cliq_account_name: string | null;
   cliq_payment_identifier: string | null;
@@ -1448,6 +1450,7 @@ export default function DarikDirectStorefrontSettingsPage() {
     fulfillmentMode: "delivery",
     orderSubmissionMode: "phone",
     acceptCash: true,
+      acceptCard: false,
     acceptCliq: false,
     cliqAccountName: "",
     cliqIdentifier: "",
@@ -9982,7 +9985,7 @@ export default function DarikDirectStorefrontSettingsPage() {
     if (step === 10) {
       const orderMode = String(setupForm.orderSubmissionMode ?? "phone");
       if (orderMode === "phone") return true;
-      return Boolean(setupForm.acceptCash || setupForm.acceptCliq);
+      return Boolean(setupForm.acceptCash || setupForm.acceptCard || setupForm.acceptCliq);
     }
 
     return true;
@@ -10457,6 +10460,7 @@ await saveStorefront(undefined, "manual");
               orderSubmissionMode:
                 loadedStorefront.order_submission_mode ?? "phone",
               acceptCash: loadedStorefront.cash_on_delivery_enabled ?? true,
+      acceptCard: loadedStorefront.card_enabled ?? false,
               acceptCliq: loadedStorefront.cliq_enabled ?? false,
               cliqAccountName: loadedStorefront.cliq_account_name ?? "",
               cliqIdentifier: loadedStorefront.cliq_payment_identifier ?? "",
@@ -10513,6 +10517,7 @@ await saveStorefront(undefined, "manual");
               fulfillmentMode: "delivery",
               orderSubmissionMode: "phone",
               acceptCash: true,
+      acceptCard: false,
               acceptCliq: false,
               cliqAccountName: "",
               cliqIdentifier: "",
@@ -11031,8 +11036,8 @@ await saveStorefront(undefined, "manual");
       (setupForm.orderSubmissionMode === "online" ||
         setupForm.orderSubmissionMode === "both");
 
-    if (onlineOrderingSelected && !setupForm.acceptCash && !setupForm.acceptCliq) {
-      showSaveError("Select at least one online payment method: Cash or CliQ.");
+    if (onlineOrderingSelected && !setupForm.acceptCash && !setupForm.acceptCard && !setupForm.acceptCliq) {
+      showSaveError("Select at least one online payment method: Cash, Debit/Credit Card, or CliQ.");
       return;
     }
 
@@ -11180,11 +11185,12 @@ await saveStorefront(undefined, "manual");
     }
 
     const paymentResult = await supabase.rpc(
-      "darik_direct_save_payment_preferences",
+      "darik_direct_save_payment_preferences_v2",
       {
         p_storefront_id: profileStorefront.id,
         p_order_submission_mode: setupForm.orderSubmissionMode,
         p_cash_on_delivery_enabled: setupForm.acceptCash,
+        p_card_enabled: setupForm.acceptCard,
         p_cliq_enabled: setupForm.acceptCliq,
         p_cliq_account_name: setupForm.acceptCliq
           ? setupForm.cliqAccountName.trim()
@@ -11208,6 +11214,7 @@ await saveStorefront(undefined, "manual");
       ...profileStorefront,
       order_submission_mode: setupForm.orderSubmissionMode,
       cash_on_delivery_enabled: setupForm.acceptCash,
+      card_enabled: setupForm.acceptCard,
       cliq_enabled: setupForm.acceptCliq,
       cliq_account_name: setupForm.acceptCliq
         ? setupForm.cliqAccountName.trim()
@@ -11284,8 +11291,7 @@ await saveStorefront(undefined, "manual");
           setupForm.orderSubmissionMode !== "both") ||
         Boolean(setupForm.phone.trim() || setupForm.whatsapp.trim())) &&
       (!onlineOrderingSelected ||
-        setupForm.acceptCash ||
-        setupForm.acceptCliq) &&
+        setupForm.acceptCash || setupForm.acceptCard || setupForm.acceptCliq) &&
       (!setupForm.showOrdering ||
         !setupForm.acceptCliq ||
         Boolean(setupForm.cliqAccountName.trim())) &&
@@ -13763,6 +13769,10 @@ await saveStorefront(undefined, "manual");
                           <input type="checkbox" checked={setupForm.acceptCash} onChange={(event) => updateSetupField("acceptCash", event.target.checked)} />
                           <span><strong>Cash / نقداً</strong><small>Pay on collection or delivery.</small></span>
                         </label>
+<label className={setupForm.acceptCard ? designStyles.exactWizardSelected109V5 : ""}>
+                          <input type="checkbox" checked={setupForm.acceptCard} onChange={(event) => updateSetupField("acceptCard", event.target.checked)} />
+                          <span><strong>Debit / Credit Card / بطاقة خصم أو ائتمان</strong><small>Physical wireless card machine at pickup or delivery. / جهاز دفع لاسلكي عند الاستلام أو التوصيل.</small></span>
+                        </label>
                         <label className={setupForm.acceptCliq ? designStyles.exactWizardSelected109V5 : ""}>
                           <input type="checkbox" checked={setupForm.acceptCliq} onChange={(event) => updateSetupField("acceptCliq", event.target.checked)} />
                           <span><strong>CliQ / كليك</strong><small>Transfer before submitting.</small></span>
@@ -13927,3 +13937,5 @@ await saveStorefront(undefined, "manual");
     </main>
   );
 }
+
+/* DARIK_PHYSICAL_CARD_TERMINAL_392F */
