@@ -13974,3 +13974,15 @@ main[dir="rtl"] .darikMarketplaceStoreList246B .darikHomeStoreLogoStage187 {
     z-index: 5 !important;
   }
 }
+
+
+/* DARIK_DASHBOARD_HIDE_GLOBAL_FLOATERS_397D
+   Hide public-site floating contact UI while the authenticated retailer
+   overview dashboard is on screen. Visual-only; no widget code is deleted.
+*/
+body:has([data-darik-dashboard-polish397d="true"]) a[href*="wa.me"],
+body:has([data-darik-dashboard-polish397d="true"]) a[href*="whatsapp"],
+body:has([data-darik-dashboard-polish397d="true"]) [aria-label*="WhatsApp" i],
+body:has([data-darik-dashboard-polish397d="true"]) [title*="WhatsApp" i] {
+  display: none !important;
+}

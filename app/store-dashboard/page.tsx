@@ -1028,7 +1028,7 @@ export default function DarikDirectOverviewPage() {
   }
 
   return (
-    <main className={styles.dashboardPage} data-darik-approved-dashboard397="true">
+    <main className={styles.dashboardPage} data-darik-approved-dashboard397="true" data-darik-dashboard-polish397d="true">
       <aside className={styles.sidebar}>
         <div>
           <p className={styles.brandEyebrow}>Darik</p>
@@ -1178,6 +1178,28 @@ export default function DarikDirectOverviewPage() {
               </div>
             </div>
             <header className={styles.commandHero} style={storefront?.hero_image_url ? { backgroundImage: `linear-gradient(90deg, rgba(247,251,253,.98) 0%, rgba(247,251,253,.86) 38%, rgba(247,251,253,.16) 72%), url("${storefront.hero_image_url}")` } : undefined} data-darik-dashboard-hero397="true">
+        <div
+          className={styles.heroMedia397D}
+          style={{
+            backgroundImage: `url("${(
+              (storefront as any)?.hero_image_url ||
+              (storefront as any)?.banner_image_url ||
+              (storefront as any)?.cover_image_url ||
+              (storefront as any)?.storefront_image_url ||
+              (storefront as any)?.header_image_url ||
+              (storefront as any)?.background_image_url ||
+              "/darik-dashboard-397d-fallback-hero.jpg"
+            )}")`
+          }}
+          aria-hidden="true"
+        />
+        <div className={styles.heroJordan397D} aria-hidden="true">
+          <span className={styles.heroJordanFlag397D}></span>
+          <span>
+            <strong>Local Stores.<br />Closer to You.</strong>
+            <small>المتاجر المحلية.<br />أقرب إليك.</small>
+          </span>
+        </div>
               <div className={styles.commandIdentity}>
                 <div className={styles.commandLogo}>
                   {storefront?.logo_url ? (
@@ -1600,7 +1622,7 @@ export default function DarikDirectOverviewPage() {
               </div>
               <a href="/support">Contact Support <small>تواصل معنا</small></a>
             </aside></section><footer className={styles.dashboardFooter397}>
-              <img src="/darik-dashboard-logo-397.svg" alt="Darik" />
+              <img src="/darik-approved-header-logo-390c.png" alt="Darik" />
               <nav>
                 <a href="/support"><strong>Help Center</strong><small>مركز المساعدة</small></a>
                 <a href="/terms"><strong>Terms of Service</strong><small>الشروط والأحكام</small></a>
