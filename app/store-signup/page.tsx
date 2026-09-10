@@ -191,24 +191,137 @@ export default function DarikStoreSignupPage() {
 
   return (
     <main className={styles.page}>
-      <div className={styles.shell}>
-        <header className={styles.header}>
-          <div>
-            <div className={styles.brand}>Darik Direct</div>
-            <h1>Create your retailer account</h1>
-            <p>
-              Your username is your Darik login. Your email can be reused for another business account.
-              <span> اسم المستخدم هو تسجيل دخولك في داريك، ويمكن استخدام نفس البريد لأكثر من نشاط تجاري.</span>
-            </p>
-          </div>
-          <a className={styles.signInLink} href="/store-dashboard">Already registered? Sign in / لديك حساب؟</a>
-        </header>
+      <div className={styles.topAccent} />
 
-        <section className={styles.card}>
+      <header className={styles.siteHeader}>
+        <div className={styles.headerInner}>
+          <a href="/" className={styles.logoLink} aria-label="Darik home">
+            <img src="/darik-approved-header-logo-390c.png" alt="Darik" className={styles.logoImage} />
+          </a>
+
+          <nav className={styles.nav}>
+            <a href="/">Home</a>
+            <a href="/#all-stores">All Stores</a>
+            <a href="/#categories">Categories</a>
+            <a href="/#about">About</a>
+            <a href="/pricing" className={styles.activeNav}>For Business</a>
+          </nav>
+
+          <div className={styles.headerActions}>
+            <button type="button" className={styles.locationPill}>
+              <span className={styles.pinDot}>●</span>
+              Amman, Jordan
+              <span className={styles.chevron}>⌄</span>
+            </button>
+            <button type="button" className={styles.languageButton}>العربية</button>
+            <a href="/store-dashboard" className={styles.dashboardButton}>Retailer dashboard</a>
+            <a href="/store-signup" className={styles.startButton}>Start your store</a>
+          </div>
+
+          <div className={styles.mobileHeader}>
+            <button type="button" className={styles.mobileIconButton}>☰</button>
+            <img src="/darik-approved-header-logo-390c.png" alt="Darik" className={styles.mobileLogo} />
+            <a href="/store-dashboard" className={styles.mobileIconButton}>↗</a>
+          </div>
+        </div>
+      </header>
+
+      <section className={styles.onboardingSection}>
+        <div className={styles.onboardingGrid}>
+          <div className={styles.storyPanel}>
+            <div className={styles.storyCopy}>
+              <div className={styles.eyebrow}>RETAILER ONBOARDING / تسجيل المتجر</div>
+
+              <h1 className={styles.heroTitle}>
+                <span>Build your</span>
+                <span className={styles.heroAccent}>Darik storefront</span>
+              </h1>
+
+              <p className={styles.heroLead}>
+                Create your Darik retailer account and start your storefront setup journey.
+                Reach thousands of customers across Jordan.
+              </p>
+
+              <p className={styles.heroArabic} dir="rtl">
+                أنشئ حساب التاجر الخاص بك في داريك وابدأ رحلة إعداد متجرك.
+                تواصل مع العملاء في جميع أنحاء الأردن.
+              </p>
+
+              <div className={styles.progressWrap} aria-label="Retailer onboarding steps">
+                <div className={styles.progressLine} />
+                <div className={styles.progressStepActive}>
+                  <span>1</span>
+                  <b>Account</b>
+                  <small>الحساب</small>
+                </div>
+                <div className={styles.progressStep}>
+                  <span>2</span>
+                  <b>Retail field</b>
+                  <small>مجال المتجر</small>
+                </div>
+                <div className={styles.progressStep}>
+                  <span>3</span>
+                  <b>Plan</b>
+                  <small>الخطة</small>
+                </div>
+                <div className={styles.progressStep}>
+                  <span>4</span>
+                  <b>CliQ payment</b>
+                  <small>دفع كليك</small>
+                </div>
+                <div className={styles.progressStep}>
+                  <span>5</span>
+                  <b>Storefront</b>
+                  <small>إنشاء المتجر</small>
+                </div>
+              </div>
+
+              <div className={styles.benefitList}>
+                <div className={styles.benefitRow}>
+                  <div className={styles.benefitIcon}>↗</div>
+                  <div>
+                    <strong>Permanent store link</strong>
+                    <p>Your store will have a unique Darik link you can share anywhere.</p>
+                    <span dir="rtl">رابط دائم وفريد لمتجرك يمكنك مشاركته في أي مكان.</span>
+                  </div>
+                </div>
+
+                <div className={styles.benefitRow}>
+                  <div className={styles.benefitIcon}>◎</div>
+                  <div>
+                    <strong>Use the same email for multiple businesses</strong>
+                    <p>Manage multiple storefronts while keeping separate Darik usernames.</p>
+                    <span dir="rtl">استخدم نفس البريد الإلكتروني لأكثر من نشاط تجاري.</span>
+                  </div>
+                </div>
+
+                <div className={styles.benefitRow}>
+                  <div className={styles.benefitIcon}>⚡</div>
+                  <div>
+                    <strong>Setup takes only a few minutes</strong>
+                    <p>A simple, focused onboarding process built for retailers.</p>
+                    <span dir="rtl">عملية إعداد بسيطة وسريعة للتجار.</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className={styles.sceneColumn}>
+              <div className={styles.sceneGlow} />
+              <img
+                src="/darik-signup-395-retailer-scene.jpg"
+                alt="Darik retailer"
+                className={styles.sceneImage}
+              />
+            </div>
+          </div>
+
+          <div className={styles.formColumn}>
+            <section className={styles.card}>
           <div className={styles.cardHeading}>
             <span>ACCOUNT / الحساب</span>
-            <h2>Create your Darik login</h2>
-            <p>After signup, choose your retail field and yearly plan, then submit CliQ before storefront setup. / بعد التسجيل اختر مجال المتجر والخطة السنوية ثم أرسل دفعة كليك قبل إعداد الواجهة.</p>
+            <h2>Create your retailer account</h2>
+            <p>Fill in your details to get started on Darik Marketplace. / أدخل بياناتك للبدء في سوق داريك.</p>
           </div>
 
           <div className={styles.formGrid}>
@@ -225,10 +338,10 @@ export default function DarikStoreSignupPage() {
                   maxLength={30}
                 />
                 <span className={`${styles.usernameBadge} ${styles[usernameState]}`}>
-                  {usernameState === "checking" ? "Checking…" : null}
-                  {usernameState === "available" ? "✓ Available" : null}
-                  {usernameState === "taken" ? "✕ Taken" : null}
-                  {usernameState === "invalid" ? "Check format" : null}
+                  {usernameState === "checking" ? "Checking… / جار التحقق" : null}
+                  {usernameState === "available" ? "✓ Available / متاح" : null}
+                  {usernameState === "taken" ? "✕ Taken / غير متاح" : null}
+                  {usernameState === "invalid" ? "Check format / تحقق من الصيغة" : null}
                 </span>
               </div>
               <small>3–30 characters: letters, numbers, _ or -. / من ٣ إلى ٣٠ حرفاً أو رقماً.</small>
@@ -295,11 +408,74 @@ export default function DarikStoreSignupPage() {
               disabled={busy || usernameState !== "available"}
               onClick={createAccount}
             >
-              {busy ? "Creating account… / جار إنشاء الحساب…" : "Sign up today / سجّل اليوم"}
+              {busy ? "Creating account… / جار إنشاء الحساب…" : "Create account / إنشاء الحساب"}
             </button>
           </div>
         </section>
-      </div>
+            <div className={styles.cardSignIn}>
+              Already have an account?
+              <a href="/store-dashboard">Log in / تسجيل الدخول</a>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className={styles.infoSection}>
+        <div className={styles.infoGrid}>
+          <article className={styles.infoCard}>
+            <div className={styles.infoIcon}>⌕</div>
+            <div>
+              <h2>Searchable storefronts</h2>
+              <p>Get discovered by customers across Jordan searching for your products and services.</p>
+              <strong dir="rtl">متاجر قابلة للبحث في جميع أنحاء الأردن.</strong>
+            </div>
+          </article>
+
+          <article className={styles.infoCard}>
+            <div className={styles.infoIcon}>▰</div>
+            <div>
+              <h2>Delivery-ready setup</h2>
+              <p>Be ready for delivery from day one with integrated storefront tools and settings.</p>
+              <strong dir="rtl">جاهز للتوصيل من اليوم الأول.</strong>
+            </div>
+          </article>
+
+          <article className={styles.infoCard}>
+            <div className={styles.infoIconWarm}>▣</div>
+            <div>
+              <h2>Yearly plans + CliQ activation</h2>
+              <p>Choose the yearly plan that fits your catalog and activate it easily with CliQ.</p>
+              <strong dir="rtl">خطط سنوية وتفعيل كليك بسهولة.</strong>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <footer className={styles.compactFooter}>
+        <div className={styles.footerTop}>
+          <img src="/darik-approved-header-logo-390c.png" alt="Darik" className={styles.footerLogo} />
+
+          <div className={styles.footerStatement}>
+            <strong>Supporting local businesses. A stronger Jordan.</strong>
+            <span dir="rtl">دعم الأعمال المحلية. لأردن أقوى.</span>
+          </div>
+
+          <div className={styles.footerLinks}>
+            <a href="/terms">Terms</a>
+            <span>·</span>
+            <a href="/privacy">Privacy</a>
+            <span>·</span>
+            <a href="/support">Contact / Support</a>
+          </div>
+        </div>
+
+        <div className={styles.footerBottom}>
+          <span>© 2026 Darik Technologies. All rights reserved.</span>
+          <span>Made for Jordan ♥</span>
+        </div>
+      </footer>
+
+      {/* DARIK_SIGNUP_APPROVED_395C */}
     </main>
   );
 }
