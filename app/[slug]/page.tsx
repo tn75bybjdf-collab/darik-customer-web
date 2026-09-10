@@ -5304,7 +5304,7 @@ export default function DarikDirectStorefrontPage() {
 
     if (!phone) {
       setDarikAuthMessage121(
-        "This Darik login does not have a customer phone profile yet. You can continue as guest or finish customer signup."
+        "This Darik login does not have a customer phone profile yet. You can continue as guest or finish customer signup. / هذا الحساب لا يحتوي على رقم هاتف للعميل بعد. يمكنك المتابعة كضيف أو إكمال إنشاء الحساب."
       );
       return null;
     }
@@ -5317,7 +5317,7 @@ export default function DarikDirectStorefrontPage() {
 
     if (rpcResult.error || !rpcResult.data) {
       setDarikAuthMessage121(
-        rpcResult.error?.message || "Could not finish the Darik customer profile."
+        rpcResult.error?.message || "Could not finish the Darik customer profile. / تعذر إكمال ملف عميل داريك."
       );
       return null;
     }
@@ -5328,7 +5328,7 @@ export default function DarikDirectStorefrontPage() {
     const profile = ((rpcRow as any)?.profile ?? rpcRow) as DarikCustomerProfile121;
 
     if (!profile?.id) {
-      setDarikAuthMessage121("Darik customer profile was not returned.");
+      setDarikAuthMessage121("Darik customer profile was not returned. / تعذر تحميل ملف عميل داريك.");
       return null;
     }
 
@@ -5425,7 +5425,7 @@ export default function DarikDirectStorefrontPage() {
   async function signInDarikCustomer121() {
     const email = darikLoginEmail121.trim().toLowerCase();
     if (!email || darikLoginPassword121.length < 6) {
-      setDarikAuthMessage121("Enter your Darik account email and password.");
+      setDarikAuthMessage121("Enter your Darik account email and password. / أدخل بريد حساب داريك وكلمة المرور.");
       return;
     }
 
@@ -5441,7 +5441,7 @@ export default function DarikDirectStorefrontPage() {
       });
 
       if (error || !data.user) {
-        throw error ?? new Error("Could not sign in to this Darik account.");
+        throw error ?? new Error("Could not sign in to this Darik account. / تعذر تسجيل الدخول إلى حساب داريك.");
       }
 
       setDarikCustomerUser121(data.user);
@@ -5453,17 +5453,17 @@ export default function DarikDirectStorefrontPage() {
 
       if (!profile?.id) {
         throw new Error(
-          "This login is valid, but Darik could not load the customer profile. You can continue as guest."
+          "This login is valid, but Darik could not load the customer profile. You can continue as guest. / تسجيل الدخول صحيح لكن تعذر تحميل ملف العميل. يمكنك المتابعة كضيف."
         );
       }
 
       setDarikLoginPassword121("");
       setDarikAuthMessage121(
-        "Signed in. This Darik account works across every Darik-powered store."
+        "Signed in. This Darik account works across every Darik-powered store. / تم تسجيل الدخول. يعمل حساب داريك هذا في جميع متاجر داريك."
       );
     } catch (error) {
       setDarikAuthMessage121(
-        error instanceof Error ? error.message : "Darik sign-in failed."
+        error instanceof Error ? error.message : "Darik sign-in failed. / فشل تسجيل الدخول إلى داريك."
       );
     } finally {
       setDarikAuthBusy121(false);
@@ -5482,44 +5482,44 @@ export default function DarikDirectStorefrontPage() {
     const emailConfirm = darikSignupEmailConfirm173.trim().toLowerCase();
 
     if (!firstName || !lastName) {
-      setDarikAuthMessage121("Enter your first name and last name.");
+      setDarikAuthMessage121("Enter your first name and last name. / أدخل الاسم الأول واسم العائلة.");
       return null;
     }
 
     if (!email || !email.includes("@") || !email.includes(".")) {
-      setDarikAuthMessage121("Enter a valid email address.");
+      setDarikAuthMessage121("Enter a valid email address. / أدخل بريداً إلكترونياً صحيحاً.");
       return null;
     }
 
     if (email !== emailConfirm) {
-      setDarikAuthMessage121("Email addresses do not match.");
+      setDarikAuthMessage121("Email addresses do not match. / عنوانا البريد الإلكتروني غير متطابقين.");
       return null;
     }
 
     if (phone.length < 8) {
-      setDarikAuthMessage121("Enter a valid phone number.");
+      setDarikAuthMessage121("Enter a valid phone number. / أدخل رقم هاتف صحيح.");
       return null;
     }
 
     if (phone !== phoneConfirm) {
-      setDarikAuthMessage121("Phone numbers do not match.");
+      setDarikAuthMessage121("Phone numbers do not match. / رقما الهاتف غير متطابقين.");
       return null;
     }
 
     if (!darikSignupPassword121) {
-      setDarikAuthMessage121("Enter a password.");
+      setDarikAuthMessage121("Enter a password. / أدخل كلمة مرور.");
       return null;
     }
 
     if (!validateStrongDarikCustomerPassword121(darikSignupPassword121)) {
       setDarikAuthMessage121(
-        "Password must be at least 8 characters with a capital letter, number, and special character."
+        "Password must be at least 8 characters with a capital letter, number, and special character. / يجب أن تتكون كلمة المرور من 8 أحرف على الأقل وتحتوي حرفاً كبيراً ورقماً ورمزاً خاصاً."
       );
       return null;
     }
 
     if (darikSignupPassword121 !== darikSignupPasswordConfirm121) {
-      setDarikAuthMessage121("Passwords do not match.");
+      setDarikAuthMessage121("Passwords do not match. / كلمتا المرور غير متطابقتين.");
       return null;
     }
 
@@ -5551,7 +5551,7 @@ export default function DarikDirectStorefrontPage() {
         throw new Error(
           String(
             (availabilityRow as any)?.reason ||
-              "This email or phone number is already registered."
+              "This email or phone number is already registered. / هذا البريد الإلكتروني أو رقم الهاتف مسجل مسبقاً."
           )
         );
       }
@@ -5570,7 +5570,7 @@ export default function DarikDirectStorefrontPage() {
       });
 
       if (error || !data.user) {
-        throw error ?? new Error("Could not create the Darik account.");
+        throw error ?? new Error("Could not create the Darik account. / تعذر إنشاء حساب داريك.");
       }
 
       if (data.session?.user) {
@@ -5582,18 +5582,18 @@ export default function DarikDirectStorefrontPage() {
 
         setDarikSignupStep121("phone_code");
         setDarikAuthMessage121(
-          "Email is ready. Enter the SMS code sent to your phone to finish your Darik account."
+          "Email is ready. Enter the SMS code sent to your phone to finish your Darik account. / البريد جاهز. أدخل رمز SMS المرسل إلى هاتفك لإكمال حساب داريك."
         );
         return;
       }
 
       setDarikSignupStep121("email_code");
       setDarikAuthMessage121(
-        "We sent a confirmation code to your email. Enter it below, then Darik will confirm your phone."
+        "We sent a confirmation code to your email. Enter it below, then Darik will confirm your phone. / أرسلنا رمز تأكيد إلى بريدك. أدخله أدناه ثم سيتم تأكيد هاتفك."
       );
     } catch (error) {
       setDarikAuthMessage121(
-        error instanceof Error ? error.message : "Darik signup failed."
+        error instanceof Error ? error.message : "Darik signup failed. / فشل إنشاء حساب داريك."
       );
     } finally {
       setDarikAuthBusy121(false);
@@ -5606,7 +5606,7 @@ export default function DarikDirectStorefrontPage() {
     const token = darikSignupEmailCode121.trim();
 
     if (token.length < 4) {
-      setDarikAuthMessage121("Enter the confirmation code sent to your email.");
+      setDarikAuthMessage121("Enter the confirmation code sent to your email. / أدخل رمز التأكيد المرسل إلى بريدك.");
       return;
     }
 
@@ -5630,7 +5630,7 @@ export default function DarikDirectStorefrontPage() {
 
       if (verifyResult.error || !verifyResult.data.session?.user) {
         throw (
-          verifyResult.error ?? new Error("Could not confirm this email code.")
+          verifyResult.error ?? new Error("Could not confirm this email code. / تعذر تأكيد رمز البريد.")
         );
       }
 
@@ -5643,11 +5643,11 @@ export default function DarikDirectStorefrontPage() {
 
       setDarikSignupStep121("phone_code");
       setDarikAuthMessage121(
-        "Email confirmed. Enter the SMS code sent to your phone to finish the account."
+        "Email confirmed. Enter the SMS code sent to your phone to finish the account. / تم تأكيد البريد. أدخل رمز SMS المرسل إلى هاتفك لإكمال الحساب."
       );
     } catch (error) {
       setDarikAuthMessage121(
-        error instanceof Error ? error.message : "Email confirmation failed."
+        error instanceof Error ? error.message : "Email confirmation failed. / فشل تأكيد البريد."
       );
     } finally {
       setDarikAuthBusy121(false);
@@ -5660,7 +5660,7 @@ export default function DarikDirectStorefrontPage() {
     const token = darikSignupPhoneCode121.trim();
 
     if (token.length < 4) {
-      setDarikAuthMessage121("Enter the SMS code sent to your phone.");
+      setDarikAuthMessage121("Enter the SMS code sent to your phone. / أدخل رمز SMS المرسل إلى هاتفك.");
       return;
     }
 
@@ -5682,7 +5682,7 @@ export default function DarikDirectStorefrontPage() {
 
       if (!activeUser) {
         throw new Error(
-          "Phone was confirmed, but Darik could not finish the account session. Sign in with your email and password."
+          "Phone was confirmed, but Darik could not finish the account session. Sign in with your email and password. / تم تأكيد الهاتف لكن تعذر إكمال جلسة الحساب. سجل الدخول بالبريد وكلمة المرور."
         );
       }
 
@@ -5694,7 +5694,7 @@ export default function DarikDirectStorefrontPage() {
       );
 
       if (!profile?.id) {
-        throw new Error("Darik could not finish the customer profile.");
+        throw new Error("Darik could not finish the customer profile. / تعذر على داريك إكمال ملف العميل.");
       }
 
       setDarikSignupPassword121("");
@@ -5704,11 +5704,11 @@ export default function DarikDirectStorefrontPage() {
       setDarikSignupStep121("details");
       setDarikPendingPhoneSession121(null);
       setDarikAuthMessage121(
-        "Darik account created. You are signed in across Darik storefronts."
+        "Darik account created. You are signed in across Darik storefronts. / تم إنشاء حساب داريك وتسجيل دخولك في متاجر داريك."
       );
     } catch (error) {
       setDarikAuthMessage121(
-        error instanceof Error ? error.message : "Phone confirmation failed."
+        error instanceof Error ? error.message : "Phone confirmation failed. / فشل تأكيد الهاتف."
       );
     } finally {
       setDarikAuthBusy121(false);
@@ -5726,10 +5726,10 @@ export default function DarikDirectStorefrontPage() {
       setDarikCustomerProfile121(null);
       setDarikNonCustomerSession121(false);
       setDarikCheckoutIdentity121("guest");
-      setDarikAuthMessage121("Signed out. Continuing as guest.");
+      setDarikAuthMessage121("Signed out. Continuing as guest. / تم تسجيل الخروج. المتابعة كضيف.");
     } catch (error) {
       setDarikAuthMessage121(
-        error instanceof Error ? error.message : "Could not sign out."
+        error instanceof Error ? error.message : "Could not sign out. / تعذر تسجيل الخروج."
       );
     } finally {
       setDarikAuthBusy121(false);
@@ -5797,7 +5797,7 @@ export default function DarikDirectStorefrontPage() {
       return text;
     }
 
-    return "The order could not be submitted.";
+    return "The order could not be submitted. / تعذر إرسال الطلب.";
   }
 
   function stageCheckoutLocation122(
@@ -6435,10 +6435,10 @@ export default function DarikDirectStorefrontPage() {
       ? String(specialDeliveryZone185.maxKm)
       : specialDeliveryZone185.maxKm.toFixed(1);
   const specialCartCountdown191 = specialDeliveryFree185
-    ? `FREE delivery unlocked — you save ${money(matchedDeliveryFee117)} JOD`
+    ? `FREE delivery unlocked — you save ${money(matchedDeliveryFee117)} JOD / تم تفعيل التوصيل المجاني`
     : specialCountdownEligible191
-      ? `Add ${money(specialDeliveryRemaining185)} JOD more and get FREE delivery`
-      : `Free delivery over ${specialThresholdLabel191} JOD is available within ${specialRadiusLabel191} km`;
+      ? `Add ${money(specialDeliveryRemaining185)} JOD more and get FREE delivery / أضف المبلغ المتبقي واحصل على توصيل مجاني`
+      : `Free delivery over ${specialThresholdLabel191} JOD is available within ${specialRadiusLabel191} km / توصيل مجاني عند بلوغ الحد المطلوب ضمن النطاق`;
   const deliveryFee =
     deliveryEnabled && !selectedPickup
       ? specialDeliveryFree185
@@ -6959,13 +6959,13 @@ export default function DarikDirectStorefrontPage() {
 
     if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) {
       setCliqReceiptFile(null);
-      setCheckoutError("Upload the CliQ receipt as a JPG, PNG or WebP image.");
+      setCheckoutError("Upload the CliQ receipt as a JPG, PNG or WebP image. / ارفع إيصال CliQ بصيغة JPG أو PNG أو WebP.");
       return;
     }
 
     if (file.size > 8 * 1024 * 1024) {
       setCliqReceiptFile(null);
-      setCheckoutError("The CliQ receipt image must be smaller than 8 MB.");
+      setCheckoutError("The CliQ receipt image must be smaller than 8 MB. / يجب أن يكون حجم صورة إيصال CliQ أقل من 8 ميجابايت.");
       return;
     }
 
@@ -6974,7 +6974,7 @@ export default function DarikDirectStorefrontPage() {
 
   async function uploadCliqReceipt() {
     if (!storefront || !cliqReceiptFile) {
-      throw new Error("Upload the CliQ receipt before submitting the order.");
+      throw new Error("Upload the CliQ receipt before submitting the order. / ارفع إيصال CliQ قبل إرسال الطلب.");
     }
 
     if (cliqReceiptPath) return cliqReceiptPath;
@@ -7003,7 +7003,7 @@ export default function DarikDirectStorefrontPage() {
   async function placeOnlineOrder() {
     if (window.location.pathname === "/_darik-private-store-preview") {
       setCheckoutError(
-        "Private storefront preview only - checkout cannot submit a real order."
+        "Private storefront preview only - checkout cannot submit a real order. / هذه معاينة خاصة للمتجر فقط، ولا يمكن إرسال طلب حقيقي."
       );
       return;
     }
@@ -7016,12 +7016,12 @@ export default function DarikDirectStorefrontPage() {
     const deliveryNote = checkoutForm.deliveryNote.trim();
 
     if (customerName.length < 2) {
-      setCheckoutError("Enter your name.");
+      setCheckoutError("Enter your name. / أدخل اسمك.");
       return;
     }
 
     if (customerPhone.length < 7) {
-      setCheckoutError("Enter a valid phone number.");
+      setCheckoutError("Enter a valid phone number. / أدخل رقم هاتف صحيح.");
       return;
     }
 
@@ -7029,7 +7029,7 @@ export default function DarikDirectStorefrontPage() {
       checkoutForm.fulfillmentMethod === "delivery" &&
       (checkoutForm.latitude == null || checkoutForm.longitude == null)
     ) {
-      setCheckoutError("Use exact location before placing the delivery order.");
+      setCheckoutError("Use exact location before placing the delivery order. / حدد موقع التوصيل بدقة قبل إرسال الطلب.");
       return;
     }
 
@@ -7037,34 +7037,34 @@ export default function DarikDirectStorefrontPage() {
       checkoutForm.paymentMethod === "cash" &&
       !storefront.cash_on_delivery_enabled
     ) {
-      setCheckoutError("Cash is not available for this store.");
+      setCheckoutError("Cash is not available for this store. / الدفع النقدي غير متاح لهذا المتجر.");
       return;
     }
 
     if (checkoutForm.paymentMethod === "cliq") {
       if (!storefront.cliq_enabled) {
-        setCheckoutError("CliQ is not available for this store.");
+        setCheckoutError("CliQ is not available for this store. / الدفع عبر CliQ غير متاح لهذا المتجر.");
         return;
       }
 
       if (!cliqReceiptFile && !cliqReceiptPath) {
-        setCheckoutError("Upload the CliQ receipt before submitting the order.");
+        setCheckoutError("Upload the CliQ receipt before submitting the order. / ارفع إيصال CliQ قبل إرسال الطلب.");
         return;
       }
     }
 
     if (buildingNumber.length > 60) {
-      setCheckoutError("Building number is too long.");
+      setCheckoutError("Building number is too long. / رقم المبنى طويل جداً.");
       return;
     }
 
     if (apartmentNumber.length > 60) {
-      setCheckoutError("Apartment number is too long.");
+      setCheckoutError("Apartment number is too long. / رقم الشقة طويل جداً.");
       return;
     }
 
     if (deliveryNote.length > 500) {
-      setCheckoutError("Extra delivery details must be 500 characters or less.");
+      setCheckoutError("Extra delivery details must be 500 characters or less. / يجب ألا تتجاوز تفاصيل التوصيل الإضافية 500 حرف.");
       return;
     }
 
@@ -7123,7 +7123,7 @@ export default function DarikDirectStorefrontPage() {
       } | null;
 
       setOrderConfirmation({
-        orderNumber: response?.order_number || "Order received",
+        orderNumber: response?.order_number || "Order received / تم استلام الطلب",
         total: specialDeliveryFree185
           ? orderTotal
           : Number(response?.total ?? orderTotal),
@@ -7856,9 +7856,9 @@ export default function DarikDirectStorefrontPage() {
     : phone;
 
   const phoneOrderLabel = whatsapp
-    ? "Order on WhatsApp"
+    ? "Order on WhatsApp / اطلب عبر واتساب"
     : phone
-      ? "Call store to order"
+      ? "Call store to order / اتصل بالمتجر للطلب"
       : "Phone ordering unavailable";
 
   const orderSubmissionMode = storefront.order_submission_mode ?? "phone";
@@ -8937,9 +8937,9 @@ style={{
                 <span>
                   {specialOfferAtLocation185
                     ? specialDeliveryFree185
-                      ? `Unlocked now • normal fee ${money(matchedDeliveryFee117)} JOD`
-                      : `${money(matchedDeliveryFee117)} JOD normal delivery until ${specialThresholdLabel191} JOD qualifying`
-                    : `${money(matchedDeliveryFee117)} JOD normal delivery • offer available within ${specialRadiusLabel191} km`}
+                      ? `Unlocked now • normal fee ${money(matchedDeliveryFee117)} JOD / العرض مفعل الآن`
+                      : `${money(matchedDeliveryFee117)} JOD normal delivery until ${specialThresholdLabel191} JOD qualifying / من الحد المؤهل`
+                    : `${money(matchedDeliveryFee117)} JOD normal delivery • offer available within ${specialRadiusLabel191} km / رسوم التوصيل العادية؛ العرض متاح ضمن النطاق`}
                 </span>
               </div>
               <b>FREE</b>
@@ -8984,10 +8984,10 @@ style={{
               </span>
               <small>
                 {specialDeliveryFree185
-                  ? `Saved ${money(matchedDeliveryFee117)} JOD delivery`
+                  ? `Saved ${money(matchedDeliveryFee117)} JOD delivery / تم توفير رسوم التوصيل`
                   : specialOfferAtLocation185
-                    ? `Add ${money(specialDeliveryRemaining185)} JOD more`
-                    : `Within ${specialRadiusLabel191} km • otherwise ${money(matchedDeliveryFee117)} JOD`}
+                    ? `Add ${money(specialDeliveryRemaining185)} JOD more / أضف المبلغ المتبقي`
+                    : `Within ${specialRadiusLabel191} km • otherwise ${money(matchedDeliveryFee117)} JOD / ضمن النطاق، وإلا تطبق رسوم التوصيل`}
               </small>
             </div>
           ) : null}
@@ -9872,7 +9872,7 @@ style={{
             <div className={styles.cartHeader}>
               <div>
                 <p>{storefront.display_name}</p>
-                <h2>Your cart</h2>
+                <h2>Your cart / سلتك</h2>
               </div>
               <button
                 onClick={() => {
@@ -9891,15 +9891,15 @@ style={{
                 specialDeliveryFree185 ? styles.specialDeliveryCountdownUnlocked191 : ""
               }`}>
                 <div className={styles.specialDeliveryCountdownTop191}>
-                  <span>{specialDeliveryFree185 ? "✓" : "FREE"}</span>
+                  <span>{specialDeliveryFree185 ? "✓" : "FREE / مجاناً"}</span>
                   <div>
                     <strong>{specialCartCountdown191}</strong>
                     <small>
                       {specialDeliveryFree185
-                        ? `Qualifying subtotal: ${money(specialQualifyingSubtotal185)} JOD`
+                        ? `Qualifying subtotal: ${money(specialQualifyingSubtotal185)} JOD / المجموع المؤهل`
                         : specialCountdownEligible191
-                          ? `${money(specialQualifyingSubtotal185)} of ${specialThresholdLabel191} JOD qualifying`
-                          : `Offer radius: ${specialRadiusLabel191} km from the store`}
+                          ? `${money(specialQualifyingSubtotal185)} of ${specialThresholdLabel191} JOD qualifying / من الحد المؤهل`
+                          : `Offer radius: ${specialRadiusLabel191} km from the store / نطاق العرض من المتجر`}
                     </small>
                   </div>
                 </div>
@@ -9915,7 +9915,7 @@ style={{
                 ) : null}
                 {specialDeliveryZone185.excludedCategoryIds.length > 0 ? (
                   <small className={styles.specialDeliveryCountdownExclusion191}>
-                    Excluded categories do not count toward the free-delivery minimum.
+                    Excluded categories do not count toward the free-delivery minimum. / الأقسام المستثناة لا تُحتسب ضمن الحد المطلوب للتوصيل المجاني.
                   </small>
                 ) : null}
               </div>
@@ -9926,17 +9926,17 @@ style={{
                 <span>
                   <Icon name="bag" size={30} />
                 </span>
-                <p>Order sent successfully</p>
+                <p>Order sent successfully / تم إرسال الطلب بنجاح</p>
                 <h2>{orderConfirmation.orderNumber}</h2>
                 <strong>{money(orderConfirmation.total)}</strong>
                 <small>
                   {orderConfirmation.fulfillmentMethod === "pickup"
                     ? orderConfirmation.paymentMethod === "cliq"
-                      ? "Your CliQ receipt was submitted. The store will contact you when the pickup order is ready."
-                      : "The store received your pickup order and will contact you when it is ready to collect."
+                      ? "Your CliQ receipt was submitted. The store will contact you when the pickup order is ready. / تم إرسال إيصال CliQ. سيتواصل معك المتجر عندما يصبح طلب الاستلام جاهزاً."
+                      : "The store received your pickup order and will contact you when it is ready to collect. / استلم المتجر طلب الاستلام وسيتواصل معك عندما يصبح جاهزاً."
                     : orderConfirmation.paymentMethod === "cliq"
-                      ? "Your CliQ receipt was submitted for store verification. The store will contact you to confirm delivery."
-                      : "The store received your cash-on-delivery order and will contact you to confirm delivery."}
+                      ? "Your CliQ receipt was submitted for store verification. The store will contact you to confirm delivery. / تم إرسال إيصال CliQ للتحقق. سيتواصل معك المتجر لتأكيد التوصيل."
+                      : "The store received your cash-on-delivery order and will contact you to confirm delivery. / استلم المتجر طلب الدفع عند التوصيل وسيتواصل معك لتأكيد التوصيل."}
                 </small>
                 <button
                   onClick={() => {
@@ -9944,7 +9944,7 @@ style={{
                     setCartOpen(false);
                   }}
                 >
-                  Done
+                  Done / تم
                 </button>
               </div>
             ) : (
@@ -9959,15 +9959,15 @@ style={{
                       <span>
                         <Icon name="bag" size={30} />
                       </span>
-                      <h3>Your cart is empty</h3>
-                      <p>Add something from {storefront.display_name}.</p>
+                      <h3>Your cart is empty / سلتك فارغة</h3>
+                      <p>Add something from / أضف منتجاً من {storefront.display_name}.</p>
                       <button
                         onClick={() => {
                           setCartOpen(false);
                           jumpToCatalog();
                         }}
                       >
-                        Start shopping
+                        Start shopping / ابدأ التسوق
                       </button>
                     </div>
                   ) : (
@@ -10050,12 +10050,12 @@ style={{
                   }`}
                 >
                   <div>
-                    <span>Subtotal</span>
+                    <span>Subtotal / المجموع الفرعي</span>
                     <strong>{money(cartSubtotal)}</strong>
                   </div>
                   <div>
-                    <span>{selectedPickup ? "Pickup" : "Delivery"}</span>
-                    <strong>{selectedPickup ? "Free" : specialDeliveryFree185 ? "Free" : money(deliveryFee)}</strong>
+                    <span>{selectedPickup ? "Pickup / الاستلام" : "Delivery / التوصيل"}</span>
+                    <strong>{selectedPickup ? "Free / مجاناً" : specialDeliveryFree185 ? "Free / مجاناً" : money(deliveryFee)}</strong>
                   </div>
                   {!selectedPickup && specialOfferConfigured191 ? (
                     <div
@@ -10070,8 +10070,8 @@ style={{
                           {specialDeliveryFree185
                             ? "FREE delivery unlocked"
                             : specialCountdownEligible191
-                              ? `Add ${money(specialDeliveryRemaining185)} JOD more and get FREE delivery`
-                              : `Free delivery over ${specialThresholdLabel191} JOD within ${specialRadiusLabel191} km`}
+                              ? `Add ${money(specialDeliveryRemaining185)} JOD more and get FREE delivery / أضف المبلغ المتبقي واحصل على توصيل مجاني`
+                              : `Free delivery over ${specialThresholdLabel191} JOD within ${specialRadiusLabel191} km / توصيل مجاني عند بلوغ الحد ضمن النطاق`}
                         </span>
                         <strong>
                           {money(specialQualifyingSubtotal185)} / {money(
@@ -10097,13 +10097,13 @@ style={{
                       ) : null}
                       <small>
                         {specialDeliveryFree185
-                          ? "Excluded-category items can ride along without removing this benefit."
-                          : `${money(specialDeliveryRemaining185)} more in qualifying categories. Excluded categories do not count.`}
+                          ? "Excluded-category items can ride along without removing this benefit. / يمكن إضافة منتجات من الأقسام المستثناة دون إلغاء ميزة التوصيل المجاني."
+                          : `${money(specialDeliveryRemaining185)} more in qualifying categories. Excluded categories do not count. / أضف المبلغ المتبقي من الأقسام المؤهلة؛ الأقسام المستثناة لا تحتسب`}
                       </small>
                     </div>
                   ) : null}
                   <div className={styles.cartTotal}>
-                    <span>Total</span>
+                    <span>Total / الإجمالي</span>
                     <strong>{money(orderTotal)}</strong>
                   </div>
 
@@ -10143,12 +10143,12 @@ style={{
                   <div className={styles.darikCheckoutIdentityHeader121}>
                     <div>
                       <span>حساب داريك / Darik account</span>
-                      <strong>One account. Every Darik store.</strong>
+                      <strong>One account. Every Darik store. / حساب واحد لكل متاجر داريك.</strong>
                     </div>
                     {darikCustomerProfile121 ? (
-                      <span className={styles.darikAccountBadge121}>SIGNED IN</span>
+                      <span className={styles.darikAccountBadge121}>SIGNED IN / مسجل الدخول</span>
                     ) : darikCheckoutIdentity121 === "guest" ? (
-                      <span className={styles.darikGuestBadge121}>GUEST</span>
+                      <span className={styles.darikGuestBadge121}>GUEST / ضيف</span>
                     ) : null}
                   </div>
 
@@ -10229,14 +10229,14 @@ style={{
                           setDarikCheckoutIdentity121("choice");
                         }}
                       >
-                        Use a Darik account instead
+                        Use a Darik account instead / استخدم حساب داريك بدلاً من ذلك
                       </button>
                     </div>
                   ) : darikCheckoutIdentity121 === "login" ? (
                     <div className={styles.darikAccountForm121}>
                       <div className={styles.darikAccountFormHeading121}>
                         <strong>Sign in to Darik / تسجيل الدخول إلى داريك</strong>
-                        <span>Your login works across Darik-powered stores.</span>
+                        <span>Your login works across Darik-powered stores. / تسجيل الدخول يعمل في جميع متاجر داريك.</span>
                       </div>
                       {darikNonCustomerSession121 ? (
                         <p className={styles.darikAccountSessionNotice121}>
@@ -10260,7 +10260,7 @@ style={{
                           type="password"
                           value={darikLoginPassword121}
                           onChange={(event) => setDarikLoginPassword121(event.target.value)}
-                          placeholder="Your Darik password"
+                          placeholder="Your Darik password / كلمة مرور داريك"
                           autoComplete="current-password"
                         />
                       </label>
@@ -10271,21 +10271,21 @@ style={{
                           onClick={() => void signInDarikCustomer121()}
                           disabled={darikAuthBusy121}
                         >
-                          {darikAuthBusy121 ? "Signing in..." : "Sign in / تسجيل الدخول"}
+                          {darikAuthBusy121 ? "Signing in... / جارٍ تسجيل الدخول..." : "Sign in / تسجيل الدخول"}
                         </button>
                         <button
                           type="button"
                           onClick={() => setDarikCheckoutIdentity121("choice")}
                           disabled={darikAuthBusy121}
                         >
-                          Back
+                          Back / رجوع
                         </button>
                         <button
                           type="button"
                           onClick={() => void chooseDarikGuestCheckout121()}
                           disabled={darikAuthBusy121}
                         >
-                          Continue as guest
+                          Continue as guest / المتابعة كضيف
                         </button>
                       </div>
                     </div>
@@ -10294,7 +10294,7 @@ style={{
                       <div className={styles.darikAccountFormHeading121}>
                         <strong>Create your Darik account / أنشئ حساب داريك</strong>
                         <span>
-                          Use this same email and password later at any Darik store.
+                          Use this same email and password later at any Darik store. / استخدم نفس البريد وكلمة المرور لاحقاً في أي متجر داريك.
                         </span>
                       </div>
 
@@ -10307,7 +10307,7 @@ style={{
                               onChange={(event) =>
                                 setDarikSignupFirstName173(event.target.value)
                               }
-                              placeholder="First name"
+                              placeholder="First name / الاسم الأول"
                               autoComplete="given-name"
                             />
                           </label>
@@ -10318,7 +10318,7 @@ style={{
                               onChange={(event) =>
                                 setDarikSignupLastName173(event.target.value)
                               }
-                              placeholder="Last name"
+                              placeholder="Last name / اسم العائلة"
                               autoComplete="family-name"
                             />
                           </label>
@@ -10342,7 +10342,7 @@ style={{
                               onChange={(event) =>
                                 setDarikSignupEmailConfirm173(event.target.value)
                               }
-                              placeholder="Repeat email"
+                              placeholder="Repeat email / أعد إدخال البريد"
                               autoComplete="off"
                             />
                           </label>
@@ -10366,7 +10366,7 @@ style={{
                               onChange={(event) =>
                                 setDarikSignupPhoneConfirm173(event.target.value)
                               }
-                              placeholder="Repeat phone"
+                              placeholder="Repeat phone / أعد إدخال الهاتف"
                               autoComplete="off"
                             />
                           </label>
@@ -10378,7 +10378,7 @@ style={{
                               onChange={(event) =>
                                 setDarikSignupPassword121(event.target.value)
                               }
-                              placeholder="8+ chars, capital, number, special"
+                              placeholder="8+ chars, capital, number, special / 8+ أحرف، حرف كبير، رقم ورمز"
                               autoComplete="new-password"
                             />
                           </label>
@@ -10390,7 +10390,7 @@ style={{
                               onChange={(event) =>
                                 setDarikSignupPasswordConfirm121(event.target.value)
                               }
-                              placeholder="Repeat password"
+                              placeholder="Repeat password / أعد إدخال كلمة المرور"
                               autoComplete="new-password"
                             />
                           </label>
@@ -10407,7 +10407,7 @@ style={{
                             onChange={(event) =>
                               setDarikSignupEmailCode121(event.target.value)
                             }
-                            placeholder="Email code"
+                            placeholder="Email code / رمز البريد"
                             autoComplete="one-time-code"
                           />
                         </div>
@@ -10425,7 +10425,7 @@ style={{
                             onChange={(event) =>
                               setDarikSignupPhoneCode121(event.target.value)
                             }
-                            placeholder="SMS code"
+                            placeholder="SMS code / رمز SMS"
                             autoComplete="one-time-code"
                           />
                         </div>
@@ -10440,7 +10440,7 @@ style={{
                             disabled={darikAuthBusy121}
                           >
                             {darikAuthBusy121
-                              ? "Creating..."
+                              ? "Creating... / جارٍ إنشاء الحساب..."
                               : "Create Darik account / إنشاء الحساب"}
                           </button>
                         ) : darikSignupStep121 === "email_code" ? (
@@ -10451,8 +10451,8 @@ style={{
                             disabled={darikAuthBusy121}
                           >
                             {darikAuthBusy121
-                              ? "Confirming..."
-                              : "Confirm email & send SMS"}
+                              ? "Confirming... / جارٍ التأكيد..."
+                              : "Confirm email & send SMS / تأكيد البريد وإرسال رسالة SMS"}
                           </button>
                         ) : (
                           <button
@@ -10462,8 +10462,8 @@ style={{
                             disabled={darikAuthBusy121}
                           >
                             {darikAuthBusy121
-                              ? "Confirming..."
-                              : "Confirm phone & finish account"}
+                              ? "Confirming... / جارٍ التأكيد..."
+                              : "Confirm phone & finish account / تأكيد الهاتف وإكمال الحساب"}
                           </button>
                         )}
 
@@ -10476,14 +10476,14 @@ style={{
                           }}
                           disabled={darikAuthBusy121}
                         >
-                          Back
+                          Back / رجوع
                         </button>
                         <button
                           type="button"
                           onClick={() => void chooseDarikGuestCheckout121()}
                           disabled={darikAuthBusy121}
                         >
-                          Continue as guest
+                          Continue as guest / المتابعة كضيف
                         </button>
                       </div>
                     </div>
@@ -10499,8 +10499,8 @@ style={{
 
                       <div className={styles.onlineCheckoutHeading}>
                         <div>
-                          <span>Online order</span>
-                          <h3>{selectedPickup ? "Pickup details" : "Delivery details"}</h3>
+                          <span>Online order / طلب أونلاين</span>
+                          <h3>{selectedPickup ? "Pickup details / تفاصيل الاستلام" : "Delivery details / تفاصيل التوصيل"}</h3>
                         </div>
                         <button
                           type="button"
@@ -10509,12 +10509,12 @@ style={{
                             setCheckoutError("");
                           }}
                         >
-                          Cancel
+                          Cancel / إلغاء
                         </button>
                       </div>
 
                       <div className={styles.paymentMethodSection}>
-                        <span>Fulfillment method</span>
+                        <span>Fulfillment method / طريقة الاستلام</span>
                         <div className={styles.paymentMethodChoices}>
                           {deliveryEnabled ? (
                             <button
@@ -10528,8 +10528,8 @@ style={{
                                 updateCheckoutField("fulfillmentMethod", "delivery")
                               }
                             >
-                              <strong>Delivery</strong>
-                              <small>Delivered to your exact location</small>
+                              <strong>Delivery / التوصيل</strong>
+                              <small>Delivered to your exact location / التوصيل إلى موقعك المحدد</small>
                             </button>
                           ) : null}
                           {pickupEnabled ? (
@@ -10544,15 +10544,15 @@ style={{
                                 updateCheckoutField("fulfillmentMethod", "pickup")
                               }
                             >
-                              <strong>Local pickup</strong>
-                              <small>Collect from the store</small>
+                              <strong>Local pickup / استلام من المتجر</strong>
+                              <small>Collect from the store / الاستلام من المتجر</small>
                             </button>
                           ) : null}
                         </div>
                       </div>
 
                       <div className={styles.paymentMethodSection}>
-                        <span>Payment method</span>
+                        <span>Payment method / طريقة الدفع</span>
                         <div className={styles.paymentMethodChoices}>
                           {storefront.cash_on_delivery_enabled ? (
                             <button
@@ -10566,8 +10566,8 @@ style={{
                                 updateCheckoutField("paymentMethod", "cash")
                               }
                             >
-                              <strong>Cash</strong>
-                              <small>{selectedPickup ? "Pay at pickup" : "Pay on delivery"}</small>
+                              <strong>Cash / نقداً</strong>
+                              <small>{selectedPickup ? "Pay at pickup / الدفع عند الاستلام" : "Pay on delivery / الدفع عند التوصيل"}</small>
                             </button>
                           ) : null}
 
@@ -10584,7 +10584,7 @@ style={{
                               }
                             >
                               <strong>CliQ</strong>
-                              <small>Transfer before submitting</small>
+                              <small>Transfer before submitting / حوّل قبل إرسال الطلب</small>
                             </button>
                           ) : null}
                         </div>
@@ -10594,20 +10594,20 @@ style={{
                         <div className={styles.cliqPaymentPanel}>
                           <span>Send exactly {money(orderTotal)} by CliQ</span>
                           <div>
-                            <small>Account name</small>
+                            <small>Account name / اسم الحساب</small>
                             <strong>
                               {storefront.cliq_account_name ||
                                 storefront.display_name}
                             </strong>
                           </div>
                           <div>
-                            <small>CliQ alias / mobile</small>
+                            <small>CliQ alias / mobile / اسم CliQ أو رقم الهاتف</small>
                             <strong>
                               {storefront.cliq_payment_identifier}
                             </strong>
                           </div>
                           <label className={styles.receiptUploadField}>
-                            CliQ receipt image <strong>Required</strong>
+                            CliQ receipt image / صورة إيصال CliQ <strong>Required / مطلوب</strong>
                             <input
                               type="file"
                               accept="image/jpeg,image/png,image/webp"
@@ -10620,13 +10620,13 @@ style={{
                             <div className={styles.receiptPreview}>
                               <img src={cliqReceiptPreview} alt="CliQ receipt preview" />
                               <div>
-                                <strong>Receipt ready</strong>
+                                <strong>Receipt ready / الإيصال جاهز</strong>
                                 <small>{cliqReceiptFile?.name}</small>
                                 <button
                                   type="button"
                                   onClick={() => selectCliqReceipt(null)}
                                 >
-                                  Remove receipt
+                                  Remove receipt / حذف الإيصال
                                 </button>
                               </div>
                             </div>
@@ -10644,7 +10644,7 @@ style={{
                       ) : null}
 
                       <label>
-                        Name
+                        Name / الاسم
                         <input
                           value={checkoutForm.customerName}
                           onChange={(event) =>
@@ -10653,12 +10653,12 @@ style={{
                               event.target.value
                             )
                           }
-                          placeholder="Your full name"
+                          placeholder="Your full name / الاسم الكامل"
                         />
                       </label>
 
                       <label>
-                        Phone
+                        Phone / رقم الهاتف
                         <input
                           type="tel"
                           value={checkoutForm.customerPhone}
@@ -10675,10 +10675,10 @@ style={{
                       {selectedPickup ? (
                         <div className={styles.exactLocationBlock}>
                           <div>
-                            <strong>Local pickup only</strong>
-                            <small>Collect your order from the store address after confirmation.</small>
+                            <strong>Local pickup only / استلام من المتجر فقط</strong>
+                            <small>Collect your order from the store address after confirmation. / استلم طلبك من عنوان المتجر بعد التأكيد.</small>
                           </div>
-                          <strong>{storefront.address_text || "Store address shown in store information"}</strong>
+                          <strong>{storefront.address_text || "Store address shown in store information / عنوان المتجر موجود في معلومات المتجر"}</strong>
                         </div>
                       ) : (
                         <>
@@ -10846,7 +10846,7 @@ style={{
                             <small>
                               Delivery fee / رسوم التوصيل:{" "}
                               {specialDeliveryFree185
-                                ? "Free"
+                                ? "Free / مجاناً"
                                 : money(deliveryFee)}
                               {" · "}
                               Minimum / الحد الأدنى:{" "}
@@ -10860,8 +10860,8 @@ style={{
                                   {" · "}
                                   Special Zone / المنطقة الخاصة:{" "}
                                   {specialDeliveryFree185
-                                    ? "Unlocked"
-                                    : `${money(specialDeliveryRemaining185)} qualifying to go`}
+                                    ? "Unlocked / مفعّل"
+                                    : `${money(specialDeliveryRemaining185)} qualifying to go / متبقي لبلوغ الحد المؤهل`}
                                 </>
                               ) : null}
                             </small>
@@ -10904,7 +10904,7 @@ style={{
 
                           <div className={styles.addressDetailsGrid}>
                             <label>
-                              Building number <small>Optional</small>
+                              Building number / رقم المبنى <small>Optional / اختياري</small>
                               <input
                                 value={checkoutForm.buildingNumber}
                                 onChange={(event) =>
@@ -10913,12 +10913,12 @@ style={{
                                     event.target.value
                                   )
                                 }
-                                placeholder="Example: 18"
+                                placeholder="Example: 18 / مثال: 18"
                               />
                             </label>
 
                             <label>
-                              Apartment number <small>Optional</small>
+                              Apartment number / رقم الشقة <small>Optional / اختياري</small>
                               <input
                                 value={checkoutForm.apartmentNumber}
                                 onChange={(event) =>
@@ -10927,7 +10927,7 @@ style={{
                                     event.target.value
                                   )
                                 }
-                                placeholder="Example: 4B"
+                                placeholder="Example: 4B / مثال: 4B"
                               />
                             </label>
                           </div>
@@ -10935,7 +10935,7 @@ style={{
                       )}
 
                       <label>
-                        {selectedPickup ? "Pickup note" : "Extra delivery details"} <small>Optional</small>
+                        {selectedPickup ? "Pickup note / ملاحظة الاستلام" : "Extra delivery details / تفاصيل إضافية للتوصيل"} <small>Optional / اختياري</small>
                         <textarea
                           value={checkoutForm.deliveryNote}
                           onChange={(event) =>
@@ -10946,8 +10946,8 @@ style={{
                           }
                           placeholder={
                             selectedPickup
-                              ? "Anything the store should know before pickup"
-                              : "Floor, entrance, landmark or delivery instructions"
+                              ? "Anything the store should know before pickup / أي ملاحظة يجب أن يعرفها المتجر قبل الاستلام"
+                              : "Floor, entrance, landmark or delivery instructions / الطابق، المدخل، معلم قريب أو تعليمات التوصيل"
                           }
                           rows={3}
                         />
@@ -10964,10 +10964,10 @@ style={{
                         disabled={placingOrder}
                       >
                         {placingOrder
-                          ? "Sending order…"
+                          ? "Sending order… / جارٍ إرسال الطلب…"
                           : checkoutForm.paymentMethod === "cliq"
-                            ? `Submit CliQ ${selectedPickup ? "pickup" : "delivery"} order · ${money(orderTotal)}`
-                            : `Place cash ${selectedPickup ? "pickup" : "delivery"} order · ${money(orderTotal)}`}
+                            ? `Submit CliQ ${selectedPickup ? "pickup" : "delivery"} order · ${money(orderTotal)} / إرسال طلب CliQ`
+                            : `Place cash ${selectedPickup ? "pickup" : "delivery"} order · ${money(orderTotal)} / إرسال طلب نقدي`}
                         {!placingOrder ? <Icon name="arrow" size={18} /> : null}
                       </button>
                     </div>
@@ -10978,10 +10978,10 @@ style={{
                   !minimumReached ? (
                     <button className={styles.checkoutButton} disabled>
                       {!storefront.is_accepting_orders
-                        ? "Store is not accepting orders"
+                        ? "Store is not accepting orders / المتجر لا يستقبل الطلبات حالياً"
                         : cart.length === 0
-                          ? "Add products to continue"
-                          : "Minimum order not reached"}
+                          ? "Add products to continue / أضف منتجات للمتابعة"
+                          : "Minimum order not reached / لم تصل للحد الأدنى للطلب"}
                     </button>
                   ) : (
                     <div className={styles.orderMethodButtons}>
@@ -10994,7 +10994,7 @@ style={{
                             setCheckoutError("");
                           }}
                         >
-                          Place order online
+                          Place order online / اطلب أونلاين
                           <Icon name="arrow" size={18} />
                         </button>
                       ) : null}
@@ -11035,7 +11035,7 @@ style={{
                           }`}
                           disabled
                         >
-                          Phone ordering unavailable
+                          Phone ordering unavailable / الطلب الهاتفي غير متاح
                         </button>
                       ) : null}
                     </div>
@@ -11044,15 +11044,15 @@ style={{
                   <p className={styles.checkoutNote}>
                     {onlineOrderingEnabled
                       ? selectedPickup
-                        ? "This is a local pickup order. The store will confirm when it is ready to collect."
+                        ? "This is a local pickup order. The store will confirm when it is ready to collect. / هذا طلب استلام من المتجر. سيؤكد المتجر عندما يصبح الطلب جاهزاً."
                         : storefront.cash_on_delivery_enabled && storefront.cliq_enabled
-                          ? "This store accepts cash on delivery and CliQ for online orders."
+                          ? "This store accepts cash on delivery and CliQ for online orders. / يقبل هذا المتجر الدفع نقداً عند التوصيل وCliQ للطلبات الأونلاين."
                           : storefront.cliq_enabled
-                            ? "This store accepts CliQ for online orders."
-                            : "This store accepts cash on delivery for online orders."
+                            ? "This store accepts CliQ for online orders. / يقبل هذا المتجر الدفع عبر CliQ للطلبات الأونلاين."
+                            : "This store accepts cash on delivery for online orders. / يقبل هذا المتجر الدفع نقداً عند التوصيل للطلبات الأونلاين."
                       : pickupOnly
-                        ? "The store will confirm product availability and pickup timing."
-                        : "The store will confirm product availability, address and final delivery details."}
+                        ? "The store will confirm product availability and pickup timing. / سيؤكد المتجر توفر المنتجات وموعد الاستلام."
+                        : "The store will confirm product availability, address and final delivery details. / سيؤكد المتجر توفر المنتجات والعنوان وتفاصيل التوصيل النهائية."}
                   </p>
                 </div>
               </>
@@ -11063,3 +11063,5 @@ style={{
     </main>
   );
 }
+
+/* DARIK_CART_CHECKOUT_BILINGUAL_391: customer cart and checkout are English / Arabic */
