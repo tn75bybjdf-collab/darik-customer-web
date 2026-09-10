@@ -6407,3 +6407,474 @@ button.commandSecondaryButton:disabled {
     max-height: none !important;
   }
 }
+
+
+/* DARIK_DASHBOARD_ALL_TABS_APPROVED_398
+   Shared visual system for every authenticated retailer dashboard tab.
+   CSS only: no route logic, handlers, preview code, forms, or RPCs are changed.
+*/
+
+.dashboardPage {
+  --d398-navy: #061f3d;
+  --d398-navy2: #082946;
+  --d398-green: #09a978;
+  --d398-green2: #0bc28b;
+  --d398-text: #0c244d;
+  --d398-muted: #60748f;
+  --d398-line: #dce6ed;
+  --d398-bg: #f6fafc;
+  grid-template-columns: 242px minmax(0, 1fr) !important;
+  min-height: 100vh !important;
+  background: var(--d398-bg) !important;
+  color: var(--d398-text) !important;
+  font-family: Arial, "Segoe UI", sans-serif !important;
+}
+
+/* Unified Darik sidebar on EVERY dashboard tab. */
+.dashboardPage .sidebar {
+  width: auto !important;
+  min-width: 0 !important;
+  height: 100vh !important;
+  min-height: 100vh !important;
+  position: sticky !important;
+  top: 0 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  padding: 17px 9px 12px !important;
+  background:
+    radial-gradient(circle at 92% 8%, rgba(11, 190, 145, .10), transparent 28%),
+    linear-gradient(180deg, #06243f 0%, #061d38 100%) !important;
+  border-right: 0 !important;
+  box-shadow: 10px 0 30px rgba(7, 30, 67, .07) !important;
+  overflow: hidden !important;
+  scrollbar-width: none !important;
+}
+.dashboardPage .sidebar::-webkit-scrollbar {
+  width: 0 !important;
+  height: 0 !important;
+}
+.dashboardPage .sidebar > div:first-child {
+  min-height: 87px !important;
+  margin: 0 14px 10px !important;
+  padding: 0 !important;
+  position: relative !important;
+  background: url("/darik-dashboard-logo-397.svg") left top / 188px auto no-repeat !important;
+  border: 0 !important;
+}
+.dashboardPage .sidebar > div:first-child::after {
+  content: "Retailer Dashboard\A لوحة التحكم بالتاجر";
+  position: absolute !important;
+  left: 74px !important;
+  top: 50px !important;
+  white-space: pre-line !important;
+  color: rgba(237,247,255,.82) !important;
+  font-size: 10px !important;
+  line-height: 1.28 !important;
+  font-weight: 700 !important;
+}
+.dashboardPage .sidebar > div:first-child > * {
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+.dashboardPage .sidebar nav {
+  flex: 0 0 auto !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 3px !important;
+  margin-top: 0 !important;
+}
+.dashboardPage .sidebar nav a {
+  position: relative !important;
+  min-height: 54px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: center !important;
+  align-items: flex-start !important;
+  gap: 3px !important;
+  padding: 8px 12px 8px 57px !important;
+  border: 0 !important;
+  border-radius: 10px !important;
+  background: transparent !important;
+  color: rgba(244,250,255,.92) !important;
+  text-decoration: none !important;
+  font-size: 0 !important;
+  line-height: 1.1 !important;
+  white-space: nowrap !important;
+}
+.dashboardPage .sidebar nav a::before {
+  content: "" !important;
+  position: absolute !important;
+  left: 20px !important;
+  top: 15px !important;
+  width: 23px !important;
+  height: 23px !important;
+  background: currentColor !important;
+  -webkit-mask-repeat: no-repeat !important;
+  mask-repeat: no-repeat !important;
+  -webkit-mask-position: center !important;
+  mask-position: center !important;
+  -webkit-mask-size: contain !important;
+  mask-size: contain !important;
+}
+.dashboardPage .sidebar nav a::after {
+  display: block !important;
+  white-space: pre-line !important;
+  color: rgba(240,248,255,.90) !important;
+  font-size: 13px !important;
+  line-height: 1.12 !important;
+  font-weight: 800 !important;
+}
+.dashboardPage .sidebar nav a[href="/store-dashboard"]::before {
+  -webkit-mask-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZD0iTTMgMTEuNSAxMiA0bDkgNy41TTUuNSAxMC41VjIwaDEzdi05LjVNOS41IDIwdi02aDV2NiIgZmlsbD0ibm9uZSIgc3Ryb2tlPSJibGFjayIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiLz48L3N2Zz4=") !important;
+  mask-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZD0iTTMgMTEuNSAxMiA0bDkgNy41TTUuNSAxMC41VjIwaDEzdi05LjVNOS41IDIwdi02aDV2NiIgZmlsbD0ibm9uZSIgc3Ryb2tlPSJibGFjayIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiLz48L3N2Zz4=") !important;
+}
+.dashboardPage .sidebar nav a[href="/store-dashboard"]::after {
+  content: "Overview\A نظرة عامة" !important;
+}
+.dashboardPage .sidebar nav a[href="/store-dashboard/storefront"]::before {
+  -webkit-mask-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZD0iTTQgMTBoMTZsLTEgMTBINUw0IDEwWk02IDRoMTJsMiA2SDRsMi02Wk05IDE0djZNMTUgMTR2NiIgZmlsbD0ibm9uZSIgc3Ryb2tlPSJibGFjayIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiLz48L3N2Zz4=") !important;
+  mask-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZD0iTTQgMTBoMTZsLTEgMTBINUw0IDEwWk02IDRoMTJsMiA2SDRsMi02Wk05IDE0djZNMTUgMTR2NiIgZmlsbD0ibm9uZSIgc3Ryb2tlPSJibGFjayIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiLz48L3N2Zz4=") !important;
+}
+.dashboardPage .sidebar nav a[href="/store-dashboard/storefront"]::after {
+  content: "Storefront\A متجري" !important;
+}
+.dashboardPage .sidebar nav a[href="/store-dashboard/orders"]::before {
+  -webkit-mask-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZD0iTTMgNWgybDIgMTBoMTBsMi03SDZNOSAyMGguMDFNMTcgMjBoLjAxIiBmaWxsPSJub25lIiBzdHJva2U9ImJsYWNrIiBzdHJva2Utd2lkdGg9IjIiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIvPjwvc3ZnPg==") !important;
+  mask-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZD0iTTMgNWgybDIgMTBoMTBsMi03SDZNOSAyMGguMDFNMTcgMjBoLjAxIiBmaWxsPSJub25lIiBzdHJva2U9ImJsYWNrIiBzdHJva2Utd2lkdGg9IjIiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIvPjwvc3ZnPg==") !important;
+}
+.dashboardPage .sidebar nav a[href="/store-dashboard/orders"]::after {
+  content: "Orders\A الطلبات" !important;
+}
+.dashboardPage .sidebar nav a[href="/store-dashboard/products"]::before {
+  -webkit-mask-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZD0iTTEyIDMgMjEgOGwtOSA1LTktNSA5LTVabS05IDV2OGw5IDUgOS01VjhNMTIgMTN2OCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSJibGFjayIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiLz48L3N2Zz4=") !important;
+  mask-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZD0iTTEyIDMgMjEgOGwtOSA1LTktNSA5LTVabS05IDV2OGw5IDUgOS01VjhNMTIgMTN2OCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSJibGFjayIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiLz48L3N2Zz4=") !important;
+}
+.dashboardPage .sidebar nav a[href="/store-dashboard/products"]::after {
+  content: "Products\A المنتجات" !important;
+}
+.dashboardPage .sidebar nav a[href="/store-dashboard/categories"]::before {
+  -webkit-mask-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZD0iTTQgNGg2djZINFY0Wm0xMCAwaDZ2NmgtNlY0Wk00IDE0aDZ2Nkg0di02Wm0xMCAwaDZ2NmgtNnYtNloiIGZpbGw9Im5vbmUiIHN0cm9rZT0iYmxhY2siIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIi8+PC9zdmc+") !important;
+  mask-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZD0iTTQgNGg2djZINFY0Wm0xMCAwaDZ2NmgtNlY0Wk00IDE0aDZ2Nkg0di02Wm0xMCAwaDZ2NmgtNnYtNloiIGZpbGw9Im5vbmUiIHN0cm9rZT0iYmxhY2siIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIi8+PC9zdmc+") !important;
+}
+.dashboardPage .sidebar nav a[href="/store-dashboard/categories"]::after {
+  content: "Categories\A الأقسام" !important;
+}
+.dashboardPage .sidebar nav a[href="/store-dashboard/activation"]::before {
+  -webkit-mask-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZD0iTTMgNmgxOHYxMkgzVjZabTAgNGgxOE03IDE1aDQiIGZpbGw9Im5vbmUiIHN0cm9rZT0iYmxhY2siIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIi8+PC9zdmc+") !important;
+  mask-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZD0iTTMgNmgxOHYxMkgzVjZabTAgNGgxOE03IDE1aDQiIGZpbGw9Im5vbmUiIHN0cm9rZT0iYmxhY2siIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIi8+PC9zdmc+") !important;
+}
+.dashboardPage .sidebar nav a[href="/store-dashboard/activation"]::after {
+  content: "Plan & Payment\A الخطة والدفع" !important;
+}
+.dashboardPage .sidebar nav a[href="/store-dashboard/ai-credits"]::before {
+  -webkit-mask-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZD0ibTEyIDMgMS42IDQuNEwxOCA5bC00LjQgMS42TDEyIDE1bC0xLjYtNC40TDYgOWw0LjQtMS42TDEyIDNabTYgMTEgLjggMi4yTDIxIDE3bC0yLjIuOEwxOCAyMGwtLjgtMi4yTDE1IDE3bDIuMi0uOEwxOCAxNFoiIGZpbGw9Im5vbmUiIHN0cm9rZT0iYmxhY2siIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIi8+PC9zdmc+") !important;
+  mask-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZD0ibTEyIDMgMS42IDQuNEwxOCA5bC00LjQgMS42TDEyIDE1bC0xLjYtNC40TDYgOWw0LjQtMS42TDEyIDNabTYgMTEgLjggMi4yTDIxIDE3bC0yLjIuOEwxOCAyMGwtLjgtMi4yTDE1IDE3bDIuMi0uOEwxOCAxNFoiIGZpbGw9Im5vbmUiIHN0cm9rZT0iYmxhY2siIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIi8+PC9zdmc+") !important;
+}
+.dashboardPage .sidebar nav a[href="/store-dashboard/ai-credits"]::after {
+  content: "AI Credits\A رصيد الذكاء الاصطناعي" !important;
+}
+.dashboardPage .sidebar nav a:hover {
+  transform: none !important;
+  background: rgba(255,255,255,.055) !important;
+  color: #ffffff !important;
+}
+.dashboardPage .sidebar nav .activeNav {
+  color: #ffffff !important;
+  background: linear-gradient(90deg, rgba(6,174,130,.24) 0%, rgba(5,137,112,.50) 100%) !important;
+  border-color: transparent !important;
+  box-shadow: inset 3px 0 0 #0ac68e !important;
+}
+.dashboardPage .sidebar nav .activeNav::before {
+  color: #78efd0 !important;
+}
+.dashboardPage .sidebar nav .activeNav::after {
+  color: #ffffff !important;
+}
+.dashboardPage .sidebarFooter {
+  flex: 0 0 auto !important;
+  max-height: 86px !important;
+  margin: auto 13px 0 !important;
+  padding: 9px 0 0 !important;
+  border-top: 1px solid rgba(255,255,255,.10) !important;
+  background: transparent !important;
+  overflow: hidden !important;
+  color: #dcebf5 !important;
+}
+.dashboardPage .sidebarFooter span {
+  color: #dcebf5 !important;
+  font-size: 10px !important;
+}
+.dashboardPage .sidebarFooter button {
+  min-height: 34px !important;
+  border-radius: 8px !important;
+  padding: 6px 9px !important;
+  font-size: 10px !important;
+}
+
+/* Consistent content shell on non-overview tabs. */
+.dashboardPage .dashboardContent {
+  box-sizing: border-box !important;
+  width: 100% !important;
+  max-width: none !important;
+  min-width: 0 !important;
+  margin: 0 !important;
+  padding: 0 20px 42px !important;
+  background: #f7fafc !important;
+}
+.dashboardPage .topbar {
+  margin: 0 -20px 18px !important;
+  padding: 18px 26px !important;
+  min-height: 76px !important;
+  border: 0 !important;
+  border-bottom: 1px solid #e0e8ed !important;
+  border-radius: 0 !important;
+  background: #ffffff !important;
+  box-shadow: none !important;
+}
+.dashboardPage .topbar p {
+  color: #64809a !important;
+  font-size: 10px !important;
+  font-weight: 900 !important;
+  letter-spacing: .09em !important;
+}
+.dashboardPage .topbar h2 {
+  color: #0c254f !important;
+  margin-top: 4px !important;
+  font-size: 28px !important;
+  line-height: 1.05 !important;
+  letter-spacing: -.035em !important;
+}
+.dashboardPage .topbar select {
+  min-height: 40px !important;
+  border-radius: 10px !important;
+  border-color: #d7e2ea !important;
+}
+
+/* Main cards/panels use the approved flatter Darik treatment. */
+.dashboardPage .panel {
+  margin-top: 14px !important;
+  padding: 20px !important;
+  border: 1px solid #dce6ed !important;
+  border-radius: 14px !important;
+  background: #ffffff !important;
+  box-shadow: 0 8px 28px rgba(19,55,90,.045) !important;
+}
+.dashboardPage .panelHeader {
+  margin-bottom: 16px !important;
+  gap: 14px !important;
+}
+.dashboardPage .panelHeader p {
+  color: #0b8d69 !important;
+  font-size: 9px !important;
+  letter-spacing: .09em !important;
+}
+.dashboardPage .panelHeader h2 {
+  color: #0d2852 !important;
+  margin-top: 3px !important;
+  font-size: 23px !important;
+  line-height: 1.08 !important;
+}
+.dashboardPage .panelActions {
+  gap: 7px !important;
+}
+.dashboardPage .panelActions a,
+.dashboardPage .panelActions button {
+  min-height: 39px !important;
+  padding: 0 12px !important;
+  border-radius: 9px !important;
+  border-color: #d3dfe8 !important;
+  color: #12305b !important;
+  background: #ffffff !important;
+  font-size: 10px !important;
+}
+.dashboardPage .panelActions button:last-child {
+  color: #ffffff !important;
+  background: linear-gradient(135deg, #0aaa7c, #078d68) !important;
+  border-color: transparent !important;
+}
+
+/* Forms + settings stay mechanically identical, just use the approved visual system. */
+.dashboardPage .formSection {
+  padding: 16px !important;
+  border-radius: 14px !important;
+  border-color: #dfe7ed !important;
+  background: #f8fbfc !important;
+}
+.dashboardPage .formSectionHeading {
+  margin-bottom: 13px !important;
+}
+.dashboardPage .formSectionHeading span {
+  color: #0a8f6b !important;
+}
+.dashboardPage .formSectionHeading h3 {
+  color: #122b55 !important;
+  font-size: 17px !important;
+}
+.dashboardPage .formSectionHeading p {
+  color: #667b94 !important;
+  font-size: 10px !important;
+}
+.dashboardPage .setupForm label,
+.dashboardPage .loginForm label {
+  color: #385373 !important;
+}
+.dashboardPage .setupForm input,
+.dashboardPage .setupForm textarea,
+.dashboardPage .loginForm input,
+.dashboardPage select {
+  border-color: #d4e0e8 !important;
+  border-radius: 10px !important;
+}
+.dashboardPage .setupForm input:focus,
+.dashboardPage .setupForm textarea:focus,
+.dashboardPage .loginForm input:focus,
+.dashboardPage select:focus {
+  border-color: #55b69e !important;
+  box-shadow: 0 0 0 4px rgba(8,169,120,.09) !important;
+}
+.dashboardPage .saveButton,
+.dashboardPage .catalogButton {
+  background: linear-gradient(135deg, #0aaa7c 0%, #078d68 100%) !important;
+  border-color: transparent !important;
+  border-radius: 10px !important;
+  box-shadow: 0 9px 20px rgba(8,169,120,.17) !important;
+}
+.dashboardPage .catalogSecondaryButton {
+  border-radius: 10px !important;
+}
+.dashboardPage .formSaveBar {
+  bottom: 10px !important;
+  padding: 10px 12px !important;
+  border-radius: 12px !important;
+  border-color: #d7e2e9 !important;
+  box-shadow: 0 12px 30px rgba(15,23,42,.12) !important;
+}
+.dashboardPage .formSaveBar .saveButton {
+  min-height: 41px !important;
+}
+
+/* Orders already have good mechanics; bring their styling into the same family. */
+.dashboardPage .ordersHero,
+.dashboardPage .ordersWorkspace {
+  border-radius: 14px !important;
+  border-color: #dce6ed !important;
+  box-shadow: 0 8px 28px rgba(19,55,90,.045) !important;
+}
+.dashboardPage .ordersHero {
+  padding: 20px 22px !important;
+}
+.dashboardPage .ordersHeroTitleRow h2 {
+  color: #0c254f !important;
+}
+.dashboardPage .ordersHeroEyebrow,
+.dashboardPage .workspaceHeader p {
+  color: #0a8f6b !important;
+}
+.dashboardPage .refreshOrdersButton {
+  background: linear-gradient(135deg, #0aaa7c, #078d68) !important;
+  border-radius: 10px !important;
+}
+.dashboardPage .premiumMetricCard,
+.dashboardPage .premiumOrderCard {
+  border-radius: 13px !important;
+  border-color: #dce6ed !important;
+  box-shadow: 0 7px 22px rgba(19,55,90,.04) !important;
+}
+.dashboardPage .ordersWorkspace {
+  padding: 19px !important;
+}
+.dashboardPage .orderSearchControl input,
+.dashboardPage .orderFilterControl select,
+.dashboardPage .statusUpdateControl select {
+  border-radius: 10px !important;
+}
+.dashboardPage .orderNumberBadge {
+  color: #087657 !important;
+  background: #eaf8f3 !important;
+}
+
+/* Payment + order method cards */
+.dashboardPage .onlinePaymentSettings,
+.dashboardPage .orderMethodChoices button,
+.dashboardPage .paymentCheckboxGrid > label {
+  border-radius: 13px !important;
+  border-color: #dce6ed !important;
+}
+.dashboardPage .activeOrderMethod,
+.dashboardPage .activePaymentCheckbox {
+  border-color: #0aa77a !important;
+  background: #ecfaf5 !important;
+  box-shadow: 0 0 0 3px rgba(8,169,120,.09) !important;
+}
+.dashboardPage .paymentCheckboxGrid input {
+  accent-color: #08a878 !important;
+}
+
+/* Quick-action/product/category cards */
+.dashboardPage .quickActionCard {
+  min-height: 150px !important;
+  border-radius: 14px !important;
+  border-color: #dce6ed !important;
+  background: #ffffff !important;
+  box-shadow: 0 7px 22px rgba(19,55,90,.035) !important;
+}
+.dashboardPage .quickActionCard > span {
+  color: #0a8f6b !important;
+}
+.dashboardPage .quickActionCard:hover {
+  border-color: #9fcfc0 !important;
+  box-shadow: 0 12px 28px rgba(19,55,90,.07) !important;
+}
+
+/* Responsive */
+@media (max-width: 1020px) {
+  .dashboardPage {
+    display: block !important;
+  }
+  .dashboardPage .sidebar {
+    width: 100% !important;
+    height: auto !important;
+    min-height: 0 !important;
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 40 !important;
+    padding: 8px 10px !important;
+    overflow-x: auto !important;
+  }
+  .dashboardPage .sidebar > div:first-child {
+    min-height: 46px !important;
+    margin: 0 8px 5px !important;
+    background-size: 138px auto !important;
+  }
+  .dashboardPage .sidebar > div:first-child::after {
+    display: none !important;
+  }
+  .dashboardPage .sidebar nav {
+    flex-direction: row !important;
+    overflow-x: auto !important;
+  }
+  .dashboardPage .sidebar nav a {
+    min-width: 126px !important;
+    min-height: 48px !important;
+    padding: 7px 9px 7px 38px !important;
+  }
+  .dashboardPage .sidebar nav a::before {
+    left: 10px !important;
+    top: 12px !important;
+    width: 20px !important;
+    height: 20px !important;
+  }
+  .dashboardPage .sidebar nav a::after {
+    font-size: 10px !important;
+  }
+  .dashboardPage .sidebarFooter {
+    display: none !important;
+  }
+  .dashboardPage .dashboardContent {
+    padding: 0 12px 32px !important;
+  }
+  .dashboardPage .topbar {
+    margin: 0 -12px 14px !important;
+    padding: 15px 14px !important;
+  }
+}

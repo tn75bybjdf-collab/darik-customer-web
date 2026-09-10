@@ -4115,3 +4115,158 @@
     font-size: 0.82rem;
   }
 }
+
+
+/* DARIK_STOREFRONT_VISUAL_SKIN_398
+   Storefront editor visual-only harmonization with approved dashboard.
+   No preview sizing, iframe, save behavior, setup mechanics, or controls are removed.
+*/
+
+.storefrontSetupController109 {
+  margin: 0 0 12px !important;
+  padding: 15px !important;
+  border-radius: 14px !important;
+  border-color: #dce6ed !important;
+  background: linear-gradient(180deg, #ffffff 0%, #f8fbfc 100%) !important;
+  box-shadow: 0 8px 28px rgba(19,55,90,.04) !important;
+}
+.storefrontSetupControllerTop109 span,
+.exactWizardHeading109V5 > span,
+.exactWizardTheme109V5 small,
+.exactWizardGlobalFont109V5 small,
+.exactWizardZonesHead109V5 small {
+  color: #0a8f6b !important;
+}
+.storefrontSetupControllerTop109 h3,
+.exactWizardHeading109V5 h3 {
+  color: #0c254f !important;
+}
+.storefrontSetupControllerTop109 > b {
+  background: #0b294e !important;
+}
+.storefrontSetupSteps109,
+.storefrontSetupTabs109 {
+  gap: 7px !important;
+  scrollbar-width: thin !important;
+}
+.storefrontSetupStepChip109 {
+  min-height: 50px !important;
+  min-width: 130px !important;
+  padding: 7px 10px !important;
+  border-radius: 11px !important;
+  border-color: #dce6ed !important;
+  background: #ffffff !important;
+}
+.storefrontSetupStepChip109 > i {
+  background: #eef4f7 !important;
+  color: #567089 !important;
+}
+.storefrontSetupStepChipActive109 {
+  color: #ffffff !important;
+  background: linear-gradient(135deg, #0b294e 0%, #0b3a5d 100%) !important;
+  border-color: #0aa77a !important;
+  box-shadow: inset 3px 0 0 #0bc28b, 0 8px 18px rgba(7,31,69,.12) !important;
+}
+.storefrontSetupStepChipActive109 > i {
+  background: #0aaa7c !important;
+}
+.storefrontSetupStepChipDone109 > i {
+  background: #daf6eb !important;
+  color: #07835f !important;
+}
+.storefrontSetupTheme109,
+.storefrontSetupSynthetic109,
+.exactWizardPanel109V5,
+.themeFirstStepScreen {
+  border-radius: 14px !important;
+  border-color: #dce6ed !important;
+  box-shadow: 0 8px 28px rgba(19,55,90,.04) !important;
+}
+.exactWizardPanel109V5 {
+  padding: 20px !important;
+}
+.exactWizardTheme109V5,
+.exactWizardGlobalFont109V5 {
+  border-radius: 13px !important;
+  border-color: #dce6ed !important;
+  background: #f4faf8 !important;
+}
+.exactWizardHeadingRow109V5 > button,
+.exactWizardTheme109V5 button,
+.exactWizardGlobalFont109V5 button,
+.exactWizardZonesHead109V5 > button,
+.storefrontSetupThemeCurrent109 button,
+.deliveryZonesHeading109 button {
+  background: linear-gradient(135deg, #0aaa7c, #078d68) !important;
+  border-radius: 10px !important;
+  box-shadow: 0 8px 18px rgba(8,169,120,.14) !important;
+}
+.exactWizardAssetCard109V5,
+.exactWizardFontCard109V5,
+.exactWizardHours109V5 > article,
+.exactWizardRows109V5 > article,
+.exactWizardZoneList109V5 > article,
+.exactWizardPayments109V5 > label,
+.exactWizardFeatures109V5 > label,
+.storefrontSetupThemeCurrent109,
+.deliveryZones109,
+.deliveryLocationCard112,
+.pickupOnlyChoice114,
+.deliveryTimingCard163,
+.specialDeliveryZone185 {
+  border-radius: 12px !important;
+  border-color: #dce6ed !important;
+  box-shadow: none !important;
+}
+.exactWizardSelected109V5 {
+  background: #ecfaf5 !important;
+  border-color: #0aa77a !important;
+}
+.exactWizardPayments109V5 input,
+.exactWizardFeatures109V5 input {
+  accent-color: #08a878 !important;
+}
+.storefrontSetupWizardActions109,
+.formSaveBar {
+  bottom: 10px !important;
+  border-radius: 12px !important;
+  border-color: #d6e2e9 !important;
+  box-shadow: 0 12px 28px rgba(15,23,42,.12) !important;
+}
+.storefrontSetupNext109,
+.storefrontSetupFinish109 {
+  background: linear-gradient(135deg, #0aaa7c, #078d68) !important;
+  box-shadow: 0 8px 18px rgba(8,169,120,.15) !important;
+}
+.liveBuilderOpenPreviewTab107 {
+  top: 78px !important;
+  left: auto !important;
+  right: 28px !important;
+  transform: none !important;
+  min-width: 0 !important;
+  border-radius: 10px !important;
+  background: #0b294e !important;
+  border: 1px solid rgba(255,255,255,.18) !important;
+  box-shadow: 0 10px 24px rgba(7,31,69,.18) !important;
+}
+.themeGalleryIntro,
+.typographyStudio,
+.arabicIdentity106,
+.heroSizeControl254 {
+  border-radius: 13px !important;
+  border-color: #dce6ed !important;
+  box-shadow: 0 7px 22px rgba(19,55,90,.035) !important;
+}
+
+@media (max-width: 760px) {
+  .storefrontSetupController109,
+  .storefrontSetupTheme109,
+  .storefrontSetupSynthetic109,
+  .exactWizardPanel109V5 {
+    border-radius: 12px !important;
+  }
+  .liveBuilderOpenPreviewTab107 {
+    top: 70px !important;
+    right: 10px !important;
+  }
+}

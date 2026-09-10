@@ -13986,3 +13986,15 @@ body:has([data-darik-dashboard-polish397d="true"]) [aria-label*="WhatsApp" i],
 body:has([data-darik-dashboard-polish397d="true"]) [title*="WhatsApp" i] {
   display: none !important;
 }
+
+
+/* DARIK_DASHBOARD_ALL_TABS_HIDE_FLOATERS_398
+   Public-site floating contact widgets do not belong inside retailer tools.
+   Hides them only while any retailer dashboard shell is present.
+*/
+body:has(main[class*="dashboardPage"]) a[href*="wa.me"],
+body:has(main[class*="dashboardPage"]) a[href*="whatsapp"],
+body:has(main[class*="dashboardPage"]) [aria-label*="WhatsApp" i],
+body:has(main[class*="dashboardPage"]) [title*="WhatsApp" i] {
+  display: none !important;
+}
