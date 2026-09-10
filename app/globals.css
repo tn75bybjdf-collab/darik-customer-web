@@ -13998,3 +13998,12 @@ body:has(main[class*="dashboardPage"]) [aria-label*="WhatsApp" i],
 body:has(main[class*="dashboardPage"]) [title*="WhatsApp" i] {
   display: none !important;
 }
+
+
+/* DARIK_ACTIVATION_HIDE_PUBLIC_FLOATERS_399 */
+body:has(main[class*="activation-module__"][class*="page"]) a[href*="wa.me"],
+body:has(main[class*="activation-module__"][class*="page"]) a[href*="whatsapp"],
+body:has(main[class*="activation-module__"][class*="page"]) [aria-label*="WhatsApp" i],
+body:has(main[class*="activation-module__"][class*="page"]) [title*="WhatsApp" i] {
+  display: none !important;
+}
