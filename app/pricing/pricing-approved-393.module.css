@@ -307,7 +307,17 @@
 
 .footer { background: linear-gradient(135deg,#041b3d,#062650); color: #d9e5f4; padding: 34px 0 20px; }
 .footerTop { display: grid; grid-template-columns: 300px 1fr 220px; gap: 48px; align-items: start; }
-.footerBrand img { width: 150px; height: auto; object-fit: contain; object-position: left center; filter: none; opacity: 1; display: block; background: transparent; }
+.footerBrand img {
+  display: block;
+  width: 188px;
+  max-width: 100%;
+  height: auto;
+  object-fit: contain;
+  object-position: left center;
+  background: transparent;
+  filter: none;
+  opacity: 1;
+}
 .footerBrand p { margin: 10px 0 0; color: #b6c4d5; font-size: 12px; line-height: 1.55; }
 .footerColumns { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 28px; }
 .footerColumns > div { display: flex; flex-direction: column; gap: 7px; }

@@ -464,7 +464,7 @@ export default function PricingPage() {
         <div className={styles.shell}>
           <div className={styles.footerTop}>
             <div className={styles.footerBrand}>
-              <a href="/" aria-label="Darik home"><img src="/darik-pricing-footer-logo-white.png" alt="Darik" /></a>
+              <a href="/" aria-label="Darik home"><img src="/darik-pricing-footer-logo-vector.svg" alt="Darik" /></a>
               <p>{c.footerIntro}</p>
             </div>
             <div className={styles.footerColumns}>
