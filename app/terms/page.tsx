@@ -1059,7 +1059,7 @@ export default function DarikTermsPage() {
       <article className={`${styles.shell} ${styles.termsShell333}`}>
         <div className={styles.brandRow}>
           <Link href="/" className={styles.termsBrand333}>
-            <img src="/darik_logo_final_v2.png" alt="Darik" />
+            <img src="/darik-approved-header-logo-390c.png" alt="Darik" />
           </Link>
           <div className={styles.termsHeaderActions333}>
             <a href="#en">English</a>
