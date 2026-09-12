@@ -12,7 +12,7 @@ export const metadata = {
 
 export default function DarikPrivacyPage() {
   return (
-    <main className={styles.page}>
+    <main className={styles.page} data-darik-privacy401="true">
       <article className={styles.shell}>
         <div className={styles.brandRow}>
           <Link href="/" className={styles.brand}>Darik</Link>
