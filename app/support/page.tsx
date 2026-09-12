@@ -20,7 +20,7 @@ const WHATSAPP_URL =
 
 export default function DarikSupportPage() {
   return (
-    <main className={styles.page}>
+    <main className={styles.page} data-darik-support402="true">
       <section className={styles.shell}>
         <div className={styles.brandRow}>
           <Link href="/" className={styles.brand}>Darik</Link>
