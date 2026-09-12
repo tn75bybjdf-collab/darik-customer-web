@@ -258,11 +258,11 @@ function readSupabaseError(error: unknown) {
     try {
       return JSON.stringify(record);
     } catch {
-      return "حدث خطأ غير معروف من Supabase.";
+      return "حدث خطأ غير معروف من Supabase. / Unknown Supabase error.";
     }
   }
 
-  return String(error || "حدث خطأ غير معروف.");
+  return String(error || "حدث خطأ غير معروف. / Unknown error.");
 }
 
 type CreditInvoiceLookupRow = {
@@ -310,7 +310,7 @@ async function loadCustomerCreditBalanceForClient(
 }
 
 function customerLabel(customer: PartPOSCustomer) {
-  const name = customer.customer_name?.trim() || "زبون بدون اسم";
+  const name = customer.customer_name?.trim() || "زبون بدون اسم / Unnamed customer";
   const phone = customer.phone_number?.trim();
 
   return phone ? `${name} - ${phone}` : name;
@@ -514,7 +514,7 @@ export default function PartPOSPage() {
     }
 
     setPinEntry("");
-    setPinError("الرمز غير صحيح، حاول مرة أخرى.");
+    setPinError("الرمز غير صحيح، حاول مرة أخرى. / Incorrect PIN, try again.");
   }
 
   function addPinDigit(digit: string) {
@@ -531,7 +531,7 @@ export default function PartPOSPage() {
     setIsUnlocked(false);
     setPinEntry("");
     setPinError("");
-    setLockNotice("تم إتمام البيع. أدخل الرمز لفتح فاتورة جديدة.");
+    setLockNotice("تم إتمام البيع. أدخل الرمز لفتح فاتورة جديدة. / Sale completed. Enter PIN to open a new sale.");
   }
 
   function lockPOSAfterCustomerCreditPayment(amountPaid: number, balanceAfter: number) {
@@ -539,7 +539,7 @@ export default function PartPOSPage() {
     setPinEntry("");
     setPinError("");
     setLockNotice(
-      `تم تسجيل دفعة ائتمان ${money(amountPaid)} د.أ. الرصيد المتبقي: ${money(
+      `تم تسجيل دفعة ائتمان ${money(amountPaid)} د.أ. / Credit payment recorded. الرصيد المتبقي / Remaining balance: ${money(
         balanceAfter,
       )} د.أ`,
     );
@@ -662,7 +662,7 @@ export default function PartPOSPage() {
     if (Math.abs(currentPrice - originalPrice) < 0.005) return;
 
     setMarginPopup({
-      productName: row.productName.trim() || "منتج بدون اسم",
+      productName: row.productName.trim() || "منتج بدون اسم / Unnamed product",
       marginPercent: percentText(marginPercentNumber(row)),
       currentPrice: money(currentPrice) || "0.00",
       originalPrice: money(originalPrice) || "0.00",
@@ -995,7 +995,7 @@ export default function PartPOSPage() {
   async function saveNewCustomer() {
     if (!supabase) {
       setCustomerSaveStatus("error");
-      setCustomerSaveError("Supabase غير مربوط. لا يمكن حفظ الزبون.");
+      setCustomerSaveError("Supabase غير مربوط. لا يمكن حفظ الزبون. / Supabase is not connected. Customer cannot be saved.");
       return;
     }
 
@@ -1008,19 +1008,19 @@ export default function PartPOSPage() {
 
     if (!customerName) {
       setCustomerSaveStatus("error");
-      setCustomerSaveError("أدخل اسم الزبون أو اسم الشركة.");
+      setCustomerSaveError("أدخل اسم الزبون أو اسم الشركة. / Enter the customer or company name.");
       return;
     }
 
     if (needsCreditPin && customerPin.length !== 4) {
       setCustomerSaveStatus("error");
-      setCustomerSaveError("الزبون لديه سقف ائتمان. أدخل رمز ائتمان من 4 أرقام.");
+      setCustomerSaveError("الزبون لديه سقف ائتمان. أدخل رمز ائتمان من 4 أرقام. / This customer has a credit limit. Enter a 4-digit credit PIN.");
       return;
     }
 
     if (needsCreditPin && customerPin !== customerPinConfirm) {
       setCustomerSaveStatus("error");
-      setCustomerSaveError("رمز الائتمان غير متطابق. أدخله مرتين بنفس الرقم.");
+      setCustomerSaveError("رمز الائتمان غير متطابق. أدخله مرتين بنفس الرقم. / Credit PINs do not match. Enter the same PIN twice.");
       return;
     }
 
@@ -1090,7 +1090,7 @@ export default function PartPOSPage() {
       }
 
       if (!data) {
-        throw new Error("لم يرجع Supabase بيانات الزبون بعد الحفظ.");
+        throw new Error("لم يرجع Supabase بيانات الزبون بعد الحفظ. / Supabase did not return the saved customer.");
       }
 
       const savedCustomer: PartPOSCustomer = {
@@ -1112,7 +1112,7 @@ export default function PartPOSPage() {
     } catch (error) {
       const rawMessage = readSupabaseError(error);
       setCustomerSaveStatus("error");
-      setCustomerSaveError(`خطأ Supabase: ${rawMessage}`);
+      setCustomerSaveError(`خطأ Supabase / Supabase error: ${rawMessage}`);
     }
   }
 
@@ -1132,7 +1132,7 @@ export default function PartPOSPage() {
 <html dir="rtl" lang="ar">
   <head>
     <meta charset="utf-8" />
-    <title>سند قبض ائتمان</title>
+    <title>سند قبض ائتمان / Credit Payment Receipt</title>
     <style>
       * { box-sizing: border-box; }
       body { margin: 0; background: #fff; color: #111827; font-family: Arial, sans-serif; direction: rtl; }
@@ -1152,26 +1152,26 @@ export default function PartPOSPage() {
     <div class="receipt">
       <div class="header">
         <img src="/partpos/receipt-header.png" alt="" />
-        <h1>سند قبض ائتمان</h1>
-        <div class="muted">Credit Account Payment</div>
+        <h1>سند قبض ائتمان / Credit Payment Receipt</h1>
+        <div class="muted">دفعة على حساب ائتمان / Credit Account Payment</div>
       </div>
 
-      <div class="row"><strong>رقم السند</strong><span>${payment.payment_number ?? "—"}</span></div>
-      <div class="row"><strong>التاريخ</strong><span>${dateText}</span></div>
-      <div class="row"><strong>الوقت</strong><span>${timeText}</span></div>
-      <div class="row"><strong>الزبون</strong><span>${escapeReceiptText(payment.customer_name)}</span></div>
-      <div class="row"><strong>الهاتف</strong><span>${escapeReceiptText(payment.customer_phone || "—")}</span></div>
+      <div class="row"><strong>رقم السند / Receipt No.</strong><span>${payment.payment_number ?? "—"}</span></div>
+      <div class="row"><strong>التاريخ / Date</strong><span>${dateText}</span></div>
+      <div class="row"><strong>الوقت / Time</strong><span>${timeText}</span></div>
+      <div class="row"><strong>الزبون / Customer</strong><span>${escapeReceiptText(payment.customer_name)}</span></div>
+      <div class="row"><strong>الهاتف / Phone</strong><span>${escapeReceiptText(payment.customer_phone || "—")}</span></div>
 
       <div class="box">
-        <div class="muted">المبلغ المدفوع</div>
+        <div class="muted">المبلغ المدفوع / Amount Paid</div>
         <div class="amount">${money(payment.amount_paid)} د.أ</div>
       </div>
 
-      <div class="row"><strong>الرصيد قبل الدفع</strong><span>${money(payment.balance_before)} د.أ</span></div>
-      <div class="row"><strong>الرصيد بعد الدفع</strong><span>${money(payment.balance_after)} د.أ</span></div>
+      <div class="row"><strong>الرصيد قبل الدفع / Balance Before</strong><span>${money(payment.balance_before)} د.أ</span></div>
+      <div class="row"><strong>الرصيد بعد الدفع / Balance After</strong><span>${money(payment.balance_after)} د.أ</span></div>
 
       <div class="footer">
-        شكراً لكم<br />
+        شكراً لكم / Thank you<br />
         تم تسجيل الدفعة على حساب الائتمان
       </div>
     </div>
@@ -1201,19 +1201,19 @@ export default function PartPOSPage() {
 
     if (!selectedCustomer) {
       setCashoutStatus("error");
-      setCashoutMessage("اختر زبون أولاً قبل تسجيل دفعة ائتمان.");
+      setCashoutMessage("اختر زبون أولاً قبل تسجيل دفعة ائتمان. / Select a customer before recording a credit payment.");
       return;
     }
 
     if (creditBalanceLoading) {
       setCashoutStatus("error");
-      setCashoutMessage("جاري حساب رصيد الزبون. حاول بعد ثانية.");
+      setCashoutMessage("جاري حساب رصيد الزبون. حاول بعد ثانية. / Calculating customer balance. Try again in a moment.");
       return;
     }
 
     if (selectedCustomerCreditBalance <= 0) {
       setCashoutStatus("error");
-      setCashoutMessage("لا يوجد رصيد ائتمان مستحق على هذا الزبون.");
+      setCashoutMessage("لا يوجد رصيد ائتمان مستحق على هذا الزبون. / This customer has no outstanding credit balance.");
       return;
     }
 
@@ -1233,12 +1233,12 @@ export default function PartPOSPage() {
 
   async function saveCreditAccountPayment(payFullBalance = false) {
     if (!supabase) {
-      setCreditPaymentError("Supabase غير متصل.");
+      setCreditPaymentError("Supabase غير متصل. / Supabase is not connected.");
       return;
     }
 
     if (!selectedCustomer) {
-      setCreditPaymentError("اختر زبون أولاً.");
+      setCreditPaymentError("اختر زبون أولاً. / Select a customer first.");
       return;
     }
 
@@ -1248,17 +1248,17 @@ export default function PartPOSPage() {
       : parseMoney(creditPaymentAmount);
 
     if (balanceBefore <= 0) {
-      setCreditPaymentError("لا يوجد رصيد مستحق على هذا الزبون.");
+      setCreditPaymentError("لا يوجد رصيد مستحق على هذا الزبون. / This customer has no outstanding balance.");
       return;
     }
 
     if (requestedAmount <= 0) {
-      setCreditPaymentError("أدخل مبلغ الدفع.");
+      setCreditPaymentError("أدخل مبلغ الدفع. / Enter the payment amount.");
       return;
     }
 
     if (requestedAmount > balanceBefore) {
-      setCreditPaymentError("مبلغ الدفع أكبر من الرصيد المستحق.");
+      setCreditPaymentError("مبلغ الدفع أكبر من الرصيد المستحق. / Payment amount exceeds the outstanding balance.");
       return;
     }
 
@@ -1349,7 +1349,7 @@ export default function PartPOSPage() {
       lockPOSAfterCustomerCreditPayment(requestedAmount, balanceAfter);
     } catch (error) {
       setCreditPaymentStatus("error");
-      setCreditPaymentError(`خطأ Supabase: ${readSupabaseError(error)}`);
+      setCreditPaymentError(`خطأ Supabase / Supabase error: ${readSupabaseError(error)}`);
     }
   }
 
@@ -1369,26 +1369,26 @@ export default function PartPOSPage() {
 
     if (!selectedCustomer) {
       setCashoutStatus("error");
-      setCashoutMessage("اختر زبون للفاتورة قبل البيع على الائتمان.");
+      setCashoutMessage("اختر زبون للفاتورة قبل البيع على الائتمان. / Select a customer before making a credit sale.");
       return;
     }
 
     if (Number(selectedCustomer.credit_allowance) <= 0) {
       setCashoutStatus("error");
-      setCashoutMessage("هذا الزبون لا يملك سقف ائتمان.");
+      setCashoutMessage("هذا الزبون لا يملك سقف ائتمان. / This customer does not have a credit limit.");
       return;
     }
 
     if (saleRows.length === 0) {
       setCashoutStatus("error");
-      setCashoutMessage("أدخل قطعة واحدة على الأقل قبل إتمام البيع.");
+      setCashoutMessage("أدخل قطعة واحدة على الأقل قبل إتمام البيع. / Add at least one item before cashout.");
       return;
     }
 
     if (saleTotal > Number(selectedCustomer.credit_allowance)) {
       setCashoutStatus("error");
       setCashoutMessage(
-        `قيمة الفاتورة أعلى من سقف الائتمان. السقف: ${money(
+        `قيمة الفاتورة أعلى من سقف الائتمان. / Invoice total exceeds the credit limit. السقف: ${money(
           Number(selectedCustomer.credit_allowance),
         )} د.أ`,
       );
@@ -1407,19 +1407,19 @@ export default function PartPOSPage() {
 
   async function confirmCreditPinAndCashout() {
     if (!selectedCustomer) {
-      setCreditPinError("اختر زبون قبل البيع على الائتمان.");
+      setCreditPinError("اختر زبون قبل البيع على الائتمان. / Select a customer before a credit sale.");
       return;
     }
 
     const expectedPin = String(selectedCustomer.credit_pin_code || "");
 
     if (expectedPin.length !== 4) {
-      setCreditPinError("لا يوجد رمز ائتمان محفوظ لهذا الزبون. عدّل بيانات الزبون أولاً.");
+      setCreditPinError("لا يوجد رمز ائتمان محفوظ لهذا الزبون. عدّل بيانات الزبون أولاً. / No credit PIN is saved for this customer. Edit the customer first.");
       return;
     }
 
     if (creditPinEntry.length !== 4) {
-      setCreditPinError("أدخل رمز الائتمان من 4 أرقام.");
+      setCreditPinError("أدخل رمز الائتمان من 4 أرقام. / Enter the 4-digit credit PIN.");
       return;
     }
 
@@ -1429,7 +1429,7 @@ export default function PartPOSPage() {
     if (creditPinEntry !== expectedPin) {
       setCreditPinEntry("");
       setCreditCashoutStatus("error");
-      setCreditPinError("رمز الائتمان غير صحيح. البيع متوقف.");
+      setCreditPinError("رمز الائتمان غير صحيح. البيع متوقف. / Incorrect credit PIN. Sale blocked.");
       return;
     }
 
@@ -1482,7 +1482,7 @@ export default function PartPOSPage() {
           <tr>
             <td class="itemName">
               <strong>${index + 1}. ${productName}</strong>
-              <span>${department}${discount ? ` • خصم ${discount}` : ""}</span>
+              <span>${department}${discount ? ` • خصم / Discount ${discount}` : ""}</span>
             </td>
             <td>${quantity}</td>
             <td>${money(salePrice) || "0.00"}</td>
@@ -1496,30 +1496,30 @@ export default function PartPOSPage() {
       ? `
     <section class="customerBox">
       <div>
-        <span>الزبون</span>
+        <span>الزبون / Customer</span>
         <strong>${escapeReceiptText(args.customer.customer_name)}</strong>
       </div>
       <div>
-        <span>رقم الهاتف</span>
+        <span>رقم الهاتف / Phone Number</span>
         <strong>${escapeReceiptText(args.customer.phone_number || "—")}</strong>
       </div>
       <div>
-        <span>سقف الائتمان</span>
+        <span>سقف الائتمان / Credit Limit</span>
         <strong>${money(Number(args.customer.credit_allowance)) || "0.00"} د.أ</strong>
       </div>
     </section>`
       : `
     <section class="customerBox">
       <div>
-        <span>الزبون</span>
-        <strong>زبون نقدي</strong>
+        <span>الزبون / Customer</span>
+        <strong>زبون نقدي / Cash Customer</strong>
       </div>
       <div>
-        <span>رقم الهاتف</span>
+        <span>رقم الهاتف / Phone Number</span>
         <strong>—</strong>
       </div>
       <div>
-        <span>سقف الائتمان</span>
+        <span>سقف الائتمان / Credit Limit</span>
         <strong>0.00 د.أ</strong>
       </div>
     </section>`;
@@ -1702,21 +1702,21 @@ export default function PartPOSPage() {
       <img
         class="receiptLogo"
         src="/partpos/receipt-header.png"
-        alt="المعدنية المثالية لقطع غيار السيارات"
+        alt="المعدنية المثالية لقطع غيار السيارات / Ideal Metal Auto Parts"
       />
     </header>
 
     <section class="topBar">
       <div class="brand">
-        <h1>فاتورة بيع</h1>
-        <p>فاتورة بيع قطع سيارات</p>
-        <span class="badge">فاتورة للزبون</span>
+        <h1>فاتورة بيع / Sales Receipt</h1>
+        <p>فاتورة بيع قطع سيارات / Auto Parts Sales Receipt</p>
+        <span class="badge">فاتورة للزبون / Customer Copy</span>
       </div>
       <div class="meta">
-        <strong>رقم الفاتورة: ${escapeReceiptText(String(args.saleNumber ?? "قيد الحفظ"))}</strong>
-        <p>التاريخ: ${escapeReceiptText(dateText)}</p>
-        <p>الوقت: ${escapeReceiptText(timeText)}</p>
-        <p>طريقة الدفع: ${escapeReceiptText(args.tender)}</p>
+        <strong>رقم الفاتورة / Receipt No.: ${escapeReceiptText(String(args.saleNumber ?? "قيد الحفظ / Saving"))}</strong>
+        <p>التاريخ / Date: ${escapeReceiptText(dateText)}</p>
+        <p>الوقت / Time: ${escapeReceiptText(timeText)}</p>
+        <p>طريقة الدفع / Payment Method: ${escapeReceiptText(args.tender)}</p>
       </div>
     </section>
 
@@ -1726,10 +1726,10 @@ export default function PartPOSPage() {
       <table>
         <thead>
           <tr>
-            <th>الصنف</th>
-            <th>الكمية</th>
-            <th>السعر د.أ</th>
-            <th style="text-align:left;">المجموع</th>
+            <th>الصنف / Item</th>
+            <th>الكمية / Qty</th>
+            <th>السعر د.أ / Price JOD</th>
+            <th style="text-align:left;">المجموع / Total</th>
           </tr>
         </thead>
         <tbody>${itemRows}</tbody>
@@ -1737,18 +1737,18 @@ export default function PartPOSPage() {
     </section>
 
     <section class="summary">
-      <div class="summaryRow total"><span>الإجمالي</span><strong>${money(args.total) || "0.00"} د.أ</strong></div>
-      <div class="summaryRow paid"><span>المبلغ المدفوع</span><strong>${money(args.paid) || "0.00"} د.أ</strong></div>
-      <div class="summaryRow"><span>طريقة الدفع</span><strong>${escapeReceiptText(args.tender)}</strong></div>
-      <div class="summaryRow change"><span>الراجع للزبون</span><strong>${money(args.change) || "0.00"} د.أ</strong></div>
+      <div class="summaryRow total"><span>الإجمالي / Total</span><strong>${money(args.total) || "0.00"} د.أ</strong></div>
+      <div class="summaryRow paid"><span>المبلغ المدفوع / Amount Paid</span><strong>${money(args.paid) || "0.00"} د.أ</strong></div>
+      <div class="summaryRow"><span>طريقة الدفع / Payment Method</span><strong>${escapeReceiptText(args.tender)}</strong></div>
+      <div class="summaryRow change"><span>الراجع للزبون / Change</span><strong>${money(args.change) || "0.00"} د.أ</strong></div>
     </section>
 
     <section class="footer">
       <div>
-        <div class="thankYou">شكراً لتعاملكم معنا</div>
-        <p>يرجى الاحتفاظ بهذه الفاتورة لسجلاتك.</p>
+        <div class="thankYou">شكراً لتعاملكم معنا / Thank you for your business</div>
+        <p>يرجى الاحتفاظ بهذه الفاتورة لسجلاتك. / Please keep this receipt for your records.</p>
       </div>
-      <p>مشغل بواسطة Darik Technologies</p>
+      <p>مشغل بواسطة Darik Technologies / Powered by Darik Technologies</p>
     </section>
   </main>
   <script>
@@ -1811,7 +1811,7 @@ export default function PartPOSPage() {
   async function saveExpense() {
     if (!supabase) {
       setExpenseSaveStatus("error");
-      setExpenseSaveMessage("Supabase غير مربوط. لا يمكن حفظ المصروف.");
+      setExpenseSaveMessage("Supabase غير مربوط. لا يمكن حفظ المصروف. / Supabase is not connected. Expense cannot be saved.");
       return;
     }
 
@@ -1821,19 +1821,19 @@ export default function PartPOSPage() {
 
     if (amount <= 0) {
       setExpenseSaveStatus("error");
-      setExpenseSaveMessage("أدخل مبلغ المصروف.");
+      setExpenseSaveMessage("أدخل مبلغ المصروف. / Enter the expense amount.");
       return;
     }
 
     if (expenseMode === "utility" && !details) {
       setExpenseSaveStatus("error");
-      setExpenseSaveMessage("أدخل تفاصيل المصروف.");
+      setExpenseSaveMessage("أدخل تفاصيل المصروف. / Enter expense details.");
       return;
     }
 
     if (expenseMode === "vendor" && !company) {
       setExpenseSaveStatus("error");
-      setExpenseSaveMessage("أدخل اسم الشركة أو المورد.");
+      setExpenseSaveMessage("أدخل اسم الشركة أو المورد. / Enter the company or supplier name.");
       return;
     }
 
@@ -1854,13 +1854,13 @@ export default function PartPOSPage() {
       setExpenseSaveStatus("success");
       setExpenseSaveMessage(
         expenseMode === "utility"
-          ? `تم حفظ المصروف بقيمة ${money(amount)} د.أ (${expenseForm.paidBy === "cash" ? "نقداً" : "على الحساب"}).`
-          : `تم حفظ دفعة المورد بقيمة ${money(amount)} د.أ (${expenseForm.paidBy === "cash" ? "نقداً" : "على الحساب"}).`,
+          ? `تم حفظ المصروف / Expense saved: ${money(amount)} د.أ (${expenseForm.paidBy === "cash" ? "نقداً / Cash" : "على الحساب / Account"}).`
+          : `تم حفظ دفعة المورد / Supplier payment saved: ${money(amount)} د.أ (${expenseForm.paidBy === "cash" ? "نقداً / Cash" : "على الحساب / Account"}).`,
       );
       setExpenseForm(emptyExpenseForm());
     } catch (error) {
       setExpenseSaveStatus("error");
-      setExpenseSaveMessage(`خطأ Supabase: ${readSupabaseError(error)}`);
+      setExpenseSaveMessage(`خطأ Supabase / Supabase error: ${readSupabaseError(error)}`);
     }
   }
 
@@ -1907,13 +1907,13 @@ export default function PartPOSPage() {
   ) {
     if (!supabase) {
       setCashoutStatus("error");
-      setCashoutMessage("Supabase غير مربوط. لا يمكن حفظ البيع.");
+      setCashoutMessage("Supabase غير مربوط. لا يمكن حفظ البيع. / Supabase is not connected. Sale cannot be saved.");
       return;
     }
 
     if (saleRows.length === 0 || saleTotal <= 0) {
       setCashoutStatus("error");
-      setCashoutMessage("أضف منتج واحد على الأقل قبل إتمام البيع.");
+      setCashoutMessage("أضف منتج واحد على الأقل قبل إتمام البيع. / Add at least one product before cashout.");
       return;
     }
 
@@ -1923,25 +1923,25 @@ export default function PartPOSPage() {
 
     if (!isCreditSale && paidAmount < saleTotal) {
       setCashoutStatus("error");
-      setCashoutMessage("المبلغ المدفوع أقل من الإجمالي.");
+      setCashoutMessage("المبلغ المدفوع أقل من الإجمالي. / Amount paid is less than the total.");
       return;
     }
 
     if (isCreditSale && !selectedCustomer) {
       setCashoutStatus("error");
-      setCashoutMessage("اختر زبون قبل البيع على الائتمان.");
+      setCashoutMessage("اختر زبون قبل البيع على الائتمان. / Select a customer before a credit sale.");
       return;
     }
 
     if (isCreditSale && Number(selectedCustomer?.credit_allowance ?? 0) <= 0) {
       setCashoutStatus("error");
-      setCashoutMessage("هذا الزبون لا يملك سقف ائتمان.");
+      setCashoutMessage("هذا الزبون لا يملك سقف ائتمان. / This customer does not have a credit limit.");
       return;
     }
 
     if (isCreditSale && saleTotal > Number(selectedCustomer?.credit_allowance ?? 0)) {
       setCashoutStatus("error");
-      setCashoutMessage("قيمة الفاتورة أعلى من سقف الائتمان.");
+      setCashoutMessage("قيمة الفاتورة أعلى من سقف الائتمان. / Invoice total exceeds the credit limit.");
       return;
     }
 
@@ -1951,7 +1951,7 @@ export default function PartPOSPage() {
         : null;
 
     setCashoutStatus("saving");
-    setCashoutMessage("جاري حفظ البيع...");
+    setCashoutMessage("جاري حفظ البيع... / Saving sale...");
 
     try {
       const productIds: Record<string, string | null> = {};
@@ -2018,7 +2018,7 @@ export default function PartPOSPage() {
           total: saleTotal,
           paid: salePaidAmount,
           change: saleChangeDue,
-          tender: isCreditSale ? "ائتمان" : "نقداً",
+          tender: isCreditSale ? "ائتمان / Credit" : "نقداً / Cash",
           customer: selectedCustomer,
         });
 
@@ -2027,11 +2027,11 @@ export default function PartPOSPage() {
 
       const successMessage = isCreditSale
         ? printBlocked
-          ? `تم حفظ البيع على الائتمان رقم ${sale.sale_number ?? ""}، لكن المتصفح منع نافذة الطباعة. اسمح بالـ popups.`
-          : `تم حفظ البيع على الائتمان رقم ${sale.sale_number ?? ""}.`
+          ? `تم حفظ البيع على الائتمان رقم ${sale.sale_number ?? ""}، لكن المتصفح منع نافذة الطباعة. اسمح بالـ popups. / Credit sale saved, but the browser blocked the print window. Allow popups.`
+          : `تم حفظ البيع على الائتمان رقم ${sale.sale_number ?? ""}. / Credit sale saved.`
         : printBlocked
-          ? `تم حفظ البيع رقم ${sale.sale_number ?? ""}، لكن المتصفح منع نافذة الطباعة. اسمح بالـ popups. الراجع: ${money(saleChangeDue) || "0.00"} د.أ`
-          : `تم حفظ البيع رقم ${sale.sale_number ?? ""}. الراجع: ${money(saleChangeDue) || "0.00"} د.أ`;
+          ? `تم حفظ البيع رقم ${sale.sale_number ?? ""}، لكن المتصفح منع نافذة الطباعة. اسمح بالـ popups. / Sale saved, but the browser blocked the print window. Allow popups. الراجع / Change: ${money(saleChangeDue) || "0.00"} د.أ`
+          : `تم حفظ البيع رقم ${sale.sale_number ?? ""}. / Sale saved. الراجع / Change: ${money(saleChangeDue) || "0.00"} د.أ`;
 
       clearCurrentSaleInputs();
       setCashoutStatus("success");
@@ -2058,14 +2058,14 @@ export default function PartPOSPage() {
       <main className="pinPage" dir="rtl">
         <section className="pinCard">
           <p className="pinEyebrow">PartPOS</p>
-          <h1>شاشة الدخول</h1>
+          <h1>شاشة الدخول / Login</h1>
           <p className="pinSubtext">
-            أدخل رمز الكاشير للبيع أو رمز التقارير للعرض فقط.
+            أدخل رمز الكاشير للبيع أو رمز التقارير للعرض فقط. / Enter cashier PIN for sales or reports PIN for view-only access.
           </p>
 
           {lockNotice && <div className="lockNotice">{lockNotice}</div>}
 
-          <label htmlFor="pin-input">رمز الدخول</label>
+          <label htmlFor="pin-input">رمز الدخول / PIN</label>
           <input
             id="pin-input"
             value={pinEntry}
@@ -2104,7 +2104,7 @@ export default function PartPOSPage() {
               0
             </button>
             <button type="button" className="deletePinKey" onClick={deletePinDigit}>
-              حذف
+              حذف / Delete
             </button>
           </div>
         </section>
@@ -2263,7 +2263,7 @@ export default function PartPOSPage() {
         <div>
           <p className="eyebrow">Darik Technologies</p>
           <h1>PartPOS</h1>
-          <p className="subtext">نظام بيع بسيط لقطع السيارات</p>
+          <p className="subtext">نظام بيع بسيط لقطع السيارات / Simple Auto Parts POS</p>
         </div>
         <div className="headerActions">
           <button
@@ -2271,54 +2271,53 @@ export default function PartPOSPage() {
             onClick={openReports}
             type="button"
           >
-            التقارير
+            التقارير / Reports
           </button>
           <button
             className="historyTopButton"
             onClick={openEndOfDayReport}
             type="button"
           >
-            تقرير نهاية اليوم
+            تقرير نهاية اليوم / End of Day
           </button>
           <button
             className="historyTopButton"
             onClick={openSalesHistory}
             type="button"
           >
-            سجل المبيعات
+            سجل المبيعات / Sales History
           </button>
           <button
             className="expenseTopButton"
             onClick={openExpensePopup}
             type="button"
           >
-            إضافة مصروف
+            إضافة مصروف / Add Expense
           </button>
           <button className="clearButton" onClick={clearSale} type="button">
-            فاتورة جديدة
+            فاتورة جديدة / New Sale
           </button>
         </div>
       </section>
 
       {!supabase && (
         <div className="warning">
-          أضف NEXT_PUBLIC_SUPABASE_URL و NEXT_PUBLIC_SUPABASE_ANON_KEY حتى يعمل
-          الحفظ والبحث.
+          أضف NEXT_PUBLIC_SUPABASE_URL و NEXT_PUBLIC_SUPABASE_ANON_KEY حتى يعمل الحفظ والبحث. / Add the Supabase URL and anon key to enable saving and search.
         </div>
       )}
 
       <section className="searchCard">
-        <label htmlFor="partpos-search">بحث عن منتج محفوظ</label>
+        <label htmlFor="partpos-search">بحث عن منتج محفوظ / Search Saved Product</label>
         <input
           id="partpos-search"
           value={search}
           onFocus={handleProductSearchFocus}
           onChange={(event) => void searchProducts(event.target.value)}
-          placeholder="اضغط هنا لآخر 10 منتجات أو اكتب للبحث"
+          placeholder="اضغط لآخر 10 منتجات أو اكتب للبحث / Tap for last 10 products or type to search"
           autoComplete="off"
         />
 
-        {isSearching && <div className="hint">جاري البحث...</div>}
+        {isSearching && <div className="hint">جاري البحث... / Searching...</div>}
         {searchError && <div className="error">{searchError}</div>}
 
         {suggestions.length > 0 && (
@@ -2341,12 +2340,12 @@ export default function PartPOSPage() {
       <section className="customerCard">
         <div className="customerBarHeader">
           <div>
-            <label htmlFor="customer-search">إضافة زبون للفاتورة</label>
-            <p>اضغط لعرض آخر 10 زبائن، أو اكتب للبحث بالاسم / الشركة / الهاتف.</p>
+            <label htmlFor="customer-search">إضافة زبون للفاتورة / Add Customer to Sale</label>
+            <p>اضغط لعرض آخر 10 زبائن، أو اكتب للبحث بالاسم / الشركة / الهاتف. / Tap for the last 10 customers, or search by name, company, or phone.</p>
           </div>
           {selectedCustomer && (
             <button type="button" className="removeCustomerButton" onClick={clearCustomerSelection}>
-              إزالة الزبون
+              إزالة الزبون / Remove Customer
             </button>
           )}
         </div>
@@ -2358,11 +2357,11 @@ export default function PartPOSPage() {
               value={customerSearch}
               onFocus={handleCustomerSearchFocus}
               onChange={(event) => void searchCustomers(event.target.value)}
-              placeholder="اضغط هنا لآخر 10 زبائن أو اكتب للبحث"
+              placeholder="اضغط لآخر 10 زبائن أو اكتب للبحث / Tap for last 10 customers or type to search"
               autoComplete="off"
             />
 
-            {isCustomerSearching && <div className="hint">جاري البحث عن الزبون...</div>}
+            {isCustomerSearching && <div className="hint">جاري البحث عن الزبون... / Searching customers...</div>}
             {customerSearchError && <div className="error">{customerSearchError}</div>}
 
             {customerSuggestions.length > 0 && (
@@ -2374,7 +2373,7 @@ export default function PartPOSPage() {
                     onClick={() => selectCustomer(customer)}
                   >
                     <strong>{customer.customer_name}</strong>
-                    <span>{customer.phone_number || "بدون رقم"}</span>
+                    <span>{customer.phone_number || "بدون رقم / No number"}</span>
                     <b>{money(Number(customer.credit_allowance)) || "0.00"} د.أ</b>
                   </button>
                 ))}
@@ -2383,32 +2382,32 @@ export default function PartPOSPage() {
           </div>
 
           <button type="button" className="addCustomerButton" onClick={openCustomerPopup}>
-            إضافة زبون جديد
+            إضافة زبون جديد / Add New Customer
           </button>
         </div>
 
         {selectedCustomer && (
           <div className="selectedCustomerBox">
             <div>
-              <span>الزبون على الفاتورة</span>
+              <span>الزبون على الفاتورة / Customer on Sale</span>
               <strong>{selectedCustomer.customer_name}</strong>
             </div>
             <div>
-              <span>رقم الهاتف</span>
+              <span>رقم الهاتف / Phone Number</span>
               <strong>{selectedCustomer.phone_number || "—"}</strong>
             </div>
             <div>
-              <span>سقف الائتمان</span>
+              <span>سقف الائتمان / Credit Limit</span>
               <strong>{money(Number(selectedCustomer.credit_allowance)) || "0.00"} د.أ</strong>
             </div>
             <div>
-              <span>الرصيد المستحق</span>
+              <span>الرصيد المستحق / Outstanding Balance</span>
               <strong className={selectedCustomerCreditBalance > 0 ? "remainingNumber" : "changeNumber"}>
                 {creditBalanceLoading
-                  ? "جاري الحساب..."
+                  ? "جاري الحساب... / Calculating..."
                   : `${money(selectedCustomerCreditBalance)} د.أ`}
               </strong>
-              <small className="creditBalanceNote">لا يشمل الفواتير الملغاة VOID</small>
+              <small className="creditBalanceNote">لا يشمل الفواتير الملغاة VOID / Excludes VOID receipts</small>
             </div>
           </div>
         )}
@@ -2417,20 +2416,20 @@ export default function PartPOSPage() {
       <section className="tableCard">
         {departmentLoadError && (
           <div className="departmentLoadError">
-            لم يتم تحميل قائمة الأقسام: {departmentLoadError}
+            لم يتم تحميل قائمة الأقسام / Departments failed to load: {departmentLoadError}
           </div>
         )}
         <div className="tableWrap">
           <table>
             <thead>
               <tr>
-                <th>اسم المنتج</th>
-                <th>القسم</th>
-                <th>التكلفة</th>
-                <th>السعر</th>
-                <th>الكمية</th>
-                <th>المجموع</th>
-                <th>الحفظ</th>
+                <th>اسم المنتج / Product Name</th>
+                <th>القسم / Department</th>
+                <th>التكلفة / Cost</th>
+                <th>السعر / Price</th>
+                <th>الكمية / Qty</th>
+                <th>المجموع / Total</th>
+                <th>الحفظ / Save</th>
               </tr>
             </thead>
             <tbody>
@@ -2443,7 +2442,7 @@ export default function PartPOSPage() {
                         onChange={(event) =>
                           updateRow(index, "productName", event.target.value)
                         }
-                        placeholder="اسم المنتج بالعربي"
+                        placeholder="اسم المنتج / Product name"
                       />
                     </td>
                     <td className="departmentCell">
@@ -2466,18 +2465,18 @@ export default function PartPOSPage() {
                               updateRow(index, "department", selectedValue);
                             }}
                           >
-                            <option value="">اختر القسم</option>
+                            <option value="">اختر القسم / Choose Department</option>
                             {departmentOptions.map((department) => (
                               <option value={department} key={department}>
                                 {department}
                               </option>
                             ))}
                             <option value="__new_department__">
-                              + قسم جديد
+                              + قسم جديد / New Department
                             </option>
                           </select>
                           <small className="departmentHint">
-                            اختر من الأقسام المحفوظة حتى لا يتكرر نفس القسم بتهجئة مختلفة.
+                            اختر من الأقسام المحفوظة حتى لا يتكرر نفس القسم بتهجئة مختلفة. / Choose a saved department to avoid duplicate spellings.
                           </small>
                         </>
                       ) : (
@@ -2489,8 +2488,8 @@ export default function PartPOSPage() {
                             }
                             placeholder={
                               departmentOptions.length > 0
-                                ? "اكتب اسم القسم الجديد"
-                                : "القسم"
+                                ? "اكتب اسم القسم الجديد / Enter new department"
+                                : "القسم / Department"
                             }
                           />
                           {departmentOptions.length > 0 && (
@@ -2502,7 +2501,7 @@ export default function PartPOSPage() {
                                 updateRow(index, "department", "");
                               }}
                             >
-                              اختيار من القائمة
+                              اختيار من القائمة / Choose from list
                             </button>
                           )}
                         </div>
@@ -2517,20 +2516,20 @@ export default function PartPOSPage() {
                         }
                         placeholder={
                           isUsedDepartment(row.department)
-                            ? "لا يوجد تكلفة للمستعمل"
+                            ? "لا يوجد تكلفة للمستعمل / No cost for used parts"
                             : "0.00"
                         }
                         inputMode="decimal"
                         disabled={isUsedDepartment(row.department)}
                         title={
                           isUsedDepartment(row.department)
-                            ? "قسم مستعمل بدون تكلفة - أدخل السعر فقط"
-                            : "تكلفة القطعة"
+                            ? "قسم مستعمل بدون تكلفة - أدخل السعر فقط / Used department has no cost - enter selling price only"
+                            : "تكلفة القطعة / Item cost"
                         }
                       />
                       {isUsedDepartment(row.department) && (
                         <small className="usedCostHint">
-                          مستعمل: أدخل سعر البيع فقط
+                          مستعمل: أدخل سعر البيع فقط / Used: enter selling price only
                         </small>
                       )}
                     </td>
@@ -2544,13 +2543,13 @@ export default function PartPOSPage() {
                         onKeyDown={(event) => {
                           if (event.key === "Enter") event.currentTarget.blur();
                         }}
-                        placeholder="تلقائي ويمكن تعديله"
+                        placeholder="تلقائي ويمكن تعديله / Auto, editable"
                         inputMode="decimal"
                       />
                       {row.basePrice &&
                         parseMoney(row.price) !== rowBasePrice(row) && (
                           <small className="basePriceNote">
-                            السعر الأصلي: {row.basePrice} د.أ
+                            السعر الأصلي / Original price: {row.basePrice} د.أ
                           </small>
                         )}
                     </td>
@@ -2573,13 +2572,13 @@ export default function PartPOSPage() {
                     </td>
                     <td className="statusCell">
                       {row.savedProductId && row.saveStatus === "saved" && (
-                        <span className="saved">محفوظ سابقاً</span>
+                        <span className="saved">محفوظ سابقاً / Saved</span>
                       )}
                       {!row.savedProductId && rowIsSaveReady(row) && (
-                        <span className="pendingSave">سيحفظ عند البيع</span>
+                        <span className="pendingSave">سيحفظ عند البيع / Saves at cashout</span>
                       )}
                       {row.saveStatus === "error" && (
-                        <span className="error">خطأ</span>
+                        <span className="error">خطأ / Error</span>
                       )}
                       {row.errorMessage && <small>{row.errorMessage}</small>}
                     </td>
@@ -2591,7 +2590,7 @@ export default function PartPOSPage() {
         </div>
 
         <div className="totals">
-          <span>الإجمالي</span>
+          <span>الإجمالي / Total</span>
           <strong className="totalNumber">
             {money(saleTotal) || "0.00"} د.أ
           </strong>
@@ -2599,7 +2598,7 @@ export default function PartPOSPage() {
 
         <div className="cashoutPanel">
           <div className="cashInputGroup">
-            <label htmlFor="cash-received">المبلغ المدفوع نقداً</label>
+            <label htmlFor="cash-received">المبلغ المدفوع نقداً / Cash Received</label>
             <input
               id="cash-received"
               value={cashReceived}
@@ -2615,18 +2614,18 @@ export default function PartPOSPage() {
 
           <div className="changeGrid">
             <div>
-              <span>الإجمالي المطلوب</span>
+              <span>الإجمالي المطلوب / Total Due</span>
               <strong className="totalNumber">
                 {money(saleTotal) || "0.00"} د.أ
               </strong>
             </div>
             <div>
-              <span>المدفوع</span>
+              <span>المدفوع / Paid</span>
               <strong>{money(paidAmount) || "0.00"} د.أ</strong>
             </div>
             <div>
               <span>
-                {remainingDue > 0 ? "باقي على الزبون" : "الراجع للزبون"}
+                {remainingDue > 0 ? "باقي على الزبون / Remaining Due" : "الراجع للزبون / Change"}
               </span>
               <strong
                 className={
@@ -2646,7 +2645,7 @@ export default function PartPOSPage() {
               onClick={() => void cashOutSale(false, "cash")}
               type="button"
             >
-              {cashoutStatus === "saving" ? "جاري الحفظ..." : "إتمام البيع"}
+              {cashoutStatus === "saving" ? "جاري الحفظ... / Saving..." : "إتمام البيع / Cashout"}
             </button>
             <button
               className="printCashoutButton"
@@ -2654,7 +2653,7 @@ export default function PartPOSPage() {
               onClick={() => void cashOutSale(true, "cash")}
               type="button"
             >
-              إتمام البيع وطباعة الفاتورة
+              إتمام البيع وطباعة الفاتورة / Cashout & Print
             </button>
             <button
               className="creditCashoutButton"
@@ -2662,7 +2661,7 @@ export default function PartPOSPage() {
               onClick={openCreditPinPopup}
               type="button"
             >
-              إتمام البيع على الائتمان وطباعة الفاتورة
+              إتمام البيع على الائتمان وطباعة الفاتورة / Credit Cashout & Print
             </button>
 
             <button
@@ -2679,10 +2678,10 @@ export default function PartPOSPage() {
               type="button"
             >
               {creditBalanceLoading
-                ? "جاري حساب رصيد الزبون..."
+                ? "جاري حساب رصيد الزبون... / Calculating balance..."
                 : selectedCustomerCreditBalance > 0
-                  ? `دفع على حساب الائتمان • ${money(selectedCustomerCreditBalance)} د.أ`
-                  : "دفع على حساب الائتمان"}
+                  ? `دفع على حساب الائتمان / Credit Payment • ${money(selectedCustomerCreditBalance)} د.أ`
+                  : "دفع على حساب الائتمان / Credit Payment"}
             </button>
           </div>
 
@@ -2698,8 +2697,8 @@ export default function PartPOSPage() {
       {isExpensePopupOpen && (
         <div className="popupBackdrop" role="dialog" aria-modal="true">
           <div className="expensePopupCard">
-            <p className="popupEyebrow">مصروفات</p>
-            <h2>إضافة مصروف</h2>
+            <p className="popupEyebrow">مصروفات / Expenses</p>
+            <h2>إضافة مصروف / Add Expense</h2>
 
             <div className="expenseTabs">
               <button
@@ -2707,25 +2706,25 @@ export default function PartPOSPage() {
                 className={expenseMode === "utility" ? "expenseTab activeExpenseTab" : "expenseTab"}
                 onClick={() => switchExpenseMode("utility")}
               >
-                خدمات / مرافق
+                خدمات / مرافق / Utilities
               </button>
               <button
                 type="button"
                 className={expenseMode === "vendor" ? "expenseTab activeExpenseTab" : "expenseTab"}
                 onClick={() => switchExpenseMode("vendor")}
               >
-                دفع مورد
+                دفع مورد / Supplier Payment
               </button>
             </div>
 
             <div className="expenseCashNote">
-              نقداً = يخصم من تقرير نهاية اليوم. على الحساب = يبقى مستحق ولا يلمس الكاش.
+              نقداً = يخصم من تقرير نهاية اليوم. على الحساب = يبقى مستحق ولا يلمس الكاش. / Cash reduces today's drawer; account/credit remains outstanding and does not affect cash.
             </div>
 
             {expenseMode === "utility" ? (
               <div className="expenseFormGrid">
                 <div>
-                  <label htmlFor="expense-details">التفاصيل</label>
+                  <label htmlFor="expense-details">التفاصيل / Details</label>
                   <input
                     id="expense-details"
                     value={expenseForm.details}
@@ -2735,14 +2734,14 @@ export default function PartPOSPage() {
                         details: event.target.value,
                       }))
                     }
-                    placeholder="مثال: راتب موظف، كهرباء، ماء، إنترنت، إيجار"
+                    placeholder="مثال: راتب، كهرباء، ماء / Example: salary, electricity, water"
                     autoComplete="off"
                     autoFocus
                   />
                 </div>
 
                 <div>
-                  <label htmlFor="expense-amount">المبلغ</label>
+                  <label htmlFor="expense-amount">المبلغ / Amount</label>
                   <input
                     id="expense-amount"
                     value={expenseForm.amount}
@@ -2759,7 +2758,7 @@ export default function PartPOSPage() {
                 </div>
 
                 <div>
-                  <label htmlFor="expense-paid-by">طريقة الدفع</label>
+                  <label htmlFor="expense-paid-by">طريقة الدفع / Payment Method</label>
                   <select
                     id="expense-paid-by"
                     value={expenseForm.paidBy}
@@ -2770,15 +2769,15 @@ export default function PartPOSPage() {
                       }))
                     }
                   >
-                    <option value="cash">نقداً - يخصم من صندوق اليوم</option>
-                    <option value="credit">على الحساب - لا يخصم من الكاش</option>
+                    <option value="cash">نقداً - يخصم من صندوق اليوم / Cash - deducts from today's drawer</option>
+                    <option value="credit">على الحساب - لا يخصم من الكاش / Account - does not reduce cash</option>
                   </select>
                 </div>
               </div>
             ) : (
               <div className="expenseFormGrid">
                 <div>
-                  <label htmlFor="vendor-company">الشركة / المورد</label>
+                  <label htmlFor="vendor-company">الشركة / المورد / Company / Supplier</label>
                   <input
                     id="vendor-company"
                     value={expenseForm.company}
@@ -2788,14 +2787,14 @@ export default function PartPOSPage() {
                         company: event.target.value,
                       }))
                     }
-                    placeholder="اسم الشركة أو المورد"
+                    placeholder="اسم الشركة أو المورد / Company or supplier name"
                     autoComplete="off"
                     autoFocus
                   />
                 </div>
 
                 <div>
-                  <label htmlFor="vendor-amount">المبلغ</label>
+                  <label htmlFor="vendor-amount">المبلغ / Amount</label>
                   <input
                     id="vendor-amount"
                     value={expenseForm.amount}
@@ -2812,7 +2811,7 @@ export default function PartPOSPage() {
                 </div>
 
                 <div>
-                  <label htmlFor="vendor-paid-by">طريقة الدفع</label>
+                  <label htmlFor="vendor-paid-by">طريقة الدفع / Payment Method</label>
                   <select
                     id="vendor-paid-by"
                     value={expenseForm.paidBy}
@@ -2823,8 +2822,8 @@ export default function PartPOSPage() {
                       }))
                     }
                   >
-                    <option value="cash">نقداً - يخصم من صندوق اليوم</option>
-                    <option value="credit">على الحساب - يبقى مستحق</option>
+                    <option value="cash">نقداً - يخصم من صندوق اليوم / Cash - deducts from today's drawer</option>
+                    <option value="credit">على الحساب - يبقى مستحق / Credit - remains outstanding</option>
                   </select>
                 </div>
               </div>
@@ -2843,7 +2842,7 @@ export default function PartPOSPage() {
                 onClick={closeExpensePopup}
                 disabled={expenseSaveStatus === "saving"}
               >
-                إغلاق
+                إغلاق / Close
               </button>
               <button
                 type="button"
@@ -2851,7 +2850,7 @@ export default function PartPOSPage() {
                 onClick={() => void saveExpense()}
                 disabled={expenseSaveStatus === "saving"}
               >
-                {expenseSaveStatus === "saving" ? "جاري الحفظ..." : "حفظ المصروف"}
+                {expenseSaveStatus === "saving" ? "جاري الحفظ... / Saving..." : "حفظ المصروف / Save Expense"}
               </button>
             </div>
           </div>
@@ -2861,25 +2860,25 @@ export default function PartPOSPage() {
       {isCreditPaymentPopupOpen && (
         <div className="popupBackdrop" role="dialog" aria-modal="true">
           <div className="creditPaymentPopupCard">
-            <p className="popupEyebrow">دفعة ائتمان</p>
-            <h2>دفع على حساب الزبون</h2>
+            <p className="popupEyebrow">دفعة ائتمان / Credit Payment</p>
+            <h2>دفع على حساب الزبون / Customer Credit Payment</h2>
 
             <div className="creditCustomerSummary">
               <div>
-                <span>الزبون</span>
+                <span>الزبون / Customer</span>
                 <strong>{selectedCustomer?.customer_name || "—"}</strong>
               </div>
               <div>
-                <span>الرصيد المستحق</span>
+                <span>الرصيد المستحق / Outstanding Balance</span>
                 <strong>{money(selectedCustomerCreditBalance)} د.أ</strong>
               </div>
               <div>
-                <span>عدد الفواتير المفتوحة</span>
+                <span>عدد الفواتير المفتوحة / Open Invoices</span>
                 <strong>{customerCreditInvoices.length}</strong>
               </div>
             </div>
 
-            <label htmlFor="credit-payment-amount">مبلغ الدفع</label>
+            <label htmlFor="credit-payment-amount">مبلغ الدفع / Payment Amount</label>
             <input
               id="credit-payment-amount"
               value={creditPaymentAmount}
@@ -2901,7 +2900,7 @@ export default function PartPOSPage() {
                 onClick={closeCreditPaymentPopup}
                 disabled={creditPaymentStatus === "saving"}
               >
-                إلغاء
+                إلغاء / Cancel
               </button>
               <button
                 type="button"
@@ -2909,7 +2908,7 @@ export default function PartPOSPage() {
                 onClick={() => void saveCreditAccountPayment(false)}
                 disabled={creditPaymentStatus === "saving"}
               >
-                {creditPaymentStatus === "saving" ? "جاري الحفظ..." : "تسجيل دفعة جزئية"}
+                {creditPaymentStatus === "saving" ? "جاري الحفظ... / Saving..." : "تسجيل دفعة جزئية / Record Partial Payment"}
               </button>
               <button
                 type="button"
@@ -2917,7 +2916,7 @@ export default function PartPOSPage() {
                 onClick={() => void saveCreditAccountPayment(true)}
                 disabled={creditPaymentStatus === "saving"}
               >
-                دفع كامل الرصيد
+                دفع كامل الرصيد / Pay Full Balance
               </button>
             </div>
           </div>
@@ -2927,32 +2926,32 @@ export default function PartPOSPage() {
       {isCreditPinPopupOpen && (
         <div className="popupBackdrop" role="dialog" aria-modal="true">
           <div className="creditPinPopupCard">
-            <p className="popupEyebrow">بيع على الائتمان</p>
-            <h2>تأكيد رمز الزبون</h2>
+            <p className="popupEyebrow">بيع على الائتمان / Credit Sale</p>
+            <h2>تأكيد رمز الزبون / Confirm Customer PIN</h2>
 
             <div className="creditCustomerSummary">
               <div>
-                <span>الزبون</span>
+                <span>الزبون / Customer</span>
                 <strong>{selectedCustomer?.customer_name || "—"}</strong>
               </div>
               <div>
-                <span>إجمالي الفاتورة</span>
+                <span>إجمالي الفاتورة / Invoice Total</span>
                 <strong>{money(saleTotal)} د.أ</strong>
               </div>
               <div>
-                <span>سقف الائتمان</span>
+                <span>سقف الائتمان / Credit Limit</span>
                 <strong>{money(Number(selectedCustomer?.credit_allowance ?? 0))} د.أ</strong>
               </div>
             </div>
 
-            <label htmlFor="credit-sale-pin">رمز الائتمان</label>
+            <label htmlFor="credit-sale-pin">رمز الائتمان / Credit PIN</label>
             <input
               id="credit-sale-pin"
               value={creditPinEntry}
               onChange={(event) =>
                 setCreditPinEntry(cleanFourDigitPin(event.target.value))
               }
-              placeholder="أدخل 4 أرقام"
+              placeholder="أدخل 4 أرقام / Enter 4 digits"
               inputMode="numeric"
               autoComplete="off"
               maxLength={4}
@@ -2970,7 +2969,7 @@ export default function PartPOSPage() {
                   creditCashoutStatus === "saving" || creditCashoutStatus === "checking"
                 }
               >
-                إلغاء
+                إلغاء / Cancel
               </button>
               <button
                 type="button"
@@ -2981,10 +2980,10 @@ export default function PartPOSPage() {
                 }
               >
                 {creditCashoutStatus === "saving"
-                  ? "جاري الحفظ..."
+                  ? "جاري الحفظ... / Saving..."
                   : creditCashoutStatus === "checking"
-                    ? "جاري التحقق..."
-                    : "تأكيد وإتمام البيع"}
+                    ? "جاري التحقق... / Checking..."
+                    : "تأكيد وإتمام البيع / Confirm & Cashout"}
               </button>
             </div>
           </div>
@@ -2994,10 +2993,10 @@ export default function PartPOSPage() {
       {isCustomerPopupOpen && (
         <div className="popupBackdrop" role="dialog" aria-modal="true">
           <div className="customerPopupCard">
-            <p className="popupEyebrow">زبون جديد</p>
-            <h2>إضافة زبون للفاتورة</h2>
+            <p className="popupEyebrow">زبون جديد / New Customer</p>
+            <h2>إضافة زبون للفاتورة / Add Customer to Sale</h2>
 
-            <label htmlFor="customer-name">الاسم أو اسم الشركة</label>
+            <label htmlFor="customer-name">الاسم أو اسم الشركة / Name or Company</label>
             <input
               id="customer-name"
               value={customerForm.customerName}
@@ -3007,11 +3006,11 @@ export default function PartPOSPage() {
                   customerName: event.target.value,
                 }))
               }
-              placeholder="مثال: شركة المدينة / محمد أحمد"
+              placeholder="مثال: شركة المدينة / محمد أحمد / Example: company or customer name"
               autoComplete="off"
             />
 
-            <label htmlFor="customer-phone">رقم الهاتف</label>
+            <label htmlFor="customer-phone">رقم الهاتف / Phone Number</label>
             <input
               id="customer-phone"
               value={customerForm.phoneNumber}
@@ -3026,7 +3025,7 @@ export default function PartPOSPage() {
               autoComplete="off"
             />
 
-            <label htmlFor="credit-allowance">سقف الائتمان</label>
+            <label htmlFor="credit-allowance">سقف الائتمان / Credit Limit</label>
             <input
               id="credit-allowance"
               value={customerForm.creditAllowance}
@@ -3049,10 +3048,10 @@ export default function PartPOSPage() {
             {parseMoney(customerForm.creditAllowance) > 0 && (
               <div className="creditPinBox">
                 <div className="creditPinNotice">
-                  هذا الزبون لديه سقف ائتمان. لازم الزبون ينشئ رمز من 4 أرقام.
+                  هذا الزبون لديه سقف ائتمان. لازم الزبون ينشئ رمز من 4 أرقام. / This customer has a credit limit and must create a 4-digit PIN.
                 </div>
 
-                <label htmlFor="customer-pin">رمز الائتمان من الزبون</label>
+                <label htmlFor="customer-pin">رمز الائتمان من الزبون / Customer Credit PIN</label>
                 <input
                   id="customer-pin"
                   value={customerForm.customerPin}
@@ -3062,13 +3061,13 @@ export default function PartPOSPage() {
                       customerPin: cleanFourDigitPin(event.target.value),
                     }))
                   }
-                  placeholder="4 أرقام"
+                  placeholder="4 أرقام / 4 digits"
                   inputMode="numeric"
                   autoComplete="off"
                   maxLength={4}
                 />
 
-                <label htmlFor="customer-pin-confirm">تأكيد رمز الائتمان</label>
+                <label htmlFor="customer-pin-confirm">تأكيد رمز الائتمان / Confirm Credit PIN</label>
                 <input
                   id="customer-pin-confirm"
                   value={customerForm.customerPinConfirm}
@@ -3078,7 +3077,7 @@ export default function PartPOSPage() {
                       customerPinConfirm: cleanFourDigitPin(event.target.value),
                     }))
                   }
-                  placeholder="أدخل نفس الرمز مرة ثانية"
+                  placeholder="أدخل نفس الرمز مرة ثانية / Re-enter the same PIN"
                   inputMode="numeric"
                   autoComplete="off"
                   maxLength={4}
@@ -3095,7 +3094,7 @@ export default function PartPOSPage() {
                 onClick={closeCustomerPopup}
                 disabled={customerSaveStatus === "saving"}
               >
-                إلغاء
+                إلغاء / Cancel
               </button>
               <button
                 type="button"
@@ -3103,7 +3102,7 @@ export default function PartPOSPage() {
                 onClick={() => void saveNewCustomer()}
                 disabled={customerSaveStatus === "saving"}
               >
-                {customerSaveStatus === "saving" ? "جاري الحفظ..." : "حفظ الزبون"}
+                {customerSaveStatus === "saving" ? "جاري الحفظ... / Saving..." : "حفظ الزبون / Save Customer"}
               </button>
             </div>
           </div>
@@ -3113,28 +3112,28 @@ export default function PartPOSPage() {
       {marginPopup && (
         <div className="popupBackdrop" role="dialog" aria-modal="true">
           <div className="marginPopupCard">
-            <p className="popupEyebrow">تعديل السعر</p>
-            <h2>تم تغيير الهامش إلى {marginPopup.marginPercent}</h2>
+            <p className="popupEyebrow">تعديل السعر / Price Change</p>
+            <h2>تم تغيير الهامش إلى {marginPopup.marginPercent} / Margin changed to {marginPopup.marginPercent}</h2>
             <div className="popupInfo">
-              <span>المنتج</span>
+              <span>المنتج / Product</span>
               <strong>{marginPopup.productName}</strong>
             </div>
             <div className="popupInfo">
-              <span>السعر الحالي</span>
+              <span>السعر الحالي / Current Price</span>
               <strong>{marginPopup.currentPrice} د.أ</strong>
             </div>
             <div className="popupInfo">
-              <span>السعر الأصلي</span>
+              <span>السعر الأصلي / Original Price</span>
               <strong>{marginPopup.originalPrice} د.أ</strong>
             </div>
             {marginPopup.discountPercent !== "0.0%" && (
               <div className="popupInfo discountPopupInfo">
-                <span>الخصم عن السعر الأصلي</span>
+                <span>الخصم عن السعر الأصلي / Discount from Original Price</span>
                 <strong>{marginPopup.discountPercent}</strong>
               </div>
             )}
             <button type="button" onClick={() => setMarginPopup(null)}>
-              إغلاق
+              إغلاق / Close
             </button>
           </div>
         </div>

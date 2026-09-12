@@ -268,13 +268,13 @@ function getPresetRange(range: ReportRange) {
 }
 
 function rangeLabel(range: ReportRange) {
-  if (range === "today") return "اليوم";
-  if (range === "yesterday") return "أمس";
-  if (range === "this_week") return "هذا الأسبوع";
-  if (range === "this_month") return "هذا الشهر";
-  if (range === "last_month") return "الشهر الماضي";
-  if (range === "year_to_date") return "من بداية السنة";
-  return "تخصيص";
+  if (range === "today") return "اليوم / Today";
+  if (range === "yesterday") return "أمس / Yesterday";
+  if (range === "this_week") return "هذا الأسبوع / This Week";
+  if (range === "this_month") return "هذا الشهر / This Month";
+  if (range === "last_month") return "الشهر الماضي / Last Month";
+  if (range === "year_to_date") return "من بداية السنة / Year to Date";
+  return "تخصيص / Custom";
 }
 
 function englishRangeLabel(range: ReportRange) {
@@ -288,7 +288,7 @@ function englishRangeLabel(range: ReportRange) {
 }
 
 function rangeLabelByLanguage(range: ReportRange, language: ReportLanguage) {
-  return language === "en" ? englishRangeLabel(range) : rangeLabel(range);
+  return rangeLabel(range);
 }
 
 function dayRange(startDateValue: string, endDateValue: string) {
@@ -360,9 +360,11 @@ function formatDateRangeByLanguage(
   endDate: string,
   language: ReportLanguage,
 ) {
-  if (language !== "en") return formatArabicDateRange(startDate, endDate);
-  if (startDate === endDate) return formatEnglishDate(startDate);
-  return `${formatEnglishDate(startDate)} - ${formatEnglishDate(endDate)}`;
+  const arabic = formatArabicDateRange(startDate, endDate);
+  const english = startDate === endDate
+    ? formatEnglishDate(startDate)
+    : `${formatEnglishDate(startDate)} - ${formatEnglishDate(endDate)}`;
+  return `${arabic} / ${english}`;
 }
 
 function formatArabicDateTime(value: string) {
@@ -387,13 +389,13 @@ function daysOutstanding(value: string) {
 }
 
 function reportTitle(mode: ReportMode) {
-  if (mode === "department") return "تقرير حسب القسم";
-  if (mode === "items") return "تقرير حسب القطع";
-  if (mode === "credit") return "المبالغ المستحقة على الزبائن";
-  if (mode === "expenses") return "المصروفات";
-  if (mode === "vendorCredit") return "ائتمان الموردين";
-  if (mode === "dailyCount") return "عد الصندوق اليومي";
-  return "الربح والخسارة";
+  if (mode === "department") return "تقرير حسب القسم / Sales by Department";
+  if (mode === "items") return "تقرير حسب القطع / Sales by Item";
+  if (mode === "credit") return "المبالغ المستحقة على الزبائن / Customer Credit";
+  if (mode === "expenses") return "المصروفات / Expenses";
+  if (mode === "vendorCredit") return "ائتمان الموردين / Vendor Credit";
+  if (mode === "dailyCount") return "عد الصندوق اليومي / Daily Cash Count";
+  return "الربح والخسارة / Profit & Loss";
 }
 
 function englishReportTitle(mode: ReportMode) {
@@ -407,7 +409,7 @@ function englishReportTitle(mode: ReportMode) {
 }
 
 function reportTitleByLanguage(mode: ReportMode, language: ReportLanguage) {
-  return language === "en" ? englishReportTitle(mode) : reportTitle(mode);
+  return reportTitle(mode);
 }
 
 function isAllTimeMode(mode: ReportMode) {
@@ -420,9 +422,9 @@ function isReturnStatus(value: string) {
 }
 
 function dailyCountStatusLabel(status: DailyCountRow["status"]) {
-  if (status === "short") return "نقص";
-  if (status === "over") return "زيادة";
-  return "مطابق";
+  if (status === "short") return "نقص / Short";
+  if (status === "over") return "زيادة / Over";
+  return "مطابق / Matched";
 }
 
 function readSupabaseError(error: unknown) {
@@ -532,7 +534,7 @@ function cleanExpensePayment(payment: any): ExpensePaymentRow {
 export default function PartPOSReportsPage() {
   const [mode, setMode] = useState<ReportMode>("department");
   const [isReportsOnlyAccess, setIsReportsOnlyAccess] = useState(false);
-  const [reportsOnlyLanguage, setReportsOnlyLanguage] = useState<ReportLanguage>("ar");
+  const reportsOnlyLanguage: ReportLanguage = "ar";
   const [rangePreset, setRangePreset] = useState<ReportRange>("today");
   const [startDate, setStartDate] = useState(() => getPresetRange("today").startDate);
   const [endDate, setEndDate] = useState(() => getPresetRange("today").endDate);
@@ -587,19 +589,7 @@ export default function PartPOSReportsPage() {
       accessParam === "reports_only" || savedAccessMode === "reports_only",
     );
 
-    const savedLanguage = window.localStorage.getItem("partpos_reports_language");
-    if (savedLanguage === "en" || savedLanguage === "ar") {
-      setReportsOnlyLanguage(savedLanguage);
-    }
   }, []);
-
-  function setReportsLanguage(language: ReportLanguage) {
-    setReportsOnlyLanguage(language);
-
-    if (typeof window !== "undefined") {
-      window.localStorage.setItem("partpos_reports_language", language);
-    }
-  }
 
   function handleRangeChange(nextRange: ReportRange) {
     setRangePreset(nextRange);
@@ -616,7 +606,7 @@ export default function PartPOSReportsPage() {
       ? formatArabicDateRange(startDate, endDate)
       : `${rangeLabel(rangePreset)} • ${formatArabicDateRange(startDate, endDate)}`;
 
-  const reportsOnlyIsEnglish = reportsOnlyLanguage === "en";
+  const reportsOnlyIsEnglish = false;
   const reportsOnlySelectedRangeText =
     rangePreset === "custom"
       ? formatDateRangeByLanguage(startDate, endDate, reportsOnlyLanguage)
@@ -1020,7 +1010,7 @@ export default function PartPOSReportsPage() {
     const groups: Record<string, Set<string>> = {};
 
     for (const item of items) {
-      const department = item.department_ar.trim() || "غير محدد";
+      const department = item.department_ar.trim() || "غير محدد / Unspecified";
       if (!groups[department]) groups[department] = new Set<string>();
       groups[department].add(item.sale_id);
     }
@@ -1032,7 +1022,7 @@ export default function PartPOSReportsPage() {
     const groups: Record<string, Set<string>> = {};
 
     for (const item of voidedItems) {
-      const department = item.department_ar.trim() || "غير محدد";
+      const department = item.department_ar.trim() || "غير محدد / Unspecified";
       if (!groups[department]) groups[department] = new Set<string>();
       groups[department].add(item.sale_id);
     }
@@ -1044,8 +1034,8 @@ export default function PartPOSReportsPage() {
     const groups: Record<string, Set<string>> = {};
 
     for (const item of items) {
-      const productName = item.product_name_ar.trim() || "قطعة بدون اسم";
-      const department = item.department_ar.trim() || "غير محدد";
+      const productName = item.product_name_ar.trim() || "قطعة بدون اسم / Unnamed Item";
+      const department = item.department_ar.trim() || "غير محدد / Unspecified";
       const key = `${productName}__${department}`;
 
       if (!groups[key]) groups[key] = new Set<string>();
@@ -1059,7 +1049,7 @@ export default function PartPOSReportsPage() {
     const groups: Record<string, DepartmentReportRow> = {};
 
     for (const item of items) {
-      const department = item.department_ar.trim() || "غير محدد";
+      const department = item.department_ar.trim() || "غير محدد / Unspecified";
       const quantity = Number(item.quantity) || 0;
       const totalCost = (Number(item.cost) || 0) * quantity;
       const totalSales = Number(item.line_total) || 0;
@@ -1089,7 +1079,7 @@ export default function PartPOSReportsPage() {
     }
 
     for (const item of voidedItems) {
-      const department = item.department_ar.trim() || "غير محدد";
+      const department = item.department_ar.trim() || "غير محدد / Unspecified";
       const quantity = Number(item.quantity) || 0;
       const totalSales = Number(item.line_total) || 0;
 
@@ -1140,8 +1130,8 @@ export default function PartPOSReportsPage() {
     }
 
     for (const item of items) {
-      const department = item.department_ar.trim() || "غير محدد";
-      const productName = item.product_name_ar.trim() || "قطعة بدون اسم";
+      const department = item.department_ar.trim() || "غير محدد / Unspecified";
+      const productName = item.product_name_ar.trim() || "قطعة بدون اسم / Unnamed Item";
       const key = `${department}__${productName}`;
       const quantity = Number(item.quantity) || 0;
       const totalCost = (Number(item.cost) || 0) * quantity;
@@ -1185,13 +1175,13 @@ export default function PartPOSReportsPage() {
     }
 
     for (const item of voidedItems) {
-      const department = item.department_ar.trim() || "غير محدد";
+      const department = item.department_ar.trim() || "غير محدد / Unspecified";
       const sale = voidedSaleById.get(item.sale_id);
 
       ensureDepartment(department).voided.push({
         id: item.id,
         saleNumber: sale?.sale_number ?? null,
-        productName: item.product_name_ar.trim() || "قطعة بدون اسم",
+        productName: item.product_name_ar.trim() || "قطعة بدون اسم / Unnamed Item",
         quantity: Number(item.quantity) || 0,
         salePrice: Number(item.sale_price) || 0,
         lineTotal: Number(item.line_total) || 0,
@@ -1214,8 +1204,8 @@ export default function PartPOSReportsPage() {
     const groups: Record<string, ItemReportRow> = {};
 
     for (const item of items) {
-      const productName = item.product_name_ar.trim() || "قطعة بدون اسم";
-      const department = item.department_ar.trim() || "غير محدد";
+      const productName = item.product_name_ar.trim() || "قطعة بدون اسم / Unnamed Item";
+      const department = item.department_ar.trim() || "غير محدد / Unspecified";
       const key = `${productName}__${department}`;
       const quantity = Number(item.quantity) || 0;
       const totalCost = (Number(item.cost) || 0) * quantity;
@@ -1258,7 +1248,7 @@ export default function PartPOSReportsPage() {
       const amountOwed = Number(sale.sale_total || 0) - Number(sale.amount_paid || 0);
       if (amountOwed <= 0) continue;
 
-      const customerName = sale.customer_name.trim() || "زبون غير محدد";
+      const customerName = sale.customer_name.trim() || "زبون غير محدد / Unspecified Customer";
       const customerPhone = sale.customer_phone.trim();
       const customerKey =
         sale.customer_id || `${customerName}__${customerPhone || "no-phone"}`.toLowerCase();
@@ -1370,7 +1360,7 @@ export default function PartPOSReportsPage() {
 
     for (const balance of vendorCreditExpenseBalanceRows) {
       const expense = balance.expense;
-      const companyName = expense.company_name.trim() || "مورد غير محدد";
+      const companyName = expense.company_name.trim() || "مورد غير محدد / Unspecified Supplier";
       const companyKey = companyName.toLowerCase();
 
       if (!groups[companyKey]) {
@@ -1448,7 +1438,7 @@ export default function PartPOSReportsPage() {
   );
   const profitLossExpenses = totalExpenses;
   const profitLossNet = profitLossSales - profitLossExpenses;
-  const profitLossLabel = profitLossNet >= 0 ? "ربح" : "خسارة";
+  const profitLossLabel = profitLossNet >= 0 ? "ربح / Profit" : "خسارة / Loss";
 
   const utilityExpenses = expenses
     .filter((row) => row.expense_type === "utility" && row.paid_by === "cash")
@@ -1536,17 +1526,17 @@ export default function PartPOSReportsPage() {
     const balance = creditExpenseBalance(payExpense);
 
     if (!Number.isFinite(amount) || amount <= 0) {
-      setPayExpenseError("أدخل مبلغ دفع صحيح.");
+      setPayExpenseError("أدخل مبلغ دفع صحيح. / Enter a valid payment amount.");
       return;
     }
 
     if (amount > balance.remainingAmount + 0.0001) {
-      setPayExpenseError(`المبلغ أكبر من المتبقي: ${money(balance.remainingAmount)} د.أ`);
+      setPayExpenseError(`المبلغ أكبر من المتبقي / Amount exceeds remaining balance: ${money(balance.remainingAmount)} د.أ`);
       return;
     }
 
     if (payExpensePin !== EXPENSE_VOID_PIN) {
-      setPayExpenseError("الرمز غير صحيح. أدخل رمز الدخول لتسجيل الدفعة.");
+      setPayExpenseError("الرمز غير صحيح. أدخل رمز الدخول لتسجيل الدفعة. / Incorrect PIN. Enter the login PIN to record the payment.");
       setPayExpensePin("");
       return;
     }
@@ -1559,8 +1549,8 @@ export default function PartPOSReportsPage() {
         expense_id: payExpense.id,
         expense_number: payExpense.expense_number,
         expense_type: payExpense.expense_type,
-        company_name: payExpense.company_name || "مورد غير محدد",
-        details: payExpense.details || "دفعة على ائتمان مورد",
+        company_name: payExpense.company_name || "مورد غير محدد / Unspecified Supplier",
+        details: payExpense.details || "دفعة على ائتمان مورد / Supplier Credit Payment",
         amount,
         paid_by: payExpensePaidBy,
         status: "active",
@@ -1569,14 +1559,14 @@ export default function PartPOSReportsPage() {
       if (insertError) throw insertError;
 
       setActionMessage(
-        `تم تسجيل دفعة ${money(amount)} د.أ على قيد ${payExpense.expense_number ?? "—"}.`,
+        `تم تسجيل دفعة / Payment recorded: ${money(amount)} د.أ على قيد / on entry ${payExpense.expense_number ?? "—"}.`,
       );
       setPayExpense(null);
       setPayExpenseAmount("");
       setPayExpensePin("");
       await loadReports();
     } catch (caught) {
-      setPayExpenseError(`خطأ Supabase: ${readSupabaseError(caught)}`);
+      setPayExpenseError(`خطأ Supabase / Supabase error: ${readSupabaseError(caught)}`);
     } finally {
       setPayingExpenseId(null);
     }
@@ -1603,7 +1593,7 @@ export default function PartPOSReportsPage() {
     if (!supabase || !voidExpensePayment) return;
 
     if (voidExpensePaymentPin !== EXPENSE_VOID_PIN) {
-      setVoidExpensePaymentError("الرمز غير صحيح. أدخل رمز الدخول لإلغاء الدفعة.");
+      setVoidExpensePaymentError("الرمز غير صحيح. أدخل رمز الدخول لإلغاء الدفعة. / Incorrect PIN. Enter the login PIN to void the payment.");
       setVoidExpensePaymentPin("");
       return;
     }
@@ -1622,12 +1612,12 @@ export default function PartPOSReportsPage() {
 
       if (updateError) throw updateError;
 
-      setActionMessage(`تم إلغاء دفعة رقم ${voidExpensePayment.payment_number ?? "—"}.`);
+      setActionMessage(`تم إلغاء دفعة رقم / Payment voided No. ${voidExpensePayment.payment_number ?? "—"}.`);
       setVoidExpensePayment(null);
       setVoidExpensePaymentPin("");
       await loadReports();
     } catch (caught) {
-      setVoidExpensePaymentError(`خطأ Supabase: ${readSupabaseError(caught)}`);
+      setVoidExpensePaymentError(`خطأ Supabase / Supabase error: ${readSupabaseError(caught)}`);
     } finally {
       setVoidingExpensePaymentId(null);
     }
@@ -1639,7 +1629,7 @@ export default function PartPOSReportsPage() {
     const balance = creditExpenseBalance(expense);
     if (expense.paid_by === "credit" && balance.paymentEverCount > 0) {
       setActionMessage(
-        "لا يمكن إلغاء هذا المصروف لأنه يوجد دفعات عليه. قم بإلغاء الدفعات أولاً، وبعد وجود سجل دفعات سابق سيبقى القيد محفوظاً للمراجعة.",
+        "لا يمكن إلغاء هذا المصروف لأنه يوجد دفعات عليه. قم بإلغاء الدفعات أولاً، وبعد وجود سجل دفعات سابق سيبقى القيد محفوظاً للمراجعة. / This expense has payments. Void them first; the entry remains for audit history.",
       );
       return;
     }
@@ -1662,7 +1652,7 @@ export default function PartPOSReportsPage() {
     if (!supabase || !voidExpense) return;
 
     if (voidExpensePin !== EXPENSE_VOID_PIN) {
-      setVoidExpenseError("الرمز غير صحيح. أدخل رمز الدخول لإلغاء المصروف.");
+      setVoidExpenseError("الرمز غير صحيح. أدخل رمز الدخول لإلغاء المصروف. / Incorrect PIN. Enter the login PIN to void the expense.");
       setVoidExpensePin("");
       return;
     }
@@ -1681,12 +1671,12 @@ export default function PartPOSReportsPage() {
 
       if (updateError) throw updateError;
 
-      setActionMessage(`تم إلغاء المصروف رقم ${voidExpense.expense_number ?? "—"}.`);
+      setActionMessage(`تم إلغاء المصروف رقم / Expense voided No. ${voidExpense.expense_number ?? "—"}.`);
       setVoidExpense(null);
       setVoidExpensePin("");
       await loadReports();
     } catch (caught) {
-      setVoidExpenseError(`خطأ Supabase: ${readSupabaseError(caught)}`);
+      setVoidExpenseError(`خطأ Supabase / Supabase error: ${readSupabaseError(caught)}`);
     } finally {
       setVoidingExpenseId(null);
     }
@@ -1714,38 +1704,38 @@ export default function PartPOSReportsPage() {
   }[] = [
     {
       value: "department",
-      label: reportsOnlyIsEnglish ? "Sales by Department" : "المبيعات حسب القسم",
-      helper: reportsOnlyIsEnglish ? "Default" : "الافتراضي",
+      label: reportsOnlyIsEnglish ? "Sales by Department" : "المبيعات حسب القسم / Sales by Department",
+      helper: reportsOnlyIsEnglish ? "Default" : "الافتراضي / Default",
     },
     {
       value: "items",
-      label: reportsOnlyIsEnglish ? "Sales by Item" : "المبيعات حسب القطع",
-      helper: reportsOnlyIsEnglish ? "Best sellers" : "أفضل القطع",
+      label: reportsOnlyIsEnglish ? "Sales by Item" : "المبيعات حسب القطع / Sales by Item",
+      helper: reportsOnlyIsEnglish ? "Best sellers" : "أفضل القطع / Best Sellers",
     },
     {
       value: "profitLoss",
-      label: reportsOnlyIsEnglish ? "Profit & Loss" : "الربح والخسارة",
-      helper: reportsOnlyIsEnglish ? "Sales - expenses" : "مبيعات - مصروفات",
+      label: reportsOnlyIsEnglish ? "Profit & Loss" : "الربح والخسارة / Profit & Loss",
+      helper: reportsOnlyIsEnglish ? "Sales - expenses" : "مبيعات - مصروفات / Sales - Expenses",
     },
     {
       value: "expenses",
-      label: reportsOnlyIsEnglish ? "Expenses" : "المصروفات",
-      helper: reportsOnlyIsEnglish ? "Cash + account" : "نقداً وعلى الحساب",
+      label: reportsOnlyIsEnglish ? "Expenses" : "المصروفات / Expenses",
+      helper: reportsOnlyIsEnglish ? "Cash + account" : "نقداً وعلى الحساب / Cash + Account",
     },
     {
       value: "dailyCount",
-      label: reportsOnlyIsEnglish ? "Daily Cash Count" : "عد الصندوق",
-      helper: reportsOnlyIsEnglish ? "Short / over" : "نقص / زيادة",
+      label: reportsOnlyIsEnglish ? "Daily Cash Count" : "عد الصندوق / Daily Cash Count",
+      helper: reportsOnlyIsEnglish ? "Short / over" : "نقص / زيادة / Short / Over",
     },
     {
       value: "credit",
-      label: reportsOnlyIsEnglish ? "Customer Credit" : "ديون الزبائن",
-      helper: reportsOnlyIsEnglish ? "All time" : "كل الفترات",
+      label: reportsOnlyIsEnglish ? "Customer Credit" : "ديون الزبائن / Customer Credit",
+      helper: reportsOnlyIsEnglish ? "All time" : "كل الفترات / All Time",
     },
     {
       value: "vendorCredit",
-      label: reportsOnlyIsEnglish ? "Vendor Credit" : "ديون الموردين",
-      helper: reportsOnlyIsEnglish ? "All time" : "كل الفترات",
+      label: reportsOnlyIsEnglish ? "Vendor Credit" : "ديون الموردين / Vendor Credit",
+      helper: reportsOnlyIsEnglish ? "All time" : "كل الفترات / All Time",
     },
   ];
 
@@ -1756,45 +1746,45 @@ export default function PartPOSReportsPage() {
   }[] = [
     {
       value: "today",
-      label: reportsOnlyIsEnglish ? "Today" : "اليوم",
-      helper: reportsOnlyIsEnglish ? "Today only" : "تقرير اليوم",
+      label: reportsOnlyIsEnglish ? "Today" : "اليوم / Today",
+      helper: reportsOnlyIsEnglish ? "Today only" : "تقرير اليوم / Today Only",
     },
     {
       value: "yesterday",
-      label: reportsOnlyIsEnglish ? "Yesterday" : "أمس",
-      helper: reportsOnlyIsEnglish ? "Yesterday only" : "تقرير أمس",
+      label: reportsOnlyIsEnglish ? "Yesterday" : "أمس / Yesterday",
+      helper: reportsOnlyIsEnglish ? "Yesterday only" : "تقرير أمس / Yesterday Only",
     },
     {
       value: "this_week",
-      label: reportsOnlyIsEnglish ? "Week" : "الأسبوع",
-      helper: reportsOnlyIsEnglish ? "Current week" : "الأسبوع الحالي",
+      label: reportsOnlyIsEnglish ? "Week" : "الأسبوع / Week",
+      helper: reportsOnlyIsEnglish ? "Current week" : "الأسبوع الحالي / Current Week",
     },
     {
       value: "this_month",
-      label: reportsOnlyIsEnglish ? "Month" : "الشهر",
-      helper: reportsOnlyIsEnglish ? "Current month" : "الشهر الحالي",
+      label: reportsOnlyIsEnglish ? "Month" : "الشهر / Month",
+      helper: reportsOnlyIsEnglish ? "Current month" : "الشهر الحالي / Current Month",
     },
     {
       value: "last_month",
-      label: reportsOnlyIsEnglish ? "Last Month" : "الشهر الماضي",
-      helper: reportsOnlyIsEnglish ? "Previous period" : "الفترة السابقة",
+      label: reportsOnlyIsEnglish ? "Last Month" : "الشهر الماضي / Last Month",
+      helper: reportsOnlyIsEnglish ? "Previous period" : "الفترة السابقة / Previous Period",
     },
     {
       value: "year_to_date",
-      label: reportsOnlyIsEnglish ? "Year" : "السنة",
-      helper: reportsOnlyIsEnglish ? "Year to date" : "من بداية السنة",
+      label: reportsOnlyIsEnglish ? "Year" : "السنة / Year",
+      helper: reportsOnlyIsEnglish ? "Year to date" : "من بداية السنة / Year to Date",
     },
     {
       value: "custom",
-      label: reportsOnlyIsEnglish ? "Custom" : "تخصيص",
-      helper: reportsOnlyIsEnglish ? "Choose dates" : "اختر التاريخ",
+      label: reportsOnlyIsEnglish ? "Custom" : "تخصيص / Custom",
+      helper: reportsOnlyIsEnglish ? "Choose dates" : "اختر التاريخ / Choose Dates",
     },
   ];
 
   return (
     <main
       className={isReportsOnlyAccess ? "reportsPage reportsOnlyMode" : "reportsPage"}
-      dir={isReportsOnlyAccess && reportsOnlyIsEnglish ? "ltr" : "rtl"}
+      dir="rtl"
       suppressHydrationWarning
     >
       <section className="topCard noPrint">
@@ -1802,23 +1792,21 @@ export default function PartPOSReportsPage() {
           <p className="eyebrow">PartPOS</p>
           <h1>
             {isReportsOnlyAccess
-              ? reportsOnlyIsEnglish
-                ? "Reports Dashboard"
-                : "لوحة التقارير"
-              : "التقارير"}
+              ? "لوحة التقارير / Reports Dashboard"
+              : "التقارير / Reports"}
           </h1>
           <p className="subtext">
             {isReportsOnlyAccess
               ? reportsOnlyIsEnglish
                 ? "Reports-only access. Choose report type and dates easily from mobile. VOID receipts are not counted."
-                : "عرض تقارير فقط. اختر التقرير والفترة بسهولة من الموبايل. الفواتير الملغاة VOID لا تُحسب."
-              : "الفواتير الملغاة VOID لا تدخل في المبيعات أو الأرباح أو نهاية اليوم."}
+                : "عرض تقارير فقط. اختر التقرير والفترة بسهولة من الموبايل. الفواتير الملغاة VOID لا تُحسب. / Reports-only access. Choose report type and dates easily from mobile. VOID receipts are not counted."
+              : "الفواتير الملغاة VOID لا تدخل في المبيعات أو الأرباح أو نهاية اليوم. / VOID receipts are excluded from sales, profit, and end-of-day totals."}
           </p>
           {isReportsOnlyAccess && (
             <div className="reportsOnlyBadge">
               {reportsOnlyIsEnglish
                 ? "Reports only — no cashier or sale access"
-                : "دخول تقارير فقط — لا يوجد صلاحية للكاشير أو البيع"}
+                : "دخول تقارير فقط — لا يوجد صلاحية للكاشير أو البيع / Reports only — no cashier or sale access"}
             </div>
           )}
         </div>
@@ -1827,19 +1815,19 @@ export default function PartPOSReportsPage() {
           {!isReportsOnlyAccess && (
             <>
               <button type="button" className="secondaryButton" onClick={backToPOS}>
-                الرجوع للكاشير
+                الرجوع للكاشير / Back to Cashier
               </button>
               <button type="button" className="secondaryButton" onClick={openEndOfDayReport}>
-                تقرير نهاية اليوم
+                تقرير نهاية اليوم / End of Day Report
               </button>
             </>
           )}
           <button type="button" className="printButton" onClick={() => window.print()}>
-            {isReportsOnlyAccess && reportsOnlyIsEnglish ? "Print Report" : "طباعة التقرير"}
+            {"طباعة التقرير / Print Report"}
           </button>
           {isReportsOnlyAccess && (
             <button type="button" className="secondaryButton" onClick={logoutReportsOnly}>
-              {reportsOnlyIsEnglish ? "Logout" : "خروج"}
+              {"خروج / Logout"}
             </button>
           )}
         </div>
@@ -1847,89 +1835,61 @@ export default function PartPOSReportsPage() {
 
       {!supabase && (
         <div className="warning noPrint">
-          أضف NEXT_PUBLIC_SUPABASE_URL و NEXT_PUBLIC_SUPABASE_ANON_KEY حتى تظهر التقارير.
+          أضف NEXT_PUBLIC_SUPABASE_URL و NEXT_PUBLIC_SUPABASE_ANON_KEY حتى تظهر التقارير. / Add the Supabase URL and anon key to display reports.
         </div>
       )}
 
       <section className="controlsCard noPrint">
         {isReportsOnlyAccess && (
           <div className="reportsOnlyPicker">
-            <div className="reportsLanguageSwitch" dir="ltr">
-              <span>{reportsOnlyIsEnglish ? "Language" : "اللغة"}</span>
-              <div>
-                <button
-                  type="button"
-                  className={
-                    reportsOnlyLanguage === "ar"
-                      ? "languageButton activeLanguageButton"
-                      : "languageButton"
-                  }
-                  onClick={() => setReportsLanguage("ar")}
-                >
-                  عربي
-                </button>
-                <button
-                  type="button"
-                  className={
-                    reportsOnlyLanguage === "en"
-                      ? "languageButton activeLanguageButton"
-                      : "languageButton"
-                  }
-                  onClick={() => setReportsLanguage("en")}
-                >
-                  English
-                </button>
-              </div>
-            </div>
-
             <div className="reportsOnlyHero">
               <div>
                 <p className="eyebrow">
-                  {reportsOnlyIsEnglish ? "Reports-only view" : "عرض التقارير فقط"}
+                  {"عرض التقارير فقط / Reports-only View"}
                 </p>
                 <h2>{reportTitleByLanguage(mode, reportsOnlyLanguage)}</h2>
                 <p>
                   {isAllTimeMode(mode)
                     ? reportsOnlyIsEnglish
                       ? "This report shows all-time balances."
-                      : "هذا التقرير يعرض كل الفترات."
+                      : "هذا التقرير يعرض كل الفترات. / This report shows all-time balances."
                     : reportsOnlySelectedRangeText}
                 </p>
               </div>
               <div className="reportsOnlyHeroStat">
-                <span>{reportsOnlyIsEnglish ? "Records" : "السجلات"}</span>
+                <span>{"السجلات / Records"}</span>
                 <strong>{activeRowsCount}</strong>
               </div>
             </div>
 
             <div className="reportsOnlyMiniStats">
               <div>
-                <span>{reportsOnlyIsEnglish ? "Report" : "التقرير"}</span>
+                <span>{"التقرير / Report"}</span>
                 <strong>{reportTitleByLanguage(mode, reportsOnlyLanguage)}</strong>
               </div>
               <div>
-                <span>{reportsOnlyIsEnglish ? "Period" : "الفترة"}</span>
+                <span>{"الفترة / Period"}</span>
                 <strong>
                   {isAllTimeMode(mode)
                     ? reportsOnlyIsEnglish
                       ? "All time"
-                      : "كل الفترات"
+                      : "كل الفترات / All Time"
                     : rangeLabelByLanguage(rangePreset, reportsOnlyLanguage)}
                 </strong>
               </div>
               <div>
-                <span>{reportsOnlyIsEnglish ? "Last update" : "آخر تحديث"}</span>
+                <span>{"آخر تحديث / Last Update"}</span>
                 <strong>{lastUpdated || "—"}</strong>
               </div>
             </div>
 
             <div className="pickerGroup">
               <div className="pickerTitleRow">
-                <strong>{reportsOnlyIsEnglish ? "Report Type" : "نوع التقرير"}</strong>
+                <strong>{"نوع التقرير / Report Type"}</strong>
                 <span>
                   {reportsOnlyIsEnglish
                     ? "Sales by Department is the default"
-                    : "المبيعات حسب القسم هي الافتراضية"}
+                    : "المبيعات حسب القسم هي الافتراضية / Sales by Department is the default"}
                 </span>
               </div>
               <div className="mobileReportGrid">
@@ -1953,15 +1913,15 @@ export default function PartPOSReportsPage() {
 
             <div className="pickerGroup">
               <div className="pickerTitleRow">
-                <strong>{reportsOnlyIsEnglish ? "Period" : "الفترة"}</strong>
+                <strong>{"الفترة / Period"}</strong>
                 <span>
                   {isAllTimeMode(mode)
                     ? reportsOnlyIsEnglish
                       ? "All-time report"
-                      : "كل الفترات لهذا التقرير"
+                      : "كل الفترات لهذا التقرير / All-time Report"
                     : reportsOnlyIsEnglish
                       ? "Quick select"
-                      : "اختر بسرعة"}
+                      : "اختر بسرعة / Quick Select"}
                 </span>
               </div>
 
@@ -1969,7 +1929,7 @@ export default function PartPOSReportsPage() {
                 <div className="allTimeMobileNotice">
                   {reportsOnlyIsEnglish
                     ? "This report is not tied to one day. It shows all outstanding balances."
-                    : "هذا التقرير غير مرتبط بيوم معين ويعرض كل المبالغ المستحقة."}
+                    : "هذا التقرير غير مرتبط بيوم معين ويعرض كل المبالغ المستحقة. / This report is not tied to one day. It shows all outstanding balances."}
                 </div>
               ) : (
                 <div className="mobileRangeGrid">
@@ -1995,7 +1955,7 @@ export default function PartPOSReportsPage() {
                 <div className="reportsOnlyCustomDates">
                   <div>
                     <label htmlFor="mobile-start-date">
-                      {reportsOnlyIsEnglish ? "Start Date" : "من تاريخ"}
+                      {"من تاريخ / Start Date"}
                     </label>
                     <input
                       id="mobile-start-date"
@@ -2006,7 +1966,7 @@ export default function PartPOSReportsPage() {
                   </div>
                   <div>
                     <label htmlFor="mobile-end-date">
-                      {reportsOnlyIsEnglish ? "End Date" : "إلى تاريخ"}
+                      {"إلى تاريخ / End Date"}
                     </label>
                     <input
                       id="mobile-end-date"
@@ -2028,37 +1988,37 @@ export default function PartPOSReportsPage() {
               {loading
                 ? reportsOnlyIsEnglish
                   ? "Updating report..."
-                  : "جاري تحديث التقرير..."
+                  : "جاري تحديث التقرير... / Updating Report..."
                 : reportsOnlyIsEnglish
                   ? "Update Report"
-                  : "تحديث التقرير"}
+                  : "تحديث التقرير / Update Report"}
             </button>
           </div>
         )}
 
         <div className="dateControls">
           <div>
-            <label htmlFor="range-preset">فترة التقرير</label>
+            <label htmlFor="range-preset">فترة التقرير / Report Period</label>
             <select
               id="range-preset"
               value={rangePreset}
               onChange={(event) => handleRangeChange(event.target.value as ReportRange)}
               disabled={isAllTimeMode(mode)}
             >
-              <option value="today">اليوم</option>
-              <option value="yesterday">أمس</option>
-              <option value="this_week">هذا الأسبوع</option>
-              <option value="this_month">هذا الشهر</option>
-              <option value="last_month">الشهر الماضي</option>
-              <option value="year_to_date">من بداية السنة</option>
-              <option value="custom">تخصيص</option>
+              <option value="today">اليوم / Today</option>
+              <option value="yesterday">أمس / Yesterday</option>
+              <option value="this_week">هذا الأسبوع / This Week</option>
+              <option value="this_month">هذا الشهر / This Month</option>
+              <option value="last_month">الشهر الماضي / Last Month</option>
+              <option value="year_to_date">من بداية السنة / Year to Date</option>
+              <option value="custom">تخصيص / Custom</option>
             </select>
           </div>
 
           {rangePreset === "custom" && !isAllTimeMode(mode) ? (
             <>
               <div>
-                <label htmlFor="start-date">من تاريخ</label>
+                <label htmlFor="start-date">من تاريخ / Start Date</label>
                 <input
                   id="start-date"
                   type="date"
@@ -2068,7 +2028,7 @@ export default function PartPOSReportsPage() {
               </div>
 
               <div>
-                <label htmlFor="end-date">إلى تاريخ</label>
+                <label htmlFor="end-date">إلى تاريخ / End Date</label>
                 <input
                   id="end-date"
                   type="date"
@@ -2079,8 +2039,8 @@ export default function PartPOSReportsPage() {
             </>
           ) : (
             <div className="selectedPeriodBox">
-              <label>الفترة المحددة</label>
-              <strong>{isAllTimeMode(mode) ? "كل الفترات" : selectedRangeText}</strong>
+              <label>الفترة المحددة / Selected Period</label>
+              <strong>{isAllTimeMode(mode) ? "كل الفترات / All Time" : selectedRangeText}</strong>
             </div>
           )}
 
@@ -2090,7 +2050,7 @@ export default function PartPOSReportsPage() {
             onClick={() => void loadReports()}
             disabled={!supabase || loading}
           >
-            {loading ? "جاري التحميل..." : "تحديث التقرير"}
+            {loading ? "جاري التحميل... / Loading..." : "تحديث التقرير / Update Report"}
           </button>
         </div>
 
@@ -2177,7 +2137,7 @@ export default function PartPOSReportsPage() {
               {isAllTimeMode(mode)
                 ? isReportsOnlyAccess && reportsOnlyIsEnglish
                   ? "All time"
-                  : "كل الفترات"
+                  : "كل الفترات / All Time"
                 : isReportsOnlyAccess
                   ? formatDateRangeByLanguage(startDate, endDate, reportsOnlyLanguage)
                   : formatArabicDateRange(startDate, endDate)}
@@ -2187,30 +2147,30 @@ export default function PartPOSReportsPage() {
           <div className="reportMeta">
             <span>
               {mode === "credit"
-                ? "عدد الزبائن"
+                ? "عدد الزبائن / Customers"
                 : mode === "vendorCredit"
-                  ? "عدد الموردين"
+                  ? "عدد الموردين / Suppliers"
                   : mode === "expenses"
-                    ? "عدد المصروفات"
+                    ? "عدد المصروفات / Expenses"
                     : mode === "dailyCount"
-                      ? "عدد الأيام"
+                      ? "عدد الأيام / Days"
                       : mode === "profitLoss"
-                        ? "نتيجة الفترة"
-                        : "عدد الفواتير"}
+                        ? "نتيجة الفترة / Period Result"
+                        : "عدد الفواتير / Receipts"}
             </span>
             <strong>{mode === "department" || mode === "items" ? sales.length : activeRowsCount}</strong>
-            <small>{lastUpdated ? `آخر تحديث: ${lastUpdated}` : ""}</small>
+            <small>{lastUpdated ? `آخر تحديث / Last updated: ${lastUpdated}` : ""}</small>
           </div>
         </div>
 
         {mode === "department" || mode === "items" ? (
           <div className="summaryGrid">
-            <StatBox label="عدد السطور" value={activeRowsCount} />
-            <StatBox label="إجمالي الكمية" value={money(totalQuantity)} />
-            <StatBox label="إجمالي التكلفة" value={`${money(totalCost)} د.أ`} />
-            <StatBox label="إجمالي البيع" value={`${money(totalSales)} د.أ`} tone="red" />
-            <StatBox label="إجمالي الربح" value={`${money(totalProfit)} د.أ`} tone="green" />
-            <StatBox label="هامش الربح" value={percent(totalMarginPercent)} />
+            <StatBox label="عدد السطور / Lines" value={activeRowsCount} />
+            <StatBox label="إجمالي الكمية / Total Quantity" value={money(totalQuantity)} />
+            <StatBox label="إجمالي التكلفة / Total Cost" value={`${money(totalCost)} د.أ`} />
+            <StatBox label="إجمالي البيع / Total Sales" value={`${money(totalSales)} د.أ`} tone="red" />
+            <StatBox label="إجمالي الربح / Total Profit" value={`${money(totalProfit)} د.أ`} tone="green" />
+            <StatBox label="هامش الربح / Profit Margin" value={percent(totalMarginPercent)} />
             {mode === "department" ? (
               <StatBox
                 label="VOID"
@@ -2224,81 +2184,81 @@ export default function PartPOSReportsPage() {
 
         {mode === "credit" ? (
           <div className="summaryGrid three">
-            <StatBox label="عدد الزبائن الذين عليهم مبالغ" value={creditCustomerRows.length} />
-            <StatBox label="عدد فواتير الائتمان المفتوحة" value={totalCreditInvoices} />
-            <StatBox label="إجمالي المبالغ المستحقة" value={`${money(totalCreditOwed)} د.أ`} tone="red" />
+            <StatBox label="عدد الزبائن الذين عليهم مبالغ / Customers Owing" value={creditCustomerRows.length} />
+            <StatBox label="عدد فواتير الائتمان المفتوحة / Open Credit Invoices" value={totalCreditInvoices} />
+            <StatBox label="إجمالي المبالغ المستحقة / Total Outstanding" value={`${money(totalCreditOwed)} د.أ`} tone="red" />
           </div>
         ) : null}
 
         {mode === "expenses" ? (
           <div className="summaryGrid four">
             <StatBox
-              label="إجمالي المصروفات المحتسبة"
+              label="إجمالي المصروفات المحتسبة / Counted Expenses"
               value={`${money(totalExpenses)} د.أ`}
               tone="red"
-              small="نقداً + دفعات ائتمان الموردين"
+              small="نقداً + دفعات ائتمان الموردين / Cash + Supplier Credit Payments"
             />
-            <StatBox label="خدمات / مرافق نقداً" value={`${money(utilityExpenses)} د.أ`} />
-            <StatBox label="موردين نقداً" value={`${money(vendorCashExpenses)} د.أ`} />
+            <StatBox label="خدمات / مرافق نقداً / Cash Utilities" value={`${money(utilityExpenses)} د.أ`} />
+            <StatBox label="موردين نقداً / Cash Supplier Expenses" value={`${money(vendorCashExpenses)} د.أ`} />
             <StatBox
-              label="دفعات ائتمان الموردين"
+              label="دفعات ائتمان الموردين / Supplier Credit Payments"
               value={`${money(creditExpensePaymentsForPeriod)} د.أ`}
               tone="red"
             />
             <StatBox
-              label="مشتريات ائتمان جديدة"
+              label="مشتريات ائتمان جديدة / New Credit Purchases"
               value={`${money(vendorCreditExpensesForPeriod)} د.أ`}
               tone="orange"
-              small="لا تُحسب حتى يتم الدفع"
+              small="لا تُحسب حتى يتم الدفع / Not counted until paid"
             />
             <StatBox
               label="VOID"
               value={`${money(totalVoidedExpenses + totalVoidedExpensePayments)} د.أ`}
               tone="orange"
-              small="مصروفات ودفعات غير محسوبة"
+              small="مصروفات ودفعات غير محسوبة / Excluded Expenses & Payments"
             />
           </div>
         ) : null}
 
         {mode === "vendorCredit" ? (
           <div className="summaryGrid three">
-            <StatBox label="عدد الموردين الذين لهم رصيد" value={vendorCreditRows.length} />
-            <StatBox label="عدد قيود ائتمان مفتوحة" value={totalVendorCreditEntries} />
-            <StatBox label="إجمالي المستحق للموردين" value={`${money(totalVendorCreditOwed)} د.أ`} tone="orange" />
+            <StatBox label="عدد الموردين الذين لهم رصيد / Suppliers Owed" value={vendorCreditRows.length} />
+            <StatBox label="عدد قيود ائتمان مفتوحة / Open Credit Entries" value={totalVendorCreditEntries} />
+            <StatBox label="إجمالي المستحق للموردين / Total Owed to Suppliers" value={`${money(totalVendorCreditOwed)} د.أ`} tone="orange" />
           </div>
         ) : null}
 
         {mode === "dailyCount" ? (
           <div className="summaryGrid">
-            <StatBox label="عدد الأيام المحفوظة" value={dailyCounts.length} />
-            <StatBox label="أيام فيها نقص" value={shortDayCount} tone="red" />
-            <StatBox label="أيام فيها زيادة" value={overDayCount} tone="orange" />
-            <StatBox label="أيام مطابقة" value={matchedDayCount} tone="green" />
-            <StatBox label="إجمالي النقص" value={`${money(totalDailyShort)} د.أ`} tone="red" />
-            <StatBox label="إجمالي الزيادة" value={`${money(totalDailyOver)} د.أ`} tone="orange" />
-            <StatBox label="إجمالي مصروفات نقدية" value={`${money(totalDailyCashExpenses)} د.أ`} tone="red" />
+            <StatBox label="عدد الأيام المحفوظة / Saved Days" value={dailyCounts.length} />
+            <StatBox label="أيام فيها نقص / Short Days" value={shortDayCount} tone="red" />
+            <StatBox label="أيام فيها زيادة / Over Days" value={overDayCount} tone="orange" />
+            <StatBox label="أيام مطابقة / Matched Days" value={matchedDayCount} tone="green" />
+            <StatBox label="إجمالي النقص / Total Short" value={`${money(totalDailyShort)} د.أ`} tone="red" />
+            <StatBox label="إجمالي الزيادة / Total Over" value={`${money(totalDailyOver)} د.أ`} tone="orange" />
+            <StatBox label="إجمالي مصروفات نقدية / Total Cash Expenses" value={`${money(totalDailyCashExpenses)} د.أ`} tone="red" />
           </div>
         ) : null}
 
         {mode === "profitLoss" ? (
           <div className="summaryGrid three">
             <StatBox
-              label="إجمالي المبيعات"
+              label="إجمالي المبيعات / Total Sales"
               value={`${money(profitLossSales)} د.أ`}
               tone="green"
-              small="حسب الفترة المختارة"
+              small="حسب الفترة المختارة / Selected Period"
             />
             <StatBox
-              label="إجمالي المصروفات"
+              label="إجمالي المصروفات / Total Expenses"
               value={`${money(profitLossExpenses)} د.أ`}
               tone="red"
-              small="نقداً + دفعات ائتمان الموردين"
+              small="نقداً + دفعات ائتمان الموردين / Cash + Supplier Credit Payments"
             />
             <StatBox
               label={profitLossLabel}
               value={`${money(Math.abs(profitLossNet))} د.أ`}
               tone={profitLossNet >= 0 ? "green" : "red"}
-              small="المبيعات - المصروفات"
+              small="المبيعات - المصروفات / Sales - Expenses"
             />
           </div>
         ) : null}
@@ -2306,7 +2266,7 @@ export default function PartPOSReportsPage() {
         <section className="recordsSection">
           {mode === "department" ? (
             departmentRows.length === 0 ? (
-              <div className="emptyState">لا يوجد مبيعات ضمن الفترة المحددة.</div>
+              <div className="emptyState">لا يوجد مبيعات ضمن الفترة المحددة. / No sales in the selected period.</div>
             ) : (
               <div className="recordList">
                 {departmentRows.map((row) => {
@@ -2331,29 +2291,29 @@ export default function PartPOSReportsPage() {
                         onClick={() => toggleDepartment(row.department)}
                       >
                         <div className="recordMain">
-                          <p>القسم</p>
+                          <p>القسم / Department</p>
                           <h3>{row.department}</h3>
                           <span className="expandHint">
                             {expanded
                               ? reportsOnlyIsEnglish
                                 ? "Hide details"
-                                : "إخفاء التفاصيل"
+                                : "إخفاء التفاصيل / Hide Details"
                               : reportsOnlyIsEnglish
                                 ? "Tap to view items and VOID receipts"
-                                : "اضغط لعرض القطع والفواتير الملغاة"}
+                                : "اضغط لعرض القطع والفواتير الملغاة / Tap to show items and VOID receipts"}
                           </span>
                         </div>
 
                         <div className="detailGrid">
-                          <DetailCell label="عدد الفواتير" value={row.receiptCount} />
-                          <DetailCell label="عدد السطور" value={row.itemLines} />
-                          <DetailCell label="الكمية" value={money(row.quantity)} />
-                          <DetailCell label="إجمالي التكلفة" value={`${money(row.totalCost)} د.أ`} />
-                          <DetailCell label="إجمالي البيع" value={`${money(row.totalSales)} د.أ`} tone="red" />
-                          <DetailCell label="الربح" value={`${money(row.profit)} د.أ`} tone={row.profit >= 0 ? "green" : "red"} />
-                          <DetailCell label="الهامش" value={percent(row.marginPercent)} />
+                          <DetailCell label="عدد الفواتير / Receipts" value={row.receiptCount} />
+                          <DetailCell label="عدد السطور / Lines" value={row.itemLines} />
+                          <DetailCell label="الكمية / Quantity" value={money(row.quantity)} />
+                          <DetailCell label="إجمالي التكلفة / Total Cost" value={`${money(row.totalCost)} د.أ`} />
+                          <DetailCell label="إجمالي البيع / Total Sales" value={`${money(row.totalSales)} د.أ`} tone="red" />
+                          <DetailCell label="الربح / Profit" value={`${money(row.profit)} د.أ`} tone={row.profit >= 0 ? "green" : "red"} />
+                          <DetailCell label="الهامش / Margin" value={percent(row.marginPercent)} />
                           <DetailCell
-                            label="VOID داخل القسم"
+                            label="VOID داخل القسم / VOID in Department"
                             value={row.voidReceiptCount}
                             tone={row.voidReceiptCount > 0 ? "orange" : undefined}
                           />
@@ -2364,15 +2324,15 @@ export default function PartPOSReportsPage() {
                         <div className="departmentExpandPanel">
                           <div className="departmentDetailSection">
                             <div className="departmentDetailHeader">
-                              <h4>{reportsOnlyIsEnglish ? "Items sold in this department" : "القطع المباعة في هذا القسم"}</h4>
-                              <span>{reportsOnlyIsEnglish ? `${details.active.length} items` : `${details.active.length} قطع`}</span>
+                              <h4>{reportsOnlyIsEnglish ? "Items sold in this department" : "القطع المباعة في هذا القسم / Items Sold in this Department"}</h4>
+                              <span>{reportsOnlyIsEnglish ? `${details.active.length} items` : `${details.active.length} قطع / items`}</span>
                             </div>
 
                             {details.active.length === 0 ? (
                               <div className="emptyState smallEmptyState">
                                 {reportsOnlyIsEnglish
                                   ? "No active sold items in this department."
-                                  : "لا يوجد قطع مباعة غير ملغاة في هذا القسم."}
+                                  : "لا يوجد قطع مباعة غير ملغاة في هذا القسم. / No active sold items in this department."}
                               </div>
                             ) : (
                               <div className="departmentItemList">
@@ -2381,13 +2341,13 @@ export default function PartPOSReportsPage() {
                                     <div>
                                       <strong>{item.productName}</strong>
                                       <span>
-                                        {item.receiptCount} فواتير • كمية {money(item.quantity)}
+                                        {item.receiptCount} فواتير / receipts • كمية / Qty {money(item.quantity)}
                                       </span>
                                     </div>
                                     <div className="departmentItemNumbers">
                                       <strong>{money(item.totalSales)} د.أ</strong>
                                       <span>
-                                        ربح {money(item.profit)} د.أ • هامش {percent(item.marginPercent)}
+                                        ربح / Profit {money(item.profit)} د.أ • هامش / Margin {percent(item.marginPercent)}
                                       </span>
                                     </div>
                                   </div>
@@ -2398,15 +2358,15 @@ export default function PartPOSReportsPage() {
 
                           <div className="departmentDetailSection voidDetailSection">
                             <div className="departmentDetailHeader">
-                              <h4>{reportsOnlyIsEnglish ? "VOID receipts in this department" : "VOID / الفواتير الملغاة في هذا القسم"}</h4>
-                              <span>{reportsOnlyIsEnglish ? `${details.voided.length} void lines` : `${details.voided.length} سطور ملغاة`}</span>
+                              <h4>{reportsOnlyIsEnglish ? "VOID receipts in this department" : "الفواتير الملغاة في هذا القسم / VOID Receipts in this Department"}</h4>
+                              <span>{reportsOnlyIsEnglish ? `${details.voided.length} void lines` : `${details.voided.length} سطور ملغاة / void lines`}</span>
                             </div>
 
                             {details.voided.length === 0 ? (
                               <div className="emptyState smallEmptyState">
                                 {reportsOnlyIsEnglish
                                   ? "No VOID receipts in this department for the selected period."
-                                  : "لا يوجد VOID داخل هذا القسم ضمن الفترة المختارة."}
+                                  : "لا يوجد VOID داخل هذا القسم ضمن الفترة المختارة. / No VOID receipts in this department for the selected period."}
                               </div>
                             ) : (
                               <div className="departmentItemList">
@@ -2417,7 +2377,7 @@ export default function PartPOSReportsPage() {
                                       <span>
                                         فاتورة {voidItem.saleNumber ?? "—"} •{" "}
                                         {formatArabicDateTime(voidItem.createdAt)} •{" "}
-                                        {voidItem.paymentMethod === "credit" ? "ائتمان" : "نقداً"}
+                                        {voidItem.paymentMethod === "credit" ? "ائتمان / Credit" : "نقداً / Cash"}
                                       </span>
                                     </div>
                                     <div className="departmentItemNumbers">
@@ -2442,7 +2402,7 @@ export default function PartPOSReportsPage() {
 
           {mode === "items" ? (
             itemRows.length === 0 ? (
-              <div className="emptyState">لا يوجد مبيعات ضمن الفترة المحددة.</div>
+              <div className="emptyState">لا يوجد مبيعات ضمن الفترة المحددة. / No sales in the selected period.</div>
             ) : (
               <div className="recordList">
                 {itemRows.map((row) => (
@@ -2452,13 +2412,13 @@ export default function PartPOSReportsPage() {
                       <h3>{row.productName}</h3>
                     </div>
                     <div className="detailGrid">
-                      <DetailCell label="عدد الفواتير" value={row.receiptCount} />
-                      <DetailCell label="الكمية" value={money(row.quantity)} />
-                      <DetailCell label="متوسط سعر البيع" value={`${money(row.averageSalePrice)} د.أ`} />
-                      <DetailCell label="إجمالي التكلفة" value={`${money(row.totalCost)} د.أ`} />
-                      <DetailCell label="إجمالي البيع" value={`${money(row.totalSales)} د.أ`} tone="red" />
-                      <DetailCell label="الربح" value={`${money(row.profit)} د.أ`} tone={row.profit >= 0 ? "green" : "red"} />
-                      <DetailCell label="الهامش" value={percent(row.marginPercent)} />
+                      <DetailCell label="عدد الفواتير / Receipts" value={row.receiptCount} />
+                      <DetailCell label="الكمية / Quantity" value={money(row.quantity)} />
+                      <DetailCell label="متوسط سعر البيع / Average Sale Price" value={`${money(row.averageSalePrice)} د.أ`} />
+                      <DetailCell label="إجمالي التكلفة / Total Cost" value={`${money(row.totalCost)} د.أ`} />
+                      <DetailCell label="إجمالي البيع / Total Sales" value={`${money(row.totalSales)} د.أ`} tone="red" />
+                      <DetailCell label="الربح / Profit" value={`${money(row.profit)} د.أ`} tone={row.profit >= 0 ? "green" : "red"} />
+                      <DetailCell label="الهامش / Margin" value={percent(row.marginPercent)} />
                     </div>
                   </article>
                 ))}
@@ -2468,23 +2428,23 @@ export default function PartPOSReportsPage() {
 
           {mode === "credit" ? (
             creditCustomerRows.length === 0 ? (
-              <div className="emptyState">لا يوجد زبائن عليهم مبالغ ائتمان حالياً.</div>
+              <div className="emptyState">لا يوجد زبائن عليهم مبالغ ائتمان حالياً. / No customers currently owe credit balances.</div>
             ) : (
               <div className="recordList">
                 {creditCustomerRows.map((row) => (
                   <article className="recordCard" key={row.customerKey}>
                     <div className="recordMain">
-                      <p>{row.customerPhone || "بدون رقم"}</p>
+                      <p>{row.customerPhone || "بدون رقم / No Number"}</p>
                       <h3>{row.customerName}</h3>
                     </div>
                     <div className="detailGrid">
-                      <DetailCell label="عدد الفواتير" value={row.invoiceCount} />
-                      <DetailCell label="المبلغ المستحق" value={`${money(row.amountOwed)} د.أ`} tone="red" />
-                      <DetailCell label="سقف الائتمان" value={`${money(row.creditAllowance)} د.أ`} />
-                      <DetailCell label="مستحق منذ" value={formatArabicDateTime(row.outstandingSince)} />
-                      <DetailCell label="مدة الاستحقاق" value={`${daysOutstanding(row.outstandingSince)} يوم`} />
-                      <DetailCell label="أول فاتورة" value={row.oldestSaleNumber ? `فاتورة ${row.oldestSaleNumber}` : "—"} />
-                      <DetailCell label="آخر فاتورة" value={row.newestSaleNumber ? `فاتورة ${row.newestSaleNumber}` : "—"} />
+                      <DetailCell label="عدد الفواتير / Receipts" value={row.invoiceCount} />
+                      <DetailCell label="المبلغ المستحق / Amount Owed" value={`${money(row.amountOwed)} د.أ`} tone="red" />
+                      <DetailCell label="سقف الائتمان / Credit Limit" value={`${money(row.creditAllowance)} د.أ`} />
+                      <DetailCell label="مستحق منذ / Outstanding Since" value={formatArabicDateTime(row.outstandingSince)} />
+                      <DetailCell label="مدة الاستحقاق / Days Outstanding" value={`${daysOutstanding(row.outstandingSince)} يوم / days`} />
+                      <DetailCell label="أول فاتورة / Oldest Receipt" value={row.oldestSaleNumber ? `فاتورة / Receipt ${row.oldestSaleNumber}` : "—"} />
+                      <DetailCell label="آخر فاتورة / Newest Receipt" value={row.newestSaleNumber ? `فاتورة / Receipt ${row.newestSaleNumber}` : "—"} />
                     </div>
                   </article>
                 ))}
@@ -2494,29 +2454,29 @@ export default function PartPOSReportsPage() {
 
           {mode === "expenses" ? (
             expenses.length === 0 && voidedExpenses.length === 0 ? (
-              <div className="emptyState">لا يوجد مصروفات ضمن الفترة المحددة.</div>
+              <div className="emptyState">لا يوجد مصروفات ضمن الفترة المحددة. / No expenses in the selected period.</div>
             ) : (
               <div className="recordList">
                 {expenses.map((row) => (
                   <article className="recordCard" key={row.id}>
                     <div className="recordMain">
-                      <p>{row.expense_number ? `قيد ${row.expense_number}` : "قيد بدون رقم"}</p>
+                      <p>{row.expense_number ? `قيد / Entry ${row.expense_number}` : "قيد بدون رقم / Entry Without Number"}</p>
                       <h3>
                         {row.expense_type === "vendor"
-                          ? row.company_name || "مورد غير محدد"
-                          : row.details || "مصروف بدون تفاصيل"}
+                          ? row.company_name || "مورد غير محدد / Unspecified Supplier"
+                          : row.details || "مصروف بدون تفاصيل / Expense Without Details"}
                       </h3>
                     </div>
                     <div className="detailGrid">
-                      <DetailCell label="النوع" value={row.expense_type === "vendor" ? "دفع مورد" : "خدمات / مرافق"} />
-                      <DetailCell label="طريقة الدفع" value={row.paid_by === "credit" ? "على الائتمان" : "نقداً"} />
-                      <DetailCell label="المبلغ" value={`${money(row.amount)} د.أ`} tone={row.paid_by === "credit" ? "orange" : "red"} />
+                      <DetailCell label="النوع / Type" value={row.expense_type === "vendor" ? "دفع مورد / Supplier Payment" : "خدمات / مرافق / Utilities"} />
+                      <DetailCell label="طريقة الدفع / Payment Method" value={row.paid_by === "credit" ? "على الائتمان / Credit" : "نقداً / Cash"} />
+                      <DetailCell label="المبلغ / Amount" value={`${money(row.amount)} د.أ`} tone={row.paid_by === "credit" ? "orange" : "red"} />
                       <DetailCell
-                        label="المحتسب على الربح"
-                        value={row.paid_by === "credit" ? "0.00 د.أ حتى الدفع" : `${money(row.amount)} د.أ`}
+                        label="المحتسب على الربح / Counted in Profit"
+                        value={row.paid_by === "credit" ? "0.00 د.أ حتى الدفع / 0.00 JOD until paid" : `${money(row.amount)} د.أ`}
                         tone={row.paid_by === "credit" ? "orange" : "red"}
                       />
-                      <DetailCell label="التاريخ" value={formatArabicDateTime(row.created_at)} />
+                      <DetailCell label="التاريخ / Date" value={formatArabicDateTime(row.created_at)} />
                     </div>
                     {!isReportsOnlyAccess && (
                       <div className="expenseActions noPrint">
@@ -2526,7 +2486,7 @@ export default function PartPOSReportsPage() {
                           onClick={() => openVoidExpenseConfirm(row)}
                           disabled={voidingExpenseId === row.id}
                         >
-                          {voidingExpenseId === row.id ? "جاري الإلغاء..." : "إلغاء المصروف / VOID"}
+                          {voidingExpenseId === row.id ? "جاري الإلغاء... / Voiding..." : "إلغاء المصروف / VOID Expense"}
                         </button>
                       </div>
                     )}
@@ -2536,20 +2496,20 @@ export default function PartPOSReportsPage() {
                 {expensePayments.length > 0 && (
                   <div className="expensePaymentsBlock">
                     <div className="expensePaymentsHeader">
-                      <strong>دفعات على مصروفات ائتمان الموردين</strong>
+                      <strong>دفعات على مصروفات ائتمان الموردين / Supplier Credit Expense Payments</strong>
                       <span>{expensePayments.length} دفعات • {money(creditExpensePaymentsForPeriod)} د.أ محسوبة</span>
                     </div>
                     {expensePayments.map((payment) => (
                       <article className="recordCard expensePaymentCard" key={payment.id}>
                         <div className="recordMain">
-                          <p>{payment.payment_number ? `دفعة ${payment.payment_number}` : "دفعة بدون رقم"}</p>
-                          <h3>{payment.company_name || payment.details || "مورد غير محدد"}</h3>
+                          <p>{payment.payment_number ? `دفعة / Payment ${payment.payment_number}` : "دفعة بدون رقم / Payment Without Number"}</p>
+                          <h3>{payment.company_name || payment.details || "مورد غير محدد / Unspecified Supplier"}</h3>
                         </div>
                         <div className="detailGrid">
-                          <DetailCell label="على قيد" value={payment.expense_number ? `قيد ${payment.expense_number}` : "—"} />
-                          <DetailCell label="طريقة الدفع" value={payment.paid_by === "cash" ? "نقداً" : "من الحساب / البنك"} />
-                          <DetailCell label="المبلغ المحتسب" value={`${money(payment.amount)} د.أ`} tone="red" />
-                          <DetailCell label="التاريخ" value={formatArabicDateTime(payment.created_at)} />
+                          <DetailCell label="على قيد / Applied to Entry" value={payment.expense_number ? `قيد / Entry ${payment.expense_number}` : "—"} />
+                          <DetailCell label="طريقة الدفع / Payment Method" value={payment.paid_by === "cash" ? "نقداً / Cash" : "من الحساب / البنك / Account / Bank"} />
+                          <DetailCell label="المبلغ المحتسب / Counted Amount" value={`${money(payment.amount)} د.أ`} tone="red" />
+                          <DetailCell label="التاريخ / Date" value={formatArabicDateTime(payment.created_at)} />
                         </div>
                         {!isReportsOnlyAccess && (
                           <div className="expenseActions noPrint">
@@ -2559,7 +2519,7 @@ export default function PartPOSReportsPage() {
                               onClick={() => openVoidExpensePaymentConfirm(payment)}
                               disabled={voidingExpensePaymentId === payment.id}
                             >
-                              {voidingExpensePaymentId === payment.id ? "جاري الإلغاء..." : "إلغاء الدفعة / VOID"}
+                              {voidingExpensePaymentId === payment.id ? "جاري الإلغاء... / Voiding..." : "إلغاء الدفعة / VOID Payment"}
                             </button>
                           </div>
                         )}
@@ -2571,22 +2531,22 @@ export default function PartPOSReportsPage() {
                 {voidedExpensePayments.length > 0 && (
                   <div className="voidedExpensesBlock">
                     <div className="voidedExpensesHeader">
-                      <strong>دفعات مصروفات ملغاة / VOID</strong>
+                      <strong>دفعات مصروفات ملغاة / VOID Expense Payments</strong>
                       <span>{voidedExpensePayments.length} دفعات • {money(totalVoidedExpensePayments)} د.أ غير محسوبة</span>
                     </div>
                     {voidedExpensePayments.map((payment) => (
                       <article className="recordCard voidedExpenseCard" key={payment.id}>
                         <div className="recordMain">
-                          <p>{payment.payment_number ? `دفعة ${payment.payment_number}` : "دفعة بدون رقم"}</p>
-                          <h3>{payment.company_name || payment.details || "مورد غير محدد"}</h3>
+                          <p>{payment.payment_number ? `دفعة / Payment ${payment.payment_number}` : "دفعة بدون رقم / Payment Without Number"}</p>
+                          <h3>{payment.company_name || payment.details || "مورد غير محدد / Unspecified Supplier"}</h3>
                           <span className="voidBadge">VOID / ملغاة</span>
                         </div>
                         <div className="detailGrid">
-                          <DetailCell label="على قيد" value={payment.expense_number ? `قيد ${payment.expense_number}` : "—"} />
-                          <DetailCell label="طريقة الدفع" value={payment.paid_by === "cash" ? "نقداً" : "من الحساب / البنك"} />
-                          <DetailCell label="المبلغ الملغى" value={`${money(payment.amount)} د.أ`} tone="orange" />
-                          <DetailCell label="تاريخ الدفع" value={formatArabicDateTime(payment.created_at)} />
-                          <DetailCell label="تاريخ الإلغاء" value={payment.voided_at ? formatArabicDateTime(payment.voided_at) : "—"} />
+                          <DetailCell label="على قيد / Applied to Entry" value={payment.expense_number ? `قيد / Entry ${payment.expense_number}` : "—"} />
+                          <DetailCell label="طريقة الدفع / Payment Method" value={payment.paid_by === "cash" ? "نقداً / Cash" : "من الحساب / البنك / Account / Bank"} />
+                          <DetailCell label="المبلغ الملغى / Voided Amount" value={`${money(payment.amount)} د.أ`} tone="orange" />
+                          <DetailCell label="تاريخ الدفع / Payment Date" value={formatArabicDateTime(payment.created_at)} />
+                          <DetailCell label="تاريخ الإلغاء / Void Date" value={payment.voided_at ? formatArabicDateTime(payment.voided_at) : "—"} />
                         </div>
                       </article>
                     ))}
@@ -2596,26 +2556,26 @@ export default function PartPOSReportsPage() {
                 {voidedExpenses.length > 0 && (
                   <div className="voidedExpensesBlock">
                     <div className="voidedExpensesHeader">
-                      <strong>مصروفات ملغاة / VOID</strong>
+                      <strong>مصروفات ملغاة / VOID Expenses</strong>
                       <span>{voidedExpenses.length} قيود • {money(totalVoidedExpenses)} د.أ غير محسوبة</span>
                     </div>
                     {voidedExpenses.map((row) => (
                       <article className="recordCard voidedExpenseCard" key={row.id}>
                         <div className="recordMain">
-                          <p>{row.expense_number ? `قيد ${row.expense_number}` : "قيد بدون رقم"}</p>
+                          <p>{row.expense_number ? `قيد / Entry ${row.expense_number}` : "قيد بدون رقم / Entry Without Number"}</p>
                           <h3>
                             {row.expense_type === "vendor"
-                              ? row.company_name || "مورد غير محدد"
-                              : row.details || "مصروف بدون تفاصيل"}
+                              ? row.company_name || "مورد غير محدد / Unspecified Supplier"
+                              : row.details || "مصروف بدون تفاصيل / Expense Without Details"}
                           </h3>
                           <span className="voidBadge">VOID / ملغى</span>
                         </div>
                         <div className="detailGrid">
-                          <DetailCell label="النوع" value={row.expense_type === "vendor" ? "دفع مورد" : "خدمات / مرافق"} />
-                          <DetailCell label="طريقة الدفع" value={row.paid_by === "credit" ? "على الائتمان" : "نقداً"} />
-                          <DetailCell label="المبلغ الملغى" value={`${money(row.amount)} د.أ`} tone="orange" />
-                          <DetailCell label="تاريخ الإدخال" value={formatArabicDateTime(row.created_at)} />
-                          <DetailCell label="تاريخ الإلغاء" value={row.voided_at ? formatArabicDateTime(row.voided_at) : "—"} />
+                          <DetailCell label="النوع / Type" value={row.expense_type === "vendor" ? "دفع مورد / Supplier Payment" : "خدمات / مرافق / Utilities"} />
+                          <DetailCell label="طريقة الدفع / Payment Method" value={row.paid_by === "credit" ? "على الائتمان / Credit" : "نقداً / Cash"} />
+                          <DetailCell label="المبلغ الملغى / Voided Amount" value={`${money(row.amount)} د.أ`} tone="orange" />
+                          <DetailCell label="تاريخ الإدخال / Entry Date" value={formatArabicDateTime(row.created_at)} />
+                          <DetailCell label="تاريخ الإلغاء / Void Date" value={row.voided_at ? formatArabicDateTime(row.voided_at) : "—"} />
                         </div>
                       </article>
                     ))}
@@ -2627,7 +2587,7 @@ export default function PartPOSReportsPage() {
 
           {mode === "vendorCredit" ? (
             vendorCreditExpenseBalanceRows.length === 0 ? (
-              <div className="emptyState">لا يوجد مبالغ ائتمان مستحقة للموردين حالياً.</div>
+              <div className="emptyState">لا يوجد مبالغ ائتمان مستحقة للموردين حالياً. / No supplier credit balances currently outstanding.</div>
             ) : (
               <div className="recordList">
                 {vendorCreditExpenseBalanceRows.map((row) => {
@@ -2636,21 +2596,21 @@ export default function PartPOSReportsPage() {
                   return (
                     <article className="recordCard vendorCreditExpenseCard" key={expense.id}>
                       <div className="recordMain">
-                        <p>{expense.expense_number ? `قيد ${expense.expense_number}` : "قيد ائتمان"}</p>
-                        <h3>{expense.company_name || "مورد غير محدد"}</h3>
+                        <p>{expense.expense_number ? `قيد / Entry ${expense.expense_number}` : "قيد ائتمان / Credit Entry"}</p>
+                        <h3>{expense.company_name || "مورد غير محدد / Unspecified Supplier"}</h3>
                         {row.paymentEverCount > 0 ? (
-                          <span className="paymentHistoryBadge">يوجد دفعات — لا يمكن إلغاء القيد</span>
+                          <span className="paymentHistoryBadge">يوجد دفعات — لا يمكن إلغاء القيد / Payments exist — cannot void entry</span>
                         ) : (
-                          <span className="payableBadge">لم يتم الدفع بعد</span>
+                          <span className="payableBadge">لم يتم الدفع بعد / Not Paid Yet</span>
                         )}
                       </div>
                       <div className="detailGrid">
-                        <DetailCell label="قيمة الشراء على الائتمان" value={`${money(expense.amount)} د.أ`} tone="orange" />
-                        <DetailCell label="المدفوع" value={`${money(row.paidAmount)} د.أ`} tone={row.paidAmount > 0 ? "green" : "plain"} />
-                        <DetailCell label="المتبقي" value={`${money(row.remainingAmount)} د.أ`} tone="red" />
-                        <DetailCell label="عدد الدفعات" value={row.activePaymentCount} />
-                        <DetailCell label="تاريخ القيد" value={formatArabicDateTime(expense.created_at)} />
-                        <DetailCell label="الوصف" value={expense.details || "—"} />
+                        <DetailCell label="قيمة الشراء على الائتمان / Credit Purchase Amount" value={`${money(expense.amount)} د.أ`} tone="orange" />
+                        <DetailCell label="المدفوع / Paid" value={`${money(row.paidAmount)} د.أ`} tone={row.paidAmount > 0 ? "green" : "plain"} />
+                        <DetailCell label="المتبقي / Remaining" value={`${money(row.remainingAmount)} د.أ`} tone="red" />
+                        <DetailCell label="عدد الدفعات / Payment Count" value={row.activePaymentCount} />
+                        <DetailCell label="تاريخ القيد / Entry Date" value={formatArabicDateTime(expense.created_at)} />
+                        <DetailCell label="الوصف / Description" value={expense.details || "—"} />
                       </div>
 
                       <div className="expenseActions noPrint vendorCreditActions">
@@ -2660,7 +2620,7 @@ export default function PartPOSReportsPage() {
                           onClick={() => openPayExpensePopup(expense)}
                           disabled={payingExpenseId === expense.id || row.remainingAmount <= 0}
                         >
-                          {payingExpenseId === expense.id ? "جاري الدفع..." : "دفع على القيد / PAY"}
+                          {payingExpenseId === expense.id ? "جاري الدفع... / Paying..." : "دفع على القيد / PAY Entry"}
                         </button>
 
                         {!isReportsOnlyAccess ? (
@@ -2671,18 +2631,18 @@ export default function PartPOSReportsPage() {
                             disabled={voidingExpenseId === expense.id || row.paymentEverCount > 0}
                             title={
                               row.paymentEverCount > 0
-                                ? "لا يمكن الإلغاء لأن هناك دفعات سابقة على هذا القيد"
-                                : "إلغاء القيد"
+                                ? "لا يمكن الإلغاء لأن هناك دفعات سابقة على هذا القيد / Cannot void because this entry has previous payments"
+                                : "إلغاء القيد / Void Entry"
                             }
                           >
-                            {voidingExpenseId === expense.id ? "جاري الإلغاء..." : "إلغاء القيد / VOID"}
+                            {voidingExpenseId === expense.id ? "جاري الإلغاء... / Voiding..." : "إلغاء القيد / VOID Entry"}
                           </button>
                         ) : null}
                       </div>
 
                       {row.payments.length > 0 && (
                         <div className="paymentHistoryList">
-                          <div className="paymentHistoryTitle">سجل الدفعات</div>
+                          <div className="paymentHistoryTitle">سجل الدفعات / Payment History</div>
                           {row.payments.map((payment) => (
                             <div
                               className={
@@ -2694,11 +2654,11 @@ export default function PartPOSReportsPage() {
                             >
                               <div>
                                 <strong>
-                                  {payment.payment_number ? `دفعة ${payment.payment_number}` : "دفعة"}
+                                  {payment.payment_number ? `دفعة / Payment ${payment.payment_number}` : "دفعة / Payment"}
                                   {payment.status === "voided" ? " • VOID" : ""}
                                 </strong>
                                 <span>
-                                  {formatArabicDateTime(payment.created_at)} • {payment.paid_by === "cash" ? "نقداً" : "من الحساب / البنك"}
+                                  {formatArabicDateTime(payment.created_at)} • {payment.paid_by === "cash" ? "نقداً / Cash" : "من الحساب / البنك / Account / Bank"}
                                 </span>
                               </div>
                               <div className="paymentHistoryAmount">
@@ -2726,7 +2686,7 @@ export default function PartPOSReportsPage() {
 
           {mode === "dailyCount" ? (
             dailyCounts.length === 0 ? (
-              <div className="emptyState">لا يوجد عد صندوق محفوظ ضمن الفترة المحددة.</div>
+              <div className="emptyState">لا يوجد عد صندوق محفوظ ضمن الفترة المحددة. / No saved cash counts in the selected period.</div>
             ) : (
               <div className="recordList">
                 {dailyCounts.map((row) => (
@@ -2746,10 +2706,10 @@ export default function PartPOSReportsPage() {
                       </h3>
                     </div>
                     <div className="detailGrid">
-                      <DetailCell label="المتوقع" value={`${money(row.expected_cash)} د.أ`} />
-                      <DetailCell label="الموجود فعلياً" value={`${money(row.actual_cash)} د.أ`} />
+                      <DetailCell label="المتوقع / Expected" value={`${money(row.expected_cash)} د.أ`} />
+                      <DetailCell label="الموجود فعلياً / Actual" value={`${money(row.actual_cash)} د.أ`} />
                       <DetailCell
-                        label="الفرق"
+                        label="الفرق / Difference"
                         value={`${money(Math.abs(row.difference))} د.أ`}
                         tone={
                           row.status === "matched"
@@ -2759,12 +2719,12 @@ export default function PartPOSReportsPage() {
                               : "orange"
                         }
                       />
-                      <DetailCell label="مبيعات نقدية" value={`${money(row.cash_sales)} د.أ`} />
-                      <DetailCell label="مبيعات ائتمان" value={`${money(row.credit_sales)} د.أ`} />
-                      <DetailCell label="تحصيل ائتمان" value={`${money(row.credit_account_payments)} د.أ`} />
-                      <DetailCell label="مصروفات نقدية" value={`${money(row.cash_expenses)} د.أ`} tone="red" />
-                      <DetailCell label="الإيداع" value={`${money(row.deposit_amount)} د.أ`} />
-                      <DetailCell label="آخر تحديث" value={formatArabicDateTime(row.updated_at)} />
+                      <DetailCell label="مبيعات نقدية / Cash Sales" value={`${money(row.cash_sales)} د.أ`} />
+                      <DetailCell label="مبيعات ائتمان / Credit Sales" value={`${money(row.credit_sales)} د.أ`} />
+                      <DetailCell label="تحصيل ائتمان / Credit Collections" value={`${money(row.credit_account_payments)} د.أ`} />
+                      <DetailCell label="مصروفات نقدية / Cash Expenses" value={`${money(row.cash_expenses)} د.أ`} tone="red" />
+                      <DetailCell label="الإيداع / Deposit" value={`${money(row.deposit_amount)} د.أ`} />
+                      <DetailCell label="آخر تحديث / Last Update" value={formatArabicDateTime(row.updated_at)} />
                     </div>
                   </article>
                 ))}
@@ -2783,26 +2743,26 @@ export default function PartPOSReportsPage() {
                 </div>
                 <div className="detailGrid">
                   <DetailCell
-                    label="إجمالي المبيعات"
+                    label="إجمالي المبيعات / Total Sales"
                     value={`${money(profitLossSales)} د.أ`}
                     tone="green"
                   />
                   <DetailCell
-                    label="إجمالي المصروفات"
+                    label="إجمالي المصروفات / Total Expenses"
                     value={`${money(profitLossExpenses)} د.أ`}
                     tone="red"
                   />
                   <DetailCell
-                    label="المعادلة"
-                    value="المبيعات - المصروفات"
+                    label="المعادلة / Formula"
+                    value="المبيعات - المصروفات / Sales - Expenses"
                   />
                   <DetailCell
-                    label="النتيجة"
+                    label="النتيجة / Result"
                     value={`${money(profitLossSales)} - ${money(profitLossExpenses)} = ${money(profitLossNet)} د.أ`}
                     tone={profitLossNet >= 0 ? "green" : "red"}
                   />
-                  <DetailCell label="عدد الفواتير" value={sales.length} />
-                  <DetailCell label="عدد المصروفات" value={expenses.length} />
+                  <DetailCell label="عدد الفواتير / Receipts" value={sales.length} />
+                  <DetailCell label="عدد المصروفات / Expenses" value={expenses.length} />
                 </div>
               </article>
             </div>
@@ -2813,15 +2773,15 @@ export default function PartPOSReportsPage() {
           {mode === "department" || mode === "items" ? (
             <>
               <div>
-                <span>إجمالي التكلفة</span>
+                <span>إجمالي التكلفة / Total Cost</span>
                 <strong>{money(totalCost)} د.أ</strong>
               </div>
               <div>
-                <span>إجمالي البيع</span>
+                <span>إجمالي البيع / Total Sales</span>
                 <strong className="redText">{money(totalSales)} د.أ</strong>
               </div>
               <div>
-                <span>إجمالي الربح / الهامش</span>
+                <span>إجمالي الربح / الهامش / Total Profit / Margin</span>
                 <strong className={totalProfit >= 0 ? "greenText" : "redText"}>
                   {money(totalProfit)} د.أ • {percent(totalMarginPercent)}
                 </strong>
@@ -2832,15 +2792,15 @@ export default function PartPOSReportsPage() {
           {mode === "credit" ? (
             <>
               <div>
-                <span>إجمالي الزبائن عليهم مبالغ</span>
+                <span>إجمالي الزبائن عليهم مبالغ / Customers Owing</span>
                 <strong>{creditCustomerRows.length}</strong>
               </div>
               <div>
-                <span>إجمالي فواتير الائتمان المفتوحة</span>
+                <span>إجمالي فواتير الائتمان المفتوحة / Open Credit Invoices</span>
                 <strong>{totalCreditInvoices}</strong>
               </div>
               <div>
-                <span>إجمالي المبالغ المستحقة</span>
+                <span>إجمالي المبالغ المستحقة / Total Outstanding</span>
                 <strong className="redText">{money(totalCreditOwed)} د.أ</strong>
               </div>
             </>
@@ -2849,15 +2809,15 @@ export default function PartPOSReportsPage() {
           {mode === "expenses" ? (
             <>
               <div>
-                <span>إجمالي المصروفات</span>
+                <span>إجمالي المصروفات / Total Expenses</span>
                 <strong className="redText">{money(totalExpenses)} د.أ</strong>
               </div>
               <div>
-                <span>مصروفات نقدية</span>
+                <span>مصروفات نقدية / Cash Expenses</span>
                 <strong>{money(utilityExpenses + vendorCashExpenses)} د.أ</strong>
               </div>
               <div>
-                <span>مصروفات على الائتمان</span>
+                <span>مصروفات على الائتمان / Credit Expenses</span>
                 <strong className="orangeText">{money(vendorCreditExpensesForPeriod)} د.أ</strong>
               </div>
             </>
@@ -2866,15 +2826,15 @@ export default function PartPOSReportsPage() {
           {mode === "vendorCredit" ? (
             <>
               <div>
-                <span>إجمالي الموردين لهم رصيد</span>
+                <span>إجمالي الموردين لهم رصيد / Suppliers Owed</span>
                 <strong>{vendorCreditRows.length}</strong>
               </div>
               <div>
-                <span>إجمالي قيود ائتمان الموردين</span>
+                <span>إجمالي قيود ائتمان الموردين / Supplier Credit Entries</span>
                 <strong>{totalVendorCreditEntries}</strong>
               </div>
               <div>
-                <span>إجمالي المستحق للموردين</span>
+                <span>إجمالي المستحق للموردين / Total Owed to Suppliers</span>
                 <strong className="orangeText">{money(totalVendorCreditOwed)} د.أ</strong>
               </div>
             </>
@@ -2883,15 +2843,15 @@ export default function PartPOSReportsPage() {
           {mode === "dailyCount" ? (
             <>
               <div>
-                <span>عدد الأيام المحفوظة</span>
+                <span>عدد الأيام المحفوظة / Saved Days</span>
                 <strong>{dailyCounts.length}</strong>
               </div>
               <div>
-                <span>إجمالي النقص</span>
+                <span>إجمالي النقص / Total Short</span>
                 <strong className="redText">{money(totalDailyShort)} د.أ</strong>
               </div>
               <div>
-                <span>إجمالي الزيادة</span>
+                <span>إجمالي الزيادة / Total Over</span>
                 <strong className="orangeText">{money(totalDailyOver)} د.أ</strong>
               </div>
             </>
@@ -2900,11 +2860,11 @@ export default function PartPOSReportsPage() {
           {mode === "profitLoss" ? (
             <>
               <div>
-                <span>إجمالي المبيعات</span>
+                <span>إجمالي المبيعات / Total Sales</span>
                 <strong className="greenText">{money(profitLossSales)} د.أ</strong>
               </div>
               <div>
-                <span>إجمالي المصروفات</span>
+                <span>إجمالي المصروفات / Total Expenses</span>
                 <strong className="redText">{money(profitLossExpenses)} د.أ</strong>
               </div>
               <div>
@@ -2922,7 +2882,7 @@ export default function PartPOSReportsPage() {
         <div className="popupBackdrop noPrint" role="dialog" aria-modal="true">
           <div className="voidConfirmCard">
             <p className="eyebrow">دفع مورد / Supplier Payment</p>
-            <h2>{payExpense.company_name || "مورد غير محدد"}</h2>
+            <h2>{payExpense.company_name || "مورد غير محدد / Unspecified Supplier"}</h2>
             <p className="selectedSupplierLine">
               قيد رقم {payExpense.expense_number ?? "—"} • المتبقي{" "}
               {money(creditExpenseBalance(payExpense).remainingAmount)} د.أ
@@ -2931,7 +2891,7 @@ export default function PartPOSReportsPage() {
               هذه الدفعة ستُحسب كمصروف في تاريخ الدفع. إذا كانت نقداً، ستخصم من صندوق نهاية اليوم.
             </p>
 
-            <label htmlFor="pay-expense-amount">مبلغ الدفعة</label>
+            <label htmlFor="pay-expense-amount">مبلغ الدفعة / Payment Amount</label>
             <input
               id="pay-expense-amount"
               value={payExpenseAmount}
@@ -2941,7 +2901,7 @@ export default function PartPOSReportsPage() {
               autoFocus
             />
 
-            <label htmlFor="pay-expense-method">طريقة الدفع</label>
+            <label htmlFor="pay-expense-method">طريقة الدفع / Payment Method</label>
             <select
               id="pay-expense-method"
               value={payExpensePaidBy}
@@ -2949,18 +2909,18 @@ export default function PartPOSReportsPage() {
                 setPayExpensePaidBy(event.target.value === "account" ? "account" : "cash")
               }
             >
-              <option value="cash">نقداً من الصندوق</option>
-              <option value="account">من الحساب / البنك</option>
+              <option value="cash">نقداً من الصندوق / Cash from Drawer</option>
+              <option value="account">من الحساب / البنك / Account / Bank</option>
             </select>
 
-            <label htmlFor="pay-expense-pin">رمز الدخول</label>
+            <label htmlFor="pay-expense-pin">رمز الدخول / Login PIN</label>
             <input
               id="pay-expense-pin"
               value={payExpensePin}
               onChange={(event) =>
                 setPayExpensePin(event.target.value.replace(/\D/g, "").slice(0, 6))
               }
-              placeholder="أدخل رمز الدخول"
+              placeholder="أدخل رمز الدخول / Enter Login PIN"
               inputMode="numeric"
               type="password"
               onKeyDown={(event) => {
@@ -2987,7 +2947,7 @@ export default function PartPOSReportsPage() {
                 onClick={() => void confirmPayExpense()}
                 disabled={Boolean(payingExpenseId)}
               >
-                {payingExpenseId ? "جاري الحفظ..." : "تسجيل الدفعة"}
+                {payingExpenseId ? "جاري الحفظ... / Saving..." : "تسجيل الدفعة / Record Payment"}
               </button>
             </div>
           </div>
@@ -2997,20 +2957,20 @@ export default function PartPOSReportsPage() {
       {voidExpensePayment && (
         <div className="popupBackdrop noPrint" role="dialog" aria-modal="true">
           <div className="voidConfirmCard">
-            <p className="eyebrow">تأكيد إلغاء دفعة</p>
-            <h2>إلغاء دفعة رقم {voidExpensePayment.payment_number ?? "—"}</h2>
+            <p className="eyebrow">تأكيد إلغاء دفعة / Confirm Payment Void</p>
+            <h2>إلغاء دفعة رقم / Void Payment No. {voidExpensePayment.payment_number ?? "—"}</h2>
             <p className="voidConfirmText">
               الدفعة ستبقى ظاهرة كـ VOID للمراجعة، لكنها لن تُحسب كمصروف ولن تخصم من صندوق اليوم.
             </p>
 
-            <label htmlFor="void-expense-payment-pin">رمز الدخول</label>
+            <label htmlFor="void-expense-payment-pin">رمز الدخول / Login PIN</label>
             <input
               id="void-expense-payment-pin"
               value={voidExpensePaymentPin}
               onChange={(event) =>
                 setVoidExpensePaymentPin(event.target.value.replace(/\D/g, "").slice(0, 6))
               }
-              placeholder="أدخل رمز الدخول"
+              placeholder="أدخل رمز الدخول / Enter Login PIN"
               inputMode="numeric"
               type="password"
               autoFocus
@@ -3038,7 +2998,7 @@ export default function PartPOSReportsPage() {
                 onClick={() => void confirmVoidExpensePayment()}
                 disabled={Boolean(voidingExpensePaymentId)}
               >
-                {voidingExpensePaymentId ? "جاري الإلغاء..." : "تأكيد إلغاء الدفعة"}
+                {voidingExpensePaymentId ? "جاري الإلغاء... / Voiding..." : "تأكيد إلغاء الدفعة / Confirm Payment Void"}
               </button>
             </div>
           </div>
@@ -3048,20 +3008,20 @@ export default function PartPOSReportsPage() {
       {voidExpense && (
         <div className="popupBackdrop noPrint" role="dialog" aria-modal="true">
           <div className="voidConfirmCard">
-            <p className="eyebrow">تأكيد إلغاء المصروف</p>
-            <h2>إلغاء مصروف رقم {voidExpense.expense_number ?? "—"}</h2>
+            <p className="eyebrow">تأكيد إلغاء المصروف / Confirm Expense Void</p>
+            <h2>إلغاء مصروف رقم / Void Expense No. {voidExpense.expense_number ?? "—"}</h2>
             <p className="voidConfirmText">
               المصروف سيبقى ظاهر كـ VOID للمراجعة، لكنه لن يدخل في المصروفات أو الربح والخسارة أو نهاية اليوم.
             </p>
 
-            <label htmlFor="void-expense-pin">رمز الدخول</label>
+            <label htmlFor="void-expense-pin">رمز الدخول / Login PIN</label>
             <input
               id="void-expense-pin"
               value={voidExpensePin}
               onChange={(event) =>
                 setVoidExpensePin(event.target.value.replace(/\D/g, "").slice(0, 6))
               }
-              placeholder="أدخل رمز الدخول"
+              placeholder="أدخل رمز الدخول / Enter Login PIN"
               inputMode="numeric"
               type="password"
               autoFocus
@@ -3089,7 +3049,7 @@ export default function PartPOSReportsPage() {
                 onClick={() => void confirmVoidExpense()}
                 disabled={Boolean(voidingExpenseId)}
               >
-                {voidingExpenseId ? "جاري الإلغاء..." : "تأكيد الإلغاء"}
+                {voidingExpenseId ? "جاري الإلغاء... / Voiding..." : "تأكيد الإلغاء / Confirm Void"}
               </button>
             </div>
           </div>

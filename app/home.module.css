@@ -1,0 +1,6246 @@
+.page {
+  --ink: #101828;
+  --muted: #667085;
+  --line: #e7eaf0;
+  --surface: #ffffff;
+  --soft: #f6f7f9;
+  --yellow: #ffd43b;
+  --yellow-strong: #f4be00;
+  --navy: #111827;
+  min-height: 100vh;
+  overflow-x: hidden;
+  background: #ffffff;
+  color: var(--ink);
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+}
+
+.page *,
+.page *::before,
+.page *::after {
+  box-sizing: border-box;
+}
+
+.page a { color: inherit; }
+.page button,
+.page input { font: inherit; }
+
+.header {
+  position: sticky;
+  top: 0;
+  z-index: 80;
+  background: rgba(255, 255, 255, .9);
+  border-bottom: 1px solid rgba(231, 234, 240, .82);
+  backdrop-filter: blur(18px);
+}
+
+.headerInner {
+  width: min(1440px, calc(100% - 48px));
+  min-height: 76px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 36px;
+}
+
+.brand {
+  display: inline-flex;
+  align-items: center;
+  text-decoration: none;
+  width: fit-content;
+}
+
+.brandLogo {
+  display: block;
+  width: 150px;
+  height: 52px;
+  object-fit: contain;
+  object-position: left center;
+}
+
+[dir="rtl"] .brandLogo { object-position: right center; }
+
+.desktopNav {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 32px;
+}
+
+.desktopNav a {
+  position: relative;
+  padding: 28px 0 25px;
+  color: #475467;
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 800;
+}
+
+.desktopNav a::after {
+  content: "";
+  position: absolute;
+  right: 0;
+  bottom: 19px;
+  left: 0;
+  height: 2px;
+  border-radius: 999px;
+  background: #111827;
+  transform: scaleX(0);
+  transition: transform .2s ease;
+}
+
+.desktopNav a:hover { color: #111827; }
+.desktopNav a:hover::after { transform: scaleX(1); }
+
+.headerActions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.languageButton,
+.dashboardLink,
+.retailerButton,
+.mobileMenuButton {
+  min-height: 43px;
+  border-radius: 13px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: 1px solid var(--line);
+  background: #fff;
+  text-decoration: none;
+  color: #344054;
+  font-size: 13px;
+  font-weight: 850;
+  white-space: nowrap;
+}
+
+.languageButton { padding: 0 12px; }
+.dashboardLink { padding: 0 14px; }
+.retailerButton {
+  padding: 0 17px;
+  border-color: #111827;
+  background: #111827;
+  color: #fff;
+  box-shadow: 0 9px 22px rgba(17, 24, 39, .16);
+}
+
+.languageButton:hover,
+.dashboardLink:hover { background: #f8f9fb; border-color: #d0d5dd; }
+.retailerButton:hover { background: #263244; transform: translateY(-1px); }
+
+.mobileMenuButton { display: none; width: 43px; padding: 0; }
+.mobileNav { display: none; }
+
+.heroSection {
+  position: relative;
+  overflow: hidden;
+  background:
+    linear-gradient(180deg, #ffffff 0%, #fbfbfa 70%, #f6f7f9 100%);
+}
+
+.heroGlowOne,
+.heroGlowTwo {
+  position: absolute;
+  border-radius: 999px;
+  pointer-events: none;
+  filter: blur(2px);
+}
+
+.heroGlowOne {
+  width: 520px;
+  height: 520px;
+  top: -260px;
+  right: -120px;
+  background: radial-gradient(circle, rgba(255, 212, 59, .28), rgba(255, 212, 59, 0) 70%);
+}
+
+.heroGlowTwo {
+  width: 480px;
+  height: 480px;
+  bottom: -300px;
+  left: -120px;
+  background: radial-gradient(circle, rgba(148, 163, 184, .16), rgba(148, 163, 184, 0) 70%);
+}
+
+.heroInner {
+  position: relative;
+  z-index: 1;
+  width: min(1440px, calc(100% - 48px));
+  min-height: 690px;
+  margin: 0 auto;
+  padding: 74px 0 70px;
+  display: grid;
+  grid-template-columns: minmax(0, 1.02fr) minmax(500px, .98fr);
+  align-items: center;
+  gap: 74px;
+}
+
+.heroCopy { max-width: 720px; }
+
+.eyebrow,
+.sectionKicker,
+.retailerEyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: #344054;
+  font-size: 11px;
+  font-weight: 950;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+}
+
+.eyebrow {
+  padding: 8px 12px;
+  border: 1px solid #e3e7ed;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, .82);
+  box-shadow: 0 8px 24px rgba(16, 24, 40, .05);
+}
+
+.eyebrow svg { color: #d8a800; }
+
+.heroCopy h1 {
+  margin: 25px 0 0;
+  max-width: 760px;
+  font-size: clamp(56px, 6.1vw, 94px);
+  line-height: .92;
+  letter-spacing: -.074em;
+  font-weight: 1000;
+}
+
+.heroCopy h1 span,
+.heroCopy h1 strong { display: block; }
+.heroCopy h1 span { color: #111827; }
+.heroCopy h1 strong { color: #c99600; font-weight: inherit; }
+
+.heroBody {
+  max-width: 660px;
+  margin: 28px 0 0;
+  color: #667085;
+  font-size: 18px;
+  line-height: 1.72;
+}
+
+.heroLocationPanel {
+  max-width: 690px;
+  margin-top: 34px;
+  padding: 8px;
+  border: 1px solid #e3e7ed;
+  border-radius: 22px;
+  display: grid;
+  grid-template-columns: minmax(280px, .95fr) minmax(260px, 1.05fr);
+  gap: 8px;
+  background: rgba(255,255,255,.92);
+  box-shadow: 0 24px 60px rgba(16, 24, 40, .12);
+}
+
+.locationButton {
+  min-width: 0;
+  min-height: 64px;
+  padding: 7px 10px 7px 8px;
+  display: grid;
+  grid-template-columns: 48px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 11px;
+  border: 0;
+  border-radius: 16px;
+  background: #111827;
+  color: #fff;
+  text-align: start;
+}
+
+.locationButton:hover { background: #202b3b; }
+
+.locationIcon {
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
+  display: grid;
+  place-items: center;
+  background: var(--yellow);
+  color: #111827;
+}
+
+.locationText { min-width: 0; }
+.locationText small { display: block; color: #98a2b3; font-size: 10px; font-weight: 850; letter-spacing: .06em; text-transform: uppercase; }
+.locationText strong { display: block; margin-top: 4px; overflow: hidden; color: #fff; font-size: 14px; font-weight: 900; text-overflow: ellipsis; white-space: nowrap; }
+.changeLocation { padding: 0 6px; color: #d0d5dd; font-size: 11px; font-weight: 900; }
+
+.heroSearch {
+  min-width: 0;
+  min-height: 64px;
+  padding: 0 17px;
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  border-radius: 16px;
+  background: #f7f8fa;
+  color: #98a2b3;
+}
+
+.heroSearch:focus-within { background: #fff; box-shadow: inset 0 0 0 2px rgba(255, 212, 59, .9); }
+.heroSearch input { width: 100%; min-width: 0; border: 0; outline: 0; background: transparent; color: #101828; font-size: 14px; font-weight: 750; }
+.heroSearch input::placeholder { color: #98a2b3; }
+.heroSearch input:disabled { cursor: not-allowed; }
+
+.heroTrustRow {
+  margin-top: 22px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 20px;
+  color: #667085;
+  font-size: 11px;
+  font-weight: 750;
+}
+
+.heroTrustRow span { display: inline-flex; align-items: center; gap: 6px; }
+.heroTrustRow svg { color: #b58b00; }
+
+.heroVisual { position: relative; min-height: 530px; }
+
+.mapSurface {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  border: 1px solid #e1e5eb;
+  border-radius: 42px;
+  background:
+    linear-gradient(90deg, transparent 49.5%, rgba(148,163,184,.12) 50%, transparent 50.5%),
+    linear-gradient(0deg, transparent 49.5%, rgba(148,163,184,.12) 50%, transparent 50.5%),
+    radial-gradient(circle at 45% 46%, #fff 0 12%, transparent 12.5%),
+    #edf0f2;
+  box-shadow: 0 38px 90px rgba(16, 24, 40, .16), inset 0 1px 0 #fff;
+  transform: perspective(900px) rotateY(-3deg) rotateX(2deg);
+}
+
+.mapSurface::before,
+.mapSurface::after {
+  content: "";
+  position: absolute;
+  background: rgba(255,255,255,.68);
+  box-shadow: 0 0 0 1px rgba(148,163,184,.08);
+}
+
+.mapSurface::before { width: 155%; height: 54px; left: -25%; top: 39%; transform: rotate(17deg); }
+.mapSurface::after { width: 54px; height: 145%; left: 61%; top: -18%; transform: rotate(29deg); }
+
+.mapRoadOne,
+.mapRoadTwo,
+.mapRoadThree {
+  position: absolute;
+  z-index: 1;
+  border: 2px solid rgba(255,255,255,.75);
+  border-radius: 36px;
+}
+
+.mapRoadOne { width: 310px; height: 170px; left: -70px; top: 62px; transform: rotate(-10deg); }
+.mapRoadTwo { width: 260px; height: 300px; right: -80px; bottom: -70px; transform: rotate(22deg); }
+.mapRoadThree { width: 210px; height: 120px; left: 150px; bottom: 54px; transform: rotate(12deg); }
+
+.deliveryRadius {
+  position: absolute;
+  z-index: 4;
+  left: 50%;
+  top: 48%;
+  width: 280px;
+  height: 280px;
+  border: 1px solid rgba(224, 173, 0, .5);
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255,212,59,.28), rgba(255,212,59,.11) 48%, rgba(255,212,59,0) 72%);
+  transform: translate(-50%, -50%);
+}
+
+.deliveryRadius::before,
+.deliveryRadius::after {
+  content: "";
+  position: absolute;
+  border: 1px solid rgba(224, 173, 0, .3);
+  border-radius: 50%;
+  inset: 38px;
+}
+
+.deliveryRadius::after { inset: 83px; }
+
+.deliveryRadiusPulse {
+  position: absolute;
+  inset: 50%;
+  width: 76px;
+  height: 76px;
+  margin: -38px;
+  border-radius: 50%;
+  background: rgba(255,212,59,.26);
+  animation: pulse 2.4s ease-out infinite;
+}
+
+.customerPin {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 62px;
+  height: 62px;
+  border: 7px solid #fff;
+  border-radius: 22px 22px 22px 5px;
+  display: grid;
+  place-items: center;
+  background: #111827;
+  color: var(--yellow);
+  box-shadow: 0 18px 34px rgba(16,24,40,.25);
+  transform: translate(-50%, -50%) rotate(-4deg);
+}
+
+.customerPin svg { transform: rotate(4deg); }
+
+.floatingCategory {
+  position: absolute;
+  z-index: 7;
+  min-width: 170px;
+  padding: 10px 12px;
+  border: 1px solid rgba(255,255,255,.9);
+  border-radius: 17px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: rgba(255,255,255,.93);
+  box-shadow: 0 16px 38px rgba(16,24,40,.14);
+  backdrop-filter: blur(10px);
+}
+
+.floatingCategory > span {
+  width: 37px;
+  height: 37px;
+  flex: 0 0 37px;
+  border-radius: 11px;
+  display: grid;
+  place-items: center;
+  background: #fff7d6;
+  color: #9b7500;
+}
+
+.floatingCategory div { min-width: 0; }
+.floatingCategory strong { display: block; overflow: hidden; color: #101828; font-size: 12px; font-weight: 900; text-overflow: ellipsis; white-space: nowrap; }
+.floatingCategory small { display: block; margin-top: 3px; color: #667085; font-size: 9px; font-weight: 750; }
+
+.floatingCategory1 { left: 26px; top: 38px; }
+.floatingCategory2 { right: 22px; top: 91px; }
+.floatingCategory3 { left: 25px; bottom: 94px; }
+.floatingCategory4 { right: 25px; bottom: 52px; }
+
+.mapCaption {
+  position: absolute;
+  z-index: 8;
+  left: 50%;
+  bottom: 19px;
+  width: min(360px, calc(100% - 38px));
+  padding: 12px 14px;
+  border: 1px solid rgba(255,255,255,.9);
+  border-radius: 17px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: rgba(17,24,39,.92);
+  color: #fff;
+  box-shadow: 0 20px 38px rgba(16,24,40,.2);
+  transform: translateX(-50%);
+}
+
+.mapCaption > span { width: 34px; height: 34px; flex: 0 0 34px; border-radius: 10px; display: grid; place-items: center; background: var(--yellow); color: #111827; }
+.mapCaption div { min-width: 0; }
+.mapCaption small { display: block; color: #98a2b3; font-size: 8px; font-weight: 900; letter-spacing: .1em; text-transform: uppercase; }
+.mapCaption strong { display: block; margin-top: 3px; overflow: hidden; font-size: 11px; font-weight: 850; text-overflow: ellipsis; white-space: nowrap; }
+
+.marketSection { padding: 78px 0 92px; background: #f6f7f9; }
+.sectionShell { width: min(1440px, calc(100% - 48px)); margin: 0 auto; }
+
+.marketHeadingRow {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 34px;
+}
+
+.marketHeadingRow h2,
+.centeredHeading h2,
+.retailerCopy h2 {
+  margin: 10px 0 0;
+  color: #101828;
+  font-size: clamp(34px, 4vw, 54px);
+  line-height: 1.03;
+  letter-spacing: -.052em;
+  font-weight: 1000;
+}
+
+.marketHeadingRow p,
+.centeredHeading p,
+.retailerCopy p {
+  max-width: 690px;
+  margin: 15px 0 0;
+  color: #667085;
+  font-size: 15px;
+  line-height: 1.7;
+}
+
+.currentLocationPill {
+  max-width: 430px;
+  min-height: 49px;
+  padding: 8px 11px;
+  border: 1px solid #dfe3e8;
+  border-radius: 15px;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  background: #fff;
+  color: #475467;
+  box-shadow: 0 9px 24px rgba(16,24,40,.06);
+}
+
+.currentLocationPill svg { flex: 0 0 auto; color: #b28700; }
+.currentLocationPill span { min-width: 0; overflow: hidden; font-size: 12px; font-weight: 750; text-overflow: ellipsis; white-space: nowrap; }
+.currentLocationPill strong { flex: 0 0 auto; padding: 6px 8px; border-radius: 9px; background: #f5f6f8; color: #101828; font-size: 10px; font-weight: 900; }
+
+.categoryScroller {
+  margin: 34px 0 0;
+  padding: 4px 1px 12px;
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  scrollbar-width: thin;
+}
+
+.categoryChip {
+  min-width: 136px;
+  min-height: 72px;
+  padding: 10px 12px;
+  border: 1px solid #e0e4e9;
+  border-radius: 18px;
+  display: grid;
+  grid-template-columns: 38px 1fr auto;
+  align-items: center;
+  gap: 8px;
+  background: #fff;
+  color: #475467;
+  box-shadow: 0 7px 18px rgba(16,24,40,.035);
+  text-align: start;
+  transition: transform .18s ease, border-color .18s ease, box-shadow .18s ease;
+}
+
+.categoryChip:hover:not(:disabled) { transform: translateY(-2px); border-color: #cfd4db; box-shadow: 0 12px 26px rgba(16,24,40,.07); }
+.categoryChip:disabled { cursor: not-allowed; opacity: .48; }
+.categoryChip > span { width: 38px; height: 38px; border-radius: 12px; display: grid; place-items: center; background: #f5f6f8; color: #344054; }
+.categoryChip strong { font-size: 11px; font-weight: 900; line-height: 1.2; }
+.categoryChip small { min-width: 23px; height: 23px; padding: 0 5px; border-radius: 999px; display: grid; place-items: center; background: #f2f4f7; color: #667085; font-size: 9px; font-weight: 900; }
+.categoryChipActive { border-color: #111827; background: #111827; color: #fff; box-shadow: 0 14px 28px rgba(17,24,39,.16); }
+.categoryChipActive > span { background: var(--yellow); color: #111827; }
+.categoryChipActive small { background: rgba(255,255,255,.12); color: #fff; }
+
+.locationEmptyState,
+.errorState {
+  margin-top: 30px;
+  min-height: 220px;
+  padding: 30px;
+  border: 1px solid #e1e5ea;
+  border-radius: 28px;
+  display: grid;
+  grid-template-columns: 130px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 28px;
+  background: #fff;
+  box-shadow: 0 14px 34px rgba(16,24,40,.05);
+}
+
+.emptyIllustration { position: relative; width: 120px; height: 120px; border-radius: 50%; display: grid; place-items: center; background: #fff9df; }
+.emptyPin { position: relative; z-index: 3; width: 58px; height: 58px; border-radius: 19px 19px 19px 6px; display: grid; place-items: center; background: #111827; color: var(--yellow); box-shadow: 0 16px 28px rgba(17,24,39,.2); transform: rotate(-4deg); }
+.emptyPin svg { transform: rotate(4deg); }
+.emptyOrbitOne,
+.emptyOrbitTwo { position: absolute; border: 1px dashed rgba(177,135,0,.4); border-radius: 50%; }
+.emptyOrbitOne { inset: 14px; }
+.emptyOrbitTwo { inset: -9px; }
+.locationEmptyState > div:nth-child(2) > span { color: #a57c00; font-size: 10px; font-weight: 950; letter-spacing: .12em; text-transform: uppercase; }
+.locationEmptyState h3 { margin: 8px 0 0; font-size: 25px; letter-spacing: -.035em; }
+.locationEmptyState p { max-width: 650px; margin: 9px 0 0; color: #667085; font-size: 14px; line-height: 1.65; }
+.locationEmptyState > button,
+.errorState > button { min-height: 47px; padding: 0 17px; border: 0; border-radius: 13px; display: inline-flex; align-items: center; gap: 8px; background: #111827; color: #fff; font-size: 12px; font-weight: 900; }
+
+.loadingState {
+  min-height: 240px;
+  margin-top: 30px;
+  border: 1px solid #e1e5ea;
+  border-radius: 28px;
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 16px;
+  background: #fff;
+  color: #475467;
+  font-size: 13px;
+}
+
+.loadingRing {
+  width: 42px;
+  height: 42px;
+  border: 4px solid #eceff2;
+  border-top-color: #d6a400;
+  border-radius: 50%;
+  animation: spin .75s linear infinite;
+}
+
+.errorState { grid-template-columns: 54px minmax(0,1fr) auto; min-height: 150px; }
+.errorState > span { width: 48px; height: 48px; border-radius: 16px; display: grid; place-items: center; background: #fff1f1; color: #b42318; font-size: 22px; font-weight: 1000; }
+.errorState h3 { margin: 0; font-size: 18px; }
+.errorState p { margin: 5px 0 0; color: #667085; font-size: 12px; }
+
+.storeSections { margin-top: 38px; display: grid; gap: 52px; }
+.storeGroup { min-width: 0; }
+.storeGroupHeading { margin-bottom: 17px; display: flex; align-items: center; justify-content: space-between; gap: 18px; }
+.groupTitle { display: flex; align-items: center; gap: 11px; }
+.groupTitle > span { width: 44px; height: 44px; border-radius: 14px; display: grid; place-items: center; background: #fff; color: #344054; border: 1px solid #e0e4e9; box-shadow: 0 7px 18px rgba(16,24,40,.04); }
+.groupTitle h3 { margin: 0; color: #101828; font-size: 23px; letter-spacing: -.035em; }
+.groupTitle p { margin: 4px 0 0; color: #98a2b3; font-size: 10px; font-weight: 850; text-transform: uppercase; letter-spacing: .08em; }
+.storeGroupHeading > button { border: 0; display: inline-flex; align-items: center; gap: 3px; background: transparent; color: #475467; font-size: 11px; font-weight: 900; }
+
+.storeGrid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.storeCard {
+  min-width: 0;
+  overflow: hidden;
+  border: 1px solid #e0e4e9;
+  border-radius: 24px;
+  display: block;
+  background: #fff;
+  text-decoration: none;
+  box-shadow: 0 10px 25px rgba(16,24,40,.045);
+  transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease;
+}
+
+.storeCard:hover { transform: translateY(-5px); border-color: #cdd2d9; box-shadow: 0 22px 44px rgba(16,24,40,.12); }
+.storeCover { position: relative; min-height: 176px; background-position: center; background-size: cover; }
+.orderStatus,
+.distanceBadge { position: absolute; top: 12px; min-height: 30px; padding: 0 10px; border-radius: 999px; display: inline-flex; align-items: center; gap: 6px; backdrop-filter: blur(10px); font-size: 9px; font-weight: 950; }
+.orderStatus { left: 12px; background: rgba(255,255,255,.92); color: #344054; }
+.orderStatus > span { width: 7px; height: 7px; border-radius: 50%; }
+.orderStatusOpen > span { background: #12b76a; box-shadow: 0 0 0 4px rgba(18,183,106,.12); }
+.orderStatusPaused > span { background: #f04438; box-shadow: 0 0 0 4px rgba(240,68,56,.12); }
+.distanceBadge { right: 12px; background: rgba(17,24,39,.82); color: #fff; }
+.storeCardBody { padding: 0 16px 16px; }
+.storeIdentityRow { position: relative; margin-top: -29px; display: grid; grid-template-columns: 58px minmax(0,1fr) 30px; align-items: end; gap: 10px; }
+.storeLogo { width: 58px; height: 58px; overflow: hidden; border: 4px solid #fff; border-radius: 18px; display: grid; place-items: center; background: #fff; box-shadow: 0 10px 22px rgba(16,24,40,.14); }
+.storeLogo img { width: 100%; height: 100%; object-fit: contain; }
+.storeLogo span { color: #111827; font-size: 23px; font-weight: 1000; }
+.storeIdentityText { min-width: 0; padding-top: 34px; }
+.storeIdentityText p { margin: 0 0 3px; overflow: hidden; color: #8b6d00; font-size: 8px; font-weight: 950; letter-spacing: .07em; text-overflow: ellipsis; text-transform: uppercase; white-space: nowrap; }
+.storeIdentityText h3 { margin: 0; overflow: hidden; color: #101828; font-size: 17px; font-weight: 950; letter-spacing: -.025em; text-overflow: ellipsis; white-space: nowrap; }
+.cardArrow { width: 30px; height: 30px; margin-bottom: 2px; border-radius: 10px; display: grid; place-items: center; background: #f4f5f7; color: #667085; }
+.storeCard:hover .cardArrow { background: var(--yellow); color: #111827; }
+.storeTagline { min-height: 36px; margin: 14px 0 0; overflow: hidden; color: #667085; font-size: 11px; line-height: 1.55; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; }
+.storeAddress { margin: 10px 0 0; display: flex; align-items: center; gap: 5px; overflow: hidden; color: #98a2b3; font-size: 9px; font-weight: 750; text-overflow: ellipsis; white-space: nowrap; }
+.storeAddress svg { flex: 0 0 auto; }
+.storeFacts { margin-top: 14px; padding-top: 12px; border-top: 1px solid #eef0f3; display: flex; flex-wrap: wrap; gap: 7px; }
+.storeFacts span { min-height: 26px; padding: 0 8px; border-radius: 8px; display: inline-flex; align-items: center; gap: 4px; background: #f6f7f9; color: #475467; font-size: 8px; font-weight: 900; }
+
+.noStoresState { min-height: 290px; margin-top: 30px; padding: 38px; border: 1px solid #e1e5ea; border-radius: 28px; display: flex; flex-direction: column; align-items: center; justify-content: center; background: #fff; text-align: center; box-shadow: 0 14px 34px rgba(16,24,40,.05); }
+.noStoresState > span { width: 62px; height: 62px; border-radius: 20px; display: grid; place-items: center; background: #fff7d6; color: #a57c00; }
+.noStoresState h3 { margin: 17px 0 0; font-size: 24px; letter-spacing: -.035em; }
+.noStoresState p { max-width: 560px; margin: 10px 0 0; color: #667085; font-size: 13px; line-height: 1.65; }
+.noStoresState > div { margin-top: 20px; display: flex; gap: 9px; }
+.noStoresState button,
+.noStoresState a { min-height: 43px; padding: 0 15px; border-radius: 12px; display: inline-flex; align-items: center; gap: 7px; text-decoration: none; font-size: 11px; font-weight: 900; }
+.noStoresState button { border: 1px solid #dfe3e8; background: #fff; color: #344054; }
+.noStoresState a { border: 1px solid #111827; background: #111827; color: #fff; }
+
+.howSection { padding: 100px 0; background: #fff; }
+.centeredHeading { max-width: 780px; margin: 0 auto; text-align: center; }
+.centeredHeading .sectionKicker { color: #9b7500; }
+.centeredHeading p { margin-right: auto; margin-left: auto; }
+.stepsGrid { position: relative; margin-top: 46px; display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 18px; }
+.stepsGrid::before { content: ""; position: absolute; top: 51px; left: 17%; right: 17%; border-top: 1px dashed #d0d5dd; }
+.stepCard { position: relative; z-index: 1; min-height: 235px; padding: 25px; border: 1px solid #e4e7ec; border-radius: 25px; background: #fff; box-shadow: 0 12px 28px rgba(16,24,40,.045); }
+.stepNumber { position: absolute; top: 20px; right: 20px; color: #e4e7ec; font-size: 30px; font-weight: 1000; letter-spacing: -.06em; }
+.stepIcon { width: 55px; height: 55px; border-radius: 17px; display: grid; place-items: center; background: #111827; color: var(--yellow); box-shadow: 0 13px 26px rgba(17,24,39,.16); }
+.stepCard h3 { margin: 27px 0 0; color: #101828; font-size: 20px; letter-spacing: -.03em; }
+.stepCard p { margin: 10px 0 0; color: #667085; font-size: 13px; line-height: 1.65; }
+
+.retailerSection { padding: 20px 0 100px; background: #fff; }
+.retailerPanel { position: relative; overflow: hidden; min-height: 510px; padding: 68px; border-radius: 38px; display: grid; grid-template-columns: minmax(0,.86fr) minmax(540px,1.14fr); align-items: center; gap: 52px; background: #111827; color: #fff; box-shadow: 0 34px 80px rgba(17,24,39,.2); }
+.retailerPanel::before { content: ""; position: absolute; width: 520px; height: 520px; right: -160px; top: -250px; border-radius: 50%; background: radial-gradient(circle, rgba(255,212,59,.25), rgba(255,212,59,0) 70%); }
+.retailerPanel::after { content: ""; position: absolute; width: 300px; height: 300px; left: -170px; bottom: -170px; border: 1px solid rgba(255,255,255,.08); border-radius: 50%; box-shadow: 0 0 0 55px rgba(255,255,255,.025), 0 0 0 110px rgba(255,255,255,.015); }
+.retailerCopy { position: relative; z-index: 2; }
+.retailerEyebrow { color: var(--yellow); }
+.retailerCopy h2 { color: #fff; font-size: clamp(38px, 4.2vw, 61px); }
+.retailerCopy p { color: #aeb7c5; }
+.retailerActions { margin-top: 28px; display: flex; flex-wrap: wrap; gap: 10px; }
+.retailerActions a { min-height: 48px; padding: 0 17px; border-radius: 13px; display: inline-flex; align-items: center; gap: 8px; text-decoration: none; font-size: 12px; font-weight: 900; }
+.retailerActions a:first-child { background: var(--yellow); color: #111827; }
+.retailerActions a:last-child { border: 1px solid rgba(255,255,255,.2); background: rgba(255,255,255,.07); color: #fff; }
+
+.retailerDashboardMock { position: relative; z-index: 2; overflow: hidden; border: 1px solid rgba(255,255,255,.17); border-radius: 24px; background: #f6f7f9; color: #111827; box-shadow: 0 32px 70px rgba(0,0,0,.28); transform: rotate(1.5deg); }
+.mockTopbar { height: 47px; padding: 0 15px; display: flex; align-items: center; gap: 7px; background: #fff; border-bottom: 1px solid #e5e7eb; }
+.mockTopbar > span { width: 7px; height: 7px; border-radius: 50%; background: #d0d5dd; }
+.mockTopbar > span:first-child { background: #ffd43b; }
+.mockTopbar strong { margin-left: auto; color: #475467; font-size: 9px; }
+.mockBody { min-height: 310px; display: grid; grid-template-columns: 72px 1fr; }
+.mockSidebar { padding: 20px 14px; display: grid; align-content: start; gap: 14px; background: #111827; }
+.mockSidebar span { height: 31px; border-radius: 9px; background: rgba(255,255,255,.08); }
+.mockSidebar span:first-child { background: var(--yellow); }
+.mockContent { padding: 24px; }
+.mockWelcome { display: flex; align-items: center; justify-content: space-between; gap: 18px; }
+.mockWelcome small { display: block; color: #98a2b3; font-size: 7px; font-weight: 900; letter-spacing: .12em; }
+.mockWelcome strong { display: block; margin-top: 5px; font-size: 18px; letter-spacing: -.035em; }
+.mockWelcome button { min-height: 31px; padding: 0 10px; border: 0; border-radius: 8px; background: #111827; color: #fff; font-size: 8px; font-weight: 850; }
+.mockMetrics { margin-top: 21px; display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; }
+.mockMetrics span { padding: 13px; border: 1px solid #e3e6ea; border-radius: 12px; background: #fff; }
+.mockMetrics small { display: block; color: #98a2b3; font-size: 7px; font-weight: 850; }
+.mockMetrics strong { display: block; margin-top: 7px; font-size: 15px; }
+.mockChart { height: 105px; margin-top: 15px; padding: 16px 15px 0; border: 1px solid #e3e6ea; border-radius: 12px; display: flex; align-items: flex-end; gap: 8px; background: #fff; }
+.mockChart i { flex: 1; border-radius: 4px 4px 0 0; background: #e8ebef; }
+.mockChart i:nth-child(1) { height: 32%; } .mockChart i:nth-child(2) { height: 49%; } .mockChart i:nth-child(3) { height: 38%; } .mockChart i:nth-child(4) { height: 70%; background: #ffd43b; } .mockChart i:nth-child(5) { height: 57%; } .mockChart i:nth-child(6) { height: 83%; background: #111827; } .mockChart i:nth-child(7) { height: 66%; } .mockChart i:nth-child(8) { height: 90%; background: #ffd43b; }
+
+.pricingSection { padding: 100px 0 110px; background: #f6f7f9; }
+.pricingGrid { margin-top: 45px; display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); gap: 15px; align-items: stretch; }
+.priceCard { position: relative; padding: 27px; border: 1px solid #e0e4e9; border-radius: 25px; display: flex; flex-direction: column; background: #fff; box-shadow: 0 10px 26px rgba(16,24,40,.04); }
+.priceCardPremium { border-color: #111827; background: #111827; color: #fff; box-shadow: 0 24px 50px rgba(17,24,39,.18); transform: translateY(-9px); }
+.planBadge { position: absolute; top: 18px; right: 18px; min-height: 24px; padding: 0 9px; border-radius: 999px; display: inline-flex; align-items: center; background: #fff7d6; color: #8b6d00; font-size: 8px; font-weight: 950; text-transform: uppercase; letter-spacing: .08em; }
+.priceCardPremium .planBadge { background: var(--yellow); color: #111827; }
+.priceCard > p { margin: 0; color: #667085; font-size: 12px; font-weight: 900; }
+.priceCardPremium > p { color: #c6cdd8; }
+.priceLine { margin-top: 20px; display: flex; align-items: flex-start; gap: 6px; }
+.priceLine span { padding-top: 8px; color: #98a2b3; font-size: 9px; font-weight: 950; }
+.priceLine strong { font-size: 50px; line-height: .95; letter-spacing: -.065em; }
+.priceCard > small { margin-top: 8px; color: #98a2b3; font-size: 9px; font-weight: 800; }
+.priceDivider { height: 1px; margin: 23px 0; background: #e9ecf0; }
+.priceCardPremium .priceDivider { background: rgba(255,255,255,.13); }
+.priceCard ul { min-height: 142px; margin: 0; padding: 0; display: grid; align-content: start; gap: 12px; list-style: none; }
+.priceCard li { display: flex; align-items: flex-start; gap: 8px; color: #667085; font-size: 10px; line-height: 1.5; font-weight: 750; }
+.priceCard li svg { flex: 0 0 auto; color: #ad8400; }
+.priceCardPremium li { color: #c6cdd8; }
+.priceCardPremium li svg { color: var(--yellow); }
+.priceCard > a { min-height: 43px; margin-top: auto; border: 1px solid #dfe3e8; border-radius: 12px; display: inline-flex; align-items: center; justify-content: center; gap: 7px; color: #344054; text-decoration: none; font-size: 10px; font-weight: 900; }
+.priceCardPremium > a { border-color: var(--yellow); background: var(--yellow); color: #111827; }
+
+.footer { padding: 64px max(24px, calc((100% - 1440px) / 2)) 24px; background: #0c111d; color: #fff; }
+.footerInner { display: grid; grid-template-columns: 1fr auto; gap: 60px; }
+.footer .brand { padding: 5px 10px; border-radius: 14px; background: #fff; }
+.footerBrand p { max-width: 390px; margin: 18px 0 0; color: #98a2b3; font-size: 12px; line-height: 1.65; }
+.footerLinks { display: flex; gap: 80px; }
+.footerLinks > div { display: grid; align-content: start; gap: 10px; }
+.footerLinks strong { margin-bottom: 4px; color: #fff; font-size: 11px; }
+.footerLinks a { color: #98a2b3; text-decoration: none; font-size: 11px; }
+.footerLinks a:hover { color: var(--yellow); }
+.footerBottom { margin-top: 50px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,.1); display: flex; justify-content: space-between; gap: 20px; color: #667085; font-size: 9px; }
+
+.modalBackdrop { position: fixed; inset: 0; z-index: 200; padding: 24px; display: grid; place-items: center; background: rgba(7,12,22,.7); backdrop-filter: blur(12px); }
+.locationModal { position: relative; width: min(560px,100%); max-height: calc(100vh - 48px); overflow-y: auto; padding: 38px; border: 1px solid rgba(255,255,255,.6); border-radius: 30px; background: #fff; box-shadow: 0 40px 110px rgba(0,0,0,.35); text-align: center; }
+.modalClose { position: absolute; top: 16px; right: 16px; width: 36px; height: 36px; border: 1px solid #e4e7ec; border-radius: 12px; display: grid; place-items: center; background: #f7f8fa; color: #475467; font-size: 22px; }
+.modalIcon { width: 66px; height: 66px; margin: 0 auto 15px; border-radius: 22px 22px 22px 7px; display: grid; place-items: center; background: #111827; color: var(--yellow); box-shadow: 0 17px 34px rgba(17,24,39,.2); transform: rotate(-4deg); }
+.modalIcon svg { transform: rotate(4deg); }
+.modalKicker { color: #a57c00; font-size: 9px; font-weight: 1000; letter-spacing: .18em; }
+.locationModal h2 { margin: 9px 0 0; color: #101828; font-size: 32px; letter-spacing: -.045em; }
+.locationModal > p { max-width: 430px; margin: 12px auto 0; color: #667085; font-size: 12px; line-height: 1.65; }
+.gpsButton { width: 100%; min-height: 58px; margin-top: 26px; padding: 7px 13px 7px 8px; border: 0; border-radius: 16px; display: grid; grid-template-columns: 44px 1fr auto; align-items: center; gap: 10px; background: #111827; color: #fff; text-align: start; }
+.gpsButton:disabled { opacity: .72; cursor: wait; }
+.gpsButton > span { width: 44px; height: 44px; border-radius: 13px; display: grid; place-items: center; background: var(--yellow); color: #111827; }
+.gpsButton strong { font-size: 12px; font-weight: 900; }
+.buttonSpinner { width: 19px; height: 19px; border: 2px solid rgba(255,255,255,.3); border-top-color: #fff; border-radius: 50%; animation: spin .7s linear infinite; }
+.modalDivider { position: relative; margin: 24px 0 18px; color: #98a2b3; font-size: 9px; font-weight: 850; text-transform: uppercase; letter-spacing: .08em; }
+.modalDivider::before { content: ""; position: absolute; left: 0; right: 0; top: 50%; border-top: 1px solid #e8ebef; }
+.modalDivider span { position: relative; padding: 0 12px; background: #fff; }
+.addressForm { display: grid; grid-template-columns: minmax(0,1fr) auto; gap: 8px; }
+.addressForm label { min-height: 50px; padding: 0 13px; border: 1px solid #dfe3e8; border-radius: 14px; display: flex; align-items: center; gap: 9px; color: #98a2b3; background: #f9fafb; }
+.addressForm label:focus-within { border-color: #d0a000; background: #fff; box-shadow: 0 0 0 3px rgba(255,212,59,.2); }
+.addressForm input { width: 100%; min-width: 0; border: 0; outline: 0; background: transparent; color: #101828; font-size: 11px; font-weight: 750; }
+.addressForm button { min-width: 78px; border: 0; border-radius: 13px; background: var(--yellow); color: #111827; font-size: 10px; font-weight: 950; }
+.addressForm button:disabled { opacity: .65; }
+.predictions { margin-top: 10px; overflow: hidden; border: 1px solid #e1e5ea; border-radius: 15px; text-align: start; }
+.predictions button { width: 100%; min-height: 58px; padding: 9px 11px; border: 0; border-bottom: 1px solid #eceff2; display: grid; grid-template-columns: 34px minmax(0,1fr) auto; align-items: center; gap: 9px; background: #fff; color: #344054; text-align: start; }
+.predictions button:last-child { border-bottom: 0; }
+.predictions button:hover { background: #f8f9fb; }
+.predictions button > span { width: 34px; height: 34px; border-radius: 10px; display: grid; place-items: center; background: #fff7d6; color: #a57c00; }
+.predictions button div { min-width: 0; }
+.predictions strong,
+.predictions small { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.predictions strong { font-size: 10px; }
+.predictions small { margin-top: 3px; color: #98a2b3; font-size: 8px; }
+.locationError { margin-top: 12px; padding: 10px 12px; border: 1px solid #fecaca; border-radius: 12px; display: flex; align-items: flex-start; gap: 8px; background: #fff5f5; color: #b42318; text-align: start; font-size: 10px; font-weight: 750; line-height: 1.5; }
+.locationError span { width: 18px; height: 18px; flex: 0 0 18px; border-radius: 50%; display: grid; place-items: center; background: #b42318; color: #fff; font-size: 10px; font-weight: 950; }
+.privacyNote { margin-top: 17px; display: flex; align-items: center; justify-content: center; gap: 6px; color: #98a2b3; font-size: 9px; font-weight: 700; }
+.privacyNote svg { color: #12b76a; }
+
+[dir="rtl"] .heroCopy h1 { letter-spacing: -.045em; }
+[dir="rtl"] .retailerDashboardMock { transform: rotate(-1.5deg); }
+[dir="rtl"] .floatingCategory1 { right: 26px; left: auto; }
+[dir="rtl"] .floatingCategory2 { right: auto; left: 22px; }
+[dir="rtl"] .floatingCategory3 { right: 25px; left: auto; }
+[dir="rtl"] .floatingCategory4 { right: auto; left: 25px; }
+[dir="rtl"] .orderStatus { right: 12px; left: auto; }
+[dir="rtl"] .distanceBadge { right: auto; left: 12px; }
+[dir="rtl"] .planBadge { right: auto; left: 18px; }
+[dir="rtl"] .modalClose { right: auto; left: 16px; }
+[dir="rtl"] .mockTopbar strong { margin-right: auto; margin-left: 0; }
+
+@keyframes spin { to { transform: rotate(360deg); } }
+@keyframes pulse { 0% { transform: scale(.65); opacity: .85; } 80%,100% { transform: scale(2.4); opacity: 0; } }
+
+@media (max-width: 1220px) {
+  .headerInner,
+  .heroInner,
+  .sectionShell { width: min(1180px, calc(100% - 36px)); }
+  .dashboardLink { display: none; }
+  .heroInner { grid-template-columns: minmax(0,1fr) minmax(430px,.86fr); gap: 42px; }
+  .storeGrid { grid-template-columns: repeat(3,minmax(0,1fr)); }
+  .retailerPanel { padding: 54px; grid-template-columns: minmax(0,.85fr) minmax(450px,1.15fr); }
+  .pricingGrid { grid-template-columns: repeat(2,minmax(0,1fr)); }
+  .priceCardPremium { transform: none; }
+}
+
+@media (max-width: 980px) {
+  .desktopNav { display: none; }
+  .headerInner { grid-template-columns: auto 1fr; }
+  .headerActions { grid-column: 2; }
+  .retailerButton { display: none; }
+  .mobileMenuButton { display: grid; }
+  .mobileNav { padding: 12px 18px 16px; border-top: 1px solid #edf0f2; display: grid; grid-template-columns: repeat(5,1fr); gap: 8px; background: #fff; }
+  .mobileNav a { min-height: 40px; padding: 0 10px; border: 1px solid #e4e7ec; border-radius: 11px; display: flex; align-items: center; justify-content: center; color: #475467; text-decoration: none; text-align: center; font-size: 9px; font-weight: 850; }
+  .heroInner { min-height: auto; padding: 56px 0 70px; grid-template-columns: 1fr; }
+  .heroCopy { max-width: 760px; margin: 0 auto; text-align: center; }
+  .eyebrow { margin: 0 auto; }
+  .heroBody { margin-right: auto; margin-left: auto; }
+  .heroLocationPanel { margin-right: auto; margin-left: auto; }
+  .heroTrustRow { justify-content: center; }
+  .heroVisual { width: min(700px,100%); min-height: 500px; margin: 0 auto; }
+  .storeGrid { grid-template-columns: repeat(2,minmax(0,1fr)); }
+  .retailerPanel { grid-template-columns: 1fr; }
+  .retailerCopy { max-width: 700px; text-align: center; margin: 0 auto; }
+  .retailerEyebrow { justify-content: center; }
+  .retailerCopy p { margin-right: auto; margin-left: auto; }
+  .retailerActions { justify-content: center; }
+  .retailerDashboardMock { width: min(680px,100%); margin: 0 auto; }
+}
+
+@media (max-width: 720px) {
+  .headerInner,
+  .heroInner,
+  .sectionShell { width: min(100% - 24px, 680px); }
+  .headerInner { min-height: 66px; gap: 12px; }
+  .brandLogo { width: 132px; height: 46px; }
+  .languageButton { width: 43px; padding: 0; }
+  .languageButton span { display: none; }
+  .mobileNav { grid-template-columns: repeat(2,1fr); }
+  .heroInner { padding: 42px 0 54px; gap: 42px; }
+  .heroCopy h1 { margin-top: 20px; font-size: clamp(49px,15vw,72px); }
+  .heroBody { margin-top: 21px; font-size: 15px; line-height: 1.62; }
+  .heroLocationPanel { grid-template-columns: 1fr; border-radius: 20px; }
+  .locationButton,
+  .heroSearch { min-height: 61px; }
+  .heroTrustRow { display: none; }
+  .heroVisual { min-height: 430px; }
+  .mapSurface { border-radius: 30px; transform: none; }
+  .deliveryRadius { width: 230px; height: 230px; }
+  .floatingCategory { min-width: 145px; padding: 8px; border-radius: 14px; }
+  .floatingCategory > span { width: 32px; height: 32px; flex-basis: 32px; }
+  .floatingCategory1 { left: 10px; top: 24px; }
+  .floatingCategory2 { right: 8px; top: 80px; }
+  .floatingCategory3 { left: 8px; bottom: 83px; }
+  .floatingCategory4 { right: 8px; bottom: 43px; }
+  [dir="rtl"] .floatingCategory1 { right: 10px; }
+  [dir="rtl"] .floatingCategory2 { left: 8px; }
+  [dir="rtl"] .floatingCategory3 { right: 8px; }
+  [dir="rtl"] .floatingCategory4 { left: 8px; }
+  .marketSection { padding: 60px 0 72px; }
+  .marketHeadingRow { align-items: flex-start; flex-direction: column; }
+  .currentLocationPill { width: 100%; }
+  .categoryScroller { margin-top: 24px; }
+  .categoryChip { min-width: 124px; min-height: 66px; grid-template-columns: 35px 1fr auto; }
+  .categoryChip > span { width: 35px; height: 35px; }
+  .locationEmptyState,
+  .errorState { padding: 24px; grid-template-columns: 1fr; text-align: center; }
+  .emptyIllustration { margin: 0 auto; }
+  .locationEmptyState > button,
+  .errorState > button { justify-content: center; }
+  .storeSections { gap: 42px; }
+  .storeGrid { grid-template-columns: 1fr; }
+  .storeCover { min-height: 190px; }
+  .howSection { padding: 78px 0; }
+  .stepsGrid { grid-template-columns: 1fr; }
+  .stepsGrid::before { display: none; }
+  .stepCard { min-height: auto; }
+  .retailerSection { padding-bottom: 78px; }
+  .retailerPanel { padding: 38px 22px; border-radius: 28px; }
+  .retailerCopy h2 { font-size: 41px; }
+  .retailerActions { flex-direction: column; }
+  .retailerActions a { justify-content: center; }
+  .mockBody { grid-template-columns: 48px 1fr; }
+  .mockSidebar { padding: 15px 8px; }
+  .mockContent { padding: 16px; }
+  .mockMetrics { grid-template-columns: 1fr 1fr; }
+  .mockMetrics span:last-child { display: none; }
+  .pricingSection { padding: 78px 0 86px; }
+  .pricingGrid { grid-template-columns: 1fr; }
+  .footer { padding: 48px 18px 22px; }
+  .footerInner { grid-template-columns: 1fr; gap: 38px; }
+  .footerLinks { gap: 50px; }
+  .footerBottom { flex-direction: column; }
+  .modalBackdrop { padding: 12px; }
+  .locationModal { max-height: calc(100vh - 24px); padding: 31px 18px 22px; border-radius: 24px; }
+  .locationModal h2 { font-size: 28px; }
+  .addressForm { grid-template-columns: 1fr; }
+  .addressForm button { min-height: 46px; }
+}
+
+.orderStatusShowcase {
+  background: rgba(17, 24, 39, 0.88);
+  color: #ffffff;
+}
+
+.orderStatusShowcase span {
+  background: #facc15;
+}
+
+/* DARIK_FRONTEND_130_BUTTON_CONTRAST_FIX - main page CTA contrast */
+.sell,
+.sell:visited {
+  background: #0f7b6c !important;
+  color: #ffffff !important;
+  border-color: #0f7b6c !important;
+  text-shadow: none !important;
+}
+
+.sell:hover,
+.sell:focus-visible,
+.sell:active {
+  background: #0b5f54 !important;
+  color: #ffffff !important;
+  border-color: #0b5f54 !important;
+}
+
+
+/* DARIK_MARKETPLACE_REDESIGN_CHECKPOINT1_246A */
+/* DARIK_MARKETPLACE_REDESIGN_CHECKPOINT1_CSS_FIX_246A_V3 */
+.header {
+  position: sticky;
+  top: 0;
+  z-index: 90;
+  border-bottom: 1px solid rgba(228, 231, 236, .9);
+  background: rgba(255,255,255,.96);
+  box-shadow: 0 1px 0 rgba(16,24,40,.02);
+  backdrop-filter: blur(18px);
+}
+
+.headerInner {
+  width: min(1180px, calc(100% - 40px));
+  min-height: 76px;
+  grid-template-columns: auto minmax(150px, auto) 1fr auto;
+  gap: 24px;
+}
+
+.brand {
+  position: relative;
+  z-index: 2;
+}
+
+.brandLogo {
+  width: 164px;
+  height: 54px;
+  object-fit: contain;
+  object-position: center;
+}
+
+.headerMenu246 {
+  display: none;
+}
+
+.discoveryToolbar246 {
+  position: relative;
+  z-index: 70;
+  padding: 18px 20px 22px;
+  background: #fff;
+}
+
+.discoveryToolbarInner246 {
+  width: min(1180px, 100%);
+  margin: 0 auto;
+  display: grid;
+  gap: 12px;
+}
+
+.discoveryLocation246 {
+  width: 100%;
+  min-height: 84px;
+  display: grid;
+  grid-template-columns: 58px minmax(0,1fr) auto;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 18px 12px 12px;
+  border: 0;
+  border-radius: 22px;
+  background:
+    linear-gradient(135deg, #111827 0%, #0f172a 68%, #182238 100%);
+  color: #fff;
+  text-align: start;
+  box-shadow:
+    0 14px 28px rgba(15,23,42,.13),
+    inset 0 1px 0 rgba(255,255,255,.06);
+  cursor: pointer;
+}
+
+.discoveryLocationIcon246 {
+  width: 58px;
+  height: 58px;
+  display: grid;
+  place-items: center;
+  border-radius: 18px;
+  background: #ffd43b;
+  color: #111827;
+  box-shadow: inset 0 -1px 0 rgba(0,0,0,.08);
+}
+
+.discoveryLocationText246 {
+  min-width: 0;
+}
+
+.discoveryLocationText246 small {
+  display: block;
+  color: #98a2b3;
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: .11em;
+  text-transform: uppercase;
+}
+
+.discoveryLocationText246 strong {
+  display: block;
+  margin-top: 5px;
+  overflow: hidden;
+  color: #fff;
+  font-size: 18px;
+  font-weight: 950;
+  letter-spacing: -.018em;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.discoveryLocationChange246 {
+  min-width: 88px;
+  padding-inline-start: 18px;
+  border-inline-start: 1px solid rgba(255,255,255,.22);
+  text-align: center;
+}
+
+.discoveryLocationChange246 strong {
+  display: block;
+  color: #ffd43b;
+  font-size: 13px;
+  font-weight: 950;
+}
+
+.discoveryLocationChange246 small {
+  display: block;
+  margin-top: 3px;
+  color: #cbd5e1;
+  font-size: 10px;
+  font-weight: 750;
+}
+
+.discoverySearchRow246 {
+  display: grid;
+  grid-template-columns: minmax(0,1fr) 58px;
+  gap: 10px;
+}
+
+.discoverySearch246 {
+  min-width: 0;
+  min-height: 60px;
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  padding: 0 18px;
+  border: 1px solid #e3e7ed;
+  border-radius: 18px;
+  background: #f8f9fb;
+  color: #98a2b3;
+  transition:
+    border-color .16s ease,
+    box-shadow .16s ease,
+    background .16s ease;
+}
+
+.discoverySearch246:focus-within {
+  border-color: #d7aa00;
+  background: #fff;
+  box-shadow: 0 0 0 3px rgba(255,212,59,.18);
+}
+
+.discoverySearch246 input {
+  width: 100%;
+  min-width: 0;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: #111827;
+  font-size: 14px;
+  font-weight: 800;
+}
+
+.discoverySearch246 input::placeholder {
+  color: #98a2b3;
+}
+
+.discoverySearch246 input:disabled {
+  cursor: not-allowed;
+  opacity: .65;
+}
+
+.discoveryFilterButton246 {
+  width: 58px;
+  min-height: 60px;
+  display: grid;
+  place-items: center;
+  border: 1px solid #e3e7ed;
+  border-radius: 18px;
+  background: #fff;
+  color: #344054;
+  cursor: pointer;
+  transition:
+    transform .16s ease,
+    border-color .16s ease,
+    background .16s ease;
+}
+
+.discoveryFilterButton246:hover:not(:disabled) {
+  transform: translateY(-1px);
+  border-color: #d0d5dd;
+  background: #f8fafc;
+}
+
+.discoveryFilterButton246:disabled {
+  cursor: not-allowed;
+  opacity: .48;
+}
+
+.discoveryFilterButtonActive246 {
+  border-color: #d8a800;
+  background: #fff9df;
+  color: #8a6700;
+}
+
+.discoveryFilterPanel246 {
+  padding: 14px;
+  border: 1px solid #e4e7ec;
+  border-radius: 18px;
+  background: #fff;
+  box-shadow: 0 18px 38px rgba(15,23,42,.11);
+}
+
+.discoveryFilterHeading246 {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.discoveryFilterHeading246 > div {
+  display: grid;
+  gap: 3px;
+}
+
+.discoveryFilterHeading246 strong {
+  color: #111827;
+  font-size: 13px;
+  font-weight: 950;
+}
+
+.discoveryFilterHeading246 small {
+  color: #667085;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.discoveryFilterHeading246 > button {
+  border: 0;
+  background: transparent;
+  color: #9a7400;
+  font-size: 10px;
+  font-weight: 950;
+  cursor: pointer;
+}
+
+.discoveryFilterChips246 {
+  margin-top: 12px;
+  display: flex;
+  gap: 7px;
+  overflow-x: auto;
+  padding-bottom: 2px;
+  scrollbar-width: none;
+}
+
+.discoveryFilterChips246::-webkit-scrollbar {
+  display: none;
+}
+
+.discoveryFilterChips246 > button {
+  min-height: 39px;
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 5px 9px 5px 6px;
+  border: 1px solid #e4e7ec;
+  border-radius: 999px;
+  background: #fff;
+  color: #475467;
+  cursor: pointer;
+}
+
+.discoveryFilterChips246 > button > span {
+  width: 28px;
+  height: 28px;
+  display: grid;
+  place-items: center;
+  border-radius: 999px;
+  background: #fff7d1;
+  color: #a47b00;
+}
+
+.discoveryFilterChips246 > button strong {
+  font-size: 10px;
+  font-weight: 900;
+}
+
+.discoveryFilterChips246 > button small {
+  min-width: 20px;
+  height: 20px;
+  display: grid;
+  place-items: center;
+  border-radius: 999px;
+  background: #f2f4f7;
+  color: #667085;
+  font-size: 9px;
+  font-weight: 900;
+}
+
+.discoveryFilterChips246 > .discoveryFilterChipActive246 {
+  border-color: #111827;
+  background: #111827;
+  color: #fff;
+}
+
+.discoveryFilterChips246 > .discoveryFilterChipActive246 > span {
+  background: #ffd43b;
+  color: #111827;
+}
+
+.discoveryFilterChips246 > .discoveryFilterChipActive246 small {
+  background: rgba(255,255,255,.15);
+  color: #fff;
+}
+
+@media (max-width: 980px) {
+  .headerInner {
+    grid-template-columns: 46px minmax(0,1fr) auto;
+  }
+
+  .headerMenu246 {
+    display: grid;
+    grid-column: 1;
+  }
+
+  .brand {
+    grid-column: 2;
+    justify-self: center;
+  }
+
+  .headerActions {
+    grid-column: 3;
+  }
+}
+
+@media (max-width: 720px) {
+  .headerInner {
+    width: calc(100% - 28px);
+    min-height: 68px;
+    gap: 10px;
+  }
+
+  .headerMenu246,
+  .languageButton {
+    width: 44px;
+    min-height: 44px;
+    border-radius: 14px;
+    background: #fff;
+  }
+
+  .headerMenu246 {
+    border-color: transparent;
+  }
+
+  .brandLogo {
+    width: 148px;
+    height: 48px;
+  }
+
+  .headerActions {
+    gap: 8px;
+    padding-inline-end: 50px;
+  }
+
+  .page :global([data-darik-customer-account-hub175="all"]) {
+    top: max(12px, env(safe-area-inset-top));
+    right: 14px;
+  }
+
+  .page :global([data-darik-customer-account-hub175="all"]) > div {
+    display: none !important;
+  }
+
+  .page :global([data-darik-customer-account-hub175="all"]) > button {
+    width: 44px !important;
+    height: 44px !important;
+    border: 1px solid #e4e7ec !important;
+    background: #fff !important;
+    color: #111827 !important;
+    box-shadow: none !important;
+  }
+
+  .discoveryToolbar246 {
+    padding: 12px 12px 16px;
+  }
+
+  .discoveryToolbarInner246 {
+    gap: 10px;
+  }
+
+  .discoveryLocation246 {
+    min-height: 76px;
+    grid-template-columns: 52px minmax(0,1fr) 72px;
+    gap: 11px;
+    padding: 10px 13px 10px 10px;
+    border-radius: 20px;
+  }
+
+  .discoveryLocationIcon246 {
+    width: 52px;
+    height: 52px;
+    border-radius: 16px;
+  }
+
+  .discoveryLocationText246 small {
+    font-size: 9px;
+    letter-spacing: .1em;
+  }
+
+  .discoveryLocationText246 strong {
+    margin-top: 4px;
+    font-size: 15px;
+  }
+
+  .discoveryLocationChange246 {
+    min-width: 68px;
+    padding-inline-start: 11px;
+  }
+
+  .discoveryLocationChange246 strong {
+    font-size: 11px;
+  }
+
+  .discoveryLocationChange246 small {
+    font-size: 8px;
+  }
+
+  .discoverySearchRow246 {
+    grid-template-columns: minmax(0,1fr) 52px;
+    gap: 8px;
+  }
+
+  .discoverySearch246 {
+    min-height: 54px;
+    padding: 0 15px;
+    border-radius: 16px;
+  }
+
+  .discoverySearch246 input {
+    font-size: 13px;
+  }
+
+  .discoveryFilterButton246 {
+    width: 52px;
+    min-height: 54px;
+    border-radius: 16px;
+  }
+
+  .discoveryFilterPanel246 {
+    padding: 12px;
+    border-radius: 16px;
+  }
+
+  .heroInner {
+    padding-top: 36px;
+  }
+}
+
+
+/* DARIK_MARKETPLACE_REDESIGN_CHECKPOINT1_MOBILE_ALIGNMENT_246A4 */
+
+/*
+  Mobile location-selected state follows the approved mockup:
+  delivery card -> search/filter -> stores.
+  The branding/marketing hero is for location-entry mode only.
+*/
+@media (max-width: 720px) {
+  .page[data-location-selected="true"] .header {
+    display: none;
+  }
+
+  .page[data-location-selected="true"] .heroSection {
+    display: none;
+  }
+
+  .page[data-location-selected="true"] :global([data-darik-customer-account-hub175="all"]) {
+    display: none !important;
+  }
+
+  .page[data-location-selected="true"] .discoveryToolbar246 {
+    padding: 10px 10px 12px;
+    border-bottom: 1px solid #eef0f3;
+  }
+
+  .page[data-location-selected="true"] .discoveryToolbarInner246 {
+    gap: 9px;
+  }
+
+  .page[data-location-selected="true"] .discoveryLocation246 {
+    min-height: 68px;
+    grid-template-columns: 46px minmax(0, 1fr) 64px;
+    gap: 10px;
+    padding: 9px 11px 9px 9px;
+    border-radius: 17px;
+    box-shadow: none;
+  }
+
+  .page[data-location-selected="true"] .discoveryLocationIcon246 {
+    width: 46px;
+    height: 46px;
+    border-radius: 13px;
+  }
+
+  .page[data-location-selected="true"] .discoveryLocationText246 small {
+    font-size: 8px;
+    letter-spacing: .11em;
+  }
+
+  .page[data-location-selected="true"] .discoveryLocationText246 strong {
+    margin-top: 3px;
+    font-size: 13px;
+    letter-spacing: -.01em;
+  }
+
+  .page[data-location-selected="true"] .discoveryLocationChange246 {
+    min-width: 62px;
+    padding-inline-start: 9px;
+  }
+
+  .page[data-location-selected="true"] .discoveryLocationChange246 strong {
+    font-size: 10px;
+  }
+
+  .page[data-location-selected="true"] .discoveryLocationChange246 small {
+    font-size: 7px;
+  }
+
+  .page[data-location-selected="true"] .discoverySearchRow246 {
+    grid-template-columns: minmax(0, 1fr) 48px;
+    gap: 8px;
+  }
+
+  .page[data-location-selected="true"] .discoverySearch246 {
+    min-height: 48px;
+    padding: 0 14px;
+    border-radius: 14px;
+    background: #fff;
+  }
+
+  .page[data-location-selected="true"] .discoverySearch246 input {
+    font-size: 12px;
+  }
+
+  .page[data-location-selected="true"] .discoveryFilterButton246 {
+    width: 48px;
+    min-height: 48px;
+    border: 1px solid #f3c400;
+    border-radius: 14px;
+    background: #ffd43b;
+    color: #111827;
+    box-shadow: none;
+  }
+
+  .page[data-location-selected="true"] .discoveryFilterButton246:hover:not(:disabled),
+  .page[data-location-selected="true"] .discoveryFilterButtonActive246 {
+    border-color: #d6a900;
+    background: #f8c900;
+    color: #111827;
+  }
+
+  .page[data-location-selected="true"] .marketSection {
+    padding-top: 24px;
+  }
+
+  .page[data-location-selected="true"] .marketHeadingRow {
+    margin-bottom: 20px;
+  }
+
+  /*
+    The toolbar is now the only location control in stores mode.
+    Hide the old repeated location pill in the results heading.
+  */
+  .page[data-location-selected="true"] .currentLocationPill {
+    display: none;
+  }
+}
+
+
+/* DARIK_MARKETPLACE_REDESIGN_CHECKPOINT2_STORE_LIST_246B */
+.storeCount246B {
+  flex: 0 0 auto;
+  align-self: end;
+  padding-bottom: 7px;
+  color: #98a2b3;
+  font-size: 12px;
+  font-weight: 900;
+  white-space: nowrap;
+}
+
+.categoryTabs246B {
+  display: flex;
+  gap: 7px;
+  margin: -6px 0 20px;
+  overflow-x: auto;
+  padding: 0 0 4px;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+
+.categoryTabs246B::-webkit-scrollbar {
+  display: none;
+}
+
+.categoryTabs246B > button {
+  min-height: 36px;
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px 4px 6px;
+  border: 1px solid #e4e7ec;
+  border-radius: 999px;
+  background: #fff;
+  color: #475467;
+  cursor: pointer;
+}
+
+.categoryTabs246B > button > span {
+  width: 26px;
+  height: 26px;
+  display: grid;
+  place-items: center;
+  border-radius: 999px;
+  background: #fff7d1;
+  color: #9b7500;
+}
+
+.categoryTabs246B > button strong {
+  font-size: 10px;
+  font-weight: 900;
+  white-space: nowrap;
+}
+
+.categoryTabs246B > button small {
+  min-width: 18px;
+  height: 18px;
+  display: grid;
+  place-items: center;
+  border-radius: 999px;
+  background: #f2f4f7;
+  color: #667085;
+  font-size: 8px;
+  font-weight: 900;
+}
+
+.categoryTabs246B > .categoryTabActive246B {
+  border-color: #111827;
+  background: #111827;
+  color: #fff;
+}
+
+.categoryTabs246B > .categoryTabActive246B > span {
+  background: #ffd43b;
+  color: #111827;
+}
+
+.categoryTabs246B > .categoryTabActive246B small {
+  background: rgba(255,255,255,.14);
+  color: #fff;
+}
+
+@media (max-width: 720px) {
+  .page[data-location-selected="true"] .marketSection {
+    padding: 20px 0 56px;
+  }
+
+  .page[data-location-selected="true"] .marketHeadingRow {
+    display: grid;
+    grid-template-columns: minmax(0,1fr) auto;
+    align-items: end;
+    gap: 10px;
+    margin-bottom: 14px;
+  }
+
+  .page[data-location-selected="true"] .marketHeadingRow > div {
+    min-width: 0;
+  }
+
+  .page[data-location-selected="true"] .marketHeadingRow h2 {
+    margin-top: 5px;
+    font-size: 25px;
+    line-height: 1.02;
+    letter-spacing: -.045em;
+  }
+
+  .page[data-location-selected="true"] .marketHeadingRow p {
+    margin-top: 8px;
+    max-width: 260px;
+    font-size: 11px;
+    line-height: 1.55;
+  }
+
+  .storeCount246B {
+    padding-bottom: 3px;
+    font-size: 9px;
+  }
+
+  .categoryTabs246B {
+    margin: 0 0 15px;
+    gap: 6px;
+  }
+
+  .categoryTabs246B > button {
+    min-height: 33px;
+    padding: 3px 9px 3px 5px;
+  }
+
+  .categoryTabs246B > button > span {
+    width: 24px;
+    height: 24px;
+  }
+
+  .categoryTabs246B > button strong {
+    font-size: 9px;
+  }
+
+  .categoryTabs246B > button small {
+    display: none;
+  }
+}
+
+
+/* DARIK_MARKETPLACE_REDESIGN_CHECKPOINT3_CATEGORIES_BROWSER_246C */
+.categoryBrowseTrigger246C {
+  border-style: dashed !important;
+}
+
+.categoryBrowseTrigger246C > svg {
+  flex: 0 0 auto;
+}
+
+.categoryBrowserBackdrop246C {
+  position: fixed;
+  inset: 0;
+  z-index: 220;
+  display: grid;
+  place-items: center;
+  padding: 18px;
+  background: rgba(15,23,42,.36);
+  backdrop-filter: blur(8px);
+}
+
+.categoryBrowser246C {
+  width: min(720px, 100%);
+  max-height: min(760px, calc(100dvh - 36px));
+  overflow: hidden;
+  display: grid;
+  grid-template-rows: auto minmax(0,1fr);
+  border: 1px solid #e4e7ec;
+  border-radius: 28px;
+  background: #f8fafc;
+  box-shadow: 0 28px 80px rgba(15,23,42,.24);
+}
+
+.categoryBrowserHeader246C {
+  min-height: 82px;
+  display: grid;
+  grid-template-columns: 44px minmax(0,1fr) 44px;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 18px;
+  border-bottom: 1px solid #e4e7ec;
+  background: rgba(255,255,255,.96);
+}
+
+.categoryBrowserHeader246C > button,
+.categoryBrowserSearchIcon246C {
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  border: 1px solid #e4e7ec;
+  border-radius: 14px;
+  background: #fff;
+  color: #111827;
+}
+
+.categoryBrowserHeader246C > button {
+  cursor: pointer;
+}
+
+.categoryBrowserHeader246C > button svg {
+  transform: rotate(180deg);
+}
+
+.page[dir="rtl"] .categoryBrowserHeader246C > button svg {
+  transform: none;
+}
+
+.categoryBrowserHeader246C > div {
+  min-width: 0;
+  display: grid;
+  gap: 2px;
+  text-align: center;
+}
+
+.categoryBrowserHeader246C strong {
+  color: #111827;
+  font-size: 21px;
+  font-weight: 950;
+  letter-spacing: -.035em;
+}
+
+.categoryBrowserHeader246C small {
+  color: #667085;
+  font-size: 10px;
+  font-weight: 750;
+}
+
+.categoryBrowserGrid246C {
+  min-height: 0;
+  overflow-y: auto;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0,1fr));
+  gap: 12px;
+  padding: 16px;
+  scrollbar-width: thin;
+}
+
+.categoryBrowserCard246C {
+  min-width: 0;
+  overflow: hidden;
+  display: grid;
+  grid-template-rows: 132px auto;
+  padding: 0;
+  border: 1px solid #e4e7ec;
+  border-radius: 18px;
+  background: #fff;
+  color: inherit;
+  text-align: start;
+  box-shadow: 0 8px 20px rgba(15,23,42,.05);
+  cursor: pointer;
+  transition:
+    transform .16s ease,
+    border-color .16s ease,
+    box-shadow .16s ease;
+}
+
+.categoryBrowserCard246C:hover {
+  transform: translateY(-2px);
+  border-color: #d0d5dd;
+  box-shadow: 0 14px 28px rgba(15,23,42,.09);
+}
+
+.categoryBrowserImage246C {
+  position: relative;
+  display: grid;
+  place-items: center;
+  background-size: cover;
+  background-position: center;
+}
+
+.categoryBrowserImage246C::after {
+  content: "";
+  position: absolute;
+  inset: auto 0 0;
+  height: 42%;
+  background: linear-gradient(180deg, transparent, rgba(15,23,42,.16));
+  pointer-events: none;
+}
+
+.categoryBrowserImage246C > span {
+  width: 58px;
+  height: 58px;
+  display: grid;
+  place-items: center;
+  border: 1px solid rgba(255,255,255,.3);
+  border-radius: 18px;
+  background: rgba(255,255,255,.92);
+  color: #111827;
+  box-shadow: 0 10px 22px rgba(15,23,42,.16);
+}
+
+.categoryBrowserCardBody246C {
+  min-width: 0;
+  display: grid;
+  gap: 4px;
+  padding: 12px 13px 13px;
+}
+
+.categoryBrowserCardBody246C strong {
+  overflow: hidden;
+  color: #111827;
+  font-size: 13px;
+  font-weight: 950;
+  line-height: 1.2;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.categoryBrowserCardBody246C small {
+  color: #667085;
+  font-size: 10px;
+  font-weight: 800;
+}
+
+@media (max-width: 720px) {
+  .categoryBrowserBackdrop246C {
+    place-items: stretch;
+    padding: 0;
+    background: #f8fafc;
+    backdrop-filter: none;
+  }
+
+  .categoryBrowser246C {
+    width: 100%;
+    max-height: 100dvh;
+    min-height: 100dvh;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+  }
+
+  .categoryBrowserHeader246C {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    min-height: 68px;
+    grid-template-columns: 38px minmax(0,1fr) 38px;
+    padding: 10px 12px;
+  }
+
+  .categoryBrowserHeader246C > button,
+  .categoryBrowserSearchIcon246C {
+    width: 38px;
+    height: 38px;
+    border-radius: 12px;
+  }
+
+  .categoryBrowserHeader246C strong {
+    font-size: 18px;
+  }
+
+  .categoryBrowserHeader246C small {
+    font-size: 9px;
+  }
+
+  .categoryBrowserGrid246C {
+    gap: 9px;
+    padding: 12px 12px 28px;
+  }
+
+  .categoryBrowserCard246C {
+    grid-template-rows: 104px auto;
+    border-radius: 15px;
+  }
+
+  .categoryBrowserCardBody246C {
+    gap: 3px;
+    padding: 9px 10px 10px;
+  }
+
+  .categoryBrowserCardBody246C strong {
+    font-size: 11px;
+  }
+
+  .categoryBrowserCardBody246C small {
+    font-size: 8px;
+  }
+
+  .categoryBrowserImage246C > span {
+    width: 48px;
+    height: 48px;
+    border-radius: 15px;
+  }
+}
+
+
+/* DARIK_MARKETPLACE_REDESIGN_CHECKPOINT3_ENTRY_FIX_246C4 */
+.categoryBrowseStandalone246C4 {
+  width: 100%;
+  min-height: 54px;
+  display: grid;
+  grid-template-columns: 36px minmax(0,1fr) 28px;
+  align-items: center;
+  gap: 10px;
+  margin: -4px 0 16px;
+  padding: 8px 10px;
+  border: 1px solid #e4e7ec;
+  border-radius: 16px;
+  background: #fff;
+  color: #111827;
+  text-align: start;
+  box-shadow: 0 6px 16px rgba(15,23,42,.045);
+  cursor: pointer;
+}
+
+.categoryBrowseStandalone246C4:hover {
+  border-color: #d0d5dd;
+  background: #fcfcfd;
+}
+
+.categoryBrowseStandaloneIcon246C4 {
+  width: 36px;
+  height: 36px;
+  display: grid;
+  place-items: center;
+  border-radius: 11px;
+  background: #ffd43b;
+  color: #111827;
+}
+
+.categoryBrowseStandaloneText246C4 {
+  min-width: 0;
+  display: grid;
+  gap: 2px;
+}
+
+.categoryBrowseStandaloneText246C4 strong {
+  color: #111827;
+  font-size: 11px;
+  font-weight: 950;
+  line-height: 1.2;
+}
+
+.categoryBrowseStandaloneText246C4 small {
+  color: #667085;
+  font-size: 8px;
+  font-weight: 750;
+  line-height: 1.25;
+}
+
+.categoryBrowseStandaloneArrow246C4 {
+  width: 28px;
+  height: 28px;
+  display: grid;
+  place-items: center;
+  border-radius: 9px;
+  background: #f8fafc;
+  color: #475467;
+}
+
+.page[dir="rtl"] .categoryBrowseStandaloneArrow246C4 svg {
+  transform: rotate(180deg);
+}
+
+@media (max-width: 720px) {
+  .categoryBrowseStandalone246C4 {
+    min-height: 50px;
+    grid-template-columns: 34px minmax(0,1fr) 26px;
+    gap: 9px;
+    margin: -2px 0 14px;
+    padding: 7px 9px;
+    border-radius: 14px;
+  }
+
+  .categoryBrowseStandaloneIcon246C4 {
+    width: 34px;
+    height: 34px;
+    border-radius: 10px;
+  }
+
+  .categoryBrowseStandaloneText246C4 strong {
+    font-size: 10px;
+  }
+
+  .categoryBrowseStandaloneText246C4 small {
+    font-size: 7px;
+  }
+
+  .categoryBrowseStandaloneArrow246C4 {
+    width: 26px;
+    height: 26px;
+    background: transparent;
+  }
+}
+
+
+/* DARIK_MARKETPLACE_REDESIGN_CHECKPOINT3_CARD_LABEL_FIX_246C5 */
+
+.categoryBrowserCard246C {
+  height: auto !important;
+  min-height: 176px !important;
+  grid-template-rows: 112px minmax(54px, auto) !important;
+  align-content: stretch !important;
+}
+
+.categoryBrowserImage246C {
+  min-height: 112px !important;
+}
+
+.categoryBrowserCardBody246C {
+  position: relative !important;
+  z-index: 2 !important;
+  min-height: 54px !important;
+  display: grid !important;
+  align-content: center !important;
+  gap: 3px !important;
+  padding: 9px 10px 10px !important;
+  background: #ffffff !important;
+  color: #111827 !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+.categoryBrowserCardBody246C strong {
+  display: block !important;
+  color: #111827 !important;
+  font-size: 11px !important;
+  font-weight: 950 !important;
+  line-height: 1.2 !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+.categoryBrowserCardBody246C small {
+  display: block !important;
+  color: #667085 !important;
+  font-size: 8px !important;
+  font-weight: 800 !important;
+  line-height: 1.2 !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+@media (max-width: 720px) {
+  .categoryBrowserCard246C {
+    min-height: 160px !important;
+    grid-template-rows: 102px minmax(50px, auto) !important;
+  }
+
+  .categoryBrowserImage246C {
+    min-height: 102px !important;
+  }
+
+  .categoryBrowserCardBody246C {
+    min-height: 50px !important;
+    padding: 8px 9px 9px !important;
+  }
+
+  .categoryBrowserCardBody246C strong {
+    font-size: 10px !important;
+  }
+
+  .categoryBrowserCardBody246C small {
+    font-size: 7px !important;
+  }
+}
+
+/* DARIK_MARKETPLACE_REDESIGN_CHECKPOINT5_FINAL_POLISH_246E */
+
+/* Once the customer has chosen a delivery location, GetDarik becomes
+   a focused discovery experience. Retailer marketing lives outside it. */
+.page[data-location-selected="true"] .retailerSection,
+.page[data-location-selected="true"] .footer {
+  display: none;
+}
+
+.page[data-location-selected="true"] .marketSection {
+  min-height: calc(100dvh - 150px);
+}
+
+.filterSheetHandle246E {
+  display: none;
+}
+
+.filterSection246E {
+  display: grid;
+  gap: 9px;
+  margin-top: 14px;
+}
+
+.filterLabel246E {
+  color: #667085;
+  font-size: 9px;
+  font-weight: 900;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+}
+
+.filterSortGrid246E {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0,1fr));
+  gap: 7px;
+}
+
+.filterSortGrid246E > button {
+  min-width: 0;
+  min-height: 68px;
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 6px;
+  padding: 8px 6px;
+  border: 1px solid #e4e7ec;
+  border-radius: 13px;
+  background: #fff;
+  color: #475467;
+  cursor: pointer;
+}
+
+.filterSortGrid246E > button strong {
+  font-size: 9px;
+  font-weight: 900;
+  line-height: 1.15;
+  text-align: center;
+}
+
+.filterSortGrid246E > .filterChoiceActive246E {
+  border-color: #111827;
+  background: #111827;
+  color: #fff;
+  box-shadow: 0 8px 18px rgba(15,23,42,.12);
+}
+
+.filterSortGrid246E > .filterChoiceActive246E svg {
+  color: #ffd43b;
+}
+
+.filterToggleRow246E {
+  width: 100%;
+  min-height: 58px;
+  display: grid;
+  grid-template-columns: 34px minmax(0,1fr) 38px;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 9px;
+  border: 1px solid #e4e7ec;
+  border-radius: 13px;
+  background: #fff;
+  color: #111827;
+  text-align: start;
+  cursor: pointer;
+}
+
+.filterToggleIcon246E {
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  border-radius: 10px;
+  background: #fff7d1;
+  color: #9b7500;
+}
+
+.filterToggleRow246E > span:nth-child(2) {
+  min-width: 0;
+  display: grid;
+  gap: 2px;
+}
+
+.filterToggleRow246E strong {
+  font-size: 10px;
+  font-weight: 900;
+}
+
+.filterToggleRow246E small {
+  color: #667085;
+  font-size: 8px;
+  font-weight: 700;
+  line-height: 1.25;
+}
+
+.filterToggleRow246E > i {
+  position: relative;
+  width: 38px;
+  height: 22px;
+  justify-self: end;
+  border-radius: 999px;
+  background: #e4e7ec;
+  transition: background .15s ease;
+}
+
+.filterToggleRow246E > i::after {
+  content: "";
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 16px;
+  height: 16px;
+  border-radius: 999px;
+  background: #fff;
+  box-shadow: 0 2px 5px rgba(15,23,42,.14);
+  transition: transform .15s ease;
+}
+
+.filterToggleRow246E > .filterSwitchActive246E {
+  background: #111827;
+}
+
+.filterToggleRow246E > .filterSwitchActive246E::after {
+  transform: translateX(16px);
+  background: #ffd43b;
+}
+
+.page[dir="rtl"] .filterToggleRow246E > i::after {
+  left: auto;
+  right: 3px;
+}
+
+.page[dir="rtl"] .filterToggleRow246E > .filterSwitchActive246E::after {
+  transform: translateX(-16px);
+}
+
+.filterDone246E {
+  width: 100%;
+  min-height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  margin-top: 14px;
+  border: 1px solid #e4b800;
+  border-radius: 13px;
+  background: #ffd43b;
+  color: #111827;
+  font-size: 10px;
+  font-weight: 950;
+  cursor: pointer;
+}
+
+.page[dir="rtl"] .filterDone246E svg {
+  transform: rotate(180deg);
+}
+
+@media (max-width: 720px) {
+  .page[data-location-selected="true"] .marketSection {
+    min-height: calc(100dvh - 132px);
+    padding-bottom: max(34px, env(safe-area-inset-bottom));
+  }
+
+  .discoveryFilterPanel246 {
+    position: fixed;
+    z-index: 235;
+    left: 10px;
+    right: 10px;
+    bottom: max(10px, env(safe-area-inset-bottom));
+    max-height: calc(100dvh - 28px);
+    overflow-y: auto;
+    margin: 0;
+    padding: 10px 12px 12px;
+    border: 1px solid #e4e7ec;
+    border-radius: 22px;
+    background: rgba(255,255,255,.99);
+    box-shadow: 0 28px 70px rgba(15,23,42,.26);
+  }
+
+  .filterSheetHandle246E {
+    width: 38px;
+    height: 4px;
+    display: block;
+    margin: 0 auto 10px;
+    border-radius: 999px;
+    background: #d0d5dd;
+  }
+
+  .discoveryFilterHeading246 strong {
+    font-size: 12px;
+  }
+
+  .discoveryFilterHeading246 small {
+    font-size: 8px;
+  }
+
+  .filterSection246E {
+    margin-top: 12px;
+  }
+
+  .filterSortGrid246E > button {
+    min-height: 62px;
+    border-radius: 12px;
+  }
+
+  .filterSortGrid246E > button strong {
+    font-size: 8px;
+  }
+
+  .filterToggleRow246E {
+    min-height: 54px;
+  }
+
+  .filterDone246E {
+    min-height: 46px;
+  }
+}
+
+
+/* DARIK_MARKETPLACE_RESTORE_FULL_SITE_SHELL_246F */
+
+/*
+  246F corrects an over-aggressive cleanup from Checkpoints 1/5.
+  The redesigned discovery experience stays intact, but GetDarik remains
+  a complete website with branding, retailer access, pricing and footer.
+*/
+.page[data-location-selected="true"] .retailerSection,
+.page[data-location-selected="true"] .footer {
+  display: block !important;
+}
+
+/* The retailer panel now has explicit Signup + Dashboard + Pricing actions. */
+.retailerActions a:nth-child(2),
+.retailerActions a:nth-child(3) {
+  border: 1px solid rgba(255,255,255,.2);
+  background: rgba(255,255,255,.07);
+  color: #fff;
+}
+
+.retailerActions a:nth-child(2):hover,
+.retailerActions a:nth-child(3):hover {
+  border-color: rgba(255,255,255,.34);
+  background: rgba(255,255,255,.12);
+}
+
+/*
+  Keep the large marketing hero hidden after a delivery location is chosen.
+  That preserves the approved delivery-card -> search -> stores hierarchy.
+  Restore only the site chrome and retailer/business content.
+*/
+@media (max-width: 720px) {
+  .page[data-location-selected="true"] .header {
+    display: block !important;
+  }
+
+  .page[data-location-selected="true"] .headerInner {
+    width: calc(100% - 24px);
+    min-height: 66px;
+    grid-template-columns: 44px minmax(0,1fr) 44px;
+    gap: 8px;
+  }
+
+  .page[data-location-selected="true"] .headerMenu246 {
+    width: 44px;
+    min-height: 44px;
+    grid-column: 1;
+    display: grid !important;
+    place-items: center;
+  }
+
+  .page[data-location-selected="true"] .brand {
+    grid-column: 2;
+    justify-self: center;
+  }
+
+  .page[data-location-selected="true"] .brandLogo {
+    width: 140px;
+    height: 46px;
+  }
+
+  .page[data-location-selected="true"] .headerActions {
+    grid-column: 3;
+    width: 44px;
+    padding-inline-end: 0;
+    gap: 0;
+  }
+
+  .page[data-location-selected="true"] .languageButton {
+    width: 44px;
+    min-height: 44px;
+  }
+
+  /*
+    The floating customer-account control stays hidden here because it would
+    overlap the restored compact header. Account access remains independent
+    elsewhere; this correction is specifically about restoring site shell.
+  */
+  .page[data-location-selected="true"]
+  :global([data-darik-customer-account-hub175="all"]) {
+    display: none !important;
+  }
+
+  .page[data-location-selected="true"] .discoveryToolbar246 {
+    padding-top: 10px;
+  }
+
+  .page[data-location-selected="true"] .retailerSection {
+    padding: 34px 0 54px;
+  }
+
+  .page[data-location-selected="true"] .retailerPanel {
+    min-height: auto;
+    padding: 32px 20px;
+    border-radius: 26px;
+  }
+
+  .page[data-location-selected="true"] .retailerCopy h2 {
+    font-size: 36px;
+    line-height: 1.02;
+  }
+
+  .page[data-location-selected="true"] .retailerActions {
+    margin-top: 22px;
+    flex-direction: column;
+  }
+
+  .page[data-location-selected="true"] .retailerActions a {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .page[data-location-selected="true"] .footer {
+    padding: 42px 18px 22px;
+  }
+}
+
+/* DARIK_STORE_FILTER_ON_SUBMIT_296
+   Type first. Nothing filters until Search is submitted.
+   After submit, the normal #stores marketplace section is hidden and replaced
+   by only Darik stores carrying the requested item. */
+
+.darikDirectorySearch296 {
+  width: 100%;
+}
+
+.darikDirectoryForm296 {
+  display: flex;
+  align-items: stretch;
+  gap: 8px;
+  width: 100%;
+}
+
+.darikDirectoryInputShell296 {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.darikDirectoryInputShell296 input {
+  width: 100%;
+}
+
+.darikDirectorySubmit296,
+.darikDirectoryClear296 {
+  appearance: none;
+  border: 0;
+  border-radius: 12px;
+  min-height: 48px;
+  padding: 0 18px;
+  cursor: pointer;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 850;
+  white-space: nowrap;
+}
+
+.darikDirectorySubmit296 {
+  background: #0f172a;
+  color: #ffffff;
+}
+
+.darikDirectorySubmit296:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
+
+.darikDirectoryClear296 {
+  background: #eef2f7;
+  color: #334155;
+}
+
+/* DARIK_NEXT16_GLOBAL_PURITY_FIX_001B_HOME_296 - rule moved to app/globals.css */
+
+.darikDirectoryStoreResults296 {
+  scroll-margin-top: 24px;
+  margin-top: 20px;
+  width: 100%;
+  padding: 22px;
+  border: 1px solid rgba(15, 23, 42, 0.09);
+  border-radius: 22px;
+  background: #f8fafc;
+}
+
+.darikDirectoryHeading296 {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 20px;
+  margin-bottom: 16px;
+}
+
+.darikDirectoryHeading296 > div {
+  display: grid;
+  gap: 4px;
+}
+
+.darikDirectoryHeading296 span {
+  color: #64748b;
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.darikDirectoryHeading296 h2 {
+  margin: 0;
+  color: #0f172a;
+  font-size: clamp(22px, 3vw, 34px);
+  line-height: 1.05;
+  letter-spacing: -0.03em;
+}
+
+.darikDirectoryHeading296 p {
+  margin: 0;
+  color: #64748b;
+  font-size: 13px;
+}
+
+.darikDirectoryHeading296 > strong {
+  flex: 0 0 auto;
+  border-radius: 999px;
+  background: #ffffff;
+  padding: 8px 12px;
+  color: #334155;
+  font-size: 12px;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.06);
+}
+
+.darikDirectoryState296 {
+  display: grid;
+  gap: 5px;
+  padding: 34px 14px;
+  border-radius: 16px;
+  background: #ffffff;
+  text-align: center;
+  color: #64748b;
+}
+
+.darikDirectoryState296 strong {
+  color: #0f172a;
+  font-size: 15px;
+}
+
+.darikDirectoryStoreGrid296 {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.darikDirectoryStoreCard296 {
+  overflow: hidden;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  border-radius: 17px;
+  background: #ffffff;
+  box-shadow: 0 6px 20px rgba(15, 23, 42, 0.045);
+}
+
+.darikDirectoryStoreMain296,
+.darikDirectorySampleProduct296 {
+  appearance: none;
+  border: 0;
+  width: 100%;
+  cursor: pointer;
+  font: inherit;
+  color: inherit;
+  text-align: left;
+}
+
+.darikDirectoryStoreMain296 {
+  display: grid;
+  grid-template-columns: 54px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  padding: 14px;
+  background: #ffffff;
+}
+
+.darikDirectoryLogo296 {
+  width: 54px;
+  height: 54px;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  border-radius: 14px;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  background: #f1f5f9;
+  color: #334155;
+  font-size: 20px;
+  font-weight: 900;
+}
+
+.darikDirectoryLogo296 img,
+.darikDirectorySampleImage296 img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.darikDirectoryStoreCopy296 {
+  min-width: 0;
+  display: grid;
+  gap: 2px;
+}
+
+.darikDirectoryStoreCopy296 strong {
+  overflow: hidden;
+  color: #0f172a;
+  font-size: 14px;
+  font-weight: 850;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.darikDirectoryStoreCopy296 small {
+  overflow: hidden;
+  color: #64748b;
+  font-size: 11px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.darikDirectoryStoreCopy296 > span {
+  color: #475569;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.darikDirectoryViewStore296 {
+  color: #475569;
+  font-size: 11px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.darikDirectorySampleProduct296 {
+  display: grid;
+  grid-template-columns: 46px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  border-top: 1px solid rgba(15, 23, 42, 0.07);
+  background: #f8fafc;
+}
+
+.darikDirectorySampleImage296 {
+  width: 46px;
+  height: 46px;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  border-radius: 10px;
+  background: #e9eef5;
+}
+
+.darikDirectorySampleImage296 svg {
+  width: 20px;
+  height: 20px;
+  fill: none;
+  stroke: #94a3b8;
+  stroke-width: 1.5;
+}
+
+.darikDirectorySampleProduct296 > span:nth-child(2) {
+  min-width: 0;
+  display: grid;
+  gap: 2px;
+}
+
+.darikDirectorySampleProduct296 small {
+  color: #64748b;
+  font-size: 9px;
+  font-weight: 750;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.darikDirectorySampleProduct296 strong {
+  overflow: hidden;
+  color: #0f172a;
+  font-size: 12px;
+  font-weight: 800;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.darikDirectorySampleProduct296 > span:last-child {
+  color: #334155;
+  font-size: 10px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+@media (max-width: 820px) {
+  .darikDirectoryForm296 {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  .darikDirectoryClear296 {
+    grid-column: 1 / -1;
+    min-height: 40px;
+  }
+
+  .darikDirectoryStoreResults296 {
+    margin-top: 14px;
+    padding: 14px;
+    border-radius: 17px;
+  }
+
+  .darikDirectoryHeading296 {
+    align-items: flex-start;
+  }
+
+  .darikDirectoryStoreGrid296 {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 520px) {
+  .darikDirectorySubmit296 {
+    padding: 0 13px;
+  }
+
+  .darikDirectoryStoreMain296 {
+    grid-template-columns: 48px minmax(0, 1fr);
+  }
+
+  .darikDirectoryLogo296 {
+    width: 48px;
+    height: 48px;
+  }
+
+  .darikDirectoryViewStore296 {
+    grid-column: 2;
+  }
+
+  .darikDirectorySampleProduct296 {
+    grid-template-columns: 42px minmax(0, 1fr);
+  }
+
+  .darikDirectorySampleImage296 {
+    width: 42px;
+    height: 42px;
+  }
+
+  .darikDirectorySampleProduct296 > span:last-child {
+    grid-column: 2;
+  }
+}
+
+/* DARIK_JORDAN_DIRECTORY_ALL_ACTIVE_STORES_CSS_331 */
+.directoryLocationHint331 {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  margin: 4px 0 14px;
+  padding: 13px 15px;
+  border: 1px solid #dbe5e3;
+  border-radius: 16px;
+  background: #f7fbfa;
+}
+
+.directoryLocationHint331 > span {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 11px;
+  background: #e4f4f0;
+  color: #0f7b6c;
+}
+
+.directoryLocationHint331 > div {
+  min-width: 0;
+  display: grid;
+  gap: 2px;
+}
+
+.directoryLocationHint331 strong {
+  color: #16232d;
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.directoryLocationHint331 small {
+  color: #66747f;
+  font-size: 11px;
+  line-height: 1.35;
+}
+
+.directoryLocationHint331 button {
+  border: 0;
+  border-radius: 10px;
+  padding: 9px 12px;
+  background: #0f7b6c;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 900;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.darikDirectoryStoreSlot331 {
+  min-width: 0;
+}
+
+.darikNoDeliveryDivider331 {
+  display: grid;
+  grid-template-columns: minmax(18px, 1fr) auto minmax(18px, 1fr);
+  align-items: center;
+  gap: 10px;
+  margin: 14px 2px 9px;
+  color: #7b4a48;
+}
+
+.darikNoDeliveryDivider331 > span {
+  height: 1px;
+  background: #ead7d5;
+}
+
+.darikNoDeliveryDivider331 > strong {
+  font-size: 11px;
+  font-weight: 900;
+  text-align: center;
+}
+
+.darikMarketplaceStoreList246B .darikHomeStoreCardNoDelivery331 {
+  border-color: #eadbd9;
+  background: #fffdfc;
+}
+
+.darikMarketplaceStoreList246B .darikHomeStoreCardNoDelivery331:hover {
+  border-color: #dcc5c2;
+}
+
+.darikMarketplaceStoreList246B .darikHomeNoDelivery331,
+.darikMarketplaceStoreList246B .darikHomeDeliveryUnknown331 {
+  display: inline-flex;
+  align-items: center;
+  align-self: flex-start;
+  gap: 5px;
+  max-width: 100%;
+  margin-top: 2px;
+  padding: 5px 8px;
+  border-radius: 8px;
+  font-size: 10px;
+  font-weight: 900;
+  line-height: 1.2;
+}
+
+.darikMarketplaceStoreList246B .darikHomeNoDelivery331 {
+  background: #fff0ee;
+  color: #a33c34;
+  border: 1px solid #f1d1cd;
+}
+
+.darikMarketplaceStoreList246B .darikHomeDeliveryUnknown331 {
+  background: #eef7f5;
+  color: #0f6e62;
+  border: 1px solid #d4ebe6;
+}
+
+@media (max-width: 620px) {
+  .directoryLocationHint331 {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  .directoryLocationHint331 button {
+    grid-column: 1 / -1;
+    width: 100%;
+  }
+
+  .darikNoDeliveryDivider331 {
+    grid-template-columns: minmax(8px, 1fr) auto minmax(8px, 1fr);
+    gap: 7px;
+  }
+
+  .darikNoDeliveryDivider331 > strong {
+    max-width: 230px;
+    font-size: 10px;
+  }
+}
+
+/* DARIK_HELP_FOOTER_HOME_CSS_335 */
+.footerLinks {
+  flex-wrap: wrap;
+  gap: 56px;
+}
+
+@media (max-width: 900px) {
+  .footerLinks {
+    gap: 34px 44px;
+  }
+}
+
+@media (max-width: 560px) {
+  .footerLinks {
+    gap: 30px;
+  }
+}
+
+/* DARIK_STORE_AUTO_25_THEN_MANUAL_10_CSS_338 */
+.loadMoreStores338 {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  padding: 16px 0 6px;
+}
+
+.loadMoreStores338 button {
+  min-width: 210px;
+  min-height: 46px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #d8e1e1;
+  border-radius: 999px;
+  padding: 0 22px;
+  background: #ffffff;
+  color: #16242d;
+  box-shadow: 0 8px 22px rgba(15, 23, 42, 0.055);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 900;
+  cursor: pointer;
+  transition:
+    transform 160ms ease,
+    border-color 160ms ease,
+    box-shadow 160ms ease,
+    background 160ms ease;
+}
+
+.loadMoreStores338 button:hover {
+  transform: translateY(-1px);
+  border-color: #9fc9c1;
+  background: #f7fbfa;
+  box-shadow: 0 11px 26px rgba(15, 23, 42, 0.075);
+}
+
+.loadMoreStores338 button:focus-visible {
+  outline: 3px solid rgba(13, 123, 108, 0.2);
+  outline-offset: 3px;
+}
+
+@media (max-width: 560px) {
+  .loadMoreStores338 {
+    padding-top: 13px;
+  }
+
+  .loadMoreStores338 button {
+    width: 100%;
+    min-width: 0;
+  }
+}
+/* DARIK_FRONTEND_385_TRUE_CENTER_MOBILE_HEADER
+   Center the Darik logo against the viewport/header itself rather than the
+   asymmetric space left between one control on the left and two on the right. */
+@media (max-width: 980px) {
+  .headerInner {
+    position: relative;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+  }
+
+  .headerMenu246 {
+    grid-column: 1;
+    justify-self: start;
+  }
+
+  .header .brand {
+    position: absolute !important;
+    left: 50% !important;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    grid-column: auto !important;
+    justify-self: auto !important;
+    margin: 0 !important;
+    z-index: 3;
+  }
+
+  .headerActions {
+    grid-column: 3;
+    justify-self: end;
+    width: auto !important;
+    padding-inline-end: 0 !important;
+  }
+}
+
+@media (max-width: 720px) {
+  .headerInner {
+    width: calc(100% - 28px);
+    min-height: 68px;
+    gap: 8px;
+  }
+
+  .headerActions {
+    gap: 8px !important;
+  }
+
+  .page[data-location-selected="true"] .headerInner {
+    width: calc(100% - 28px);
+    min-height: 68px;
+    grid-template-columns: auto minmax(0, 1fr) auto !important;
+    gap: 8px;
+    position: relative;
+  }
+
+  .page[data-location-selected="true"] .brand {
+    position: absolute !important;
+    left: 50% !important;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    grid-column: auto !important;
+    justify-self: auto !important;
+  }
+
+  .page[data-location-selected="true"] .headerActions {
+    grid-column: 3;
+    justify-self: end;
+    width: auto !important;
+    padding-inline-end: 0 !important;
+    gap: 8px !important;
+  }
+}
+
+@media (max-width: 380px) {
+  .header .brandLogo,
+  .page[data-location-selected="true"] .header .brandLogo {
+    width: 124px;
+    height: 44px;
+  }
+}
+
+/* DARIK_FRONTEND_387_DOUBLE_LOGO_SCOPE_FIX
+   385 is intentionally limited to the homepage header. The footer reuses the
+   .brand class and must remain in normal document flow. */
+
+/* DARIK_MARKETPLACE_FINISHED_HOME_CSS_389 */
+.page {
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at 12% 0%, rgba(18, 183, 132, .055), transparent 22rem),
+    linear-gradient(180deg, #f7fafb 0%, #ffffff 38%, #f6f9fa 100%);
+  color: #0d1b35;
+}
+
+.header {
+  position: sticky;
+  top: 0;
+  z-index: 120;
+  border-bottom: 1px solid rgba(15, 23, 42, .07);
+  background: rgba(255, 255, 255, .96);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  box-shadow: 0 8px 28px rgba(15, 23, 42, .045);
+}
+
+.headerInner {
+  width: min(100% - 34px, 1540px);
+  min-height: 76px;
+  margin: 0 auto;
+  gap: 24px;
+}
+
+.brandLogo {
+  width: 166px;
+  height: 54px;
+  object-fit: contain;
+  object-position: left center;
+}
+
+.desktopNav {
+  margin-inline: auto;
+  gap: 8px;
+}
+
+.desktopNav a {
+  position: relative;
+  border-radius: 999px;
+  padding: 11px 14px;
+  color: #17233a;
+  font-size: 13px;
+  font-weight: 850;
+  text-decoration: none;
+  transition: color 160ms ease, background 160ms ease;
+}
+
+.desktopNav a:hover {
+  color: #087b61;
+  background: #edf9f5;
+}
+
+.desktopNav a:first-child {
+  color: #087b61;
+}
+
+.desktopNav a:first-child::after {
+  content: "";
+  position: absolute;
+  left: 18px;
+  right: 18px;
+  bottom: 4px;
+  height: 2px;
+  border-radius: 999px;
+  background: #17b886;
+}
+
+.headerActions {
+  gap: 8px;
+}
+
+.languageButton,
+.dashboardLink {
+  border: 1px solid #e5e9ee;
+  border-radius: 12px;
+  background: #fff;
+  color: #182238;
+}
+
+.retailerButton {
+  border-radius: 12px;
+  background: linear-gradient(135deg, #12b981, #07966d);
+  color: #fff;
+  box-shadow: 0 8px 18px rgba(10, 149, 106, .20);
+}
+
+.homeHero389 {
+  position: relative;
+  min-height: 405px;
+  overflow: hidden;
+  border-bottom: 1px solid rgba(15, 23, 42, .06);
+  background:
+    radial-gradient(circle at 8% 25%, rgba(31, 196, 151, .16), transparent 26rem),
+    linear-gradient(90deg, #f7fbfa 0%, #f8fbfb 42%, #eef5f3 100%);
+}
+
+.homeHeroImage389 {
+  position: absolute;
+  inset-block: 0;
+  inset-inline-end: 0;
+  width: min(65%, 1080px);
+  background-image: url("/darik-home-hero-389.jpg");
+  background-size: cover;
+  background-position: center;
+  filter: saturate(.96) contrast(1.01);
+}
+
+.homeHeroShade389 {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(90deg,
+      #f8fbfa 0%,
+      rgba(248,251,250,.99) 32%,
+      rgba(248,251,250,.90) 45%,
+      rgba(248,251,250,.25) 63%,
+      rgba(248,251,250,0) 78%
+    );
+  pointer-events: none;
+}
+
+.homeHeroInner389 {
+  position: relative;
+  z-index: 2;
+  width: min(100% - 42px, 1540px);
+  min-height: 405px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+}
+
+.homeHeroCopy389 {
+  width: min(620px, 48vw);
+  padding: 48px 0 88px;
+}
+
+.homeHeroEyebrow389 {
+  display: inline-flex;
+  align-items: center;
+  min-height: 26px;
+  margin-bottom: 10px;
+  color: #087b61;
+  font-size: 11px;
+  font-weight: 950;
+  letter-spacing: .13em;
+}
+
+.homeHeroCopy389 h1 {
+  margin: 0;
+  display: grid;
+  gap: 0;
+  color: #0c1930;
+  font-size: clamp(40px, 4.4vw, 66px);
+  line-height: .96;
+  letter-spacing: -.055em;
+}
+
+.homeHeroCopy389 h1 span,
+.homeHeroCopy389 h1 strong {
+  display: block;
+}
+
+.homeHeroCopy389 h1 strong {
+  color: #0a8f70;
+}
+
+.homeHeroCopy389 p {
+  max-width: 600px;
+  margin: 20px 0 0;
+  color: #4e5e75;
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1.65;
+}
+
+.homeHeroTrust389 {
+  margin-top: 22px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 18px;
+}
+
+.homeHeroTrust389 span {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  color: #1a2b42;
+  font-size: 12px;
+  font-weight: 850;
+}
+
+.homeHeroTrust389 svg {
+  color: #0f9f75;
+}
+
+.discoveryToolbar246 {
+  position: relative;
+  z-index: 8;
+  margin-top: -70px;
+  padding: 0 20px 18px;
+  background: transparent;
+}
+
+.discoveryToolbarInner246 {
+  width: min(100%, 1500px);
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: minmax(220px, 290px) minmax(0, 1fr);
+  align-items: stretch;
+  gap: 10px;
+  border: 1px solid rgba(16, 24, 40, .10);
+  border-radius: 18px;
+  padding: 10px;
+  background: rgba(255, 255, 255, .98);
+  box-shadow: 0 18px 42px rgba(15, 23, 42, .13);
+}
+
+.discoveryLocation246 {
+  min-height: 60px;
+  border: 0;
+  border-radius: 13px;
+  background: #f4f8f7;
+}
+
+.discoverySearchRow246 {
+  min-width: 0;
+  align-self: stretch;
+}
+
+.discoverySearch246 {
+  min-height: 60px;
+  border-radius: 13px;
+}
+
+.discoveryFilterButton246 {
+  min-width: 60px;
+  border-radius: 13px;
+}
+
+.marketSection {
+  padding: 20px 20px 52px;
+  background: transparent;
+}
+
+.sectionShell {
+  width: min(100%, 1500px);
+}
+
+.marketHeadingRow {
+  align-items: end;
+  margin-bottom: 18px;
+}
+
+.marketHeadingRow .sectionKicker {
+  color: #0b9972;
+  font-size: 11px;
+  font-weight: 950;
+  letter-spacing: .08em;
+}
+
+.marketHeadingRow h2 {
+  margin-top: 5px;
+  color: #0d1b35;
+  font-size: clamp(28px, 2.7vw, 42px);
+  line-height: 1;
+  letter-spacing: -.04em;
+}
+
+.marketHeadingRow p {
+  margin-top: 8px;
+  color: #69778b;
+  font-size: 14px;
+}
+
+.storeCount246B {
+  border: 1px solid #e4ebe8;
+  background: #fff;
+  color: #6a7687;
+  box-shadow: 0 5px 15px rgba(15,23,42,.04);
+}
+
+.categoryTabs246B {
+  margin: 0 0 22px;
+  padding: 0 0 4px;
+  gap: 10px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.categoryTabs246B::-webkit-scrollbar { display: none; }
+
+.categoryTabs246B button {
+  flex: 0 0 145px;
+  min-height: 88px;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  grid-template-rows: 42px auto;
+  align-items: center;
+  gap: 2px 8px;
+  border: 1px solid #e4eaee;
+  border-radius: 17px;
+  padding: 11px 12px;
+  background: #fff;
+  color: #17243b;
+  box-shadow: 0 6px 16px rgba(15,23,42,.035);
+}
+
+.categoryTabs246B button > span {
+  width: 38px;
+  height: 38px;
+  display: grid;
+  place-items: center;
+  border-radius: 12px;
+  background: #effaf6;
+  color: #0b9972;
+}
+
+.categoryTabs246B button > strong {
+  grid-column: 1 / -1;
+  text-align: start;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.categoryTabs246B button > small {
+  grid-column: 2;
+  grid-row: 1;
+  justify-self: end;
+  border-radius: 999px;
+  padding: 4px 7px;
+  background: #f0f3f5;
+  color: #8792a2;
+  font-size: 9px;
+  font-weight: 900;
+}
+
+.categoryTabs246B .categoryTabActive246B {
+  border-color: #1bb587;
+  background: linear-gradient(180deg, #f5fffb, #ecfbf6);
+  box-shadow: 0 9px 22px rgba(13, 157, 115, .10);
+}
+
+.categoryBrowseStandalone246C4 {
+  margin: 0 0 24px;
+  border-radius: 17px;
+  border: 1px solid #e4eaee;
+  background: #fff;
+  box-shadow: 0 6px 16px rgba(15,23,42,.035);
+}
+
+.trendingSection389 { padding: 0 20px 42px; }
+
+.trendingHeading389 {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 24px;
+  margin-bottom: 14px;
+}
+
+.trendingHeading389 > div { display: grid; gap: 4px; }
+
+.trendingHeading389 span {
+  color: #e15b35;
+  font-size: 10px;
+  font-weight: 950;
+  letter-spacing: .08em;
+}
+
+.trendingHeading389 h2 {
+  margin: 0;
+  color: #0d1b35;
+  font-size: clamp(25px, 2.2vw, 34px);
+  letter-spacing: -.035em;
+}
+
+.trendingHeading389 p {
+  margin: 0;
+  color: #778497;
+  font-size: 13px;
+}
+
+.trendingHeading389 > a {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: #087b61;
+  font-size: 12px;
+  font-weight: 900;
+  text-decoration: none;
+}
+
+.trendingGrid389 {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.trendingCard389 {
+  min-width: 0;
+  display: grid;
+  grid-template-columns: 76px minmax(0, 1fr) 26px;
+  align-items: center;
+  gap: 10px;
+  min-height: 84px;
+  border: 1px solid #e5eaee;
+  border-radius: 15px;
+  padding: 8px;
+  background: #fff;
+  color: inherit;
+  text-decoration: none;
+  box-shadow: 0 6px 18px rgba(15,23,42,.045);
+  transition: transform 160ms ease, box-shadow 160ms ease;
+}
+
+.trendingCard389:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 26px rgba(15,23,42,.08);
+}
+
+.trendingCard389 img {
+  width: 76px;
+  height: 66px;
+  display: block;
+  border-radius: 11px;
+  object-fit: cover;
+  background: #f2f4f7;
+}
+
+.trendingCard389 > span { min-width: 0; display: grid; gap: 4px; }
+
+.trendingCard389 small {
+  overflow: hidden;
+  color: #657388;
+  font-size: 10px;
+  font-weight: 800;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.trendingCard389 strong {
+  color: #0e6d58;
+  font-size: 12px;
+  font-weight: 950;
+}
+
+.trendingCard389 i { color: #0a8f70; }
+
+.homePromo389 { padding: 0 20px 50px; }
+
+.homePromoGrid389 {
+  display: grid;
+  grid-template-columns: 1.45fr 1fr;
+  gap: 12px;
+}
+
+.businessPromo389,
+.wholesalePromo389 {
+  min-height: 118px;
+  display: grid;
+  grid-template-columns: 48px minmax(0,1fr) 28px;
+  align-items: center;
+  gap: 14px;
+  border-radius: 22px;
+  padding: 22px 24px;
+  text-decoration: none;
+  transition: transform 160ms ease, box-shadow 160ms ease;
+}
+
+.businessPromo389 {
+  border: 1px solid #bdebdc;
+  background:
+    radial-gradient(circle at 92% 30%, rgba(29,185,135,.15), transparent 16rem),
+    linear-gradient(135deg, #effcf7, #e5f8f0);
+  color: #0d4f42;
+}
+
+.wholesalePromo389 {
+  border: 1px solid #f3d589;
+  background:
+    radial-gradient(circle at 90% 25%, rgba(255,195,60,.22), transparent 13rem),
+    linear-gradient(135deg, #fff9e9, #fff1bd);
+  color: #6e4d09;
+}
+
+.businessPromo389:hover,
+.wholesalePromo389:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 14px 26px rgba(15,23,42,.08);
+}
+
+.promoIcon389 {
+  width: 48px;
+  height: 48px;
+  display: grid;
+  place-items: center;
+  border-radius: 15px;
+  background: rgba(255,255,255,.72);
+}
+
+.businessPromo389 > span:nth-child(2),
+.wholesalePromo389 > span:nth-child(2) {
+  display: grid;
+  gap: 3px;
+}
+
+.businessPromo389 small,
+.wholesalePromo389 small {
+  font-size: 9px;
+  font-weight: 950;
+  letter-spacing: .09em;
+}
+
+.businessPromo389 strong,
+.wholesalePromo389 strong {
+  font-size: 19px;
+  font-weight: 950;
+  letter-spacing: -.025em;
+}
+
+.businessPromo389 em,
+.wholesalePromo389 em {
+  font-size: 11px;
+  font-style: normal;
+  font-weight: 700;
+  opacity: .78;
+}
+
+.businessPromo389 > i,
+.wholesalePromo389 > i { justify-self: end; }
+
+.retailerSection { padding-top: 0; }
+
+.retailerPanel {
+  border-radius: 26px;
+  border: 1px solid rgba(15, 23, 42, .08);
+  box-shadow: 0 16px 38px rgba(15,23,42,.07);
+}
+
+.footer {
+  background: #0d1b2a;
+  color: #e9f2ef;
+}
+
+.footerInner,
+.footerBottom { width: min(100% - 40px, 1500px); }
+
+@media (max-width: 1120px) {
+  .desktopNav a { padding-inline: 10px; font-size: 12px; }
+  .homeHero389, .homeHeroInner389 { min-height: 380px; }
+  .homeHeroImage389 { width: 63%; }
+  .homeHeroCopy389 { width: 52vw; }
+  .trendingGrid389 { grid-template-columns: repeat(3, minmax(0,1fr)); }
+}
+
+@media (max-width: 820px) {
+  .headerInner { width: min(100% - 20px, 100%); min-height: 64px; }
+  .brandLogo { width: 145px; height: 48px; }
+
+  .homeHero389,
+  .homeHeroInner389 { min-height: 460px; }
+
+  .homeHeroImage389 {
+    inset-block-start: 160px;
+    width: 100%;
+    height: 300px;
+    opacity: .82;
+    background-position: 60% center;
+  }
+
+  .homeHeroShade389 {
+    background:
+      linear-gradient(180deg,
+        #f8fbfa 0%,
+        rgba(248,251,250,.99) 42%,
+        rgba(248,251,250,.58) 68%,
+        rgba(248,251,250,.08) 100%
+      );
+  }
+
+  .homeHeroInner389 { align-items: start; }
+  .homeHeroCopy389 { width: 100%; padding: 34px 0 210px; }
+  .homeHeroCopy389 h1 { font-size: clamp(38px, 9vw, 54px); }
+  .homeHeroCopy389 p { max-width: 620px; font-size: 14px; }
+
+  .discoveryToolbar246 { margin-top: -54px; padding-inline: 12px; }
+  .discoveryToolbarInner246 { grid-template-columns: 1fr; gap: 8px; border-radius: 17px; }
+  .discoveryLocation246 { min-height: 52px; }
+  .discoverySearch246 { min-height: 54px; }
+
+  .marketSection,
+  .trendingSection389,
+  .homePromo389 { padding-inline: 12px; }
+
+  .trendingGrid389 { grid-template-columns: repeat(2, minmax(0,1fr)); }
+  .homePromoGrid389 { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 560px) {
+  .homeHero389,
+  .homeHeroInner389 { min-height: 430px; }
+
+  .homeHeroImage389 { inset-block-start: 185px; height: 245px; }
+  .homeHeroCopy389 { padding-top: 26px; }
+  .homeHeroCopy389 h1 { font-size: 40px; }
+  .homeHeroCopy389 p { margin-top: 13px; font-size: 13px; line-height: 1.5; }
+
+  .homeHeroTrust389 { margin-top: 14px; gap: 8px 12px; }
+  .homeHeroTrust389 span { font-size: 10px; }
+  .marketHeadingRow { align-items: start; }
+  .marketHeadingRow h2 { font-size: 29px; }
+  .categoryTabs246B button { flex-basis: 124px; }
+
+  .trendingGrid389 { grid-template-columns: 1fr; }
+  .trendingHeading389 { align-items: start; }
+  .trendingHeading389 > a { display: none; }
+
+  .businessPromo389,
+  .wholesalePromo389 {
+    min-height: 108px;
+    grid-template-columns: 42px minmax(0,1fr) 24px;
+    padding: 16px;
+  }
+
+  .promoIcon389 { width: 42px; height: 42px; }
+
+  .businessPromo389 strong,
+  .wholesalePromo389 strong { font-size: 17px; }
+}
+
+/* DARIK_APPROVED_EXACT_HOME_CSS_390 */
+.page {
+  --darik-green-390: #079875;
+  --darik-green-dark-390: #08735d;
+  --darik-navy-390: #071a38;
+  --darik-soft-390: #f5faf8;
+  background: #fff;
+}
+
+.header {
+  min-height: 58px !important;
+  background: rgba(255,255,255,.98) !important;
+  border-bottom: 1px solid #edf1f3 !important;
+  box-shadow: 0 1px 7px rgba(15,23,42,.035) !important;
+}
+
+.headerInner {
+  width: min(1600px, calc(100% - 48px)) !important;
+  min-height: 58px !important;
+  grid-template-columns: 240px auto minmax(310px, 1fr) auto !important;
+  gap: 19px !important;
+}
+
+.brandLogo {
+  width: 200px !important;
+  height: 50px !important;
+  object-position: left center !important;
+}
+
+.desktopNav {
+  justify-content: flex-start !important;
+  gap: 24px !important;
+}
+
+.desktopNav a {
+  color: #0d2341 !important;
+  padding: 20px 0 17px !important;
+  font-size: 12px !important;
+  font-weight: 780 !important;
+}
+
+.desktopNav a::after {
+  bottom: 12px !important;
+  background: var(--darik-green-390) !important;
+}
+
+.headerHomeActive390 {
+  color: var(--darik-green-dark-390) !important;
+}
+
+.headerHomeActive390::after {
+  transform: scaleX(1) !important;
+}
+
+.headerDiscovery390 {
+  min-width: 0;
+  display: grid;
+  grid-template-columns: minmax(250px, 1fr) auto 44px;
+  align-items: center;
+  gap: 9px;
+}
+
+.headerSearch390 {
+  min-width: 0;
+  height: 40px;
+  color: #8794a7;
+  background: #f8fafc;
+  border: 1px solid #e4e9ef;
+  border-radius: 11px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 13px;
+  cursor: text;
+  box-shadow: inset 0 1px 1px rgba(15,23,42,.02);
+}
+
+.headerSearch390 span {
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font-size: 11px;
+  font-weight: 650;
+}
+
+.headerLocation390 {
+  min-height: 40px !important;
+  width: auto !important;
+  grid-template-columns: 28px minmax(82px, auto) !important;
+  gap: 7px !important;
+  color: #0d2341 !important;
+  background: #f8fafc !important;
+  border: 1px solid #e4e9ef !important;
+  border-radius: 12px !important;
+  padding: 5px 11px 5px 6px !important;
+  box-shadow: none !important;
+}
+
+.headerLocation390 .discoveryLocationIcon246 {
+  width: 28px !important;
+  height: 28px !important;
+  border-radius: 9px !important;
+  color: #fff !important;
+  background: var(--darik-green-390) !important;
+}
+
+.headerLocation390 .discoveryLocationText246 small,
+.headerLocation390 .discoveryLocationChange246 { display: none !important; }
+
+.headerLocation390 .discoveryLocationText246 strong {
+  color: #0d2341 !important;
+  margin: 0 !important;
+  max-width: 118px;
+  font-size: 10px !important;
+  font-weight: 800 !important;
+}
+
+.headerCart390 {
+  position: relative;
+  width: 42px;
+  height: 40px;
+  color: #061a38;
+  border-radius: 11px;
+  display: grid;
+  place-items: center;
+  text-decoration: none;
+}
+
+.headerCart390 b {
+  position: absolute;
+  top: -2px;
+  right: -1px;
+  min-width: 17px;
+  height: 17px;
+  padding: 0 4px;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  color: #fff;
+  background: var(--darik-green-390);
+  font-size: 8px;
+  line-height: 1;
+}
+
+.headerActions {
+  gap: 8px !important;
+}
+
+.languageButton,
+.dashboardLink { display: none !important; }
+
+.retailerButton {
+  min-height: 40px !important;
+  padding: 0 20px !important;
+  color: #fff !important;
+  background: linear-gradient(180deg, #0aa17d, #08765f) !important;
+  border-color: #08765f !important;
+  border-radius: 10px !important;
+  font-size: 11px !important;
+  box-shadow: 0 8px 18px rgba(7,135,103,.19) !important;
+}
+
+.homeHero390 {
+  position: relative;
+  height: 286px;
+  min-height: 286px;
+  overflow: hidden;
+  background: #f8fbfa;
+}
+
+.homeHeroVisual390 {
+  position: absolute;
+  inset: 0 0 0 auto;
+  width: 61.5%;
+  background-image: url('/darik-home-approved-390.jpg');
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-position: center right;
+}
+
+.homeHeroFade390 {
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background:
+    linear-gradient(90deg, #fff 0%, #fff 30%, rgba(255,255,255,.96) 36%, rgba(255,255,255,.58) 48%, rgba(255,255,255,0) 61%),
+    linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,0));
+}
+
+.homeHeroInner390 {
+  position: relative;
+  z-index: 2;
+  width: min(1600px, calc(100% - 82px));
+  height: 100%;
+  margin: 0 auto;
+}
+
+.homeHeroCopy390 {
+  width: min(610px, 47%);
+  padding-top: 26px;
+}
+
+.homeHeroCopy390 h1 {
+  margin: 0;
+  color: #071a38;
+  letter-spacing: -.045em;
+  font-size: clamp(30px, 2.55vw, 43px);
+  font-weight: 1000;
+  line-height: 1.02;
+}
+
+.homeHeroCopy390 h2 {
+  margin: 3px 0 0;
+  letter-spacing: -.045em;
+  font-size: clamp(27px, 2.38vw, 39px);
+  font-weight: 1000;
+  line-height: 1.03;
+}
+
+.homeHeroCopy390 h2 strong { color: var(--darik-green-390); }
+.homeHeroCopy390 h2 span { color: #071a38; }
+
+.homeHeroCopy390 p {
+  max-width: 570px;
+  margin: 8px 0 0;
+  color: #4c6180;
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.43;
+}
+
+.homeHeroTrust390 {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px 25px;
+  margin-top: 12px;
+  color: #0e2847;
+}
+
+.homeHeroTrust390 span {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 10px;
+  font-weight: 800;
+}
+
+.homeHeroTrust390 svg { color: var(--darik-green-390); }
+.homeHeroHeart390 svg { color: #f04438 !important; }
+
+.homePopular390 {
+  position: absolute;
+  left: 0;
+  bottom: 8px;
+  width: min(860px, 58%);
+  min-height: 25px;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  z-index: 5;
+}
+
+.homePopular390 b {
+  color: #17314f;
+  white-space: nowrap;
+  font-size: 9px;
+  font-weight: 900;
+}
+
+.homePopular390 button {
+  height: 24px;
+  padding: 0 13px;
+  color: #35506f;
+  white-space: nowrap;
+  background: rgba(245,249,252,.92);
+  border: 1px solid #dbe5ef;
+  border-radius: 999px;
+  cursor: pointer;
+  font-size: 9px;
+  font-weight: 700;
+}
+
+.discoveryToolbar246 {
+  position: relative !important;
+  z-index: 15 !important;
+  margin-top: -96px !important;
+  padding: 0 0 45px !important;
+  background: transparent !important;
+}
+
+.discoveryToolbarInner246 {
+  width: min(850px, calc(100% - 82px)) !important;
+  margin-left: max(41px, calc((100% - 1600px) / 2 + 41px)) !important;
+  margin-right: auto !important;
+  display: block !important;
+}
+
+.discoveryToolbarInner246 > .discoveryLocation246 { display: none !important; }
+
+.discoverySearchRow246 {
+  grid-template-columns: minmax(0,1fr) !important;
+  gap: 0 !important;
+}
+
+.discoverySearchRow246 > .discoveryFilterButton246 { display: none !important; }
+
+.discoverySearch246 {
+  min-height: 48px !important;
+  background: rgba(255,255,255,.98) !important;
+  border: 1px solid #d9e3e8 !important;
+  border-radius: 12px !important;
+  padding: 0 12px !important;
+  box-shadow: 0 6px 19px rgba(15,23,42,.07) !important;
+}
+
+.darikDirectoryForm296 { gap: 7px !important; }
+.darikDirectorySubmit296 {
+  min-width: 110px !important;
+  min-height: 43px !important;
+  color: #fff !important;
+  background: linear-gradient(180deg, #0aa17d, #08765f) !important;
+  border-radius: 10px !important;
+  font-size: 11px !important;
+}
+.darikDirectoryClear296 { min-height: 43px !important; }
+
+.marketSection {
+  background: #fff !important;
+  padding: 7px 0 11px !important;
+}
+
+.sectionShell {
+  width: min(1600px, calc(100% - 76px)) !important;
+}
+
+.marketSection > .sectionShell {
+  display: flex;
+  flex-direction: column;
+}
+
+.categoryTabs246B {
+  order: 0;
+  display: grid !important;
+  grid-template-columns: 1.7fr repeat(9, minmax(0, 1fr)) !important;
+  gap: 9px !important;
+  margin: 0 0 11px !important;
+  padding: 0 !important;
+  overflow: visible !important;
+}
+
+.categoryTabs246B > button {
+  position: relative;
+  min-width: 0 !important;
+  min-height: 87px !important;
+  padding: 7px 6px 8px !important;
+  color: #071a38 !important;
+  background: #fff !important;
+  border: 1px solid #e4eaee !important;
+  border-radius: 11px !important;
+  display: grid !important;
+  grid-template-rows: 49px auto !important;
+  place-items: center !important;
+  gap: 2px !important;
+  box-shadow: 0 5px 14px rgba(15,23,42,.035) !important;
+}
+
+.categoryTabs246B > button > span {
+  width: 78px !important;
+  height: 48px !important;
+  color: #0b8f6d !important;
+  background-color: transparent !important;
+  background-repeat: no-repeat !important;
+  background-position: center !important;
+  background-size: contain !important;
+  border-radius: 0 !important;
+}
+
+.categoryTabs246B > button > span svg { width: 23px; height: 23px; }
+.categoryTabs246B > button > strong {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 10px !important;
+  font-weight: 900 !important;
+}
+.categoryTabs246B > button > small { display: none !important; }
+
+.categoryTabs246B > button:first-child {
+  grid-template-columns: 52px minmax(0,1fr) !important;
+  grid-template-rows: 1fr 1fr !important;
+  column-gap: 10px !important;
+  place-items: center start !important;
+  padding: 10px 12px !important;
+  background: linear-gradient(135deg, #f8fffc, #f3fbf8) !important;
+}
+.categoryTabs246B > button:first-child > span {
+  grid-row: 1 / 3;
+  width: 46px !important;
+  height: 46px !important;
+  color: #071a38 !important;
+  background: #ffd43b !important;
+  border-radius: 12px !important;
+  display: grid !important;
+  place-items: center !important;
+}
+.categoryTabs246B > button:first-child > strong {
+  align-self: end;
+  justify-self: start;
+  font-size: 13px !important;
+}
+.categoryTabs246B > button:first-child::after {
+  content: "Browse every active store";
+  align-self: start;
+  justify-self: start;
+  color: #728299;
+  white-space: nowrap;
+  font-size: 9px;
+  font-weight: 650;
+}
+
+.page[dir="rtl"] .categoryTabs246B > button:first-child::after { content: "ط·ع¾ط·آµط¸ظ¾ط·آ­ ط¸ئ’ط¸â€‍ ط¸â€¦ط·ع¾ط·آ¬ط·آ± ط¸â€ ط·آ´ط·آ·"; }
+
+.categoryTabs246B > button:nth-child(2) > span { background-image: url('/darik-cat-390-groceries.jpg') !important; }
+.categoryTabs246B > button:nth-child(3) > span { background-image: url('/darik-cat-390-food.jpg') !important; }
+.categoryTabs246B > button:nth-child(4) > span { background-image: url('/darik-cat-390-pharmacy.jpg') !important; }
+.categoryTabs246B > button:nth-child(5) > span { background-image: url('/darik-cat-390-fashion.jpg') !important; }
+.categoryTabs246B > button:nth-child(6) > span { background-image: url('/darik-cat-390-beauty.jpg') !important; }
+.categoryTabs246B > button:nth-child(7) > span { background-image: url('/darik-cat-390-technology.jpg') !important; }
+.categoryTabs246B > button:nth-child(8) > span { background-image: url('/darik-cat-390-home.jpg') !important; }
+.categoryTabs246B > button:nth-child(9) > span { background-image: url('/darik-cat-390-automotive.jpg') !important; }
+.categoryTabs246B > button:nth-child(n+2):nth-child(-n+9) > span svg { opacity: 0 !important; }
+.categoryTabs246B > button:nth-child(10) > span svg { display: none !important; }
+.categoryTabs246B > button:nth-child(10) > span::after {
+  content: "أ¢â‚¬آ¢أ¢â‚¬آ¢أ¢â‚¬آ¢";
+  color: #071a38;
+  letter-spacing: 4px;
+  font-size: 15px;
+  font-weight: 900;
+}
+
+.categoryTabs246B > .categoryTabActive246B {
+  color: #071a38 !important;
+  background: #f4fffb !important;
+  border-color: #90dac7 !important;
+  box-shadow: 0 6px 17px rgba(7,152,117,.08) !important;
+}
+
+.categoryBrowseStandalone246C4 { display: none !important; }
+
+.marketHeadingRow {
+  order: 1;
+  align-items: center !important;
+  gap: 16px !important;
+  margin: 1px 0 7px !important;
+}
+.marketHeadingRow .sectionKicker { display: none !important; }
+.marketHeadingRow h2 {
+  margin: 0 !important;
+  color: #071a38 !important;
+  letter-spacing: -.03em !important;
+  font-size: 19px !important;
+  font-weight: 1000 !important;
+  line-height: 1 !important;
+}
+.marketHeadingRow p {
+  margin: 3px 0 0 !important;
+  color: #718198 !important;
+  max-width: 760px !important;
+  font-size: 9px !important;
+  line-height: 1.25 !important;
+}
+
+.viewAllStores390,
+.viewProducts390 {
+  color: #08765f;
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 10px;
+  font-weight: 900;
+  text-decoration: none;
+}
+
+.directoryLocationHint331 { display: none !important; }
+
+.trendingSection389,
+.homePromo389 { display: none !important; }
+
+.trendingSection390 {
+  background: #fff;
+  padding: 3px 0 7px;
+}
+
+.trendingLayout390 {
+  position: relative;
+  display: grid;
+  grid-template-columns: 285px minmax(0,1fr);
+  align-items: center;
+  gap: 18px;
+  min-height: 89px;
+}
+
+.trendingHeading390 h2 {
+  margin: 0;
+  color: #071a38;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  letter-spacing: -.025em;
+  font-size: 18px;
+  font-weight: 1000;
+}
+.trendingHeading390 p {
+  margin: 3px 0 0 38px;
+  color: #718198;
+  font-size: 9px;
+  font-weight: 650;
+}
+
+.trendingGrid390 {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0,1fr));
+  gap: 9px;
+}
+
+.trendingCard390 {
+  min-width: 0;
+  height: 61px;
+  display: grid;
+  grid-template-columns: 96px minmax(0,1fr) 35px;
+  align-items: center;
+  gap: 9px;
+  padding: 5px 8px 5px 5px;
+  color: #0d2341;
+  background: #fff;
+  border: 1px solid #e2e8ec;
+  border-radius: 9px;
+  text-decoration: none;
+  overflow: hidden;
+}
+
+.trendingCard390 > img {
+  width: 96px;
+  height: 50px;
+  object-fit: contain;
+  background: #f7f8fa;
+  border-radius: 7px;
+}
+.trendingCard390 > span {
+  min-width: 0;
+  display: grid;
+  gap: 4px;
+}
+.trendingCard390 strong {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: #51657f;
+  font-size: 9px;
+  font-weight: 700;
+}
+.trendingCard390 b {
+  color: #078563;
+  font-size: 12px;
+  font-weight: 950;
+}
+.trendingCard390 i {
+  width: 30px;
+  height: 30px;
+  color: #078563;
+  border: 1px solid #cde8df;
+  border-radius: 7px;
+  display: grid;
+  place-items: center;
+  font-style: normal;
+}
+
+.viewProducts390 {
+  position: absolute;
+  right: 0;
+  top: -21px;
+}
+.page[dir="rtl"] .viewProducts390 { right: auto; left: 0; }
+
+.appPromo390 {
+  background: #fff;
+  padding: 0 0 7px;
+}
+
+.appPromoInner390 {
+  position: relative;
+  height: 103px;
+  overflow: hidden;
+  display: grid;
+  grid-template-columns: 225px 320px 250px minmax(360px,1fr) 180px;
+  align-items: center;
+  gap: 12px;
+  padding: 0 20px;
+  background:
+    radial-gradient(circle at 85% 50%, rgba(11,152,117,.09), transparent 18rem),
+    linear-gradient(90deg, #effdf7, #e7faf2 55%, #f0fcf7);
+  border: 1px solid #daf1e8;
+  border-radius: 13px;
+}
+
+.appPhone390 {
+  align-self: end;
+  width: 205px;
+  height: 112px;
+  object-fit: cover;
+  object-position: center top;
+  mix-blend-mode: multiply;
+}
+
+.appCopy390 small {
+  color: #08765f;
+  font-size: 9px;
+  font-weight: 850;
+}
+.appCopy390 h2 {
+  margin: 2px 0 0;
+  color: #071a38;
+  letter-spacing: -.035em;
+  font-size: 24px;
+  font-weight: 1000;
+  line-height: 1.05;
+}
+.appCopy390 p {
+  margin: 4px 0 0;
+  color: #6e8197;
+  font-size: 9px;
+  font-weight: 650;
+}
+
+.appBadges390 {
+  display: flex;
+  gap: 7px;
+}
+.appBadges390 > span {
+  position: relative;
+  width: 115px;
+  height: 38px;
+  padding: 5px 7px 4px 34px;
+  color: #fff;
+  background: #090b0d;
+  border-radius: 6px;
+  display: grid;
+  align-content: center;
+  line-height: 1;
+}
+.appBadges390 b {
+  position: absolute;
+  left: 9px;
+  top: 8px;
+  font-size: 20px;
+}
+.appBadges390 em {
+  font-size: 6px;
+  font-style: normal;
+  font-weight: 650;
+}
+.appBadges390 strong {
+  margin-top: 2px;
+  font-size: 10px;
+  font-weight: 800;
+}
+
+.appBenefits390 {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0,1fr));
+  gap: 12px;
+}
+.appBenefits390 > span {
+  min-width: 0;
+  display: grid;
+  grid-template-columns: 48px minmax(0,1fr);
+  align-items: center;
+  gap: 7px;
+  color: #0b765f;
+}
+.appBenefits390 svg {
+  width: 43px;
+  height: 43px;
+  padding: 10px;
+  background: #d8f5e9;
+  border-radius: 50%;
+}
+.appBenefits390 b {
+  color: #31506b;
+  font-size: 8px;
+  font-weight: 780;
+  line-height: 1.25;
+}
+
+.appJordan390 {
+  color: #08765f;
+  text-align: center;
+  transform: rotate(-4deg);
+  font-family: "Segoe Print", "Comic Sans MS", cursive;
+  font-size: 13px;
+  font-weight: 800;
+  line-height: 1.1;
+}
+
+.trustStrip390 {
+  background: #fff;
+  border-top: 1px solid #edf1f3;
+  border-bottom: 1px solid #edf1f3;
+  padding: 10px 0 11px;
+}
+
+.trustGrid390 {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0,1fr)) 170px;
+  align-items: center;
+  gap: 18px;
+}
+.trustGrid390 > span {
+  display: grid;
+  grid-template-columns: 35px minmax(0,1fr);
+  grid-template-rows: auto auto;
+  align-items: center;
+  column-gap: 9px;
+  color: #078563;
+}
+.trustGrid390 > span svg { grid-row: 1 / 3; }
+.trustGrid390 b {
+  color: #132b48;
+  font-size: 9px;
+  font-weight: 900;
+}
+.trustGrid390 small {
+  color: #8190a4;
+  font-size: 8px;
+  font-weight: 650;
+}
+.trustHeart390 { color: #f04438 !important; }
+.trustGrid390 > em {
+  color: #08765f;
+  text-align: center;
+  transform: rotate(-3deg);
+  font-family: "Segoe Print", "Comic Sans MS", cursive;
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 800;
+  line-height: 1.1;
+}
+
+.retailerSection { display: none !important; }
+
+.footer {
+  padding-top: 26px !important;
+  padding-bottom: 16px !important;
+}
+.footerInner { gap: 30px !important; }
+.footerBrand p { margin-top: 8px !important; }
+.footerBottom { margin-top: 20px !important; }
+
+@media (max-width: 1320px) {
+  .headerInner { grid-template-columns: 200px auto minmax(270px,1fr) auto !important; gap: 13px !important; }
+  .brandLogo { width: 176px !important; }
+  .desktopNav { gap: 17px !important; }
+  .headerLocation390 { display: none !important; }
+  .headerDiscovery390 { grid-template-columns: minmax(240px,1fr) 42px; }
+  .homeHeroInner390, .sectionShell { width: min(1240px, calc(100% - 44px)) !important; }
+  .discoveryToolbarInner246 { width: min(760px, calc(100% - 44px)) !important; margin-left: 22px !important; }
+  .categoryTabs246B { grid-template-columns: 1.55fr repeat(9, minmax(100px,1fr)) !important; overflow-x: auto !important; }
+  .appPromoInner390 { grid-template-columns: 185px 260px 230px minmax(300px,1fr); }
+  .appJordan390 { display: none; }
+}
+
+@media (max-width: 1040px) {
+  .headerDiscovery390 { display: none; }
+  .headerInner { grid-template-columns: 46px 1fr auto !important; }
+  .homeHero390 { height: 365px; min-height: 365px; }
+  .homeHeroVisual390 { width: 73%; opacity: .82; }
+  .homeHeroFade390 { background: linear-gradient(90deg,#fff 0%,rgba(255,255,255,.97) 45%,rgba(255,255,255,.18) 78%,rgba(255,255,255,0)); }
+  .homeHeroCopy390 { width: min(570px, 62%); }
+  .homePopular390 { width: 90%; overflow-x: auto; }
+  .discoveryToolbar246 { margin-top: -100px !important; padding-bottom: 47px !important; }
+  .discoveryToolbarInner246 { margin: 0 auto !important; }
+  .trendingLayout390 { grid-template-columns: 220px minmax(0,1fr); }
+  .trendingGrid390 { grid-template-columns: repeat(2,minmax(0,1fr)); }
+  .appPromoInner390 { height: auto; min-height: 120px; grid-template-columns: 150px 1fr auto; padding: 10px 16px; }
+  .appPhone390 { width: 150px; height: 100px; }
+  .appBenefits390 { grid-column: 2 / 4; }
+  .appJordan390 { display: none; }
+  .trustGrid390 { grid-template-columns: repeat(2,minmax(0,1fr)); }
+  .trustGrid390 > em { display: none; }
+}
+
+@media (max-width: 720px) {
+  .header { min-height: 66px !important; }
+  .headerInner { width: calc(100% - 24px) !important; min-height: 66px !important; }
+  .brandLogo { width: 140px !important; height: 46px !important; }
+
+  .homeHero390 { height: 455px; min-height: 455px; }
+  .homeHeroVisual390 {
+    inset: auto 0 0;
+    width: 100%;
+    height: 255px;
+    background-size: cover;
+    background-position: 66% center;
+    opacity: .9;
+  }
+  .homeHeroFade390 {
+    background: linear-gradient(180deg,#fff 0%,#fff 43%,rgba(255,255,255,.89) 56%,rgba(255,255,255,.12) 88%,rgba(255,255,255,0));
+  }
+  .homeHeroInner390 { width: calc(100% - 28px) !important; }
+  .homeHeroCopy390 { width: 100%; padding-top: 24px; }
+  .homeHeroCopy390 h1 { font-size: 33px; }
+  .homeHeroCopy390 h2 { font-size: 29px; }
+  .homeHeroCopy390 p { max-width: 100%; font-size: 12px; }
+  .homeHeroTrust390 { gap: 8px 14px; }
+  .homeHeroTrust390 span { font-size: 9px; }
+  .homePopular390 { bottom: 7px; width: 100%; scrollbar-width: none; }
+  .homePopular390 button { flex: none; }
+
+  .discoveryToolbar246 { margin-top: -92px !important; padding: 0 10px 41px !important; }
+  .discoveryToolbarInner246 { width: 100% !important; }
+  .discoverySearch246 { min-height: 53px !important; }
+  .darikDirectorySubmit296 { min-width: 88px !important; }
+
+  .marketSection { padding-top: 5px !important; }
+  .sectionShell { width: calc(100% - 20px) !important; }
+  .categoryTabs246B {
+    grid-template-columns: 150px repeat(9, 105px) !important;
+    gap: 7px !important;
+    overflow-x: auto !important;
+    scrollbar-width: none;
+  }
+  .categoryTabs246B > button { min-height: 78px !important; }
+  .categoryTabs246B > button > span { width: 66px !important; height: 42px !important; }
+  .categoryTabs246B > button:first-child { grid-template-columns: 42px minmax(0,1fr) !important; }
+  .categoryTabs246B > button:first-child > span { width: 39px !important; height: 39px !important; }
+  .categoryTabs246B > button:first-child::after { font-size: 7px; }
+
+  .marketHeadingRow { margin: 4px 0 8px !important; }
+  .marketHeadingRow h2 { font-size: 18px !important; }
+  .viewAllStores390 { font-size: 9px; }
+
+  .trendingLayout390 { grid-template-columns: 1fr; gap: 9px; }
+  .trendingHeading390 p { margin-left: 0; }
+  .trendingGrid390 {
+    display: flex;
+    overflow-x: auto;
+    gap: 8px;
+    scrollbar-width: none;
+  }
+  .trendingCard390 { flex: 0 0 285px; }
+  .viewProducts390 { top: 3px; }
+
+  .appPromoInner390 {
+    min-height: 174px;
+    grid-template-columns: 115px minmax(0,1fr);
+    align-items: center;
+    padding: 8px 12px;
+  }
+  .appPhone390 { width: 110px; height: 105px; }
+  .appCopy390 h2 { font-size: 21px; }
+  .appBadges390 { grid-column: 1 / 3; justify-content: center; }
+  .appBenefits390 { grid-column: 1 / 3; grid-template-columns: repeat(3,1fr); }
+  .appBenefits390 > span { grid-template-columns: 32px 1fr; }
+  .appBenefits390 svg { width: 31px; height: 31px; padding: 7px; }
+
+  .trustGrid390 { grid-template-columns: 1fr 1fr; gap: 12px 8px; }
+  .trustGrid390 b { font-size: 8px; }
+  .trustGrid390 small { font-size: 7px; }
+}
+
+/* DARIK_APPROVED_CLEANUP_CSS_390C */
+.header .brandLogo {
+  width: 210px !important;
+  height: 53px !important;
+  object-fit: contain !important;
+  object-position: left center !important;
+}
+
+.homeHeroCopy390 h1,
+.homeHeroCopy390 h2,
+.homeHeroCopy390 p,
+.homeHeroTrust390,
+.homePopular390 {
+  text-rendering: geometricPrecision;
+}
+
+.categoryTabs246B > button:nth-child(10) > span::after {
+  content: "..." !important;
+  letter-spacing: 3px !important;
+  font-family: Arial, sans-serif !important;
+}
+
+.trendingHeading390 h2 {
+  min-width: 0;
+}
+.trendingMark390 {
+  width: 28px;
+  height: 28px;
+  flex: 0 0 28px;
+  display: grid;
+  place-items: center;
+  color: #f04438;
+  background: #fff1f0;
+  border-radius: 9px;
+}
+.trendingMark390 svg { color: inherit !important; }
+
+.viewProducts390 {
+  top: 9px !important;
+  right: 0 !important;
+}
+.page[dir="rtl"] .viewProducts390 {
+  right: auto !important;
+  left: 0 !important;
+}
+
+.appPhone390 {
+  width: 205px !important;
+  height: 118px !important;
+  object-fit: contain !important;
+  object-position: left bottom !important;
+  transform: translateY(6px);
+}
+
+.appBadges390 {
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+}
+.appBadges390 > img {
+  display: block !important;
+  width: auto !important;
+  height: 38px !important;
+  object-fit: contain !important;
+  border-radius: 6px !important;
+}
+.appBadges390 > span { display: none !important; }
+
+.appJordan390,
+.trustGrid390 > em {
+  white-space: normal !important;
+}
+
+@media (max-width: 1320px) {
+  .header .brandLogo {
+    width: 190px !important;
+    height: 49px !important;
+  }
+}
+
+@media (max-width: 720px) {
+  .header .brandLogo {
+    width: 146px !important;
+    height: 42px !important;
+  }
+  .viewProducts390 {
+    top: 2px !important;
+  }
+}
+
+/* DARIK_APPROVED_LEGAL_FOOTER_390D */
+.footer {
+  display: block !important;
+  background: #ffffff !important;
+  color: #475467 !important;
+  border-top: 1px solid #e8eeec !important;
+  padding: 0 max(24px, calc((100% - 1440px) / 2)) 16px !important;
+  box-shadow: none !important;
+}
+
+.footerInner {
+  display: flex !important;
+  grid-template-columns: none !important;
+  align-items: flex-start !important;
+  justify-content: space-between !important;
+  gap: 28px !important;
+  padding: 20px 0 16px !important;
+}
+
+.footer .brand {
+  background: transparent !important;
+  border-radius: 0 !important;
+  padding: 0 !important;
+}
+
+.footer .brandLogo {
+  width: 118px !important;
+  height: 38px !important;
+  object-fit: contain !important;
+  object-position: left center !important;
+}
+
+.footerBrand {
+  flex: 1 1 360px !important;
+  max-width: 430px !important;
+  min-width: 250px !important;
+}
+
+.footerBrand p {
+  color: #667085 !important;
+  max-width: 370px !important;
+  margin: 7px 0 0 !important;
+  font-size: 10px !important;
+  line-height: 1.5 !important;
+}
+
+.footerLinks {
+  flex: 0 1 auto !important;
+  display: flex !important;
+  flex-wrap: wrap !important;
+  justify-content: flex-end !important;
+  align-items: flex-start !important;
+  gap: 18px 34px !important;
+}
+
+.footerLinks > div {
+  display: grid !important;
+  align-content: start !important;
+  gap: 6px !important;
+  min-width: 106px !important;
+}
+
+.footerLinks strong {
+  color: #101828 !important;
+  margin-bottom: 2px !important;
+  font-size: 10px !important;
+  font-weight: 900 !important;
+}
+
+.footerLinks a {
+  color: #667085 !important;
+  font-size: 10px !important;
+  line-height: 1.35 !important;
+  text-decoration: none !important;
+}
+
+.footerLinks a:hover,
+.footerLinks a:focus-visible {
+  color: #0d7b6c !important;
+}
+
+.footerBottom {
+  display: flex !important;
+  justify-content: space-between !important;
+  gap: 18px !important;
+  color: #98a2b3 !important;
+  border-top: 1px solid #edf1ef !important;
+  margin-top: 0 !important;
+  padding-top: 11px !important;
+  font-size: 9px !important;
+}
+
+@media (max-width: 900px) {
+  .footer {
+    padding-left: 18px !important;
+    padding-right: 18px !important;
+  }
+  .footerInner {
+    flex-direction: column !important;
+    gap: 18px !important;
+  }
+  .footerBrand {
+    flex-basis: auto !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+  }
+  .footerLinks {
+    width: 100% !important;
+    justify-content: flex-start !important;
+    gap: 18px 28px !important;
+  }
+}
+
+@media (max-width: 560px) {
+  .footerInner {
+    padding-top: 16px !important;
+  }
+  .footerLinks {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 18px 20px !important;
+  }
+  .footerLinks > div {
+    min-width: 0 !important;
+  }
+  .footerBottom {
+    flex-direction: column !important;
+    gap: 4px !important;
+  }
+}
+
+/* DARIK_TRENDING_LINK_CLEANUP_390E */
+/* The approved homepage has no separate Trending 'View all products' CTA. */
+.viewProducts390 {
+  display: none !important;
+}
+
+/* DARIK_MOBILE_HERO_CLEAN_390F */
+/*
+  Phone layout only. Desktop remains the approved 390 layout.
+  iOS Safari gets a normal-flow centered brand instead of an absolutely
+  positioned brand inside a sticky/backdrop-filter header. This avoids the
+  duplicated/ghost logo seen in the supplied iPhone screenshot.
+*/
+@media (max-width: 720px) {
+  .header {
+    position: relative !important;
+    top: auto !important;
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
+    background: #fff !important;
+  }
+
+  .headerInner {
+    grid-template-columns: 44px minmax(0, 1fr) 44px !important;
+    gap: 8px !important;
+    width: calc(100% - 24px) !important;
+    min-height: 68px !important;
+  }
+
+  .headerMenu246 {
+    grid-column: 1 !important;
+    justify-self: start !important;
+  }
+
+  .header .brand {
+    position: static !important;
+    left: auto !important;
+    right: auto !important;
+    top: auto !important;
+    transform: none !important;
+    grid-column: 2 !important;
+    justify-self: center !important;
+    margin: 0 !important;
+  }
+
+  .header .brandLogo {
+    width: 158px !important;
+    height: 46px !important;
+    object-fit: contain !important;
+    object-position: center !important;
+  }
+
+  .headerActions {
+    grid-column: 3 !important;
+    justify-self: end !important;
+    width: 44px !important;
+    gap: 0 !important;
+    padding: 0 !important;
+  }
+
+  /* Defensive rule: a Darik brand image may never render as a hero overlay. */
+  .homeHero390 img[src*="darik-approved-header-logo"],
+  .homeHero390 .brand {
+    display: none !important;
+  }
+
+  /* Clean phone hero: copy first, uninterrupted photo underneath. */
+  .homeHero390 {
+    height: 535px !important;
+    min-height: 535px !important;
+    background: #fff !important;
+    overflow: hidden !important;
+  }
+
+  .homeHeroInner390 {
+    width: calc(100% - 28px) !important;
+    height: auto !important;
+    margin: 0 auto !important;
+  }
+
+  .homeHeroCopy390 {
+    width: 100% !important;
+    padding-top: 22px !important;
+  }
+
+  .homeHeroCopy390 h1 {
+    max-width: 355px !important;
+    font-size: 35px !important;
+    line-height: .98 !important;
+    letter-spacing: -.048em !important;
+  }
+
+  .homeHeroCopy390 h2 {
+    max-width: 360px !important;
+    margin-top: 8px !important;
+    font-size: 30px !important;
+    line-height: 1.01 !important;
+    letter-spacing: -.045em !important;
+  }
+
+  .homeHeroCopy390 p {
+    max-width: 370px !important;
+    margin-top: 13px !important;
+    font-size: 13px !important;
+    line-height: 1.45 !important;
+  }
+
+  .homeHeroTrust390 {
+    display: grid !important;
+    grid-template-columns: max-content max-content !important;
+    align-items: center !important;
+    justify-content: start !important;
+    gap: 10px 20px !important;
+    margin-top: 15px !important;
+    max-width: 100% !important;
+  }
+
+  .homeHeroTrust390 span {
+    min-width: 0 !important;
+    font-size: 10px !important;
+    white-space: nowrap !important;
+  }
+
+  .homeHeroTrust390 .homeHeroHeart390 {
+    grid-column: 1 / -1 !important;
+  }
+
+  .homeHeroVisual390 {
+    inset: auto 0 0 !important;
+    width: 100% !important;
+    height: 220px !important;
+    opacity: 1 !important;
+    background-size: cover !important;
+    background-position: 61% center !important;
+  }
+
+  .homeHeroFade390 {
+    display: none !important;
+  }
+
+  /* Popular chips are useful on desktop but made the phone hero crowded. */
+  .homePopular390 {
+    display: none !important;
+  }
+
+  /* Search is a distinct block below the photo instead of covering the driver. */
+  .discoveryToolbar246 {
+    margin-top: 0 !important;
+    padding: 12px 12px 16px !important;
+    background: #fff !important;
+  }
+
+  .discoveryToolbarInner246 {
+    width: 100% !important;
+    margin: 0 auto !important;
+  }
+
+  .darikDirectoryForm296 {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) 92px !important;
+    gap: 8px !important;
+  }
+
+  .discoverySearch246 {
+    min-width: 0 !important;
+    min-height: 52px !important;
+    border-radius: 14px !important;
+    box-shadow: 0 5px 16px rgba(15, 23, 42, .06) !important;
+  }
+
+  .discoverySearch246 input {
+    min-width: 0 !important;
+    font-size: 13px !important;
+  }
+
+  .darikDirectorySubmit296 {
+    width: 92px !important;
+    min-width: 92px !important;
+    min-height: 52px !important;
+    padding: 0 8px !important;
+    border-radius: 14px !important;
+    font-size: 11px !important;
+  }
+
+  .marketSection {
+    padding-top: 4px !important;
+  }
+}
+
+@media (max-width: 410px) {
+  .homeHero390 {
+    height: 548px !important;
+    min-height: 548px !important;
+  }
+
+  .homeHeroCopy390 h1 { font-size: 33px !important; }
+  .homeHeroCopy390 h2 { font-size: 28px !important; }
+  .homeHeroCopy390 p { font-size: 12.5px !important; }
+  .homeHeroTrust390 { gap: 9px 13px !important; }
+  .homeHeroTrust390 span { font-size: 9px !important; }
+  .homeHeroVisual390 {
+    height: 218px !important;
+    background-position: 60% center !important;
+  }
+}
+
+/* DARIK_APPROVED_LOCATION_MODAL_390G */
+/*
+  Approved second Darik location concept.
+  This is visual only: the existing GPS, Places search, predictions,
+  privacy behavior and 390F session/location logic remain in control.
+*/
+.modalBackdrop {
+  background: rgba(8, 18, 32, .54) !important;
+  -webkit-backdrop-filter: blur(15px) saturate(.88) !important;
+  backdrop-filter: blur(15px) saturate(.88) !important;
+  padding: 16px !important;
+}
+
+.locationModal {
+  position: relative !important;
+  width: min(620px, 100%) !important;
+  max-height: calc(100dvh - 32px) !important;
+  overflow-y: auto !important;
+  text-align: left !important;
+  background:
+    radial-gradient(circle at 86% 8%, rgba(12, 157, 119, .07), transparent 24%),
+    #fff !important;
+  border: 1px solid rgba(255, 255, 255, .85) !important;
+  border-radius: 32px !important;
+  padding: 26px 30px 26px !important;
+  box-shadow:
+    0 36px 110px rgba(0, 0, 0, .34),
+    0 2px 9px rgba(15, 23, 42, .08) !important;
+  scrollbar-width: thin;
+}
+
+.locationModal::before {
+  content: "" !important;
+  position: absolute !important;
+  z-index: 2 !important;
+  top: 24px !important;
+  left: 30px !important;
+  width: 208px !important;
+  height: 58px !important;
+  background: url("/darik-approved-header-logo-390c.png") left center / contain no-repeat !important;
+  pointer-events: none !important;
+}
+
+.modalClose {
+  z-index: 5 !important;
+  top: 22px !important;
+  right: 24px !important;
+  width: 42px !important;
+  height: 42px !important;
+  color: #667085 !important;
+  background: #f2f5f8 !important;
+  border: 0 !important;
+  border-radius: 999px !important;
+  font-size: 24px !important;
+  line-height: 1 !important;
+}
+
+.modalIcon {
+  width: 100% !important;
+  height: 232px !important;
+  margin: 68px 0 20px !important;
+  color: transparent !important;
+  background:
+    url("/darik-location-scene-390g.jpg") center center / cover no-repeat,
+    #eef9f6 !important;
+  border: 0 !important;
+  border-radius: 24px !important;
+  transform: none !important;
+  box-shadow: inset 0 0 0 1px rgba(16, 185, 129, .07) !important;
+  overflow: hidden !important;
+}
+
+.modalIcon svg {
+  display: none !important;
+}
+
+.modalKicker {
+  display: none !important;
+}
+
+.locationModal h2 {
+  color: #0b1b38 !important;
+  letter-spacing: -.046em !important;
+  margin: 0 !important;
+  font-size: clamp(32px, 5vw, 45px) !important;
+  font-weight: 1000 !important;
+  line-height: 1.02 !important;
+}
+
+.locationModal > p {
+  color: #667085 !important;
+  max-width: 530px !important;
+  margin: 13px 0 0 !important;
+  font-size: 14px !important;
+  font-weight: 600 !important;
+  line-height: 1.55 !important;
+}
+
+.gpsButton {
+  color: #fff !important;
+  background: linear-gradient(135deg, #0b9a76 0%, #008b6b 100%) !important;
+  border: 0 !important;
+  border-radius: 20px !important;
+  grid-template-columns: 48px minmax(0, 1fr) 28px !important;
+  gap: 12px !important;
+  width: 100% !important;
+  min-height: 68px !important;
+  margin-top: 22px !important;
+  padding: 8px 16px 8px 10px !important;
+  box-shadow: 0 14px 28px rgba(0, 139, 107, .19) !important;
+}
+
+.gpsButton:hover:not(:disabled) {
+  background: linear-gradient(135deg, #098e6d 0%, #00785c 100%) !important;
+  transform: translateY(-1px) !important;
+}
+
+.gpsButton > span {
+  width: 48px !important;
+  height: 48px !important;
+  color: #fff !important;
+  background: rgba(255, 255, 255, .13) !important;
+  border: 1px solid rgba(255, 255, 255, .18) !important;
+  border-radius: 15px !important;
+}
+
+.gpsButton strong {
+  color: #fff !important;
+  font-size: 15px !important;
+  font-weight: 950 !important;
+}
+
+.modalDivider {
+  color: #718096 !important;
+  letter-spacing: .11em !important;
+  margin: 22px 0 16px !important;
+  font-size: 10px !important;
+  font-weight: 950 !important;
+}
+
+.modalDivider::before {
+  border-top-color: #dfe5ec !important;
+}
+
+.addressForm {
+  grid-template-columns: 1fr !important;
+  gap: 10px !important;
+}
+
+.addressForm label {
+  color: #94a3b8 !important;
+  background: #fbfcfd !important;
+  border: 1px solid #dbe2ea !important;
+  border-radius: 18px !important;
+  min-height: 58px !important;
+  padding: 0 16px !important;
+}
+
+.addressForm label:focus-within {
+  background: #fff !important;
+  border-color: #0b9a76 !important;
+  box-shadow: 0 0 0 3px rgba(11, 154, 118, .12) !important;
+}
+
+.addressForm input {
+  color: #0b1b38 !important;
+  font-size: 13px !important;
+  font-weight: 750 !important;
+}
+
+.addressForm input::placeholder {
+  color: #98a2b3 !important;
+}
+
+.addressForm button {
+  color: #0b1b38 !important;
+  background: #ffd43b !important;
+  border: 1px solid #f0c629 !important;
+  border-radius: 18px !important;
+  min-height: 58px !important;
+  font-size: 14px !important;
+  font-weight: 950 !important;
+  box-shadow: 0 11px 23px rgba(194, 145, 0, .12) !important;
+}
+
+.addressForm button:hover:not(:disabled) {
+  background: #ffcf24 !important;
+  transform: translateY(-1px) !important;
+}
+
+.predictions {
+  border: 1px solid #e3e8ee !important;
+  border-radius: 17px !important;
+  margin-top: 10px !important;
+  box-shadow: 0 13px 28px rgba(15, 23, 42, .08) !important;
+}
+
+.privacyNote {
+  color: #667085 !important;
+  justify-content: flex-start !important;
+  text-align: left !important;
+  gap: 11px !important;
+  margin-top: 17px !important;
+  font-size: 10px !important;
+  font-weight: 700 !important;
+  line-height: 1.45 !important;
+}
+
+.privacyNote svg {
+  box-sizing: content-box !important;
+  flex: 0 0 auto !important;
+  width: 17px !important;
+  height: 17px !important;
+  color: #079572 !important;
+  background: #e7f7f2 !important;
+  border-radius: 999px !important;
+  padding: 9px !important;
+}
+
+[dir="rtl"] .locationModal {
+  text-align: right !important;
+}
+
+[dir="rtl"] .locationModal::before {
+  left: auto !important;
+  right: 30px !important;
+  background-position: right center !important;
+}
+
+[dir="rtl"] .modalClose {
+  left: 24px !important;
+  right: auto !important;
+}
+
+[dir="rtl"] .privacyNote {
+  text-align: right !important;
+}
+
+@media (max-width: 720px) {
+  .modalBackdrop {
+    padding: 10px !important;
+  }
+
+  .locationModal {
+    width: 100% !important;
+    max-height: calc(100dvh - 20px) !important;
+    border-radius: 30px !important;
+    padding: 18px 18px 20px !important;
+  }
+
+  .locationModal::before {
+    top: 18px !important;
+    left: 20px !important;
+    width: 178px !important;
+    height: 50px !important;
+  }
+
+  .modalClose {
+    top: 17px !important;
+    right: 18px !important;
+    width: 38px !important;
+    height: 38px !important;
+    font-size: 21px !important;
+  }
+
+  .modalIcon {
+    height: 174px !important;
+    margin: 58px 0 16px !important;
+    border-radius: 20px !important;
+    background-position: center center !important;
+  }
+
+  .locationModal h2 {
+    font-size: 30px !important;
+    line-height: 1.01 !important;
+  }
+
+  .locationModal > p {
+    margin-top: 10px !important;
+    font-size: 12.5px !important;
+    line-height: 1.48 !important;
+  }
+
+  .gpsButton {
+    min-height: 60px !important;
+    margin-top: 17px !important;
+    border-radius: 17px !important;
+    grid-template-columns: 43px minmax(0, 1fr) 24px !important;
+    padding: 7px 13px 7px 8px !important;
+  }
+
+  .gpsButton > span {
+    width: 43px !important;
+    height: 43px !important;
+    border-radius: 13px !important;
+  }
+
+  .gpsButton strong {
+    font-size: 13px !important;
+  }
+
+  .modalDivider {
+    margin: 17px 0 13px !important;
+    font-size: 9px !important;
+  }
+
+  .addressForm {
+    gap: 8px !important;
+  }
+
+  .addressForm label,
+  .addressForm button {
+    min-height: 53px !important;
+    border-radius: 16px !important;
+  }
+
+  .addressForm input {
+    font-size: 12px !important;
+  }
+
+  .privacyNote {
+    margin-top: 13px !important;
+    font-size: 9px !important;
+  }
+
+  [dir="rtl"] .locationModal::before {
+    left: auto !important;
+    right: 20px !important;
+  }
+
+  [dir="rtl"] .modalClose {
+    left: 18px !important;
+    right: auto !important;
+  }
+}
+
+@media (max-width: 390px) {
+  .modalIcon {
+    height: 160px !important;
+  }
+
+  .locationModal h2 {
+    font-size: 28px !important;
+  }
+
+  .locationModal > p {
+    font-size: 12px !important;
+  }
+}
+
+/* DARIK_SURGICAL_BANNER_LOGO_390H */
+/*
+  Surgical patch only:
+  - permanently hide the old oversized retailer promo section;
+  - true-center the existing Darik brand inside the phone header grid.
+  Nothing else on the homepage is changed here.
+*/
+.retailerSection {
+  display: none !important;
+  visibility: hidden !important;
+  height: 0 !important;
+  min-height: 0 !important;
+  max-height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+  border: 0 !important;
+}
+
+@media (max-width: 720px) {
+  .headerInner {
+    position: relative !important;
+    display: grid !important;
+    grid-template-columns: 44px minmax(0, 1fr) 44px !important;
+    align-items: center !important;
+    column-gap: 8px !important;
+    width: calc(100% - 24px) !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+  }
+
+  .headerMenu246 {
+    grid-column: 1 !important;
+    justify-self: start !important;
+    width: 44px !important;
+    min-width: 44px !important;
+    margin: 0 !important;
+  }
+
+  .header .brand {
+    grid-column: 2 !important;
+    justify-self: stretch !important;
+    align-self: center !important;
+    position: static !important;
+    left: auto !important;
+    right: auto !important;
+    top: auto !important;
+    width: 100% !important;
+    max-width: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    transform: none !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    text-align: center !important;
+  }
+
+  .header .brandLogo {
+    display: block !important;
+    width: 158px !important;
+    height: 46px !important;
+    max-width: 100% !important;
+    margin: 0 auto !important;
+    object-fit: contain !important;
+    object-position: center center !important;
+  }
+
+  .headerActions {
+    grid-column: 3 !important;
+    justify-self: end !important;
+    align-self: center !important;
+    width: 44px !important;
+    min-width: 44px !important;
+    max-width: 44px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+}
+
+/* DARIK_MOBILE_FINISH_ALL20_390J */
+/*
+  Final phone-only homepage composition.
+  This layer intentionally comes after 390H so it wins the cascade without
+  rewriting any approved desktop/source logic.
+*/
+@media (max-width: 720px) {
+  /* 01-04, 17-18: compact, balanced header with zero horizontal spill. */
+  .page {
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow-x: clip !important;
+  }
+
+  .header {
+    position: relative !important;
+    top: auto !important;
+    min-height: 64px !important;
+    background: #fff !important;
+    border-bottom: 1px solid #edf1f3 !important;
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
+    box-shadow: 0 1px 8px rgba(15, 23, 42, .035) !important;
+    overflow: visible !important;
+  }
+
+  .headerInner {
+    position: relative !important;
+    display: grid !important;
+    grid-template-columns: 44px minmax(0, 1fr) 44px !important;
+    align-items: center !important;
+    gap: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-height: 64px !important;
+    margin: 0 !important;
+    padding: 0 14px !important;
+    box-sizing: border-box !important;
+    overflow: visible !important;
+  }
+
+  .desktopNav,
+  .headerDiscovery390 {
+    display: none !important;
+  }
+
+  .headerMenu246 {
+    grid-column: 1 !important;
+    grid-row: 1 !important;
+    justify-self: start !important;
+    align-self: center !important;
+    position: relative !important;
+    inset: auto !important;
+    width: 44px !important;
+    min-width: 44px !important;
+    max-width: 44px !important;
+    height: 44px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    transform: none !important;
+    z-index: 4 !important;
+  }
+
+  /* Undo the 390H stretch that pushed the logo off the phone viewport. */
+  .header .brand {
+    grid-column: 2 !important;
+    grid-row: 1 !important;
+    justify-self: center !important;
+    align-self: center !important;
+    position: static !important;
+    inset: auto !important;
+    left: auto !important;
+    right: auto !important;
+    top: auto !important;
+    width: auto !important;
+    min-width: 0 !important;
+    max-width: 142px !important;
+    height: auto !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    transform: none !important;
+    display: block !important;
+    text-align: center !important;
+    overflow: visible !important;
+    z-index: 3 !important;
+  }
+
+  .header .brandLogo {
+    display: block !important;
+    width: 136px !important;
+    min-width: 0 !important;
+    max-width: 136px !important;
+    height: 40px !important;
+    margin: 0 auto !important;
+    padding: 0 !important;
+    object-fit: contain !important;
+    object-position: center center !important;
+    transform: none !important;
+  }
+
+  .headerActions {
+    grid-column: 3 !important;
+    grid-row: 1 !important;
+    justify-self: end !important;
+    align-self: center !important;
+    position: relative !important;
+    inset: auto !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-end !important;
+    width: 44px !important;
+    min-width: 44px !important;
+    max-width: 44px !important;
+    min-height: 44px !important;
+    gap: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    transform: none !important;
+    overflow: visible !important;
+    z-index: 4 !important;
+  }
+
+  /* The mobile menu handles anonymous auth; never let a wide Sign Up CTA
+     displace the centered logo on a 390px header. */
+  .headerActions .retailerButton {
+    display: none !important;
+  }
+
+  /* 05-06, 18: do NOT use broad img[src] selectors in this CSS module.
+     The apparent second logo on iPhone is handled by fixing the header itself:
+     non-sticky/non-blurred mobile header, normal-flow centered brand, constrained logo.
+     There is only one actual header-logo element in the homepage source. */
+
+  /* 07-16, 19-20: the phone hero is intentionally composed for a phone,
+     not a desktop hero squeezed into a narrow column. */
+  .homeHero390 {
+    position: relative !important;
+    display: flex !important;
+    flex-direction: column !important;
+    height: auto !important;
+    min-height: 0 !important;
+    margin: 0 !important;
+    padding: 0 0 14px !important;
+    background: #fff !important;
+    border-bottom: 0 !important;
+    overflow: hidden !important;
+  }
+
+  .homeHeroFade390 {
+    display: none !important;
+  }
+
+  .homeHeroInner390 {
+    order: 1 !important;
+    position: relative !important;
+    z-index: 2 !important;
+    width: calc(100% - 32px) !important;
+    max-width: 520px !important;
+    height: auto !important;
+    min-height: 0 !important;
+    margin: 0 auto !important;
+    padding: 0 !important;
+  }
+
+  .homeHeroCopy390 {
+    width: 100% !important;
+    max-width: none !important;
+    margin: 0 !important;
+    padding: 20px 0 16px !important;
+  }
+
+  .homeHeroCopy390 h1 {
+    width: 100% !important;
+    max-width: 350px !important;
+    margin: 0 !important;
+    color: #071a38 !important;
+    font-size: clamp(32px, 8.45vw, 35px) !important;
+    font-weight: 1000 !important;
+    line-height: 1.01 !important;
+    letter-spacing: -.045em !important;
+    text-wrap: balance !important;
+    overflow-wrap: normal !important;
+  }
+
+  .homeHeroCopy390 h2 {
+    width: 100% !important;
+    max-width: 360px !important;
+    margin: 8px 0 0 !important;
+    font-size: clamp(28px, 7.55vw, 31px) !important;
+    font-weight: 1000 !important;
+    line-height: 1.035 !important;
+    letter-spacing: -.043em !important;
+    text-wrap: pretty !important;
+  }
+
+  .homeHeroCopy390 h2 strong,
+  .homeHeroCopy390 h2 span {
+    display: block !important;
+    width: max-content !important;
+    max-width: 100% !important;
+  }
+
+  .homeHeroCopy390 p {
+    width: 100% !important;
+    max-width: 370px !important;
+    margin: 13px 0 0 !important;
+    color: #52647d !important;
+    font-size: 13.5px !important;
+    font-weight: 520 !important;
+    line-height: 1.5 !important;
+    letter-spacing: 0 !important;
+    overflow-wrap: normal !important;
+  }
+
+  .homeHeroTrust390 {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    align-items: start !important;
+    justify-content: stretch !important;
+    gap: 8px !important;
+    width: 100% !important;
+    max-width: 360px !important;
+    margin: 14px 0 0 !important;
+    padding: 0 !important;
+  }
+
+  .homeHeroTrust390 span,
+  .homeHeroTrust390 .homeHeroHeart390 {
+    grid-column: auto !important;
+    min-width: 0 !important;
+    width: 100% !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    color: #102945 !important;
+    font-size: 11px !important;
+    font-weight: 850 !important;
+    line-height: 1.25 !important;
+    white-space: normal !important;
+    overflow: visible !important;
+    text-overflow: clip !important;
+  }
+
+  .homeHeroTrust390 svg {
+    flex: 0 0 auto !important;
+  }
+
+  .homePopular390 {
+    display: none !important;
+  }
+
+  /* 11-12, 15-16: compact photo card. 75% horizontal position deliberately
+     removes the baked-in left-edge search fragment while preserving the flag,
+     driver and almost all of the Shop Local handwriting on the right. */
+  .homeHeroVisual390 {
+    order: 2 !important;
+    position: relative !important;
+    inset: auto !important;
+    align-self: center !important;
+    width: calc(100% - 24px) !important;
+    max-width: 520px !important;
+    height: 160px !important;
+    min-height: 160px !important;
+    max-height: 160px !important;
+    flex: 0 0 160px !important;
+    margin: 0 auto !important;
+    border: 1px solid #e7eeeb !important;
+    border-radius: 18px !important;
+    background-size: cover !important;
+    background-position: 75% center !important;
+    background-repeat: no-repeat !important;
+    opacity: 1 !important;
+    overflow: hidden !important;
+    box-shadow: 0 9px 24px rgba(15, 23, 42, .075) !important;
+  }
+
+  /* 09, 13, 19: search appears immediately after the compact image and
+     overlaps its lower edge only slightly, like an intentional floating card. */
+  .discoveryToolbar246 {
+    position: relative !important;
+    z-index: 18 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: -18px 0 0 !important;
+    padding: 0 14px 12px !important;
+    box-sizing: border-box !important;
+    background: transparent !important;
+  }
+
+  .discoveryToolbarInner246 {
+    width: 100% !important;
+    max-width: 520px !important;
+    margin: 0 auto !important;
+    padding: 8px !important;
+    box-sizing: border-box !important;
+    display: block !important;
+    background: rgba(255, 255, 255, .985) !important;
+    border: 1px solid #e3ebe8 !important;
+    border-radius: 18px !important;
+    box-shadow: 0 14px 32px rgba(15, 23, 42, .12) !important;
+  }
+
+  .discoveryToolbarInner246 > .discoveryLocation246 {
+    display: none !important;
+  }
+
+  .discoverySearchRow246 {
+    min-width: 0 !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+    gap: 0 !important;
+  }
+
+  .darikDirectoryForm296 {
+    width: 100% !important;
+    min-width: 0 !important;
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) 84px !important;
+    align-items: stretch !important;
+    gap: 8px !important;
+  }
+
+  .discoverySearch246 {
+    min-width: 0 !important;
+    min-height: 52px !important;
+    height: 52px !important;
+    padding: 0 11px !important;
+    background: #fff !important;
+    border: 1px solid #dce5e2 !important;
+    border-radius: 13px !important;
+    box-shadow: none !important;
+  }
+
+  .discoverySearch246 input {
+    min-width: 0 !important;
+    width: 100% !important;
+    font-size: 12.5px !important;
+    line-height: 1.2 !important;
+    text-overflow: ellipsis !important;
+  }
+
+  .darikDirectorySubmit296 {
+    width: 84px !important;
+    min-width: 84px !important;
+    min-height: 52px !important;
+    height: 52px !important;
+    margin: 0 !important;
+    padding: 0 7px !important;
+    border-radius: 13px !important;
+    font-size: 11px !important;
+    line-height: 1.15 !important;
+    white-space: nowrap !important;
+    box-shadow: 0 7px 16px rgba(7, 135, 103, .18) !important;
+  }
+
+  .darikDirectoryClear296 {
+    min-height: 52px !important;
+  }
+
+  .marketSection {
+    padding-top: 4px !important;
+  }
+}
+
+/* Narrow iPhones: preserve the same hierarchy without overflow. */
+@media (max-width: 380px) {
+  .headerInner {
+    padding-left: 11px !important;
+    padding-right: 11px !important;
+  }
+
+  .header .brand {
+    max-width: 130px !important;
+  }
+
+  .header .brandLogo {
+    width: 126px !important;
+    max-width: 126px !important;
+    height: 38px !important;
+  }
+
+  .homeHeroInner390 {
+    width: calc(100% - 28px) !important;
+  }
+
+  .homeHeroCopy390 {
+    padding-top: 18px !important;
+    padding-bottom: 14px !important;
+  }
+
+  .homeHeroCopy390 h1 {
+    font-size: 31px !important;
+  }
+
+  .homeHeroCopy390 h2 {
+    font-size: 27px !important;
+  }
+
+  .homeHeroCopy390 p {
+    font-size: 13px !important;
+  }
+
+  .homeHeroTrust390 span,
+  .homeHeroTrust390 .homeHeroHeart390 {
+    font-size: 10.5px !important;
+  }
+
+  .homeHeroVisual390 {
+    width: calc(100% - 20px) !important;
+    height: 150px !important;
+    min-height: 150px !important;
+    max-height: 150px !important;
+    flex-basis: 150px !important;
+    background-position: 76% center !important;
+    border-radius: 16px !important;
+  }
+
+  .discoveryToolbar246 {
+    padding-left: 10px !important;
+    padding-right: 10px !important;
+  }
+
+  .darikDirectoryForm296 {
+    grid-template-columns: minmax(0, 1fr) 78px !important;
+    gap: 6px !important;
+  }
+
+  .darikDirectorySubmit296 {
+    width: 78px !important;
+    min-width: 78px !important;
+    font-size: 10px !important;
+  }
+}
+
+/* DARIK_FINAL_MOBILE_CLEANUP_390L */
+@media (max-width: 720px) {
+  /*
+    Mobile header: render the Darik mark as a CSS background instead of the
+    <img>. This keeps it exactly viewport-centered and avoids the duplicate/
+    ghost image artifact seen in Mobile Safari.
+  */
+  .header {
+    min-height: 62px !important;
+    overflow: visible !important;
+  }
+
+  .headerInner {
+    position: relative !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-height: 62px !important;
+    margin: 0 !important;
+    padding: 0 14px !important;
+    box-sizing: border-box !important;
+    grid-template-columns: 44px minmax(0, 1fr) 44px !important;
+    align-items: center !important;
+    overflow: visible !important;
+  }
+
+  .headerMenu246 {
+    grid-column: 1 !important;
+    justify-self: start !important;
+    position: relative !important;
+    z-index: 5 !important;
+  }
+
+  .headerActions {
+    grid-column: 3 !important;
+    justify-self: end !important;
+    position: relative !important;
+    z-index: 5 !important;
+  }
+
+  .header .brand {
+    position: absolute !important;
+    left: 50% !important;
+    top: 50% !important;
+    transform: translate(-50%, -50%) !important;
+    width: 138px !important;
+    height: 42px !important;
+    min-width: 138px !important;
+    max-width: 138px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    display: block !important;
+    background: url("/darik-approved-header-logo-390c.png") center center / contain no-repeat !important;
+    z-index: 3 !important;
+  }
+
+  .header .brandLogo {
+    display: none !important;
+  }
+
+  /* Hero copy: keep the approved look, just remove excess mobile height. */
+  .homeHeroInner390 {
+    width: calc(100% - 30px) !important;
+    max-width: 520px !important;
+  }
+
+  .homeHeroCopy390 {
+    padding: 18px 0 12px !important;
+  }
+
+  .homeHeroCopy390 h1 {
+    max-width: 336px !important;
+    font-size: clamp(30px, 8vw, 33px) !important;
+    line-height: 1 !important;
+  }
+
+  .homeHeroCopy390 h2 {
+    max-width: 342px !important;
+    margin-top: 6px !important;
+    font-size: clamp(26px, 7.2vw, 29px) !important;
+    line-height: 1.025 !important;
+  }
+
+  .homeHeroCopy390 p {
+    max-width: 360px !important;
+    margin-top: 10px !important;
+    font-size: 12.8px !important;
+    line-height: 1.46 !important;
+  }
+
+  /* Three clean, full-width trust rows. */
+  .homeHeroTrust390 {
+    position: relative !important;
+    z-index: 4 !important;
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    gap: 9px !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 12px 0 0 !important;
+    padding: 0 !important;
+    overflow: visible !important;
+  }
+
+  .homeHeroTrust390 span,
+  .homeHeroTrust390 .homeHeroHeart390 {
+    grid-column: auto !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    padding: 0 !important;
+    color: #102945 !important;
+    font-size: 10.8px !important;
+    font-weight: 850 !important;
+    line-height: 1.25 !important;
+    white-space: normal !important;
+    overflow: visible !important;
+    text-overflow: clip !important;
+  }
+
+  .homeHeroTrust390 svg {
+    flex: 0 0 auto !important;
+  }
+
+  /*
+    Hero image crop:
+    enlarge slightly and bias right. This removes the chopped "Local People"
+    fragment on the left while preserving the driver, Jordan flag and almost
+    all of the Shop Local sign.
+  */
+  .homeHeroVisual390 {
+    width: calc(100% - 24px) !important;
+    max-width: 520px !important;
+    height: 152px !important;
+    min-height: 152px !important;
+    max-height: 152px !important;
+    flex-basis: 152px !important;
+    border-radius: 17px !important;
+    background-size: 120% auto !important;
+    background-position: 85% center !important;
+    background-repeat: no-repeat !important;
+  }
+
+  /* Search: slightly shorter, with more space given to the input. */
+  .discoveryToolbar246 {
+    margin-top: -13px !important;
+    padding: 0 12px 14px !important;
+  }
+
+  .discoveryToolbarInner246 {
+    max-width: 510px !important;
+    padding: 7px !important;
+    border-radius: 16px !important;
+    box-shadow: 0 12px 28px rgba(15, 23, 42, .10) !important;
+  }
+
+  .darikDirectoryForm296 {
+    grid-template-columns: minmax(0, 1fr) 76px !important;
+    gap: 7px !important;
+  }
+
+  .discoverySearch246 {
+    min-height: 48px !important;
+    height: 48px !important;
+    padding: 0 9px !important;
+    border-radius: 12px !important;
+  }
+
+  .discoverySearch246 input,
+  .discoverySearch246 input::placeholder {
+    font-size: 11.8px !important;
+  }
+
+  .darikDirectorySubmit296 {
+    width: 76px !important;
+    min-width: 76px !important;
+    min-height: 48px !important;
+    height: 48px !important;
+    padding: 0 5px !important;
+    border-radius: 12px !important;
+    font-size: 10px !important;
+    box-shadow: 0 6px 14px rgba(7, 135, 103, .16) !important;
+  }
+
+  .marketSection {
+    padding-top: 7px !important;
+  }
+}
+
+@media (max-width: 380px) {
+  .header .brand {
+    width: 130px !important;
+    min-width: 130px !important;
+    max-width: 130px !important;
+    height: 39px !important;
+  }
+
+  .homeHeroCopy390 h1 {
+    font-size: 29px !important;
+  }
+
+  .homeHeroCopy390 h2 {
+    font-size: 25px !important;
+  }
+
+  .homeHeroCopy390 p {
+    font-size: 12.3px !important;
+  }
+
+  .homeHeroTrust390 span,
+  .homeHeroTrust390 .homeHeroHeart390 {
+    font-size: 10.1px !important;
+  }
+
+  .homeHeroVisual390 {
+    height: 146px !important;
+    min-height: 146px !important;
+    max-height: 146px !important;
+    flex-basis: 146px !important;
+    background-size: 122% auto !important;
+    background-position: 86% center !important;
+  }
+
+  .darikDirectoryForm296 {
+    grid-template-columns: minmax(0, 1fr) 72px !important;
+    gap: 6px !important;
+  }
+
+  .darikDirectorySubmit296 {
+    width: 72px !important;
+    min-width: 72px !important;
+    font-size: 9.6px !important;
+  }
+}
+
+/* DARIK_FOOTER_LAYOUT_REPAIR_390Q */
+/*
+  Mobile footer brand repair:
+  - keep the raw footer logo image in normal document flow
+  - stack logo above copy
+  - remove the 390P pinned/background-style footer logo behavior
+  - still suppress any Darik logo image that somehow lands in the hero/trust area
+*/
+@media (max-width: 720px) {
+  .footer {
+    display: block !important;
+    position: relative !important;
+    isolation: isolate !important;
+    overflow: visible !important;
+  }
+
+  .footerInner {
+    align-items: start !important;
+    gap: 22px !important;
+  }
+
+  .footerBrand {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    justify-content: flex-start !important;
+    gap: 10px !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+  }
+
+  .footerBrand > a,
+  .footerBrand .brand,
+  .footer .brand {
+    position: relative !important;
+    inset: auto !important;
+    left: auto !important;
+    right: auto !important;
+    top: auto !important;
+    bottom: auto !important;
+    transform: none !important;
+    z-index: auto !important;
+    display: block !important;
+    float: none !important;
+    width: 132px !important;
+    min-width: 132px !important;
+    max-width: 132px !important;
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: none !important;
+    contain: none !important;
+    isolation: auto !important;
+    overflow: visible !important;
+  }
+
+  .footerBrand .brandLogo,
+  .footer .brandLogo {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    position: static !important;
+    inset: auto !important;
+    left: auto !important;
+    right: auto !important;
+    top: auto !important;
+    bottom: auto !important;
+    transform: none !important;
+    float: none !important;
+    width: 132px !important;
+    min-width: 132px !important;
+    max-width: 132px !important;
+    height: auto !important;
+    object-fit: contain !important;
+  }
+
+  .footerBrand p,
+  .footerBrand small,
+  .footerBrand strong {
+    clear: both !important;
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  .footerBrand p {
+    margin: 0 !important;
+  }
+
+  .homeHeroTrust390 img[src*="darik-approved-header-logo-390c"],
+  .homeHeroTrust390 img[src*="darik_logo_final_v2"],
+  .homeHero390 img[src*="darik-approved-header-logo-390c"],
+  .homeHero390 img[src*="darik_logo_final_v2"] {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+  }
+}
+
+/* DARIK_FOOTER_EXACT_SLOT_390R */
+/*
+  Mobile-only exact placement requested from the Sep 9 footer screenshot:
+  remove the footer logo/link from normal footer flow and paint ONE Darik logo
+  in the unused white space directly below the Retailers / Retailer dashboard
+  column. Nothing else in the footer is repositioned.
+*/
+@media (max-width: 720px) {
+  .footer {
+    position: relative !important;
+    isolation: isolate !important;
+    overflow: visible !important;
+  }
+
+  /*
+    Remove the physical footer logo node from the layout completely.
+    The brand copy remains exactly where it already is.
+  */
+  .footer .brand {
+    display: none !important;
+  }
+
+  .footer .brandLogo {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+  }
+
+  /*
+    The footer begins immediately below the trust strip.
+    On a two-column mobile footer, the Retailers column begins at 50%.
+    146px down lands in the intentionally empty area just below
+    "Retailer dashboard", matching the supplied iPhone screenshot.
+  */
+  .footer::after {
+    content: "" !important;
+    position: absolute !important;
+    left: 50% !important;
+    top: 146px !important;
+    width: 138px !important;
+    height: 42px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    pointer-events: none !important;
+    z-index: 2 !important;
+    background-image: url("/darik-approved-header-logo-390c.png") !important;
+    background-repeat: no-repeat !important;
+    background-position: left center !important;
+    background-size: contain !important;
+  }
+
+  /* Keep the previously fixed hero area completely logo-free. */
+  .homeHeroTrust390 img[src*="darik-approved-header-logo-390c"],
+  .homeHeroTrust390 img[src*="darik_logo_final_v2"],
+  .homeHero390 img[src*="darik-approved-header-logo-390c"],
+  .homeHero390 img[src*="darik_logo_final_v2"] {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+  }
+}
+
+@media (max-width: 380px) {
+  .footer::after {
+    top: 148px !important;
+    width: 130px !important;
+    height: 40px !important;
+  }
+}

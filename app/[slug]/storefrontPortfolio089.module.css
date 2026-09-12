@@ -1,0 +1,723 @@
+/* DARIK_STOREFRONT_PORTFOLIO_COMPOSITION_089 */
+
+.pagePolish {
+  --sf-page-pad: clamp(16px, 3.6vw, 28px);
+  --sf-section-gap: clamp(22px, 4vw, 40px);
+  --sf-soft-border: color-mix(in srgb, var(--store-accent) 17%, rgba(148, 163, 184, 0.22));
+  --sf-soft-surface: color-mix(in srgb, var(--store-background) 92%, white 8%);
+  --sf-deep-shadow: 0 24px 60px rgba(2, 8, 23, 0.16);
+  overflow-x: clip;
+}
+
+.pagePolish * {
+  box-sizing: border-box;
+}
+
+.headerPolish {
+  position: relative;
+  z-index: 12;
+  width: min(1180px, calc(100% - (var(--sf-page-pad) * 2)));
+  margin-inline: auto;
+}
+
+.heroPolish {
+  position: relative;
+  width: min(1180px, calc(100% - (var(--sf-page-pad) * 2)));
+  margin-inline: auto;
+  overflow: hidden;
+  box-shadow: var(--sf-deep-shadow);
+}
+
+.quickInfoPolish {
+  width: min(1180px, calc(100% - (var(--sf-page-pad) * 2)));
+  margin-inline: auto;
+}
+
+.sectionsPolish {
+  width: min(1180px, calc(100% - (var(--sf-page-pad) * 2)));
+  margin-inline: auto;
+}
+
+.catalogPolish,
+.categoriesPolish,
+.storyPolish {
+  min-width: 0;
+}
+
+.catalogTopbarPolish {
+  position: relative;
+}
+
+.searchBoxPolish {
+  transition:
+    border-color 160ms ease,
+    box-shadow 160ms ease,
+    transform 160ms ease;
+}
+
+.searchBoxPolish:focus-within {
+  border-color: color-mix(in srgb, var(--store-accent) 72%, white 28%);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--store-accent) 13%, transparent);
+  transform: translateY(-1px);
+}
+
+.productGridPolish {
+  align-items: start;
+}
+
+.productCardPolish {
+  position: relative;
+  min-width: 0;
+  overflow: hidden;
+  isolation: isolate;
+  transition:
+    transform 190ms ease,
+    border-color 190ms ease,
+    box-shadow 190ms ease;
+}
+
+.productCardPolish:hover {
+  transform: translateY(-3px);
+  border-color: color-mix(in srgb, var(--store-accent) 38%, transparent);
+  box-shadow: 0 22px 48px rgba(2, 8, 23, 0.16);
+}
+
+.productImagePolish {
+  position: relative;
+  overflow: hidden;
+}
+
+.productImagePolish img {
+  transition: transform 350ms cubic-bezier(0.22, 0.8, 0.24, 1);
+}
+
+.productCardPolish:hover .productImagePolish img {
+  transform: scale(1.018);
+}
+
+.productBodyPolish {
+  min-width: 0;
+}
+
+.categoryScrollerPolish {
+  scrollbar-width: none;
+  scroll-snap-type: x proximity;
+}
+
+.categoryScrollerPolish::-webkit-scrollbar {
+  display: none;
+}
+
+.categoryScrollerPolish > button {
+  scroll-snap-align: start;
+}
+
+.conciergePolish,
+.footerPolish {
+  width: min(1180px, calc(100% - (var(--sf-page-pad) * 2)));
+  margin-inline: auto;
+}
+
+@media (min-width: 901px) {
+  .headerPolish {
+    padding-block: 16px;
+  }
+
+  .heroPolish {
+    min-height: clamp(520px, 60vh, 690px);
+    border-radius: 34px;
+  }
+
+  .quickInfoPolish {
+    margin-top: 14px;
+    border-radius: 24px;
+  }
+
+  .sectionsPolish {
+    gap: var(--sf-section-gap);
+    padding-block: 30px 46px;
+  }
+
+  .productGridPolish {
+    gap: 20px;
+  }
+
+  .productCardPolish {
+    border-radius: 26px;
+  }
+
+  .productImagePolish {
+    aspect-ratio: 1.32 / 1;
+  }
+
+  .productImagePolish img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+}
+
+@media (max-width: 900px) {
+  .pagePolish {
+    --sf-page-pad: 14px;
+    --sf-section-gap: 22px;
+    padding-bottom: calc(12px + env(safe-area-inset-bottom));
+  }
+
+  /* ---------------------------------------------------------------------- */
+  /* Header: retailer identity + essential actions, nothing else competing. */
+  /* ---------------------------------------------------------------------- */
+  .headerPolish {
+    min-height: 72px;
+    padding: 10px 2px;
+    gap: 10px;
+    background: transparent;
+    border: 0;
+  }
+
+  .headerPolish > a:first-child {
+    min-width: 0;
+    gap: 10px;
+  }
+
+  .headerPolish > a:first-child > div:first-child {
+    width: 46px;
+    height: 46px;
+    flex: 0 0 46px;
+    border-radius: 14px;
+    box-shadow: 0 8px 22px rgba(2, 8, 23, 0.16);
+  }
+
+  .headerPolish > a:first-child > div:last-child {
+    min-width: 0;
+  }
+
+  .headerPolish > a:first-child strong {
+    display: block;
+    overflow: hidden;
+    font-size: clamp(16px, 4.5vw, 20px);
+    line-height: 1.1;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .headerPolish > a:first-child span {
+    display: none;
+  }
+
+  .headerPolish nav {
+    gap: 7px;
+  }
+
+  .headerPolish nav > button,
+  .headerPolish nav > a {
+    width: 48px;
+    min-width: 48px;
+    height: 48px;
+    padding: 0;
+    border-radius: 15px;
+  }
+
+  .headerPolish nav > button span,
+  .headerPolish nav > a span {
+    display: none;
+  }
+
+  /* Shop/search is immediately below the hero; do not spend header space twice. */
+  .headerPolish nav > button:first-child {
+    display: none;
+  }
+
+  /* ---------------------------------------------------------------------- */
+  /* Hero: premium but deliberately capped so merchandise arrives sooner.    */
+  /* ---------------------------------------------------------------------- */
+  .heroPolish {
+    min-height: 0;
+    height: clamp(390px, 51dvh, 470px);
+    border-radius: 28px;
+    background-position: center center;
+    box-shadow: 0 24px 54px rgba(1, 7, 20, 0.26);
+  }
+
+  .heroPolish > div:nth-child(3) {
+    min-height: 100%;
+    padding: 24px 20px 22px;
+    justify-content: flex-end;
+  }
+
+  .heroPolish h1 {
+    max-width: 10.5ch;
+    margin-top: 10px;
+    font-size: clamp(37px, 10.8vw, 54px);
+    line-height: 0.94;
+    letter-spacing: -0.046em;
+  }
+
+  .heroPolish p {
+    max-width: 30ch;
+  }
+
+  .heroPolish button {
+    min-height: 52px;
+  }
+
+  .heroPolish aside {
+    display: none;
+  }
+
+  /* The secondary details button is redundant with the header info action. */
+  .heroPolish [class*="heroButtons"] > button:nth-child(2) {
+    display: none;
+  }
+
+  .heroPolish [class*="heroButtons"] > button:first-child {
+    width: min(100%, 340px);
+  }
+
+  /* ---------------------------------------------------------------------- */
+  /* Store essentials: one compact reassurance/contact rail.                 */
+  /* ---------------------------------------------------------------------- */
+  .quickInfoPolish {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+    margin-top: 10px;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    box-shadow: none;
+  }
+
+  .quickInfoPolish > a {
+    min-width: 0;
+    min-height: 58px;
+    padding: 9px 11px;
+    border: 1px solid var(--sf-soft-border);
+    border-radius: 17px;
+    background: color-mix(in srgb, var(--store-background) 92%, white 8%);
+    box-shadow: 0 8px 22px rgba(2, 8, 23, 0.055);
+  }
+
+  .quickInfoPolish > a:first-child {
+    grid-column: 1 / -1;
+  }
+
+  .quickInfoPolish > a > span:first-child {
+    width: 34px;
+    height: 34px;
+    flex: 0 0 34px;
+    border-radius: 11px;
+  }
+
+  .quickInfoPolish small {
+    font-size: 8px;
+    line-height: 1.1;
+    letter-spacing: 0.08em;
+  }
+
+  .quickInfoPolish strong {
+    display: block;
+    overflow: hidden;
+    font-size: 11px;
+    line-height: 1.25;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  /* ---------------------------------------------------------------------- */
+  /* Main commerce stack. Search + products now become the dominant content. */
+  /* ---------------------------------------------------------------------- */
+  .sectionsPolish {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sf-section-gap);
+    padding-block: 16px 24px;
+  }
+
+  .catalogPolish {
+    padding: 0;
+    border: 0;
+    background: transparent;
+    box-shadow: none;
+  }
+
+  .catalogTopbarPolish {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 12px;
+    margin-bottom: 15px;
+    padding: 0;
+  }
+
+  .catalogTopbarPolish > label {
+    order: -1;
+  }
+
+  .catalogTopbarPolish > div:first-child {
+    display: flex;
+    align-items: end;
+    justify-content: space-between;
+    gap: 12px;
+  }
+
+  .catalogTopbarPolish > div:first-child > span {
+    display: none;
+  }
+
+  .catalogTopbarPolish h2 {
+    margin: 0;
+    font-size: clamp(29px, 8.7vw, 38px);
+    line-height: 0.98;
+    letter-spacing: -0.035em;
+  }
+
+  .searchBoxPolish {
+    min-height: 56px;
+    padding-inline: 16px;
+    border: 1px solid color-mix(in srgb, var(--store-accent) 19%, rgba(148, 163, 184, 0.27));
+    border-radius: 18px;
+    background: color-mix(in srgb, var(--store-background) 94%, white 6%);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  }
+
+  .searchBoxPolish input {
+    font-size: 16px;
+  }
+
+  /* The category pills inside catalog are useful; keep them tiny and fast. */
+  .catalogPolish [class*="categoryPills"] {
+    gap: 7px;
+    margin: 0 0 15px;
+    padding-bottom: 2px;
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    scrollbar-width: none;
+  }
+
+  .catalogPolish [class*="categoryPills"]::-webkit-scrollbar {
+    display: none;
+  }
+
+  .catalogPolish [class*="categoryPills"] button {
+    min-height: 34px;
+    flex: 0 0 auto;
+    padding: 6px 10px;
+    border-radius: 999px;
+    font-size: 10px;
+  }
+
+  .productSectionPolish {
+    margin-top: 0;
+  }
+
+  .productSectionPolish > div:first-child {
+    margin-bottom: 11px;
+  }
+
+  .productSectionPolish > div:first-child span {
+    font-size: 9px;
+    letter-spacing: 0.12em;
+  }
+
+  .productSectionPolish > div:first-child h3 {
+    margin-top: 3px;
+    font-size: 27px;
+    line-height: 1;
+    letter-spacing: -0.025em;
+  }
+
+  .productSectionPolish > div:first-child small {
+    font-size: 10px;
+  }
+
+  .productGridPolish {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 15px;
+  }
+
+  /* ---------------------------------------------------------------------- */
+  /* Merchandise card: photography remains generous, UI no longer enormous. */
+  /* ---------------------------------------------------------------------- */
+  .productCardPolish {
+    border: 1px solid color-mix(in srgb, var(--store-accent) 21%, rgba(148, 163, 184, 0.18));
+    border-radius: 23px;
+    background: color-mix(in srgb, var(--store-background) 95%, white 5%);
+    box-shadow: 0 13px 32px rgba(2, 8, 23, 0.085);
+  }
+
+  .productImagePolish {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 1.55 / 1;
+    border-radius: 22px 22px 0 0;
+    background: color-mix(in srgb, var(--store-background) 88%, white 12%);
+  }
+
+  .productImagePolish img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .productImagePolish > div:last-child {
+    inset: 12px auto auto 12px;
+  }
+
+  .productImagePolish strong {
+    min-height: 28px;
+    padding: 5px 9px;
+    font-size: 9px;
+  }
+
+  .productBodyPolish {
+    padding: 15px 16px 15px;
+  }
+
+  .productBodyPolish > p:first-child {
+    margin: 0 0 6px;
+    font-size: 9px;
+    line-height: 1.2;
+    letter-spacing: 0.12em;
+  }
+
+  .productBodyPolish h3 {
+    margin: 0;
+    font-size: clamp(22px, 6.7vw, 29px);
+    line-height: 1.06;
+    letter-spacing: -0.025em;
+  }
+
+  .productBodyPolish h3 + p {
+    margin-top: 6px;
+    font-size: 13px;
+    line-height: 1.35;
+  }
+
+  .productBodyPolish [class*="productFitment"] {
+    margin-top: 10px;
+    min-height: 44px;
+    padding: 9px 11px;
+    border-radius: 13px;
+  }
+
+  .productBodyPolish [class*="productDescription"] {
+    display: -webkit-box;
+    margin: 9px 0 0;
+    overflow: hidden;
+    font-size: 11px;
+    line-height: 1.45;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+  }
+
+  .productBodyPolish > div:last-child {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin-top: 12px;
+    padding-top: 11px;
+  }
+
+  .productBodyPolish > div:last-child > div:first-child {
+    min-width: 0;
+  }
+
+  .productBodyPolish > div:last-child > div:first-child > strong {
+    font-size: 14px;
+    line-height: 1.15;
+  }
+
+  .productBodyPolish > div:last-child > button {
+    width: auto;
+    min-width: 118px;
+    min-height: 46px;
+    flex: 0 0 auto;
+    margin: 0;
+    padding: 0 16px;
+    border-radius: 14px;
+  }
+
+  .productBodyPolish [class*="pricingActions"] {
+    width: auto;
+    flex: 0 0 auto;
+    gap: 7px;
+  }
+
+  .productBodyPolish [class*="pricingActions"] a {
+    min-height: 44px;
+    padding: 0 11px;
+    border-radius: 13px;
+    font-size: 10px;
+  }
+
+  /* ---------------------------------------------------------------------- */
+  /* Categories are navigation, not a second hero.                           */
+  /* ---------------------------------------------------------------------- */
+  .categoriesPolish {
+    padding: 0;
+    border: 0;
+    background: transparent;
+  }
+
+  .categoriesPolish > div:first-child {
+    align-items: end;
+    margin-bottom: 11px;
+  }
+
+  .categoriesPolish > div:first-child > div > span {
+    font-size: 8px;
+    letter-spacing: 0.12em;
+  }
+
+  .categoriesPolish > div:first-child h2 {
+    max-width: none;
+    margin: 3px 0 0;
+    font-size: 29px;
+    line-height: 0.98;
+    letter-spacing: -0.035em;
+  }
+
+  .categoriesPolish > div:first-child > button {
+    min-height: 34px;
+    padding: 0 10px;
+    border-radius: 999px;
+    font-size: 9px;
+  }
+
+  .categoryScrollerPolish {
+    display: flex;
+    gap: 9px;
+    overflow-x: auto;
+    padding: 2px 1px 8px;
+  }
+
+  .categoryScrollerPolish > button {
+    width: 116px;
+    min-width: 116px;
+    min-height: 132px;
+    padding: 10px;
+    border-radius: 20px;
+  }
+
+  .categoryScrollerPolish > button > div:first-child {
+    width: 74px;
+    height: 74px;
+    margin-inline: auto;
+    border-radius: 50%;
+  }
+
+  .categoryScrollerPolish > button > span {
+    margin-top: 7px;
+    font-size: 12px;
+    line-height: 1.15;
+  }
+
+  .categoryScrollerPolish > button > small {
+    margin-top: 3px;
+    font-size: 9px;
+  }
+
+  /* ---------------------------------------------------------------------- */
+  /* Supporting sections + footer: finished, compact, intentional.           */
+  /* ---------------------------------------------------------------------- */
+  .storyPolish {
+    padding: 20px;
+    border-radius: 22px;
+  }
+
+  .conciergePolish {
+    margin-top: 4px;
+    padding: 16px;
+    border-radius: 22px;
+  }
+
+  .conciergePolish h2 {
+    font-size: 22px;
+  }
+
+  .footerPolish {
+    min-height: 0;
+    margin-top: 18px;
+    margin-bottom: 12px;
+    padding: 15px;
+    gap: 10px;
+    border-radius: 22px;
+  }
+
+  .footerPolish > div:first-child {
+    min-width: 0;
+  }
+
+  .footerPolish > div:first-child > div:first-child {
+    width: 46px;
+    height: 46px;
+    flex: 0 0 46px;
+    border-radius: 13px;
+  }
+
+  .footerPolish > div:first-child strong {
+    font-size: 15px;
+  }
+
+  .footerPolish > div:first-child span {
+    font-size: 10px;
+  }
+
+  .footerPolish [class*="footerSocials"] {
+    gap: 6px;
+  }
+
+  .footerPolish [class*="footerSocials"] a {
+    width: 34px;
+    height: 34px;
+  }
+
+  .footerPolish > a:last-child {
+    margin: 0;
+    font-size: 9px;
+    opacity: 0.62;
+  }
+}
+
+@media (max-width: 420px) {
+  .heroPolish {
+    height: clamp(370px, 49dvh, 440px);
+  }
+
+  .heroPolish h1 {
+    font-size: clamp(35px, 10.3vw, 47px);
+  }
+
+  .quickInfoPolish > a {
+    min-height: 54px;
+    padding-inline: 9px;
+  }
+
+  .productImagePolish {
+    aspect-ratio: 1.48 / 1;
+  }
+
+  .productBodyPolish {
+    padding-inline: 15px;
+  }
+
+  .productBodyPolish [class*="pricingActions"] a span {
+    display: none;
+  }
+
+  .productBodyPolish [class*="pricingActions"] a {
+    width: 46px;
+    min-width: 46px;
+    padding: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .productCardPolish,
+  .productImagePolish img,
+  .searchBoxPolish {
+    transition: none !important;
+  }
+}

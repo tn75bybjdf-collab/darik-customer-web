@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="360" height="82" viewBox="0 0 360 82">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#20B8E8"/>
+      <stop offset="100%" stop-color="#0AA36C"/>
+    </linearGradient>
+  </defs>
+  <g transform="translate(3 12)">
+    <circle cx="5" cy="6" r="4" fill="#20B8E8"/>
+    <circle cx="5" cy="28" r="4" fill="#0AA36C"/>
+    <circle cx="5" cy="50" r="4" fill="#0A8F78"/>
+    <path d="M16 6 H36 C50 6 59 15 59 28 C59 41 50 50 36 50 H16" fill="none" stroke="url(#g)" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M16 28 H38" fill="none" stroke="#0AA36C" stroke-width="9" stroke-linecap="round"/>
+    <path d="M16 6 H29" fill="none" stroke="#20B8E8" stroke-width="9" stroke-linecap="round"/>
+    <path d="M16 50 H29" fill="none" stroke="#0AA36C" stroke-width="9" stroke-linecap="round"/>
+  </g>
+  <text x="78" y="45" fill="#ffffff" font-family="Arial, Helvetica, sans-serif" font-size="38" font-weight="800" letter-spacing="-1.2">Darik</text>
+  <text x="79" y="65" fill="#D7E7F1" font-family="Arial, Helvetica, sans-serif" font-size="13.5" font-weight="600">Local Stores. Closer to You.</text>
+</svg>

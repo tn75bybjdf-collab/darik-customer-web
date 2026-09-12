@@ -12606,3 +12606,1672 @@ body {
 .mobileSponsoredProductAdButton:active {
   transform: translateY(1px) !important;
 }
+
+/* DARIK_HOME_STORE_SHELVES_TRUE_BESTSELLERS_186 */
+/*
+  getdarik.com discovery shelves intentionally use the same card footprint as
+  storefront Best Sellers:
+    mobile: 184px
+    desktop: 210px
+*/
+.darikHomeBrandSpacer186 {
+  display: block;
+  width: min(190px, 22vw);
+  min-width: 36px;
+  height: 1px;
+}
+
+.darikHomeStoreShelfStack186 {
+  display: grid;
+  gap: 34px;
+}
+
+.darikHomeStoreGroup186 {
+  min-width: 0;
+}
+
+.darikHomeStoreShelfHeading186 {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 18px;
+  margin: 0 0 12px;
+}
+
+.darikHomeStoreShelfHeading186 > div {
+  min-width: 0;
+  display: grid;
+  gap: 3px;
+}
+
+.darikHomeStoreShelfHeading186 span {
+  color: #7b8798;
+  font-size: 9px;
+  font-weight: 900;
+  letter-spacing: 0.13em;
+}
+
+.darikHomeStoreShelfHeading186 h3 {
+  margin: 0;
+  color: #111827;
+  font-size: clamp(21px, 2.1vw, 30px);
+  font-weight: 950;
+  letter-spacing: -0.035em;
+  line-height: 1.05;
+}
+
+.darikHomeStoreShelfHeading186 > small {
+  flex: 0 0 auto;
+  color: #8a95a5;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.darikHomeStoreShelfShell186 {
+  position: relative;
+  min-width: 0;
+}
+
+.darikHomeStoreShelf186 {
+  display: flex;
+  align-items: flex-start;
+  gap: 18px;
+  width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 0 1px 5px;
+  scrollbar-width: none;
+  scroll-snap-type: x proximity;
+  overscroll-behavior-x: contain;
+  -webkit-overflow-scrolling: touch;
+}
+
+.darikHomeStoreShelf186::-webkit-scrollbar {
+  display: none;
+}
+
+.darikHomeStoreCard186 {
+  flex: 0 0 184px;
+  width: 184px;
+  min-width: 184px;
+  display: block;
+  color: inherit;
+  text-decoration: none;
+  scroll-snap-align: start;
+}
+
+.darikHomeStoreCover186 {
+  position: relative;
+  width: 184px;
+  min-width: 184px;
+  height: 184px;
+  min-height: 184px;
+  overflow: hidden;
+  display: grid;
+  place-items: center;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  border-radius: 18px;
+  background-color: #eef2f6;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+  box-shadow: 0 9px 24px rgba(15, 23, 42, 0.08);
+  transition:
+    transform 180ms ease,
+    box-shadow 180ms ease;
+}
+
+.darikHomeStoreCard186:hover .darikHomeStoreCover186 {
+  transform: translateY(-2px);
+  box-shadow: 0 15px 32px rgba(15, 23, 42, 0.12);
+}
+
+.darikHomeStoreCoverLogo186 {
+  width: 58%;
+  height: 58%;
+  object-fit: contain;
+  filter: drop-shadow(0 6px 16px rgba(0, 0, 0, 0.16));
+}
+
+.darikHomeStoreStatus186 {
+  position: absolute;
+  top: 9px;
+  left: 9px;
+  min-height: 22px;
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid rgba(255, 255, 255, 0.46);
+  border-radius: 999px;
+  padding: 4px 8px;
+  color: #ffffff;
+  background: rgba(15, 23, 42, 0.62);
+  font-size: 8px;
+  font-weight: 900;
+  letter-spacing: 0.03em;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+.darikHomeStoreStatusOpen186 {
+  background: rgba(20, 83, 45, 0.78);
+}
+
+.darikHomeStoreStatusClosed186 {
+  background: rgba(127, 29, 29, 0.76);
+}
+
+.darikHomeStoreStatusShowcase186 {
+  background: rgba(30, 41, 59, 0.72);
+}
+
+.darikHomeStoreBody186 {
+  min-width: 0;
+  display: grid;
+  gap: 4px;
+  padding: 10px 2px 0;
+}
+
+.darikHomeStoreBody186 h3 {
+  margin: 0;
+  overflow: hidden;
+  color: #111827;
+  font-size: 14px;
+  font-weight: 900;
+  letter-spacing: -0.018em;
+  line-height: 1.24;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.darikHomeStoreSpecial186 {
+  overflow: hidden;
+  color: #138a55;
+  font-size: 10px;
+  font-weight: 900;
+  line-height: 1.25;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.darikHomeStoreFee186 {
+  color: #111827;
+  font-size: 13px;
+  font-weight: 950;
+  line-height: 1.2;
+}
+
+.darikHomeStoreDistance186 {
+  color: #8a95a5;
+  font-size: 9px;
+  font-weight: 750;
+}
+
+.darikHomeStoreShelfShell186::after {
+  content: "";
+  position: absolute;
+  z-index: 22;
+  top: 0;
+  right: 0;
+  bottom: 4px;
+  width: 42px;
+  pointer-events: none;
+  opacity: 0;
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0),
+    rgba(248, 250, 252, 0.92)
+  );
+  transition: opacity 160ms ease;
+}
+
+.darikHomeStoreShelfShell186[data-can-forward="true"]::after {
+  opacity: 1;
+}
+
+.darikHomeStoreContinue186 {
+  position: absolute;
+  z-index: 24;
+  top: 82px;
+  right: 5px;
+  width: 28px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  border: 1px solid rgba(15, 23, 42, 0.12);
+  border-radius: 999px;
+  padding: 0;
+  color: #253044;
+  background: rgba(255, 255, 255, 0.88);
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.12);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  cursor: pointer;
+  transform: translateY(-50%);
+}
+
+main[dir="rtl"] .darikHomeStoreContinue186 {
+  right: auto;
+  left: 5px;
+  transform: translateY(-50%) rotate(180deg);
+}
+
+main[dir="rtl"] .darikHomeStoreShelfShell186::after {
+  right: auto;
+  left: 0;
+  transform: scaleX(-1);
+}
+
+@media (min-width: 761px) {
+  .darikHomeStoreCard186 {
+    flex-basis: 210px;
+    width: 210px;
+    min-width: 210px;
+  }
+
+  .darikHomeStoreCover186 {
+    width: 210px;
+    min-width: 210px;
+    height: 210px;
+    min-height: 210px;
+  }
+
+  .darikHomeStoreBody186 h3 {
+    font-size: 15px;
+  }
+
+  .darikHomeStoreContinue186 {
+    top: 95px;
+  }
+}
+
+@media (max-width: 760px) {
+  .darikHomeBrandSpacer186 {
+    width: 38px;
+    min-width: 38px;
+  }
+
+  .darikHomeStoreShelfStack186 {
+    gap: 28px;
+  }
+
+  .darikHomeStoreShelfHeading186 {
+    margin-bottom: 10px;
+  }
+
+  .darikHomeStoreShelfHeading186 h3 {
+    font-size: 22px;
+  }
+
+  .darikHomeStoreShelf186 {
+    gap: 14px;
+    padding-right: 20px;
+  }
+
+  .darikHomeStoreShelfShell186 {
+    margin-right: -14px;
+  }
+
+  main[dir="rtl"] .darikHomeStoreShelf186 {
+    padding-right: 0;
+    padding-left: 20px;
+  }
+
+  main[dir="rtl"] .darikHomeStoreShelfShell186 {
+    margin-right: 0;
+    margin-left: -14px;
+  }
+}
+
+/* DARIK_HOME_STORE_LOGO_DEAD_CENTER_187 */
+/* DARIK_HOME_STORE_LOGO_CIRCLE_CUTOUT_187_V4 */
+/*
+  Pure circular logo cutout:
+  no square plate, no border, no outline, no frosted frame.
+*/
+.darikHomeStoreLogoStage187 {
+  position: absolute;
+  z-index: 3;
+  top: 50%;
+  left: 50%;
+  width: 82px;
+  height: 82px;
+  display: block;
+  overflow: hidden;
+  border: 0;
+  border-radius: 50%;
+  padding: 0;
+  background: transparent;
+  box-shadow: none;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  clip-path: circle(50% at 50% 50%);
+}
+
+.darikHomeStoreLogoStage187 .darikHomeStoreCoverLogo186 {
+  width: 100%;
+  height: 100%;
+  display: block;
+  border: 0;
+  border-radius: 50%;
+  padding: 0;
+  object-fit: cover;
+  object-position: center;
+  background: transparent;
+  filter: none;
+}
+
+@media (min-width: 761px) {
+  .darikHomeStoreLogoStage187 {
+    width: 94px;
+    height: 94px;
+  }
+}
+
+/* DARIK_STORE_OPENING_CENTER_LOGO_188 */
+.darikStoreOpeningLogo188 {
+  width: 88px;
+  height: 88px;
+  display: block;
+  overflow: hidden;
+  border: 0;
+  border-radius: 50%;
+  padding: 0;
+  background: transparent;
+  box-shadow: none;
+  clip-path: circle(50% at 50% 50%);
+  pointer-events: none;
+}
+
+.darikStoreOpeningLogo188 img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  border: 0;
+  border-radius: 50%;
+  padding: 0;
+  object-fit: cover;
+  object-position: center;
+  background: transparent;
+  filter: none;
+}
+
+@media (min-width: 761px) {
+  .darikStoreOpeningLogo188 {
+    width: 102px;
+    height: 102px;
+  }
+}
+
+
+/* DARIK_MARKETPLACE_REDESIGN_CHECKPOINT2_STORE_LIST_246B */
+.darikMarketplaceStoreList246B {
+  display: grid;
+  gap: 10px;
+}
+
+.darikMarketplaceStoreList246B .darikHomeStoreCard186 {
+  position: relative;
+  width: 100%;
+  min-width: 0;
+  min-height: 126px;
+  display: grid;
+  grid-template-columns: 132px minmax(0, 1fr) 30px;
+  align-items: center;
+  gap: 14px;
+  padding: 10px;
+  overflow: hidden;
+  border: 1px solid #e4e7ec;
+  border-radius: 19px;
+  background: #fff;
+  color: inherit;
+  text-decoration: none;
+  scroll-snap-align: none;
+  box-shadow: 0 8px 22px rgba(15,23,42,.055);
+  transition: transform 160ms ease, border-color 160ms ease, box-shadow 160ms ease;
+}
+
+.darikMarketplaceStoreList246B .darikHomeStoreCard186:hover {
+  transform: translateY(-1px);
+  border-color: #d0d5dd;
+  box-shadow: 0 13px 28px rgba(15,23,42,.09);
+}
+
+.darikMarketplaceStoreList246B .darikHomeStoreCover186 {
+  width: 132px;
+  min-width: 132px;
+  height: 106px;
+  min-height: 106px;
+  border: 0;
+  border-radius: 14px;
+  box-shadow: none;
+}
+
+.darikMarketplaceStoreList246B .darikHomeStoreCard186:hover .darikHomeStoreCover186 {
+  transform: none;
+  box-shadow: none;
+}
+
+.darikMarketplaceStoreList246B .darikHomeStoreLogoStage187 {
+  width: 54px;
+  height: 54px;
+  border: 3px solid rgba(255,255,255,.94);
+  background: #fff;
+  box-shadow: 0 7px 15px rgba(15,23,42,.13);
+}
+
+.darikMarketplaceStoreList246B .darikHomeStoreStatus186 {
+  display: none;
+}
+
+.darikMarketplaceStoreList246B .darikHomeStoreBody186 {
+  align-self: stretch;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 5px;
+  padding: 0;
+  min-width: 0;
+}
+
+.darikMarketplaceStoreList246B .darikHomeStoreBody186 h3 {
+  margin: 0;
+  color: #111827;
+  font-size: 16px;
+  font-weight: 950;
+  letter-spacing: -.026em;
+  line-height: 1.15;
+  white-space: normal;
+}
+
+.darikHomeStoreInlineStatus246B {
+  width: fit-content;
+  min-height: 24px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+  border-radius: 999px;
+  font-size: 8px;
+  font-weight: 900;
+  line-height: 1;
+}
+
+.darikHomeStoreInlineStatusOpen246B {
+  background: #eaf8ee;
+  color: #15803d;
+}
+
+.darikHomeStoreInlineStatusClosed246B {
+  background: #fff1f2;
+  color: #b42318;
+}
+
+.darikHomeStoreInlineStatusShowcase246B {
+  background: #f2f4f7;
+  color: #475467;
+}
+
+.darikMarketplaceStoreList246B .darikHomeStoreSpecial186 {
+  color: #138a55;
+  font-size: 10px;
+  font-weight: 900;
+  line-height: 1.25;
+  white-space: normal;
+}
+
+.darikMarketplaceStoreList246B .darikHomeStoreFee186 {
+  color: #344054;
+  font-size: 10px;
+  font-weight: 850;
+  line-height: 1.25;
+}
+
+.darikHomeStoreMeta246B {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  color: #98a2b3;
+  font-size: 9px;
+  font-weight: 800;
+}
+
+.darikMarketplaceStoreList246B .darikHomeStoreDistance186,
+.darikHomeStoreMeta246B small {
+  color: #98a2b3;
+  font-size: 9px;
+  font-weight: 800;
+}
+
+.darikHomeStoreArrow246B {
+  width: 30px;
+  height: 30px;
+  display: grid;
+  place-items: center;
+  border-radius: 10px;
+  color: #475467;
+  background: #f8fafc;
+}
+
+main[dir="rtl"] .darikHomeStoreArrow246B svg {
+  transform: rotate(180deg);
+}
+
+@media (max-width: 760px) {
+  .darikMarketplaceStoreList246B {
+    gap: 8px;
+  }
+
+  .darikMarketplaceStoreList246B .darikHomeStoreCard186 {
+    min-height: 112px;
+    grid-template-columns: 102px minmax(0, 1fr) 24px;
+    gap: 10px;
+    padding: 8px;
+    border-radius: 16px;
+    box-shadow: 0 6px 17px rgba(15,23,42,.045);
+  }
+
+  .darikMarketplaceStoreList246B .darikHomeStoreCover186 {
+    width: 102px;
+    min-width: 102px;
+    height: 96px;
+    min-height: 96px;
+    border-radius: 12px;
+  }
+
+  .darikMarketplaceStoreList246B .darikHomeStoreLogoStage187 {
+    width: 48px;
+    height: 48px;
+    border-width: 2px;
+  }
+
+  .darikMarketplaceStoreList246B .darikHomeStoreBody186 {
+    gap: 4px;
+  }
+
+  .darikMarketplaceStoreList246B .darikHomeStoreBody186 h3 {
+    font-size: 13px;
+  }
+
+  .darikHomeStoreInlineStatus246B {
+    min-height: 21px;
+    padding: 3px 7px;
+    font-size: 7px;
+  }
+
+  .darikMarketplaceStoreList246B .darikHomeStoreSpecial186,
+  .darikMarketplaceStoreList246B .darikHomeStoreFee186 {
+    font-size: 9px;
+  }
+
+  .darikMarketplaceStoreList246B .darikHomeStoreDistance186,
+  .darikHomeStoreMeta246B small,
+  .darikHomeStoreMeta246B {
+    font-size: 8px;
+  }
+
+  .darikHomeStoreArrow246B {
+    width: 24px;
+    height: 28px;
+    border-radius: 8px;
+    background: transparent;
+  }
+}
+
+@media (max-width: 350px) {
+  .darikMarketplaceStoreList246B .darikHomeStoreCard186 {
+    grid-template-columns: 92px minmax(0,1fr) 20px;
+    gap: 8px;
+  }
+
+  .darikMarketplaceStoreList246B .darikHomeStoreCover186 {
+    width: 92px;
+    min-width: 92px;
+    height: 90px;
+    min-height: 90px;
+  }
+
+  .darikMarketplaceStoreList246B .darikHomeStoreBody186 h3 {
+    font-size: 12px;
+  }
+}
+
+
+/* DARIK_HOME_STORE_CARD_BESTSELLER_VISUALS_249 */
+.darikMarketplaceStoreList246B .darikHomeStoreProducts249 {
+  grid-column: 1 / -1;
+  width: 100%;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 88px));
+  justify-content: start;
+  gap: 8px;
+  padding-top: 8px;
+  border-top: 1px solid #eef1f4;
+}
+
+.darikMarketplaceStoreList246B .darikHomeStoreProducts249 > span {
+  aspect-ratio: 1 / 1;
+  overflow: hidden;
+  display: block;
+  border: 1px solid #e7e9ee;
+  border-radius: 12px;
+  background: #f5f6f8;
+}
+
+.darikMarketplaceStoreList246B .darikHomeStoreProducts249 img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+  object-position: center;
+  transition: transform 180ms ease;
+}
+
+.darikMarketplaceStoreList246B
+  .darikHomeStoreCard186:hover
+  .darikHomeStoreProducts249 img {
+  transform: scale(1.025);
+}
+
+.darikMarketplaceStoreList246B
+  .darikHomeStoreProductsLoading249
+  > span {
+  background:
+    linear-gradient(
+      110deg,
+      #f2f4f7 8%,
+      #fafafa 18%,
+      #f2f4f7 33%
+    );
+  background-size: 200% 100%;
+  animation: darikHomeProductLoading249 1.2s linear infinite;
+}
+
+@keyframes darikHomeProductLoading249 {
+  to {
+    background-position-x: -200%;
+  }
+}
+
+@media (max-width: 760px) {
+  .darikMarketplaceStoreList246B .darikHomeStoreProducts249 {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 6px;
+    padding-top: 7px;
+  }
+
+  .darikMarketplaceStoreList246B .darikHomeStoreProducts249 > span {
+    border-radius: 10px;
+  }
+}
+
+@media (max-width: 350px) {
+  .darikMarketplaceStoreList246B .darikHomeStoreProducts249 {
+    gap: 5px;
+  }
+
+  .darikMarketplaceStoreList246B .darikHomeStoreProducts249 > span {
+    border-radius: 9px;
+  }
+}
+
+
+/* DARIK_BESTSELLER_EXACT_PRODUCT_OPEN_250 */
+.darikMarketplaceStoreList246B
+  .darikHomeStoreProducts249
+  > span[data-darik-product-id249] {
+  cursor: pointer;
+  position: relative;
+}
+
+.darikMarketplaceStoreList246B
+  .darikHomeStoreProducts249
+  > span[data-darik-product-id249]::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  box-shadow: inset 0 0 0 0 rgba(255, 212, 59, 0);
+  transition: box-shadow 140ms ease;
+  pointer-events: none;
+}
+
+.darikMarketplaceStoreList246B
+  .darikHomeStoreProducts249
+  > span[data-darik-product-id249]:active::after {
+  box-shadow: inset 0 0 0 3px rgba(255, 212, 59, 0.9);
+}
+/* DARIK_NEXT16_GLOBAL_PURITY_FIX_001B_HOME_296
+   Moved from app/home.module.css because Next 16 CSS Modules rejects
+   selectors that are entirely :global(...). Semantics are unchanged. */
+body.darik-directory-search-active-296 #stores {
+  display: none !important;
+}
+/* DARIK_NEXT16_GLOBAL_PURITY_FIX_001B_STOREFRONT_292
+   Exact DARIK_SMOOTH_SEARCH_LOCK_292 rules moved from the CSS Module
+   into global CSS for Next 16 CSS Modules purity compatibility. */
+[data-darik-search-shell="292"] {
+  box-sizing: border-box;
+}
+
+[data-darik-search-locked="292"] {
+  position: fixed !important;
+
+  top: var(--darik-search-top-292, 0px) !important;
+  left: 0 !important;
+  right: 0 !important;
+
+  width: 100vw !important;
+  min-width: 100vw !important;
+  max-width: 100vw !important;
+
+  margin: 0 !important;
+  padding: 8px 10px !important;
+
+  z-index: 95 !important;
+
+  border-radius: 0 !important;
+
+  transform: translate3d(0, 0, 0) !important;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+
+  background: #ffffff !important;
+  box-shadow: 0 5px 16px rgba(15, 23, 42, .11) !important;
+
+  contain: layout paint;
+  will-change: transform;
+}
+
+[data-darik-search-locked="292"] *,
+[data-darik-search-locked="292"]::before,
+[data-darik-search-locked="292"]::after {
+  box-sizing: border-box;
+}
+
+[data-darik-search-input="292"],
+[data-darik-search-locked="292"] input,
+[data-darik-search-locked="292"] [class*="search"],
+[data-darik-search-locked="292"] [class*="Search"] {
+  border-radius: 0 !important;
+}
+
+[data-darik-search-input="292"] {
+  width: 100% !important;
+  max-width: none !important;
+}
+
+[data-darik-search-sentinel="292"],
+[data-darik-search-placeholder="292"] {
+  pointer-events: none !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-darik-search-locked="292"] {
+    transition: none !important;
+  }
+}
+
+/* DARIK_MARKETPLACE_FINISHED_HOME_GLOBAL_CARDS_389 */
+.darikMarketplaceStoreList246B {
+  display: grid !important;
+  grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+  gap: 14px !important;
+}
+
+.darikMarketplaceStoreList246B .darikHomeStoreCard186 {
+  position: relative !important;
+  min-width: 0 !important;
+  min-height: 300px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: stretch !important;
+  gap: 0 !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+  border: 1px solid #e1e7ea !important;
+  border-radius: 20px !important;
+  background: #fff !important;
+  box-shadow: 0 10px 28px rgba(15, 23, 42, .065) !important;
+  transition: transform 170ms ease, box-shadow 170ms ease, border-color 170ms ease !important;
+}
+
+.darikMarketplaceStoreList246B .darikHomeStoreCard186:hover {
+  transform: translateY(-4px) !important;
+  border-color: #cfdad6 !important;
+  box-shadow: 0 18px 38px rgba(15, 23, 42, .11) !important;
+}
+
+.darikMarketplaceStoreList246B .darikHomeStoreCover186 {
+  position: relative !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  height: 155px !important;
+  min-height: 155px !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background-size: cover !important;
+  background-position: center !important;
+}
+
+.darikMarketplaceStoreList246B .darikHomeStoreLogoStage187 {
+  position: absolute !important;
+  left: 16px !important;
+  right: auto !important;
+  top: auto !important;
+  bottom: -27px !important;
+  width: 58px !important;
+  height: 58px !important;
+  transform: none !important;
+  border: 4px solid #fff !important;
+  border-radius: 50% !important;
+  background: #fff !important;
+  box-shadow: 0 8px 20px rgba(15,23,42,.16) !important;
+  z-index: 3 !important;
+}
+
+main[dir="rtl"] .darikMarketplaceStoreList246B .darikHomeStoreLogoStage187 {
+  left: auto !important;
+  right: 16px !important;
+}
+
+.darikMarketplaceStoreList246B .darikHomeStoreBody186 {
+  flex: 1 1 auto !important;
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: flex-start !important;
+  gap: 6px !important;
+  padding: 34px 16px 16px !important;
+}
+
+.darikMarketplaceStoreList246B .darikHomeStoreBody186 h3 {
+  margin: 0 !important;
+  color: #0c1930 !important;
+  font-size: 17px !important;
+  font-weight: 950 !important;
+  line-height: 1.15 !important;
+  letter-spacing: -.025em !important;
+}
+
+.darikMarketplaceStoreList246B .darikHomeStoreInlineStatus246B {
+  order: -1 !important;
+  min-height: 22px !important;
+  padding: 4px 8px !important;
+  font-size: 8px !important;
+}
+
+.darikMarketplaceStoreList246B .darikHomeStoreFee186 {
+  color: #087b61 !important;
+  font-size: 11px !important;
+  font-weight: 900 !important;
+}
+
+.darikMarketplaceStoreList246B .darikHomeStoreSpecial186 {
+  color: #0a916d !important;
+  font-size: 10px !important;
+}
+
+.darikMarketplaceStoreList246B .darikHomeStoreMeta246B,
+.darikMarketplaceStoreList246B .darikHomeStoreDistance186,
+.darikMarketplaceStoreList246B .darikHomeStoreMeta246B small {
+  color: #8290a1 !important;
+  font-size: 9px !important;
+}
+
+.darikMarketplaceStoreList246B .darikHomeStoreArrow246B {
+  position: absolute !important;
+  right: 12px !important;
+  bottom: 12px !important;
+  width: 30px !important;
+  height: 30px !important;
+  display: grid !important;
+  place-items: center !important;
+  border-radius: 10px !important;
+  background: #eff9f5 !important;
+  color: #0b8f6d !important;
+}
+
+main[dir="rtl"] .darikMarketplaceStoreList246B .darikHomeStoreArrow246B {
+  right: auto !important;
+  left: 12px !important;
+}
+
+.darikMarketplaceStoreList246B .darikHomeStoreProducts249,
+.darikMarketplaceStoreList246B .darikHomeStoreProductsLoading249 {
+  display: none !important;
+}
+
+@media (max-width: 1180px) {
+  .darikMarketplaceStoreList246B {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  }
+}
+
+@media (max-width: 860px) {
+  .darikMarketplaceStoreList246B {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+
+  .darikMarketplaceStoreList246B .darikHomeStoreCard186 {
+    min-height: 278px !important;
+  }
+
+  .darikMarketplaceStoreList246B .darikHomeStoreCover186 {
+    height: 140px !important;
+    min-height: 140px !important;
+  }
+}
+
+@media (max-width: 560px) {
+  .darikMarketplaceStoreList246B {
+    grid-template-columns: 1fr !important;
+    gap: 10px !important;
+  }
+
+  .darikMarketplaceStoreList246B .darikHomeStoreCard186 {
+    min-height: 0 !important;
+  }
+
+  .darikMarketplaceStoreList246B .darikHomeStoreCover186 {
+    height: 142px !important;
+    min-height: 142px !important;
+  }
+
+  .darikMarketplaceStoreList246B .darikHomeStoreBody186 {
+    padding: 34px 14px 14px !important;
+  }
+}
+
+/* DARIK_APPROVED_EXACT_HOME_GLOBAL_390 */
+[data-darik-customer-account-hub175="all"] {
+  position: static !important;
+  inset: auto !important;
+  z-index: 120 !important;
+}
+
+.darikMarketplaceStoreList246B {
+  order: 2 !important;
+  width: 100% !important;
+  display: flex !important;
+  gap: 10px !important;
+  overflow-x: auto !important;
+  overflow-y: hidden !important;
+  padding: 0 0 3px !important;
+  scroll-snap-type: x proximity !important;
+  scrollbar-width: none !important;
+}
+.darikMarketplaceStoreList246B::-webkit-scrollbar { display: none !important; }
+
+.darikMarketplaceStoreList246B > .darikDirectoryStoreSlot331 {
+  flex: 0 0 calc((100% - 40px) / 5) !important;
+  min-width: 0 !important;
+  scroll-snap-align: start !important;
+}
+
+.darikMarketplaceStoreList246B .darikHomeStoreCard186 {
+  position: relative !important;
+  min-width: 0 !important;
+  min-height: 156px !important;
+  height: 156px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+  background: #fff !important;
+  border: 1px solid #e2e8ec !important;
+  border-radius: 10px !important;
+  box-shadow: 0 5px 15px rgba(15,23,42,.045) !important;
+  transform: none !important;
+}
+.darikMarketplaceStoreList246B .darikHomeStoreCard186:hover {
+  transform: translateY(-2px) !important;
+  border-color: #c8ddd6 !important;
+  box-shadow: 0 9px 20px rgba(15,23,42,.08) !important;
+}
+
+.darikMarketplaceStoreList246B .darikHomeStoreCover186 {
+  position: relative !important;
+  width: 100% !important;
+  height: 73px !important;
+  min-height: 73px !important;
+  border-radius: 0 !important;
+  background-size: cover !important;
+  background-position: center !important;
+}
+
+.darikMarketplaceStoreList246B .darikHomeStoreStatus186 {
+  top: 8px !important;
+  left: 8px !important;
+  right: auto !important;
+  min-height: 21px !important;
+  padding: 0 8px !important;
+  color: #08765f !important;
+  background: rgba(239,255,249,.96) !important;
+  border: 1px solid #ccecdf !important;
+  font-size: 7px !important;
+  font-weight: 900 !important;
+}
+main[dir="rtl"] .darikMarketplaceStoreList246B .darikHomeStoreStatus186 {
+  left: auto !important;
+  right: 8px !important;
+}
+
+.darikMarketplaceStoreList246B .darikHomeStoreLogoStage187 {
+  position: absolute !important;
+  left: 12px !important;
+  right: auto !important;
+  top: auto !important;
+  bottom: -19px !important;
+  width: 43px !important;
+  height: 43px !important;
+  border: 3px solid #fff !important;
+  border-radius: 50% !important;
+  background: #fff !important;
+  transform: none !important;
+  z-index: 4 !important;
+  box-shadow: 0 5px 13px rgba(15,23,42,.15) !important;
+}
+main[dir="rtl"] .darikMarketplaceStoreList246B .darikHomeStoreLogoStage187 {
+  left: auto !important;
+  right: 12px !important;
+}
+
+.darikMarketplaceStoreList246B .darikHomeStoreBody186 {
+  flex: 1 1 auto !important;
+  min-height: 0 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 2px !important;
+  padding: 22px 10px 8px !important;
+}
+.darikMarketplaceStoreList246B .darikHomeStoreBody186 h3 {
+  margin: 0 !important;
+  color: #071a38 !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+  font-size: 12px !important;
+  font-weight: 950 !important;
+  line-height: 1.15 !important;
+}
+
+.darikMarketplaceStoreList246B .darikHomeStoreInlineStatus246B { display: none !important; }
+
+.darikMarketplaceStoreList246B .darikHomeStoreFee186,
+.darikMarketplaceStoreList246B .darikHomeStoreSpecial186,
+.darikMarketplaceStoreList246B .darikHomeNoDelivery331,
+.darikMarketplaceStoreList246B .darikHomeDeliveryUnknown331 {
+  width: fit-content !important;
+  max-width: calc(100% - 4px) !important;
+  margin: 1px 0 0 !important;
+  padding: 0 !important;
+  color: #08765f !important;
+  background: transparent !important;
+  border: 0 !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+  font-size: 8px !important;
+  font-weight: 800 !important;
+}
+
+.darikMarketplaceStoreList246B .darikHomeStoreMeta246B {
+  min-width: 0 !important;
+  display: flex !important;
+  gap: 4px !important;
+  color: #73839a !important;
+  overflow: hidden !important;
+}
+.darikMarketplaceStoreList246B .darikHomeStoreMeta246B small,
+.darikMarketplaceStoreList246B .darikHomeStoreDistance186 {
+  color: #73839a !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+  font-size: 7px !important;
+  font-weight: 700 !important;
+}
+
+.darikMarketplaceStoreList246B .darikHomeStoreArrow246B,
+.darikMarketplaceStoreList246B .darikHomeStoreProducts249,
+.darikMarketplaceStoreList246B .darikHomeStoreProductsLoading249 {
+  display: none !important;
+}
+
+.darikNoDeliveryDivider331 {
+  display: none !important;
+}
+
+.loadMoreStores338 {
+  order: 3 !important;
+  flex: 0 0 100% !important;
+  padding-top: 7px !important;
+}
+
+@media (max-width: 1180px) {
+  .darikMarketplaceStoreList246B > .darikDirectoryStoreSlot331 {
+    flex-basis: calc((100% - 30px) / 4) !important;
+  }
+}
+
+@media (max-width: 820px) {
+  [data-darik-customer-account-hub175="all"] {
+    position: fixed !important;
+    top: max(10px, env(safe-area-inset-top)) !important;
+    right: 10px !important;
+  }
+  main[dir="rtl"] [data-darik-customer-account-hub175="all"] {
+    right: auto !important;
+    left: 10px !important;
+  }
+  .darikMarketplaceStoreList246B > .darikDirectoryStoreSlot331 {
+    flex-basis: calc((100% - 20px) / 3) !important;
+  }
+}
+
+@media (max-width: 560px) {
+  .darikMarketplaceStoreList246B { gap: 8px !important; }
+  .darikMarketplaceStoreList246B > .darikDirectoryStoreSlot331 {
+    flex-basis: 78% !important;
+  }
+  .darikMarketplaceStoreList246B .darikHomeStoreCard186 {
+    height: 158px !important;
+    min-height: 158px !important;
+  }
+}
+
+/* DARIK_APPROVED_CLEANUP_GLOBAL_390C */
+
+/* Signed-in account UI must never float over navigation or the Sign Up area. */
+[data-darik-customer-account-hub175="all"] {
+  gap: 0 !important;
+}
+[data-darik-customer-account-hub175="all"] [class*="darikHello"] {
+  display: none !important;
+}
+
+/* Turn the old three-bar account launcher into a clean profile icon. */
+[data-darik-account-menu-launcher-354="true"] {
+  width: 42px !important;
+  height: 40px !important;
+  min-width: 42px !important;
+  border-radius: 11px !important;
+  border: 1px solid #e4e9ef !important;
+  background: #fff !important;
+  color: #0d2341 !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+}
+[data-darik-account-menu-launcher-354="true"] > span[aria-hidden="true"] {
+  position: relative !important;
+  display: block !important;
+  width: 21px !important;
+  height: 21px !important;
+}
+[data-darik-account-menu-launcher-354="true"] > span[aria-hidden="true"] > span {
+  display: none !important;
+}
+[data-darik-account-menu-launcher-354="true"] > span[aria-hidden="true"]::before {
+  content: "" !important;
+  position: absolute !important;
+  top: 1px !important;
+  left: 7px !important;
+  width: 7px !important;
+  height: 7px !important;
+  border: 2px solid currentColor !important;
+  border-radius: 50% !important;
+  box-sizing: border-box !important;
+}
+[data-darik-account-menu-launcher-354="true"] > span[aria-hidden="true"]::after {
+  content: "" !important;
+  position: absolute !important;
+  left: 3px !important;
+  bottom: 1px !important;
+  width: 15px !important;
+  height: 8px !important;
+  border: 2px solid currentColor !important;
+  border-bottom: 0 !important;
+  border-radius: 10px 10px 0 0 !important;
+  box-sizing: border-box !important;
+}
+
+/* Once signed in, the account control replaces the anonymous Sign Up call-to-action. */
+@supports selector(:has(*)) {
+  main:has([data-darik-customer-account-hub175="all"] [class*="darikHello"]) a[class*="retailerButton"] {
+    display: none !important;
+  }
+}
+
+/* DARIK_STORE_BESTSELLERS_CSS_390E */
+/*
+  390 originally hid the already-existing per-store product shelf.
+  Restore that real shelf here. The React card already loads up to four
+  best sellers (with existing fallback products) and already intercepts
+  clicks on [data-darik-product-id249] to deep-link to the exact item.
+*/
+.darikMarketplaceStoreList246B .darikHomeStoreCard186 {
+  height: 211px !important;
+  min-height: 211px !important;
+}
+
+.darikMarketplaceStoreList246B .darikHomeStoreBody186 {
+  padding-bottom: 8px !important;
+}
+
+.darikMarketplaceStoreList246B .darikHomeStoreProducts249,
+.darikMarketplaceStoreList246B .darikHomeStoreProductsLoading249 {
+  display: grid !important;
+  grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+  gap: 5px !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  margin-top: auto !important;
+  padding-top: 7px !important;
+  border-top: 1px solid #edf2f0 !important;
+}
+
+.darikMarketplaceStoreList246B .darikHomeStoreProducts249 > span,
+.darikMarketplaceStoreList246B .darikHomeStoreProductsLoading249 > span {
+  position: relative !important;
+  display: block !important;
+  width: 100% !important;
+  height: 43px !important;
+  min-width: 0 !important;
+  overflow: hidden !important;
+  border: 1px solid #e5ece9 !important;
+  border-radius: 7px !important;
+  background: #f7faf9 !important;
+}
+
+.darikMarketplaceStoreList246B .darikHomeStoreProducts249 > span {
+  cursor: pointer !important;
+  transition: transform 140ms ease, border-color 140ms ease, box-shadow 140ms ease !important;
+}
+
+.darikMarketplaceStoreList246B .darikHomeStoreProducts249 > span:hover {
+  z-index: 2 !important;
+  transform: translateY(-1px) !important;
+  border-color: #9fd9c9 !important;
+  box-shadow: 0 4px 10px rgba(7, 152, 117, .12) !important;
+}
+
+.darikMarketplaceStoreList246B .darikHomeStoreProducts249 img {
+  display: block !important;
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+  object-position: center !important;
+}
+
+.darikMarketplaceStoreList246B .darikHomeStoreProductsLoading249 > span {
+  background: linear-gradient(90deg, #f4f7f6 0%, #edf3f1 50%, #f4f7f6 100%) !important;
+}
+
+/* Make it visually clear each thumbnail is a direct product target. */
+.darikMarketplaceStoreList246B .darikHomeStoreProducts249 > span::after {
+  content: "" !important;
+  position: absolute !important;
+  inset: 0 !important;
+  pointer-events: none !important;
+  border-radius: inherit !important;
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,.28) !important;
+}
+
+@media (max-width: 820px) {
+  .darikMarketplaceStoreList246B .darikHomeStoreCard186 {
+    height: 207px !important;
+    min-height: 207px !important;
+  }
+  .darikMarketplaceStoreList246B .darikHomeStoreProducts249 > span,
+  .darikMarketplaceStoreList246B .darikHomeStoreProductsLoading249 > span {
+    height: 40px !important;
+  }
+}
+
+@media (max-width: 560px) {
+  .darikMarketplaceStoreList246B .darikHomeStoreCard186 {
+    height: 211px !important;
+    min-height: 211px !important;
+  }
+  .darikMarketplaceStoreList246B .darikHomeStoreProducts249 > span,
+  .darikMarketplaceStoreList246B .darikHomeStoreProductsLoading249 > span {
+    height: 43px !important;
+  }
+}
+
+/* DARIK_MOBILE_ACCOUNT_FINISH_390J */
+/* Keep the signed-in mobile account launcher inside the right 44px header rail. */
+@media (max-width: 720px) {
+  [data-darik-customer-account-hub175="all"] {
+    position: relative !important;
+    inset: auto !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-end !important;
+    width: 44px !important;
+    min-width: 44px !important;
+    max-width: 44px !important;
+    min-height: 44px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    transform: none !important;
+    overflow: visible !important;
+  }
+
+  [data-darik-account-menu-launcher-354="true"] {
+    position: relative !important;
+    inset: auto !important;
+    display: grid !important;
+    place-items: center !important;
+    width: 42px !important;
+    min-width: 42px !important;
+    max-width: 42px !important;
+    height: 42px !important;
+    min-height: 42px !important;
+    margin: 0 !important;
+    transform: none !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    z-index: 5 !important;
+  }
+}
+
+
+/* DARIK_DASHBOARD_HIDE_GLOBAL_FLOATERS_397D
+   Hide public-site floating contact UI while the authenticated retailer
+   overview dashboard is on screen. Visual-only; no widget code is deleted.
+*/
+body:has([data-darik-dashboard-polish397d="true"]) a[href*="wa.me"],
+body:has([data-darik-dashboard-polish397d="true"]) a[href*="whatsapp"],
+body:has([data-darik-dashboard-polish397d="true"]) [aria-label*="WhatsApp" i],
+body:has([data-darik-dashboard-polish397d="true"]) [title*="WhatsApp" i] {
+  display: none !important;
+}
+
+
+/* DARIK_DASHBOARD_ALL_TABS_HIDE_FLOATERS_398
+   Public-site floating contact widgets do not belong inside retailer tools.
+   Hides them only while any retailer dashboard shell is present.
+*/
+body:has(main[class*="dashboardPage"]) a[href*="wa.me"],
+body:has(main[class*="dashboardPage"]) a[href*="whatsapp"],
+body:has(main[class*="dashboardPage"]) [aria-label*="WhatsApp" i],
+body:has(main[class*="dashboardPage"]) [title*="WhatsApp" i] {
+  display: none !important;
+}
+
+
+/* DARIK_ACTIVATION_HIDE_PUBLIC_FLOATERS_399 */
+body:has(main[class*="activation-module__"][class*="page"]) a[href*="wa.me"],
+body:has(main[class*="activation-module__"][class*="page"]) a[href*="whatsapp"],
+body:has(main[class*="activation-module__"][class*="page"]) [aria-label*="WhatsApp" i],
+body:has(main[class*="activation-module__"][class*="page"]) [title*="WhatsApp" i] {
+  display: none !important;
+}
+
+
+/* DARIK_TERMS_APPROVED_400
+   Premium visual rebuild for /terms.
+   Legal content is preserved; this styles the existing terms document
+   so it matches the new Darik public site more closely.
+*/
+
+main[data-approved-legal="400"] {
+  --t400-navy: #06213f;
+  --t400-navy2: #0a3154;
+  --t400-green: #08a878;
+  --t400-green2: #0bc28b;
+  --t400-text: #0d254f;
+  --t400-muted: #62768f;
+  --t400-line: #dce6ed;
+  --t400-bg: #f6fafc;
+  --t400-chip: #eef8f4;
+  position: relative !important;
+  max-width: 1180px !important;
+  margin: 0 auto !important;
+  padding: 34px 22px 70px !important;
+  color: var(--t400-text) !important;
+  background:
+    radial-gradient(circle at 92% 2%, rgba(11,194,139,.08), transparent 24%),
+    linear-gradient(180deg, #f8fbfd 0%, #f7fafc 100%) !important;
+}
+
+main[data-approved-legal="400"]::before {
+  content: "";
+  position: absolute;
+  inset: 0 auto auto 0;
+  width: 100%;
+  height: 260px;
+  border-radius: 26px;
+  background:
+    radial-gradient(circle at 92% 18%, rgba(11,194,139,.12), transparent 22%),
+    linear-gradient(135deg, #0b294e 0%, #08233f 100%);
+  z-index: 0;
+  pointer-events: none;
+}
+
+main[data-approved-legal="400"] > * {
+  position: relative;
+  z-index: 1;
+}
+
+main[data-approved-legal="400"] > a,
+main[data-approved-legal="400"] > div:first-child a {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  min-height: 34px !important;
+  margin: 0 8px 10px 0 !important;
+  padding: 0 14px !important;
+  border: 1px solid rgba(255,255,255,.16) !important;
+  border-radius: 999px !important;
+  background: rgba(255,255,255,.08) !important;
+  color: #ffffff !important;
+  text-decoration: none !important;
+  font-size: 12px !important;
+  font-weight: 800 !important;
+  backdrop-filter: blur(4px);
+}
+
+main[data-approved-legal="400"] > a:hover,
+main[data-approved-legal="400"] > div:first-child a:hover {
+  background: rgba(255,255,255,.16) !important;
+}
+
+main[data-approved-legal="400"] > h1:first-of-type {
+  margin: 16px 0 12px !important;
+  max-width: 760px !important;
+  color: #ffffff !important;
+  font-size: 44px !important;
+  line-height: 1.02 !important;
+  letter-spacing: -0.04em !important;
+  font-weight: 950 !important;
+}
+
+main[data-approved-legal="400"] > h1:first-of-type + p {
+  max-width: 800px !important;
+  margin: 0 0 14px !important;
+  color: rgba(232,243,250,.92) !important;
+  font-size: 15px !important;
+  line-height: 1.55 !important;
+}
+
+main[data-approved-legal="400"] > :is(p,div,span):nth-child(2),
+main[data-approved-legal="400"] > :is(p,div,span):nth-child(3),
+main[data-approved-legal="400"] > :is(p,div,span):nth-child(4) {
+  display: inline-flex !important;
+  align-items: center !important;
+  min-height: 32px !important;
+  margin: 0 8px 10px 0 !important;
+  padding: 0 12px !important;
+  border: 1px solid rgba(255,255,255,.12) !important;
+  border-radius: 999px !important;
+  background: rgba(255,255,255,.10) !important;
+  color: #edf6fb !important;
+  font-size: 11px !important;
+  line-height: 1 !important;
+  font-weight: 900 !important;
+  letter-spacing: .04em !important;
+  text-transform: uppercase !important;
+}
+
+main[data-approved-legal="400"] > p:nth-of-type(2),
+main[data-approved-legal="400"] > p:nth-of-type(3) {
+  display: inline-flex !important;
+}
+
+main[data-approved-legal="400"] > p:nth-of-type(5),
+main[data-approved-legal="400"] > p:nth-of-type(6) {
+  margin-top: 12px !important;
+  padding: 18px 20px !important;
+  border: 1px solid #dbe8e4 !important;
+  border-radius: 16px !important;
+  background: linear-gradient(135deg, #effaf5 0%, #f7fffb 100%) !important;
+  color: #14345e !important;
+  box-shadow: 0 8px 22px rgba(19,55,90,.04) !important;
+}
+
+main[data-approved-legal="400"] > p:nth-of-type(6) {
+  border-color: #e6dfbf !important;
+  background: linear-gradient(135deg, #fff8e7 0%, #fffdf5 100%) !important;
+}
+
+main[data-approved-legal="400"] a[href^="#"] {
+  display: inline-flex !important;
+  align-items: center !important;
+  min-height: 34px !important;
+  margin: 0 8px 10px 0 !important;
+  padding: 0 13px !important;
+  border-radius: 999px !important;
+  border: 1px solid #d8e4ea !important;
+  background: #ffffff !important;
+  color: #16345c !important;
+  text-decoration: none !important;
+  font-size: 12px !important;
+  line-height: 1.2 !important;
+  font-weight: 700 !important;
+  box-shadow: 0 4px 12px rgba(19,55,90,.035) !important;
+}
+
+main[data-approved-legal="400"] a[href^="#"]:hover {
+  border-color: #9dd0bf !important;
+  color: #08785a !important;
+  background: #f1fbf6 !important;
+}
+
+main[data-approved-legal="400"] > *:has(a[href^="#"]) {
+  margin-top: 18px !important;
+  margin-bottom: 22px !important;
+  padding: 18px 18px 10px !important;
+  border: 1px solid #dce6ed !important;
+  border-radius: 18px !important;
+  background: #ffffff !important;
+  box-shadow: 0 10px 28px rgba(19,55,90,.05) !important;
+}
+
+main[data-approved-legal="400"] h2 {
+  margin: 28px 0 10px !important;
+  padding: 18px 20px !important;
+  border: 1px solid #dce6ed !important;
+  border-radius: 16px !important;
+  background: linear-gradient(180deg, #ffffff 0%, #fbfdfe 100%) !important;
+  color: #0d2852 !important;
+  font-size: 22px !important;
+  line-height: 1.14 !important;
+  font-weight: 900 !important;
+  letter-spacing: -0.02em !important;
+  box-shadow: 0 8px 26px rgba(19,55,90,.04) !important;
+  scroll-margin-top: 110px !important;
+}
+
+main[data-approved-legal="400"] h2::before {
+  content: "";
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  margin-right: 10px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #08a878, #0bc28b);
+  vertical-align: middle;
+}
+
+main[data-approved-legal="400"] p {
+  margin: 10px 0 !important;
+  color: #324d6d !important;
+  font-size: 14px !important;
+  line-height: 1.68 !important;
+}
+
+main[data-approved-legal="400"] ul,
+main[data-approved-legal="400"] ol {
+  margin: 10px 0 16px 20px !important;
+  padding: 0 !important;
+  color: #324d6d !important;
+}
+
+main[data-approved-legal="400"] li {
+  margin: 8px 0 !important;
+  line-height: 1.62 !important;
+  color: #324d6d !important;
+}
+
+main[data-approved-legal="400"] hr {
+  border: 0 !important;
+  border-top: 1px solid #e2e9ee !important;
+  margin: 24px 0 !important;
+}
+
+main[data-approved-legal="400"] > :last-child {
+  margin-top: 32px !important;
+  padding: 18px 20px !important;
+  border-radius: 16px !important;
+  border: 1px solid #ead49b !important;
+  background: linear-gradient(135deg, #fff8e6 0%, #fffdf7 100%) !important;
+  color: #7a5a00 !important;
+  font-size: 13px !important;
+  line-height: 1.58 !important;
+}
+
+main[data-approved-legal="400"] ::selection {
+  background: rgba(8,168,120,.18) !important;
+}
+
+@media (max-width: 900px) {
+  main[data-approved-legal="400"] {
+    padding: 18px 12px 50px !important;
+  }
+
+  main[data-approved-legal="400"]::before {
+    height: 230px !important;
+    border-radius: 0 0 22px 22px !important;
+  }
+
+  main[data-approved-legal="400"] > h1:first-of-type {
+    font-size: 34px !important;
+  }
+
+  main[data-approved-legal="400"] h2 {
+    font-size: 20px !important;
+    padding: 15px 14px !important;
+  }
+
+  main[data-approved-legal="400"] > *:has(a[href^="#"]) {
+    padding: 14px 12px 6px !important;
+  }
+}
+
+@media (max-width: 640px) {
+  main[data-approved-legal="400"] > h1:first-of-type {
+    font-size: 29px !important;
+  }
+
+  main[data-approved-legal="400"] p,
+  main[data-approved-legal="400"] li {
+    font-size: 13px !important;
+    line-height: 1.62 !important;
+  }
+
+  main[data-approved-legal="400"] a[href^="#"] {
+    min-height: 32px !important;
+    font-size: 11px !important;
+  }
+}
