@@ -1055,7 +1055,7 @@ function TermsLanguage({
 
 export default function DarikTermsPage() {
   return (
-    <main className={`${styles.page} ${styles.termsPage333}`}>
+    <main data-approved-legal="400" className={`${styles.page} ${styles.termsPage333}`}>
       <article className={`${styles.shell} ${styles.termsShell333}`}>
         <div className={styles.brandRow}>
           <Link href="/" className={styles.termsBrand333}>
