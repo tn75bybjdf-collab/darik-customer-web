@@ -2705,7 +2705,8 @@ export default function DarikDiscoveryHome() {
           <div className={styles.footerLinks}>
             <div><strong>{t.platformLinks}</strong><a href="#stores">{t.stores}</a><a href="/how-it-works">{t.how}</a><a href="/pricing">{t.pricing}</a></div>
             <div><strong>{t.retailerLinks}</strong><a href="/store-signup">{t.retailerSignup}</a><a href="/store-dashboard">{t.dashboard}</a></div>
-            <div><strong>{t.helpLinks}</strong><a href="/terms">{t.termsLink}</a><a href="/privacy">{t.privacyLink}</a><a href="/darik-promise">{t.promiseLink}</a><a href="/support">{t.supportLink}</a></div>
+            <div><strong>{t.helpLinks}</strong><a href="/terms">{t.termsLink}</a><a href="/privacy">{t.privacyLink}</a>
+<a href="/support">{t.supportLink}</a></div>
           </div>
         </div>
         <div className={styles.footerBottom}><span>© {new Date().getFullYear()} {t.rights}</span><span>getdarik.com · Jordan</span></div>

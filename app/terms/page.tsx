@@ -1110,8 +1110,7 @@ export default function DarikTermsPage() {
         <nav className={styles.footerLinks} aria-label="Legal links">
           <Link href="/privacy">Privacy / الخصوصية</Link>
           <Link href="/support">Support / الدعم</Link>
-          <Link href="/darik-promise">Darik Promise / وعد داريك</Link>
-          <Link href="/how-it-works">How it works / كيف تعمل</Link>
+<Link href="/how-it-works">How it works / كيف تعمل</Link>
           <Link href="/">GetDarik.com</Link>
         </nav>
       </article>
