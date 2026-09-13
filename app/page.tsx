@@ -1496,17 +1496,15 @@ export default function DarikDiscoveryHome() {
     STORE_BATCH_SIZE_318D
   );
 
-  const renderedStores318D = useMemo(
-    () =>
-      nearestCategoryStores318D.slice(
-        0,
-        visibleStoreCount318D
-      ),
-    [
-      nearestCategoryStores318D,
-      visibleStoreCount318D,
-    ]
-  );
+  const renderedStores318D = /* DARIK_HOMEPAGE_TWO_STORE_ROWS_404 */
+useMemo(() => {
+  const deliveryStores404 = nearestCategoryStores318D.filter((store) => store.delivers_to_location === true);
+  const pickupStores404 = nearestCategoryStores318D.filter((store) => store.delivers_to_location === false);
+  if (deliveryStores404.length || pickupStores404.length) {
+    return [...deliveryStores404.slice(0, visibleStoreCount318D), ...pickupStores404.slice(0, visibleStoreCount318D)];
+  }
+  return nearestCategoryStores318D.slice(0, visibleStoreCount318D);
+}, [nearestCategoryStores318D, visibleStoreCount318D]);
 
   const hasMoreStores318D =
     renderedStores318D.length <
@@ -2460,7 +2458,11 @@ export default function DarikDiscoveryHome() {
             </div>
           ) : visibleStores246B.length ? (
             <div className="darikMarketplaceStoreList246B">
-              {renderedStores318D.map((store, index331) => {
+              {(renderedStores318D.some((store) => store.delivers_to_location === true || store.delivers_to_location === false) ? (
+<div className="darikTwoStoreRows404" data-darik-two-store-rows="404">
+<section className="darikStoreShelf404 darikStoreShelfDelivery404">
+<div className="darikStoreShelfHeader404"><div><strong>{language === "ar" ? "التوصيل متاح إلى موقعك" : "Delivery available to your location"}</strong><small>{language === "ar" ? "هذه المتاجر توصل إلى العنوان الذي اخترته." : "These stores can deliver to your selected address."}</small></div><b>{nearestCategoryStores318D.filter((store) => store.delivers_to_location === true).length}</b></div>
+{renderedStores318D.some((store) => store.delivers_to_location === true) ? <div className="darikStoreShelfTrack404">{renderedStores318D.filter((store) => store.delivers_to_location === true).map((store, index331) => {
                 const previous331 =
                   index331 > 0 ? renderedStores318D[index331 - 1] : null;
 
@@ -2501,7 +2503,96 @@ export default function DarikDiscoveryHome() {
                     />
                   </div>
                 );
-              })}
+              })}</div> : <div className="darikStoreShelfEmpty404">{language === "ar" ? "لا توجد متاجر توصل إلى هذا الموقع حالياً." : "No stores currently deliver to this location."}</div>}
+</section>
+<section className="darikStoreShelf404 darikStoreShelfPickup404">
+<div className="darikStoreShelfHeader404"><div><strong>{language === "ar" ? "استلام من المتجر فقط" : "Pickup only"}</strong><small>{language === "ar" ? "تصفح المتاجر المتاحة للاستلام من المتجر." : "Browse stores available for pickup from the store."}</small></div><b>{nearestCategoryStores318D.filter((store) => store.delivers_to_location === false).length}</b></div>
+{renderedStores318D.some((store) => store.delivers_to_location === false) ? <div className="darikStoreShelfTrack404">{renderedStores318D.filter((store) => store.delivers_to_location === false).map((store, index331) => {
+                const previous331 =
+                  index331 > 0 ? renderedStores318D[index331 - 1] : null;
+
+                const showNoDeliveryDivider331 = Boolean(
+                  location &&
+                    store.delivers_to_location === false &&
+                    previous331?.delivers_to_location !== false
+                );
+
+                return (
+                  <div
+                    className="darikDirectoryStoreSlot331"
+                    key={store.storefront_id}
+                  >
+                    {showNoDeliveryDivider331 ? (
+                      <div className="darikNoDeliveryDivider331">
+                        <span />
+                        <strong>
+                          {language === "ar"
+                            ? "متاجر فعالة أخرى — لا يوجد توصيل إلى موقعك"
+                            : "Other active stores — no delivery to your location"}
+                        </strong>
+                        <span />
+                      </div>
+                    ) : null}
+
+                    <HomeStoreCard186
+                      store={store}
+                      language={language}
+                      special={
+                        specialDeliveryBySlug186[store.slug.toLowerCase()] ?? null
+                      }
+                      bestSellers249={
+                        bestSellerProductsBySlug249[
+                          store.slug.trim().toLowerCase()
+                        ]
+                      }
+                    />
+                  </div>
+                );
+              })}</div> : <div className="darikStoreShelfEmpty404">{language === "ar" ? "لا توجد متاجر للاستلام فقط في هذه الفئة حالياً." : "No pickup-only stores in this category right now."}</div>}
+</section>
+</div>
+) : renderedStores318D.map((store, index331) => {
+                const previous331 =
+                  index331 > 0 ? renderedStores318D[index331 - 1] : null;
+
+                const showNoDeliveryDivider331 = Boolean(
+                  location &&
+                    store.delivers_to_location === false &&
+                    previous331?.delivers_to_location !== false
+                );
+
+                return (
+                  <div
+                    className="darikDirectoryStoreSlot331"
+                    key={store.storefront_id}
+                  >
+                    {showNoDeliveryDivider331 ? (
+                      <div className="darikNoDeliveryDivider331">
+                        <span />
+                        <strong>
+                          {language === "ar"
+                            ? "متاجر فعالة أخرى — لا يوجد توصيل إلى موقعك"
+                            : "Other active stores — no delivery to your location"}
+                        </strong>
+                        <span />
+                      </div>
+                    ) : null}
+
+                    <HomeStoreCard186
+                      store={store}
+                      language={language}
+                      special={
+                        specialDeliveryBySlug186[store.slug.toLowerCase()] ?? null
+                      }
+                      bestSellers249={
+                        bestSellerProductsBySlug249[
+                          store.slug.trim().toLowerCase()
+                        ]
+                      }
+                    />
+                  </div>
+                );
+              }))}
               {hasMoreStores318D &&
               visibleStoreCount318D >=
                 Math.min(
