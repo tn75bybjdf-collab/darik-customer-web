@@ -121,7 +121,15 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const canonicalUrl = `${DARIK_ORIGIN}/${encodeURIComponent(slug)}`;
   const hero = absoluteHttpUrl(store.hero_image_url);
   const logo = absoluteHttpUrl(store.logo_url);
-  const shareImage = hero || logo;
+  // DARIK_STOREFRONT_SHARE_JPEG_405F
+  // Social crawlers get a first-party compressed JPEG rather than the raw retailer upload.
+  const shareSource = hero || logo;
+  const shareVersion = shareSource
+    ? encodeURIComponent(shareSource.split("/").pop() || "1")
+    : "1";
+  const shareImage = shareSource
+    ? `${DARIK_ORIGIN}/api/store-share-image/${encodeURIComponent(slug)}?v=${shareVersion}`
+    : null;
 
   return {
     title: `${name} | Darik`,
@@ -133,7 +141,9 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
       siteName: "Darik",
       title: name,
       description,
-      ...(shareImage ? { images: [{ url: shareImage, alt: name }] } : {}),
+      ...(shareImage ? { images: [{ url: shareImage,
+                width: 1200,
+                height: 630, alt: name }] } : {}),
     },
     twitter: {
       card: shareImage ? "summary_large_image" : "summary",
