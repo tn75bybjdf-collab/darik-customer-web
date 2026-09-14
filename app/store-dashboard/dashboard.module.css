@@ -6884,3 +6884,39 @@ button.commandSecondaryButton:disabled {
 .passwordOverlay406{position:fixed;inset:0;z-index:10050;background:rgba(4,15,31,.66);backdrop-filter:blur(7px);display:grid;place-items:center;padding:22px}.passwordModal406{width:min(100%,520px);max-height:calc(100vh - 44px);overflow:auto;border:1px solid #dfe7e8;border-radius:22px;background:#fff;color:#071a38;box-shadow:0 28px 80px rgba(4,15,31,.28)}.passwordModalHeader406{display:flex;align-items:flex-start;justify-content:space-between;gap:18px;padding:24px 25px 18px;border-bottom:1px solid #edf1f2}.passwordModalHeader406 span{display:block;margin-bottom:5px;color:#0a8e72;font-size:10px;font-weight:950;letter-spacing:.09em}.passwordModalHeader406 h2{margin:0;font-size:24px;line-height:1.08}.passwordModalHeader406 p{margin:4px 0 0;color:#758397;font-size:12px;font-weight:700}.passwordClose406{width:36px;height:36px;border:1px solid #e2e8ea;border-radius:50%;background:#f7f9f9;color:#425269;cursor:pointer;font-size:23px}
 .passwordForm406{display:grid;gap:15px;padding:22px 25px 25px}.passwordForm406 label{display:grid;gap:7px;color:#273a51;font-size:11px;font-weight:850}.passwordForm406 label>span{display:flex;align-items:center;gap:8px}.passwordForm406 label>span b{width:21px;height:21px;border-radius:50%;display:inline-grid;place-items:center;background:#eaf8f4;color:#08735d;font-size:10px}.passwordForm406 input{width:100%;min-height:48px;box-sizing:border-box;border:1px solid #d7e0e2;border-radius:13px;outline:none;background:#fff;color:#071a38;padding:0 13px;font:inherit;font-size:13px;font-weight:700}.passwordForm406 input:focus{border-color:#0a9a7b;box-shadow:0 0 0 3px rgba(10,154,123,.11)}.passwordRules406{padding:11px 13px;border:1px solid #e2e8ea;border-radius:12px;background:#f8faf9;color:#6c7b8f;font-size:10px;line-height:1.55;font-weight:650}.passwordError406,.passwordSuccess406{margin:0;padding:11px 13px;border-radius:12px;font-size:11px;line-height:1.45;font-weight:800}.passwordError406{border:1px solid #f4cccc;background:#fff4f4;color:#a52a2a}.passwordSuccess406{border:1px solid #bfe5d9;background:#effaf6;color:#08735d}.passwordActions406{display:flex;justify-content:flex-end;gap:9px}.passwordCancel406,.passwordSave406{min-height:43px;border-radius:12px;padding:0 16px;cursor:pointer;font-size:11px;font-weight:900}.passwordCancel406{border:1px solid #dce4e6;background:#fff;color:#425269}.passwordSave406{border:1px solid #08755f;background:#098b70;color:#fff}.passwordCancel406:disabled,.passwordSave406:disabled,.passwordClose406:disabled{cursor:wait;opacity:.62}
 @media(max-width:680px){.passwordOverlay406{align-items:end;padding:0}.passwordModal406{width:100%;max-height:90vh;border-radius:22px 22px 0 0}.passwordModalHeader406{padding:20px 18px 15px}.passwordForm406{padding:18px}.passwordActions406{display:grid;grid-template-columns:1fr 1fr}}
+
+/* DARIK_DASHBOARD_SCROLLABLE_SIDEBAR_407
+   Desktop sidebar stays fixed/sticky with the dashboard shell, but if the
+   navigation/account area is taller than the viewport, THIS column scrolls.
+   Main dashboard scrolling is unchanged. */
+@media (min-width: 901px) {
+  .sidebar {
+    height: 100vh !important;
+    height: 100dvh !important;
+    max-height: 100vh !important;
+    max-height: 100dvh !important;
+    min-height: 0 !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    overscroll-behavior-y: contain;
+    scrollbar-gutter: stable;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .sidebar::-webkit-scrollbar {
+    width: 7px;
+  }
+
+  .sidebar::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .sidebar::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.22);
+    border-radius: 999px;
+  }
+
+  .sidebar::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.34);
+  }
+}
