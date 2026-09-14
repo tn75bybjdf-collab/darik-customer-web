@@ -23231,3 +23231,485 @@
     font-size: 12px !important;
   }
 }
+
+/* ========================================================================
+   DARIK_APPROVED_STORE_LOADING_408
+   Approved store-opening experience.
+   Dynamic retailer hero is the backdrop; retailer logo/name/tagline sit
+   inside the centered glass card. Responsive for iPhone/Android/desktop.
+   ======================================================================== */
+.approvedOpening408 {
+  position: relative;
+  isolation: isolate;
+  width: 100%;
+  min-height: 100vh;
+  min-height: 100svh;
+  min-height: 100dvh;
+  overflow: hidden;
+  color: #0a254b;
+  background:
+    radial-gradient(circle at 12% 14%, rgba(243, 221, 202, 0.72), transparent 27%),
+    radial-gradient(circle at 88% 22%, rgba(211, 227, 207, 0.78), transparent 28%),
+    linear-gradient(145deg, #fbfaf7 0%, #f4f6fb 54%, #f8f5f2 100%);
+  font-family: Inter, "Segoe UI", Arial, sans-serif;
+}
+
+.approvedOpeningBackdrop408 {
+  position: absolute;
+  inset: -18px;
+  z-index: -3;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 18% 22%, rgba(235, 211, 195, 0.72), transparent 34%),
+    radial-gradient(circle at 82% 30%, rgba(197, 221, 199, 0.62), transparent 32%),
+    #f7f7f5;
+}
+
+.approvedOpeningBackdrop408::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.28), rgba(255, 255, 255, 0.18)),
+    radial-gradient(circle at center, transparent 14%, rgba(255, 255, 255, 0.22) 100%);
+  pointer-events: none;
+}
+
+.approvedOpeningBackdrop408 img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  transform: scale(1.045);
+  filter: blur(2.2px) saturate(0.86) brightness(1.05);
+  opacity: 0.6;
+  animation: darikOpeningBackdropIn408 360ms ease-out both;
+}
+
+.approvedOpeningWash408 {
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.48) 0%, rgba(248, 249, 252, 0.34) 42%, rgba(255, 255, 255, 0.58) 100%);
+  backdrop-filter: blur(1px);
+  -webkit-backdrop-filter: blur(1px);
+}
+
+.approvedOpeningStage408 {
+  box-sizing: border-box;
+  min-height: 100vh;
+  min-height: 100svh;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(24px, 4.2vh, 42px);
+  padding:
+    max(28px, env(safe-area-inset-top))
+    20px
+    max(28px, env(safe-area-inset-bottom));
+}
+
+.approvedOpeningDarik408 {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 7px;
+  flex: 0 0 auto;
+  animation: darikOpeningLift408 460ms ease-out both;
+}
+
+.approvedOpeningDarik408 img {
+  display: block;
+  width: clamp(126px, 25vw, 184px);
+  max-height: 64px;
+  object-fit: contain;
+}
+
+.approvedOpeningDarik408 span {
+  color: rgba(36, 62, 101, 0.72);
+  font-size: clamp(9px, 1.6vw, 12px);
+  font-weight: 700;
+  letter-spacing: 0.28em;
+  text-align: center;
+}
+
+.approvedOpeningCard408 {
+  width: min(560px, calc(100vw - 42px));
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: clamp(28px, 4.6vh, 42px) clamp(20px, 5.2vw, 42px) 26px;
+  border: 1px solid rgba(255, 255, 255, 0.82);
+  border-radius: clamp(28px, 6vw, 38px);
+  background: rgba(255, 255, 255, 0.88);
+  box-shadow:
+    0 28px 80px rgba(28, 52, 87, 0.13),
+    0 4px 18px rgba(28, 52, 87, 0.07),
+    inset 0 1px 0 rgba(255, 255, 255, 0.98);
+  backdrop-filter: blur(22px) saturate(1.08);
+  -webkit-backdrop-filter: blur(22px) saturate(1.08);
+  text-align: center;
+  animation: darikOpeningCardIn408 520ms cubic-bezier(0.22, 0.86, 0.24, 1) both;
+}
+
+.approvedOpeningLogoShell408 {
+  width: clamp(88px, 21vw, 112px);
+  height: clamp(88px, 21vw, 112px);
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  margin-top: -2px;
+  margin-bottom: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.96);
+  border-radius: clamp(25px, 6vw, 34px);
+  background:
+    linear-gradient(145deg, rgba(255, 255, 255, 0.96), rgba(246, 244, 248, 0.92));
+  box-shadow:
+    0 14px 36px rgba(27, 53, 87, 0.10),
+    inset 0 1px 0 #ffffff;
+}
+
+.approvedOpeningLogoShell408 img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  padding: 8px;
+  box-sizing: border-box;
+}
+
+.approvedOpeningLogoShell408 strong {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 100%;
+  color: #0a315d;
+  font-size: 42px;
+  font-weight: 800;
+}
+
+.approvedOpeningCard408 h1 {
+  margin: 0;
+  color: #0b2d58;
+  font-size: clamp(25px, 6.1vw, 38px);
+  line-height: 1.08;
+  font-weight: 800;
+  letter-spacing: -0.035em;
+}
+
+.approvedOpeningTagline408 {
+  max-width: 420px;
+  margin: 9px 0 0;
+  color: rgba(32, 57, 95, 0.66);
+  font-size: clamp(11px, 2.55vw, 14px);
+  line-height: 1.45;
+  font-weight: 700;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+}
+
+.approvedOpeningSpinner408 {
+  width: clamp(58px, 14vw, 72px);
+  height: clamp(58px, 14vw, 72px);
+  box-sizing: border-box;
+  margin: clamp(28px, 4.6vh, 38px) 0 22px;
+  border: 7px solid rgba(43, 103, 223, 0.10);
+  border-top-color: #2563eb;
+  border-right-color: rgba(37, 99, 235, 0.34);
+  border-radius: 50%;
+  animation: darikOpeningSpin408 0.92s linear infinite;
+}
+
+.approvedOpeningCard408 h2 {
+  margin: 0;
+  color: #0b2d58;
+  font-size: clamp(22px, 5.4vw, 32px);
+  line-height: 1.12;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+}
+
+.approvedOpeningPreparing408 {
+  max-width: 390px;
+  margin: 10px 0 0;
+  color: rgba(45, 69, 106, 0.65);
+  font-size: clamp(14px, 3.6vw, 18px);
+  line-height: 1.45;
+  font-weight: 500;
+}
+
+.approvedOpeningTrust408 {
+  width: 100%;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin-top: clamp(30px, 5vh, 42px);
+  padding-top: 2px;
+}
+
+.approvedOpeningTrust408 > div {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0 12px;
+  color: #496486;
+}
+
+.approvedOpeningTrust408 > div + div {
+  border-left: 1px solid rgba(25, 70, 125, 0.10);
+}
+
+.approvedOpeningTrustIcon408 {
+  width: 31px;
+  height: 31px;
+  display: grid;
+  place-items: center;
+  margin-bottom: 10px;
+  color: #2fba88;
+}
+
+.approvedOpeningTrustIcon408 svg {
+  width: 30px;
+  height: 30px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.approvedOpeningTrust408 strong,
+.approvedOpeningTrust408 small {
+  display: block;
+  line-height: 1.15;
+}
+
+.approvedOpeningTrust408 strong {
+  color: #496486;
+  font-size: clamp(12px, 3vw, 15px);
+  font-weight: 700;
+}
+
+.approvedOpeningTrust408 small {
+  margin-top: 3px;
+  color: rgba(55, 81, 116, 0.68);
+  font-size: clamp(11px, 2.7vw, 14px);
+}
+
+.approvedOpeningPowered408 {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 9px;
+  color: rgba(36, 62, 101, 0.55);
+  font-size: clamp(10px, 2.4vw, 12px);
+  font-weight: 700;
+  letter-spacing: 0.28em;
+  animation: darikOpeningLift408 600ms 120ms ease-out both;
+}
+
+.approvedOpeningPowered408 strong {
+  color: #0b2d58;
+  font-size: 1.08em;
+  letter-spacing: 0.22em;
+}
+
+@keyframes darikOpeningSpin408 {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes darikOpeningCardIn408 {
+  from {
+    opacity: 0;
+    transform: translateY(14px) scale(0.985);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes darikOpeningLift408 {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes darikOpeningBackdropIn408 {
+  from { opacity: 0; }
+  to { opacity: 0.6; }
+}
+
+@media (max-width: 540px) {
+  .approvedOpeningStage408 {
+    justify-content: space-between;
+    gap: 18px;
+    padding:
+      max(24px, env(safe-area-inset-top))
+      14px
+      max(24px, env(safe-area-inset-bottom));
+  }
+
+  .approvedOpeningDarik408 {
+    margin-top: 3px;
+  }
+
+  .approvedOpeningDarik408 img {
+    width: 136px;
+  }
+
+  .approvedOpeningCard408 {
+    width: min(100%, 370px);
+    padding: 27px 19px 22px;
+    border-radius: 31px;
+  }
+
+  .approvedOpeningLogoShell408 {
+    width: 92px;
+    height: 92px;
+    margin-bottom: 16px;
+    border-radius: 27px;
+  }
+
+  .approvedOpeningSpinner408 {
+    width: 62px;
+    height: 62px;
+    margin-top: 26px;
+    margin-bottom: 20px;
+    border-width: 6px;
+  }
+
+  .approvedOpeningTrust408 {
+    margin-top: 29px;
+  }
+
+  .approvedOpeningTrust408 > div {
+    padding: 0 8px;
+  }
+
+  .approvedOpeningPowered408 {
+    margin-bottom: 2px;
+  }
+}
+
+@media (max-width: 370px), (max-height: 690px) {
+  .approvedOpeningStage408 {
+    gap: 12px;
+    padding-top: max(16px, env(safe-area-inset-top));
+    padding-bottom: max(16px, env(safe-area-inset-bottom));
+  }
+
+  .approvedOpeningDarik408 {
+    gap: 4px;
+  }
+
+  .approvedOpeningDarik408 img {
+    width: 116px;
+    max-height: 48px;
+  }
+
+  .approvedOpeningDarik408 span {
+    font-size: 8px;
+  }
+
+  .approvedOpeningCard408 {
+    width: min(100%, 350px);
+    padding: 20px 16px 17px;
+    border-radius: 27px;
+  }
+
+  .approvedOpeningLogoShell408 {
+    width: 74px;
+    height: 74px;
+    margin-bottom: 11px;
+    border-radius: 22px;
+  }
+
+  .approvedOpeningCard408 h1 {
+    font-size: 23px;
+  }
+
+  .approvedOpeningTagline408 {
+    margin-top: 6px;
+    font-size: 10px;
+  }
+
+  .approvedOpeningSpinner408 {
+    width: 48px;
+    height: 48px;
+    margin: 18px 0 13px;
+    border-width: 5px;
+  }
+
+  .approvedOpeningCard408 h2 {
+    font-size: 20px;
+  }
+
+  .approvedOpeningPreparing408 {
+    margin-top: 6px;
+    font-size: 13px;
+  }
+
+  .approvedOpeningTrust408 {
+    margin-top: 20px;
+  }
+
+  .approvedOpeningTrustIcon408 {
+    width: 25px;
+    height: 25px;
+    margin-bottom: 6px;
+  }
+
+  .approvedOpeningTrustIcon408 svg {
+    width: 24px;
+    height: 24px;
+  }
+
+  .approvedOpeningTrust408 strong {
+    font-size: 11px;
+  }
+
+  .approvedOpeningTrust408 small {
+    font-size: 10px;
+  }
+
+  .approvedOpeningPowered408 {
+    font-size: 9px;
+  }
+}
+
+@media (min-width: 900px) {
+  .approvedOpeningBackdrop408 img {
+    filter: blur(2px) saturate(0.9) brightness(1.03);
+    opacity: 0.56;
+  }
+
+  .approvedOpeningStage408 {
+    gap: 32px;
+  }
+
+  .approvedOpeningCard408 {
+    padding: 38px 44px 30px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .approvedOpeningBackdrop408 img,
+  .approvedOpeningDarik408,
+  .approvedOpeningCard408,
+  .approvedOpeningPowered408 {
+    animation: none !important;
+  }
+
+  .approvedOpeningSpinner408 {
+    animation-duration: 1.6s;
+  }
+}

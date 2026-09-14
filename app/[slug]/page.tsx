@@ -2410,6 +2410,203 @@ function darikMarketplaceReferrerIsRoot117() {
   }
 }
 
+/* DARIK_APPROVED_STORE_LOADING_408
+   Approved customer-facing store opener:
+   dynamic retailer hero + logo + name/tagline, polished glass card,
+   Darik brand, loading ring, trust row, and responsive mobile layout. */
+type DarikOpeningTruth408 = {
+  display_name?: string | null;
+  tagline?: string | null;
+  logo_url?: string | null;
+  hero_image_url?: string | null;
+};
+
+function DarikApprovedStoreOpening408() {
+  const [openingTruth408, setOpeningTruth408] = useState<DarikOpeningTruth408 | null>(null);
+  const [heroFailed408, setHeroFailed408] = useState(false);
+  const [logoFailed408, setLogoFailed408] = useState(false);
+
+  useEffect(() => {
+    let cancelled408 = false;
+
+    let slug408 = "";
+    try {
+      slug408 = decodeURIComponent(
+        window.location.pathname.split("/").filter(Boolean)[0] || "",
+      )
+        .trim()
+        .toLowerCase();
+    } catch {
+      slug408 = "";
+    }
+
+    if (!slug408 || slug408 === "_darik-private-store-preview") {
+      return () => {
+        cancelled408 = true;
+      };
+    }
+
+    const cacheKey408 = `darik:approved-opening-truth:408:${slug408}`;
+
+    try {
+      const cached408 = window.sessionStorage.getItem(cacheKey408);
+      if (cached408) {
+        const parsed408 = JSON.parse(cached408) as DarikOpeningTruth408;
+        if (parsed408 && typeof parsed408 === "object") {
+          setOpeningTruth408(parsed408);
+        }
+      }
+    } catch {}
+
+    void (async () => {
+      try {
+        const { data, error } = await supabase.from("public_retailer_storefronts")
+          .select("display_name,tagline,logo_url,hero_image_url")
+          .eq("slug", slug408)
+          .maybeSingle();
+
+        if (cancelled408 || error || !data) return;
+
+        const next408: DarikOpeningTruth408 = {
+          display_name: String(data.display_name ?? "").trim() || null,
+          tagline: String(data.tagline ?? "").trim() || null,
+          logo_url: String(data.logo_url ?? "").trim() || null,
+          hero_image_url: String(data.hero_image_url ?? "").trim() || null,
+        };
+
+        setOpeningTruth408(next408);
+        setHeroFailed408(false);
+        setLogoFailed408(false);
+
+        try {
+          window.sessionStorage.setItem(cacheKey408, JSON.stringify(next408));
+        } catch {}
+      } catch {}
+    })();
+
+    return () => {
+      cancelled408 = true;
+    };
+  }, []);
+
+  const storeName408 = String(openingTruth408?.display_name || "").trim() || "your store";
+  const storeTagline408 =
+    String(openingTruth408?.tagline || "").trim() ||
+    "Local shopping, beautifully prepared for you.";
+  const hero408 =
+    !heroFailed408 && String(openingTruth408?.hero_image_url || "").trim()
+      ? String(openingTruth408?.hero_image_url)
+      : "";
+  const logo408 =
+    !logoFailed408 && String(openingTruth408?.logo_url || "").trim()
+      ? String(openingTruth408?.logo_url)
+      : "";
+
+  return (
+    <main className={styles.approvedOpening408} aria-live="polite">
+      <div className={styles.approvedOpeningBackdrop408} aria-hidden="true">
+        {hero408 ? (
+          <img
+            src={hero408}
+            alt=""
+            loading="eager"
+            decoding="async"
+            onError={() => setHeroFailed408(true)}
+          />
+        ) : null}
+      </div>
+      <div className={styles.approvedOpeningWash408} aria-hidden="true" />
+
+      <div className={styles.approvedOpeningStage408}>
+        <div className={styles.approvedOpeningDarik408}>
+          <img
+            src="/darik-approved-header-logo-390c.png"
+            alt="Darik"
+            draggable={false}
+          />
+          <span>LOCAL STORES. CLOSER TO YOU.</span>
+        </div>
+
+        <section className={styles.approvedOpeningCard408}>
+          <div className={styles.approvedOpeningLogoShell408}>
+            {logo408 ? (
+              <img
+                src={logo408}
+                alt={`${storeName408} logo`}
+                loading="eager"
+                decoding="async"
+                onError={() => setLogoFailed408(true)}
+              />
+            ) : (
+              <strong aria-hidden="true">
+                {storeName408 === "your store"
+                  ? "D"
+                  : storeName408.slice(0, 1).toUpperCase()}
+              </strong>
+            )}
+          </div>
+
+          <h1>
+            {storeName408 === "your store" ? "Opening your store" : storeName408}
+          </h1>
+          <p className={styles.approvedOpeningTagline408}>{storeTagline408}</p>
+
+          <div className={styles.approvedOpeningSpinner408} aria-hidden="true" />
+
+          <h2>
+            Opening{" "}
+            {storeName408 === "your store" ? "the store" : storeName408}…
+          </h2>
+          <p className={styles.approvedOpeningPreparing408}>
+            Preparing products, offers, and delivery details.
+          </p>
+
+          <div className={styles.approvedOpeningTrust408}>
+            <div>
+              <span className={styles.approvedOpeningTrustIcon408}>
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M12 3 20 6v5c0 5.2-3.2 8.4-8 10-4.8-1.6-8-4.8-8-10V6l8-3Z" />
+                  <path d="m8.5 12 2.1 2.1 4.8-5" />
+                </svg>
+              </span>
+              <strong>Secure</strong>
+              <small>Shopping</small>
+            </div>
+
+            <div>
+              <span className={styles.approvedOpeningTrustIcon408}>
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M3 6h11v10H3z" />
+                  <path d="M14 10h4l3 3v3h-7" />
+                  <circle cx="7" cy="18" r="2" />
+                  <circle cx="18" cy="18" r="2" />
+                </svg>
+              </span>
+              <strong>Fast</strong>
+              <small>Delivery</small>
+            </div>
+
+            <div>
+              <span className={styles.approvedOpeningTrustIcon408}>
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M20.8 5.8a5.5 5.5 0 0 0-7.8 0L12 6.8l-1-1a5.5 5.5 0 0 0-7.8 7.8L12 22l8.8-8.4a5.5 5.5 0 0 0 0-7.8Z" />
+                </svg>
+              </span>
+              <strong>Curated</strong>
+              <small>for You</small>
+            </div>
+          </div>
+        </section>
+
+        <div className={styles.approvedOpeningPowered408}>
+          <span>POWERED BY</span>
+          <strong>DARIK</strong>
+        </div>
+      </div>
+    </main>
+  );
+}
+
 export default function DarikDirectStorefrontPage() {
   // DARIK_REAL_BUSINESS_HOURS_NEXT_DAY_DELIVERY_115_V3_HOOK_ORDER_FIX
   const [storeClock115, setStoreClock115] = useState(0);
@@ -7554,20 +7751,7 @@ if (
   ]);
 
   if (loading) {
-    return (
-      <main className={styles.statePage}>
-        {openingStoreLogo188 ? (
-          <div className="darikStoreOpeningLogo188" aria-hidden="true">
-            <img src={openingStoreLogo188} alt="" />
-          </div>
-        ) : null}
-        <div className={styles.loadingBrand}>
-          <div className={styles.spinner} />
-          <span>Darik Direct</span>
-        </div>
-        <h1>Opening the store…</h1>
-      </main>
-    );
+    return <DarikApprovedStoreOpening408 />;
   }
 
   if (!storefront) {
