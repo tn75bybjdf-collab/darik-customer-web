@@ -2410,6 +2410,263 @@ function darikMarketplaceReferrerIsRoot117() {
   }
 }
 
+/* DARIK_APPROVED_STORE_LOADING_408G
+   Built specifically from the GOOD 407 production baseline:
+   e5da3ae30f94cb14b40668458b6384ff5fa3f23a
+
+   Rules:
+   - Never show a generic loading screen.
+   - Fetch retailer branding, then preload BOTH hero + logo.
+   - Only then show the approved branded opening screen.
+   - No Darik logo/header at top.
+   - Keep "Powered by Darik" at bottom.
+   - Parent storefront can escape a stale legacy loading boolean once real
+     storefront data exists, so the opener can never trap the customer forever.
+*/
+type DarikOpeningTruth408G = {
+  display_name?: string | null;
+  tagline?: string | null;
+  logo_url?: string | null;
+  hero_image_url?: string | null;
+};
+
+function DarikApprovedStoreOpening408G({
+  onFinished,
+}: {
+  onFinished: () => void;
+}) {
+  const [openingTruth408G, setOpeningTruth408G] =
+    useState<DarikOpeningTruth408G | null>(null);
+  const [assetsReady408G, setAssetsReady408G] = useState(false);
+
+  useEffect(() => {
+    let cancelled408G = false;
+
+    let slug408G = "";
+    try {
+      slug408G = decodeURIComponent(
+        window.location.pathname.split("/").filter(Boolean)[0] || "",
+      )
+        .trim()
+        .toLowerCase();
+    } catch {
+      slug408G = "";
+    }
+
+    if (!slug408G || slug408G === "_darik-private-store-preview") {
+      return () => {
+        cancelled408G = true;
+      };
+    }
+
+    const cacheKey408G = `darik:approved-opening-truth:408e:${slug408G}`;
+
+    try {
+      const cached408G = window.sessionStorage.getItem(cacheKey408G);
+      if (cached408G) {
+        const parsed408G = JSON.parse(cached408G) as DarikOpeningTruth408G;
+        if (parsed408G && typeof parsed408G === "object") {
+          setOpeningTruth408G(parsed408G);
+        }
+      }
+    } catch {}
+
+    void (async () => {
+      try {
+        const { data, error } = await supabase
+          .from("public_retailer_storefronts")
+          .select("display_name,tagline,logo_url,hero_image_url")
+          .eq("slug", slug408G)
+          .maybeSingle();
+
+        if (cancelled408G || error || !data) return;
+
+        const next408G: DarikOpeningTruth408G = {
+          display_name: String(data.display_name ?? "").trim() || null,
+          tagline: String(data.tagline ?? "").trim() || null,
+          logo_url: String(data.logo_url ?? "").trim() || null,
+          hero_image_url: String(data.hero_image_url ?? "").trim() || null,
+        };
+
+        setOpeningTruth408G(next408G);
+
+        try {
+          window.sessionStorage.setItem(cacheKey408G, JSON.stringify(next408G));
+        } catch {}
+      } catch {}
+    })();
+
+    return () => {
+      cancelled408G = true;
+    };
+  }, []);
+
+  useEffect(() => {
+    setAssetsReady408G(false);
+
+    const hero408G = String(openingTruth408G?.hero_image_url || "").trim();
+    const logo408G = String(openingTruth408G?.logo_url || "").trim();
+
+    // Explicit user requirement: do not display the opening screen until
+    // BOTH the real retailer hero and logo have finished loading.
+    if (!hero408G || !logo408G) return;
+
+    let cancelled408G = false;
+    let loaded408G = 0;
+    let failed408G = false;
+
+    const loadedOne408G = () => {
+      loaded408G += 1;
+      if (!cancelled408G && !failed408G && loaded408G === 2) {
+        setAssetsReady408G(true);
+      }
+    };
+
+    const preload408G = (src408G: string) => {
+      const image408G = new Image();
+      let settled408G = false;
+
+      image408G.onload = () => {
+        if (settled408G) return;
+        settled408G = true;
+        loadedOne408G();
+      };
+
+      image408G.onerror = () => {
+        if (settled408G) return;
+        settled408G = true;
+        failed408G = true;
+      };
+
+      image408G.src = src408G;
+
+      if (image408G.complete && image408G.naturalWidth > 0) {
+        image408G.onload?.(new Event("load"));
+      }
+    };
+
+    preload408G(hero408G);
+    preload408G(logo408G);
+
+    return () => {
+      cancelled408G = true;
+    };
+  }, [openingTruth408G?.hero_image_url, openingTruth408G?.logo_url]);
+
+  useEffect(() => {
+    if (!assetsReady408G) return;
+
+    // Once the fully-branded opener becomes visible, keep it on screen briefly
+    // so it reads as intentional rather than flashing for a single frame.
+    const timer408G = window.setTimeout(() => {
+      onFinished();
+    }, 700);
+
+    return () => window.clearTimeout(timer408G);
+    // onFinished is intentionally omitted: parent passes a simple state setter
+    // closure and this timer should only restart when asset readiness changes.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [assetsReady408G]);
+
+  const storeName408G = String(openingTruth408G?.display_name || "").trim();
+  const storeTagline408G =
+    String(openingTruth408G?.tagline || "").trim() ||
+    "Local shopping, beautifully prepared for you.";
+  const hero408G = String(openingTruth408G?.hero_image_url || "").trim();
+  const logo408G = String(openingTruth408G?.logo_url || "").trim();
+
+  // SSR + first hydration remain visually blank. No generic Darik screen.
+  if (
+    !openingTruth408G ||
+    !storeName408G ||
+    !hero408G ||
+    !logo408G ||
+    !assetsReady408G
+  ) {
+    return null;
+  }
+
+  return (
+    <main className={styles.approvedOpening408} aria-live="polite">
+      <div className={styles.approvedOpeningBackdrop408} aria-hidden="true">
+        <img
+          src={hero408G}
+          alt=""
+          loading="eager"
+          decoding="sync"
+          fetchPriority="high"
+        />
+      </div>
+      <div className={styles.approvedOpeningWash408} aria-hidden="true" />
+
+      <div className={styles.approvedOpeningStage408}>
+        <section className={styles.approvedOpeningCard408}>
+          <div className={styles.approvedOpeningLogoShell408}>
+            <img
+              src={logo408G}
+              alt={`${storeName408G} logo`}
+              loading="eager"
+              decoding="sync"
+              fetchPriority="high"
+            />
+          </div>
+
+          <h1>{storeName408G}</h1>
+          <p className={styles.approvedOpeningTagline408}>{storeTagline408G}</p>
+
+          <div className={styles.approvedOpeningSpinner408} aria-hidden="true" />
+
+          <h2>Opening {storeName408G}…</h2>
+          <p className={styles.approvedOpeningPreparing408}>
+            Preparing products, offers, and delivery details.
+          </p>
+
+          <div className={styles.approvedOpeningTrust408}>
+            <div>
+              <span className={styles.approvedOpeningTrustIcon408}>
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M12 3 20 6v5c0 5.2-3.2 8.4-8 10-4.8-1.6-8-4.8-8-10V6l8-3Z" />
+                  <path d="m8.5 12 2.1 2.1 4.8-5" />
+                </svg>
+              </span>
+              <strong>Secure</strong>
+              <small>Shopping</small>
+            </div>
+
+            <div>
+              <span className={styles.approvedOpeningTrustIcon408}>
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M3 6h11v10H3z" />
+                  <path d="M14 10h4l3 3v3h-7" />
+                  <circle cx="7" cy="18" r="2" />
+                  <circle cx="18" cy="18" r="2" />
+                </svg>
+              </span>
+              <strong>Fast</strong>
+              <small>Delivery</small>
+            </div>
+
+            <div>
+              <span className={styles.approvedOpeningTrustIcon408}>
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M20.8 5.8a5.5 5.5 0 0 0-7.8 0L12 6.8l-1-1a5.5 5.5 0 0 0-7.8 7.8L12 22l8.8-8.4a5.5 5.5 0 0 0 0-7.8Z" />
+                </svg>
+              </span>
+              <strong>Curated</strong>
+              <small>for You</small>
+            </div>
+          </div>
+        </section>
+
+        <div className={styles.approvedOpeningPowered408}>
+          <span>POWERED BY</span>
+          <strong>DARIK</strong>
+        </div>
+      </div>
+    </main>
+  );
+}
+
 export default function DarikDirectStorefrontPage() {
   // DARIK_REAL_BUSINESS_HOURS_NEXT_DAY_DELIVERY_115_V3_HOOK_ORDER_FIX
   const [storeClock115, setStoreClock115] = useState(0);
@@ -3263,6 +3520,22 @@ export default function DarikDirectStorefrontPage() {
     return () => window.removeEventListener("scroll", updateMobileContactDock);
   }, []);
   const [loading, setLoading] = useState(true);
+
+  /* DARIK_APPROVED_STORE_LOADING_408G_PARENT */
+  const [darikOpeningComplete408G, setDarikOpeningComplete408G] = useState(false);
+
+  useEffect(() => {
+    if (!storefront || darikOpeningComplete408G) return;
+
+    // Absolute escape hatch: if retailer branding cannot preload for any reason,
+    // reveal the actual store rather than trapping the customer on a loader.
+    const darikOpeningFallback408G = window.setTimeout(() => {
+      setDarikOpeningComplete408G(true);
+    }, 3500);
+
+    return () => window.clearTimeout(darikOpeningFallback408G);
+  }, [storefront, darikOpeningComplete408G]);
+
   const [loadError, setLoadError] = useState("");
   // DARIK_STORE_OPENING_CENTER_LOGO_188
   const [openingStoreLogo188, setOpeningStoreLogo188] = useState("");
@@ -7553,20 +7826,14 @@ if (
     storefront?.id,
   ]);
 
-  if (loading) {
+  if (
+    (loading && !storefront) ||
+    (storefront && !darikOpeningComplete408G)
+  ) {
     return (
-      <main className={styles.statePage}>
-        {openingStoreLogo188 ? (
-          <div className="darikStoreOpeningLogo188" aria-hidden="true">
-            <img src={openingStoreLogo188} alt="" />
-          </div>
-        ) : null}
-        <div className={styles.loadingBrand}>
-          <div className={styles.spinner} />
-          <span>Darik Direct</span>
-        </div>
-        <h1>Opening the store…</h1>
-      </main>
+      <DarikApprovedStoreOpening408G
+        onFinished={() => setDarikOpeningComplete408G(true)}
+      />
     );
   }
 
