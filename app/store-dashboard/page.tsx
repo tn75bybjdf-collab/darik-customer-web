@@ -377,6 +377,46 @@ function orderStatusLabel(value: string) {
 }
 
 export default function DarikDirectOverviewPage() {
+  // DARIK_RETAILER_PASSWORD_CHANGE_406
+  const [passwordModalOpen406,setPasswordModalOpen406]=useState(false);
+  const [currentPassword406,setCurrentPassword406]=useState("");
+  const [newPassword406,setNewPassword406]=useState("");
+  const [confirmPassword406,setConfirmPassword406]=useState("");
+  const [passwordSaving406,setPasswordSaving406]=useState(false);
+  const [passwordError406,setPasswordError406]=useState("");
+  const [passwordSuccess406,setPasswordSuccess406]=useState("");
+
+  function openPasswordModal406(){
+    setCurrentPassword406("");setNewPassword406("");setConfirmPassword406("");
+    setPasswordError406("");setPasswordSuccess406("");setPasswordModalOpen406(true);
+  }
+  function closePasswordModal406(){
+    if(passwordSaving406)return;
+    setPasswordModalOpen406(false);setCurrentPassword406("");setNewPassword406("");
+    setConfirmPassword406("");setPasswordError406("");setPasswordSuccess406("");
+  }
+  async function handlePasswordChange406(event:React.FormEvent<HTMLFormElement>){
+    event.preventDefault();setPasswordError406("");setPasswordSuccess406("");
+    const oldPassword=currentPassword406,nextPassword=newPassword406,confirmed=confirmPassword406;
+    if(!oldPassword){setPasswordError406("Enter your current password first. / أدخل كلمة المرور الحالية أولاً.");return}
+    if(nextPassword.length<8){setPasswordError406("New password must be at least 8 characters. / يجب أن تتكون كلمة المرور الجديدة من 8 أحرف على الأقل.");return}
+    if(!/[A-Z]/.test(nextPassword)||!/d/.test(nextPassword)||!/[^A-Za-z0-9]/.test(nextPassword)){setPasswordError406("New password needs a capital letter, a number, and a special character. / يجب أن تحتوي كلمة المرور الجديدة على حرف كبير ورقم ورمز خاص.");return}
+    if(nextPassword===oldPassword){setPasswordError406("Your new password must be different from your current password. / يجب أن تختلف كلمة المرور الجديدة عن الحالية.");return}
+    if(nextPassword!==confirmed){setPasswordError406("The two new passwords do not match. / كلمتا المرور الجديدتان غير متطابقتين.");return}
+    setPasswordSaving406(true);
+    try{
+      const u=await supabase.auth.getUser(),email=String(u.data.user?.email??"").trim();
+      if(u.error||!email)throw Error("Could not verify this retailer account. Please sign in again. / تعذر التحقق من حساب التاجر. سجل الدخول مرة أخرى.");
+      const verify=await supabase.auth.signInWithPassword({email,password:oldPassword});
+      if(verify.error){setPasswordError406("Current password is incorrect. / كلمة المرور الحالية غير صحيحة.");return}
+      const update=await supabase.auth.updateUser({password:nextPassword});
+      if(update.error)throw update.error;
+      setCurrentPassword406("");setNewPassword406("");setConfirmPassword406("");
+      setPasswordSuccess406("Password changed successfully. / تم تغيير كلمة المرور بنجاح.");
+    }catch(error){setPasswordError406(error instanceof Error?error.message:"Could not change the password. / تعذر تغيير كلمة المرور.");}
+    finally{setPasswordSaving406(false)}
+  }
+
   const [retailFieldDrafts134, setRetailFieldDrafts134] = useState<Record<string, string>>({});
   const [retailFieldOtherDrafts134, setRetailFieldOtherDrafts134] = useState<Record<string, string>>({});
   const [retailFieldSaving134, setRetailFieldSaving134] = useState(false);
@@ -1093,6 +1133,10 @@ export default function DarikDirectOverviewPage() {
               )
             ) : null}
           </div>
+                <button type="button" className={styles.passwordChangeButton406} onClick={openPasswordModal406}>
+                  <span>Change password</span><small>تغيير كلمة المرور</small>
+                </button>
+
           <DashboardLogoutButton />
         </div>
       </aside>
@@ -1643,6 +1687,29 @@ export default function DarikDirectOverviewPage() {
           onClose={() => setPreviewOpen(false)}
         />
       ) : null}
-    </main>
+
+        {passwordModalOpen406 ? (
+          <div className={styles.passwordOverlay406} role="presentation" onMouseDown={(e)=>{if(e.target===e.currentTarget)closePasswordModal406();}}>
+            <section className={styles.passwordModal406} role="dialog" aria-modal="true" aria-labelledby="darik-password-title-406" onMouseDown={(e)=>e.stopPropagation()}>
+              <header className={styles.passwordModalHeader406}>
+                <div><span>ACCOUNT SECURITY / أمان الحساب</span><h2 id="darik-password-title-406">Change password</h2><p>تغيير كلمة المرور</p></div>
+                <button type="button" className={styles.passwordClose406} onClick={closePasswordModal406} disabled={passwordSaving406} aria-label="Close">×</button>
+              </header>
+              <form className={styles.passwordForm406} onSubmit={handlePasswordChange406}>
+                <label><span><b>1</b> Current password / كلمة المرور الحالية</span><input type="password" value={currentPassword406} onChange={(e)=>setCurrentPassword406(e.target.value)} autoComplete="current-password" required autoFocus /></label>
+                <label><span><b>2</b> New password / كلمة المرور الجديدة</span><input type="password" value={newPassword406} onChange={(e)=>setNewPassword406(e.target.value)} autoComplete="new-password" required /></label>
+                <label><span><b>3</b> Confirm new password / تأكيد كلمة المرور الجديدة</span><input type="password" value={confirmPassword406} onChange={(e)=>setConfirmPassword406(e.target.value)} autoComplete="new-password" required /></label>
+                <div className={styles.passwordRules406}>Minimum 8 characters with a capital letter, number, and special character.<br/>8 أحرف على الأقل مع حرف كبير ورقم ورمز خاص.</div>
+                {passwordError406?<p className={styles.passwordError406} role="alert">{passwordError406}</p>:null}
+                {passwordSuccess406?<p className={styles.passwordSuccess406} role="status">{passwordSuccess406}</p>:null}
+                <div className={styles.passwordActions406}>
+                  <button type="button" className={styles.passwordCancel406} onClick={closePasswordModal406} disabled={passwordSaving406}>Cancel / إلغاء</button>
+                  <button type="submit" className={styles.passwordSave406} disabled={passwordSaving406}>{passwordSaving406?"Saving… / جارٍ الحفظ…":"Save new password / حفظ كلمة المرور"}</button>
+                </div>
+              </form>
+            </section>
+          </div>
+        ):null}
+</main>
   );
 }
