@@ -260,8 +260,8 @@ export default function DarikCustomerAccountHub339({
     const legacyTriggerLabels355 = new Set([
       "Customer sign in",
       "Account",
-      "طھط³ط¬ظٹظ„ ط¯ط®ظˆظ„ ط§ظ„ط¹ظ…ظٹظ„",
-      "ط§ظ„ط­ط³ط§ط¨",
+      "تسجيل دخول العميل",
+      "الحساب",
     ]);
 
     const hideLegacyFloatingTrigger355 = () => {

@@ -1936,10 +1936,10 @@ useMemo(() => {
                 input390?.scrollIntoView({ behavior: "smooth", block: "center" });
                 window.setTimeout(() => input390?.focus(), 320);
               }}
-              aria-label={language === "ar" ? "ط¨ط­ط« ظپظٹ ط¯ط§ط±ظٹظƒ" : "Search Darik"}
+              aria-label={language === "ar" ? "بحث في داريك" : "Search Darik"}
             >
               <Icon name="search" size={18} />
-              <span>{language === "ar" ? "ط§ط¨ط­ط« ط¹ظ† ظ…ط·ط§ط¹ظ… ط£ظˆ ظ…ظ†طھط¬ط§طھ ط£ظˆ ظ…طھط§ط¬ط±..." : "Search for restaurants, products, or stores..."}</span>
+              <span>{language === "ar" ? "ابحث عن مطاعم أو منتجات أو متاجر..." : "Search for restaurants, products, or stores..."}</span>
             </button>
             <button
             data-darik-location-entry-390f="true"
@@ -1965,7 +1965,7 @@ useMemo(() => {
               <small>{language === "ar" ? "تغيير الموقع" : "Change"}</small>
             </span>
           </button>
-            <a className={styles.headerCart390} href="#stores" aria-label={language === "ar" ? "ط§ظ„ط³ظ„ط©" : "Cart"}>
+            <a className={styles.headerCart390} href="#stores" aria-label={language === "ar" ? "السلة" : "Cart"}>
               <Icon name="shop" size={21} />
               <b>0</b>
             </a>
@@ -2363,12 +2363,12 @@ useMemo(() => {
           <div className={styles.marketHeadingRow}>
             <div>
               <span className={styles.sectionKicker}>{location ? t.deliveringTo : t.locationRequired}</span>
-              <h2>{language === "ar" ? "ط§ظ„ظ…طھط§ط¬ط± ط§ظ„ظ†ط´ط·ط© ط§ظ„ظ‚ط±ظٹط¨ط© ظ…ظ†ظƒ" : "Active stores near you"}</h2>
-              <p>{location ? (language === "ar" ? `ط§ط·ظ„ط¨ ظ…ظ† ط§ظ„ظ…طھط§ط¬ط± ط§ظ„ظ…ط­ظ„ظٹط© ط§ظ„طھظٹ طھظˆطµظ„ ط¥ظ„ظ‰ ${location.label}` : `Order from local stores delivering to ${location.label}`) : (language === "ar" ? "ط­ط¯ط¯ ظ…ظˆظ‚ط¹ظƒ ظ„طھط±طھظٹط¨ ط§ظ„ظ…طھط§ط¬ط± ط§ظ„طھظٹ طھظˆطµظ„ ط¥ظ„ظٹظƒ ط£ظˆظ„ط§ظ‹" : "Set your location to move stores that deliver to you to the top")}</p>
+              <h2>{language === "ar" ? "المتاجر النشطة القريبة منك" : "Active stores near you"}</h2>
+              <p>{location ? (language === "ar" ? `اطلب من المتاجر المحلية التي توصل إلى ${location.label}` : `Order from local stores delivering to ${location.label}`) : (language === "ar" ? "حدد موقعك لترتيب المتاجر التي توصل إليك أولاً" : "Set your location to move stores that deliver to you to the top")}</p>
             </div>
 
             <a className={styles.viewAllStores390} href="#stores">
-                {language === "ar" ? "ط¹ط±ط¶ ظƒظ„ ط§ظ„ظ…طھط§ط¬ط±" : "View all stores"} <Icon name="arrow" size={16} />
+                {language === "ar" ? "عرض كل المتاجر" : "View all stores"} <Icon name="arrow" size={16} />
               </a>
           </div>
 

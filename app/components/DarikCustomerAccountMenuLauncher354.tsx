@@ -36,7 +36,7 @@ const lineStyle354: CSSProperties = {
 };
 
 export default function DarikCustomerAccountMenuLauncher354({
-  title = "Customer account / ط­ط³ط§ط¨ ط§ظ„ط¹ظ…ظٹظ„",
+  title = "Customer account / حساب العميل",
 }: DarikCustomerAccountMenuLauncher354Props) {
   function openAccount354() {
     window.dispatchEvent(

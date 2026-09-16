@@ -4096,7 +4096,7 @@
   font-weight: 650;
 }
 
-.page[dir="rtl"] .categoryTabs246B > button:first-child::after { content: "ط·ع¾ط·آµط¸ظ¾ط·آ­ ط¸ئ’ط¸â€‍ ط¸â€¦ط·ع¾ط·آ¬ط·آ± ط¸â€ ط·آ´ط·آ·"; }
+.page[dir="rtl"] .categoryTabs246B > button:first-child::after { content: "طھطآµظپطآ­ ط¸ئ’ط¸â€‍ ط¸â€¦طھطآ¬ط·آ± ط¸â€ ط·آ´ط·آ·"; }
 
 .categoryTabs246B > button:nth-child(2) > span { background-image: url('/darik-cat-390-groceries.jpg') !important; }
 .categoryTabs246B > button:nth-child(3) > span { background-image: url('/darik-cat-390-food.jpg') !important; }
