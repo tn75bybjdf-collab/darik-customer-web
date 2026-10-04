@@ -6714,6 +6714,51 @@ export default function DarikDirectStorefrontPage() {
     !selectedPickup &&
     checkoutForm.destinationType === "room" &&
     destinationMode418 !== "gps";
+
+  useEffect(() => {
+    if (!storefront?.slug || !roomDeliverySelected418) {
+      if (!customerLocation117) {
+        setDeliveryMatch117(null);
+      }
+      return;
+    }
+
+    let cancelled418 = false;
+
+    void (async () => {
+      const result418 = await supabase.rpc(
+        "darik_direct_room_delivery_quote_v1",
+        { p_storefront_slug: storefront.slug }
+      );
+
+      if (cancelled418) return;
+
+      if (result418.error) {
+        console.warn(
+          "Darik room-delivery quote could not load:",
+          result418.error.message
+        );
+        setDeliveryMatch117(null);
+        return;
+      }
+
+      const quote418 =
+        result418.data && typeof result418.data === "object"
+          ? (result418.data as DarikNearbyStoreMatch117)
+          : null;
+
+      setDeliveryMatch117(quote418);
+    })();
+
+    return () => {
+      cancelled418 = true;
+    };
+  }, [
+    storefront?.slug,
+    roomDeliverySelected418,
+    customerLocation117,
+  ]);
+
   const matchedDeliveryFee117 = Number(
     deliveryMatch117?.delivery_fee ??
       storefront?.delivery_fee ??
