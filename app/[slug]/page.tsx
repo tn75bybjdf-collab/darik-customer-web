@@ -79,16 +79,6 @@ type Storefront = {
   card_enabled: boolean;
   delivery_enabled: boolean | null;
   pickup_enabled: boolean;
-  direct_destination_mode?: "gps" | "room" | "both" | null;
-  direct_room_delivery_property_type?:
-    | "hotel"
-    | "hospital"
-    | "resort"
-    | "dorm"
-    | "apartment"
-    | "other"
-    | null;
-  direct_room_delivery_property_name?: string | null;
   order_submission_mode: "phone" | "online" | "both";
   storefront_theme: "modern_market" | "boutique" | "auto_pro" | "minimal" | "premium" | "menu" | null;
   appearance_mode: "light" | "dark" | null;
@@ -273,8 +263,6 @@ type OnlineCheckoutForm = {
   deliveryNote: string;
   paymentMethod: "cash" | "card" | "cliq";
   fulfillmentMethod: "delivery" | "pickup";
-  destinationType: "gps" | "room";
-  roomNumber: string;
   latitude: number | null;
   longitude: number | null;
 };
@@ -3504,8 +3492,6 @@ export default function DarikDirectStorefrontPage() {
     deliveryNote: "",
     paymentMethod: "cash",
     fulfillmentMethod: "delivery",
-    destinationType: "gps",
-    roomNumber: "",
     latitude: null,
     longitude: null,
   });
@@ -3980,23 +3966,6 @@ export default function DarikDirectStorefrontPage() {
         (current.fulfillmentMethod === "delivery" && deliveryEnabled) ||
         (current.fulfillmentMethod === "pickup" && pickupEnabled);
 
-      const destinationMode =
-        storefront.direct_destination_mode === "room" ||
-        storefront.direct_destination_mode === "both"
-          ? storefront.direct_destination_mode
-          : "gps";
-
-      let qrRoom = "";
-      try {
-        qrRoom =
-          new URLSearchParams(window.location.search)
-            .get("room")
-            ?.trim()
-            .slice(0, 40) ?? "";
-      } catch {
-        qrRoom = "";
-      }
-
       return {
         ...current,
         paymentMethod: currentPaymentAllowed
@@ -4007,14 +3976,6 @@ export default function DarikDirectStorefrontPage() {
           : deliveryEnabled
             ? "delivery"
             : "pickup",
-        destinationType:
-          destinationMode === "room" ||
-          (destinationMode === "both" && Boolean(qrRoom))
-            ? "room"
-            : current.destinationType === "room" && destinationMode === "both"
-              ? "room"
-              : "gps",
-        roomNumber: qrRoom || current.roomNumber,
       };
     });
   }, [storefront]);
@@ -4917,22 +4878,6 @@ export default function DarikDirectStorefrontPage() {
 
     const storeDeliveryEnabled117 =
       storefront.delivery_enabled !== false;
-    const destinationMode117 =
-      storefront.direct_destination_mode === "room" ||
-      storefront.direct_destination_mode === "both"
-        ? storefront.direct_destination_mode
-        : "gps";
-
-    let qrRoom117 = "";
-    try {
-      qrRoom117 =
-        new URLSearchParams(window.location.search)
-          .get("room")
-          ?.trim()
-          .slice(0, 40) ?? "";
-    } catch {
-      qrRoom117 = "";
-    }
 
     if (!storeDeliveryEnabled117) {
       setLocationGateOpen117(false);
@@ -4947,32 +4892,6 @@ export default function DarikDirectStorefrontPage() {
         // No delivery location is required for pickup-only stores.
       }
 
-      return;
-    }
-
-    /*
-      Room-delivery stores never ask the customer for GPS.
-      A room QR (?room=417) also bypasses GPS when this store supports both.
-    */
-    if (
-      destinationMode117 === "room" ||
-      (destinationMode117 === "both" && Boolean(qrRoom117))
-    ) {
-      setLocationGateOpen117(false);
-      setLocationGateBusy117(false);
-      setLocationGateError117("");
-      setLocationPredictions117([]);
-      setPickupBrowse118(false);
-      setCustomerLocation117(null);
-      setDeliveryMatch117(null);
-      setCheckoutForm((current) => ({
-        ...current,
-        fulfillmentMethod: "delivery",
-        destinationType: "room",
-        roomNumber: qrRoom117 || current.roomNumber,
-        latitude: null,
-        longitude: null,
-      }));
       return;
     }
 
@@ -5078,7 +4997,6 @@ export default function DarikDirectStorefrontPage() {
     storefront?.id,
     storefront?.delivery_enabled,
     storefront?.pickup_enabled,
-    storefront?.direct_destination_mode,
     slug,
   ]);
 
@@ -6705,15 +6623,6 @@ export default function DarikDirectStorefrontPage() {
   const pickupEnabled = storefront?.pickup_enabled === true;
   const pickupOnly = Boolean(storefront && !deliveryEnabled && pickupEnabled);
   const selectedPickup = checkoutForm.fulfillmentMethod === "pickup";
-  const destinationMode418 =
-    storefront?.direct_destination_mode === "room" ||
-    storefront?.direct_destination_mode === "both"
-      ? storefront.direct_destination_mode
-      : "gps";
-  const roomDeliverySelected418 =
-    !selectedPickup &&
-    checkoutForm.destinationType === "room" &&
-    destinationMode418 !== "gps";
   const matchedDeliveryFee117 = Number(
     deliveryMatch117?.delivery_fee ??
       storefront?.delivery_fee ??
@@ -7376,16 +7285,6 @@ export default function DarikDirectStorefrontPage() {
     const buildingNumber = checkoutForm.buildingNumber.trim();
     const apartmentNumber = checkoutForm.apartmentNumber.trim();
     const deliveryNote = checkoutForm.deliveryNote.trim();
-    const destinationMode =
-      storefront.direct_destination_mode === "room" ||
-      storefront.direct_destination_mode === "both"
-        ? storefront.direct_destination_mode
-        : "gps";
-    const roomNumber = checkoutForm.roomNumber.trim();
-    const roomDelivery =
-      checkoutForm.fulfillmentMethod === "delivery" &&
-      checkoutForm.destinationType === "room" &&
-      destinationMode !== "gps";
 
     if (customerName.length < 2) {
       setCheckoutError("Enter your name. / أدخل اسمك.");
@@ -7399,20 +7298,9 @@ export default function DarikDirectStorefrontPage() {
 
     if (
       checkoutForm.fulfillmentMethod === "delivery" &&
-      !roomDelivery &&
       (checkoutForm.latitude == null || checkoutForm.longitude == null)
     ) {
       setCheckoutError("Use exact location before placing the delivery order. / حدد موقع التوصيل بدقة قبل إرسال الطلب.");
-      return;
-    }
-
-    if (roomDelivery && !roomNumber) {
-      setCheckoutError("Enter the room number. / أدخل رقم الغرفة.");
-      return;
-    }
-
-    if (roomNumber.length > 40) {
-      setCheckoutError("Room number is too long. / رقم الغرفة طويل جداً.");
       return;
     }
 
@@ -7467,11 +7355,7 @@ if (
           ? await uploadCliqReceipt()
           : null;
 
-      const result = await supabase.rpc(
-        roomDelivery
-          ? "darik_direct_place_online_order_v8"
-          : "darik_direct_place_online_order_v7",
-        {
+      const result = await supabase.rpc("darik_direct_place_online_order_v7", {
         p_storefront_slug: storefront.slug,
         p_customer_name: customerName,
         p_customer_phone: customerPhone,
@@ -7504,14 +7388,7 @@ if (
         p_building_number: buildingNumber || null,
         p_apartment_number: apartmentNumber || null,
         p_delivery_note: deliveryNote || null,
-        ...(roomDelivery
-          ? {
-              p_destination_type: "room",
-              p_room_number: roomNumber,
-            }
-          : {}),
-        }
-      );
+      });
 
       if (result.error) throw result.error;
 
@@ -7544,7 +7421,6 @@ if (
         buildingNumber: "",
         apartmentNumber: "",
         deliveryNote: "",
-        roomNumber: "",
         latitude: null,
         longitude: null,
       }));
@@ -8624,8 +8500,7 @@ function renderProductCard(product: Product) {
       {/* DARIK_LOCATION_FULL_INTERACTION_MODE_200 */}
       {locationGateOpen117 &&
       deliveryEnabled &&
-      !pickupOnly &&
-      destinationMode418 !== "room" ? (
+      !pickupOnly ? (
         <div
           className={styles.customerLocationGate117}
           data-darik-live-editor-interaction197="true"
@@ -8772,34 +8647,6 @@ function renderProductCard(product: Product) {
               >
                 {locationGateError117}
               </div>
-            ) : null}
-
-            {destinationMode418 === "both" ? (
-              <>
-                <div className={styles.customerLocationPickupBreak118}>
-                  <span>OR ROOM DELIVERY / أو التوصيل للغرفة</span>
-                </div>
-                <button
-                  type="button"
-                  className={styles.customerLocationPickupBrowse118}
-                  onClick={() => {
-                    setCheckoutForm((current) => ({
-                      ...current,
-                      fulfillmentMethod: "delivery",
-                      destinationType: "room",
-                      latitude: null,
-                      longitude: null,
-                    }));
-                    setCustomerLocation117(null);
-                    setDeliveryMatch117(null);
-                    setLocationGateOpen117(false);
-                    setLocationGateError117("");
-                  }}
-                >
-                  <strong>Deliver by room number / التوصيل برقم الغرفة</strong>
-                  <span>No location permission needed. Enter your room at checkout.</span>
-                </button>
-              </>
             ) : null}
 
                         <div
@@ -10954,11 +10801,7 @@ style={{
                               }
                             >
                               <strong>Delivery / التوصيل</strong>
-                              <small>
-                                {roomDeliverySelected418
-                                  ? "Delivered to your room / التوصيل إلى غرفتك"
-                                  : "Delivered to your exact location / التوصيل إلى موقعك المحدد"}
-                              </small>
+                              <small>Delivered to your exact location / التوصيل إلى موقعك المحدد</small>
                             </button>
                           ) : null}
                           {pickupEnabled ? (
@@ -11161,59 +11004,6 @@ style={{
                           </div>
                           <strong>{storefront.address_text || "Store address shown in store information / عنوان المتجر موجود في معلومات المتجر"}</strong>
                         </div>
-                      ) : roomDeliverySelected418 ? (
-                        <>
-                          <div className={styles.exactLocationBlock}>
-                            <div>
-                              <strong>Room delivery / التوصيل للغرفة</strong>
-                              <small>
-                                No GPS location is required. The property location is already configured.
-                                / لا نحتاج موقع GPS. موقع المكان محدد مسبقاً.
-                              </small>
-                            </div>
-                            <strong>
-                              {storefront.direct_room_delivery_property_name ||
-                                storefront.display_name}
-                            </strong>
-                          </div>
-
-                          {destinationMode418 === "both" ? (
-                            <div className={styles.paymentMethodSection}>
-                              <span>Delivery destination / وجهة التوصيل</span>
-                              <div className={styles.paymentMethodChoices}>
-                                <button type="button" className={styles.activePaymentMethod}>
-                                  <strong>Room number / رقم الغرفة</strong>
-                                  <small>No GPS needed / بدون GPS</small>
-                                </button>
-                                <button
-                                  type="button"
-                                  onClick={() => {
-                                    updateCheckoutField("destinationType", "gps");
-                                    setOnlineCheckoutOpen(false);
-                                    setLocationGateOpen117(true);
-                                  }}
-                                >
-                                  <strong>Exact location / موقع دقيق</strong>
-                                  <small>Use GPS or Google Maps / استخدم GPS أو خرائط جوجل</small>
-                                </button>
-                              </div>
-                            </div>
-                          ) : null}
-
-                          <div className={styles.addressDetailsGrid}>
-                            <label>
-                              Room number / رقم الغرفة <strong>Required / مطلوب</strong>
-                              <input
-                                value={checkoutForm.roomNumber}
-                                onChange={(event) =>
-                                  updateCheckoutField("roomNumber", event.target.value)
-                                }
-                                placeholder="Example: 417 / مثال: 417"
-                                autoComplete="off"
-                              />
-                            </label>
-                          </div>
-                        </>
                       ) : (
                         <>
                           <div className={styles.darikCheckoutLocation122}>
