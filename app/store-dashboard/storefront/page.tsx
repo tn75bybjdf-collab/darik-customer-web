@@ -82,6 +82,14 @@ type OperatingHours = Record<string, string>;
 
 type OrderSubmissionMode = "phone" | "online" | "both";
 type FulfillmentMode = "delivery" | "pickup";
+type DeliveryDestinationMode = "gps" | "room" | "both";
+type RoomDeliveryPropertyType =
+  | "hotel"
+  | "hospital"
+  | "resort"
+  | "dorm"
+  | "apartment"
+  | "other";
 // DARIK_DELIVERY_STAGES_DAYS_CUTOFF_163
 // DARIK_DELIVERY_DEFAULT_END_OF_DAY_CUTOFF_168
 // Untouched timing defaults to 23:59; retailer-selected earlier cutoffs remain supported.
@@ -279,6 +287,9 @@ type StorefrontForm = {
   estimatedDeliveryDays: string;
   deliveryCutoffTime: string;
   fulfillmentMode: FulfillmentMode;
+  destinationMode: DeliveryDestinationMode;
+  roomPropertyType: RoomDeliveryPropertyType;
+  roomPropertyName: string;
   orderSubmissionMode: OrderSubmissionMode;
   acceptCash: boolean;
   acceptCard: boolean;
@@ -443,6 +454,9 @@ type StorefrontSettings = {
   delivery_cutoff_time?: string | null;
   delivery_enabled: boolean | null;
   pickup_enabled: boolean | null;
+  direct_destination_mode?: DeliveryDestinationMode | null;
+  direct_room_delivery_property_type?: RoomDeliveryPropertyType | null;
+  direct_room_delivery_property_name?: string | null;
   order_submission_mode: OrderSubmissionMode;
   cash_on_delivery_enabled: boolean;
   card_enabled: boolean;
@@ -1448,6 +1462,9 @@ export default function DarikDirectStorefrontSettingsPage() {
     estimatedDeliveryDays: "0",
     deliveryCutoffTime: "23:59",
     fulfillmentMode: "delivery",
+    destinationMode: "gps",
+    roomPropertyType: "hotel",
+    roomPropertyName: "",
     orderSubmissionMode: "phone",
     acceptCash: true,
       acceptCard: false,
@@ -9965,6 +9982,14 @@ export default function DarikDirectStorefrontSettingsPage() {
         return true;
       }
 
+      if (
+        (setupForm.destinationMode === "room" ||
+          setupForm.destinationMode === "both") &&
+        setupForm.roomPropertyName.trim().length < 2
+      ) {
+        return false;
+      }
+
       const deliveryDays163 = Number(setupForm.estimatedDeliveryDays);
       const cutoff163 = String(setupForm.deliveryCutoffTime ?? "").trim();
 
@@ -10011,6 +10036,14 @@ export default function DarikDirectStorefrontSettingsPage() {
         return deliveryLocation112
           ? "Press Continue to configure delivery. / اضغط متابعة لإعداد التوصيل."
           : "Confirm the exact store location first. / أكد موقع المتجر أولاً.";
+      }
+
+      if (
+        (setupForm.destinationMode === "room" ||
+          setupForm.destinationMode === "both") &&
+        setupForm.roomPropertyName.trim().length < 2
+      ) {
+        return "Enter the hotel, hospital, or property name for room delivery. / أدخل اسم الفندق أو المستشفى أو المبنى للتوصيل للغرف.";
       }
 
       return "Choose a valid delivery promise, cutoff time, and at least one valid delivery zone. / اختر موعد توصيل ووقت إغلاق صالحين وأضف منطقة توصيل واحدة على الأقل.";
@@ -10457,6 +10490,21 @@ await saveStorefront(undefined, "manual");
                 loadedStorefront.pickup_enabled === true
                   ? "pickup"
                   : "delivery",
+              destinationMode:
+                loadedStorefront.direct_destination_mode === "room" ||
+                loadedStorefront.direct_destination_mode === "both"
+                  ? loadedStorefront.direct_destination_mode
+                  : "gps",
+              roomPropertyType:
+                loadedStorefront.direct_room_delivery_property_type === "hospital" ||
+                loadedStorefront.direct_room_delivery_property_type === "resort" ||
+                loadedStorefront.direct_room_delivery_property_type === "dorm" ||
+                loadedStorefront.direct_room_delivery_property_type === "apartment" ||
+                loadedStorefront.direct_room_delivery_property_type === "other"
+                  ? loadedStorefront.direct_room_delivery_property_type
+                  : "hotel",
+              roomPropertyName:
+                loadedStorefront.direct_room_delivery_property_name ?? "",
               orderSubmissionMode:
                 loadedStorefront.order_submission_mode ?? "phone",
               acceptCash: loadedStorefront.cash_on_delivery_enabled ?? true,
@@ -10515,6 +10563,9 @@ await saveStorefront(undefined, "manual");
     estimatedDeliveryDays: "0",
     deliveryCutoffTime: "23:59",
               fulfillmentMode: "delivery",
+              destinationMode: "gps",
+              roomPropertyType: "hotel",
+              roomPropertyName: "",
               orderSubmissionMode: "phone",
               acceptCash: true,
       acceptCard: false,
@@ -11105,6 +11156,20 @@ await saveStorefront(undefined, "manual");
       },
       delivery_enabled: setupForm.fulfillmentMode === "delivery",
       pickup_enabled: true,
+      direct_destination_mode:
+        setupForm.fulfillmentMode === "delivery"
+          ? setupForm.destinationMode
+          : "gps",
+      direct_room_delivery_property_type:
+        setupForm.fulfillmentMode === "delivery" &&
+        setupForm.destinationMode !== "gps"
+          ? setupForm.roomPropertyType
+          : null,
+      direct_room_delivery_property_name:
+        setupForm.fulfillmentMode === "delivery" &&
+        setupForm.destinationMode !== "gps"
+          ? setupForm.roomPropertyName.trim() || null
+          : null,
       delivery_fee:
         setupForm.fulfillmentMode === "delivery"
           ? Number(setupForm.deliveryFee || 0)
@@ -11224,6 +11289,20 @@ await saveStorefront(undefined, "manual");
         : null,
       delivery_enabled: setupForm.fulfillmentMode === "delivery",
       pickup_enabled: true,
+      direct_destination_mode:
+        setupForm.fulfillmentMode === "delivery"
+          ? setupForm.destinationMode
+          : "gps",
+      direct_room_delivery_property_type:
+        setupForm.fulfillmentMode === "delivery" &&
+        setupForm.destinationMode !== "gps"
+          ? setupForm.roomPropertyType
+          : null,
+      direct_room_delivery_property_name:
+        setupForm.fulfillmentMode === "delivery" &&
+        setupForm.destinationMode !== "gps"
+          ? setupForm.roomPropertyName.trim() || null
+          : null,
     };
 
     setStorefront(savedStorefront);
@@ -13416,6 +13495,121 @@ await saveStorefront(undefined, "manual");
 
                       {setupForm.fulfillmentMode === "delivery" ? (
                         <>
+                      <section className={designStyles.pickupOnlyChoice114}>
+                        <div className={designStyles.pickupOnlyChoiceCopy114}>
+                          <small>DELIVERY DESTINATION / وجهة التوصيل</small>
+                          <strong>How should customers identify where the order goes?</strong>
+                          <span>
+                            Room delivery skips customer GPS. It is built for hotels,
+                            hospitals, resorts, dorms, and other properties that deliver
+                            by room number.
+                          </span>
+                        </div>
+
+                        <div className={designStyles.pickupOnlyChoiceActions114}>
+                          <button
+                            type="button"
+                            aria-pressed={setupForm.destinationMode === "gps"}
+                            className={
+                              setupForm.destinationMode === "gps"
+                                ? designStyles.pickupOnlyChoiceSelected114
+                                : ""
+                            }
+                            onClick={() =>
+                              updateSetupField("destinationMode", "gps")
+                            }
+                          >
+                            <b>Exact location / موقع دقيق</b>
+                            <span>Customer chooses GPS / يحدد العميل الموقع</span>
+                          </button>
+
+                          <button
+                            type="button"
+                            aria-pressed={setupForm.destinationMode === "room"}
+                            className={
+                              setupForm.destinationMode === "room"
+                                ? designStyles.pickupOnlyChoiceSelected114
+                                : ""
+                            }
+                            onClick={() =>
+                              updateSetupField("destinationMode", "room")
+                            }
+                          >
+                            <b>Room number only / رقم الغرفة فقط</b>
+                            <span>No customer GPS prompt / بدون طلب موقع العميل</span>
+                          </button>
+
+                          <button
+                            type="button"
+                            aria-pressed={setupForm.destinationMode === "both"}
+                            className={
+                              setupForm.destinationMode === "both"
+                                ? designStyles.pickupOnlyChoiceSelected114
+                                : ""
+                            }
+                            onClick={() =>
+                              updateSetupField("destinationMode", "both")
+                            }
+                          >
+                            <b>Both / الاثنين</b>
+                            <span>Customer chooses GPS or room / العميل يختار</span>
+                          </button>
+                        </div>
+                      </section>
+
+                      {setupForm.destinationMode !== "gps" ? (
+                        <div className={designStyles.exactWizardGrid109V5}>
+                          <label>
+                            <span>Property type / نوع المكان</span>
+                            <select
+                              value={setupForm.roomPropertyType}
+                              onChange={(event) =>
+                                updateSetupField(
+                                  "roomPropertyType",
+                                  event.target.value as RoomDeliveryPropertyType
+                                )
+                              }
+                            >
+                              <option value="hotel">Hotel / فندق</option>
+                              <option value="hospital">Hospital / مستشفى</option>
+                              <option value="resort">Resort / منتجع</option>
+                              <option value="dorm">Dorm / سكن</option>
+                              <option value="apartment">Apartment building / مبنى شقق</option>
+                              <option value="other">Other / غير ذلك</option>
+                            </select>
+                          </label>
+
+                          <label>
+                            <span>Property name / اسم المكان</span>
+                            <input
+                              value={setupForm.roomPropertyName}
+                              onChange={(event) =>
+                                updateSetupField(
+                                  "roomPropertyName",
+                                  event.target.value
+                                )
+                              }
+                              placeholder="Example: Jabal Zaitoon Hospital"
+                            />
+                          </label>
+
+                          <label>
+                            <span>Room QR link format / صيغة رابط QR للغرفة</span>
+                            <input
+                              readOnly
+                              value={
+                                typeof window === "undefined"
+                                  ? ""
+                                  : `${window.location.origin}/${cleanSlug(
+                                      setupForm.slug
+                                    )}?room=ROOM_NUMBER`
+                              }
+                              onFocus={(event) => event.currentTarget.select()}
+                            />
+                          </label>
+                        </div>
+                      ) : null}
+
 <div className={designStyles.exactWizardOrderModes109V5}>
                         <button type="button" className={setupForm.orderSubmissionMode === "phone" ? designStyles.exactWizardSelected109V5 : ""} onClick={() => updateSetupField("orderSubmissionMode", "phone")}><strong>Phone / WhatsApp</strong><span>هاتف / واتساب</span></button>
                         <button type="button" className={setupForm.orderSubmissionMode === "online" ? designStyles.exactWizardSelected109V5 : ""} onClick={() => updateSetupField("orderSubmissionMode", "online")}><strong>Online orders</strong><span>طلبات إلكترونية</span></button>
