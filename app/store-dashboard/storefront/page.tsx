@@ -83,6 +83,7 @@ type OperatingHours = Record<string, string>;
 type OrderSubmissionMode = "phone" | "online" | "both";
 type FulfillmentMode = "delivery" | "pickup";
 type DeliveryDestinationMode = "gps" | "room" | "both";
+// DARIK_ROOM_DELIVERY_RELEASE_20261005
 type RoomDeliveryPropertyType =
   | "hotel"
   | "hospital"
