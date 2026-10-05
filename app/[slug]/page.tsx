@@ -10709,7 +10709,7 @@ style={{
                   cart.length > 0 &&
                   minimumReached &&
                   storefront.is_accepting_orders ? (
-                    {roomOnlyCheckout419 ? (
+                    roomOnlyCheckout419 ? (
                       <div className={styles.onlineCheckoutForm}>
                         <div className={styles.onlineCheckoutHeading}>
                           <div>
@@ -11732,7 +11732,7 @@ style={{
                                               {!placingOrder ? <Icon name="arrow" size={18} /> : null}                      
                                             </button>                      
                                           </div>                      
-                                          )}
+                                          )
                   ) : null}
 
                   {!storefront.is_accepting_orders ||
