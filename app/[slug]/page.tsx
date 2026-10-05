@@ -6715,6 +6715,11 @@ export default function DarikDirectStorefrontPage() {
     checkoutForm.destinationType === "room" &&
     destinationMode418 !== "gps";
 
+  // DARIK_ROOM_ONLY_ULTRA_SIMPLE_CHECKOUT_419
+  const roomOnlyCheckout419 =
+    !selectedPickup &&
+    storefront?.direct_destination_mode === "room";
+
   useEffect(() => {
     if (!storefront?.slug || !roomDeliverySelected418) {
       if (!customerLocation117) {
@@ -7405,6 +7410,105 @@ export default function DarikDirectStorefrontPage() {
 
     setCliqReceiptPath(receiptPath);
     return receiptPath;
+  }
+
+  async function placeRoomOnlyOrder419() {
+    if (window.location.pathname === "/_darik-private-store-preview") {
+      setCheckoutError(
+        "Private storefront preview only - checkout cannot submit a real order. / هذه معاينة خاصة للمتجر فقط، ولا يمكن إرسال طلب حقيقي."
+      );
+      return;
+    }
+    if (!storefront || placingOrder) return;
+
+    const customerName = checkoutForm.customerName.trim();
+    const roomOrArea = checkoutForm.roomNumber.trim();
+
+    if (customerName.length < 2) {
+      setCheckoutError("Enter your name. / أدخل اسمك.");
+      return;
+    }
+
+    if (!roomOrArea) {
+      setCheckoutError(
+        "Enter your room number or room name. / أدخل رقم الغرفة أو اسم المكان."
+      );
+      return;
+    }
+
+    if (roomOrArea.length > 80) {
+      setCheckoutError(
+        "Room number or room name is too long. / رقم الغرفة أو اسم المكان طويل جداً."
+      );
+      return;
+    }
+
+    setPlacingOrder(true);
+    setCheckoutError("");
+
+    try {
+      const result = await supabase.rpc("darik_direct_place_room_order_v1", {
+        p_storefront_slug: storefront.slug,
+        p_customer_name: customerName,
+        p_room_or_area: roomOrArea,
+        p_items: cart.map((line) => ({
+          product_id: line.productId,
+          quantity: line.quantity,
+          weight_quantity:
+            line.soldByWeight && line.weightStep
+              ? line.quantity * line.weightStep
+              : null,
+          weight_unit: line.soldByWeight
+            ? line.weightUnit || "kg"
+            : null,
+          color_variant_id: line.colorVariantId,
+          size_key: line.sizeKey,
+          restaurant_option_id: line.restaurantOptionId,
+          restaurant_modifier_selections: line.restaurantModifierSelections.map(
+            (selection364) => ({
+              group_id: selection364.groupId,
+              option_ids: selection364.optionIds,
+              option_quantities: selection364.optionQuantities,
+            })
+          ),
+        })),
+      });
+
+      if (result.error) throw result.error;
+
+      const response = result.data as {
+        order_number?: string;
+        total?: number | string;
+        payment_method?: "cash" | "card" | "cliq";
+        fulfillment_method?: "delivery" | "pickup";
+      } | null;
+
+      setOrderConfirmation({
+        orderNumber:
+          response?.order_number || "Order received / تم استلام الطلب",
+        total: Number(response?.total ?? orderTotal),
+        paymentMethod: response?.payment_method ?? "cash",
+        fulfillmentMethod: response?.fulfillment_method ?? "delivery",
+      });
+
+      setCart([]);
+      setOnlineCheckoutOpen(false);
+      setCheckoutForm((current) => ({
+        ...current,
+        customerName: "",
+        customerPhone: "",
+        buildingNumber: "",
+        apartmentNumber: "",
+        deliveryNote: "",
+        roomNumber: "",
+        latitude: null,
+        longitude: null,
+      }));
+    } catch (error) {
+      setCheckoutError(darikCheckoutErrorMessage122(error));
+    } finally {
+      setPlacingOrder(false);
+    }
   }
 
   async function placeOnlineOrder() {
@@ -10406,7 +10510,9 @@ style={{
                       : "The store received your pickup order and will contact you when it is ready to collect. / استلم المتجر طلب الاستلام وسيتواصل معك عندما يصبح جاهزاً."
                     : orderConfirmation.paymentMethod === "cliq"
                       ? "Your CliQ receipt was submitted for store verification. The store will contact you to confirm delivery. / تم إرسال إيصال CliQ للتحقق. سيتواصل معك المتجر لتأكيد التوصيل."
-                      : "The store received your cash-on-delivery order and will contact you to confirm delivery. / استلم المتجر طلب الدفع عند التوصيل وسيتواصل معك لتأكيد التوصيل."}
+                      : roomOnlyCheckout419
+                        ? "Your order was sent to the cafeteria and will be delivered to the room or area you entered. / تم إرسال طلبك إلى الكافتيريا وسيتم توصيله إلى الغرفة أو المكان الذي أدخلته."
+                        : "The store received your cash-on-delivery order and will contact you to confirm delivery. / استلم المتجر طلب الدفع عند التوصيل وسيتواصل معك لتأكيد التوصيل."}
                 </small>
                 <button
                   onClick={() => {
@@ -10603,953 +10709,1030 @@ style={{
                   cart.length > 0 &&
                   minimumReached &&
                   storefront.is_accepting_orders ? (
-                    <div className={styles.onlineCheckoutForm}>
-                {/* Second guest sign-in confirmation removed by 373. */}
-              {!darikIsBuilderPreview120() ? (
-                <section
-                  className={styles.darikCheckoutIdentity121}
-                  data-darik-customer-account="checkout"
-                >
-                  <div className={styles.darikCheckoutIdentityHeader121}>
-                    <div>
-                      <span>حساب داريك / Darik account</span>
-                      <strong>One account. Every Darik store. / حساب واحد لكل متاجر داريك.</strong>
-                    </div>
-                    {darikCustomerProfile121 ? (
-                      <span className={styles.darikAccountBadge121}>SIGNED IN / مسجل الدخول</span>
-                    ) : darikCheckoutIdentity121 === "guest" ? (
-                      <span className={styles.darikGuestBadge121}>GUEST / ضيف</span>
-                    ) : null}
-                  </div>
-
-                  <p className={styles.darikCheckoutIdentityCopy121}>
-                    Create one Darik customer account and use the same login on any
-                    Darik-powered retailer storefront. Or place this order as a guest.
-                  </p>
-
-                  {darikCustomerProfile121 ? (
-                    <div className={styles.darikAccountSigned121}>
-                      <div>
-                        <small>Signed in as / مسجل الدخول</small>
-                        <strong>
-                          {darikCustomerProfile121.full_name ||
-                            darikCustomerUser121?.email ||
-                            "Darik customer"}
-                        </strong>
-                        <span>{darikCustomerUser121?.email || ""}</span>
-                      </div>
-                      <div className={styles.darikAccountSignedActions121}>
-                        <span>
-                          This order will be saved to your Darik account / سيتم حفظ الطلب
-                          في حساب داريك
-                        </span>
-                        <button
-                          type="button"
-                          onClick={() => void signOutDarikCustomer121()}
-                          disabled={darikAuthBusy121}
-                        >
-                          Sign out & use guest / تسجيل الخروج والمتابعة كضيف
-                        </button>
-                      </div>
-                    </div>
-                  ) : darikCheckoutIdentity121 === "choice" ? (
-                    <div className={styles.darikAccountChoiceActions121}>
-                      <button
-                        type="button"
-                        className={styles.darikAccountPrimary121}
-                        onClick={() => {
-                          setDarikAuthMessage121("");
-                          setDarikCheckoutIdentity121("login");
-                        }}
-                      >
-                        Sign in / تسجيل الدخول
-                      </button>
-                      <button
-                        type="button"
-                        className={styles.darikAccountSecondary121}
-                        onClick={() => {
-                          setDarikAuthMessage121("");
-                          setDarikSignupStep121("details");
-                          setDarikCheckoutIdentity121("signup");
-                        }}
-                      >
-                        Create Darik account / إنشاء حساب داريك
-                      </button>
-                      <button
-                        type="button"
-                        className={styles.darikAccountGuest121}
-                        onClick={() => void chooseDarikGuestCheckout121()}
-                      >
-                        Continue as guest / المتابعة كضيف
-                      </button>
-                    </div>
-                  ) : darikCheckoutIdentity121 === "guest" ? (
-                    <div className={styles.darikAccountGuestState121}>
-                      <div>
-                        <strong>Guest checkout / طلب كضيف</strong>
-                        <span>
-                          No Darik account required. This order will use the name and
-                          phone entered below.
-                        </span>
-                      </div>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setDarikAuthMessage121("");
-                          setDarikCheckoutIdentity121("choice");
-                        }}
-                      >
-                        Use a Darik account instead / استخدم حساب داريك بدلاً من ذلك
-                      </button>
-                    </div>
-                  ) : darikCheckoutIdentity121 === "login" ? (
-                    <div className={styles.darikAccountForm121}>
-                      <div className={styles.darikAccountFormHeading121}>
-                        <strong>Sign in to Darik / تسجيل الدخول إلى داريك</strong>
-                        <span>Your login works across Darik-powered stores. / تسجيل الدخول يعمل في جميع متاجر داريك.</span>
-                      </div>
-                      {darikNonCustomerSession121 ? (
-                        <p className={styles.darikAccountSessionNotice121}>
-                          Another Darik staff/retailer session is active in this browser.
-                          Signing in here will switch this browser to your customer account.
-                        </p>
-                      ) : null}
-                      <label>
-                        Email / البريد الإلكتروني
-                        <input
-                          type="email"
-                          value={darikLoginEmail121}
-                          onChange={(event) => setDarikLoginEmail121(event.target.value)}
-                          placeholder="you@example.com"
-                          autoComplete="email"
-                        />
-                      </label>
-                      <label>
-                        Password / كلمة المرور
-                        <input
-                          type="password"
-                          value={darikLoginPassword121}
-                          onChange={(event) => setDarikLoginPassword121(event.target.value)}
-                          placeholder="Your Darik password / كلمة مرور داريك"
-                          autoComplete="current-password"
-                        />
-                      </label>
-                      <div className={styles.darikAccountFormActions121}>
-                        <button
-                          type="button"
-                          className={styles.darikAccountPrimary121}
-                          onClick={() => void signInDarikCustomer121()}
-                          disabled={darikAuthBusy121}
-                        >
-                          {darikAuthBusy121 ? "Signing in... / جارٍ تسجيل الدخول..." : "Sign in / تسجيل الدخول"}
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => setDarikCheckoutIdentity121("choice")}
-                          disabled={darikAuthBusy121}
-                        >
-                          Back / رجوع
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => void chooseDarikGuestCheckout121()}
-                          disabled={darikAuthBusy121}
-                        >
-                          Continue as guest / المتابعة كضيف
-                        </button>
-                      </div>
-                    </div>
-                  ) : (
-                    <div className={styles.darikAccountForm121}>
-                      <div className={styles.darikAccountFormHeading121}>
-                        <strong>Create your Darik account / أنشئ حساب داريك</strong>
-                        <span>
-                          Use this same email and password later at any Darik store. / استخدم نفس البريد وكلمة المرور لاحقاً في أي متجر داريك.
-                        </span>
-                      </div>
-
-                      {darikSignupStep121 === "details" ? (
-                        <div className={styles.darikAccountFormGrid121}>
-                          <label>
-                            First name / الاسم الأول
-                            <input
-                              value={darikSignupFirstName173}
-                              onChange={(event) =>
-                                setDarikSignupFirstName173(event.target.value)
-                              }
-                              placeholder="First name / الاسم الأول"
-                              autoComplete="given-name"
-                            />
-                          </label>
-                          <label>
-                            Last name / اسم العائلة
-                            <input
-                              value={darikSignupLastName173}
-                              onChange={(event) =>
-                                setDarikSignupLastName173(event.target.value)
-                              }
-                              placeholder="Last name / اسم العائلة"
-                              autoComplete="family-name"
-                            />
-                          </label>
-                          <label>
-                            Email / البريد الإلكتروني
-                            <input
-                              type="email"
-                              value={darikSignupEmail121}
-                              onChange={(event) =>
-                                setDarikSignupEmail121(event.target.value)
-                              }
-                              placeholder="you@example.com"
-                              autoComplete="email"
-                            />
-                          </label>
-                          <label>
-                            Confirm email / تأكيد البريد الإلكتروني
-                            <input
-                              type="email"
-                              value={darikSignupEmailConfirm173}
-                              onChange={(event) =>
-                                setDarikSignupEmailConfirm173(event.target.value)
-                              }
-                              placeholder="Repeat email / أعد إدخال البريد"
-                              autoComplete="off"
-                            />
-                          </label>
-                          <label>
-                            Phone / رقم الهاتف
-                            <input
-                              type="tel"
-                              value={darikSignupPhone121}
-                              onChange={(event) =>
-                                setDarikSignupPhone121(event.target.value)
-                              }
-                              placeholder="07XXXXXXXX"
-                              autoComplete="tel"
-                            />
-                          </label>
-                          <label>
-                            Confirm phone / تأكيد رقم الهاتف
-                            <input
-                              type="tel"
-                              value={darikSignupPhoneConfirm173}
-                              onChange={(event) =>
-                                setDarikSignupPhoneConfirm173(event.target.value)
-                              }
-                              placeholder="Repeat phone / أعد إدخال الهاتف"
-                              autoComplete="off"
-                            />
-                          </label>
-                          <label>
-                            Password / كلمة المرور
-                            <input
-                              type="password"
-                              value={darikSignupPassword121}
-                              onChange={(event) =>
-                                setDarikSignupPassword121(event.target.value)
-                              }
-                              placeholder="8+ chars, capital, number, special / 8+ أحرف، حرف كبير، رقم ورمز"
-                              autoComplete="new-password"
-                            />
-                          </label>
-                          <label>
-                            Confirm password / تأكيد كلمة المرور
-                            <input
-                              type="password"
-                              value={darikSignupPasswordConfirm121}
-                              onChange={(event) =>
-                                setDarikSignupPasswordConfirm121(event.target.value)
-                              }
-                              placeholder="Repeat password / أعد إدخال كلمة المرور"
-                              autoComplete="new-password"
-                            />
-                          </label>
-                        </div>
-                      ) : null}
-
-                      {darikSignupStep121 === "email_code" ? (
-                        <div className={styles.darikAccountCode121}>
-                          <span>Email confirmation / تأكيد البريد</span>
-                          <strong>{darikSignupEmail121.trim().toLowerCase()}</strong>
-                          <input
-                            inputMode="numeric"
-                            value={darikSignupEmailCode121}
-                            onChange={(event) =>
-                              setDarikSignupEmailCode121(event.target.value)
-                            }
-                            placeholder="Email code / رمز البريد"
-                            autoComplete="one-time-code"
-                          />
-                        </div>
-                      ) : null}
-
-                      {darikSignupStep121 === "phone_code" ? (
-                        <div className={styles.darikAccountCode121}>
-                          <span>Phone confirmation / تأكيد الهاتف</span>
-                          <strong>
-                            {normalizeDarikCustomerPhone121(darikSignupPhone121)}
-                          </strong>
-                          <input
-                            inputMode="numeric"
-                            value={darikSignupPhoneCode121}
-                            onChange={(event) =>
-                              setDarikSignupPhoneCode121(event.target.value)
-                            }
-                            placeholder="SMS code / رمز SMS"
-                            autoComplete="one-time-code"
-                          />
-                        </div>
-                      ) : null}
-
-                      <div className={styles.darikAccountFormActions121}>
-                        {darikSignupStep121 === "details" ? (
+                    {roomOnlyCheckout419 ? (
+                      <div className={styles.onlineCheckoutForm}>
+                        <div className={styles.onlineCheckoutHeading}>
+                          <div>
+                            <span>Quick checkout / طلب سريع</span>
+                            <h3>Where should we bring it? / وين نوصله؟</h3>
+                          </div>
                           <button
                             type="button"
-                            className={styles.darikAccountPrimary121}
-                            onClick={() => void startDarikCustomerSignup121()}
-                            disabled={darikAuthBusy121}
-                          >
-                            {darikAuthBusy121
-                              ? "Creating... / جارٍ إنشاء الحساب..."
-                              : "Create Darik account / إنشاء الحساب"}
-                          </button>
-                        ) : darikSignupStep121 === "email_code" ? (
-                          <button
-                            type="button"
-                            className={styles.darikAccountPrimary121}
-                            onClick={() => void confirmDarikSignupEmail121()}
-                            disabled={darikAuthBusy121}
-                          >
-                            {darikAuthBusy121
-                              ? "Confirming... / جارٍ التأكيد..."
-                              : "Confirm email & send SMS / تأكيد البريد وإرسال رسالة SMS"}
-                          </button>
-                        ) : (
-                          <button
-                            type="button"
-                            className={styles.darikAccountPrimary121}
-                            onClick={() => void confirmDarikSignupPhone121()}
-                            disabled={darikAuthBusy121}
-                          >
-                            {darikAuthBusy121
-                              ? "Confirming... / جارٍ التأكيد..."
-                              : "Confirm phone & finish account / تأكيد الهاتف وإكمال الحساب"}
-                          </button>
-                        )}
-
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setDarikAuthMessage121("");
-                            setDarikSignupStep121("details");
-                            setDarikCheckoutIdentity121("choice");
-                          }}
-                          disabled={darikAuthBusy121}
-                        >
-                          Back / رجوع
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => void chooseDarikGuestCheckout121()}
-                          disabled={darikAuthBusy121}
-                        >
-                          Continue as guest / المتابعة كضيف
-                        </button>
-                      </div>
-                    </div>
-                  )}
-
-                  {darikAuthMessage121 ? (
-                    <p className={styles.darikAccountStatus121} role="status">
-                      {darikAuthMessage121}
-                    </p>
-                  ) : null}
-                </section>
-              ) : null}
-
-                      <div className={styles.onlineCheckoutHeading}>
-                        <div>
-                          <span>Online order / طلب أونلاين</span>
-                          <h3>{selectedPickup ? "Pickup details / تفاصيل الاستلام" : "Delivery details / تفاصيل التوصيل"}</h3>
-                        </div>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setOnlineCheckoutOpen(false);
-                            setCheckoutError("");
-                          }}
-                        >
-                          Cancel / إلغاء
-                        </button>
-                      </div>
-
-                      <div className={styles.paymentMethodSection}>
-                        <span>Fulfillment method / طريقة الاستلام</span>
-                        <div className={styles.paymentMethodChoices}>
-                          {deliveryEnabled ? (
-                            <button
-                              type="button"
-                              className={
-                                checkoutForm.fulfillmentMethod === "delivery"
-                                  ? styles.activePaymentMethod
-                                  : ""
-                              }
-                              onClick={() =>
-                                updateCheckoutField("fulfillmentMethod", "delivery")
-                              }
-                            >
-                              <strong>Delivery / التوصيل</strong>
-                              <small>
-                                {roomDeliverySelected418
-                                  ? "Delivered to your room / التوصيل إلى غرفتك"
-                                  : "Delivered to your exact location / التوصيل إلى موقعك المحدد"}
-                              </small>
-                            </button>
-                          ) : null}
-                          {pickupEnabled ? (
-                            <button
-                              type="button"
-                              className={
-                                checkoutForm.fulfillmentMethod === "pickup"
-                                  ? styles.activePaymentMethod
-                                  : ""
-                              }
-                              onClick={() =>
-                                updateCheckoutField("fulfillmentMethod", "pickup")
-                              }
-                            >
-                              <strong>Local pickup / استلام من المتجر</strong>
-                              <small>Collect from the store / الاستلام من المتجر</small>
-                            </button>
-                          ) : null}
-                        </div>
-                      </div>
-
-                      <div className={styles.paymentMethodSection}>
-                        <span>Payment method / طريقة الدفع</span>
-                        <div className={styles.paymentMethodChoices}>
-                          {storefront.cash_on_delivery_enabled ? (
-                            <button
-                              type="button"
-                              className={
-                                checkoutForm.paymentMethod === "cash"
-                                  ? styles.activePaymentMethod
-                                  : ""
-                              }
-                              onClick={() =>
-                                updateCheckoutField("paymentMethod", "cash")
-                              }
-                            >
-                              <strong>Cash / نقداً</strong>
-                              <small>{selectedPickup ? "Pay at pickup / الدفع عند الاستلام" : "Pay on delivery / الدفع عند التوصيل"}</small>
-                            </button>
-                          ) : null}
-
-                          {storefront.cliq_enabled ? (
-                            <button
-                              type="button"
-                              className={
-                                checkoutForm.paymentMethod === "cliq"
-                                  ? styles.activePaymentMethod
-                                  : ""
-                              }
-                              onClick={() =>
-                                updateCheckoutField("paymentMethod", "cliq")
-                              }
-                            >
-                              <strong>CliQ</strong>
-                              <small>Transfer before submitting / حوّل قبل إرسال الطلب</small>
-                            </button>
-                          ) : null}
-                        </div>
-<div className={styles.paymentMethodChoices}>
-                          {storefront.card_enabled ? (
-                            <button
-                              type="button"
-                              className={
-                                checkoutForm.paymentMethod === "card"
-                                  ? styles.activePaymentMethod
-                                  : ""
-                              }
-                              onClick={() =>
-                                updateCheckoutField("paymentMethod", "card")
-                              }
-                            >
-                              <strong>Debit / Credit Card / بطاقة خصم أو ائتمان</strong>
-                              <small>{selectedPickup ? "Pay by card at pickup / الدفع بالبطاقة عند الاستلام" : "Pay on the driver's card machine / الدفع بجهاز البطاقة عند التوصيل"}</small>
-                            </button>
-                          ) : null}
-
-                          {storefront.cliq_enabled ? (
-                            <button
-                              type="button"
-                              className={
-                                checkoutForm.paymentMethod === "cliq"
-                                  ? styles.activePaymentMethod
-                                  : ""
-                              }
-                              onClick={() =>
-                                updateCheckoutField("paymentMethod", "cliq")
-                              }
-                            >
-                              <strong>CliQ</strong>
-                              <small>Transfer before submitting / حوّل قبل إرسال الطلب</small>
-                            </button>
-                          ) : null}
-                        </div>
-
-        {styles.paymentMethod === "card" ? (
-          <div style={{
-            marginTop: 10,
-            padding: "12px 14px",
-            borderRadius: 14,
-            border: "1px solid #bbf7d0",
-            background: "#f0fdf4",
-            color: "#14532d",
-            fontWeight: 700,
-            lineHeight: 1.45
-          }}>
-            No card information is entered online. Payment is made on the store's wireless card machine at pickup or delivery.
-            <br />
-            <span dir="rtl">لا يتم إدخال أي معلومات للبطاقة أونلاين. يتم الدفع بجهاز البطاقة اللاسلكي الخاص بالمتجر عند الاستلام أو التوصيل.</span>
-          </div>
-        ) : null}
-</div>
-
-                      {checkoutForm.paymentMethod === "cliq" ? (
-                        <div className={styles.cliqPaymentPanel}>
-                          <span>Send exactly {money(orderTotal)} by CliQ</span>
-                          <div>
-                            <small>Account name / اسم الحساب</small>
-                            <strong>
-                              {storefront.cliq_account_name ||
-                                storefront.display_name}
-                            </strong>
-                          </div>
-                          <div>
-                            <small>CliQ alias / mobile / اسم CliQ أو رقم الهاتف</small>
-                            <strong>
-                              {storefront.cliq_payment_identifier}
-                            </strong>
-                          </div>
-                          <label className={styles.receiptUploadField}>
-                            CliQ receipt image / صورة إيصال CliQ <strong>Required / مطلوب</strong>
-                            <input
-                              type="file"
-                              accept="image/jpeg,image/png,image/webp"
-                              onChange={(event) =>
-                                selectCliqReceipt(event.target.files?.[0] ?? null)
-                              }
-                            />
-                          </label>
-                          {cliqReceiptPreview ? (
-                            <div className={styles.receiptPreview}>
-                              <img src={cliqReceiptPreview} alt="CliQ receipt preview" />
-                              <div>
-                                <strong>Receipt ready / الإيصال جاهز</strong>
-                                <small>{cliqReceiptFile?.name}</small>
-                                <button
-                                  type="button"
-                                  onClick={() => selectCliqReceipt(null)}
-                                >
-                                  Remove receipt / حذف الإيصال
-                                </button>
-                              </div>
-                            </div>
-                          ) : (
-                            <p className={styles.receiptRequirement}>
-                              Upload the transfer receipt before submitting. A
-                              reference number is not required.
-                            </p>
-                          )}
-                          <p>
-                            The store will review the receipt before preparing
-                            the order.
-                          </p>
-                        </div>
-                      ) : null}
-
-                      <label>
-                        Name / الاسم
-                        <input
-                          value={checkoutForm.customerName}
-                          onChange={(event) =>
-                            updateCheckoutField(
-                              "customerName",
-                              event.target.value
-                            )
-                          }
-                          placeholder="Your full name / الاسم الكامل"
-                        />
-                      </label>
-
-                      <label>
-                        Phone / رقم الهاتف
-                        <input
-                          type="tel"
-                          value={checkoutForm.customerPhone}
-                          onChange={(event) =>
-                            updateCheckoutField(
-                              "customerPhone",
-                              event.target.value
-                            )
-                          }
-                          placeholder="07XXXXXXXX"
-                        />
-                      </label>
-
-                      {selectedPickup ? (
-                        <div className={styles.exactLocationBlock}>
-                          <div>
-                            <strong>Local pickup only / استلام من المتجر فقط</strong>
-                            <small>Collect your order from the store address after confirmation. / استلم طلبك من عنوان المتجر بعد التأكيد.</small>
-                          </div>
-                          <strong>{storefront.address_text || "Store address shown in store information / عنوان المتجر موجود في معلومات المتجر"}</strong>
-                        </div>
-                      ) : roomDeliverySelected418 ? (
-                        <>
-                          <div className={styles.exactLocationBlock}>
-                            <div>
-                              <strong>Room delivery / التوصيل للغرفة</strong>
-                              <small>
-                                No GPS location is required. The property location is already configured.
-                                / لا نحتاج موقع GPS. موقع المكان محدد مسبقاً.
-                              </small>
-                            </div>
-                            <strong>
-                              {storefront.direct_room_delivery_property_name ||
-                                storefront.display_name}
-                            </strong>
-                          </div>
-
-                          {destinationMode418 === "both" ? (
-                            <div className={styles.paymentMethodSection}>
-                              <span>Delivery destination / وجهة التوصيل</span>
-                              <div className={styles.paymentMethodChoices}>
-                                <button type="button" className={styles.activePaymentMethod}>
-                                  <strong>Room number / رقم الغرفة</strong>
-                                  <small>No GPS needed / بدون GPS</small>
-                                </button>
-                                <button
-                                  type="button"
-                                  onClick={() => {
-                                    updateCheckoutField("destinationType", "gps");
-                                    setOnlineCheckoutOpen(false);
-                                    setLocationGateOpen117(true);
-                                  }}
-                                >
-                                  <strong>Exact location / موقع دقيق</strong>
-                                  <small>Use GPS or Google Maps / استخدم GPS أو خرائط جوجل</small>
-                                </button>
-                              </div>
-                            </div>
-                          ) : null}
-
-                          <div className={styles.addressDetailsGrid}>
-                            <label>
-                              Room number / رقم الغرفة <strong>Required / مطلوب</strong>
-                              <input
-                                value={checkoutForm.roomNumber}
-                                onChange={(event) =>
-                                  updateCheckoutField("roomNumber", event.target.value)
-                                }
-                                placeholder="Example: 417 / مثال: 417"
-                                autoComplete="off"
-                              />
-                            </label>
-                          </div>
-                        </>
-                      ) : (
-                        <>
-                          <div className={styles.darikCheckoutLocation122}>
-                    <div className={styles.darikCheckoutLocationHeading122}>
-                      <div>
-                        <strong>
-                          Delivery location / موقع التوصيل
-                        </strong>
-                        <small>
-                          Use your location or search Google, then confirm the pin.
-                          / استخدم موقعك أو ابحث في جوجل ثم أكد العلامة.
-                        </small>
-                      </div>
-                      {checkoutLocationConfirmed122 ? (
-                        <span className={styles.darikCheckoutLocationConfirmed122}>
-                          Confirmed / مؤكد
-                        </span>
-                      ) : null}
-                    </div>
-
-                    <div className={styles.darikCheckoutLocationActions122}>
-                      <button
-                        type="button"
-                        className={styles.darikCheckoutGps122}
-                        onClick={useCheckoutCurrentLocation122}
-                        disabled={
-                          checkoutLocationBusy122 ||
-                          checkoutLocationSearchBusy122
-                        }
-                      >
-                        {checkoutLocationBusy122
-                          ? "Locating… / جاري تحديد الموقع…"
-                          : "Use current location / استخدم موقعي الحالي"}
-                      </button>
-
-                      <div className={styles.darikCheckoutSearchRow122}>
-                        <input
-                          value={checkoutLocationQuery122}
-                          onChange={(event) =>
-                            setCheckoutLocationQuery122(
-                              event.target.value
-                            )
-                          }
-                          onKeyDown={(event) => {
-                            if (event.key === "Enter") {
-                              event.preventDefault();
-                              void searchCheckoutLocation122();
-                            }
-                          }}
-                          placeholder="Search Google Maps / ابحث في خرائط جوجل"
-                          aria-label="Search Google Maps for delivery location"
-                        />
-                        <button
-                          type="button"
-                          onClick={() =>
-                            void searchCheckoutLocation122()
-                          }
-                          disabled={
-                            checkoutLocationSearchBusy122 ||
-                            checkoutLocationBusy122
-                          }
-                        >
-                          {checkoutLocationSearchBusy122
-                            ? "Searching…"
-                            : "Search / بحث"}
-                        </button>
-                      </div>
-                    </div>
-
-                    {checkoutLocationPredictions122.length ? (
-                      <div className={styles.darikCheckoutPredictions122}>
-                        {checkoutLocationPredictions122.map(
-                          (prediction) => (
-                            <button
-                              type="button"
-                              key={prediction.place_id}
-                              onClick={() =>
-                                void chooseCheckoutPlace122(
-                                  prediction
-                                )
-                              }
-                            >
-                              <strong>
-                                {prediction.structured_formatting
-                                  ?.main_text ||
-                                  prediction.description}
-                              </strong>
-                              <span>
-                                {prediction.structured_formatting
-                                  ?.secondary_text ||
-                                  prediction.description}
-                              </span>
-                            </button>
-                          )
-                        )}
-                      </div>
-                    ) : null}
-
-                    {checkoutLocationDraft122 ? (
-                      <div className={styles.darikCheckoutMapSection122}>
-                        <div
-                          className={styles.darikCheckoutMap122}
-                          onPointerDown={startCheckoutMapPinMove122}
-                          onPointerMove={moveCheckoutMapPin122}
-                          onPointerUp={(event) =>
-                            void finishCheckoutMapPinMove122(
-                              event
-                            )
-                          }
-                          onPointerCancel={
-                            cancelCheckoutMapPinMove122
-                          }
-                          role="application"
-                          aria-label="Google map delivery pin. Tap or drag to adjust the delivery location."
-                        >
-                          <iframe
-                            key={`${checkoutLocationDraft122.latitude.toFixed(
-                              6
-                            )}:${checkoutLocationDraft122.longitude.toFixed(
-                              6
-                            )}`}
-                            src={darikCheckoutMapUrl122(
-                              checkoutLocationDraft122
-                            )}
-                            title="Delivery location Google Map"
-                            loading="lazy"
-                            referrerPolicy="no-referrer-when-downgrade"
-                          />
-                          <div
-                            className={styles.darikCheckoutMapPin122}
-                            style={{
-                              transform: `translate(calc(-50% + ${checkoutMapDragOffset122.x}px), calc(-100% + ${checkoutMapDragOffset122.y}px))`,
+                            onClick={() => {
+                              setOnlineCheckoutOpen(false);
+                              setCheckoutError("");
                             }}
-                            aria-hidden="true"
                           >
-                            <span />
-                          </div>
-                          <div
-                            className={styles.darikCheckoutMapCrosshair122}
-                            aria-hidden="true"
+                            Cancel / إلغاء
+                          </button>
+                        </div>
+
+                        <label>
+                          Name / الاسم
+                          <input
+                            autoFocus
+                            value={checkoutForm.customerName}
+                            onChange={(event) =>
+                              updateCheckoutField(
+                                "customerName",
+                                event.target.value
+                              )
+                            }
+                            placeholder="Your name / اسمك"
+                            autoComplete="name"
                           />
-                        </div>
+                        </label>
 
-                        <p className={styles.darikCheckoutMapHelp122}>
-                          Tap the exact spot or drag the pin to correct it.
-                          / اضغط على المكان الصحيح أو حرّك العلامة لتعديل الموقع.
-                        </p>
+                        <label>
+                          Room number or room name / رقم الغرفة أو اسم المكان
+                          <input
+                            value={checkoutForm.roomNumber}
+                            onChange={(event) =>
+                              updateCheckoutField(
+                                "roomNumber",
+                                event.target.value
+                              )
+                            }
+                            onKeyDown={(event) => {
+                              if (event.key === "Enter") {
+                                event.preventDefault();
+                                void placeRoomOnlyOrder419();
+                              }
+                            }}
+                            placeholder="Example: 204 or Pharmacy / مثال: 204 أو الصيدلية"
+                            autoComplete="off"
+                          />
+                        </label>
 
-                        <div className={styles.darikCheckoutLocationSummary122}>
-                          <strong>
-                            {checkoutLocationDraft122.label}
-                          </strong>
-                          <span>
-                            {checkoutLocationDraft122.latitude.toFixed(
-                              6
-                            )}
-                            ,{" "}
-                            {checkoutLocationDraft122.longitude.toFixed(
-                              6
-                            )}
-                          </span>
-                          {checkoutLocationConfirmed122 &&
-                          deliveryMatch117 ? (
-                            <small>
-                              Delivery fee / رسوم التوصيل:{" "}
-                              {specialDeliveryFree185
-                                ? "Free / مجاناً"
-                                : money(deliveryFee)}
-                              {" · "}
-                              Minimum / الحد الأدنى:{" "}
-                              {money(
-                                Number(
-                                  deliveryMatch117.minimum_order ?? 0
-                                )
-                              )}
-                              {specialOfferAtLocation185 ? (
-                                <>
-                                  {" · "}
-                                  Special Zone / المنطقة الخاصة:{" "}
-                                  {specialDeliveryFree185
-                                    ? "Unlocked / مفعّل"
-                                    : `${money(specialDeliveryRemaining185)} qualifying to go / متبقي لبلوغ الحد المؤهل`}
-                                </>
-                              ) : null}
-                            </small>
-                          ) : null}
-                        </div>
+                        {checkoutError ? (
+                          <p className={styles.checkoutError}>{checkoutError}</p>
+                        ) : null}
 
                         <button
                           type="button"
-                          className={
-                            checkoutLocationConfirmed122
-                              ? styles.darikCheckoutConfirmLocationDone122
-                              : styles.darikCheckoutConfirmLocation122
-                          }
-                          onClick={() =>
-                            void confirmCheckoutLocation122()
-                          }
-                          disabled={checkoutLocationBusy122}
+                          className={styles.checkoutButton}
+                          onClick={() => void placeRoomOnlyOrder419()}
+                          disabled={placingOrder}
                         >
-                          {checkoutLocationBusy122
-                            ? "Checking delivery zone… / جاري التحقق…"
-                            : checkoutLocationConfirmed122
-                              ? "Location confirmed ✓ / تم تأكيد الموقع ✓"
-                              : "Confirm delivery location / تأكيد موقع التوصيل"}
+                          {placingOrder
+                            ? "Sending order… / جارٍ إرسال الطلب…"
+                            : "Place order · " + money(orderTotal) + " / إرسال الطلب"}
+                          {!placingOrder ? <Icon name="arrow" size={18} /> : null}
                         </button>
+
+                        <p className={styles.checkoutNote}>
+                          Delivered inside {storefront.direct_room_delivery_property_name || storefront.display_name}. Pay when the order arrives. / التوصيل داخل المكان والدفع عند وصول الطلب.
+                        </p>
                       </div>
                     ) : (
-                      <p className={styles.darikCheckoutLocationEmpty122}>
-                        Choose current location or search Google Maps to set
-                        the delivery pin. / اختر موقعك الحالي أو ابحث في خرائط
-                        جوجل لتحديد موقع التوصيل.
-                      </p>
-                    )}
-
-                    {checkoutLocationError122 ? (
-                      <p className={styles.darikCheckoutLocationError122}>
-                        {checkoutLocationError122}
-                      </p>
-                    ) : null}
-                  </div>
-
-                          <div className={styles.addressDetailsGrid}>
-                            <label>
-                              Building number / رقم المبنى <small>Optional / اختياري</small>
-                              <input
-                                value={checkoutForm.buildingNumber}
-                                onChange={(event) =>
-                                  updateCheckoutField(
-                                    "buildingNumber",
-                                    event.target.value
-                                  )
-                                }
-                                placeholder="Example: 18 / مثال: 18"
-                              />
-                            </label>
-
-                            <label>
-                              Apartment number / رقم الشقة <small>Optional / اختياري</small>
-                              <input
-                                value={checkoutForm.apartmentNumber}
-                                onChange={(event) =>
-                                  updateCheckoutField(
-                                    "apartmentNumber",
-                                    event.target.value
-                                  )
-                                }
-                                placeholder="Example: 4B / مثال: 4B"
-                              />
-                            </label>
-                          </div>
-                        </>
-                      )}
-
-                      <label>
-                        {selectedPickup ? "Pickup note / ملاحظة الاستلام" : "Extra delivery details / تفاصيل إضافية للتوصيل"} <small>Optional / اختياري</small>
-                        <textarea
-                          value={checkoutForm.deliveryNote}
-                          onChange={(event) =>
-                            updateCheckoutField(
-                              "deliveryNote",
-                              event.target.value
-                            )
-                          }
-                          placeholder={
-                            selectedPickup
-                              ? "Anything the store should know before pickup / أي ملاحظة يجب أن يعرفها المتجر قبل الاستلام"
-                              : "Floor, entrance, landmark or delivery instructions / الطابق، المدخل، معلم قريب أو تعليمات التوصيل"
-                          }
-                          rows={3}
-                        />
-                      </label>
-
-                      {checkoutError ? (
-                        <p className={styles.checkoutError}>{checkoutError}</p>
-                      ) : null}
-
-                      <button
-                        type="button"
-                        className={styles.checkoutButton}
-                        onClick={() => void handleCheckoutWithAccountNudge173()}
-                        disabled={placingOrder}
-                      >
-                        {placingOrder
-                          ? "Sending order… / جارٍ إرسال الطلب…"
-                          : checkoutForm.paymentMethod === "cliq"
-                            ? `Submit CliQ ${selectedPickup ? "pickup" : "delivery"} order · ${money(orderTotal)} / إرسال طلب CliQ`
-                            : `Place cash ${selectedPickup ? "pickup" : "delivery"} order · ${money(orderTotal)} / إرسال طلب نقدي`}
-                        {!placingOrder ? <Icon name="arrow" size={18} /> : null}
-                      </button>
-                    </div>
+                                          <div className={styles.onlineCheckoutForm}>                      
+                                      {/* Second guest sign-in confirmation removed by 373. */}                      
+                                    {!darikIsBuilderPreview120() ? (                      
+                                      <section                      
+                                        className={styles.darikCheckoutIdentity121}                      
+                                        data-darik-customer-account="checkout"                      
+                                      >                      
+                                        <div className={styles.darikCheckoutIdentityHeader121}>                      
+                                          <div>                      
+                                            <span>حساب داريك / Darik account</span>                      
+                                            <strong>One account. Every Darik store. / حساب واحد لكل متاجر داريك.</strong>                      
+                                          </div>                      
+                                          {darikCustomerProfile121 ? (                      
+                                            <span className={styles.darikAccountBadge121}>SIGNED IN / مسجل الدخول</span>                      
+                                          ) : darikCheckoutIdentity121 === "guest" ? (                      
+                                            <span className={styles.darikGuestBadge121}>GUEST / ضيف</span>                      
+                                          ) : null}                      
+                                        </div>                      
+                                            
+                                        <p className={styles.darikCheckoutIdentityCopy121}>                      
+                                          Create one Darik customer account and use the same login on any                      
+                                          Darik-powered retailer storefront. Or place this order as a guest.                      
+                                        </p>                      
+                                            
+                                        {darikCustomerProfile121 ? (                      
+                                          <div className={styles.darikAccountSigned121}>                      
+                                            <div>                      
+                                              <small>Signed in as / مسجل الدخول</small>                      
+                                              <strong>                      
+                                                {darikCustomerProfile121.full_name ||                      
+                                                  darikCustomerUser121?.email ||                      
+                                                  "Darik customer"}                      
+                                              </strong>                      
+                                              <span>{darikCustomerUser121?.email || ""}</span>                      
+                                            </div>                      
+                                            <div className={styles.darikAccountSignedActions121}>                      
+                                              <span>                      
+                                                This order will be saved to your Darik account / سيتم حفظ الطلب                      
+                                                في حساب داريك                      
+                                              </span>                      
+                                              <button                      
+                                                type="button"                      
+                                                onClick={() => void signOutDarikCustomer121()}                      
+                                                disabled={darikAuthBusy121}                      
+                                              >                      
+                                                Sign out & use guest / تسجيل الخروج والمتابعة كضيف                      
+                                              </button>                      
+                                            </div>                      
+                                          </div>                      
+                                        ) : darikCheckoutIdentity121 === "choice" ? (                      
+                                          <div className={styles.darikAccountChoiceActions121}>                      
+                                            <button                      
+                                              type="button"                      
+                                              className={styles.darikAccountPrimary121}                      
+                                              onClick={() => {                      
+                                                setDarikAuthMessage121("");                      
+                                                setDarikCheckoutIdentity121("login");                      
+                                              }}                      
+                                            >                      
+                                              Sign in / تسجيل الدخول                      
+                                            </button>                      
+                                            <button                      
+                                              type="button"                      
+                                              className={styles.darikAccountSecondary121}                      
+                                              onClick={() => {                      
+                                                setDarikAuthMessage121("");                      
+                                                setDarikSignupStep121("details");                      
+                                                setDarikCheckoutIdentity121("signup");                      
+                                              }}                      
+                                            >                      
+                                              Create Darik account / إنشاء حساب داريك                      
+                                            </button>                      
+                                            <button                      
+                                              type="button"                      
+                                              className={styles.darikAccountGuest121}                      
+                                              onClick={() => void chooseDarikGuestCheckout121()}                      
+                                            >                      
+                                              Continue as guest / المتابعة كضيف                      
+                                            </button>                      
+                                          </div>                      
+                                        ) : darikCheckoutIdentity121 === "guest" ? (                      
+                                          <div className={styles.darikAccountGuestState121}>                      
+                                            <div>                      
+                                              <strong>Guest checkout / طلب كضيف</strong>                      
+                                              <span>                      
+                                                No Darik account required. This order will use the name and                      
+                                                phone entered below.                      
+                                              </span>                      
+                                            </div>                      
+                                            <button                      
+                                              type="button"                      
+                                              onClick={() => {                      
+                                                setDarikAuthMessage121("");                      
+                                                setDarikCheckoutIdentity121("choice");                      
+                                              }}                      
+                                            >                      
+                                              Use a Darik account instead / استخدم حساب داريك بدلاً من ذلك                      
+                                            </button>                      
+                                          </div>                      
+                                        ) : darikCheckoutIdentity121 === "login" ? (                      
+                                          <div className={styles.darikAccountForm121}>                      
+                                            <div className={styles.darikAccountFormHeading121}>                      
+                                              <strong>Sign in to Darik / تسجيل الدخول إلى داريك</strong>                      
+                                              <span>Your login works across Darik-powered stores. / تسجيل الدخول يعمل في جميع متاجر داريك.</span>                      
+                                            </div>                      
+                                            {darikNonCustomerSession121 ? (                      
+                                              <p className={styles.darikAccountSessionNotice121}>                      
+                                                Another Darik staff/retailer session is active in this browser.                      
+                                                Signing in here will switch this browser to your customer account.                      
+                                              </p>                      
+                                            ) : null}                      
+                                            <label>                      
+                                              Email / البريد الإلكتروني                      
+                                              <input                      
+                                                type="email"                      
+                                                value={darikLoginEmail121}                      
+                                                onChange={(event) => setDarikLoginEmail121(event.target.value)}                      
+                                                placeholder="you@example.com"                      
+                                                autoComplete="email"                      
+                                              />                      
+                                            </label>                      
+                                            <label>                      
+                                              Password / كلمة المرور                      
+                                              <input                      
+                                                type="password"                      
+                                                value={darikLoginPassword121}                      
+                                                onChange={(event) => setDarikLoginPassword121(event.target.value)}                      
+                                                placeholder="Your Darik password / كلمة مرور داريك"                      
+                                                autoComplete="current-password"                      
+                                              />                      
+                                            </label>                      
+                                            <div className={styles.darikAccountFormActions121}>                      
+                                              <button                      
+                                                type="button"                      
+                                                className={styles.darikAccountPrimary121}                      
+                                                onClick={() => void signInDarikCustomer121()}                      
+                                                disabled={darikAuthBusy121}                      
+                                              >                      
+                                                {darikAuthBusy121 ? "Signing in... / جارٍ تسجيل الدخول..." : "Sign in / تسجيل الدخول"}                      
+                                              </button>                      
+                                              <button                      
+                                                type="button"                      
+                                                onClick={() => setDarikCheckoutIdentity121("choice")}                      
+                                                disabled={darikAuthBusy121}                      
+                                              >                      
+                                                Back / رجوع                      
+                                              </button>                      
+                                              <button                      
+                                                type="button"                      
+                                                onClick={() => void chooseDarikGuestCheckout121()}                      
+                                                disabled={darikAuthBusy121}                      
+                                              >                      
+                                                Continue as guest / المتابعة كضيف                      
+                                              </button>                      
+                                            </div>                      
+                                          </div>                      
+                                        ) : (                      
+                                          <div className={styles.darikAccountForm121}>                      
+                                            <div className={styles.darikAccountFormHeading121}>                      
+                                              <strong>Create your Darik account / أنشئ حساب داريك</strong>                      
+                                              <span>                      
+                                                Use this same email and password later at any Darik store. / استخدم نفس البريد وكلمة المرور لاحقاً في أي متجر داريك.                      
+                                              </span>                      
+                                            </div>                      
+                                            
+                                            {darikSignupStep121 === "details" ? (                      
+                                              <div className={styles.darikAccountFormGrid121}>                      
+                                                <label>                      
+                                                  First name / الاسم الأول                      
+                                                  <input                      
+                                                    value={darikSignupFirstName173}                      
+                                                    onChange={(event) =>                      
+                                                      setDarikSignupFirstName173(event.target.value)                      
+                                                    }                      
+                                                    placeholder="First name / الاسم الأول"                      
+                                                    autoComplete="given-name"                      
+                                                  />                      
+                                                </label>                      
+                                                <label>                      
+                                                  Last name / اسم العائلة                      
+                                                  <input                      
+                                                    value={darikSignupLastName173}                      
+                                                    onChange={(event) =>                      
+                                                      setDarikSignupLastName173(event.target.value)                      
+                                                    }                      
+                                                    placeholder="Last name / اسم العائلة"                      
+                                                    autoComplete="family-name"                      
+                                                  />                      
+                                                </label>                      
+                                                <label>                      
+                                                  Email / البريد الإلكتروني                      
+                                                  <input                      
+                                                    type="email"                      
+                                                    value={darikSignupEmail121}                      
+                                                    onChange={(event) =>                      
+                                                      setDarikSignupEmail121(event.target.value)                      
+                                                    }                      
+                                                    placeholder="you@example.com"                      
+                                                    autoComplete="email"                      
+                                                  />                      
+                                                </label>                      
+                                                <label>                      
+                                                  Confirm email / تأكيد البريد الإلكتروني                      
+                                                  <input                      
+                                                    type="email"                      
+                                                    value={darikSignupEmailConfirm173}                      
+                                                    onChange={(event) =>                      
+                                                      setDarikSignupEmailConfirm173(event.target.value)                      
+                                                    }                      
+                                                    placeholder="Repeat email / أعد إدخال البريد"                      
+                                                    autoComplete="off"                      
+                                                  />                      
+                                                </label>                      
+                                                <label>                      
+                                                  Phone / رقم الهاتف                      
+                                                  <input                      
+                                                    type="tel"                      
+                                                    value={darikSignupPhone121}                      
+                                                    onChange={(event) =>                      
+                                                      setDarikSignupPhone121(event.target.value)                      
+                                                    }                      
+                                                    placeholder="07XXXXXXXX"                      
+                                                    autoComplete="tel"                      
+                                                  />                      
+                                                </label>                      
+                                                <label>                      
+                                                  Confirm phone / تأكيد رقم الهاتف                      
+                                                  <input                      
+                                                    type="tel"                      
+                                                    value={darikSignupPhoneConfirm173}                      
+                                                    onChange={(event) =>                      
+                                                      setDarikSignupPhoneConfirm173(event.target.value)                      
+                                                    }                      
+                                                    placeholder="Repeat phone / أعد إدخال الهاتف"                      
+                                                    autoComplete="off"                      
+                                                  />                      
+                                                </label>                      
+                                                <label>                      
+                                                  Password / كلمة المرور                      
+                                                  <input                      
+                                                    type="password"                      
+                                                    value={darikSignupPassword121}                      
+                                                    onChange={(event) =>                      
+                                                      setDarikSignupPassword121(event.target.value)                      
+                                                    }                      
+                                                    placeholder="8+ chars, capital, number, special / 8+ أحرف، حرف كبير، رقم ورمز"                      
+                                                    autoComplete="new-password"                      
+                                                  />                      
+                                                </label>                      
+                                                <label>                      
+                                                  Confirm password / تأكيد كلمة المرور                      
+                                                  <input                      
+                                                    type="password"                      
+                                                    value={darikSignupPasswordConfirm121}                      
+                                                    onChange={(event) =>                      
+                                                      setDarikSignupPasswordConfirm121(event.target.value)                      
+                                                    }                      
+                                                    placeholder="Repeat password / أعد إدخال كلمة المرور"                      
+                                                    autoComplete="new-password"                      
+                                                  />                      
+                                                </label>                      
+                                              </div>                      
+                                            ) : null}                      
+                                            
+                                            {darikSignupStep121 === "email_code" ? (                      
+                                              <div className={styles.darikAccountCode121}>                      
+                                                <span>Email confirmation / تأكيد البريد</span>                      
+                                                <strong>{darikSignupEmail121.trim().toLowerCase()}</strong>                      
+                                                <input                      
+                                                  inputMode="numeric"                      
+                                                  value={darikSignupEmailCode121}                      
+                                                  onChange={(event) =>                      
+                                                    setDarikSignupEmailCode121(event.target.value)                      
+                                                  }                      
+                                                  placeholder="Email code / رمز البريد"                      
+                                                  autoComplete="one-time-code"                      
+                                                />                      
+                                              </div>                      
+                                            ) : null}                      
+                                            
+                                            {darikSignupStep121 === "phone_code" ? (                      
+                                              <div className={styles.darikAccountCode121}>                      
+                                                <span>Phone confirmation / تأكيد الهاتف</span>                      
+                                                <strong>                      
+                                                  {normalizeDarikCustomerPhone121(darikSignupPhone121)}                      
+                                                </strong>                      
+                                                <input                      
+                                                  inputMode="numeric"                      
+                                                  value={darikSignupPhoneCode121}                      
+                                                  onChange={(event) =>                      
+                                                    setDarikSignupPhoneCode121(event.target.value)                      
+                                                  }                      
+                                                  placeholder="SMS code / رمز SMS"                      
+                                                  autoComplete="one-time-code"                      
+                                                />                      
+                                              </div>                      
+                                            ) : null}                      
+                                            
+                                            <div className={styles.darikAccountFormActions121}>                      
+                                              {darikSignupStep121 === "details" ? (                      
+                                                <button                      
+                                                  type="button"                      
+                                                  className={styles.darikAccountPrimary121}                      
+                                                  onClick={() => void startDarikCustomerSignup121()}                      
+                                                  disabled={darikAuthBusy121}                      
+                                                >                      
+                                                  {darikAuthBusy121                      
+                                                    ? "Creating... / جارٍ إنشاء الحساب..."                      
+                                                    : "Create Darik account / إنشاء الحساب"}                      
+                                                </button>                      
+                                              ) : darikSignupStep121 === "email_code" ? (                      
+                                                <button                      
+                                                  type="button"                      
+                                                  className={styles.darikAccountPrimary121}                      
+                                                  onClick={() => void confirmDarikSignupEmail121()}                      
+                                                  disabled={darikAuthBusy121}                      
+                                                >                      
+                                                  {darikAuthBusy121                      
+                                                    ? "Confirming... / جارٍ التأكيد..."                      
+                                                    : "Confirm email & send SMS / تأكيد البريد وإرسال رسالة SMS"}                      
+                                                </button>                      
+                                              ) : (                      
+                                                <button                      
+                                                  type="button"                      
+                                                  className={styles.darikAccountPrimary121}                      
+                                                  onClick={() => void confirmDarikSignupPhone121()}                      
+                                                  disabled={darikAuthBusy121}                      
+                                                >                      
+                                                  {darikAuthBusy121                      
+                                                    ? "Confirming... / جارٍ التأكيد..."                      
+                                                    : "Confirm phone & finish account / تأكيد الهاتف وإكمال الحساب"}                      
+                                                </button>                      
+                                              )}                      
+                                            
+                                              <button                      
+                                                type="button"                      
+                                                onClick={() => {                      
+                                                  setDarikAuthMessage121("");                      
+                                                  setDarikSignupStep121("details");                      
+                                                  setDarikCheckoutIdentity121("choice");                      
+                                                }}                      
+                                                disabled={darikAuthBusy121}                      
+                                              >                      
+                                                Back / رجوع                      
+                                              </button>                      
+                                              <button                      
+                                                type="button"                      
+                                                onClick={() => void chooseDarikGuestCheckout121()}                      
+                                                disabled={darikAuthBusy121}                      
+                                              >                      
+                                                Continue as guest / المتابعة كضيف                      
+                                              </button>                      
+                                            </div>                      
+                                          </div>                      
+                                        )}                      
+                                            
+                                        {darikAuthMessage121 ? (                      
+                                          <p className={styles.darikAccountStatus121} role="status">                      
+                                            {darikAuthMessage121}                      
+                                          </p>                      
+                                        ) : null}                      
+                                      </section>                      
+                                    ) : null}                      
+                                            
+                                            <div className={styles.onlineCheckoutHeading}>                      
+                                              <div>                      
+                                                <span>Online order / طلب أونلاين</span>                      
+                                                <h3>{selectedPickup ? "Pickup details / تفاصيل الاستلام" : "Delivery details / تفاصيل التوصيل"}</h3>                      
+                                              </div>                      
+                                              <button                      
+                                                type="button"                      
+                                                onClick={() => {                      
+                                                  setOnlineCheckoutOpen(false);                      
+                                                  setCheckoutError("");                      
+                                                }}                      
+                                              >                      
+                                                Cancel / إلغاء                      
+                                              </button>                      
+                                            </div>                      
+                                            
+                                            <div className={styles.paymentMethodSection}>                      
+                                              <span>Fulfillment method / طريقة الاستلام</span>                      
+                                              <div className={styles.paymentMethodChoices}>                      
+                                                {deliveryEnabled ? (                      
+                                                  <button                      
+                                                    type="button"                      
+                                                    className={                      
+                                                      checkoutForm.fulfillmentMethod === "delivery"                      
+                                                        ? styles.activePaymentMethod                      
+                                                        : ""                      
+                                                    }                      
+                                                    onClick={() =>                      
+                                                      updateCheckoutField("fulfillmentMethod", "delivery")                      
+                                                    }                      
+                                                  >                      
+                                                    <strong>Delivery / التوصيل</strong>                      
+                                                    <small>                      
+                                                      {roomDeliverySelected418                      
+                                                        ? "Delivered to your room / التوصيل إلى غرفتك"                      
+                                                        : "Delivered to your exact location / التوصيل إلى موقعك المحدد"}                      
+                                                    </small>                      
+                                                  </button>                      
+                                                ) : null}                      
+                                                {pickupEnabled ? (                      
+                                                  <button                      
+                                                    type="button"                      
+                                                    className={                      
+                                                      checkoutForm.fulfillmentMethod === "pickup"                      
+                                                        ? styles.activePaymentMethod                      
+                                                        : ""                      
+                                                    }                      
+                                                    onClick={() =>                      
+                                                      updateCheckoutField("fulfillmentMethod", "pickup")                      
+                                                    }                      
+                                                  >                      
+                                                    <strong>Local pickup / استلام من المتجر</strong>                      
+                                                    <small>Collect from the store / الاستلام من المتجر</small>                      
+                                                  </button>                      
+                                                ) : null}                      
+                                              </div>                      
+                                            </div>                      
+                                            
+                                            <div className={styles.paymentMethodSection}>                      
+                                              <span>Payment method / طريقة الدفع</span>                      
+                                              <div className={styles.paymentMethodChoices}>                      
+                                                {storefront.cash_on_delivery_enabled ? (                      
+                                                  <button                      
+                                                    type="button"                      
+                                                    className={                      
+                                                      checkoutForm.paymentMethod === "cash"                      
+                                                        ? styles.activePaymentMethod                      
+                                                        : ""                      
+                                                    }                      
+                                                    onClick={() =>                      
+                                                      updateCheckoutField("paymentMethod", "cash")                      
+                                                    }                      
+                                                  >                      
+                                                    <strong>Cash / نقداً</strong>                      
+                                                    <small>{selectedPickup ? "Pay at pickup / الدفع عند الاستلام" : "Pay on delivery / الدفع عند التوصيل"}</small>                      
+                                                  </button>                      
+                                                ) : null}                      
+                                            
+                                                {storefront.cliq_enabled ? (                      
+                                                  <button                      
+                                                    type="button"                      
+                                                    className={                      
+                                                      checkoutForm.paymentMethod === "cliq"                      
+                                                        ? styles.activePaymentMethod                      
+                                                        : ""                      
+                                                    }                      
+                                                    onClick={() =>                      
+                                                      updateCheckoutField("paymentMethod", "cliq")                      
+                                                    }                      
+                                                  >                      
+                                                    <strong>CliQ</strong>                      
+                                                    <small>Transfer before submitting / حوّل قبل إرسال الطلب</small>                      
+                                                  </button>                      
+                                                ) : null}                      
+                                              </div>
+                      <div className={styles.paymentMethodChoices}>                      
+                                                {storefront.card_enabled ? (                      
+                                                  <button                      
+                                                    type="button"                      
+                                                    className={                      
+                                                      checkoutForm.paymentMethod === "card"                      
+                                                        ? styles.activePaymentMethod                      
+                                                        : ""                      
+                                                    }                      
+                                                    onClick={() =>                      
+                                                      updateCheckoutField("paymentMethod", "card")                      
+                                                    }                      
+                                                  >                      
+                                                    <strong>Debit / Credit Card / بطاقة خصم أو ائتمان</strong>                      
+                                                    <small>{selectedPickup ? "Pay by card at pickup / الدفع بالبطاقة عند الاستلام" : "Pay on the driver's card machine / الدفع بجهاز البطاقة عند التوصيل"}</small>                      
+                                                  </button>                      
+                                                ) : null}                      
+                                            
+                                                {storefront.cliq_enabled ? (                      
+                                                  <button                      
+                                                    type="button"                      
+                                                    className={                      
+                                                      checkoutForm.paymentMethod === "cliq"                      
+                                                        ? styles.activePaymentMethod                      
+                                                        : ""                      
+                                                    }                      
+                                                    onClick={() =>                      
+                                                      updateCheckoutField("paymentMethod", "cliq")                      
+                                                    }                      
+                                                  >                      
+                                                    <strong>CliQ</strong>                      
+                                                    <small>Transfer before submitting / حوّل قبل إرسال الطلب</small>                      
+                                                  </button>                      
+                                                ) : null}                      
+                                              </div>                      
+                      
+                              {styles.paymentMethod === "card" ? (
+                                <div style={{
+                                  marginTop: 10,
+                                  padding: "12px 14px",
+                                  borderRadius: 14,
+                                  border: "1px solid #bbf7d0",
+                                  background: "#f0fdf4",
+                                  color: "#14532d",
+                                  fontWeight: 700,
+                                  lineHeight: 1.45
+                                }}>
+                                  No card information is entered online. Payment is made on the store's wireless card machine at pickup or delivery.
+                                  <br />
+                                  <span dir="rtl">لا يتم إدخال أي معلومات للبطاقة أونلاين. يتم الدفع بجهاز البطاقة اللاسلكي الخاص بالمتجر عند الاستلام أو التوصيل.</span>
+                                </div>
+                              ) : null}
+                      </div>                      
+                                            
+                                            {checkoutForm.paymentMethod === "cliq" ? (                      
+                                              <div className={styles.cliqPaymentPanel}>                      
+                                                <span>Send exactly {money(orderTotal)} by CliQ</span>                      
+                                                <div>                      
+                                                  <small>Account name / اسم الحساب</small>                      
+                                                  <strong>                      
+                                                    {storefront.cliq_account_name ||                      
+                                                      storefront.display_name}                      
+                                                  </strong>                      
+                                                </div>                      
+                                                <div>                      
+                                                  <small>CliQ alias / mobile / اسم CliQ أو رقم الهاتف</small>                      
+                                                  <strong>                      
+                                                    {storefront.cliq_payment_identifier}                      
+                                                  </strong>                      
+                                                </div>                      
+                                                <label className={styles.receiptUploadField}>                      
+                                                  CliQ receipt image / صورة إيصال CliQ <strong>Required / مطلوب</strong>                      
+                                                  <input                      
+                                                    type="file"                      
+                                                    accept="image/jpeg,image/png,image/webp"                      
+                                                    onChange={(event) =>                      
+                                                      selectCliqReceipt(event.target.files?.[0] ?? null)                      
+                                                    }                      
+                                                  />                      
+                                                </label>                      
+                                                {cliqReceiptPreview ? (                      
+                                                  <div className={styles.receiptPreview}>                      
+                                                    <img src={cliqReceiptPreview} alt="CliQ receipt preview" />                      
+                                                    <div>                      
+                                                      <strong>Receipt ready / الإيصال جاهز</strong>                      
+                                                      <small>{cliqReceiptFile?.name}</small>                      
+                                                      <button                      
+                                                        type="button"                      
+                                                        onClick={() => selectCliqReceipt(null)}                      
+                                                      >                      
+                                                        Remove receipt / حذف الإيصال                      
+                                                      </button>                      
+                                                    </div>                      
+                                                  </div>                      
+                                                ) : (                      
+                                                  <p className={styles.receiptRequirement}>                      
+                                                    Upload the transfer receipt before submitting. A                      
+                                                    reference number is not required.                      
+                                                  </p>                      
+                                                )}                      
+                                                <p>                      
+                                                  The store will review the receipt before preparing                      
+                                                  the order.                      
+                                                </p>                      
+                                              </div>                      
+                                            ) : null}                      
+                                            
+                                            <label>                      
+                                              Name / الاسم                      
+                                              <input                      
+                                                value={checkoutForm.customerName}                      
+                                                onChange={(event) =>                      
+                                                  updateCheckoutField(                      
+                                                    "customerName",                      
+                                                    event.target.value                      
+                                                  )                      
+                                                }                      
+                                                placeholder="Your full name / الاسم الكامل"                      
+                                              />                      
+                                            </label>                      
+                                            
+                                            <label>                      
+                                              Phone / رقم الهاتف                      
+                                              <input                      
+                                                type="tel"                      
+                                                value={checkoutForm.customerPhone}                      
+                                                onChange={(event) =>                      
+                                                  updateCheckoutField(                      
+                                                    "customerPhone",                      
+                                                    event.target.value                      
+                                                  )                      
+                                                }                      
+                                                placeholder="07XXXXXXXX"                      
+                                              />                      
+                                            </label>                      
+                                            
+                                            {selectedPickup ? (                      
+                                              <div className={styles.exactLocationBlock}>                      
+                                                <div>                      
+                                                  <strong>Local pickup only / استلام من المتجر فقط</strong>                      
+                                                  <small>Collect your order from the store address after confirmation. / استلم طلبك من عنوان المتجر بعد التأكيد.</small>                      
+                                                </div>                      
+                                                <strong>{storefront.address_text || "Store address shown in store information / عنوان المتجر موجود في معلومات المتجر"}</strong>                      
+                                              </div>                      
+                                            ) : roomDeliverySelected418 ? (                      
+                                              <>                      
+                                                <div className={styles.exactLocationBlock}>                      
+                                                  <div>                      
+                                                    <strong>Room delivery / التوصيل للغرفة</strong>                      
+                                                    <small>                      
+                                                      No GPS location is required. The property location is already configured.                      
+                                                      / لا نحتاج موقع GPS. موقع المكان محدد مسبقاً.                      
+                                                    </small>                      
+                                                  </div>                      
+                                                  <strong>                      
+                                                    {storefront.direct_room_delivery_property_name ||                      
+                                                      storefront.display_name}                      
+                                                  </strong>                      
+                                                </div>                      
+                                            
+                                                {destinationMode418 === "both" ? (                      
+                                                  <div className={styles.paymentMethodSection}>                      
+                                                    <span>Delivery destination / وجهة التوصيل</span>                      
+                                                    <div className={styles.paymentMethodChoices}>                      
+                                                      <button type="button" className={styles.activePaymentMethod}>                      
+                                                        <strong>Room number / رقم الغرفة</strong>                      
+                                                        <small>No GPS needed / بدون GPS</small>                      
+                                                      </button>                      
+                                                      <button                      
+                                                        type="button"                      
+                                                        onClick={() => {                      
+                                                          updateCheckoutField("destinationType", "gps");                      
+                                                          setOnlineCheckoutOpen(false);                      
+                                                          setLocationGateOpen117(true);                      
+                                                        }}                      
+                                                      >                      
+                                                        <strong>Exact location / موقع دقيق</strong>                      
+                                                        <small>Use GPS or Google Maps / استخدم GPS أو خرائط جوجل</small>                      
+                                                      </button>                      
+                                                    </div>                      
+                                                  </div>                      
+                                                ) : null}                      
+                                            
+                                                <div className={styles.addressDetailsGrid}>                      
+                                                  <label>                      
+                                                    Room number / رقم الغرفة <strong>Required / مطلوب</strong>                      
+                                                    <input                      
+                                                      value={checkoutForm.roomNumber}                      
+                                                      onChange={(event) =>                      
+                                                        updateCheckoutField("roomNumber", event.target.value)                      
+                                                      }                      
+                                                      placeholder="Example: 417 / مثال: 417"                      
+                                                      autoComplete="off"                      
+                                                    />                      
+                                                  </label>                      
+                                                </div>                      
+                                              </>                      
+                                            ) : (                      
+                                              <>                      
+                                                <div className={styles.darikCheckoutLocation122}>                      
+                                          <div className={styles.darikCheckoutLocationHeading122}>                      
+                                            <div>                      
+                                              <strong>                      
+                                                Delivery location / موقع التوصيل                      
+                                              </strong>                      
+                                              <small>                      
+                                                Use your location or search Google, then confirm the pin.                      
+                                                / استخدم موقعك أو ابحث في جوجل ثم أكد العلامة.                      
+                                              </small>                      
+                                            </div>                      
+                                            {checkoutLocationConfirmed122 ? (                      
+                                              <span className={styles.darikCheckoutLocationConfirmed122}>                      
+                                                Confirmed / مؤكد                      
+                                              </span>                      
+                                            ) : null}                      
+                                          </div>                      
+                                            
+                                          <div className={styles.darikCheckoutLocationActions122}>                      
+                                            <button                      
+                                              type="button"                      
+                                              className={styles.darikCheckoutGps122}                      
+                                              onClick={useCheckoutCurrentLocation122}                      
+                                              disabled={                      
+                                                checkoutLocationBusy122 ||                      
+                                                checkoutLocationSearchBusy122                      
+                                              }                      
+                                            >                      
+                                              {checkoutLocationBusy122                      
+                                                ? "Locating… / جاري تحديد الموقع…"                      
+                                                : "Use current location / استخدم موقعي الحالي"}                      
+                                            </button>                      
+                                            
+                                            <div className={styles.darikCheckoutSearchRow122}>                      
+                                              <input                      
+                                                value={checkoutLocationQuery122}                      
+                                                onChange={(event) =>                      
+                                                  setCheckoutLocationQuery122(                      
+                                                    event.target.value                      
+                                                  )                      
+                                                }                      
+                                                onKeyDown={(event) => {                      
+                                                  if (event.key === "Enter") {                      
+                                                    event.preventDefault();                      
+                                                    void searchCheckoutLocation122();                      
+                                                  }                      
+                                                }}                      
+                                                placeholder="Search Google Maps / ابحث في خرائط جوجل"                      
+                                                aria-label="Search Google Maps for delivery location"                      
+                                              />                      
+                                              <button                      
+                                                type="button"                      
+                                                onClick={() =>                      
+                                                  void searchCheckoutLocation122()                      
+                                                }                      
+                                                disabled={                      
+                                                  checkoutLocationSearchBusy122 ||                      
+                                                  checkoutLocationBusy122                      
+                                                }                      
+                                              >                      
+                                                {checkoutLocationSearchBusy122                      
+                                                  ? "Searching…"                      
+                                                  : "Search / بحث"}                      
+                                              </button>                      
+                                            </div>                      
+                                          </div>                      
+                                            
+                                          {checkoutLocationPredictions122.length ? (                      
+                                            <div className={styles.darikCheckoutPredictions122}>                      
+                                              {checkoutLocationPredictions122.map(                      
+                                                (prediction) => (                      
+                                                  <button                      
+                                                    type="button"                      
+                                                    key={prediction.place_id}                      
+                                                    onClick={() =>                      
+                                                      void chooseCheckoutPlace122(                      
+                                                        prediction                      
+                                                      )                      
+                                                    }                      
+                                                  >                      
+                                                    <strong>                      
+                                                      {prediction.structured_formatting                      
+                                                        ?.main_text ||                      
+                                                        prediction.description}                      
+                                                    </strong>                      
+                                                    <span>                      
+                                                      {prediction.structured_formatting                      
+                                                        ?.secondary_text ||                      
+                                                        prediction.description}                      
+                                                    </span>                      
+                                                  </button>                      
+                                                )                      
+                                              )}                      
+                                            </div>                      
+                                          ) : null}                      
+                                            
+                                          {checkoutLocationDraft122 ? (                      
+                                            <div className={styles.darikCheckoutMapSection122}>                      
+                                              <div                      
+                                                className={styles.darikCheckoutMap122}                      
+                                                onPointerDown={startCheckoutMapPinMove122}                      
+                                                onPointerMove={moveCheckoutMapPin122}                      
+                                                onPointerUp={(event) =>                      
+                                                  void finishCheckoutMapPinMove122(                      
+                                                    event                      
+                                                  )                      
+                                                }                      
+                                                onPointerCancel={                      
+                                                  cancelCheckoutMapPinMove122                      
+                                                }                      
+                                                role="application"                      
+                                                aria-label="Google map delivery pin. Tap or drag to adjust the delivery location."                      
+                                              >                      
+                                                <iframe                      
+                                                  key={`${checkoutLocationDraft122.latitude.toFixed(                      
+                                                    6                      
+                                                  )}:${checkoutLocationDraft122.longitude.toFixed(                      
+                                                    6                      
+                                                  )}`}                      
+                                                  src={darikCheckoutMapUrl122(                      
+                                                    checkoutLocationDraft122                      
+                                                  )}                      
+                                                  title="Delivery location Google Map"                      
+                                                  loading="lazy"                      
+                                                  referrerPolicy="no-referrer-when-downgrade"                      
+                                                />                      
+                                                <div                      
+                                                  className={styles.darikCheckoutMapPin122}                      
+                                                  style={{                      
+                                                    transform: `translate(calc(-50% + ${checkoutMapDragOffset122.x}px), calc(-100% + ${checkoutMapDragOffset122.y}px))`,                      
+                                                  }}                      
+                                                  aria-hidden="true"                      
+                                                >                      
+                                                  <span />                      
+                                                </div>                      
+                                                <div                      
+                                                  className={styles.darikCheckoutMapCrosshair122}                      
+                                                  aria-hidden="true"                      
+                                                />                      
+                                              </div>                      
+                                            
+                                              <p className={styles.darikCheckoutMapHelp122}>                      
+                                                Tap the exact spot or drag the pin to correct it.                      
+                                                / اضغط على المكان الصحيح أو حرّك العلامة لتعديل الموقع.                      
+                                              </p>                      
+                                            
+                                              <div className={styles.darikCheckoutLocationSummary122}>                      
+                                                <strong>                      
+                                                  {checkoutLocationDraft122.label}                      
+                                                </strong>                      
+                                                <span>                      
+                                                  {checkoutLocationDraft122.latitude.toFixed(                      
+                                                    6                      
+                                                  )}                      
+                                                  ,{" "}                      
+                                                  {checkoutLocationDraft122.longitude.toFixed(                      
+                                                    6                      
+                                                  )}                      
+                                                </span>                      
+                                                {checkoutLocationConfirmed122 &&                      
+                                                deliveryMatch117 ? (                      
+                                                  <small>                      
+                                                    Delivery fee / رسوم التوصيل:{" "}                      
+                                                    {specialDeliveryFree185                      
+                                                      ? "Free / مجاناً"                      
+                                                      : money(deliveryFee)}                      
+                                                    {" · "}                      
+                                                    Minimum / الحد الأدنى:{" "}                      
+                                                    {money(                      
+                                                      Number(                      
+                                                        deliveryMatch117.minimum_order ?? 0                      
+                                                      )                      
+                                                    )}                      
+                                                    {specialOfferAtLocation185 ? (                      
+                                                      <>                      
+                                                        {" · "}                      
+                                                        Special Zone / المنطقة الخاصة:{" "}                      
+                                                        {specialDeliveryFree185                      
+                                                          ? "Unlocked / مفعّل"                      
+                                                          : `${money(specialDeliveryRemaining185)} qualifying to go / متبقي لبلوغ الحد المؤهل`}                      
+                                                      </>                      
+                                                    ) : null}                      
+                                                  </small>                      
+                                                ) : null}                      
+                                              </div>                      
+                                            
+                                              <button                      
+                                                type="button"                      
+                                                className={                      
+                                                  checkoutLocationConfirmed122                      
+                                                    ? styles.darikCheckoutConfirmLocationDone122                      
+                                                    : styles.darikCheckoutConfirmLocation122                      
+                                                }                      
+                                                onClick={() =>                      
+                                                  void confirmCheckoutLocation122()                      
+                                                }                      
+                                                disabled={checkoutLocationBusy122}                      
+                                              >                      
+                                                {checkoutLocationBusy122                      
+                                                  ? "Checking delivery zone… / جاري التحقق…"                      
+                                                  : checkoutLocationConfirmed122                      
+                                                    ? "Location confirmed ✓ / تم تأكيد الموقع ✓"                      
+                                                    : "Confirm delivery location / تأكيد موقع التوصيل"}                      
+                                              </button>                      
+                                            </div>                      
+                                          ) : (                      
+                                            <p className={styles.darikCheckoutLocationEmpty122}>                      
+                                              Choose current location or search Google Maps to set                      
+                                              the delivery pin. / اختر موقعك الحالي أو ابحث في خرائط                      
+                                              جوجل لتحديد موقع التوصيل.                      
+                                            </p>                      
+                                          )}                      
+                                            
+                                          {checkoutLocationError122 ? (                      
+                                            <p className={styles.darikCheckoutLocationError122}>                      
+                                              {checkoutLocationError122}                      
+                                            </p>                      
+                                          ) : null}                      
+                                        </div>                      
+                                            
+                                                <div className={styles.addressDetailsGrid}>                      
+                                                  <label>                      
+                                                    Building number / رقم المبنى <small>Optional / اختياري</small>                      
+                                                    <input                      
+                                                      value={checkoutForm.buildingNumber}                      
+                                                      onChange={(event) =>                      
+                                                        updateCheckoutField(                      
+                                                          "buildingNumber",                      
+                                                          event.target.value                      
+                                                        )                      
+                                                      }                      
+                                                      placeholder="Example: 18 / مثال: 18"                      
+                                                    />                      
+                                                  </label>                      
+                                            
+                                                  <label>                      
+                                                    Apartment number / رقم الشقة <small>Optional / اختياري</small>                      
+                                                    <input                      
+                                                      value={checkoutForm.apartmentNumber}                      
+                                                      onChange={(event) =>                      
+                                                        updateCheckoutField(                      
+                                                          "apartmentNumber",                      
+                                                          event.target.value                      
+                                                        )                      
+                                                      }                      
+                                                      placeholder="Example: 4B / مثال: 4B"                      
+                                                    />                      
+                                                  </label>                      
+                                                </div>                      
+                                              </>                      
+                                            )}                      
+                                            
+                                            <label>                      
+                                              {selectedPickup ? "Pickup note / ملاحظة الاستلام" : "Extra delivery details / تفاصيل إضافية للتوصيل"} <small>Optional / اختياري</small>                      
+                                              <textarea                      
+                                                value={checkoutForm.deliveryNote}                      
+                                                onChange={(event) =>                      
+                                                  updateCheckoutField(                      
+                                                    "deliveryNote",                      
+                                                    event.target.value                      
+                                                  )                      
+                                                }                      
+                                                placeholder={                      
+                                                  selectedPickup                      
+                                                    ? "Anything the store should know before pickup / أي ملاحظة يجب أن يعرفها المتجر قبل الاستلام"                      
+                                                    : "Floor, entrance, landmark or delivery instructions / الطابق، المدخل، معلم قريب أو تعليمات التوصيل"                      
+                                                }                      
+                                                rows={3}                      
+                                              />                      
+                                            </label>                      
+                                            
+                                            {checkoutError ? (                      
+                                              <p className={styles.checkoutError}>{checkoutError}</p>                      
+                                            ) : null}                      
+                                            
+                                            <button                      
+                                              type="button"                      
+                                              className={styles.checkoutButton}                      
+                                              onClick={() => void handleCheckoutWithAccountNudge173()}                      
+                                              disabled={placingOrder}                      
+                                            >                      
+                                              {placingOrder                      
+                                                ? "Sending order… / جارٍ إرسال الطلب…"                      
+                                                : checkoutForm.paymentMethod === "cliq"                      
+                                                  ? `Submit CliQ ${selectedPickup ? "pickup" : "delivery"} order · ${money(orderTotal)} / إرسال طلب CliQ`                      
+                                                  : `Place cash ${selectedPickup ? "pickup" : "delivery"} order · ${money(orderTotal)} / إرسال طلب نقدي`}                      
+                                              {!placingOrder ? <Icon name="arrow" size={18} /> : null}                      
+                                            </button>                      
+                                          </div>                      
+                                          )}
                   ) : null}
 
                   {!storefront.is_accepting_orders ||
@@ -11573,7 +11756,9 @@ style={{
                             setCheckoutError("");
                           }}
                         >
-                          Place order online / اطلب أونلاين
+                          {roomOnlyCheckout419
+                            ? "Proceed to checkout / متابعة الطلب"
+                            : "Place order online / اطلب أونلاين"}
                           <Icon name="arrow" size={18} />
                         </button>
                       ) : null}
