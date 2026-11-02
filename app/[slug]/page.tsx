@@ -3510,6 +3510,7 @@ export default function DarikDirectStorefrontPage() {
   } | null>(null);
   const [cartOpen, setCartOpen] = useState(false);
   const [onlineCheckoutOpen, setOnlineCheckoutOpen] = useState(false);
+  const [minimumWhyOpen423, setMinimumWhyOpen423] = useState(false);
   const [checkoutForm, setCheckoutForm] = useState<OnlineCheckoutForm>({
     customerName: "",
     customerPhone: "",
@@ -3585,7 +3586,7 @@ export default function DarikDirectStorefrontPage() {
 
 
   useEffect(() => {
-    if (!detailsOpen && !cartOpen && !onlineCheckoutOpen) return;
+    if (!detailsOpen && !cartOpen && !onlineCheckoutOpen && !minimumWhyOpen423) return;
 
     const previousOverflow = document.body.style.overflow;
     const previousPaddingRight = document.body.style.paddingRight;
@@ -3596,7 +3597,8 @@ export default function DarikDirectStorefrontPage() {
 
     const closeOnEscape = (event: KeyboardEvent) => {
       if (event.key !== "Escape") return;
-      if (onlineCheckoutOpen) setOnlineCheckoutOpen(false);
+      if (minimumWhyOpen423) setMinimumWhyOpen423(false);
+      else if (onlineCheckoutOpen) setOnlineCheckoutOpen(false);
       else if (cartOpen) setCartOpen(false);
       else if (detailsOpen) setDetailsOpen(false);
     };
@@ -3607,7 +3609,7 @@ export default function DarikDirectStorefrontPage() {
       document.body.style.overflow = previousOverflow;
       document.body.style.paddingRight = previousPaddingRight;
     };
-  }, [cartOpen, detailsOpen, onlineCheckoutOpen]);
+  }, [cartOpen, detailsOpen, onlineCheckoutOpen, minimumWhyOpen423]);
 
   useEffect(() => {
     if (!slug) return;
@@ -10461,6 +10463,7 @@ style={{
                 onClick={() => {
                   setCartOpen(false);
                   setOnlineCheckoutOpen(false);
+                  setMinimumWhyOpen423(false);
                   setOrderConfirmation(null);
                   setCheckoutError("");
                 }}
@@ -10692,25 +10695,6 @@ style={{
                     <strong>{money(orderTotal)}</strong>
                   </div>
 
-                  {locationZoneMinimumApplies423 ? (
-                    <section className={styles.deliveryZoneMinimumNotice423}>
-                      <strong>
-                        Location-based minimum / حد أدنى حسب الموقع
-                      </strong>
-                      <p>
-                        Your location is outside {storefront.display_name}&apos;s
-                        preferred no-minimum delivery zone. Delivery is still
-                        available here, but this delivery zone requires a minimum
-                        order of {money(minimumOrder)}.
-                      </p>
-                      <p dir="rtl">
-                        موقعك خارج منطقة التوصيل المفضلة بدون حد أدنى لدى{" "}
-                        {storefront.display_name}. التوصيل متاح لموقعك، لكن هذه
-                        المنطقة تتطلب حداً أدنى للطلب بقيمة {money(minimumOrder)}.
-                      </p>
-                    </section>
-                  ) : null}
-
                   {!minimumReached ? (
                     <div className={styles.minimumProgress}>
                       <div>
@@ -10726,20 +10710,18 @@ style={{
                         />
                       </div>
                       <p>
-                        {locationZoneMinimumApplies423 ? (
-                          <>
-                            Add {money(minimumOrder - cartSubtotal)} more to meet
-                            the {money(minimumOrder)} minimum for your delivery
-                            zone. / أضف {money(minimumOrder - cartSubtotal)} للوصول
-                            إلى الحد الأدنى لمنطقة التوصيل.
-                          </>
-                        ) : (
-                          <>
-                            Add {money(minimumOrder - cartSubtotal)} to reach the
-                            minimum order.
-                          </>
-                        )}
+                        Add {money(minimumOrder - cartSubtotal)} to reach the
+                        minimum order.
                       </p>
+                      {locationZoneMinimumApplies423 ? (
+                        <button
+                          type="button"
+                          className={styles.minimumWhyLink423}
+                          onClick={() => setMinimumWhyOpen423(true)}
+                        >
+                          Why is there a minimum? / لماذا يوجد حد أدنى؟
+                        </button>
+                      ) : null}
                     </div>
                   ) : null}
 
@@ -11861,6 +11843,64 @@ style={{
               </>
             )}
           </aside>
+        </div>
+      ) : null}
+
+      {minimumWhyOpen423 && locationZoneMinimumApplies423 ? (
+        <div
+          className={`${styles.modalOverlay} ${styles.minimumWhyOverlay423}`}
+          role="presentation"
+          onMouseDown={(event) => {
+            if (event.target === event.currentTarget) setMinimumWhyOpen423(false);
+          }}
+        >
+          <section
+            className={styles.minimumWhyModal423}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="minimum-why-title-423"
+            onMouseDown={(event) => event.stopPropagation()}
+          >
+            <header className={styles.minimumWhyHeader423}>
+              <div>
+                <small>Delivery minimum / الحد الأدنى للتوصيل</small>
+                <h2 id="minimum-why-title-423">Why is there a minimum?</h2>
+              </div>
+              <button
+                type="button"
+                aria-label="Close minimum order explanation"
+                onClick={() => setMinimumWhyOpen423(false)}
+              >
+                <Icon name="close" size={19} />
+              </button>
+            </header>
+
+            <div className={styles.minimumWhyBody423}>
+              <div className={styles.minimumWhyIcon423}>
+                <Icon name="location" size={22} />
+              </div>
+              <p>
+                Your location is outside {storefront.display_name}&apos;s
+                preferred delivery zone, where no minimum order is required.
+                You&apos;re still within the store&apos;s extended delivery area,
+                but orders to your location require a minimum of{" "}
+                <strong>{money(minimumOrder)}</strong>.
+              </p>
+              <p dir="rtl">
+                موقعك خارج منطقة التوصيل المفضلة لدى {storefront.display_name}،
+                حيث لا يوجد حد أدنى للطلب. ما زال موقعك ضمن نطاق التوصيل الممتد،
+                ولكن الطلبات إلى موقعك تتطلب حداً أدنى بقيمة{" "}
+                <strong>{money(minimumOrder)}</strong>.
+              </p>
+              <button
+                type="button"
+                className={styles.minimumWhyDone423}
+                onClick={() => setMinimumWhyOpen423(false)}
+              >
+                Got it / فهمت
+              </button>
+            </div>
+          </section>
         </div>
       ) : null}
     </main>
