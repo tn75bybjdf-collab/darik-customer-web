@@ -2450,7 +2450,16 @@ function DarikApprovedStoreOpening408G({
   storefrontSlug: string;
 }) {
   const [openingTruth408G, setOpeningTruth408G] =
-    useState<DarikOpeningTruth408G | null>(null);
+    useState<DarikOpeningTruth408G | null>(() =>
+      String(storefrontSlug || "").trim().toLowerCase() === "alsalam"
+        ? {
+            display_name: "Al Salam Mall",
+            tagline: "Your Neighborhood Mall",
+            logo_url: "https://aarpjcfsnlasclxefdqj.supabase.co/storage/v1/object/public/darik-direct-storefront-assets/4fc99655-b59c-49a7-95a5-7a92da02eaac/logo/1787033888748-f5a9dd5d-0d41-440c-83a7-f2889edeb31a.png",
+            hero_image_url: "https://aarpjcfsnlasclxefdqj.supabase.co/storage/v1/object/public/darik-direct-storefront-assets/4fc99655-b59c-49a7-95a5-7a92da02eaac/hero/1787033901133-52558b8c-484b-489a-b8f5-cdbb2b67e3cb.jpeg",
+          }
+        : null
+    );
   const [assetsReady408G, setAssetsReady408G] = useState(false);
 
   useEffect(() => {
@@ -2592,47 +2601,15 @@ function DarikApprovedStoreOpening408G({
   const hero408G = String(openingTruth408G?.hero_image_url || "").trim();
   const logo408G = String(openingTruth408G?.logo_url || "").trim();
 
-  const fallbackName408G =
-    String(storefrontSlug || "")
-      .trim()
-      .split("-")
-      .filter(Boolean)
-      .map((part408G) =>
-        part408G.charAt(0).toUpperCase() + part408G.slice(1)
-      )
-      .join(" ") || "Store";
-
-  // Show an immediate lightweight opening state while branding is fetched.
-  // This prevents a blank white page on custom-domain rewrites where the
-  // browser-visible pathname is "/" even though Next routed to /[slug].
+  // The exact branded opener can paint immediately once real branding is known.
+  // Asset readiness controls when the opener finishes, not whether it is visible.
   if (
     !openingTruth408G ||
     !storeName408G ||
     !hero408G ||
-    !logo408G ||
-    !assetsReady408G
+    !logo408G
   ) {
-    return (
-      <main className={styles.approvedOpening408} aria-live="polite">
-        <div className={styles.approvedOpeningStage408}>
-          <section className={styles.approvedOpeningCard408}>
-            <div className={styles.approvedOpeningLogoShell408}>
-              <strong>{fallbackName408G.slice(0, 1).toUpperCase()}</strong>
-            </div>
-            <h1>{fallbackName408G}</h1>
-            <div className={styles.approvedOpeningSpinner408} aria-hidden="true" />
-            <h2>Opening {fallbackName408G}…</h2>
-            <p className={styles.approvedOpeningPreparing408}>
-              Preparing products, offers, and delivery details.
-            </p>
-            <div className={styles.approvedOpeningPowered408}>
-              <span>POWERED BY</span>
-              <strong>DARIK</strong>
-            </div>
-          </section>
-        </div>
-      </main>
-    );
+    return null;
   }
 
   return (
