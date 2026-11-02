@@ -11,21 +11,21 @@ const nextConfig = {
     ],
   },
 
-  async redirects() {
-    return [
-      {
-        source: "/:path*",
-        has: [{ type: "host", value: "alsalammarka.com" }],
-        destination: "https://www.getdarik.com/alsalam",
-        permanent: true,
-      },
-      {
-        source: "/:path*",
-        has: [{ type: "host", value: "www.alsalammarka.com" }],
-        destination: "https://www.getdarik.com/alsalam",
-        permanent: true,
-      },
-    ];
+  async rewrites() {
+    return {
+      beforeFiles: [
+        {
+          source: "/",
+          has: [{ type: "host", value: "alsalammarka.com" }],
+          destination: "/alsalam",
+        },
+        {
+          source: "/",
+          has: [{ type: "host", value: "www.alsalammarka.com" }],
+          destination: "/alsalam",
+        },
+      ],
+    };
   },
 
   async headers() {
