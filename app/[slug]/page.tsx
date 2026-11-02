@@ -2444,8 +2444,10 @@ type DarikOpeningTruth408G = {
 
 function DarikApprovedStoreOpening408G({
   onFinished,
+  storefrontSlug,
 }: {
   onFinished: () => void;
+  storefrontSlug: string;
 }) {
   const [openingTruth408G, setOpeningTruth408G] =
     useState<DarikOpeningTruth408G | null>(null);
@@ -2454,15 +2456,18 @@ function DarikApprovedStoreOpening408G({
   useEffect(() => {
     let cancelled408G = false;
 
-    let slug408G = "";
-    try {
-      slug408G = decodeURIComponent(
-        window.location.pathname.split("/").filter(Boolean)[0] || "",
-      )
-        .trim()
-        .toLowerCase();
-    } catch {
-      slug408G = "";
+    let slug408G = String(storefrontSlug || "").trim().toLowerCase();
+
+    if (!slug408G) {
+      try {
+        slug408G = decodeURIComponent(
+          window.location.pathname.split("/").filter(Boolean)[0] || "",
+        )
+          .trim()
+          .toLowerCase();
+      } catch {
+        slug408G = "";
+      }
     }
 
     if (!slug408G || slug408G === "_darik-private-store-preview") {
@@ -2511,7 +2516,7 @@ function DarikApprovedStoreOpening408G({
     return () => {
       cancelled408G = true;
     };
-  }, []);
+  }, [storefrontSlug]);
 
   useEffect(() => {
     setAssetsReady408G(false);
@@ -2587,7 +2592,19 @@ function DarikApprovedStoreOpening408G({
   const hero408G = String(openingTruth408G?.hero_image_url || "").trim();
   const logo408G = String(openingTruth408G?.logo_url || "").trim();
 
-  // SSR + first hydration remain visually blank. No generic Darik screen.
+  const fallbackName408G =
+    String(storefrontSlug || "")
+      .trim()
+      .split("-")
+      .filter(Boolean)
+      .map((part408G) =>
+        part408G.charAt(0).toUpperCase() + part408G.slice(1)
+      )
+      .join(" ") || "Store";
+
+  // Show an immediate lightweight opening state while branding is fetched.
+  // This prevents a blank white page on custom-domain rewrites where the
+  // browser-visible pathname is "/" even though Next routed to /[slug].
   if (
     !openingTruth408G ||
     !storeName408G ||
@@ -2595,7 +2612,27 @@ function DarikApprovedStoreOpening408G({
     !logo408G ||
     !assetsReady408G
   ) {
-    return null;
+    return (
+      <main className={styles.approvedOpening408} aria-live="polite">
+        <div className={styles.approvedOpeningStage408}>
+          <section className={styles.approvedOpeningCard408}>
+            <div className={styles.approvedOpeningLogoShell408}>
+              <strong>{fallbackName408G.slice(0, 1).toUpperCase()}</strong>
+            </div>
+            <h1>{fallbackName408G}</h1>
+            <div className={styles.approvedOpeningSpinner408} aria-hidden="true" />
+            <h2>Opening {fallbackName408G}…</h2>
+            <p className={styles.approvedOpeningPreparing408}>
+              Preparing products, offers, and delivery details.
+            </p>
+            <div className={styles.approvedOpeningPowered408}>
+              <span>POWERED BY</span>
+              <strong>DARIK</strong>
+            </div>
+          </section>
+        </div>
+      </main>
+    );
   }
 
   return (
@@ -8105,6 +8142,7 @@ if (
   ) {
     return (
       <DarikApprovedStoreOpening408G
+        storefrontSlug={slug}
         onFinished={() => setDarikOpeningComplete408G(true)}
       />
     );
