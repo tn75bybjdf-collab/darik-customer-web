@@ -6874,6 +6874,20 @@ export default function DarikDirectStorefrontPage() {
   const orderTotal = cartSubtotal + deliveryFee;
   const minimumOrder = matchedMinimumOrder117;
   const minimumReached = cartSubtotal >= minimumOrder;
+  // DARIK_LOCATION_BASED_ZONE_MINIMUM_423
+  // A zone-specific minimum can be higher than the storefront's normal/base
+  // minimum. Make that distinction visible to customers instead of presenting
+  // it as though every customer has the same minimum.
+  const baseMinimumOrder423 = Math.max(
+    0,
+    Number(storefront?.minimum_order ?? 0) || 0
+  );
+  const locationZoneMinimumApplies423 = Boolean(
+    deliveryEnabled &&
+      !selectedPickup &&
+      deliveryMatch117 &&
+      minimumOrder > baseMinimumOrder423 + 0.0001
+  );
   const activeProduct = useMemo(
     () => products.find((product) => product.id === activeProductId) ?? null,
     [activeProductId, products]
@@ -10678,6 +10692,25 @@ style={{
                     <strong>{money(orderTotal)}</strong>
                   </div>
 
+                  {locationZoneMinimumApplies423 ? (
+                    <section className={styles.deliveryZoneMinimumNotice423}>
+                      <strong>
+                        Location-based minimum / حد أدنى حسب الموقع
+                      </strong>
+                      <p>
+                        Your location is outside {storefront.display_name}&apos;s
+                        preferred no-minimum delivery zone. Delivery is still
+                        available here, but this delivery zone requires a minimum
+                        order of {money(minimumOrder)}.
+                      </p>
+                      <p dir="rtl">
+                        موقعك خارج منطقة التوصيل المفضلة بدون حد أدنى لدى{" "}
+                        {storefront.display_name}. التوصيل متاح لموقعك، لكن هذه
+                        المنطقة تتطلب حداً أدنى للطلب بقيمة {money(minimumOrder)}.
+                      </p>
+                    </section>
+                  ) : null}
+
                   {!minimumReached ? (
                     <div className={styles.minimumProgress}>
                       <div>
@@ -10693,8 +10726,19 @@ style={{
                         />
                       </div>
                       <p>
-                        Add {money(minimumOrder - cartSubtotal)} to reach the
-                        minimum order.
+                        {locationZoneMinimumApplies423 ? (
+                          <>
+                            Add {money(minimumOrder - cartSubtotal)} more to meet
+                            the {money(minimumOrder)} minimum for your delivery
+                            zone. / أضف {money(minimumOrder - cartSubtotal)} للوصول
+                            إلى الحد الأدنى لمنطقة التوصيل.
+                          </>
+                        ) : (
+                          <>
+                            Add {money(minimumOrder - cartSubtotal)} to reach the
+                            minimum order.
+                          </>
+                        )}
                       </p>
                     </div>
                   ) : null}
