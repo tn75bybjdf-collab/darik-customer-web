@@ -9709,26 +9709,6 @@ style={{
         </section>
       ) : null}
 
-            {isGroceryStore ? (
-        <section className={styles.groceryPromoBanner}>
-          <div className={styles.groceryPromoCopy}>
-            <span>{"Weekly picks / \u0645\u062e\u062a\u0627\u0631\u0627\u062a \u0627\u0644\u0623\u0633\u0628\u0648\u0639"}</span>
-            <h2>{"Fresh picks, family essentials, and fast shopping."}</h2>
-            <p>
-              {"Explore what the store is featuring this week, then add what you need straight to your basket. / \u062a\u0635\u0641\u062d \u0645\u062e\u062a\u0627\u0631\u0627\u062a \u0627\u0644\u0645\u062a\u062c\u0631 \u0644\u0647\u0630\u0627 \u0627\u0644\u0623\u0633\u0628\u0648\u0639 \u0648\u0623\u0636\u0641 \u0627\u062d\u062a\u064a\u0627\u062c\u0627\u062a\u0643 \u0644\u0644\u0633\u0644\u0629 \u0645\u0628\u0627\u0634\u0631\u0629."}
-            </p>
-            <button type="button" onClick={jumpToCatalog}>
-              {"Shop groceries / \u062a\u0633\u0648\u0642 \u0627\u0644\u0645\u0646\u062a\u062c\u0627\u062a"}
-              <Icon name="arrow" size={18} />
-            </button>
-          </div>
-          <div className={styles.groceryPromoBadge}>
-            <Icon name="bag" size={28} />
-            <strong>{"Fresh / \u0637\u0627\u0632\u062c"}</strong>
-            <span>{"Local shopping made easy / \u062a\u0633\u0648\u0642 \u0645\u062d\u0644\u064a \u0623\u0633\u0647\u0644"}</span>
-          </div>
-        </section>
-      ) : null}
 <section
         className={`${styles.catalogShell} ${portfolioStyles.catalogPolish}`}
         id="catalog"
