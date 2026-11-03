@@ -23896,3 +23896,26 @@
     padding: 19px;
   }
 }
+
+
+/* DARIK_ALSALAM_DESKTOP_STICKY_BANNER_FIT_425
+   Only the Al Salam desktop promotional banner changes.
+   Preserve uploaded artwork instead of cropping it into the fixed sticky height.
+   Phones/tablets below 900px retain their existing, approved layout. */
+@media (min-width: 900px) {
+  .page[data-storefront-slug="alsalam"] .stickyBannerInner283 {
+    height: auto !important;
+    max-height: min(260px, 24vw);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .page[data-storefront-slug="alsalam"] .stickyBannerImage283 {
+    width: 100%;
+    height: auto !important;
+    max-height: min(260px, 24vw);
+    object-fit: contain !important;
+    object-position: center !important;
+  }
+}
