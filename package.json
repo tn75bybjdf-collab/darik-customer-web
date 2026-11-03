@@ -10,8 +10,8 @@
   },
   "dependencies": {
     "@supabase/supabase-js": "latest",
-    "next": "latest",
-    "nodemailer": "^8.0.7",
+    "next": "16.4.0",
+    "nodemailer": "10.1.0",
     "react": "latest",
     "react-dom": "latest"
   },
