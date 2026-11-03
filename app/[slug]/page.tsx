@@ -8734,6 +8734,7 @@ function renderProductCard(product: Product) {
       data-corners={cornerStyle}
       data-hero={heroLayout}
       data-hero-size={heroSize254}
+      data-storefront-slug={storefront.slug}
       data-banner-active="no"
       data-business={effectiveBusinessType}
       data-theme-field={effectiveThemeField}
