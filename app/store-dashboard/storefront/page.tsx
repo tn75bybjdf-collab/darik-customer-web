@@ -6919,7 +6919,7 @@ export default function DarikDirectStorefrontSettingsPage() {
         ? "Approved — actual live storefront editor unlocked. / تمت الموافقة — محرر المتجر المباشر الفعلي متاح."
         : hasActivationRequest206 === true
           ? "Private setup preview is available while you build the store. Finish Store Setup locks it until Darik approves CliQ. / معاينة الإعداد الخاصة متاحة أثناء تجهيز المتجر، وبعد إنهاء الإعداد تُقفل حتى موافقة داريك على كليك."
-          : "Choose a yearly plan and submit CliQ payment before storefront setup. / اختر خطة سنوية وأرسل دفعة كليك قبل إعداد واجهة المتجر."
+          : "Choose a monthly plan and submit CliQ payment before storefront setup. / اختر خطة شهرية وأرسل دفعة كليك قبل إعداد واجهة المتجر."
     );
   }, [catalogUnlocked190, hasActivationRequest206]);
 
@@ -11764,7 +11764,7 @@ await saveStorefront(undefined, "manual");
             <strong>Storefront setup only / إعداد الواجهة فقط</strong>
             <p>
               You can complete branding, theme, location, delivery and storefront settings while CliQ is reviewed.
-              Products, Categories and Orders unlock only after Darik approves the yearly payment. / يمكنك إكمال الهوية
+              Products, Categories and Orders unlock only after Darik approves the plan payment. / يمكنك إكمال الهوية
               والتصميم والموقع والتوصيل وإعدادات الواجهة أثناء مراجعة CliQ، وتفتح المنتجات والفئات والطلبات بعد الموافقة.
             </p>
           </section>
@@ -11802,7 +11802,7 @@ await saveStorefront(undefined, "manual");
                       <a href="/store-dashboard/activation">
                         {storefront.activation_status === "payment_review"
                           ? "CliQ under review / دفعة CliQ قيد المراجعة"
-                          : "Choose yearly plan & pay / اختر الخطة السنوية وادفع"}
+                          : "Choose monthly plan & pay / اختر الخطة الشهرية وادفع"}
                       </a>
                     )}
                   </div>
