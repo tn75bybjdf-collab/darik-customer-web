@@ -326,8 +326,11 @@ function activationLabel(value: string | null | undefined) {
 
 function planLabel(value: string | null | undefined) {
   const labels: Record<string, string> = {
+    monthly_1000: "30 JOD/month · 1,000 items",
     annual_1000: "300 JOD/year · 1,000 items",
+    monthly_3000: "45 JOD/month · 3,000 items",
     annual_3000: "400 JOD/year · 3,000 items",
+    monthly_10000: "60 JOD/month · 10,000 items + custom domain",
     annual_10000: "500 JOD/year · 10,000 items",
     basic_monthly: "Legacy plan",
     basic_6_month: "Legacy plan",
@@ -751,7 +754,7 @@ export default function DarikDirectOverviewPage() {
     return [
       {
         id: "activation",
-        title: "Yearly plan & CliQ / الخطة السنوية وCliQ",
+        title: "Monthly plan & CliQ / الخطة الشهرية وCliQ",
         detail: "Payment approval comes before catalog creation / موافقة الدفع تسبق إنشاء الكتالوج",
         href: "/store-dashboard/activation",
         action:
@@ -791,7 +794,7 @@ export default function DarikDirectOverviewPage() {
         title: "Catalog structure / هيكلة الكتالوج",
         detail: catalogUnlocked190
           ? "Create customer-facing categories / أنشئ فئات للعملاء"
-          : "Locked until yearly payment approval / مقفل حتى موافقة الدفع السنوي",
+          : "Locked until plan payment approval / مقفل حتى موافقة دفع الاشتراك",
         href: catalogUnlocked190 ? "/store-dashboard/categories" : "/store-dashboard/activation",
         action: catalogUnlocked190 ? "Create category / إنشاء فئة" : "Locked 🔒 / مقفل",
         complete: catalogUnlocked190 && categoryCount > 0,
@@ -800,8 +803,8 @@ export default function DarikDirectOverviewPage() {
         id: "products",
         title: "Products / المنتجات",
         detail: catalogUnlocked190
-          ? "Add products within your yearly plan limit / أضف المنتجات ضمن حد خطتك"
-          : "Locked until yearly payment approval / مقفل حتى موافقة الدفع السنوي",
+          ? "Add products within your plan limit / أضف المنتجات ضمن حد خطتك"
+          : "Locked until plan payment approval / مقفل حتى موافقة دفع الاشتراك",
         href: catalogUnlocked190 ? "/store-dashboard/products" : "/store-dashboard/activation",
         action: catalogUnlocked190 ? "Add product / إضافة منتج" : "Locked 🔒 / مقفل",
         complete: catalogUnlocked190 && productCount > 0,
