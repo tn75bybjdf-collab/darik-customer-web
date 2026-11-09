@@ -287,6 +287,15 @@ export default function StoreActivationPage() {
       return;
     }
 
+    const selectedDomains = selectedPlan.premium
+      ? domainPreferences.map(normalizeDomain).filter(Boolean)
+      : [];
+    if (selectedDomains.length > 0 &&
+        (selectedDomains.length !== 5 || new Set(selectedDomains).size !== 5 || !selectedDomains.every(isValidDomain))) {
+      setError("Enter five different valid domains, or leave all five empty. / أدخل خمسة نطاقات صحيحة ومختلفة، أو اترك جميع الخانات فارغة.");
+      return;
+    }
+
     setBusy(true);
 
     const extension = receipt.name.split(".").pop()?.toLowerCase() || "jpg";
@@ -308,13 +317,14 @@ export default function StoreActivationPage() {
       return;
     }
 
-    const result = await supabase.rpc("darik_direct_submit_activation_request_v190", {
+    const result = await supabase.rpc("darik_direct_submit_activation_request_monthly_v1", {
       p_retailer_id: store.retailer_id,
       p_plan_code: plan,
       p_sender_name: senderName.trim(),
       p_receipt_path: path,
       p_cliq_reference: cliqReference.trim() || null,
       p_retailer_note: note.trim() || null,
+      p_domain_preferences: selectedDomains,
     });
 
     if (result.error) {
@@ -494,11 +504,11 @@ export default function StoreActivationPage() {
                 <section className={styles.domainPanel}>
                   <div className={styles.domainPanelHead}>
                     <div>
-                      <h3>Choose five domain names / اختر خمسة أسماء نطاقات</h3>
+                      <h3>Optional custom domain choices / خيارات النطاق الخاص (اختياري)</h3>
                       <p>
-                        Enter them from most desired to least desired. Darik will check availability in this order and
-                        assign the first eligible domain available. / أدخلها من الأكثر رغبة إلى الأقل رغبة. ستتحقق داريك
-                        من التوفر بهذا الترتيب وتخصص أول نطاق مؤهل ومتاح.
+                        If you want a custom domain, enter five names in preference order. Darik will check availability and
+                        assign an eligible option after approval. / إذا أردت نطاقاً خاصاً، أدخل خمسة أسماء حسب الأفضلية. ستتحقق داريك
+                        من توفرها بعد الموافقة وتخصص نطاقاً مؤهلاً.
                       </p>
                     </div>
                     <span>Optional with Scale / اختياري مع خطة توسع</span>
