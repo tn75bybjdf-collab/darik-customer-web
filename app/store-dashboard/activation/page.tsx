@@ -50,31 +50,31 @@ type Plan = {
 
 const plans: readonly Plan[] = [
   {
-    code: "annual_1000",
+    code: "monthly_1000",
     title: "Up to 1,000 items",
     titleAr: "حتى 1,000 منتج",
-    price: 300,
-    detail: "300 JOD/year · paid up front",
-    detailAr: "300 دينار سنوياً · الدفع مقدماً",
+    price: 30,
+    detail: "30 JOD/month · billed monthly",
+    detailAr: "30 دينار شهرياً · الدفع كل شهر",
     premium: false,
   },
   {
-    code: "annual_3000",
+    code: "monthly_3000",
     title: "Up to 3,000 items",
     titleAr: "حتى 3,000 منتج",
-    price: 400,
-    detail: "400 JOD/year · paid up front",
-    detailAr: "400 دينار سنوياً · الدفع مقدماً",
+    price: 45,
+    detail: "45 JOD/month · billed monthly",
+    detailAr: "45 دينار شهرياً · الدفع كل شهر",
     premium: false,
   },
   {
-    code: "annual_10000",
+    code: "monthly_10000",
     title: "Up to 10,000 items",
     titleAr: "حتى 10,000 منتج",
-    price: 500,
-    detail: "500 JOD/year · paid up front",
-    detailAr: "500 دينار سنوياً · الدفع مقدماً",
-    premium: false,
+    price: 60,
+    detail: "60 JOD/month · billed monthly",
+    detailAr: "60 دينار شهرياً · الدفع كل شهر",
+    premium: true,
   },
 ] as const;
 
@@ -145,6 +145,9 @@ function planLabel(code: string) {
     basic_6_month: "Legacy plan / خطة قديمة",
     basic_12_month: "Legacy plan / خطة قديمة",
     premium_annual: "Legacy plan / خطة قديمة",
+    annual_1000: "Legacy annual · 1,000 products / خطة سنوية قديمة",
+    annual_3000: "Legacy annual · 3,000 products / خطة سنوية قديمة",
+    annual_10000: "Legacy annual · 10,000 products / خطة سنوية قديمة",
   };
   return legacy[code] || code.replace(/_/g, " ");
 }
@@ -155,7 +158,7 @@ export default function StoreActivationPage() {
   const [loading, setLoading] = useState(true);
   const [store, setStore] = useState<StoreContext | null>(null);
   const [requests, setRequests] = useState<ActivationRequest[]>([]);
-  const [plan, setPlan] = useState("annual_1000");
+  const [plan, setPlan] = useState("monthly_1000");
   const [senderName, setSenderName] = useState("");
   const [cliqReference, setCliqReference] = useState("");
   const [note, setNote] = useState("");
@@ -420,10 +423,10 @@ export default function StoreActivationPage() {
         {!active && !pending ? (
           <>
             <section className={styles.panel}>
-              <h2>Choose your yearly plan / اختر خطتك السنوية</h2>
+              <h2>Choose your monthly plan / اختر خطتك الشهرية</h2>
               <p>
-                Payment comes before catalog creation. Choose one yearly plan and pay by CliQ. After you submit the
-                receipt, storefront setup opens while Darik reviews it. / الدفع يسبق إنشاء الكتالوج. اختر خطة سنوية
+                Payment comes before catalog creation. Choose one monthly plan and pay by CliQ. After you submit the
+                receipt, storefront setup opens while Darik reviews it. / الدفع يسبق إنشاء الكتالوج. اختر خطة شهرية
                 وادفع عبر CliQ، وبعد إرسال الإيصال يفتح إعداد الواجهة أثناء مراجعة داريك.
               </p>
 
@@ -462,11 +465,11 @@ export default function StoreActivationPage() {
                           <div className={styles.premiumInfo} role="note">
                             <strong>What Premium includes / ماذا تشمل الباقة المميزة؟</strong>
                             <p>
-                              Premium includes everything in the annual plan plus one eligible custom domain connected to
+                              The 60 JOD monthly Scale plan includes all core tools and the option to connect one eligible custom domain to
                               your Darik store.
                             </p>
                             <p dir="rtl">
-                              تشمل الباقة المميزة جميع مزايا الخطة السنوية، بالإضافة إلى نطاق خاص مؤهل واحد يتم ربطه بمتجرك
+                              تشمل خطة 60 دينار شهرياً الأدوات الأساسية وإمكانية ربط نطاق خاص مؤهل واحد بمتجرك
                               على داريك.
                             </p>
                             <div className={styles.domainExample}>
@@ -476,7 +479,7 @@ export default function StoreActivationPage() {
                               <code>fantoushmall.com</code>
                             </div>
                             <small>
-                              Darik checks your five choices in order and confirms the first eligible domain that is
+                              Darik can check your five choices in order and confirm an eligible domain that is
                               available. / تتحقق داريك من خياراتك الخمسة بالترتيب وتؤكد أول نطاق مؤهل ومتاح.
                             </small>
                           </div>
@@ -498,7 +501,7 @@ export default function StoreActivationPage() {
                         من التوفر بهذا الترتيب وتخصص أول نطاق مؤهل ومتاح.
                       </p>
                     </div>
-                    <span>Required for Premium / مطلوب للباقة المميزة</span>
+                    <span>Optional with Scale / اختياري مع خطة توسع</span>
                   </div>
 
                   <div className={styles.domainGrid}>
@@ -664,7 +667,7 @@ export default function StoreActivationPage() {
             ) : (
               <div className={styles.locked}>
                 <strong>No activation payments yet / لا توجد دفعات تفعيل بعد</strong>
-                <span>Choose a yearly plan and submit CliQ to start storefront setup. / اختر خطة سنوية وأرسل دفعة CliQ لبدء إعداد الواجهة.</span>
+                <span>Choose a monthly plan and submit CliQ to start storefront setup. / اختر خطة شهرية وأرسل دفعة كليك لبدء إعداد الواجهة.</span>
               </div>
             )}
           </div>
