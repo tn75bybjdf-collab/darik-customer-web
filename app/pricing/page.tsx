@@ -15,8 +15,8 @@ const COPY = {
     dashboard: "Retailer dashboard",
     startStore: "Start your store",
     location: "Amman, Jordan",
-    heroEyebrow: "SIMPLE YEARLY PRICING",
-    offer: "50% LAUNCH OFFER",
+    heroEyebrow: "SIMPLE MONTHLY PRICING",
+    offer: "FLEXIBLE MONTHLY PLANS",
     heroTitleA: "Serious storefronts.",
     heroTitleB: "Simple pricing.",
     heroBody:
@@ -36,18 +36,18 @@ const COPY = {
     plansEyebrow: "CHOOSE YOUR CATALOG SIZE",
     plansTitle: "One platform. Three straightforward plans.",
     plansBody:
-      "Every plan has the same core Darik experience. Choose based on how large you want your published catalog to be.",
+      "All plans include Darik's core tools. Choose your catalog size; Scale includes one eligible custom domain.",
     regular: "Regular",
-    launch: "Launch price",
-    paid: "paid up front",
+    launch: "Monthly rate",
+    paid: "pay monthly by CliQ",
     choose: "Choose this plan",
     plans: [
       {
         name: "Essential",
         limit: "Up to 1,000 products",
         description: "For focused local retailers building a strong searchable catalog.",
-        regular: "600",
-        price: "300",
+        regular: "",
+        price: "30",
         badge: "",
         icon: "cart",
       },
@@ -55,8 +55,8 @@ const COPY = {
         name: "Growth",
         limit: "Up to 3,000 products",
         description: "For growing stores with broader inventory and multiple categories.",
-        regular: "800",
-        price: "400",
+        regular: "",
+        price: "45",
         badge: "MOST POPULAR",
         icon: "growth",
       },
@@ -64,20 +64,20 @@ const COPY = {
         name: "Scale",
         limit: "Up to 10,000 products",
         description: "For high-volume retailers that need serious catalog capacity.",
-        regular: "1,000",
-        price: "500",
-        badge: "LARGEST CATALOG",
+        regular: "",
+        price: "60",
+        badge: "CUSTOM DOMAIN INCLUDED",
         icon: "rocket",
       },
     ],
-    domainEyebrow: "OPTIONAL ADD-ON",
+    domainEyebrow: "EXCLUSIVE TO SCALE",
     domainTitle: "Use your own domain.",
     domainBody:
-      "Want customers to visit your storefront through your own web address? Connect your domain to your Darik storefront.",
+      "Scale includes one eligible custom domain for your Darik storefront, subject to availability and setup.",
     domainNote:
       "Your Darik storefront stays connected to the same catalog, dashboard, and order system.",
-    domainPrice: "100 JOD",
-    domainFee: "one-time setup fee",
+    domainPrice: "60 JOD/month",
+    domainFee: "available with Scale",
     valueEyebrow: "WHAT YOU'RE ACTUALLY BUYING",
     valueTitle: "Not a template. Retail infrastructure.",
     valueBody:
@@ -91,9 +91,9 @@ const COPY = {
     faqEyebrow: "STRAIGHT ANSWERS",
     faqTitle: "Questions before you launch.",
     faq: [
-      ["Are these monthly prices?", "No. Darik plans are yearly. The displayed launch price is paid once for the year."],
-      ["Do different plans remove features?", "No. The core Darik storefront, discovery, delivery configuration, dashboard, and order tools are included. The main difference is catalog size."],
-      ["Do I need my own domain?", "No. Your Darik storefront already has a customer-facing Darik URL. A custom domain is optional for a one-time 100 JOD setup fee."],
+      ["Are these monthly prices?", "Yes. Essential is 30 JOD/month, Growth 45 JOD/month and Scale 60 JOD/month. Pay each month by CliQ."],
+      ["Do different plans remove features?", "Every plan includes the core tools. Product limits differ, and only Scale offers a custom domain."],
+      ["Do I need my own domain?", "No. Every store gets a getdarik.com link. One eligible custom domain is available only on the 60 JOD/month Scale plan."],
       ["Can customers find my store outside my delivery area?", "Yes. Darik is also a Jordan-wide store and product directory. Delivery matches are prioritized, but active stores remain discoverable."],
     ],
     finalTitle: "Your customers are already searching.",
@@ -134,8 +134,8 @@ const COPY = {
     dashboard: "لوحة التاجر",
     startStore: "ابدأ متجرك",
     location: "عمّان، الأردن",
-    heroEyebrow: "تسعير سنوي واضح",
-    offer: "عرض إطلاق بخصم 50%",
+    heroEyebrow: "أسعار شهرية واضحة",
+    offer: "اشتراكات شهرية مرنة",
     heroTitleA: "واجهة متجر احترافية.",
     heroTitleB: "بسعر بسيط.",
     heroBody:
@@ -154,22 +154,22 @@ const COPY = {
     ],
     plansEyebrow: "اختر حجم الكتالوج",
     plansTitle: "منصة واحدة. ثلاث خطط واضحة.",
-    plansBody: "كل الخطط تعطيك تجربة داريك الأساسية كاملة. اختر حسب حجم الكتالوج الذي تريد نشره.",
+    plansBody: "كل الخطط تشمل أدوات داريك الأساسية. اختر حجم الكتالوج، وخطة توسع بـ60 دينار شهرياً تتيح نطاقاً خاصاً مؤهلاً.",
     regular: "السعر الأصلي",
-    launch: "سعر الإطلاق",
-    paid: "تدفع مقدماً",
+    launch: "السعر الشهري",
+    paid: "الدفع شهرياً عبر كليك",
     choose: "اختر هذه الخطة",
     plans: [
-      { name: "أساسي", limit: "حتى 1,000 منتج", description: "للمتاجر المركزة التي تريد بناء كتالوج قوي وقابل للبحث.", regular: "600", price: "300", badge: "", icon: "cart" },
-      { name: "نمو", limit: "حتى 3,000 منتج", description: "للمتاجر المتنامية التي لديها مخزون أكبر وفئات متعددة.", regular: "800", price: "400", badge: "الأكثر طلباً", icon: "growth" },
-      { name: "توسع", limit: "حتى 10,000 منتج", description: "للتجار ذوي الحجم الكبير الذين يحتاجون سعة كتالوج قوية.", regular: "1,000", price: "500", badge: "أكبر كتالوج", icon: "rocket" },
+      { name: "أساسي", limit: "حتى 1,000 منتج", description: "للمتاجر المركزة التي تريد بناء كتالوج قوي وقابل للبحث.", regular: "", price: "30", badge: "", icon: "cart" },
+      { name: "نمو", limit: "حتى 3,000 منتج", description: "للمتاجر المتنامية التي لديها مخزون أكبر وفئات متعددة.", regular: "", price: "45", badge: "الأكثر طلباً", icon: "growth" },
+      { name: "توسع", limit: "حتى 10,000 منتج", description: "للتجار ذوي الحجم الكبير الذين يحتاجون سعة كتالوج قوية.", regular: "", price: "60", badge: "يشمل نطاقاً خاصاً", icon: "rocket" },
     ],
-    domainEyebrow: "إضافة اختيارية",
+    domainEyebrow: "حصري لخطة توسع",
     domainTitle: "استخدم نطاقك الخاص.",
-    domainBody: "إذا أردت أن يدخل الزبائن إلى متجرك من عنوان ويب خاص بك، نربطه مباشرة بواجهة داريك.",
+    domainBody: "خطة توسع بـ60 ديناراً شهرياً تشمل نطاقاً خاصاً مؤهلاً واحداً لمتجرك، حسب توفر الاسم وإجراءات الربط.",
     domainNote: "تبقى واجهة داريك مرتبطة بنفس الكتالوج ولوحة التحكم ونظام الطلبات.",
-    domainPrice: "100 دينار",
-    domainFee: "رسوم إعداد لمرة واحدة",
+    domainPrice: "60 دينار/شهر",
+    domainFee: "متاح ضمن خطة توسع",
     valueEyebrow: "ما الذي تحصل عليه فعلياً",
     valueTitle: "مش قالب جاهز. بنية رقمية لمتجرك.",
     valueBody: "داريك يعطي نشاطك واجهة احترافية للزبائن ويربطها بشبكة اكتشاف أوسع تساعد الناس على العثور على المخزون المحلي.",
@@ -182,9 +182,9 @@ const COPY = {
     faqEyebrow: "إجابات واضحة",
     faqTitle: "أسئلة قبل الإطلاق.",
     faq: [
-      ["هل هذه أسعار شهرية؟", "لا. خطط داريك سنوية، وسعر الإطلاق الظاهر يُدفع مرة واحدة للسنة."],
-      ["هل بعض الخطط تنقص ميزات؟", "لا. واجهة داريك والاكتشاف وإعدادات التوصيل ولوحة التحكم وأدوات الطلبات موجودة في الخطط. الفرق الأساسي هو حجم الكتالوج."],
-      ["هل لازم يكون عندي نطاق خاص؟", "لا. متجرك على داريك يأتي برابط مخصص للزبائن. النطاق الخاص اختياري مقابل 100 دينار رسوم إعداد لمرة واحدة."],
+      ["هل هذه أسعار شهرية؟", "نعم. الأساسي 30 ديناراً شهرياً، والنمو 45 ديناراً شهرياً، والتوسع 60 ديناراً شهرياً. يُدفع الاشتراك كل شهر عبر كليك."],
+      ["هل بعض الخطط تنقص ميزات؟", "كل الخطط تشمل المتجر والكتالوج والطلبات ولوحة التحكم والتوصيل. تختلف حدود المنتجات، والنطاق الخاص متاح فقط بخطة توسع."],
+      ["هل لازم يكون عندي نطاق خاص؟", "لا. جميع المتاجر تحصل على رابط getdarik.com. النطاق الخاص متاح فقط مع خطة توسع بـ60 ديناراً شهرياً."],
       ["هل الناس خارج نطاق توصيلي يقدروا يلاقوا متجري؟", "نعم. داريك أيضاً دليل للمتاجر والمنتجات على مستوى الأردن. نتائج التوصيل تظهر أولاً لكن المتاجر الفعالة تبقى قابلة للاكتشاف."],
     ],
     finalTitle: "زبائنك أصلاً قاعدين يبحثوا.",
@@ -360,9 +360,9 @@ export default function PricingPage() {
                   <h3>{plan.name}</h3>
                   <strong className={styles.productLimit}>{plan.limit}</strong>
                   <p className={styles.planDescription}>{plan.description}</p>
-                  <div className={styles.regularPrice}>{c.regular} JOD {plan.regular}</div>
+                  
                   <span className={styles.launchChip}>{c.launch}</span>
-                  <div className={styles.salePrice}><strong>{plan.price}</strong><span>JOD / year</span></div>
+                  <div className={styles.salePrice}><strong>{plan.price}</strong><span>{rtl ? "دينار / شهر" : "JOD / month"}</span></div>
                   <small>{c.paid}</small>
                   <a href="/store-signup">{c.choose}</a>
                 </article>
