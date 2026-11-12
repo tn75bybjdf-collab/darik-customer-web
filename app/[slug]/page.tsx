@@ -9229,10 +9229,22 @@ function renderProductCard(product: Product) {
         <>
           <style>{`
             @media (max-width: 767px) {
+              /* Scope scrolling to the approved storefront, not the
+                 legacy page behind it, including iPhone Safari. */
+              html:has([data-alsalam-approved="true"]),
+              body:has([data-alsalam-approved="true"]) {
+                height:100% !important;
+                overflow:hidden !important;
+                overscroll-behavior:none !important;
+              }
               [data-alsalam-approved="true"] {
+                position:fixed !important;
+                inset:0 !important;
+                width:100vw !important;
                 height:100dvh !important;
                 min-height:0 !important;
                 overflow:hidden !important;
+                isolation:isolate !important;
                 padding:0 !important;
                 margin:0 !important;
                 max-width:none !important;
@@ -9246,7 +9258,16 @@ function renderProductCard(product: Product) {
               [data-alsalam-approved="true"] > .${styles.mobileCartBar},
               [data-alsalam-approved="true"] > .${styles.stickyBanner283},
               [data-alsalam-approved="true"] > .${styles.footer} {display:none !important;}
-              #darik-alsalam-approved-live {display:block !important;}
+              #darik-alsalam-approved-live {
+                display:block !important;
+                position:absolute !important;
+                inset:0 !important;
+                width:100% !important;
+                max-width:none !important;
+                height:100% !important;
+                margin:0 !important;
+                z-index:10 !important;
+              }
             }
           `}</style>
           <iframe
