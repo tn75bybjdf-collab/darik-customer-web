@@ -36,6 +36,19 @@
   ].join("");
   document.head.appendChild(style);
   grid.classList.add("alsalam-seller-shelves");
+  // The approved illustration included a mock iPhone status bar printed
+  // inside its header artwork. Cover only those baked-in phone indicators.
+  // All actual store branding, cart actions and navigation stay untouched.
+  var deviceChromeCleanup = document.createElement("style");
+  deviceChromeCleanup.id = "darik-alsalam-remove-faux-phone-status";
+  deviceChromeCleanup.textContent = [
+    ".mast::before,.mast::after{content:'';position:absolute;top:0;height:40%;z-index:5;pointer-events:none;}",
+    ".mast::before{left:0;width:15.5%;background:linear-gradient(90deg,#73050d 0%,#76050e 42%,#830310 100%);}",
+    ".mast::after{right:0;width:27%;background:linear-gradient(90deg,#920113 0%,#890210 30%,#7c0410 62%,#72050e 100%);}",
+    ".home-indicator{display:none!important;}"
+  ].join("");
+  document.head.appendChild(deviceChromeCleanup);
+
 
   function safe(value) {
     return String(value == null ? "" : value).replace(/[&<>"']/g, function (char) {
