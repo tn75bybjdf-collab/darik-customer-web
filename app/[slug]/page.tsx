@@ -7003,6 +7003,75 @@ export default function DarikDirectStorefrontPage() {
     }, {});
   }
 
+
+  // AL SALAM APPROVED MOBILE PILOT — keep native DARIK cart, stock rules, and checkout
+  const isAlSalamApprovedPilot = storefront?.slug === "alsalam" && !isBuilderPositionPreview145;
+
+  useEffect(() => {
+    if (!isAlSalamApprovedPilot) return;
+    const iframe = document.getElementById("darik-alsalam-approved-live") as HTMLIFrameElement | null;
+    iframe?.contentWindow?.postMessage({
+      type:"darik-alsalam-catalog",
+      products:products.map((p)=>({
+        id:p.id,name:productName(p),ar:p.official_marketplace_name_ar || p.name,
+        size:"",price:Number(p.app_price??0),category:p.direct_store_category_name||"",
+        img:productPhoto(p)||""
+      })).filter((p)=>p.category&&Number.isFinite(p.price)),
+      categories:visibleCategories.map((c)=>({
+        id:c.id,name:c.name,ar:c.name_ar||"",count:Number(c.product_count||0)
+      }))
+    },window.location.origin);
+  }, [isAlSalamApprovedPilot, products, visibleCategories]);
+
+  useEffect(() => {
+    if (!isAlSalamApprovedPilot) return;
+    const sendLatest = (target: Window | null) => {
+      if (!target) return;
+      target.postMessage({
+        type:"darik-alsalam-catalog",
+        products:products.map((p)=>({
+          id:p.id,name:productName(p),ar:p.official_marketplace_name_ar || p.name,
+          size:"",price:Number(p.app_price??0),
+          category:p.direct_store_category_name || "",
+          img:productPhoto(p)||""
+        })).filter((p)=>p.category&&Number.isFinite(p.price)),
+        categories:visibleCategories.map((c)=>({
+          id:c.id,name:c.name,ar:c.name_ar||"",count:Number(c.product_count||0)
+        }))
+      },window.location.origin);
+    };
+    const onMessage = (event: MessageEvent) => {
+      const iframe = document.getElementById("darik-alsalam-approved-live") as HTMLIFrameElement | null;
+      if (!iframe || event.origin !== window.location.origin || event.source !== iframe.contentWindow) return;
+      if (event.data?.source !== "darik-alsalam-approved") return;
+      if (event.data.type === "ready") {
+        sendLatest(iframe.contentWindow);
+      } else if (event.data.type === "cart") {
+        setCartOpen(true);
+      } else if (event.data.type === "account") {
+        window.dispatchEvent(new CustomEvent("darik-customer-account-open-354", {detail:{source:"alsalam-mobile"}}));
+      } else if (event.data.type === "add") {
+        const targetId = String(event.data.productId || "");
+        const targetName = String(event.data.productName || "").trim().toLowerCase();
+        const p = products.find((candidate) => candidate.id === targetId) ||
+          products.find((candidate) => productName(candidate).trim().toLowerCase() === targetName);
+        if (!p) {
+          iframe.contentWindow?.postMessage({type:"darik-alsalam-feedback",message:"Product unavailable. Refresh the page."},window.location.origin);
+          return;
+        }
+        if (p.direct_availability_status === "out_of_stock" ||
+           (p.direct_inventory_tracking_enabled && Number(p.quantity_in_stock ?? 0) <= 0)) {
+          iframe.contentWindow?.postMessage({type:"darik-alsalam-feedback",message:"Out of stock"},window.location.origin);
+          return;
+        }
+        addToCart(p);
+        iframe.contentWindow?.postMessage({type:"darik-alsalam-feedback",message:"Added to your cart"},window.location.origin);
+      }
+    };
+    window.addEventListener("message",onMessage);
+    return ()=>window.removeEventListener("message",onMessage);
+  }, [isAlSalamApprovedPilot, products, visibleCategories]);
+
   function addToCart(
     product: Product,
     colorVariant216: FurnitureColorSelection216 | null = null,
@@ -8712,6 +8781,7 @@ function renderProductCard(product: Product) {
       data-mechanics-preview={previewMechanicsField ? "yes" : "no"}
       data-category-count={String(visibleCategories.length)}
       data-direct-purchase={hasDirectPurchaseProducts ? "yes" : "no"}
+      data-alsalam-approved={isAlSalamApprovedPilot ? "true" : undefined}
     >
       {darikPublicHiddenCss363 ? (
         <style
@@ -9122,6 +9192,48 @@ function renderProductCard(product: Product) {
           </small>
         </div>
       ) : null}
+
+      {isAlSalamApprovedPilot ? (
+        <>
+          <style>{`
+            @media (max-width: 767px) {
+              [data-alsalam-approved="true"] {
+                height:100dvh !important;
+                min-height:0 !important;
+                overflow:hidden !important;
+                padding:0 !important;
+                margin:0 !important;
+                max-width:none !important;
+                background:#fff !important;
+              }
+              [data-alsalam-approved="true"] > .${styles.announcementBar},
+              [data-alsalam-approved="true"] > .${styles.header},
+              [data-alsalam-approved="true"] > .${styles.hero},
+              [data-alsalam-approved="true"] > .${styles.quickInfoStrip},
+              [data-alsalam-approved="true"] > .${styles.reorderableSections},
+              [data-alsalam-approved="true"] > .${styles.mobileCartBar},
+              [data-alsalam-approved="true"] > .${styles.stickyBanner283},
+              [data-alsalam-approved="true"] > .${styles.footer} {display:none !important;}
+              #darik-alsalam-approved-live {display:block !important;}
+            }
+          `}</style>
+          <iframe
+            id="darik-alsalam-approved-live"
+            title="Al Salam Market — shopping"
+            src="/alsalam-approved.html"
+            style={{
+              width:"100%",
+              maxWidth:"500px",
+              height:"100dvh",
+              border:"0",
+              margin:"0 auto",
+              display:"none",
+              background:"#fff",
+            }}
+          />
+        </>
+      ) : null}
+
       <div className={styles.announcementBar}>
         <span>
           <i className={effectiveAcceptingOrders && storeIsOpenNow115 ? styles.liveDot : styles.pausedDot} />
