@@ -7036,6 +7036,20 @@ export default function DarikDirectStorefrontPage() {
 
   // AL SALAM APPROVED MOBILE PILOT — keep native DARIK cart, stock rules, and checkout
   const isAlSalamApprovedPilot = storefront?.slug === "alsalam" && !isBuilderPositionPreview145;
+  // Al Salam: synchronize the live cart quantity with the illustrated header.
+  useEffect(() => {
+    if (!isAlSalamApprovedPilot) return;
+    const iframe = document.getElementById("darik-alsalam-approved-live") as HTMLIFrameElement | null;
+    if (!iframe) return;
+    const syncBadge = () => iframe.contentWindow?.postMessage({
+      type: "darik-alsalam-cart-count",
+      count: cartCount,
+    }, window.location.origin);
+    iframe.addEventListener("load", syncBadge);
+    syncBadge();
+    return () => iframe.removeEventListener("load", syncBadge);
+  }, [isAlSalamApprovedPilot, cartCount]);
+
 
   // Al Salam-only visual Best Sellers: retain the original category shelves,
   // horizontal swiping, live inventory and actual sales ordering.
@@ -7117,6 +7131,7 @@ export default function DarikDirectStorefrontPage() {
       if (event.data?.source !== "darik-alsalam-approved") return;
       if (event.data.type === "ready") {
         sendLatest(iframe.contentWindow);
+        iframe.contentWindow?.postMessage({type:"darik-alsalam-cart-count",count:cartCount},window.location.origin);
       } else if (event.data.type === "cart") {
         setCartOpen(true);
       } else if (event.data.type === "account") {
@@ -9311,6 +9326,39 @@ function renderProductCard(product: Product) {
               }
             }
           `}</style>
+          <style>{`
+
+@media(max-width:767px){
+  .${styles.cartOverlay}[data-alsalam-cart="true"] {background:rgba(30,6,17,.67)!important;backdrop-filter:blur(9px)!important;}
+  .${styles.cartOverlay}[data-alsalam-cart="true"] .${styles.cartDrawer} {width:100%!important;max-width:100vw!important;height:100dvh!important;border-radius:24px 24px 0 0!important;background:#fffcfa!important;color:#20191d!important;overflow:hidden!important;box-shadow:0 -24px 70px rgba(60,9,23,.25)!important;}
+  .${styles.cartOverlay}[data-alsalam-cart="true"] .${styles.cartHeader} {position:relative;padding:26px 20px 22px!important;background:linear-gradient(135deg,#fff,#fff7f6)!important;border-bottom:1px solid #efe1e3!important;flex-shrink:0;}
+  .${styles.cartOverlay}[data-alsalam-cart="true"] .${styles.cartHeader}::before {content:"";position:absolute;top:0;left:0;right:0;height:5px;background:linear-gradient(90deg,#87031e,#bd1838,#df6371);}
+  .${styles.cartOverlay}[data-alsalam-cart="true"] .${styles.cartHeader} p {color:#a80a2a!important;font-size:11px!important;font-weight:900!important;letter-spacing:.13em!important;}
+  .${styles.cartOverlay}[data-alsalam-cart="true"] .${styles.cartHeader} h2 {color:#21181b!important;font-size:29px!important;font-weight:870!important;letter-spacing:-.04em!important;margin-top:8px!important;}
+  .${styles.cartOverlay}[data-alsalam-cart="true"] .${styles.cartHeader} > button {background:#fff!important;color:#a90c2c!important;border:1px solid #eed5dc!important;border-radius:14px!important;width:46px!important;height:46px!important;}
+  .${styles.cartOverlay}[data-alsalam-cart="true"] .${styles.cartLines} {background:#fffcfa!important;padding:18px 14px 28px!important;-webkit-overflow-scrolling:touch;overscroll-behavior-y:contain;}
+  .${styles.cartOverlay}[data-alsalam-cart="true"] .${styles.cartLine} {grid-template-columns:76px minmax(0,1fr) auto!important;gap:9px!important;margin-bottom:11px!important;padding:13px 10px!important;border-radius:17px!important;border:1px solid #efe4e6!important;background:white!important;box-shadow:0 5px 20px rgba(79,17,31,.05);}
+  .${styles.cartOverlay}[data-alsalam-cart="true"] .${styles.cartThumb} {width:76px!important;height:76px!important;background:#fbf8f5!important;border-radius:14px!important;border:1px solid #f2e9e9!important;}
+  .${styles.cartOverlay}[data-alsalam-cart="true"] .${styles.cartThumb} img {object-fit:contain!important;padding:4px!important;}
+  .${styles.cartOverlay}[data-alsalam-cart="true"] .${styles.cartLineInfo} h3 {color:#1c191b!important;font-size:14px!important;font-weight:850!important;line-height:1.35!important;white-space:normal!important;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;}
+  .${styles.cartOverlay}[data-alsalam-cart="true"] .${styles.cartLineInfo} p {color:#a10b2c!important;font-size:12px!important;font-weight:850!important;margin-top:7px!important;}
+  .${styles.cartOverlay}[data-alsalam-cart="true"] .${styles.quantity} {gap:4px!important;}
+  .${styles.cartOverlay}[data-alsalam-cart="true"] .${styles.quantity} button {width:32px!important;height:32px!important;color:#a8092a!important;border-radius:10px!important;background:#fff6f7!important;border:1px solid #f0d3d9!important;}
+  .${styles.cartOverlay}[data-alsalam-cart="true"] .${styles.quantity} span {font-size:13px!important;font-weight:900!important;color:#251e20!important;min-width:17px!important;}
+  .${styles.cartOverlay}[data-alsalam-cart="true"] .${styles.cartSummary} {flex-shrink:0;background:linear-gradient(#fff,#fdf8f6)!important;padding:20px 18px calc(21px + env(safe-area-inset-bottom,0px))!important;border-top:1px solid #eddddf!important;border-radius:23px 23px 0 0!important;box-shadow:0 -10px 26px rgba(84,19,35,.05);}
+  .${styles.cartOverlay}[data-alsalam-cart="true"] .${styles.cartSummary} > div strong {color:#272025!important;font-weight:800!important;}
+  .${styles.cartOverlay}[data-alsalam-cart="true"] .${styles.cartTotal} {border-top:1px dashed #d8c5c9!important;margin-top:14px!important;padding-top:17px!important;color:#222!important;font-size:18px!important;}
+  .${styles.cartOverlay}[data-alsalam-cart="true"] .${styles.cartTotal} strong {color:#a40929!important;font-size:25px!important;font-weight:950!important;}
+  .${styles.cartOverlay}[data-alsalam-cart="true"] .${styles.minimumProgress} {padding:11px 12px!important;background:#fff7f6!important;border:1px solid #eedbdf!important;border-radius:13px!important;margin:15px 0!important;}
+  .${styles.cartOverlay}[data-alsalam-cart="true"] .${styles.minimumProgress} > div {background:#f0dfe3!important;}
+  .${styles.cartOverlay}[data-alsalam-cart="true"] .${styles.minimumProgress} > div > span {background:linear-gradient(90deg,#a30729,#dc5a65)!important;}
+  .${styles.cartOverlay}[data-alsalam-cart="true"] .${styles.minimumProgress} p {font-size:11px!important;line-height:1.5!important;}
+  .${styles.cartOverlay}[data-alsalam-cart="true"] .${styles.minimumWhyLink423} {color:#a6092a!important;font-weight:800!important;text-underline-offset:3px;}
+  .${styles.cartOverlay}[data-alsalam-cart="true"] .${styles.checkoutButton} {background:linear-gradient(90deg,#9b0625,#bd1b3d)!important;min-height:56px!important;border-radius:15px!important;font-size:14px!important;font-weight:850!important;box-shadow:0 7px 18px rgba(142,11,37,.15);}
+  .${styles.cartOverlay}[data-alsalam-cart="true"] .${styles.checkoutButton}:disabled {opacity:1!important;background:#e2dede!important;color:#62676a!important;box-shadow:none!important;}
+  .${styles.cartOverlay}[data-alsalam-cart="true"] .${styles.checkoutNote} {font-size:10px!important;color:#878088!important;line-height:1.6!important;}
+}
+          `}</style>
           <iframe
             id="darik-alsalam-approved-live"
             title="Al Salam Market — shopping"
@@ -10622,7 +10670,7 @@ style={{
       ) : null}
 
       {cartOpen ? (
-        <div className={styles.cartOverlay} onClick={() => setCartOpen(false)}>
+        <div className={styles.cartOverlay} data-alsalam-cart={isAlSalamApprovedPilot ? "true" : undefined} onClick={() => setCartOpen(false)}>
           {/* DARIK_CHECKOUT_DEFAULT_SYSTEM_FONT_343 */}
           <aside
             className={styles.cartDrawer}
@@ -10631,7 +10679,7 @@ style={{
           >
             <div className={styles.cartHeader}>
               <div>
-                <p>{storefront.display_name}</p>
+                <p>{isAlSalamApprovedPilot ? "AL SALAM MARKET" : storefront.display_name}</p>
                 <h2>Your cart / سلتك</h2>
               </div>
               <button

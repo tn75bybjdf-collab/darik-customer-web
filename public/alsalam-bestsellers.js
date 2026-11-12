@@ -36,6 +36,36 @@
   ].join("");
   document.head.appendChild(style);
   grid.classList.add("alsalam-seller-shelves");
+  // The artwork contains a fixed "1". Cover that print and display the real cart total.
+  var badgeMast=document.querySelector(".mast");
+  if(badgeMast) {
+    var cover=document.createElement("span");
+    cover.id="darik-cart-printed-badge-cover";
+    cover.setAttribute("aria-hidden","true");
+    badgeMast.appendChild(cover);
+  }
+  var countStyle=document.createElement("style");
+  countStyle.textContent=[
+    "#darik-cart-printed-badge-cover{position:absolute;right:1.2%;top:43%;width:5.1%;height:22%;border-radius:14px;background:linear-gradient(125deg,#900014,#780013);z-index:7;pointer-events:none;}",
+    ".mast #topCounter{right:2.1%!important;top:44%!important;min-width:19px!important;height:19px!important;padding:2px 4px!important;border-radius:999px!important;background:white!important;color:#ac0628!important;font-size:11px!important;font-weight:950!important;z-index:12!important;line-height:1!important;pointer-events:none;}",
+    ".mast .hotspot.cart{z-index:16!important;}"
+  ].join("");
+  document.head.appendChild(countStyle);
+  function syncLiveCartCount(value) {
+    var count=Math.max(0,Math.floor(Number(value)||0));
+    var label=count>99?"99+":String(count);
+    for(var key of ["topCounter","navCounter"]){
+      var el=document.getElementById(key);
+      if(!el)continue;
+      el.textContent=label;
+      el.style.display=count>0?(key==="topCounter"?"flex":"block"):"none";
+    }
+  }
+  window.addEventListener("message",function(event){
+    if(event.origin!==window.location.origin||event.data?.type!=="darik-alsalam-cart-count")return;
+    syncLiveCartCount(event.data.count);
+  });
+
   // The approved illustration included a mock iPhone status bar printed
   // inside its header artwork. Cover only those baked-in phone indicators.
   // All actual store branding, cart actions and navigation stay untouched.
