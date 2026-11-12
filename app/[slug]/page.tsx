@@ -7037,6 +7037,47 @@ export default function DarikDirectStorefrontPage() {
   // AL SALAM APPROVED MOBILE PILOT — keep native DARIK cart, stock rules, and checkout
   const isAlSalamApprovedPilot = storefront?.slug === "alsalam" && !isBuilderPositionPreview145;
 
+  // Al Salam-only visual Best Sellers: retain the original category shelves,
+  // horizontal swiping, live inventory and actual sales ordering.
+  useEffect(() => {
+    if (!isAlSalamApprovedPilot) return;
+    const iframe = document.getElementById("darik-alsalam-approved-live") as HTMLIFrameElement | null;
+    if (!iframe) return;
+    let disposed = false;
+    const installBestSellers = () => {
+      try {
+        const doc = iframe.contentDocument;
+        const win = iframe.contentWindow;
+        if (!doc || !win || !doc.body) return;
+        const sendUnits = () => {
+          if (disposed) return;
+          win.postMessage({
+            type: "darik-alsalam-bestseller-sales",
+            units: bestSellerUnits186,
+          }, window.location.origin);
+        };
+        if (doc.getElementById("darik-alsalam-bestsellers-script")) {
+          sendUnits();
+          return;
+        }
+        const tag = doc.createElement("script");
+        tag.id = "darik-alsalam-bestsellers-script";
+        tag.src = "/alsalam-bestsellers.js";
+        tag.onload = sendUnits;
+        doc.body.appendChild(tag);
+      } catch (error) {
+        console.warn("Al Salam Best Sellers enhancement unavailable", error);
+      }
+    };
+    iframe.addEventListener("load", installBestSellers);
+    installBestSellers();
+    return () => {
+      disposed = true;
+      iframe.removeEventListener("load", installBestSellers);
+    };
+  }, [isAlSalamApprovedPilot, bestSellerUnits186]);
+
+
   useEffect(() => {
     if (!isAlSalamApprovedPilot) return;
     const iframe = document.getElementById("darik-alsalam-approved-live") as HTMLIFrameElement | null;
