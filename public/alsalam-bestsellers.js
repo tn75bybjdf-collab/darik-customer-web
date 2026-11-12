@@ -18,7 +18,7 @@
     ".alsalam-seller-heading{border:0;background:none;color:#17171e;font-size:13px;font-weight:850;padding:4px 2px 11px;display:flex;justify-content:space-between;align-items:center;width:100%;text-align:left;}",
     ".alsalam-seller-heading span:last-child{color:#b10024;font-size:18px;padding-right:3px;}",
     ".alsalam-seller-shell{position:relative;}",
-    ".alsalam-seller-track{display:flex;gap:11px;overflow-x:auto;overscroll-behavior-x:contain;scroll-snap-type:x mandatory;touch-action:pan-x;scrollbar-width:none;padding:0 4px 12px 1px;-webkit-overflow-scrolling:touch;}",
+    ".alsalam-seller-track{display:flex;gap:11px;overflow-x:auto;overscroll-behavior-x:contain;scroll-snap-type:x mandatory;touch-action:auto;scrollbar-width:none;padding:0 4px 12px 1px;-webkit-overflow-scrolling:touch;}",
     ".alsalam-seller-track::-webkit-scrollbar{display:none;}",
     ".alsalam-seller-card{flex:0 0 45%;max-width:210px;min-width:0;scroll-snap-align:start;border-radius:14px;background:#fff;box-shadow:0 3px 11px #00000014;border:1px solid #efedf0;overflow:hidden;display:flex;flex-direction:column;}",
     ".alsalam-seller-image{height:133px;width:100%;background:linear-gradient(#fff,#faf8f8);display:flex;align-items:center;justify-content:center;overflow:hidden;}",
