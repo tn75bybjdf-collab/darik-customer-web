@@ -9465,8 +9465,8 @@ function renderProductCard(product: Product) {
  .alsalam-cart-v3 .alsalam-cart-v3-quantity button{width:33px!important;height:36px!important;border:1px solid #edc6d1!important;background:#fff1f4!important;color:#af0731!important;border-radius:11px!important}
  .alsalam-cart-v3 .alsalam-cart-v3-quantity span{min-width:16px!important;font-size:14px!important;font-weight:900!important;color:#26161a!important}
  .alsalam-cart-v3 .alsalam-cart-v3-summary{display:block!important;flex:none!important;min-height:0!important;overflow:visible!important;border:0!important;border-radius:0!important;padding:0!important;margin:0!important;background:transparent!important;box-shadow:none!important}
- .alsalam-cart-v3-summary-card{display:block;border:1px solid #f0e1e5;border-radius:22px;background:#fff;padding:18px 15px 16px;margin:0 0 19px;box-shadow:0 6px 22px #4d122319}
- .alsalam-cart-v3-summary-heading{display:flex;align-items:center;gap:9px;color:#b10a33;padding-bottom:10px}
+ .alsalam-cart-v3 .alsalam-cart-v3-summary > .alsalam-cart-v3-summary-card{display:block!important;flex:none!important;width:100%!important;min-height:0!important;align-items:stretch!important;justify-content:initial!important;gap:0!important;margin:0 0 19px!important;color:#27141b!important;font-size:inherit!important;border:1px solid #f0e1e5;border-radius:22px;background:#fff;padding:18px 15px 16px;margin:0 0 19px;box-shadow:0 6px 22px #4d122319}
+ .alsalam-cart-v3 .alsalam-cart-v3-summary-card .alsalam-cart-v3-summary-heading{display:flex!important;align-items:center;gap:9px;color:#b10a33;padding-bottom:10px}
  .alsalam-cart-v3-summary-heading h3{font-size:clamp(17px,4.75vw,23px);line-height:1.3;margin:0;color:#2a0e18;letter-spacing:-.045em;font-weight:900}
  .alsalam-cart-v3-summary-heading h3 span{font-weight:800}
  .alsalam-cart-v3-price-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:9px;align-items:center;padding:14px 0;color:#585057;font-size:clamp(12px,3.65vw,15px)}
