@@ -8843,6 +8843,22 @@ function renderProductCard(product: Product) {
           <section
             className={styles.customerLocationCard117}
           >
+            <button
+              type="button"
+              aria-label="Close location picker"
+              onClick={() => {
+                setLocationGateOpen117(false);
+                setLocationGateError117("");
+              }}
+              style={{
+                position:"relative", justifySelf:"end", width:40, height:40,
+                display:"grid", placeItems:"center", borderRadius:12,
+                background:"#fff", border:"1px solid #e6d7db",
+                color:"#91203b", fontSize:24, fontWeight:700, cursor:"pointer",
+              }}
+            >
+              ×
+            </button>
             <div
               className={
                 styles.customerLocationBrand117
