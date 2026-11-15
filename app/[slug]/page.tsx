@@ -21,7 +21,8 @@ import DarikCustomerAccountMenuLauncher354 from "../components/DarikCustomerAcco
 
 // DARIK_AUTOPARTS_FITMENT_FILTERS_033
 
-import { useRef, useEffect, useMemo, useState } from "react";
+import { useRef, useEffect, useMemo, useState, type ReactNode } from "react";
+import { createPortal } from "react-dom";
 import type { CSSProperties } from "react";
 import { useParams } from "next/navigation";
 import { supabase } from "@/lib/supabaseBrowser";
@@ -297,6 +298,16 @@ type IconName =
   | "store"
   | "truck"
   | "whatsapp";
+
+// Isolate Al Salam's mobile cart from its fixed iframe storefront. The
+// legacy root clips overflow and traps iOS touch scrolling.
+function AlSalamCartPortal({ active, children }: { active: boolean; children: ReactNode }) {
+  const [host, setHost] = useState<HTMLElement | null>(null);
+  useEffect(() => {
+    setHost(active ? document.body : null);
+  }, [active]);
+  return active && host ? createPortal(children, host) : <>{children}</>;
+}
 
 function Icon({ name, size = 20 }: { name: IconName; size?: number }) {
   const common = {
@@ -9427,11 +9438,19 @@ function renderProductCard(product: Product) {
 
 /* Cart reference v3: scoped to the approved Al Salam mobile storefront. */
 @media(max-width:767px){
- .alsalam-cart-v3{z-index:2147483600!important;background:rgba(42,7,19,.67)!important;backdrop-filter:blur(10px)}
+ .alsalam-cart-v3{
+  position:fixed!important;inset:0!important;z-index:2147483600!important;
+  display:block!important;width:100vw!important;height:100dvh!important;
+  overflow-x:hidden!important;overflow-y:auto!important;
+  -webkit-overflow-scrolling:touch!important;touch-action:pan-y!important;
+  overscroll-behavior-y:contain!important;
+  background:rgba(42,7,19,.67)!important;backdrop-filter:blur(10px)
+ }
  .alsalam-cart-v3 .alsalam-cart-v3-drawer{
-  display:block!important;width:100vw!important;max-width:none!important;height:100dvh!important;
-  overflow-y:auto!important;overscroll-behavior-y:contain;-webkit-overflow-scrolling:touch;
-  padding:0 15px calc(24px + env(safe-area-inset-bottom))!important;
+  display:block!important;width:100%!important;max-width:none!important;
+  min-height:100dvh!important;height:auto!important;max-height:none!important;
+  overflow:visible!important;touch-action:pan-y!important;
+  padding:0 15px calc(34px + env(safe-area-inset-bottom))!important;
   border-radius:26px 26px 0 0!important;color:#28121b!important;
   background:linear-gradient(155deg,#fff9f9,#fffafa 56%,#fff)!important;
   box-shadow:0 -20px 70px #330c203d!important;
@@ -9465,6 +9484,27 @@ function renderProductCard(product: Product) {
  .alsalam-cart-v3 .alsalam-cart-v3-quantity button{width:33px!important;height:36px!important;border:1px solid #edc6d1!important;background:#fff1f4!important;color:#af0731!important;border-radius:11px!important}
  .alsalam-cart-v3 .alsalam-cart-v3-quantity span{min-width:16px!important;font-size:14px!important;font-weight:900!important;color:#26161a!important}
  .alsalam-cart-v3 .alsalam-cart-v3-summary{display:block!important;flex:none!important;min-height:0!important;overflow:visible!important;border:0!important;border-radius:0!important;padding:0!important;margin:0!important;background:transparent!important;box-shadow:none!important}
+ /* Remove inherited DARIK cart flex layout on all custom summary children. */
+ .alsalam-cart-v3 .alsalam-cart-v3-summary > .alsalam-cart-v3-summary-card {
+  display:block!important;flex:none!important;align-items:stretch!important;
+  justify-content:initial!important;gap:0!important;width:100%!important;
+  height:auto!important;min-height:0!important;
+ }
+ .alsalam-cart-v3 .alsalam-cart-v3-summary-card > .alsalam-cart-v3-summary-heading{
+  display:flex!important;align-items:center!important;justify-content:flex-start!important;
+  gap:9px!important;height:auto!important;
+ }
+ .alsalam-cart-v3 .alsalam-cart-v3-summary-card > .alsalam-cart-v3-price-row{
+  display:grid!important;grid-template-columns:minmax(0,1fr) auto!important;
+  align-items:center!important;gap:9px!important;
+ }
+ .alsalam-cart-v3 .alsalam-cart-v3-summary-card > .alsalam-cart-v3-total{
+  display:grid!important;align-items:center!important;
+ }
+ .alsalam-cart-v3 .alsalam-cart-v3-summary > .alsalam-cart-v3-actions {
+  display:grid!important;grid-template-columns:1fr!important;
+ }
+
  .alsalam-cart-v3 .alsalam-cart-v3-summary > .alsalam-cart-v3-summary-card{display:block!important;flex:none!important;width:100%!important;min-height:0!important;align-items:stretch!important;justify-content:initial!important;gap:0!important;margin:0 0 19px!important;color:#27141b!important;font-size:inherit!important;border:1px solid #f0e1e5;border-radius:22px;background:#fff;padding:18px 15px 16px;margin:0 0 19px;box-shadow:0 6px 22px #4d122319}
  .alsalam-cart-v3 .alsalam-cart-v3-summary-card .alsalam-cart-v3-summary-heading{display:flex!important;align-items:center;gap:9px;color:#b10a33;padding-bottom:10px}
  .alsalam-cart-v3-summary-heading h3{font-size:clamp(17px,4.75vw,23px);line-height:1.3;margin:0;color:#2a0e18;letter-spacing:-.045em;font-weight:900}
@@ -10812,6 +10852,7 @@ style={{
       ) : null}
 
       {cartOpen ? (
+        <AlSalamCartPortal active={isAlSalamApprovedPilot}>
         <div className={`${styles.cartOverlay} ${isAlSalamApprovedPilot ? "alsalam-cart-v3" : ""}`} data-alsalam-cart={isAlSalamApprovedPilot ? "true" : undefined} onClick={() => setCartOpen(false)}>
           {/* DARIK_CHECKOUT_DEFAULT_SYSTEM_FONT_343 */}
           <aside
@@ -12156,6 +12197,7 @@ style={{
             )}
           </aside>
         </div>
+        </AlSalamCartPortal>
       ) : null}
 
       {minimumWhyOpen423 && locationZoneMinimumApplies423 ? (
