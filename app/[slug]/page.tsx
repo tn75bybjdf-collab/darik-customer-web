@@ -9436,6 +9436,27 @@ function renderProductCard(product: Product) {
           `}</style>
           <style>{`
 
+/* Definitive iPhone cart scroll fix. Earlier storefront-specific selectors
+   still forced the drawer to one screen tall with overflow:hidden. Give the
+   single outer overlay the scrollbar and allow the drawer to grow naturally. */
+@media (max-width:767px){
+  .alsalam-cart-v3[data-alsalam-cart="true"] > aside.alsalam-cart-v3-drawer {
+    height:auto!important;
+    min-height:100dvh!important;
+    max-height:none!important;
+    overflow:visible!important;
+    overflow-y:visible!important;
+    display:block!important;
+    position:relative!important;
+  }
+  .alsalam-cart-v3[data-alsalam-cart="true"] {
+    height:100dvh!important;
+    overflow-y:auto!important;
+    overflow-x:hidden!important;
+    -webkit-overflow-scrolling:touch!important;
+    touch-action:pan-y!important;
+  }
+}
 /* Cart reference v3: scoped to the approved Al Salam mobile storefront. */
 @media(max-width:767px){
  .alsalam-cart-v3{
