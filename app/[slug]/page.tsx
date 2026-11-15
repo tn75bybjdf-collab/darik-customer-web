@@ -9457,6 +9457,57 @@ function renderProductCard(product: Product) {
     touch-action:pan-y!important;
   }
 }
+/* AL SALAM CART CTA v4: high-contrast, bilingual, iPhone-friendly buttons.
+   Keep cart mechanics unchanged and override legacy generic button rules. */
+@media(max-width:767px){
+  .alsalam-cart-v3 .alsalam-cart-v3-summary > .alsalam-cart-v3-actions{
+    display:grid!important;grid-template-columns:minmax(0,1fr)!important;gap:12px!important;
+    align-items:stretch!important;justify-content:stretch!important;
+    width:100%!important;margin:19px 0 0!important;
+  }
+  .alsalam-cart-v3 .alsalam-cart-v3-summary > .alsalam-cart-v3-actions > button:first-child,
+  .alsalam-cart-v3 .alsalam-cart-v3-summary > .alsalam-cart-v3-actions > a[data-alsalam-order-secondary="true"]{
+    position:relative!important;display:grid!important;
+    grid-template-columns:minmax(0,1fr) 24px!important;align-items:center!important;
+    justify-items:center!important;column-gap:10px!important;
+    width:100%!important;min-width:0!important;min-height:73px!important;
+    height:auto!important;padding:13px 16px!important;border-radius:16px!important;
+    line-height:1.25!important;text-decoration:none!important;
+    font-weight:850!important;opacity:1!important;
+    text-shadow:none!important;white-space:normal!important;
+  }
+  .alsalam-cart-v3 .alsalam-cart-v3-summary > .alsalam-cart-v3-actions > button:first-child{
+    background:#bd1036!important;color:#fff!important;border:2px solid #bd1036!important;
+    box-shadow:0 6px 17px rgba(158,3,42,.20)!important;
+  }
+  .alsalam-cart-v3 .alsalam-cart-v3-summary > .alsalam-cart-v3-actions > a[data-alsalam-order-secondary="true"]{
+    background:#fff!important;color:#a20c31!important;border:2px solid #a20c31!important;
+    box-shadow:0 4px 13px rgba(121,12,41,.07)!important;
+  }
+  .alsalam-cart-v3 .alsalam-v4-cta-label{
+    display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:center!important;
+    gap:5px!important;min-width:0!important;width:100%!important;
+    font-size:clamp(13px,3.8vw,16px)!important;font-weight:850!important;line-height:1.35!important;
+    text-align:center!important;white-space:normal!important;
+  }
+  .alsalam-cart-v3 .alsalam-v4-cta-label > span{display:block!important;max-width:100%!important;overflow-wrap:normal!important;}
+  .alsalam-cart-v3 .alsalam-v4-cta-label > span[lang="ar"]{font-size:clamp(13px,3.8vw,16px)!important;}
+  .alsalam-cart-v3 .alsalam-v4-cta-icon{display:grid!important;place-items:center!important;justify-self:end!important;line-height:1!important;}
+  .alsalam-cart-v3 .alsalam-v4-cta-icon svg{width:21px!important;height:21px!important;}
+  .alsalam-cart-v3 .alsalam-cart-v3-actions > button:first-child .alsalam-v4-cta-label,
+  .alsalam-cart-v3 .alsalam-cart-v3-actions > button:first-child .alsalam-v4-cta-icon,
+  .alsalam-cart-v3 .alsalam-cart-v3-actions > button:first-child svg{color:#fff!important;stroke:#fff!important;}
+  .alsalam-cart-v3 .alsalam-cart-v3-actions > a[data-alsalam-order-secondary="true"] .alsalam-v4-cta-label{color:#a20c31!important;}
+  .alsalam-cart-v3 .alsalam-cart-v3-actions > a[data-alsalam-order-secondary="true"] .alsalam-v4-cta-icon svg{color:#118a48!important;stroke:#118a48!important;}
+  .alsalam-cart-v3 .alsalam-cart-v3-summary .alsalam-cart-v3-payment-note{margin:16px 0 0!important;padding:8px 4px 4px!important;align-items:flex-start!important;}
+  .alsalam-cart-v3 .alsalam-cart-v3-summary .alsalam-cart-v3-payment-note p{
+    color:#49434a!important;font-size:clamp(12px,3.15vw,14px)!important;line-height:1.6!important;
+    font-weight:500!important;text-align:start!important;
+  }
+  .alsalam-cart-v3 .alsalam-cart-v3-payment-note .alsalam-cart-v3-cash{
+    color:#a20c31!important;font-size:26px!important;
+  }
+}
 /* Cart reference v3: scoped to the approved Al Salam mobile storefront. */
 @media(max-width:767px){
  .alsalam-cart-v3{
@@ -12149,12 +12200,24 @@ style={{
                             setCheckoutError("");
                           }}
                         >
-                          {roomOnlyCheckout419
-                            ? "Proceed to checkout / متابعة الطلب"
-                            : deliveryLocationPending521
-                              ? "Continue · Choose location / تابع وحدد الموقع"
-                              : "Place order online / اطلب أونلاين"}
-                          <Icon name="arrow" size={18} />
+                          {isAlSalamApprovedPilot ? (
+                            <>
+                              <span className="alsalam-v4-cta-label">
+                                <span>{roomOnlyCheckout419 ? "Proceed to checkout" : deliveryLocationPending521 ? "Continue · Choose location" : "Place order online"}</span>
+                                <span lang="ar" dir="rtl">{roomOnlyCheckout419 ? "متابعة الطلب" : deliveryLocationPending521 ? "تابع وحدد الموقع" : "اطلب أونلاين"}</span>
+                              </span>
+                              <span className="alsalam-v4-cta-icon"><Icon name="arrow" size={20}/></span>
+                            </>
+                          ) : (
+                            <>
+                              {roomOnlyCheckout419
+                                ? "Proceed to checkout / متابعة الطلب"
+                                : deliveryLocationPending521
+                                  ? "Continue · Choose location / تابع وحدد الموقع"
+                                  : "Place order online / اطلب أونلاين"}
+                              <Icon name="arrow" size={18} />
+                            </>
+                          )}
                         </button>
                       ) : null}
 
@@ -12176,12 +12239,22 @@ style={{
                               ? "noreferrer"
                               : undefined
                           }
+                          data-alsalam-order-secondary={isAlSalamApprovedPilot ? "true" : undefined}
                         >
-                          {phoneOrderLabel}
-                          <Icon
-                            name={whatsapp ? "whatsapp" : "call"}
-                            size={18}
-                          />
+                          {isAlSalamApprovedPilot ? (
+                            <>
+                              <span className="alsalam-v4-cta-label">
+                                <span>{whatsapp ? "Order on WhatsApp" : "Call store to order"}</span>
+                                <span lang="ar" dir="rtl">{whatsapp ? "اطلب عبر واتساب" : "اتصل بالمتجر للطلب"}</span>
+                              </span>
+                              <span className="alsalam-v4-cta-icon"><Icon name={whatsapp ? "whatsapp" : "call"} size={21}/></span>
+                            </>
+                          ) : (
+                            <>
+                              {phoneOrderLabel}
+                              <Icon name={whatsapp ? "whatsapp" : "call"} size={18}/>
+                            </>
+                          )}
                         </a>
                       ) : null}
 
