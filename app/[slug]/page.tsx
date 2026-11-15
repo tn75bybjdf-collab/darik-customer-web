@@ -8447,8 +8447,8 @@ if (
     "",
     `Fulfillment: ${pickupOnly ? "Local pickup" : "Delivery"}`,
     `Subtotal: ${money(cartSubtotal)}`,
-    pickupOnly ? "Pickup fee: 0.00 JOD" : `Delivery: ${money(deliveryFee)}`,
-    `Total: ${money(orderTotal)}`,
+    pickupOnly ? "Pickup fee: 0.00 JOD" : deliveryLocationPending521 ? "Delivery: after location" : `Delivery: ${money(deliveryFee)}`,
+    deliveryLocationPending521 ? "Total: after location" : `Total: ${money(orderTotal)}`,
   ].join("\n");
 
   const phoneOrderHref = whatsapp
@@ -10279,7 +10279,7 @@ style={{
             <Icon name="bag" size={19} />
             {cartCount} {cartCount === 1 ? "item" : "items"}
           </span>
-          <strong>{money(orderTotal)}</strong>
+          <strong>{deliveryLocationPending521 ? "After location" : money(orderTotal)}</strong>
           <span>
             View cart
             <Icon name="arrow" size={16} />
@@ -11345,7 +11345,7 @@ style={{
                                             
                                             {checkoutForm.paymentMethod === "cliq" ? (                      
                                               <div className={styles.cliqPaymentPanel}>                      
-                                                <span>Send exactly {money(orderTotal)} by CliQ</span>                      
+                                                <span>{deliveryLocationPending521 ? "Confirm location to calculate CliQ amount" : `Send exactly ${money(orderTotal)} by CliQ`}</span>                      
                                                 <div>                      
                                                   <small>Account name / اسم الحساب</small>                      
                                                   <strong>                      
@@ -11772,8 +11772,8 @@ style={{
                                               {placingOrder                      
                                                 ? "Sending order… / جارٍ إرسال الطلب…"                      
                                                 : checkoutForm.paymentMethod === "cliq"                      
-                                                  ? `Submit CliQ ${selectedPickup ? "pickup" : "delivery"} order · ${money(orderTotal)} / إرسال طلب CliQ`                      
-                                                  : `Place cash ${selectedPickup ? "pickup" : "delivery"} order · ${money(orderTotal)} / إرسال طلب نقدي`}                      
+                                                  ? `Submit CliQ ${selectedPickup ? "pickup" : "delivery"} order · ${deliveryLocationPending521 ? "after location" : money(orderTotal)} / إرسال طلب CliQ`                      
+                                                  : `Place cash ${selectedPickup ? "pickup" : "delivery"} order · ${deliveryLocationPending521 ? "after location" : money(orderTotal)} / إرسال طلب نقدي`}                      
                                               {!placingOrder ? <Icon name="arrow" size={18} /> : null}                      
                                             </button>                      
                                           </div>                      
