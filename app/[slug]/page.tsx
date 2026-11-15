@@ -5089,7 +5089,8 @@ export default function DarikDirectStorefrontPage() {
     setLocationGateError117("");
     setLocationPredictions117([]);
     setLocationSearch117("");
-    setLocationGateOpen117(true);
+    // Frontend 521: first visit is browsing, not a forced delivery choice.
+    setLocationGateOpen117(false);
   }, [
     storefront?.id,
     storefront?.delivery_enabled,
@@ -5145,7 +5146,7 @@ export default function DarikDirectStorefrontPage() {
       if (!match) {
         setCustomerLocation117(location);
         setDeliveryMatch117(null);
-        setLocationGateOpen117(true);
+        setLocationGateOpen117(!fromMarketplace);
         setLocationGateError117(
           "This location is outside this store's delivery zones. Choose another location. / هذا الموقع خارج مناطق توصيل المتجر. اختر موقعاً آخر."
         );
@@ -5174,7 +5175,7 @@ export default function DarikDirectStorefrontPage() {
         darikCheckoutErrorMessage122(caught)
       );
 
-      if (fromMarketplace) {
+      if (!fromMarketplace) {
         setLocationGateOpen117(true);
       }
 
@@ -6790,6 +6791,21 @@ export default function DarikDirectStorefrontPage() {
       storefront?.minimum_order ??
       0
   );
+  // Frontend 521: a GPS-delivery fee/minimum is unknown until the zone quote succeeds.
+  const deliveryLocationPending521 = Boolean(
+    deliveryEnabled && !selectedPickup && !roomDeliverySelected418 &&
+    destinationMode418 !== "room" && !deliveryMatch117
+  );
+  const getDeliveryLocationButton521 = (fromCart = false) => (
+    <button type="button" className={styles.deliveryLocationButton521}
+      onClick={() => {
+        if (fromCart) { setCartOpen(false); setOnlineCheckoutOpen(false); }
+        setLocationGateError117("");
+        setLocationGateOpen117(true);
+      }}>
+      Get location / حدد الموقع
+    </button>
+  );
 
   // DARIK_SPECIAL_FREE_DELIVERY_ZONE_185
   const usePublicDeliveryTruth191 =
@@ -7036,6 +7052,21 @@ export default function DarikDirectStorefrontPage() {
 
   // AL SALAM APPROVED MOBILE PILOT — keep native DARIK cart, stock rules, and checkout
   const isAlSalamApprovedPilot = storefront?.slug === "alsalam" && !isBuilderPositionPreview145;
+  // Approved visual storefront: add an unobtrusive fee/location row.
+  useEffect(() => {
+    if (!isAlSalamApprovedPilot) return;
+    const iframe = document.getElementById("darik-alsalam-approved-live") as HTMLIFrameElement | null;
+    if (!iframe) return;
+    const send = () => iframe.contentWindow?.postMessage({
+      type:"darik-alsalam-delivery-summary",
+      pending:deliveryLocationPending521,fee:deliveryFee,
+      free:specialDeliveryFree185,pickup:selectedPickup||pickupOnly,
+    },window.location.origin);
+    iframe.addEventListener("load",send);
+    send();
+    return () => iframe.removeEventListener("load",send);
+  },[isAlSalamApprovedPilot,deliveryLocationPending521,deliveryFee,specialDeliveryFree185,selectedPickup,pickupOnly]);
+
   // Al Salam: synchronize the live cart quantity with the illustrated header.
   useEffect(() => {
     if (!isAlSalamApprovedPilot) return;
@@ -7132,6 +7163,15 @@ export default function DarikDirectStorefrontPage() {
       if (event.data.type === "ready") {
         sendLatest(iframe.contentWindow);
         iframe.contentWindow?.postMessage({type:"darik-alsalam-cart-count",count:cartCount},window.location.origin);
+      } else if (event.data.type === "location") {
+        setLocationGateError117("");
+        setLocationGateOpen117(true);
+      } else if (event.data.type === "delivery-request") {
+        iframe.contentWindow?.postMessage({
+          type:"darik-alsalam-delivery-summary",
+          pending:deliveryLocationPending521,fee:deliveryFee,
+          free:specialDeliveryFree185,pickup:selectedPickup||pickupOnly,
+        },window.location.origin);
       } else if (event.data.type === "cart") {
         setCartOpen(true);
       } else if (event.data.type === "account") {
@@ -7156,7 +7196,7 @@ export default function DarikDirectStorefrontPage() {
     };
     window.addEventListener("message",onMessage);
     return ()=>window.removeEventListener("message",onMessage);
-  }, [isAlSalamApprovedPilot, products, visibleCategories]);
+  }, [isAlSalamApprovedPilot,products,visibleCategories,deliveryLocationPending521,deliveryFee,specialDeliveryFree185,selectedPickup,pickupOnly]);
 
   function addToCart(
     product: Product,
@@ -7674,6 +7714,14 @@ export default function DarikDirectStorefrontPage() {
       return;
     }
     if (!storefront || placingOrder) return;
+    if (deliveryEnabled && !selectedPickup && !roomDeliverySelected418 && !deliveryMatch117) {
+      setCheckoutError("Confirm your delivery location first. / أكد موقع التوصيل أولاً.");
+      return;
+    }
+    if (!minimumReached) {
+      setCheckoutError("Minimum order not reached. / لم تصل إلى الحد الأدنى للطلب.");
+      return;
+    }
 
     const customerName = checkoutForm.customerName.trim();
     const customerPhone = checkoutForm.customerPhone.trim();
@@ -9733,13 +9781,13 @@ style={{
                 <div>
                   <Icon name={pickupOnly ? "store" : "truck"} size={20} />
                   <span>{(pickupOnly || selectedPickup) ? "Pickup fee" : "Delivery fee"}</span>
-                  <strong>{(pickupOnly || selectedPickup) ? "Free" : specialDeliveryFree185 ? "Free" : money(deliveryFee)}</strong>
+                  <strong>{(pickupOnly || selectedPickup) ? "Free" : deliveryLocationPending521 ? getDeliveryLocationButton521() : specialDeliveryFree185 ? "Free" : money(deliveryFee)}</strong>
                 </div>
                 <div>
                   <Icon name="bag" size={20} />
                   <span>Minimum order</span>
                   <strong>
-                    {minimumOrder > 0 ? money(minimumOrder) : "No minimum"}
+                    {deliveryLocationPending521 ? "After location / بعد تحديد الموقع" : minimumOrder > 0 ? money(minimumOrder) : "No minimum"}
                   </strong>
                 </div>
               </>
@@ -9757,7 +9805,7 @@ style={{
             </div>
           </div>
 
-          {specialOfferConfigured191 && !pickupOnly ? (
+          {specialOfferConfigured191 && !pickupOnly && !deliveryLocationPending521 ? (
             <div className={styles.specialDeliverySnapshot191}>
               <div>
                 <small>FREE DELIVERY OFFER</small>
@@ -9800,10 +9848,10 @@ style={{
             <Icon name="truck" size={18} />
             <span>Delivery fee</span>
             <strong>
-              {specialDeliveryFree185 ? "Free" : money(deliveryFee)}
+              {deliveryLocationPending521 ? getDeliveryLocationButton521() : specialDeliveryFree185 ? "Free" : money(deliveryFee)}
             </strong>
           </div>
-          {specialOfferConfigured191 ? (
+          {specialOfferConfigured191 && !deliveryLocationPending521 ? (
             <div className={styles.mobileSpecialDelivery185}>
               <span>
                 {specialDeliveryFree185
@@ -10695,7 +10743,7 @@ style={{
               </button>
             </div>
 
-            {!orderConfirmation && cart.length > 0 && specialOfferConfigured191 && !selectedPickup ? (
+            {!orderConfirmation && cart.length > 0 && specialOfferConfigured191 && !selectedPickup && !deliveryLocationPending521 ? (
               <div className={`${styles.specialDeliveryCountdown191} ${
                 specialDeliveryFree185 ? styles.specialDeliveryCountdownUnlocked191 : ""
               }`}>
@@ -10866,9 +10914,9 @@ style={{
                   </div>
                   <div>
                     <span>{selectedPickup ? "Pickup / الاستلام" : "Delivery / التوصيل"}</span>
-                    <strong>{selectedPickup ? "Free / مجاناً" : specialDeliveryFree185 ? "Free / مجاناً" : money(deliveryFee)}</strong>
+                    <strong>{selectedPickup ? "Free / مجاناً" : deliveryLocationPending521 ? getDeliveryLocationButton521(true) : specialDeliveryFree185 ? "Free / مجاناً" : money(deliveryFee)}</strong>
                   </div>
-                  {!selectedPickup && specialOfferConfigured191 ? (
+                  {!selectedPickup && specialOfferConfigured191 && !deliveryLocationPending521 ? (
                     <div
                       className={`${styles.specialDeliveryProgress185} ${
                         specialDeliveryFree185
@@ -10915,10 +10963,10 @@ style={{
                   ) : null}
                   <div className={styles.cartTotal}>
                     <span>Total / الإجمالي</span>
-                    <strong>{money(orderTotal)}</strong>
+                    <strong>{deliveryLocationPending521 ? "After location / بعد تحديد الموقع" : money(orderTotal)}</strong>
                   </div>
 
-                  {!minimumReached ? (
+                  {!deliveryLocationPending521 && !minimumReached ? (
                     <div className={styles.minimumProgress}>
                       <div>
                         <span
@@ -10951,7 +10999,6 @@ style={{
                   {onlineCheckoutOpen &&
                   onlineOrderingEnabled &&
                   cart.length > 0 &&
-                  minimumReached &&
                   storefront.is_accepting_orders ? (
                     roomOnlyCheckout419 ? (
                       <div className={styles.onlineCheckoutForm}>
@@ -11966,7 +12013,7 @@ style={{
                                               type="button"                      
                                               className={styles.checkoutButton}                      
                                               onClick={() => void handleCheckoutWithAccountNudge173()}                      
-                                              disabled={placingOrder}                      
+                                              disabled={placingOrder || deliveryLocationPending521 || !minimumReached}                      
                                             >                      
                                               {placingOrder                      
                                                 ? "Sending order… / جارٍ إرسال الطلب…"                      
@@ -11981,7 +12028,7 @@ style={{
 
                   {!storefront.is_accepting_orders ||
                   cart.length === 0 ||
-                  !minimumReached ? (
+                  (!minimumReached && !deliveryLocationPending521) ? (
                     <button className={styles.checkoutButton} disabled>
                       {!storefront.is_accepting_orders
                         ? "Store is not accepting orders / المتجر لا يستقبل الطلبات حالياً"
@@ -12002,7 +12049,9 @@ style={{
                         >
                           {roomOnlyCheckout419
                             ? "Proceed to checkout / متابعة الطلب"
-                            : "Place order online / اطلب أونلاين"}
+                            : deliveryLocationPending521
+                              ? "Continue · Choose location / تابع وحدد الموقع"
+                              : "Place order online / اطلب أونلاين"}
                           <Icon name="arrow" size={18} />
                         </button>
                       ) : null}

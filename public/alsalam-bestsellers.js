@@ -36,6 +36,31 @@
   ].join("");
   document.head.appendChild(style);
   grid.classList.add("alsalam-seller-shelves");
+  // An optional, immediately visible delivery fee row inside the approved art.
+  var perks521=document.querySelector(".perks");
+  if(perks521 && !document.getElementById("darik-alsalam-fee521")) {
+    var fee521=document.createElement("div");
+    fee521.id="darik-alsalam-fee521";
+    fee521.style.cssText="display:flex;align-items:center;justify-content:space-between;gap:8px;padding:10px 14px;border-bottom:1px solid #f0dee2;background:#fff9f9;color:#80223e;";
+    fee521.innerHTML='<span style="font-size:12px;font-weight:800;">Delivery fee / رسوم التوصيل</span><button id="darik-fee-cta521" type="button" style="background:white;color:#a10b2a;border:1px solid #e0a8b5;border-radius:10px;padding:7px 10px;font-size:12px;font-weight:900;">Get location / حدد الموقع</button>';
+    perks521.insertAdjacentElement("afterend",fee521);
+    document.getElementById("darik-fee-cta521").addEventListener("click",function(){
+      window.parent.postMessage({source:"darik-alsalam-approved",type:"location"},window.location.origin);
+    });
+  }
+  window.addEventListener("message",function(event){
+    if(event.origin!==window.location.origin || event.data?.type!=="darik-alsalam-delivery-summary")return;
+    var el=document.getElementById("darik-fee-cta521");if(!el)return;
+    var pending=Boolean(event.data.pending);
+    el.disabled=!pending;
+    el.textContent=event.data.pickup?"Free pickup / استلام مجاني" :
+      pending?"Get location / حدد الموقع":
+      event.data.free?"Free delivery / توصيل مجاني":
+      (Number(event.data.fee)||0).toFixed(2)+" JOD";
+    el.style.opacity=pending?"1":".85";
+  });
+  window.parent.postMessage({source:"darik-alsalam-approved",type:"delivery-request"},window.location.origin);
+
   // The artwork contains a fixed "1". Cover that print and display the real cart total.
   var badgeMast=document.querySelector(".mast");
   if(badgeMast) {
