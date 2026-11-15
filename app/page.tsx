@@ -697,11 +697,13 @@ function HomeStoreCard186({
   language,
   special,
   bestSellers249,
+  onGetLocation,
 }: {
   store: NearbyStore;
   language: Language;
   special: DarikHomeSpecialDelivery186 | null;
   bestSellers249: DarikHomeBestSellerProduct249[] | undefined;
+  onGetLocation: () => void;
 }) {
   const t = copy[language];
   const distance = Number(store.distance_km || 0);
@@ -724,6 +726,12 @@ function HomeStoreCard186({
       aria-label={`${t.shopStore}: ${displayStoreName(store, language)}`}
       onClick={(event) => {
         // DARIK_BESTSELLER_EXACT_PRODUCT_OPEN_250
+        const locAction521 = (event.target as HTMLElement).closest<HTMLElement>("[data-darik-get-location-521]");
+        if (locAction521) {
+          event.preventDefault();
+          onGetLocation();
+          return;
+        }
         const clickedProduct250 = (
           event.target as HTMLElement
         ).closest<HTMLElement>("[data-darik-product-id249]");
@@ -834,11 +842,12 @@ function HomeStoreCard186({
           </>
         ) : store.delivers_to_location === null ? (
           <>
-            <strong className="darikHomeDeliveryUnknown331">
+            <strong className="darikHomeDeliveryUnknown331" role="button" tabIndex={0} data-darik-get-location-521="true" style={{cursor:"pointer"}}
+              onKeyDown={(event) => {
+                if (event.key === "Enter" || event.key === " ") { event.preventDefault(); onGetLocation(); }
+              }}>
               <Icon name="location" size={13} />
-              {language === "ar"
-                ? "حدد موقعك لمعرفة التوصيل"
-                : "Set location to check delivery"}
+              {language === "ar" ? "رسوم التوصيل: حدد الموقع" : "Delivery fee: Get location"}
             </strong>
             <div className="darikHomeStoreMeta246B">
               <small>
@@ -2492,6 +2501,7 @@ useMemo(() => {
                     <HomeStoreCard186
                       store={store}
                       language={language}
+                      onGetLocation={() => setLocationDialogOpen(true)}
                       special={
                         specialDeliveryBySlug186[store.slug.toLowerCase()] ?? null
                       }
@@ -2537,6 +2547,7 @@ useMemo(() => {
                     <HomeStoreCard186
                       store={store}
                       language={language}
+                      onGetLocation={() => setLocationDialogOpen(true)}
                       special={
                         specialDeliveryBySlug186[store.slug.toLowerCase()] ?? null
                       }
@@ -2581,6 +2592,7 @@ useMemo(() => {
                     <HomeStoreCard186
                       store={store}
                       language={language}
+                      onGetLocation={() => setLocationDialogOpen(true)}
                       special={
                         specialDeliveryBySlug186[store.slug.toLowerCase()] ?? null
                       }
@@ -2805,10 +2817,10 @@ useMemo(() => {
 
       {locationReady && locationDialogOpen ? (
         <div className={styles.modalBackdrop} role="presentation" onMouseDown={(event) => {
-          if (event.target === event.currentTarget && location) setLocationDialogOpen(false);
+          if (event.target === event.currentTarget) setLocationDialogOpen(false);
         }}>
           <section className={styles.locationModal} role="dialog" aria-modal="true" aria-labelledby="location-title">
-            {location ? <button className={styles.modalClose} type="button" onClick={() => setLocationDialogOpen(false)} aria-label={t.close}>×</button> : null}
+            <button className={styles.modalClose} type="button" onClick={() => setLocationDialogOpen(false)} aria-label={t.close}>×</button>
             <div className={styles.modalIcon}><Icon name="location" size={29} /></div>
             <span className={styles.modalKicker}>GETDARIK.COM</span>
             <h2 id="location-title">{t.locationTitle}</h2>

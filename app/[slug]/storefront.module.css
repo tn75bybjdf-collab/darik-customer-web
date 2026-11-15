@@ -23919,3 +23919,13 @@
     object-position: center !important;
   }
 }
+
+/* FRONTEND 521: delivery fee is quoted only after explicit location. */
+.deliveryLocationButton521 {
+  display:inline-flex;align-items:center;justify-content:center;
+  min-height:34px;padding:7px 10px;border:1px solid #dca6b3;
+  border-radius:10px;background:#fff6f8;color:#a20b2e;
+  font-size:12px;font-weight:850;line-height:1.25;white-space:nowrap;cursor:pointer;
+}
+.deliveryLocationButton521:hover{background:#ffeaf0;}
+.deliveryLocationButton521:focus-visible{outline:3px solid #f0b1bf;outline-offset:2px;}
