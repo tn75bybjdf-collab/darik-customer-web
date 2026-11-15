@@ -954,6 +954,11 @@ export default function DarikDiscoveryHome() {
   const [locationReady, setLocationReady] = useState(false);
   const [location, setLocation] = useState<CustomerLocation | null>(null);
   const [locationDialogOpen, setLocationDialogOpen] = useState(false);
+  const [locationDialogRequestedByUser, setLocationDialogRequestedByUser] = useState(false);
+  const openLocationPickerOnTap = () => {
+    setLocationDialogRequestedByUser(true);
+    setLocationDialogOpen(true);
+  };
   const [locating, setLocating] = useState(false);
   const [locationError, setLocationError] = useState("");
   const [placeQuery, setPlaceQuery] = useState("");
@@ -1204,6 +1209,7 @@ export default function DarikDiscoveryHome() {
     );
     setLocation(nextLocation);
     setLocationDialogOpen(false);
+    setLocationDialogRequestedByUser(false);
     setLocationError("");
     setPredictions([]);
     setPlaceQuery("");
@@ -1968,7 +1974,7 @@ useMemo(() => {
             data-darik-location-entry-390f="true"
               className={`${styles.discoveryLocation246} ${styles.headerLocation390}`}
             type="button"
-            onClick={() => setLocationDialogOpen(true)}
+            onClick={() => openLocationPickerOnTap()}
           >
             <span className={styles.discoveryLocationIcon246}>
               <Icon name="location" size={24} />
@@ -2056,7 +2062,7 @@ useMemo(() => {
             data-darik-location-entry-390f="true"
           className={styles.discoveryLocation246}
             type="button"
-            onClick={() => setLocationDialogOpen(true)}
+            onClick={() => openLocationPickerOnTap()}
           >
             <span className={styles.discoveryLocationIcon246}>
               <Icon name="location" size={24} />
@@ -2462,7 +2468,7 @@ useMemo(() => {
                     : "Set your location to move stores that deliver to you to the top."}
                 </small>
               </div>
-              <button type="button" onClick={() => setLocationDialogOpen(true)}>
+              <button type="button" onClick={() => openLocationPickerOnTap()}>
                 {language === "ar" ? "حدد الموقع" : "Set location"}
               </button>
             </div>
@@ -2515,7 +2521,7 @@ useMemo(() => {
                     <HomeStoreCard186
                       store={store}
                       language={language}
-                      onGetLocation={() => setLocationDialogOpen(true)}
+                      onGetLocation={() => openLocationPickerOnTap()}
                       special={
                         specialDeliveryBySlug186[store.slug.toLowerCase()] ?? null
                       }
@@ -2561,7 +2567,7 @@ useMemo(() => {
                     <HomeStoreCard186
                       store={store}
                       language={language}
-                      onGetLocation={() => setLocationDialogOpen(true)}
+                      onGetLocation={() => openLocationPickerOnTap()}
                       special={
                         specialDeliveryBySlug186[store.slug.toLowerCase()] ?? null
                       }
@@ -2606,7 +2612,7 @@ useMemo(() => {
                     <HomeStoreCard186
                       store={store}
                       language={language}
-                      onGetLocation={() => setLocationDialogOpen(true)}
+                      onGetLocation={() => openLocationPickerOnTap()}
                       special={
                         specialDeliveryBySlug186[store.slug.toLowerCase()] ?? null
                       }
@@ -2643,7 +2649,7 @@ useMemo(() => {
               <h3>{t.noStoresTitle}</h3>
               <p>{t.noStoresBody}</p>
               <div>
-                <button type="button" onClick={() => setLocationDialogOpen(true)}>{t.changeLocation}</button>
+                <button type="button" onClick={() => openLocationPickerOnTap()}>{t.changeLocation}</button>
                 <a href="/store-signup">{t.retailerSignup}<Icon name="arrow" size={17} /></a>
               </div>
             </div>
@@ -2829,7 +2835,7 @@ useMemo(() => {
         <div className={styles.footerBottom}><span>© {new Date().getFullYear()} {t.rights}</span><span>getdarik.com · Jordan</span></div>
       </footer>
 
-      {locationReady && locationDialogOpen ? (
+      {locationReady && locationDialogOpen && locationDialogRequestedByUser ? (
         <div className={styles.modalBackdrop} role="presentation" onMouseDown={(event) => {
           if (event.target === event.currentTarget) setLocationDialogOpen(false);
         }}>
