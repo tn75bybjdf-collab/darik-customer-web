@@ -9423,6 +9423,84 @@ function renderProductCard(product: Product) {
   .${styles.cartOverlay}[data-alsalam-cart="true"] .${styles.checkoutNote} {font-size:10px!important;color:#878088!important;line-height:1.6!important;}
 }
           `}</style>
+          <style>{`
+
+/* Cart reference v3: scoped to the approved Al Salam mobile storefront. */
+@media(max-width:767px){
+ .alsalam-cart-v3{z-index:2147483600!important;background:rgba(42,7,19,.67)!important;backdrop-filter:blur(10px)}
+ .alsalam-cart-v3 .alsalam-cart-v3-drawer{
+  display:block!important;width:100vw!important;max-width:none!important;height:100dvh!important;
+  overflow-y:auto!important;overscroll-behavior-y:contain;-webkit-overflow-scrolling:touch;
+  padding:0 15px calc(24px + env(safe-area-inset-bottom))!important;
+  border-radius:26px 26px 0 0!important;color:#28121b!important;
+  background:linear-gradient(155deg,#fff9f9,#fffafa 56%,#fff)!important;
+  box-shadow:0 -20px 70px #330c203d!important;
+ }
+ .alsalam-cart-v3 .alsalam-cart-v3-head{
+  min-height:160px!important;display:flex!important;align-items:flex-end!important;
+  position:relative;isolation:isolate;overflow:hidden;flex-shrink:0;
+  margin:0 -15px 12px!important;padding:37px 23px 24px!important;border:0!important;
+  background:radial-gradient(ellipse at top right,#ffe8e5 0%,transparent 55%),linear-gradient(125deg,#fff,#fff7f8)!important
+ }
+ .alsalam-cart-v3 .alsalam-cart-v3-head::before{content:"";height:5px;position:absolute;top:0;left:0;right:0;z-index:3;background:linear-gradient(90deg,#9b0428,#ce1642,#e77287)}
+ .alsalam-cart-v3 .alsalam-cart-v3-head::after{content:"🥬🍅";position:absolute;right:-10px;top:10px;z-index:0;font-size:67px;letter-spacing:-14px;transform:rotate(-9deg);pointer-events:none;opacity:.85}
+ .alsalam-cart-v3 .alsalam-cart-v3-head>div{min-width:0;max-width:calc(100% - 51px);position:relative;z-index:2}
+ .alsalam-cart-v3 .alsalam-cart-v3-head p{font-size:11px!important;font-weight:950!important;letter-spacing:.2em!important;color:#ad0b32!important;line-height:1.3!important}
+ .alsalam-cart-v3 .alsalam-cart-v3-head p::after{content:"";display:block;background:#ac0a31;height:3px;width:37px;border-radius:6px;margin-top:9px}
+ .alsalam-cart-v3 .alsalam-cart-v3-head h2{font-size:clamp(25px,7.7vw,34px)!important;line-height:1.22!important;letter-spacing:-.05em!important;margin:14px 0 0!important;color:#240c14!important;font-weight:950!important}
+ .alsalam-cart-v3 .alsalam-cart-v3-head>button{z-index:3;align-self:flex-start;flex:0 0 43px;width:43px!important;height:43px!important;background:#fff!important;color:#ad0c31!important;border:1px solid #f0dfe5!important;border-radius:14px!important;box-shadow:0 4px 15px #600e2918!important}
+ .alsalam-cart-v3 .alsalam-cart-v3-items{flex:none!important;min-height:0!important;overflow:visible!important;padding:0 0 5px!important;background:transparent!important}
+ .alsalam-cart-v3 .alsalam-cart-v3-product{
+  display:grid!important;grid-template-columns:clamp(70px,21vw,100px) minmax(0,1fr) auto!important;
+  gap:8px!important;align-items:center!important;min-height:111px;
+  margin:0 0 12px!important;padding:12px 11px!important;background:#fff!important;
+  border:1px solid #f0e1e5!important;border-radius:20px!important;
+  box-shadow:0 5px 18px #3b112114!important
+ }
+ .alsalam-cart-v3 .alsalam-cart-v3-thumb{width:100%!important;height:clamp(76px,22vw,100px)!important;border:1px solid #f4e8eb!important;background:#fbf9f9!important;border-radius:14px!important}
+ .alsalam-cart-v3 .alsalam-cart-v3-thumb img{object-fit:contain!important;padding:5px!important}
+ .alsalam-cart-v3 .alsalam-cart-v3-info h3{font-size:clamp(13px,3.7vw,18px)!important;line-height:1.3!important;font-weight:850!important;white-space:normal!important;color:#201419!important}
+ .alsalam-cart-v3 .alsalam-cart-v3-info p{font-size:clamp(13px,3.45vw,17px)!important;font-weight:900!important;color:#b10c34!important;margin-top:8px!important}
+ .alsalam-cart-v3 .alsalam-cart-v3-quantity{gap:4px!important}
+ .alsalam-cart-v3 .alsalam-cart-v3-quantity button{width:33px!important;height:36px!important;border:1px solid #edc6d1!important;background:#fff1f4!important;color:#af0731!important;border-radius:11px!important}
+ .alsalam-cart-v3 .alsalam-cart-v3-quantity span{min-width:16px!important;font-size:14px!important;font-weight:900!important;color:#26161a!important}
+ .alsalam-cart-v3 .alsalam-cart-v3-summary{display:block!important;flex:none!important;min-height:0!important;overflow:visible!important;border:0!important;border-radius:0!important;padding:0!important;margin:0!important;background:transparent!important;box-shadow:none!important}
+ .alsalam-cart-v3-summary-card{display:block;border:1px solid #f0e1e5;border-radius:22px;background:#fff;padding:18px 15px 16px;margin:0 0 19px;box-shadow:0 6px 22px #4d122319}
+ .alsalam-cart-v3-summary-heading{display:flex;align-items:center;gap:9px;color:#b10a33;padding-bottom:10px}
+ .alsalam-cart-v3-summary-heading h3{font-size:clamp(17px,4.75vw,23px);line-height:1.3;margin:0;color:#2a0e18;letter-spacing:-.045em;font-weight:900}
+ .alsalam-cart-v3-summary-heading h3 span{font-weight:800}
+ .alsalam-cart-v3-price-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:9px;align-items:center;padding:14px 0;color:#585057;font-size:clamp(12px,3.65vw,15px)}
+ .alsalam-cart-v3-price-row:nth-of-type(2){border-bottom:1px solid #f1e6e8}
+ .alsalam-cart-v3-price-row strong{color:#28191d;font-size:clamp(13px,3.75vw,16px);font-weight:900;white-space:nowrap}
+ .alsalam-cart-v3-price-label{display:inline-flex;align-items:center;flex-wrap:wrap;gap:6px;line-height:1.4}
+ .alsalam-cart-v3-price-label svg{color:#ab1438;flex-shrink:0}
+ .alsalam-cart-v3-price-icon{font-size:24px;color:#a40e31;line-height:1}
+ .alsalam-cart-v3-price-row strong button{min-height:40px!important;padding:8px 10px!important;border-radius:12px!important;border:1px solid #e27b92!important;color:#ae0b31!important;background:#fff6f8!important;font-size:clamp(11px,3.1vw,14px)!important;font-weight:900!important;white-space:normal!important}
+ .alsalam-cart-v3-promo{padding:9px 11px;margin:7px 0;border-radius:10px;background:#fff2f4;color:#9a2340;font-size:11px;line-height:1.4}
+ .alsalam-cart-v3-total{display:grid!important;grid-template-columns:minmax(0,1fr) minmax(0,1.2fr);align-items:center!important;gap:7px!important;border:0!important;border-radius:15px!important;background:linear-gradient(95deg,#fff8f9,#ffe9ee)!important;margin:12px 0 0!important;padding:12px 9px!important}
+ .alsalam-cart-v3-total>span{font-size:clamp(13px,3.7vw,17px);font-weight:900;color:#29121b;line-height:1.3}
+ .alsalam-cart-v3-coin{font-size:22px;color:#a40c34;margin-right:5px}
+ .alsalam-cart-v3-total strong{font-size:clamp(13px,3.65vw,17px)!important;color:#ad0b34!important;white-space:normal!important;overflow-wrap:anywhere;font-weight:900;background:#ffdee7;padding:9px 8px;border-radius:12px;text-align:center;line-height:1.35}
+ .alsalam-cart-v3-minimum{background:#fff3ee;color:#994d34;padding:10px 12px;margin-top:12px;border-radius:11px;font-size:11px}
+ .alsalam-cart-v3-minimum p{margin:0 0 5px}
+ .alsalam-cart-v3-minimum button{padding:0;border:0;color:#9a0b33;background:none;font-weight:800;text-decoration:underline}
+ .alsalam-cart-v3 .alsalam-cart-v3-actions{display:grid!important;grid-template-columns:1fr!important;gap:10px!important;margin:16px 0 0!important}
+ .alsalam-cart-v3 .alsalam-cart-v3-actions>button,.alsalam-cart-v3 .alsalam-cart-v3-actions>a{width:100%;min-height:59px!important;display:flex!important;align-items:center!important;justify-content:center!important;flex-wrap:wrap!important;gap:9px!important;padding:11px 12px!important;border-radius:17px!important;font-size:clamp(12px,3.6vw,16px)!important;font-weight:850!important;text-decoration:none!important;text-align:center!important;white-space:normal!important;line-height:1.35!important}
+ .alsalam-cart-v3 .alsalam-cart-v3-actions>button:first-child{background:linear-gradient(95deg,#aa002d,#dc1540)!important;border:0!important;color:white!important;box-shadow:0 8px 19px #970b3040!important}
+ .alsalam-cart-v3 .alsalam-cart-v3-actions>a{background:#fff!important;color:#a00930!important;border:1.5px solid #b70b37!important;box-shadow:0 5px 14px #8b14301a!important}
+ .alsalam-cart-v3 .alsalam-cart-v3-actions>a svg{color:#0a983d!important}
+ .alsalam-cart-v3 .alsalam-cart-v3-payment-note{display:flex;align-items:flex-start;justify-content:center;gap:10px;margin:15px 0 0;padding:6px 2px}
+ .alsalam-cart-v3-cash{color:#b20b31;font-size:27px;line-height:1.1}
+ .alsalam-cart-v3 .alsalam-cart-v3-payment-note p{margin:0!important;color:#70646b!important;text-align:left!important;font-size:clamp(10px,2.9vw,12px)!important;line-height:1.6!important}
+ .alsalam-cart-v3 button:focus-visible,.alsalam-cart-v3 a:focus-visible{outline:3px solid #ed7f9a;outline-offset:3px}
+}
+@media(max-width:374px){
+ .alsalam-cart-v3 .alsalam-cart-v3-product{grid-template-columns:64px minmax(0,1fr) auto!important;padding:9px 7px!important;gap:5px!important}
+ .alsalam-cart-v3 .alsalam-cart-v3-quantity button{width:28px!important;height:32px!important}
+ .alsalam-cart-v3-summary-card{padding:15px 10px}
+}
+
+          `}</style>
           <iframe
             id="darik-alsalam-approved-live"
             title="Al Salam Market — shopping"
@@ -10734,14 +10812,14 @@ style={{
       ) : null}
 
       {cartOpen ? (
-        <div className={styles.cartOverlay} data-alsalam-cart={isAlSalamApprovedPilot ? "true" : undefined} onClick={() => setCartOpen(false)}>
+        <div className={`${styles.cartOverlay} ${isAlSalamApprovedPilot ? "alsalam-cart-v3" : ""}`} data-alsalam-cart={isAlSalamApprovedPilot ? "true" : undefined} onClick={() => setCartOpen(false)}>
           {/* DARIK_CHECKOUT_DEFAULT_SYSTEM_FONT_343 */}
           <aside
-            className={styles.cartDrawer}
+            className={`${styles.cartDrawer} alsalam-cart-v3-drawer`}
             onClick={(event) => event.stopPropagation()}
           data-darik-checkout-default-font={onlineCheckoutOpen ? "true" : undefined}
           >
-            <div className={styles.cartHeader}>
+            <div className={`${styles.cartHeader} alsalam-cart-v3-head`}>
               <div>
                 <p>{isAlSalamApprovedPilot ? "AL SALAM MARKET" : storefront.display_name}</p>
                 <h2>Your cart / سلتك</h2>
@@ -10825,7 +10903,7 @@ style={{
             ) : (
               <>
                 <div
-                  className={`${styles.cartLines} ${
+                  className={`alsalam-cart-v3-items ${styles.cartLines} ${
                     onlineCheckoutOpen ? styles.cartLinesCheckoutHidden : ""
                   }`}
                 >
@@ -10847,15 +10925,15 @@ style={{
                     </div>
                   ) : (
                     cart.map((line) => (
-                      <div className={styles.cartLine} key={line.lineId}>
-                        <div className={styles.cartThumb}>
+                      <div className={`${styles.cartLine} alsalam-cart-v3-product`} key={line.lineId}>
+                        <div className={`${styles.cartThumb} alsalam-cart-v3-thumb`}>
                           {line.photoUrl ? (
                             <img src={line.photoUrl} alt={line.name} />
                           ) : (
                             <span>{line.name.slice(0, 1)}</span>
                           )}
                         </div>
-                        <div className={styles.cartLineInfo}>
+                        <div className={`${styles.cartLineInfo} alsalam-cart-v3-info`}>
                           <h3>{line.name}</h3>
                           {line.restaurantOptionName ? (
                             <small className={styles.cartSize245}>
@@ -10895,7 +10973,7 @@ style={{
                                 )}
                           </p>
                         </div>
-                        <div className={styles.quantity}>
+                        <div className={`${styles.quantity} alsalam-cart-v3-quantity`}>
                           <button
                             onClick={() => changeQuantity(line.lineId, -1)}
                           >
@@ -10920,98 +10998,44 @@ style={{
                 </div>
 
                 <div
-                  className={`${styles.cartSummary} ${
+                  className={`alsalam-cart-v3-summary ${styles.cartSummary} ${
                     onlineCheckoutOpen ? styles.checkoutSummaryOpen : ""
                   }`}
                 >
-                  <div>
-                    <span>Subtotal / المجموع الفرعي</span>
-                    <strong>{money(cartSubtotal)}</strong>
-                  </div>
-                  <div>
-                    <span>{selectedPickup ? "Pickup / الاستلام" : "Delivery / التوصيل"}</span>
-                    <strong>{selectedPickup ? "Free / مجاناً" : deliveryLocationPending521 ? getDeliveryLocationButton521(true) : specialDeliveryFree185 ? "Free / مجاناً" : money(deliveryFee)}</strong>
-                  </div>
-                  {!selectedPickup && specialOfferConfigured191 && !deliveryLocationPending521 ? (
-                    <div
-                      className={`${styles.specialDeliveryProgress185} ${
-                        specialDeliveryFree185
-                          ? styles.specialDeliveryUnlocked185
-                          : ""
-                      }`}
-                    >
-                      <div>
-                        <span>
-                          {specialDeliveryFree185
-                            ? "FREE delivery unlocked"
-                            : specialCountdownEligible191
-                              ? `Add ${money(specialDeliveryRemaining185)} JOD more and get FREE delivery / أضف المبلغ المتبقي واحصل على توصيل مجاني`
-                              : `Free delivery over ${specialThresholdLabel191} JOD within ${specialRadiusLabel191} km / توصيل مجاني عند بلوغ الحد ضمن النطاق`}
-                        </span>
-                        <strong>
-                          {money(specialQualifyingSubtotal185)} / {money(
-                            specialDeliveryZone185.minimumQualifyingJod
-                          )}
-                        </strong>
-                      </div>
-                      {!specialDeliveryFree185 ? (
-                        <div className={styles.specialDeliveryTrack185}>
-                          <span
-                            style={{
-                              width: `${Math.min(
-                                100,
-                                specialDeliveryZone185.minimumQualifyingJod > 0
-                                  ? (specialQualifyingSubtotal185 /
-                                      specialDeliveryZone185.minimumQualifyingJod) *
-                                    100
-                                  : 100
-                              )}%`,
-                            }}
-                          />
-                        </div>
-                      ) : null}
-                      <small>
-                        {specialDeliveryFree185
-                          ? "Excluded-category items can ride along without removing this benefit. / يمكن إضافة منتجات من الأقسام المستثناة دون إلغاء ميزة التوصيل المجاني."
-                          : `${money(specialDeliveryRemaining185)} more in qualifying categories. Excluded categories do not count. / أضف المبلغ المتبقي من الأقسام المؤهلة؛ الأقسام المستثناة لا تحتسب`}
-                      </small>
-                    </div>
-                  ) : null}
-                  <div className={styles.cartTotal}>
-                    <span>Total / الإجمالي</span>
-                    <strong>{deliveryLocationPending521 ? "After location / بعد تحديد الموقع" : money(orderTotal)}</strong>
-                  </div>
 
-                  {!deliveryLocationPending521 && !minimumReached ? (
-                    <div className={styles.minimumProgress}>
-                      <div>
-                        <span
-                          style={{
-                            width: `${Math.min(
-                              100,
-                              minimumOrder > 0
-                                ? (cartSubtotal / minimumOrder) * 100
-                                : 100
-                            )}%`,
-                          }}
-                        />
-                      </div>
-                      <p>
-                        Add {money(minimumOrder - cartSubtotal)} to reach the
-                        minimum order.
-                      </p>
-                      {locationZoneMinimumApplies423 ? (
-                        <button
-                          type="button"
-                          className={styles.minimumWhyLink423}
-                          onClick={() => setMinimumWhyOpen423(true)}
-                        >
-                          Why is there a minimum? / لماذا يوجد حد أدنى؟
-                        </button>
-                      ) : null}
+                  <div className="alsalam-cart-v3-summary-card">
+                    <div className="alsalam-cart-v3-summary-heading">
+                      <Icon name="bag" size={22}/>
+                      <h3>Order Summary <span dir="rtl">/ ملخص الطلب</span></h3>
                     </div>
-                  ) : null}
-
+                    <div className="alsalam-cart-v3-price-row">
+                      <span className="alsalam-cart-v3-price-label"><span className="alsalam-cart-v3-price-icon">◇</span>Subtotal <span dir="rtl">/ المجموع الفرعي</span></span>
+                      <strong>{money(cartSubtotal)}</strong>
+                    </div>
+                    <div className="alsalam-cart-v3-price-row">
+                      <span className="alsalam-cart-v3-price-label"><Icon name="truck" size={20}/>{selectedPickup ? "Pickup / الاستلام" : "Delivery / التوصيل"}</span>
+                      <strong>{selectedPickup ? "Free / مجاناً" : deliveryLocationPending521 ? getDeliveryLocationButton521(true) : specialDeliveryFree185 ? "Free / مجاناً" : money(deliveryFee)}</strong>
+                    </div>
+                    {!selectedPickup && specialOfferConfigured191 && !deliveryLocationPending521 ? (
+                      <div className="alsalam-cart-v3-promo">
+                        {specialDeliveryFree185 ? "Free delivery unlocked / توصيل مجاني" : `Add ${money(specialDeliveryRemaining185)} in qualifying products for free delivery`}
+                      </div>
+                    ) : null}
+                    <div className="alsalam-cart-v3-total">
+                      <span><span className="alsalam-cart-v3-coin">◎</span>Total <span dir="rtl">/ الإجمالي</span></span>
+                      <strong>{deliveryLocationPending521 ? "After location / بعد تحديد الموقع" : money(orderTotal)}</strong>
+                    </div>
+                    {!deliveryLocationPending521 && !minimumReached ? (
+                      <div className="alsalam-cart-v3-minimum">
+                        <p>Add {money(Math.max(0,minimumOrder-cartSubtotal))} to reach the minimum order.</p>
+                        {locationZoneMinimumApplies423 ? (
+                          <button type="button" onClick={() => setMinimumWhyOpen423(true)}>
+                            Why is there a minimum? / لماذا يوجد حد أدنى؟
+                          </button>
+                        ) : null}
+                      </div>
+                    ) : null}
+                  </div>
                   {onlineCheckoutOpen &&
                   onlineOrderingEnabled &&
                   cart.length > 0 &&
@@ -12053,7 +12077,7 @@ style={{
                           : "Minimum order not reached / لم تصل للحد الأدنى للطلب"}
                     </button>
                   ) : (
-                    <div className={styles.orderMethodButtons}>
+                    <div className={`${styles.orderMethodButtons} alsalam-cart-v3-actions`}>
                       {onlineOrderingEnabled && !onlineCheckoutOpen ? (
                         <button
                           type="button"
@@ -12114,7 +12138,7 @@ style={{
                     </div>
                   )}
 
-                  <p className={styles.checkoutNote}>
+                  <div className="alsalam-cart-v3-payment-note"><span className="alsalam-cart-v3-cash" aria-hidden="true">▤</span><p className={styles.checkoutNote}>
                     {onlineOrderingEnabled
                       ? selectedPickup
                         ? "This is a local pickup order. The store will confirm when it is ready to collect. / هذا طلب استلام من المتجر. سيؤكد المتجر عندما يصبح الطلب جاهزاً."
@@ -12126,7 +12150,7 @@ style={{
                       : pickupOnly
                         ? "The store will confirm product availability and pickup timing. / سيؤكد المتجر توفر المنتجات وموعد الاستلام."
                         : "The store will confirm product availability, address and final delivery details. / سيؤكد المتجر توفر المنتجات والعنوان وتفاصيل التوصيل النهائية."}
-                  </p>
+                  </p></div>
                 </div>
               </>
             )}
