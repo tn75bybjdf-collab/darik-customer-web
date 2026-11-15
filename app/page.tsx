@@ -842,12 +842,26 @@ function HomeStoreCard186({
           </>
         ) : store.delivers_to_location === null ? (
           <>
-            <strong className="darikHomeDeliveryUnknown331" role="button" tabIndex={0} data-darik-get-location-521="true" style={{cursor:"pointer"}}
+            <strong
+              className="darikHomeDeliveryUnknown331 darikDeliveryFeeAction522"
+              role="button"
+              tabIndex={0}
+              data-darik-get-location-521="true"
+              aria-label={language === "ar" ? "احسب رسوم التوصيل — حدد الموقع" : "Calculate delivery fee — Get location"}
               onKeyDown={(event) => {
-                if (event.key === "Enter" || event.key === " ") { event.preventDefault(); onGetLocation(); }
-              }}>
-              <Icon name="location" size={13} />
-              {language === "ar" ? "رسوم التوصيل: حدد الموقع" : "Delivery fee: Get location"}
+                if (event.key === "Enter" || event.key === " ") {
+                  event.preventDefault();
+                  onGetLocation();
+                }
+              }}
+            >
+              <span className="darikDeliveryFeeActionLabel522">
+                {language === "ar" ? "رسوم التوصيل" : "Delivery fee"}
+              </span>
+              <span className="darikDeliveryFeeActionValue522">
+                <Icon name="location" size={14} />
+                {language === "ar" ? "حدد الموقع" : "Get location"}
+              </span>
             </strong>
             <div className="darikHomeStoreMeta246B">
               <small>
